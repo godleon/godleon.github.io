@@ -1,0 +1,23 @@
+language: node_js
+
+node_js: stable
+
+cache:
+  directories:
+    - node_modules
+
+before_script:
+  - git clone --branch master https://github.com/godleon/godleon.github.io.git public
+
+script:
+  - yarn install
+  - yarn hexo generate
+
+after_success:
+  - cd public
+  - git status
+  - git config --global user.name "godleon" 
+  - git config --global user.email "godleon@gmail.com"
+  - git add --all .
+  - git commit -m "Travis CI Auto Builder Update"
+  - git push --quiet https://${GH_TOKEN}@github.com/godleon/godleon.github.io.git master
