@@ -154,6 +154,52 @@
     </entry>
     
     <entry>
+      <title><![CDATA[Kubernetes 學習筆記]]></title>
+      <url>/blog/2017/06/29/Kubernetes/Learning-Kubernetes/</url>
+      <content type="html"><![CDATA[<p>此篇文章為研究 Kubernetes 時所留下的學習筆記索引</p>
+<h1 id="Concepts"><a href="#Concepts" class="headerlink" title="Concepts"></a>Concepts</h1><h2 id="kubeconfig"><a href="#kubeconfig" class="headerlink" title="kubeconfig"></a>kubeconfig</h2><ul>
+<li><a href="https://github.com/godleon/learning_kubernetes/blob/master/concept/howto_configure_kubeconfig.md" target="_blank" rel="external">如何設定 kubeconfig 與 Kubernetes cluster 互動</a></li>
+</ul>
+<h2 id="Overview-amp-Components"><a href="#Overview-amp-Components" class="headerlink" title="Overview &amp; Components"></a>Overview &amp; Components</h2><ul>
+<li><p><a href="https://github.com/godleon/learning_kubernetes/blob/master/concept/component_overview.md" target="_blank" rel="external">組成元件概觀</a></p>
+</li>
+<li><p><a href="https://github.com/godleon/learning_kubernetes/blob/master/concept/overview.md" target="_blank" rel="external">Kubernetes Overview</a></p>
+</li>
+</ul>
+<h2 id="Networking"><a href="#Networking" class="headerlink" title="Networking"></a>Networking</h2><ul>
+<li><p><a href="https://github.com/godleon/learning_kubernetes/blob/master/concept/network/service.md" target="_blank" rel="external">Service</a></p>
+</li>
+<li><p><a href="https://github.com/godleon/learning_kubernetes/blob/master/concept/network/ingress.md" target="_blank" rel="external">Ingress</a></p>
+</li>
+</ul>
+<h2 id="Storage"><a href="#Storage" class="headerlink" title="Storage"></a>Storage</h2><ul>
+<li><a href="https://github.com/godleon/learning_kubernetes/blob/master/concept/storage/volume.md" target="_blank" rel="external">Volume, PersistentVolume &amp; PersistentVolumeClaim</a></li>
+</ul>
+<hr>
+<h1 id="Operating"><a href="#Operating" class="headerlink" title="Operating"></a>Operating</h1><ul>
+<li><a href="https://github.com/godleon/learning_kubernetes/blob/master/operation/basic.md" target="_blank" rel="external">Kubernetes 基本操作</a></li>
+</ul>
+<h2 id="Persistent-Volume"><a href="#Persistent-Volume" class="headerlink" title="Persistent Volume"></a>Persistent Volume</h2><ul>
+<li><a href="https://github.com/godleon/learning_kubernetes/blob/master/operation/use_PersistentVolume_NFS.md" target="_blank" rel="external">使用 Persistent Volume - 以 NFS 為例</a></li>
+</ul>
+]]></content>
+      
+        <categories>
+            
+            <category> Kubernetes </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Kubernetes </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
       <title><![CDATA[Ceph 簡單指令操作]]></title>
       <url>/blog/2017/05/25/Ceph/Ceph-Cheatsheet/</url>
       <content type="html"><![CDATA[<h1 id="Monitoring-and-Health"><a href="#Monitoring-and-Health" class="headerlink" title="Monitoring and Health"></a>Monitoring and Health</h1><p>剛安裝完，首先先檢查 ceph cluster 的狀態：</p>
