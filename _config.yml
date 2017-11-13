@@ -22,9 +22,9 @@ source_dir: source
 # public_dir: public
 public_dir: blog
 tag_dir: tags
-archive_dir: blog/archives
-category_dir: blog/categories
-code_dir: blog/downloads/code
+archive_dir: archives
+category_dir: categories
+code_dir: downloads/code
 i18n_dir: :lang
 skip_render:
 
