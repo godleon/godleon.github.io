@@ -354,7 +354,7 @@ han: false
 # Disqus
 disqus:
   enable: true
-  shortname: disqus_vHv5T7t8L9
+  shortname: godleon
   count: true
 
 # Hypercomments
