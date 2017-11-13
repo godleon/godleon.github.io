@@ -3,6 +3,14 @@
   
     
     <entry>
+      <title><![CDATA[All tags]]></title>
+      <url>/blog/2017/11/13/site/tags/</url>
+      <content type="html"></content>
+      
+        
+    </entry>
+    
+    <entry>
       <title><![CDATA[[OpenShift] How-to customize built-in Jenkins image]]></title>
       <url>/blog/2017/11/07/OpenShift/OpenShift-Howto-Customize-builtin-Jenkins-Image/</url>
       <content type="html"><![CDATA[<p>本文章的主題在於如何將客製化 OpenShift 原生提供的 Jenkins image</p>
