@@ -1,7 +1,10 @@
 ---
+layout: post
 title:  "[OpenShift] Concept - Image Stream"
+description: "This article introduces the concept of OpenShift Image Stream"
 date: 2017-11-06 14:00:00
 comments: true
+published: true
 tags: 
   - OpenShift
 categories: 

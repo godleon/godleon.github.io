@@ -1,7 +1,10 @@
 ---
+layout: post
 title:  "Ceph 簡單指令操作"
+description: "This artical contains simple commands for Ceph management and operation"
 date: 2017-05-26 06:00:00
 comments: true
+published: true
 tags: 
   - Ceph
   - SDS
