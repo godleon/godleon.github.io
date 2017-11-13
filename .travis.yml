@@ -11,13 +11,9 @@ before_script:
 
 script:
   - rm -rf blog/
-  - rm -rf archives/
-  - rm -rf categories/
   - yarn install
   - yarn hexo generate
   - cp -r blog dir_to_summit/
-  - cp -r archives dir_to_summit/
-  - cp -r categories dir_to_summit/
 
 after_success:
   - cd dir_to_summit

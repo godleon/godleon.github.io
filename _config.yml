@@ -19,16 +19,12 @@ permalink_defaults:
 
 # Directory
 source_dir: source
-<<<<<<< HEAD
 # public_dir: public
 public_dir: blog
-=======
-public_dir: public
->>>>>>> f90e008022a729e274848233fce896d45a75cfd7
 tag_dir: tags
-archive_dir: archives
-category_dir: categories
-code_dir: downloads/code
+archive_dir: blog/archives
+category_dir: blog/categories
+code_dir: blog/downloads/code
 i18n_dir: :lang
 skip_render:
 
@@ -82,12 +78,4 @@ theme: next
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
-<<<<<<< HEAD
-deploy:
-  deploy:
-  type: github
-  repository: git@github.com:godleon/godleon.github.io.git
-  branch: master
-=======
 # deploy:
->>>>>>> f90e008022a729e274848233fce896d45a75cfd7
