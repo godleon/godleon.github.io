@@ -86,8 +86,13 @@ index_with_subtitle: false
 menu:
   home: / || home
   #about: /about/ || user
+<<<<<<< HEAD
   tags: /tags/ || tags
   categories: /categories/ || th
+=======
+  #tags: /tags/ || tags
+  #categories: /categories/ || th
+>>>>>>> f90e008022a729e274848233fce896d45a75cfd7
   archives: /archives/ || archive
   #schedule: /schedule/ || calendar
   #sitemap: /sitemap.xml || sitemap
