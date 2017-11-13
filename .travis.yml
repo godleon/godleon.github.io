@@ -13,7 +13,10 @@ script:
   - rm -rf blog/
   - yarn install
   - yarn hexo generate
-  - cp -r blog dir_to_summit/
+  - ls -al blog/
+  - cp -rf blog dir_to_summit/
+  - ls -al dir_to_summit/
+  - ls -al dir_to_summit/blog
 
 after_success:
   - cd dir_to_summit
