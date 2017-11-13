@@ -354,7 +354,7 @@ han: false
 # Disqus
 disqus:
   enable: true
-  shortname: godleon
+  shortname: godleon-blog-hexo
   count: true
 
 # Hypercomments
