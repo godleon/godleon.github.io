@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search> 
+  
+    
+    <entry>
+      <title><![CDATA[Hello World]]></title>
+      <url>/blog/2017/11/08/hello-world/</url>
+      <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.</p>
+<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
+<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
+<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
+<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
+]]></content>
+      
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[[OpenShift] How-to customize built-in Jenkins image]]></title>
+      <url>/blog/2017/11/07/OpenShift-Howto-Customize-builtin-Jenkins-Image/</url>
+      <content type="html"><![CDATA[<p>本文章的主題在於如何將客製化 OpenShift 原生提供的 Jenkins image</p>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>Openshift 在 DevOps 的方面的確是下了不少功夫，使用 OpenShift 的確可以讓 DevOps engineer 省下不少工，但相對的也有蠻多新東西要學的! XD</p>
+<p>在 OpenShift 建立第一個 BuildConfig(pipeline) 時，它會自動幫使用者佈署一個用來驅動 build pipeline 的 Jenkins server(此 container 會由 OpenShift 本身納管，因此掛了會自己再起一個新的)，佈署的行為如下：</p>
+<ol>
+<li><p>使用 <code>openshift</code> namespace 中的 template <code>jenkins-ephemeral</code> 為範本產生 Jenkins server</p>
+</li>
+<li><p>此 tempate 使用的 image stream 為 <code>jenkins:latest</code></p>
+</li>
+<li><p>Image Stream <code>jenkins:latest</code> 則是指到 Red Hat 官方所提供的 Jenkins image(<strong>registry.access.redhat.com/openshift3/jenkins-2-rhel7</strong>)</p>
+</li>
+</ol>
+<p>當 Jenkins server 佈署好之後，就會自動的與 OpenShift 本身的認証機制進行整合，完全不用使用者進行額外的設定，相關的 credential 也都會設定在 Jenkins server 內部，使用者需要做的就是開始設計 pipeline 就對了!</p>
+<hr>
+<h1 id="Jenkins-image-for-OpenShift"><a href="#Jenkins-image-for-OpenShift" class="headerlink" title="Jenkins image for OpenShift"></a>Jenkins image for OpenShift</h1><p>由於 Jenkins 並不是一個很容易入門上手的系統，因此為了提供使用者能更方便的使用 Jenkins，OpenShift 將 Jenkins 系統打包成 docker image，並加入了許多常用的 plugin 以及與 OpenShift 整合所需要的 plugin，還很貼心的做好相關整合的設定，讓使用者在建立 pipeline 時就會同時產生相對應的 Jenkins server 來使用，省略許多繁複且容易造成錯誤的設定過程。</p>
+<p>目前使用者可能比較容易用到的 Jenkins image for OpenShift 可能會有以下兩種：</p>
+<ul>
+<li>Red Hat 版本：<code>registry.access.redhat.com/openshift3/jenkins-2-rhel7</code><br>本文章的主題在於如何將客製化 OpenShift 原生提供的 Jenkins image</li>
+</ul>
+<h1 id="前言-1"><a href="#前言-1" class="headerlink" title="前言"></a>前言</h1><p>Openshift 在 DevOps 的方面的確是下了不少功夫，使用 OpenShift 的確可以讓 DevOps engineer 省下不少工，但相對的也有蠻多新東西要學的! XD</p>
+<p>在 OpenShift 建立第一個 BuildConfig(pipeline) 時，它會自動幫使用者佈署一個用來驅動 build pipeline 的 Jenkins server(此 container 會由 OpenShift 本身納管，因此掛了會自己再起一個新的)，佈署的行為如下：</p>
+<ol>
+<li><p>使用 <code>openshift</code> namespace 中的 template <code>jenkins-ephemeral</code> 為範本產生 Jenkins server</p>
+</li>
+<li><p>此 tempate 使用的 image stream 為 <code>jenkins:latest</code></p>
+</li>
+<li><p>Image Stream <code>jenkins:latest</code> 則是指到 Red Hat 官方所提供的 Jenkins image(<strong>registry.access.redhat.com/openshift3/jenkins-2-rhel7</strong>)</p>
+</li>
+</ol>
+<p>當 Jenkins server 佈署好之後，就會自動的與 OpenShift 本身的認証機制進行整合，完全不用使用者進行額外的設定，相關的 credential 也都會設定在 Jenkins server 內部，使用者需要做的就是開始設計 pipeline 就對了!</p>
+<hr>
+<h1 id="Jenkins-image-for-OpenShift-1"><a href="#Jenkins-image-for-OpenShift-1" class="headerlink" title="Jenkins image for OpenShift"></a>Jenkins image for OpenShift</h1><p>由於 Jenkins 並不是一個很容易入門上手的系統，因此為了提供使用者能更方便的使用 Jenkins，OpenShift 將 Jenkins 系統打包成 docker image，並加入了許多常用的 plugin 以及與 OpenShift 整合所需要的 plugin，還很貼心的做好相關整合的設定，讓使用者在建立 pipeline 時就會同時產生相對應的 Jenkins server 來使用，省略許多繁複且容易造成錯誤的設定過程。</p>
+<p>目前使用者可能比較容易用到的 Jenkins image for OpenShift 可能會有以下兩種：</p>
+<ul>
+<li><p>Red Hat 版本：<code>registry.access.redhat.com/openshift3/jenkins-2-rhel7</code></p>
+</li>
+<li><p>CentOS 版本：<code>openshift/jenkins-2-centos7</code> (位於 DockerHub 上)</p>
+</li>
+</ul>
+<p>由於新版的 OpenShift pipeline plugin for Jenkins 目前僅在 CentOS 版本的 Jenkins image 支援，因此後面的範例將會以 CentOS 版本為主，並提供將原有的 Jenkins image 從 Red Hat 版本改成 CentOS 版本的方法。</p>
+<hr>
+<h1 id="安裝額外的-Jenkins-plugin"><a href="#安裝額外的-Jenkins-plugin" class="headerlink" title="安裝額外的 Jenkins plugin"></a>安裝額外的 Jenkins plugin</h1><p>由於 OpenShift 提供的 Jenkins image 本身就是一個具有 s2i 功能的 docker image，因此我們可以透過 s2i 的流程，將所需要安裝的 plugin 以 source code injection 的方式指定進來並安裝。</p>
+<p>以下的範例將會安裝 <strong>redmine</strong>, <strong>gitlab-plugin</strong>, <strong>testlink</strong> 三個 plugin：(詳細版本可參考<a href="https://github.com/godleon/learning_openshift/blob/master/jenkins_customization/plugins.txt" target="_blank" rel="external">原始碼</a>)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 取得原始碼</span></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/godleon/learning_openshift.git</span><br><span class="line"></span><br><span class="line"><span class="comment"># 建立 ImageStream(custom-jenkins-2-centos7) BuildConfig(custom-jenkins-build)</span></span><br><span class="line">$ oc create -f learning_openshift/Jenkins_Customization/</span><br><span class="line"></span><br><span class="line">$ oc -n openshift start-build custom-jenkins-build</span><br><span class="line"></span><br><span class="line">$ oc -n openshift get pods</span><br><span class="line">NAME                           READY     STATUS      RESTARTS   AGE</span><br><span class="line">custom-jenkins-build-1-build   0/1       Completed   0          22m</span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視 build log</span></span><br><span class="line">$ oc logs -f custom-jenkins-build-1-build</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>使用者必須先安裝 <a href="https://github.com/openshift/origin/releases" target="_blank" rel="external">OpenShift CLI tool</a> 才可以執行上述的 oc 指令</p>
+</blockquote>
+<p>在最後一行指令中檢視 build log 時，就可以看見 OpenShift 透過 s2i 流程將我們在程式碼中所指定的 plugin 都已經安裝完成，此時我們就可以透過 ImageStream <code>custom-jenkins-2-centos7</code>(定義於 <strong>Jenkins_Customization/bc_custom-jenkins-build.yml</strong> 中) 來作為啟動 Jenkins server 的 default image。</p>
+<hr>
+<h1 id="更換原有的-Jenkins-Image"><a href="#更換原有的-Jenkins-Image" class="headerlink" title="更換原有的 Jenkins Image"></a>更換原有的 Jenkins Image</h1><p>今天在測試設計較為複雜的 Jenkins pipeline 時，發現 <a href="https://github.com/openshift/origin/tree/master/examples/jenkins/pipeline" target="_blank" rel="external">OpenShift 在 GitHub 提供的範例</a> 無法正常的使用，會出現 openshift class 不存在的錯誤，後來仔細的查了一下，發現原來裡面的範例需要搭配 <a href="https://github.com/openshift/jenkins-client-plugin" target="_blank" rel="external">OpenShift Jenkins Pipeline (DSL) Plugin</a> 一起使用。</p>
+<p><strong>問題是，Red Hat 版本的 Jenkins image 並沒有內建這一個 plugin，此 plugin 目前僅有內建在 Centos 版本的 Jenkins image 中。</strong></p>
+<p>而在上一個步驟中，我們使用了 CentOS 版本的 Jenkins image，並安裝了額外的 plugin 作為後續使用，因此以下便使用已經客製化完成的 Jenkins image 來作為啟動 Jenkins server 的 image。</p>
+<p>為了更改自動佈署的 Jenkins server 所使用的 docker image，需要調整 <code>jenkins-ephemeral</code> 的內容，將 image 從 Red Hat 版本改到在上一個步驟完成的客製化 CentOS 版本，執行以下指令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ oc edit template/jenkins-ephemeral -n openshift</span><br></pre></td></tr></table></figure>
+<p>找到 <code>parameters</code> –&gt; <code>JENKINS_IMAGE_STREAM_TAG</code>，將 <strong>value</strong> 從 <code>jenkins:latest</code> 改為 <code>custom-jenkins-2-centos7:latest</code>，存檔即可。</p>
+<p>經過了以上的設定，後面自動佈署出來的 Jenkins server 都會是 CentOS7 的版本，也會同時預載好 <a href="https://github.com/openshift/jenkins-client-plugin" target="_blank" rel="external">OpenShift Jenkins Pipeline (DSL) Plugin</a> 以及在上一個步驟額外安裝好的 plugin。</p>
+<hr>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a href="https://github.com/jenkinsci/openshift-pipeline-plugin" target="_blank" rel="external">OpenShift V3 Plugin for Jenkins (based on Kubernetes plugin)</a></p>
+</li>
+<li><p><a href="https://github.com/openshift/jenkins-client-plugin" target="_blank" rel="external">OpenShift Jenkins Pipeline (DSL) Plugin (newly design)</a></p>
+</li>
+<li><p><a href="https://github.com/openshift/origin/tree/master/examples/jenkins/pipeline" target="_blank" rel="external">Using Jenkins Pipelines with OpenShift @GitbHub</a></p>
+</li>
+<li><p><a href="https://docs.openshift.com/container-platform/3.6/using_images/other_images/jenkins.html" target="_blank" rel="external">Jenkins - Other Images | Using Images | OpenShift Container Platform 3.6</a></p>
+</li>
+</ul>
+]]></content>
+      
+        <categories>
+            
+            <category> OpenShift </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> OpenShift </tag>
+            
+            <tag> Jenkins </tag>
+            
+        </tags>
+        
+    </entry>
+    
+  
+  
+</search>
