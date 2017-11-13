@@ -4,7 +4,7 @@
     
     <entry>
       <title><![CDATA[[OpenShift] How-to customize built-in Jenkins image]]></title>
-      <url>/blog/2017/11/07/2017/OpenShift-Howto-Customize-builtin-Jenkins-Image/</url>
+      <url>/blog/2017/11/07/OpenShift/OpenShift-Howto-Customize-builtin-Jenkins-Image/</url>
       <content type="html"><![CDATA[<p>本文章的主題在於如何將客製化 OpenShift 原生提供的 Jenkins image</p>
 <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>Openshift 在 DevOps 的方面的確是下了不少功夫，使用 OpenShift 的確可以讓 DevOps engineer 省下不少工，但相對的也有蠻多新東西要學的! XD</p>
 <p>在 OpenShift 建立第一個 BuildConfig(pipeline) 時，它會自動幫使用者佈署一個用來驅動 build pipeline 的 Jenkins server(此 container 會由 OpenShift 本身納管，因此掛了會自己再起一個新的)，佈署的行為如下：</p>
@@ -92,7 +92,7 @@
     
     <entry>
       <title><![CDATA[[OpenShift] Concept - Image Stream]]></title>
-      <url>/blog/2017/11/06/2017/OpenShift-Concept-ImageStream/</url>
+      <url>/blog/2017/11/06/OpenShift/OpenShift-Concept-ImageStream/</url>
       <content type="html"><![CDATA[<h1 id="What-is-Image-Stream"><a href="#What-is-Image-Stream" class="headerlink" title="What is Image Stream?"></a>What is Image Stream?</h1><p>每一個 image stream 代表著一個 Docker-formatted container image；它其實只是一個在 OpenShift 中內部對於 docker image 的命名方式，讓系統可以使用指定的名稱找到正確的 docker image 來使用。(類似 Docker 中對每個 image 使用 tag 來命名)</p>
 <p>也因為有自己內部的命名方式，因此 Image Stream 就可以包含以下來源的 image：</p>
 <ul>
@@ -155,7 +155,7 @@
     
     <entry>
       <title><![CDATA[Ceph 簡單指令操作]]></title>
-      <url>/blog/2017/05/25/2017/Ceph-Cheatsheet/</url>
+      <url>/blog/2017/05/25/Ceph/Ceph-Cheatsheet/</url>
       <content type="html"><![CDATA[<h1 id="Monitoring-and-Health"><a href="#Monitoring-and-Health" class="headerlink" title="Monitoring and Health"></a>Monitoring and Health</h1><p>剛安裝完，首先先檢查 ceph cluster 的狀態：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 檢視 ceph cluster status</span></span><br><span class="line">$ ceph -s</span><br><span class="line">    cluster cd6fcb41-c373-48fb-aab3-f8d330a26ccb</span><br><span class="line">     health HEALTH_WARN</span><br><span class="line">            too few PGs per OSD (16 &lt; min 30)</span><br><span class="line">     monmap e1: 3 mons at &#123;ceph01=10.102.41.101:6789/0,ceph02=10.102.41.102:6789/0,ceph03=10.102.41.103:6789/0&#125;</span><br><span class="line">            election epoch 8, quorum 0,1,2 ceph01,ceph02,ceph03</span><br><span class="line">     osdmap e36: 12 osds: 12 up, 12 <span class="keyword">in</span></span><br><span class="line">            flags sortbitwise,require_jewel_osds</span><br><span class="line">      pgmap v84: 64 pgs, 1 pools, 0 bytes data, 0 objects</span><br><span class="line">            405 MB used, 2174 GB / 2174 GB avail</span><br><span class="line">                  64 active+clean</span><br></pre></td></tr></table></figure>
 <blockquote>
