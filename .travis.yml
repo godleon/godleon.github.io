@@ -10,7 +10,6 @@ before_script:
   - git clone --branch master https://github.com/godleon/godleon.github.io.git dir_to_summit
 
 script:
-  - rm -rf blog/
   - yarn install
   - yarn hexo generate
   - ls -al blog/
