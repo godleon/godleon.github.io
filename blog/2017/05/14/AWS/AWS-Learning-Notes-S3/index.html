@@ -1,0 +1,1802 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-tw">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/blog/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/blog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/blog/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/blog/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="AWS,S3," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="This article is a memo recorded when learning AWS S3(Simple Storage Service)">
+<meta name="keywords" content="AWS,S3">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AWS 學習筆記 - S3(Simple Storage Service)">
+<meta property="og:url" content="https://godleon.github.io/blog/2017/05/14/AWS/AWS-Learning-Notes-S3/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="This article is a memo recorded when learning AWS S3(Simple Storage Service)">
+<meta property="og:locale" content="zh-tw">
+<meta property="og:updated_time" content="2017-11-16T22:02:58.152Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AWS 學習筆記 - S3(Simple Storage Service)">
+<meta name="twitter:description" content="This article is a memo recorded when learning AWS S3(Simple Storage Service)">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://godleon.github.io/blog/2017/05/14/AWS/AWS-Learning-Notes-S3/"/>
+
+
+
+
+
+  <title>AWS 學習筆記 - S3(Simple Storage Service) | 小信豬的原始部落</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-tw">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">小信豬的原始部落</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/blog/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首頁
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/blog/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            標籤
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/blog/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分類
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/blog/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            歸檔
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            檢索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/blog/2017/05/14/AWS/AWS-Learning-Notes-S3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">AWS 學習筆記 - S3(Simple Storage Service)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">發表於</span>
+              
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2017-05-14T20:30:00+00:00">
+                2017-05-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分類於</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/AWS/" itemprop="url" rel="index">
+                    <span itemprop="name">AWS</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/2017/05/14/AWS/AWS-Learning-Notes-S3/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/05/14/AWS/AWS-Learning-Notes-S3/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  This article is a memo recorded when learning AWS S3(Simple Storage Service)
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="What-is-S3"><a href="#What-is-S3" class="headerlink" title="What is S3?"></a>What is S3?</h1><p>Amazon Simple Storage Service (Amazon S3) is object storage with a simple web service interface to store and retrieve any amount of data from anywhere on the web. It is designed to deliver 99.999999999% durability, and scale past trillions of objects worldwide.</p>
+<p>Customers use S3 as primary storage for cloud-native applications; as a bulk repository, or “<a href="https://aws.amazon.com/big-data/data-lake-on-aws/download/" target="_blank" rel="noopener">data lake</a>,” for analytics; as a target for <a href="https://aws.amazon.com/backup-recovery/getting-started/" target="_blank" rel="noopener">backup &amp; recovery</a> and disaster recovery; and with <a href="https://aws.amazon.com/lambda/details/" target="_blank" rel="noopener">serverless computing</a>.</p>
+<p>It’s simple to move large volumes of data into or out of Amazon S3 with Amazon’s <a href="https://aws.amazon.com/cloud-data-migration/" target="_blank" rel="noopener">cloud data migration</a> options. Once data is stored in S3, it can be automatically tiered into lower cost, longer-term cloud storage classes like S3 Standard - Infrequent Access and <a href="https://aws.amazon.com/glacier/details/" target="_blank" rel="noopener">Amazon Glacier</a> for archiving.</p>
+<h1 id="S3-The-Basics"><a href="#S3-The-Basics" class="headerlink" title="S3 - The Basics"></a>S3 - The Basics</h1><ul>
+<li><p>單一檔案大小的限制為 <code>0 bytes</code> ~ <code>5 TB</code></p>
+</li>
+<li><p>檔案一律存在 bucket 中 (Bucket 裏面無法再放一個 bucket，但可以放 folder)</p>
+</li>
+<li><p>單一帳號預設最大上限可存放 100 個 buckets，但可以通知 AWS 協助放大上限</p>
+</li>
+<li><p>S3 裡面的每個 bucket 都會有一個全球獨一無二的 DNS 名稱(ex: <a href="https://s3-eu-west-1.amazonaws.com/YOUR_UNIQUE_BUCKET_NAME" target="_blank" rel="noopener">https://s3-eu-west-1.amazonaws.com/YOUR_UNIQUE_BUCKET_NAME</a>)</p>
+<blockquote>
+<p>因此可以做為 static website hosting 之用</p>
+</blockquote>
+</li>
+<li><p>成功上傳檔案到 S3 後，會收到 HTTP 200 的回應</p>
+</li>
+<li><p>Built for 99.99% availability for S3 platform</p>
+</li>
+<li><p>Amazon 實際保證 99.9% availability</p>
+</li>
+<li><p>Amazon 保證 11 個 9 的 durability for S3 information (資料遺失的可能性)</p>
+<blockquote>
+<p>為避免人為不小心刪除的狀況發生，最好的方法還是建議把 versioning, cross-regsion replication, MFA 刪除等機制啟用</p>
+</blockquote>
+</li>
+<li><p>Tiered Storage available</p>
+</li>
+<li><p>Lifecycle Management</p>
+<blockquote>
+<p>可以設定前 30 天在正常的 <strong>standard</strong> tier, 接著 30 天移到另外一個 IA(Infrequently Accessed) tier, 90 天後進行 archive</p>
+</blockquote>
+</li>
+<li><p>Versioning</p>
+</li>
+<li><p>Encryption</p>
+</li>
+<li><p>可透過 Access Control Lists &amp; Bucket Policies 來提升安全性</p>
+<blockquote>
+<p>剛建立好的 bucket or 上傳的 object 所預設的權限僅限於自己可以存取(private &amp; inaccessible)，完全沒有預設對外開放的規則</p>
+</blockquote>
+</li>
+</ul>
+<h1 id="Data-Consistency-Model-for-S3"><a href="#Data-Consistency-Model-for-S3" class="headerlink" title="Data Consistency Model for S3"></a>Data Consistency Model for S3</h1><ul>
+<li><p>Read after consistency for PUTS of new Object (新增檔案後馬上就可以讀取)</p>
+</li>
+<li><p>Eventually Consistency for overwrite PUTS and DELETES(can take some time to propagate)</p>
+<blockquote>
+<p>若是針對已經存在的檔案進行修改 or 刪除，這樣的變更需要花點時間才會完全套用到所有的硬體設施中</p>
+</blockquote>
+</li>
+</ul>
+<h1 id="S3-is-a-simple-key-value-store"><a href="#S3-is-a-simple-key-value-store" class="headerlink" title="S3 is a simple key, value store"></a>S3 is a simple key, value store</h1><p>S3 is object based. 每個 object 都包含以下資訊：</p>
+<ul>
+<li><p><strong>Key</strong>: object name (檔案會依照字母順序排序，新增時要考量這個問題，建議在每個檔案名稱前 random 一個字串作為開始)</p>
+</li>
+<li><p><strong>Value</strong>: 基本上就是此檔案的資料本身</p>
+</li>
+<li><p><strong>Version ID</strong>: 作為版本控管之用</p>
+</li>
+<li><p><strong>Metadata</strong>: 額外用來記錄 object 相關資訊的資料(ex: 上傳檔案的時間、最後變更的時間…etc)</p>
+<blockquote>
+<p>使用者也可以自訂客製化的 metadata，藉此來為 object 標註不同的屬性值</p>
+</blockquote>
+</li>
+<li><p><strong>Subresources</strong></p>
+<ul>
+<li>Access Control Lists (用來做細部的存取控管)</li>
+<li>Torrent (S3 支援 bittorrent protocol)</li>
+</ul>
+</li>
+</ul>
+<h1 id="S3-vs-Glacier"><a href="#S3-vs-Glacier" class="headerlink" title="S3 vs Glacier"></a>S3 vs Glacier</h1><table>
+<thead>
+<tr>
+<th></th>
+<th style="text-align:center">Standard</th>
+<th style="text-align:center">Standard - IA</th>
+<th style="text-align:center">Glacier</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Designed for Durability</td>
+<td style="text-align:center">11 x 9’s</td>
+<td style="text-align:center">11 x 9’s</td>
+<td style="text-align:center">11 x 9’s</td>
+</tr>
+<tr>
+<td>Designed for Availability</td>
+<td style="text-align:center">99.99%</td>
+<td style="text-align:center">99.99%</td>
+<td style="text-align:center">N/A</td>
+</tr>
+<tr>
+<td>Availability SLA</td>
+<td style="text-align:center">99.9%</td>
+<td style="text-align:center">99%</td>
+<td style="text-align:center">N/A</td>
+</tr>
+<tr>
+<td>Minumum Object Size</td>
+<td style="text-align:center">N/A</td>
+<td style="text-align:center">128KB</td>
+<td style="text-align:center">N/A</td>
+</tr>
+<tr>
+<td>Minumum Storage Duration</td>
+<td style="text-align:center">N/A</td>
+<td style="text-align:center">30 days</td>
+<td style="text-align:center">90 days</td>
+</tr>
+<tr>
+<td>Retrieval Fee</td>
+<td style="text-align:center">N/A</td>
+<td style="text-align:center">per GB retrieved</td>
+<td style="text-align:center">per GB retrieved</td>
+</tr>
+<tr>
+<td>First Byte Latency</td>
+<td style="text-align:center">ms</td>
+<td style="text-align:center">ms</td>
+<td style="text-align:center">select minutes or hours</td>
+</tr>
+<tr>
+<td>Storage Class</td>
+<td style="text-align:center">object level</td>
+<td style="text-align:center">object level</td>
+<td style="text-align:center">object level</td>
+</tr>
+<tr>
+<td>Lifecycle Transitions</td>
+<td style="text-align:center">yes</td>
+<td style="text-align:center">yes</td>
+<td style="text-align:center">yes</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">S3</th>
+<th style="text-align:center">Glacier</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">up to 5TB object</td>
+<td style="text-align:center">up to 40TB archive</td>
+</tr>
+<tr>
+<td style="text-align:center">user-definable key</td>
+<td style="text-align:center">system-generated archive ID</td>
+</tr>
+<tr>
+<td style="text-align:center">encrypt is optional</td>
+<td style="text-align:center">automatically encrypted</td>
+</tr>
+</tbody>
+</table>
+<h1 id="S3-收費標準"><a href="#S3-收費標準" class="headerlink" title="S3 收費標準"></a>S3 收費標準</h1><ul>
+<li><p>Storage Pricing</p>
+</li>
+<li><p>Request Pricing</p>
+</li>
+<li><p>Storage Management Pricing</p>
+<blockquote>
+<p>例如：analysis, tagging, inventory check</p>
+</blockquote>
+</li>
+<li><p>Data Transfer Pricing</p>
+<blockquote>
+<p>資料存入 S3 免費，往其他地方傳則要付費，即使是 region 之間互傳</p>
+</blockquote>
+</li>
+<li><p>Transfer Acceleration</p>
+<blockquote>
+<p>Amazon S3 Transfer Acceleration enables fast, easy, and secure transfers of files over long distances between your client and an S3 bucket. Transfer Acceleration takes advantage of Amazon CloudFront’s globally distributed edge locations. As the data arrives at an edge location, data is routed to Amazon S3 over an optimized network path.</p>
+</blockquote>
+</li>
+</ul>
+<h1 id="Advanced-Features"><a href="#Advanced-Features" class="headerlink" title="Advanced Features"></a>Advanced Features</h1><h2 id="Prefix-amp-Delimiter"><a href="#Prefix-amp-Delimiter" class="headerlink" title="Prefix &amp; Delimiter"></a>Prefix &amp; Delimiter</h2><p>以下面的 object 名稱為例：</p>
+<blockquote>
+<p>logs/2016/January/server42.log<br>logs/2016/February/server42.log<br>logs/2016/March/server42.log</p>
+</blockquote>
+<ul>
+<li><p>S3 可透過 prefix &amp; delimiter 作到類似檔案階層的功能(hierachy &amp; folder)，但事實那些都只是透過 object 的檔名虛構出來的，並沒有實際階層功能</p>
+</li>
+<li><p>REST API, SDK, CLI, Management Console 都支援使用 prefix &amp; delimiter</p>
+</li>
+<li><p>與 IAM or S3 Bucket Plicies 搭配，可以在單一個 bucket 中達成像是 department subdirectories, user home directories … 等效果</p>
+</li>
+</ul>
+<h2 id="Storage-Tiers-Classes"><a href="#Storage-Tiers-Classes" class="headerlink" title="Storage Tiers/Classes"></a>Storage Tiers/Classes</h2><table>
+<thead>
+<tr>
+<th></th>
+<th style="text-align:center">Standard</th>
+<th style="text-align:center">Standard (Infrequent Access)</th>
+<th style="text-align:center">Reduced Redundancy Storage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Durability</td>
+<td style="text-align:center">99.999999999%</td>
+<td style="text-align:center">99.999999999%</td>
+<td style="text-align:center">99.99%</td>
+</tr>
+<tr>
+<td>Availability</td>
+<td style="text-align:center">99.99%</td>
+<td style="text-align:center">99.99%</td>
+<td style="text-align:center">99.99%</td>
+</tr>
+<tr>
+<td>Concurrect facility fault tolerance</td>
+<td style="text-align:center">2</td>
+<td style="text-align:center">2</td>
+<td style="text-align:center">1</td>
+</tr>
+<tr>
+<td>SSL support</td>
+<td style="text-align:center">Yes</td>
+<td style="text-align:center">Yes</td>
+<td style="text-align:center">Yes</td>
+</tr>
+<tr>
+<td>First byte latency</td>
+<td style="text-align:center">Miliseconds</td>
+<td style="text-align:center">Miliseconds</td>
+<td style="text-align:center">Miliseconds</td>
+</tr>
+<tr>
+<td>Lifecycle Management Policies</td>
+<td style="text-align:center">Yes</td>
+<td style="text-align:center">Yes</td>
+<td style="text-align:center">Yes</td>
+</tr>
+<tr>
+<td>附註</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">object 大小限制為最小 128KB, 最少要存放 30 天, 存取資料要額外收費</td>
+</tr>
+</tbody>
+</table>
+<h3 id="1-Standard"><a href="#1-Standard" class="headerlink" title="1. Standard"></a>1. Standard</h3><p>99.99 availability, 99.999999999% durability, stored redundantly across multiple devices in multiple facilities and is designed to sustain the loss of 2 facilities concurrently.</p>
+<h3 id="2-IA-Infrequently-Accessed"><a href="#2-IA-Infrequently-Accessed" class="headerlink" title="2. IA(Infrequently Accessed)"></a>2. IA(Infrequently Accessed)</h3><p>適合不常存取的資料，比 standard 便宜，要存取時可以馬上取得，但存取需要額外付費</p>
+<h3 id="3-Reduced-Redundancy-Storage-RRS"><a href="#3-Reduced-Redundancy-Storage-RRS" class="headerlink" title="3. Reduced Redundancy Storage (RRS)"></a>3. Reduced Redundancy Storage (RRS)</h3><p>Design to provide 99.99% durability and 99.99 availability of objects over a given year.</p>
+<blockquote>
+<p>durability 從 <strong>11 x 9’s</strong> 變成 <strong>4 x 9’s</strong>，適合存像是圖片的 thumb nails 之類的資料</p>
+</blockquote>
+<h3 id="4-Glacier"><a href="#4-Glacier" class="headerlink" title="4. Glacier"></a>4. Glacier</h3><ul>
+<li><p>very cheap, but used for archival only. </p>
+</li>
+<li><p>存取前需先執行 restore 命令，並需要等待 3~5 個小時的資料準備時間</p>
+</li>
+<li><p>Glacier 上的資料不會因為 restore 命令而刪除，除非明確執行刪除指令</p>
+</li>
+<li><p>資料還原時會放到 S3 <strong>RRS(Reduced Redundancy Storage)</strong> class</p>
+</li>
+<li><p>AWS 提供每個月免費取得 5% Glacier 資料的額度 (每日為單位計算)</p>
+<blockquote>
+<p>可透過設定 <strong>retrieval policy</strong> or <strong>設定 max GB-per-hour limit</strong> 來確保存取資料會在免費的額度下進行，來降低甚至避免還原費用的發生</p>
+</blockquote>
+</li>
+<li><p>雖然是 S3 Storage Class 的一個選項，但其實 Glacier 是個獨立服務且有獨立的 API，並提供一些 S3 沒有的功能</p>
+</li>
+<li><p>可用來作為取代傳統磁帶作為長期備份的選項 (在某些行業必須有保留資料 N 年的規定)</p>
+</li>
+<li><p>非常可靠，也是有 11 個 9 的 durability</p>
+</li>
+</ul>
+<h4 id="Archive"><a href="#Archive" class="headerlink" title="Archive"></a>Archive</h4><ul>
+<li><p>在 Glacier 上儲存的備份單位稱為 <strong>archive</strong>（等同 S3 上 object 的概念)</p>
+</li>
+<li><p>每個 archive 最大可以到 <strong>40TB</strong></p>
+</li>
+<li><p>使用者可以擁有無限數量的 archive</p>
+</li>
+<li><p>每個 archive 都會有一個 unique archive ID (無法自己取名字)</p>
+</li>
+<li><p>所有的 archive 都會被自動加密 &amp; 無法被修改</p>
+</li>
+</ul>
+<h4 id="Vault"><a href="#Vault" class="headerlink" title="Vault"></a>Vault</h4><ul>
+<li><p>在 Glacier 中存放 archive 的容器稱為 <strong>vault</strong> (等同 S3 上 bucket 的概念)</p>
+</li>
+<li><p>可透過設定 IAM policy or vault access policy 來限制存取</p>
+</li>
+</ul>
+<h4 id="Vaults-Locks"><a href="#Vaults-Locks" class="headerlink" title="Vaults    Locks"></a>Vaults    Locks</h4><ul>
+<li><p>使用者可透過 Vaults    Locks 針對 Glacier 設定強制管理</p>
+</li>
+<li><p>可藉由設定 Write Once Read Many(WORM) 在 vault lock policy 中來套用到未來所有存放到 valut 的 archive</p>
+</li>
+<li><p>一旦設定了 vault lock policy，就無法再度變更規則</p>
+</li>
+</ul>
+<h2 id="Lifecycle-Management"><a href="#Lifecycle-Management" class="headerlink" title="Lifecycle Management"></a>Lifecycle Management</h2><ul>
+<li><p>等同於傳統 IT storage infra 中的 <strong>automated storage tiering</strong> 功能，是一種 data 從 <code>hot</code>(frequently    accessed) -&gt; <code>warm</code>(less    frequently    accessed) -&gt; <code>cold</code>(long-term    backup    or    archive) 的概念</p>
+</li>
+<li><p>Can be used in conjuction with versioning.</p>
+</li>
+<li><p>Can be applied to current versions and previous versions</p>
+</li>
+<li><p>Following actions can now be done:</p>
+<ul>
+<li>Transition to the <strong>Standard - Infrequent Access</strong> storage class (128Kb and 30 days after the creation date)</li>
+<li>Archive to the <strong>Glacier</strong> storage class (30 days after IA, if relevent)</li>
+<li>Permanently Delete (若有移到 Glacier 要把刪除的日期設為 90 天以上，因為 Glacier 費用低消是 90 days)</li>
+</ul>
+</li>
+</ul>
+<h2 id="Encryption"><a href="#Encryption" class="headerlink" title="Encryption"></a>Encryption</h2><h3 id="1-In-Transit"><a href="#1-In-Transit" class="headerlink" title="1. In Transit"></a>1. In Transit</h3><p>透過 AWS SSL API endpoints 存取 S3 (<strong>HTTPS</strong>)，存取的流量都會被加密</p>
+<h3 id="2-At-Rest"><a href="#2-At-Rest" class="headerlink" title="2. At Rest"></a>2. At Rest</h3><h4 id="1-Server-Side-Encryption"><a href="#1-Server-Side-Encryption" class="headerlink" title="(1) Server Side Encryption"></a>(1) Server Side Encryption</h4><ul>
+<li><p>S3 Managed Keys (<code>SSE-S3</code>)</p>
+<blockquote>
+<p>AWS 會將資料用 master key(AES-256) 進行加密，且 key 會定期更換，全由 AWS 託管</p>
+</blockquote>
+</li>
+<li><p>AWS Key Management Service, Managed Keys (<code>SSE-KMS</code>)</p>
+<blockquote>
+<p>透過 KMS 指定 master key 來進行加密，<strong>需要額外支付 KMS 的費用</strong><br>但可以控管 S3 的存取，也可以確認存取 S3 的人是擁有 key 的使用者(可以搭配 AWS 的追蹤功能之道誰在何時存取了 S3 並解密，甚至可以檢視哪個沒有權限的使用者嘗試解密資料時發生的錯誤)</p>
+</blockquote>
+</li>
+<li><p>Server Side Encryption with Customer Provided Keys (<code>SSE-C</code>)</p>
+</li>
+</ul>
+<h4 id="2-Client-Side-Encryption-將資料加密後傳到-S3"><a href="#2-Client-Side-Encryption-將資料加密後傳到-S3" class="headerlink" title="(2) Client Side Encryption (將資料加密後傳到 S3)"></a>(2) Client Side Encryption (將資料加密後傳到 S3)</h4><p>AWS 可從兩個管道取得 data encryption key:</p>
+<ul>
+<li><p>AWS KMS-managed customer master key</p>
+</li>
+<li><p>client-side master key</p>
+</li>
+</ul>
+<h2 id="Versioning"><a href="#Versioning" class="headerlink" title="Versioning"></a>Versioning</h2><ul>
+<li><p>object 的所有版本資訊都會被保留下來，<strong>包含所有的寫入資訊甚至是刪除的資訊</strong>都會被完整保留 (<strong>同樣也要支付多倍的費用來儲存不同的版本</strong>)</p>
+</li>
+<li><p>Great backup tool</p>
+</li>
+<li><p>Once enabled, Versioning cannot be disabled, only suspended.</p>
+</li>
+<li><p>Integrates with Lifecycle rules</p>
+</li>
+<li><p>Versioning’s MFA Delete capability, which uses multi-factor authentication, can be used to provide an additional layer of security. (<strong>只能由 root 帳號啟用此功能</strong>)</p>
+<blockquote>
+<p>刪除 object 前必須提供 token or security code 來完成</p>
+</blockquote>
+</li>
+<li><p>Cross Region Replication, requires versioning enabled on the source bucket</p>
+</li>
+</ul>
+<h2 id="Pre-Signed-URLs"><a href="#Pre-Signed-URLs" class="headerlink" title="Pre-Signed URLs"></a>Pre-Signed URLs</h2><p>object owner 可以透過 <strong>pre-signed URL</strong> 的機制，提供給其他人<strong>暫時</strong>存取 object 的權限，而有效期限則是由 owner 自行指定；也可以透過來保護公開的網頁資料，避免未授權的惡意行為發生。</p>
+<h2 id="Multipart-Upload"><a href="#Multipart-Upload" class="headerlink" title="Multipart Upload"></a>Multipart Upload</h2><p>當使用者有大檔案要上傳時，可開啟 multipart upload 的功能，檔案會被切成多個部份同時上傳，到 S3 上後會自動重組而成原本的檔案。</p>
+<blockquote>
+<p>建議超過 100MB 的檔案使用 multipart upload；此外，超過 5GB 的檔案一定要用 multipart upload 才可以上傳</p>
+<p>可以針對未完成上傳的檔案設定 lifecycle policy，如此可以減少費用的支出，讓超過期限未完成上傳的檔案自動失效</p>
+</blockquote>
+<h2 id="Range-GETs"><a href="#Range-GETs" class="headerlink" title="Range    GETs"></a>Range    GETs</h2><p>可下載指定 object 的部份內容，透過指定 byte 的範圍來取得 object 的部份資料；而這功能必須透過 SDK 搭配 Range HTTP header 才能實現。</p>
+<blockquote>
+<p>若是網路品質很差，或是想要從很大的 Glacier 備份中取得部份資料時可能會用到</p>
+</blockquote>
+<h2 id="Cross-Region-Replication"><a href="#Cross-Region-Replication" class="headerlink" title="Cross-Region Replication"></a>Cross-Region Replication</h2><p>cross-region replication 允許使用者將指定 bucket 的 object 非同步的複製到其他的 region。</p>
+<ul>
+<li><p>啟用 cross-region replication 的功能前，必須先啟動 bucket 的 versioning 功能</p>
+</li>
+<li><p>任何與 object 相關的 metadata or ACL 設定更動時，都會觸發 replication 的發生</p>
+</li>
+<li><p>必須設定正確的 IAM policy 讓 S3 本身可以進行 replication 的工作</p>
+</li>
+<li><p>若是已經存在的 bucket 開啟 cross-region replication 的功能，原有的資料不會被複製，必須自行複製 or 透過額外的命令來進行資料搬移</p>
+</li>
+</ul>
+<blockquote>
+<p>此功能常被用來將 object 放在靠使用者較近的地方來減少延遲；或是滿足不同地理區域備份的需求</p>
+</blockquote>
+<h2 id="Logging"><a href="#Logging" class="headerlink" title="Logging"></a>Logging</h2><ul>
+<li><p>針對 bucket 存取的 logging 功能預設關閉，可透過 S3 server access logs 功能開啟</p>
+</li>
+<li><p>log 可儲存在同一個 bucket 內，也可以存在另外一個 bucket 中；但重點是設定 prefix(例如：<code>logs/</code> or <code>bucket_name/logs/</code>) 讓後續尋找 log 方便是很重要的</p>
+</li>
+<li><p>log 資訊包含：</p>
+<ul>
+<li>requestor account &amp; IP</li>
+<li>request time</li>
+<li>bucket name</li>
+<li>action (GET, PUT, LIST … etc)</li>
+<li>response status &amp; error code</li>
+</ul>
+</li>
+</ul>
+<h2 id="Event-Notification"><a href="#Event-Notification" class="headerlink" title="Event Notification"></a>Event Notification</h2><p>event notification 可以用來在 bucket 狀態有變更(例如：上傳 object)時驅動某些事件的發生，使用者可以透過此特性來加入到 workflow 的設計，發送警告，或是執行特定工作…等等。</p>
+<ul>
+<li><p>設定於 bucket level</p>
+</li>
+<li><p>可在 object 被建立(PUT, POST, COPY or multipart upload), 被刪除(DELETE)，或是偵測到有 RRS(Reduced Redundancy Storage) object 遺失的時候發送通知</p>
+</li>
+<li><p>可透過 Amazon SNS(Simple Notification Service) or SQS(Simple Queue Service) 發送通知，也可以直接呼叫 AWS Lambda function</p>
+</li>
+</ul>
+<h1 id="S3-Management-Console"><a href="#S3-Management-Console" class="headerlink" title="S3 Management Console"></a>S3 Management Console</h1><h2 id="Permissions"><a href="#Permissions" class="headerlink" title="Permissions"></a>Permissions</h2><p>在權限管理的部分，有分成 <code>Objects</code> &amp; <code>Object permissions</code> 兩種：</p>
+<ol>
+<li><p><strong>Objects</strong>: 對於 object 本身內容的存取權限</p>
+<blockquote>
+<p>Grant permissions to the user to list, create, overwrite, or delete objects in the bucket.</p>
+</blockquote>
+</li>
+<li><p><strong>Object permissions</strong>: 對於 object 的 ACL 的存取權限，並非 object 本身</p>
+<blockquote>
+<p>Grant permissions to the user to read or write to an access control list (ACL) for the bucket</p>
+</blockquote>
+</li>
+</ol>
+<p>即使 bucket 的權限被設定為 public readable，也不代表後續上傳到此 bucket 的 object 也是 public readable，權限是分開管理的</p>
+<h2 id="Versioning-1"><a href="#Versioning-1" class="headerlink" title="Versioning"></a>Versioning</h2><ul>
+<li><p>當此功能開啟後，之後無法移除，只能關閉</p>
+</li>
+<li><p>上傳相同名稱的檔案多次，S3 會在介面上看到一個檔案搭配多個 version 可選 (透過檢視 metadata 可以發現其實根本就是不同的 object)</p>
+<blockquote>
+<p>而使用容量的計算當然就是所有版本 object 的 size 總和 (<strong>計算成本的時候要特別注意這件事情</strong>)</p>
+</blockquote>
+</li>
+<li><p>若移除 object 的 version，永遠就會消失無法還原</p>
+</li>
+<li><p>刪除 object 之後，會在系統上留下一個 <code>Delete Marker</code>(需要在 Versions 的地方選 <strong>Show</strong> 藉以顯示所有歷程記錄)，刪除 Delete Marker 之後就可以回復原本被刪除的檔案 </p>
+<blockquote>
+<p>目前還原功能是在舊版的版面上找到的，新版的目前沒有看到類似的功能頁面</p>
+</blockquote>
+</li>
+</ul>
+<h1 id="S3-Transfer-Acceleration"><a href="#S3-Transfer-Acceleration" class="headerlink" title="S3 Transfer Acceleration"></a>S3 Transfer Acceleration</h1><h2 id="What-is-S3-Transfer-Acceleration"><a href="#What-is-S3-Transfer-Acceleration" class="headerlink" title="What is S3 Transfer Acceleration?"></a>What is S3 Transfer Acceleration?</h2><p>S3 Transfer Acceleration utilise the CloudFront Edge Network to accelerate your uploads to S3. Instead of uploading directly to your S3 bucket, you can use a distinct URL to upload directly to an edge location which will then transfer that file to S3. You will get a distinct URL to upload to:</p>
+<blockquote>
+<p>your-bucket-name.s3-accelerate.amazonaws.com</p>
+</blockquote>
+<p>若要上傳大量的資料到距離本地端很遠的 region，使用 S3 Transfer Acceleration 會很有幫助</p>
+<h1 id="Create-a-Static-Website-using-S3"><a href="#Create-a-Static-Website-using-S3" class="headerlink" title="Create a Static Website using S3"></a>Create a Static Website using S3</h1><h2 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h2><ol>
+<li><p>建立 bucket</p>
+</li>
+<li><p>啟用 <strong>Static website hosting</strong></p>
+</li>
+</ol>
+<blockquote>
+<p>這裡會取得一個 <strong><a href="http://your-bucket-name.s3-website.region-alias.amazonaws.com" target="_blank" rel="noopener">http://your-bucket-name.s3-website.region-alias.amazonaws.com</a></strong> 的 domain name</p>
+</blockquote>
+<ol>
+<li><p>可以額外設定 index/error pages.</p>
+</li>
+<li><p>依然要提供 object read permission 才可以</p>
+</li>
+</ol>
+<h1 id="Exam-Tips"><a href="#Exam-Tips" class="headerlink" title="Exam Tips"></a>Exam Tips</h1><h2 id="S3-101"><a href="#S3-101" class="headerlink" title="S3 101"></a>S3 101</h2><ul>
+<li><p>S3 is Object based.</p>
+</li>
+<li><p>Files can be from 0 Bytes ~ 5 TB.</p>
+</li>
+<li><p>There is unlimited storage.</p>
+</li>
+<li><p>Files are stored in Buckets.</p>
+</li>
+<li><p>S3 is a universal namespace, that is, names must be unique globally.</p>
+<blockquote>
+<p>網址的格式為: <a href="https://[RegionName].amazonaws.com/[YourBucketName" target="_blank" rel="noopener">https://[RegionName].amazonaws.com/[YourBucketName</a>]</p>
+</blockquote>
+</li>
+<li><p>Read after Write consistency for PUTS of new Object</p>
+</li>
+<li><p>Eventual Consistency for overwrite PUTS and DELETES (can take some time to propagate)</p>
+</li>
+<li><p>S3 Storage Classes/Tiers</p>
+<ul>
+<li>S3 (durable, immediately available, frequently accessed)</li>
+<li>S3 - IA (durable, immediately available, infrequently accessed)</li>
+<li>S3 - Reduced Redundancy Storage (data that is easily reproducible, such as thumb nails etc)</li>
+<li>Glacier - Archived data, where you can wait 3~5 hours before accessing</li>
+</ul>
+</li>
+<li><p>Remember the core fundamentals of an S3 object</p>
+<ul>
+<li>Key (name)<blockquote>
+<p>這是一個 1024 bytes 的 UTF-8 字元所組成，在同一個 bucket 內不會重複(但不同的 bucket 可能會有同樣的 key)</p>
+</blockquote>
+</li>
+<li>Value (data)</li>
+<li>version ID</li>
+<li>metadata</li>
+<li>subresource (ACL, torrent)</li>
+</ul>
+</li>
+<li><p>Object based storage only (for files).</p>
+</li>
+<li><p><strong>Not suitable to install an operating system</strong>.</p>
+</li>
+<li><p>Successfuly upload will generate a HTTP 200 status code.</p>
+</li>
+</ul>
+<h2 id="Versioning-2"><a href="#Versioning-2" class="headerlink" title="Versioning"></a>Versioning</h2><ul>
+<li><p>object 的所有版本資訊都會被保留下來，<strong>包含所有的寫入資訊甚至是刪除的資訊</strong>都會被完整保留 (<strong>同樣也要支付多倍的費用來儲存不同的版本</strong>)</p>
+</li>
+<li><p>Great backup tool</p>
+</li>
+<li><p>Once enabled, Versioning cannot be disabled, only suspended.</p>
+</li>
+<li><p>Integrates with Lifecycle rules</p>
+</li>
+<li><p>Versioning’s MFA Delete capability, which uses multi-factor authentication, can be used to provide an additional layer of security. (<strong>只能由 root 帳號啟用此功能</strong>)</p>
+<blockquote>
+<p>刪除 object 前必須提供 token or security code 來完成</p>
+</blockquote>
+</li>
+<li><p>Cross Region Replication, requires versioning enabled on the source bucket</p>
+</li>
+</ul>
+<h2 id="Cross-Region-Replication-1"><a href="#Cross-Region-Replication-1" class="headerlink" title="Cross Region Replication"></a>Cross Region Replication</h2><ul>
+<li><p>要啟用 cross region replication 的功能，source &amp; destination bucket 都必須要啟用 versioning 才可以</p>
+</li>
+<li><p>設定 replication 前已經存在的 object 不會自動被同步，只有後續上傳的 object 會被同步</p>
+<blockquote>
+<p>如果上傳新版的 object，原來所有版本的記錄都會一併被同步</p>
+</blockquote>
+</li>
+<li><p>任何與 object 相關的 metadata or ACL 被變更時，都會觸發 replication 的工作執行</p>
+</li>
+<li><p>必須設定 IAM policy，用以提供 S3 合適的權限進行 replication 工作</p>
+</li>
+<li><p>單一 bucket 無法同步到多個 region，但可透過 <code>region1_bucket -&gt; region2_bucket -&gt; region3_bucket</code> 的方式達成相同效果 (daisy chain 似乎也不行)</p>
+</li>
+<li><p>刪除 object 後，原本同步 region 上的 object 也會被刪除</p>
+<ul>
+<li>所從舊版的 console 刪除 delete maker 後可以恢復檔案，但刪除 delete marker 這動作不會被同步，因此同步的 destination bucket 上的檔案不會回復</li>
+<li>若使用 <code>region1_bucket -&gt; region2_bucket -&gt; region3_bucket</code> 同步到多個 region，delete marker 只會被同步到 region2，region3 只會得到檔案被刪除的結果，看不到 delete marker</li>
+</ul>
+</li>
+<li><p>Deleting individual versions or delete markers will not be replicated</p>
+<blockquote>
+<p>在 source bucket 中刪除 delete marker or 特定版本(在舊版的 console)的結果，不會被同步到 destination bucket</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="Lifecycle-Management-1"><a href="#Lifecycle-Management-1" class="headerlink" title="Lifecycle Management"></a>Lifecycle Management</h2><ul>
+<li><p>等同於傳統 IT storage infra 中的 <strong>automated storage tiering</strong> 功能，是一種 data 從 <code>hot</code>(frequently    accessed) -&gt; <code>warm</code>(less    frequently    accessed) -&gt; <code>cold</code>(long-term    backup    or    archive) 的概念</p>
+</li>
+<li><p>Can be used in conjuction with versioning.</p>
+</li>
+<li><p>Can be applied to current versions and previous versions</p>
+</li>
+<li><p>Following actions can now be done:</p>
+<ul>
+<li>Transition to the <strong>Standard - Infrequent Access</strong> storage class (128Kb and 30 days after the creation date)</li>
+<li>Archive to the <strong>Glacier</strong> storage class (30 days after IA, if relevent)</li>
+<li>Permanently Delete (若有移到 Glacier 要把刪除的日期設為 90 天以上，因為 Glacier 費用低消是 90 days)</li>
+</ul>
+</li>
+</ul>
+<h2 id="CloudFront"><a href="#CloudFront" class="headerlink" title="CloudFront"></a>CloudFront</h2><ul>
+<li><p>Edge Location: This is the location where content will be cached. This is separate to an AWS Region/AZ.</p>
+</li>
+<li><p>Origin: This is the origin of all the files that the CDN will distribute. This can be either an S3 bucket, an EC2 instance, an Elastic Load Balancer or Route53.</p>
+</li>
+<li><p>Distribution: This is the name given the CDN which consists of a collection of Edge Locations.</p>
+<ul>
+<li><strong>Web Distribution</strong>: Typically used for websites.</li>
+<li><strong>RTMP</strong>: Used for media streaming. (ex: Adobe Flash)</li>
+</ul>
+</li>
+<li><p>Edge Locations are <strong>not just READ only</strong>, you can write to them too. (ie. put an object on to them).</p>
+</li>
+<li><p>Objects are cached for the life of the TTL (Time to Live)</p>
+</li>
+<li><p>You can clear cached objects, but you will be charged. (不需要等到 TTL 結束)</p>
+</li>
+</ul>
+<h2 id="Security"><a href="#Security" class="headerlink" title="Security"></a>Security</h2><ul>
+<li><p>By default, all newly created buckets are <strong>PRIVATE</strong></p>
+</li>
+<li><p>You can setup access control to your buckets using:</p>
+<ul>
+<li>Bucket Policies</li>
+<li>Access Control Lists (可調整個別 object 的權限)</li>
+</ul>
+</li>
+<li><p>S3 buckets can be configured to create access logs which log all requests made to the S3 buckets. This can be done to another bucket. (也可以將 log 放到另一個 AWS 帳號 S3 bucket 中，需要進行跨帳號連結的設定) </p>
+</li>
+</ul>
+<h2 id="Encryption-1"><a href="#Encryption-1" class="headerlink" title="Encryption"></a>Encryption</h2><h3 id="1-In-Transit-SSL-TLS"><a href="#1-In-Transit-SSL-TLS" class="headerlink" title="1. In Transit (SSL/TLS)"></a>1. In Transit (SSL/TLS)</h3><h3 id="2-At-Rest-1"><a href="#2-At-Rest-1" class="headerlink" title="2. At Rest"></a>2. At Rest</h3><ul>
+<li><p>Server Side Encryption</p>
+<ul>
+<li>S3 Managed Keys (<code>SSE-S3</code>)</li>
+<li>AWS Key Management Service, Managed Keys (<code>SSE-KMS</code>)</li>
+<li>Server Side Encryption with Customer Provided Keys (<code>SSE-C</code>)</li>
+</ul>
+</li>
+<li><p>Client Side Encryption</p>
+</li>
+</ul>
+<h2 id="Storage-Gateway"><a href="#Storage-Gateway" class="headerlink" title="Storage Gateway"></a>Storage Gateway</h2><ul>
+<li><p><strong>File Gateway</strong>: For flat files, stored directly on S3</p>
+</li>
+<li><p><strong>Volume Gateway</strong></p>
+<ul>
+<li><strong>Stored Volumes</strong> - Entire Dataset is stored on site and is asynchronously backed up to S3.</li>
+<li><strong>Cached Volumes</strong> - Entire Dataset is stored on S3 and the most frequently accessed data is cached on site.</li>
+</ul>
+</li>
+<li><p><strong>Gateway Virtual Tape Library (VTL)</strong>: Used for backup and uses popular backup applications like NetBackup, Backup Exec, Veam etc</p>
+</li>
+</ul>
+<h2 id="Snowball"><a href="#Snowball" class="headerlink" title="Snowball"></a>Snowball</h2><ul>
+<li><p>Snowball</p>
+</li>
+<li><p>Snowball Edge</p>
+</li>
+<li><p>Snowmobile</p>
+</li>
+<li><p>Understand what Snowball is</p>
+</li>
+<li><p>Understand what Import Export is</p>
+</li>
+<li><p>Snowball can</p>
+<ul>
+<li>Import to S3</li>
+<li>Export from S3</li>
+</ul>
+</li>
+</ul>
+<h2 id="S3-Transfer-Acceleration-1"><a href="#S3-Transfer-Acceleration-1" class="headerlink" title="S3 Transfer Acceleration"></a>S3 Transfer Acceleration</h2><p>You can speed up transfers to S3 using S3 transfer acceleration. This cost extra, and has the greatest impact on people who are in far away location.</p>
+<h2 id="S3-Static-Websites"><a href="#S3-Static-Websites" class="headerlink" title="S3 Static Websites"></a>S3 Static Websites</h2><ul>
+<li><p>You can use S3 to hsot static websites</p>
+</li>
+<li><p>Serverless</p>
+</li>
+<li><p>Very cheap, scales automatically</p>
+</li>
+<li><p><strong>STATIC</strong> only, canonot host dynamic sites</p>
+</li>
+</ul>
+<h2 id="misc"><a href="#misc" class="headerlink" title="misc"></a>misc</h2><ul>
+<li><p>Write to S3 - HTTP 200 code for a successful write.</p>
+</li>
+<li><p>You can load files to S3 much faster by enabling multipart upload</p>
+</li>
+<li><p>Read the S3 FAQ before taking the exam. It comes up A LOT!</p>
+</li>
+</ul>
+<p>##　Best Practices, Patterns,    and    Performance</p>
+<ul>
+<li><p>S3 &amp; Glacier 非常適合在 hybrid cloud 的環境下作為異地備份的工具</p>
+</li>
+<li><p>另一個常見的應用是將 S3 作為大量 blob 檔案的儲存位置，而把這些 blob 的 index 存於其他的服務(例如：Amazon DynamoDB or Amazon RDS)，透過此方式可以針對 key name 提高搜尋的速度並支援複雜的查詢</p>
+</li>
+<li><p>S3 會自動 scale 來支援 high request rate，也會自動的根據需求針對 bucket 進行 repartition 的動作</p>
+</li>
+<li><p>若有每秒超過 100 個 reuqest 的需求，可參考 developer guide 中的資訊，讓 object key 可以隨機的分佈 (可透過像是使用 hash 值作為 key name prefix 的方式來達成)</p>
+</li>
+</ul>
+<h1 id="應考前建議"><a href="#應考前建議" class="headerlink" title="應考前建議"></a>應考前建議</h1><p>詳細閱讀下列資料：</p>
+<ul>
+<li><a href="https://aws.amazon.com/s3/faqs/" target="_blank" rel="noopener">Amazon Simple Storage Service (S3) FAQs</a> <a href="https://aws.amazon.com/tw/s3/faqs/" target="_blank" rel="noopener">(中文)</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog/tags/AWS/" rel="tag"># AWS</a>
+          
+            <a href="/blog/tags/S3/" rel="tag"># S3</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/2017/05/02/AWS/AWS-Learning-Notes-IAM/" rel="next" title="AWS 學習筆記 - IAM(Identity and Access Management)">
+                <i class="fa fa-chevron-left"></i> AWS 學習筆記 - IAM(Identity and Access Management)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/2017/05/25/Ceph/Ceph-Cheatsheet/" rel="prev" title="Ceph 簡單指令操作">
+                Ceph 簡單指令操作 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            本站概覽
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">godleon</p>
+              <p class="site-description motion-element" itemprop="description">把時間花在哪裡，成就就在哪裡</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/blog/archives/">
+              
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">文章</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/blog/categories/index.html">
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">分類</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/blog/tags/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">標籤</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/godleon" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:godleon@gmail.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-globe"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://plus.google.com/godleon" target="_blank" title="Google">
+                    
+                      <i class="fa fa-fw fa-google"></i>Google</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#What-is-S3"><span class="nav-number">1.</span> <span class="nav-text">What is S3?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#S3-The-Basics"><span class="nav-number">2.</span> <span class="nav-text">S3 - The Basics</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Data-Consistency-Model-for-S3"><span class="nav-number">3.</span> <span class="nav-text">Data Consistency Model for S3</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#S3-is-a-simple-key-value-store"><span class="nav-number">4.</span> <span class="nav-text">S3 is a simple key, value store</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#S3-vs-Glacier"><span class="nav-number">5.</span> <span class="nav-text">S3 vs Glacier</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#S3-收費標準"><span class="nav-number">6.</span> <span class="nav-text">S3 收費標準</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Advanced-Features"><span class="nav-number">7.</span> <span class="nav-text">Advanced Features</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Prefix-amp-Delimiter"><span class="nav-number">7.1.</span> <span class="nav-text">Prefix & Delimiter</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Storage-Tiers-Classes"><span class="nav-number">7.2.</span> <span class="nav-text">Storage Tiers/Classes</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Standard"><span class="nav-number">7.2.1.</span> <span class="nav-text">1. Standard</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-IA-Infrequently-Accessed"><span class="nav-number">7.2.2.</span> <span class="nav-text">2. IA(Infrequently Accessed)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Reduced-Redundancy-Storage-RRS"><span class="nav-number">7.2.3.</span> <span class="nav-text">3. Reduced Redundancy Storage (RRS)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Glacier"><span class="nav-number">7.2.4.</span> <span class="nav-text">4. Glacier</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Archive"><span class="nav-number">7.2.4.1.</span> <span class="nav-text">Archive</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Vault"><span class="nav-number">7.2.4.2.</span> <span class="nav-text">Vault</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Vaults-Locks"><span class="nav-number">7.2.4.3.</span> <span class="nav-text">Vaults    Locks</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lifecycle-Management"><span class="nav-number">7.3.</span> <span class="nav-text">Lifecycle Management</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Encryption"><span class="nav-number">7.4.</span> <span class="nav-text">Encryption</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-In-Transit"><span class="nav-number">7.4.1.</span> <span class="nav-text">1. In Transit</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-At-Rest"><span class="nav-number">7.4.2.</span> <span class="nav-text">2. At Rest</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-Server-Side-Encryption"><span class="nav-number">7.4.2.1.</span> <span class="nav-text">(1) Server Side Encryption</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-Client-Side-Encryption-將資料加密後傳到-S3"><span class="nav-number">7.4.2.2.</span> <span class="nav-text">(2) Client Side Encryption (將資料加密後傳到 S3)</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Versioning"><span class="nav-number">7.5.</span> <span class="nav-text">Versioning</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pre-Signed-URLs"><span class="nav-number">7.6.</span> <span class="nav-text">Pre-Signed URLs</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Multipart-Upload"><span class="nav-number">7.7.</span> <span class="nav-text">Multipart Upload</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Range-GETs"><span class="nav-number">7.8.</span> <span class="nav-text">Range    GETs</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cross-Region-Replication"><span class="nav-number">7.9.</span> <span class="nav-text">Cross-Region Replication</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Logging"><span class="nav-number">7.10.</span> <span class="nav-text">Logging</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Event-Notification"><span class="nav-number">7.11.</span> <span class="nav-text">Event Notification</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#S3-Management-Console"><span class="nav-number">8.</span> <span class="nav-text">S3 Management Console</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Permissions"><span class="nav-number">8.1.</span> <span class="nav-text">Permissions</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Versioning-1"><span class="nav-number">8.2.</span> <span class="nav-text">Versioning</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#S3-Transfer-Acceleration"><span class="nav-number">9.</span> <span class="nav-text">S3 Transfer Acceleration</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#What-is-S3-Transfer-Acceleration"><span class="nav-number">9.1.</span> <span class="nav-text">What is S3 Transfer Acceleration?</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Create-a-Static-Website-using-S3"><span class="nav-number">10.</span> <span class="nav-text">Create a Static Website using S3</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#流程"><span class="nav-number">10.1.</span> <span class="nav-text">流程</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Exam-Tips"><span class="nav-number">11.</span> <span class="nav-text">Exam Tips</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#S3-101"><span class="nav-number">11.1.</span> <span class="nav-text">S3 101</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Versioning-2"><span class="nav-number">11.2.</span> <span class="nav-text">Versioning</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cross-Region-Replication-1"><span class="nav-number">11.3.</span> <span class="nav-text">Cross Region Replication</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lifecycle-Management-1"><span class="nav-number">11.4.</span> <span class="nav-text">Lifecycle Management</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CloudFront"><span class="nav-number">11.5.</span> <span class="nav-text">CloudFront</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Security"><span class="nav-number">11.6.</span> <span class="nav-text">Security</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Encryption-1"><span class="nav-number">11.7.</span> <span class="nav-text">Encryption</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-In-Transit-SSL-TLS"><span class="nav-number">11.7.1.</span> <span class="nav-text">1. In Transit (SSL/TLS)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-At-Rest-1"><span class="nav-number">11.7.2.</span> <span class="nav-text">2. At Rest</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Storage-Gateway"><span class="nav-number">11.8.</span> <span class="nav-text">Storage Gateway</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Snowball"><span class="nav-number">11.9.</span> <span class="nav-text">Snowball</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#S3-Transfer-Acceleration-1"><span class="nav-number">11.10.</span> <span class="nav-text">S3 Transfer Acceleration</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#S3-Static-Websites"><span class="nav-number">11.11.</span> <span class="nav-text">S3 Static Websites</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#misc"><span class="nav-number">11.12.</span> <span class="nav-text">misc</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#應考前建議"><span class="nav-number">12.</span> <span class="nav-text">應考前建議</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 強力驅動</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主題 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/blog/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://godleon-blog-hexo.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'https://godleon.github.io/blog/2017/05/14/AWS/AWS-Learning-Notes-S3/';
+          this.page.identifier = '2017/05/14/AWS/AWS-Learning-Notes-S3/';
+          this.page.title = 'AWS 學習筆記 - S3(Simple Storage Service)';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/blog/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

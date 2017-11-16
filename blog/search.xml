@@ -46,29 +46,29 @@
 <p>由於新版的 OpenShift pipeline plugin for Jenkins 目前僅在 CentOS 版本的 Jenkins image 支援，因此後面的範例將會以 CentOS 版本為主，並提供將原有的 Jenkins image 從 Red Hat 版本改成 CentOS 版本的方法。</p>
 <hr>
 <h1 id="安裝額外的-Jenkins-plugin"><a href="#安裝額外的-Jenkins-plugin" class="headerlink" title="安裝額外的 Jenkins plugin"></a>安裝額外的 Jenkins plugin</h1><p>由於 OpenShift 提供的 Jenkins image 本身就是一個具有 s2i 功能的 docker image，因此我們可以透過 s2i 的流程，將所需要安裝的 plugin 以 source code injection 的方式指定進來並安裝。</p>
-<p>以下的範例將會安裝 <strong>redmine</strong>, <strong>gitlab-plugin</strong>, <strong>testlink</strong> 三個 plugin：(詳細版本可參考<a href="https://github.com/godleon/learning_openshift/blob/master/jenkins_customization/plugins.txt" target="_blank" rel="external">原始碼</a>)</p>
+<p>以下的範例將會安裝 <strong>redmine</strong>, <strong>gitlab-plugin</strong>, <strong>testlink</strong> 三個 plugin：(詳細版本可參考<a href="https://github.com/godleon/learning_openshift/blob/master/jenkins_customization/plugins.txt" target="_blank" rel="noopener">原始碼</a>)</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 取得原始碼</span></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/godleon/learning_openshift.git</span><br><span class="line"></span><br><span class="line"><span class="comment"># 建立 ImageStream(custom-jenkins-2-centos7) BuildConfig(custom-jenkins-build)</span></span><br><span class="line">$ oc create -f learning_openshift/Jenkins_Customization/</span><br><span class="line"></span><br><span class="line">$ oc -n openshift start-build custom-jenkins-build</span><br><span class="line"></span><br><span class="line">$ oc -n openshift get pods</span><br><span class="line">NAME                           READY     STATUS      RESTARTS   AGE</span><br><span class="line">custom-jenkins-build-1-build   0/1       Completed   0          22m</span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視 build log</span></span><br><span class="line">$ oc logs -f custom-jenkins-build-1-build</span><br></pre></td></tr></table></figure>
 <blockquote>
-<p>使用者必須先安裝 <a href="https://github.com/openshift/origin/releases" target="_blank" rel="external">OpenShift CLI tool</a> 才可以執行上述的 oc 指令</p>
+<p>使用者必須先安裝 <a href="https://github.com/openshift/origin/releases" target="_blank" rel="noopener">OpenShift CLI tool</a> 才可以執行上述的 oc 指令</p>
 </blockquote>
 <p>在最後一行指令中檢視 build log 時，就可以看見 OpenShift 透過 s2i 流程將我們在程式碼中所指定的 plugin 都已經安裝完成，此時我們就可以透過 ImageStream <code>custom-jenkins-2-centos7</code>(定義於 <strong>Jenkins_Customization/bc_custom-jenkins-build.yml</strong> 中) 來作為啟動 Jenkins server 的 default image。</p>
 <hr>
-<h1 id="更換原有的-Jenkins-Image"><a href="#更換原有的-Jenkins-Image" class="headerlink" title="更換原有的 Jenkins Image"></a>更換原有的 Jenkins Image</h1><p>今天在測試設計較為複雜的 Jenkins pipeline 時，發現 <a href="https://github.com/openshift/origin/tree/master/examples/jenkins/pipeline" target="_blank" rel="external">OpenShift 在 GitHub 提供的範例</a> 無法正常的使用，會出現 openshift class 不存在的錯誤，後來仔細的查了一下，發現原來裡面的範例需要搭配 <a href="https://github.com/openshift/jenkins-client-plugin" target="_blank" rel="external">OpenShift Jenkins Pipeline (DSL) Plugin</a> 一起使用。</p>
+<h1 id="更換原有的-Jenkins-Image"><a href="#更換原有的-Jenkins-Image" class="headerlink" title="更換原有的 Jenkins Image"></a>更換原有的 Jenkins Image</h1><p>今天在測試設計較為複雜的 Jenkins pipeline 時，發現 <a href="https://github.com/openshift/origin/tree/master/examples/jenkins/pipeline" target="_blank" rel="noopener">OpenShift 在 GitHub 提供的範例</a> 無法正常的使用，會出現 openshift class 不存在的錯誤，後來仔細的查了一下，發現原來裡面的範例需要搭配 <a href="https://github.com/openshift/jenkins-client-plugin" target="_blank" rel="noopener">OpenShift Jenkins Pipeline (DSL) Plugin</a> 一起使用。</p>
 <p><strong>問題是，Red Hat 版本的 Jenkins image 並沒有內建這一個 plugin，此 plugin 目前僅有內建在 Centos 版本的 Jenkins image 中。</strong></p>
 <p>而在上一個步驟中，我們使用了 CentOS 版本的 Jenkins image，並安裝了額外的 plugin 作為後續使用，因此以下便使用已經客製化完成的 Jenkins image 來作為啟動 Jenkins server 的 image。</p>
 <p>為了更改自動佈署的 Jenkins server 所使用的 docker image，需要調整 <code>jenkins-ephemeral</code> 的內容，將 image 從 Red Hat 版本改到在上一個步驟完成的客製化 CentOS 版本，執行以下指令：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ oc edit template/jenkins-ephemeral -n openshift</span><br></pre></td></tr></table></figure>
 <p>找到 <code>parameters</code> –&gt; <code>JENKINS_IMAGE_STREAM_TAG</code>，將 <strong>value</strong> 從 <code>jenkins:latest</code> 改為 <code>custom-jenkins-2-centos7:latest</code>，存檔即可。</p>
-<p>經過了以上的設定，後面自動佈署出來的 Jenkins server 都會是 CentOS7 的版本，也會同時預載好 <a href="https://github.com/openshift/jenkins-client-plugin" target="_blank" rel="external">OpenShift Jenkins Pipeline (DSL) Plugin</a> 以及在上一個步驟額外安裝好的 plugin。</p>
+<p>經過了以上的設定，後面自動佈署出來的 Jenkins server 都會是 CentOS7 的版本，也會同時預載好 <a href="https://github.com/openshift/jenkins-client-plugin" target="_blank" rel="noopener">OpenShift Jenkins Pipeline (DSL) Plugin</a> 以及在上一個步驟額外安裝好的 plugin。</p>
 <hr>
 <h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
-<li><p><a href="https://github.com/jenkinsci/openshift-pipeline-plugin" target="_blank" rel="external">OpenShift V3 Plugin for Jenkins (based on Kubernetes plugin)</a></p>
+<li><p><a href="https://github.com/jenkinsci/openshift-pipeline-plugin" target="_blank" rel="noopener">OpenShift V3 Plugin for Jenkins (based on Kubernetes plugin)</a></p>
 </li>
-<li><p><a href="https://github.com/openshift/jenkins-client-plugin" target="_blank" rel="external">OpenShift Jenkins Pipeline (DSL) Plugin (newly design)</a></p>
+<li><p><a href="https://github.com/openshift/jenkins-client-plugin" target="_blank" rel="noopener">OpenShift Jenkins Pipeline (DSL) Plugin (newly design)</a></p>
 </li>
-<li><p><a href="https://github.com/openshift/origin/tree/master/examples/jenkins/pipeline" target="_blank" rel="external">Using Jenkins Pipelines with OpenShift @GitbHub</a></p>
+<li><p><a href="https://github.com/openshift/origin/tree/master/examples/jenkins/pipeline" target="_blank" rel="noopener">Using Jenkins Pipelines with OpenShift @GitbHub</a></p>
 </li>
-<li><p><a href="https://docs.openshift.com/container-platform/3.6/using_images/other_images/jenkins.html" target="_blank" rel="external">Jenkins - Other Images | Using Images | OpenShift Container Platform 3.6</a></p>
+<li><p><a href="https://docs.openshift.com/container-platform/3.6/using_images/other_images/jenkins.html" target="_blank" rel="noopener">Jenkins - Other Images | Using Images | OpenShift Container Platform 3.6</a></p>
 </li>
 </ul>
 ]]></content>
@@ -127,13 +127,13 @@
 <h1 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h1><p>有了 Image Stream(is), Image Stream Image (isimage), 以及 Image Stream Tag(istag) 的觀念之後，下一個階段將會介紹如何在 OpenShift 中管理 Image。</p>
 <hr>
 <h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
-<li><p><a href="https://docs.openshift.com/container-platform/3.6/architecture/core_concepts/builds_and_image_streams.html" target="_blank" rel="external">Builds and Image Streams - Core Concepts | Architecture | OpenShift Container Platform 3.6</a></p>
+<li><p><a href="https://docs.openshift.com/container-platform/3.6/architecture/core_concepts/builds_and_image_streams.html" target="_blank" rel="noopener">Builds and Image Streams - Core Concepts | Architecture | OpenShift Container Platform 3.6</a></p>
 </li>
-<li><p><a href="https://docs.openshift.com/enterprise/3.0/architecture/core_concepts/builds_and_image_streams.html" target="_blank" rel="external">Builds and Image Streams - Core Concepts | Architecture | OpenShift Enterprise 3.0</a></p>
+<li><p><a href="https://docs.openshift.com/enterprise/3.0/architecture/core_concepts/builds_and_image_streams.html" target="_blank" rel="noopener">Builds and Image Streams - Core Concepts | Architecture | OpenShift Enterprise 3.0</a></p>
 </li>
-<li><p><a href="https://github.com/openshift/origin/tree/master/examples/image-streams" target="_blank" rel="external">OpenShift ImageStream Examples @GitHub</a></p>
+<li><p><a href="https://github.com/openshift/origin/tree/master/examples/image-streams" target="_blank" rel="noopener">OpenShift ImageStream Examples @GitHub</a></p>
 </li>
-<li><p><a href="https://docs.openshift.com/container-platform/3.6/dev_guide/managing_images.html" target="_blank" rel="external">Managing Images | Developer Guide | OpenShift Container Platform 3.6</a></p>
+<li><p><a href="https://docs.openshift.com/container-platform/3.6/dev_guide/managing_images.html" target="_blank" rel="noopener">Managing Images | Developer Guide | OpenShift Container Platform 3.6</a></p>
 </li>
 </ul>
 ]]></content>
@@ -158,29 +158,29 @@
       <url>/blog/2017/06/29/Kubernetes/Learning-Kubernetes/</url>
       <content type="html"><![CDATA[<p>此篇文章為研究 Kubernetes 時所留下的學習筆記索引</p>
 <h1 id="Concepts"><a href="#Concepts" class="headerlink" title="Concepts"></a>Concepts</h1><h2 id="kubeconfig"><a href="#kubeconfig" class="headerlink" title="kubeconfig"></a>kubeconfig</h2><ul>
-<li><a href="https://github.com/godleon/learning_kubernetes/blob/master/concept/howto_configure_kubeconfig.md" target="_blank" rel="external">如何設定 kubeconfig 與 Kubernetes cluster 互動</a></li>
+<li><a href="https://github.com/godleon/learning_kubernetes/blob/master/concept/howto_configure_kubeconfig.md" target="_blank" rel="noopener">如何設定 kubeconfig 與 Kubernetes cluster 互動</a></li>
 </ul>
 <h2 id="Overview-amp-Components"><a href="#Overview-amp-Components" class="headerlink" title="Overview &amp; Components"></a>Overview &amp; Components</h2><ul>
-<li><p><a href="https://github.com/godleon/learning_kubernetes/blob/master/concept/component_overview.md" target="_blank" rel="external">組成元件概觀</a></p>
+<li><p><a href="https://github.com/godleon/learning_kubernetes/blob/master/concept/component_overview.md" target="_blank" rel="noopener">組成元件概觀</a></p>
 </li>
-<li><p><a href="https://github.com/godleon/learning_kubernetes/blob/master/concept/overview.md" target="_blank" rel="external">Kubernetes Overview</a></p>
+<li><p><a href="https://github.com/godleon/learning_kubernetes/blob/master/concept/overview.md" target="_blank" rel="noopener">Kubernetes Overview</a></p>
 </li>
 </ul>
 <h2 id="Networking"><a href="#Networking" class="headerlink" title="Networking"></a>Networking</h2><ul>
-<li><p><a href="https://github.com/godleon/learning_kubernetes/blob/master/concept/network/service.md" target="_blank" rel="external">Service</a></p>
+<li><p><a href="https://github.com/godleon/learning_kubernetes/blob/master/concept/network/service.md" target="_blank" rel="noopener">Service</a></p>
 </li>
-<li><p><a href="https://github.com/godleon/learning_kubernetes/blob/master/concept/network/ingress.md" target="_blank" rel="external">Ingress</a></p>
+<li><p><a href="https://github.com/godleon/learning_kubernetes/blob/master/concept/network/ingress.md" target="_blank" rel="noopener">Ingress</a></p>
 </li>
 </ul>
 <h2 id="Storage"><a href="#Storage" class="headerlink" title="Storage"></a>Storage</h2><ul>
-<li><a href="https://github.com/godleon/learning_kubernetes/blob/master/concept/storage/volume.md" target="_blank" rel="external">Volume, PersistentVolume &amp; PersistentVolumeClaim</a></li>
+<li><a href="https://github.com/godleon/learning_kubernetes/blob/master/concept/storage/volume.md" target="_blank" rel="noopener">Volume, PersistentVolume &amp; PersistentVolumeClaim</a></li>
 </ul>
 <hr>
 <h1 id="Operating"><a href="#Operating" class="headerlink" title="Operating"></a>Operating</h1><ul>
-<li><a href="https://github.com/godleon/learning_kubernetes/blob/master/operation/basic.md" target="_blank" rel="external">Kubernetes 基本操作</a></li>
+<li><a href="https://github.com/godleon/learning_kubernetes/blob/master/operation/basic.md" target="_blank" rel="noopener">Kubernetes 基本操作</a></li>
 </ul>
 <h2 id="Persistent-Volume"><a href="#Persistent-Volume" class="headerlink" title="Persistent Volume"></a>Persistent Volume</h2><ul>
-<li><a href="https://github.com/godleon/learning_kubernetes/blob/master/operation/use_PersistentVolume_NFS.md" target="_blank" rel="external">使用 Persistent Volume - 以 NFS 為例</a></li>
+<li><a href="https://github.com/godleon/learning_kubernetes/blob/master/operation/use_PersistentVolume_NFS.md" target="_blank" rel="noopener">使用 Persistent Volume - 以 NFS 為例</a></li>
 </ul>
 ]]></content>
       
@@ -221,15 +221,15 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 顯示目前的 RBD volume</span></span><br><span class="line">$ rbd ls</span><br><span class="line">vm-101-disk-1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 顯示指定 RBD volume 的狀態</span></span><br><span class="line">$ rbd status vm-101-disk-1</span><br><span class="line">Watchers:</span><br><span class="line">	watcher=10.102.70.124:0/3361738208 client.143192 cookie=140498849842176</span><br><span class="line"></span><br><span class="line"><span class="comment"># 顯示指定 RBD volume 的相關資訊</span></span><br><span class="line">$ rbd info vm-101-disk-1</span><br><span class="line">rbd image <span class="string">'vm-101-disk-1'</span>:</span><br><span class="line">	size 32768 MB <span class="keyword">in</span> 8192 objects</span><br><span class="line">	order 22 (4096 kB objects)</span><br><span class="line">	block_name_prefix: rbd_data.22f52238e1f29</span><br><span class="line">	format: 2</span><br><span class="line">	features: layering, exclusive-lock, object-map, fast-diff, deep-flatten</span><br><span class="line">	flags: </span><br><span class="line"></span><br><span class="line"><span class="comment"># 移除指定的 RBD volume</span></span><br><span class="line">$ rbd rm vm-101-disk-1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 建立名稱為 Jenkins_Data，大小為 40GB 的 RBD volume</span></span><br><span class="line">$ rbd create --pool rbd --image Jenkins_Data --size 40960</span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視 RBD volume 資訊</span></span><br><span class="line">$ rbd --image Jenkins_Data info</span><br><span class="line">rbd image <span class="string">'Jenkins_Data'</span>:</span><br><span class="line">	size 40960 MB <span class="keyword">in</span> 10240 objects</span><br><span class="line">	order 22 (4096 kB objects)</span><br><span class="line">	block_name_prefix: rbd_data.a71d6238e1f29</span><br><span class="line">	format: 2</span><br><span class="line">	features: layering, exclusive-lock, object-map, fast-diff, deep-flatten</span><br><span class="line">	flags: </span><br><span class="line"></span><br><span class="line"><span class="comment"># 變更 RBD volume 大小，縮小要加上 "--allow-shrink" 以確保安全</span></span><br><span class="line">$ rbd --image Jenkins_Data resize --size 10240 --allow-shrink</span><br><span class="line">Resizing image: 100% complete...done.</span><br><span class="line"></span><br><span class="line"><span class="comment"># 確認 RBD volume 容量正確變更</span></span><br><span class="line">$ rbd --image Jenkins_Data info</span><br><span class="line">rbd image <span class="string">'Jenkins_Data'</span>:</span><br><span class="line">	size 10240 MB <span class="keyword">in</span> 2560 objects</span><br><span class="line">	order 22 (4096 kB objects)</span><br><span class="line">	block_name_prefix: rbd_data.a71d6238e1f29</span><br><span class="line">	format: 2</span><br><span class="line">	features: layering, exclusive-lock, object-map, fast-diff, deep-flatten</span><br><span class="line">	flags: </span><br><span class="line"></span><br><span class="line"><span class="comment"># 放大 RBD Volume</span></span><br><span class="line">$ rbd --image Jenkins_Data resize --size 20480</span><br><span class="line">Resizing image: 100% complete...done.</span><br><span class="line"></span><br><span class="line"><span class="comment"># 確認 RBD volume 容量正確變更</span></span><br><span class="line">$ rbd --image Jenkins_Data info</span><br><span class="line">rbd image <span class="string">'Jenkins_Data'</span>:</span><br><span class="line">	size 20480 MB <span class="keyword">in</span> 5120 objects</span><br><span class="line">	order 22 (4096 kB objects)</span><br><span class="line">	block_name_prefix: rbd_data.a71d6238e1f29</span><br><span class="line">	format: 2</span><br><span class="line">	features: layering, exclusive-lock, object-map, fast-diff, deep-flatten</span><br><span class="line">	flags:</span><br></pre></td></tr></table></figure>
 <h1 id="Authentication-and-Authorization"><a href="#Authentication-and-Authorization" class="headerlink" title="Authentication and Authorization"></a>Authentication and Authorization</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 檢視目前可使用 ceph cluster 的 user list</span></span><br><span class="line">$ ceph auth list</span><br><span class="line">installed auth entries:</span><br><span class="line"></span><br><span class="line">osd.0</span><br><span class="line">	key: ABxxxxxxx</span><br><span class="line">	caps: [mon] allow profile osd</span><br><span class="line">	caps: [osd] allow *</span><br><span class="line">......</span><br><span class="line">client.admin</span><br><span class="line">	key: ABxxxxxxx</span><br><span class="line">	caps: [mds] allow *</span><br><span class="line">	caps: [mon] allow *</span><br><span class="line">	caps: [osd] allow *</span><br><span class="line">client.bootstrap-mds</span><br><span class="line">	key: ABxxxxxxx</span><br><span class="line">	caps: [mon] allow profile bootstrap-mds</span><br><span class="line">client.bootstrap-osd</span><br><span class="line">	key: ABxxxxxxx</span><br><span class="line">	caps: [mon] allow profile bootstrap-osd</span><br><span class="line">client.bootstrap-rgw</span><br><span class="line">	key: ABxxxxxxx</span><br><span class="line">	caps: [mon] allow profile bootstrap-rgw</span><br></pre></td></tr></table></figure>
 <h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
-<li><p><a href="https://www.gitbook.com/book/tobegit3hub1/ceph_from_scratch/details" target="_blank" rel="external">Ceph From Scratch · GitBook</a></p>
+<li><p><a href="https://www.gitbook.com/book/tobegit3hub1/ceph_from_scratch/details" target="_blank" rel="noopener">Ceph From Scratch · GitBook</a></p>
 </li>
-<li><p><a href="https://sabaini.at/pages/ceph-cheatsheet.html" target="_blank" rel="external">Ceph Cheatsheet - sabaini.at</a></p>
+<li><p><a href="https://sabaini.at/pages/ceph-cheatsheet.html" target="_blank" rel="noopener">Ceph Cheatsheet - sabaini.at</a></p>
 </li>
-<li><p><a href="http://michaelkang.blog.51cto.com/1553154/1698287" target="_blank" rel="external">最新ceph集群常用命令梳理 - 康建华 - 51CTO技术博客</a></p>
+<li><p><a href="http://michaelkang.blog.51cto.com/1553154/1698287" target="_blank" rel="noopener">最新ceph集群常用命令梳理 - 康建华 - 51CTO技术博客</a></p>
 </li>
-<li><p><a href="http://docs.ceph.com/docs/jewel/rados/operations/pools/" target="_blank" rel="external">Pools — Ceph Documentation</a></p>
+<li><p><a href="http://docs.ceph.com/docs/jewel/rados/operations/pools/" target="_blank" rel="noopener">Pools — Ceph Documentation</a></p>
 </li>
-<li><p><a href="http://docs.ceph.com/docs/master/rados/operations/placement-groups/" target="_blank" rel="external">Placement Groups — Ceph Documentation</a></p>
+<li><p><a href="http://docs.ceph.com/docs/master/rados/operations/placement-groups/" target="_blank" rel="noopener">Placement Groups — Ceph Documentation</a></p>
 </li>
 </ul>
 ]]></content>
@@ -252,10 +252,1000 @@
     </entry>
     
     <entry>
+      <title><![CDATA[AWS 學習筆記 - S3(Simple Storage Service)]]></title>
+      <url>/blog/2017/05/14/AWS/AWS-Learning-Notes-S3/</url>
+      <content type="html"><![CDATA[<h1 id="What-is-S3"><a href="#What-is-S3" class="headerlink" title="What is S3?"></a>What is S3?</h1><p>Amazon Simple Storage Service (Amazon S3) is object storage with a simple web service interface to store and retrieve any amount of data from anywhere on the web. It is designed to deliver 99.999999999% durability, and scale past trillions of objects worldwide.</p>
+<p>Customers use S3 as primary storage for cloud-native applications; as a bulk repository, or “<a href="https://aws.amazon.com/big-data/data-lake-on-aws/download/" target="_blank" rel="noopener">data lake</a>,” for analytics; as a target for <a href="https://aws.amazon.com/backup-recovery/getting-started/" target="_blank" rel="noopener">backup &amp; recovery</a> and disaster recovery; and with <a href="https://aws.amazon.com/lambda/details/" target="_blank" rel="noopener">serverless computing</a>.</p>
+<p>It’s simple to move large volumes of data into or out of Amazon S3 with Amazon’s <a href="https://aws.amazon.com/cloud-data-migration/" target="_blank" rel="noopener">cloud data migration</a> options. Once data is stored in S3, it can be automatically tiered into lower cost, longer-term cloud storage classes like S3 Standard - Infrequent Access and <a href="https://aws.amazon.com/glacier/details/" target="_blank" rel="noopener">Amazon Glacier</a> for archiving.</p>
+<h1 id="S3-The-Basics"><a href="#S3-The-Basics" class="headerlink" title="S3 - The Basics"></a>S3 - The Basics</h1><ul>
+<li><p>單一檔案大小的限制為 <code>0 bytes</code> ~ <code>5 TB</code></p>
+</li>
+<li><p>檔案一律存在 bucket 中 (Bucket 裏面無法再放一個 bucket，但可以放 folder)</p>
+</li>
+<li><p>單一帳號預設最大上限可存放 100 個 buckets，但可以通知 AWS 協助放大上限</p>
+</li>
+<li><p>S3 裡面的每個 bucket 都會有一個全球獨一無二的 DNS 名稱(ex: <a href="https://s3-eu-west-1.amazonaws.com/YOUR_UNIQUE_BUCKET_NAME" target="_blank" rel="noopener">https://s3-eu-west-1.amazonaws.com/YOUR_UNIQUE_BUCKET_NAME</a>)</p>
+<blockquote>
+<p>因此可以做為 static website hosting 之用</p>
+</blockquote>
+</li>
+<li><p>成功上傳檔案到 S3 後，會收到 HTTP 200 的回應</p>
+</li>
+<li><p>Built for 99.99% availability for S3 platform</p>
+</li>
+<li><p>Amazon 實際保證 99.9% availability</p>
+</li>
+<li><p>Amazon 保證 11 個 9 的 durability for S3 information (資料遺失的可能性)</p>
+<blockquote>
+<p>為避免人為不小心刪除的狀況發生，最好的方法還是建議把 versioning, cross-regsion replication, MFA 刪除等機制啟用</p>
+</blockquote>
+</li>
+<li><p>Tiered Storage available</p>
+</li>
+<li><p>Lifecycle Management</p>
+<blockquote>
+<p>可以設定前 30 天在正常的 <strong>standard</strong> tier, 接著 30 天移到另外一個 IA(Infrequently Accessed) tier, 90 天後進行 archive</p>
+</blockquote>
+</li>
+<li><p>Versioning</p>
+</li>
+<li><p>Encryption</p>
+</li>
+<li><p>可透過 Access Control Lists &amp; Bucket Policies 來提升安全性</p>
+<blockquote>
+<p>剛建立好的 bucket or 上傳的 object 所預設的權限僅限於自己可以存取(private &amp; inaccessible)，完全沒有預設對外開放的規則</p>
+</blockquote>
+</li>
+</ul>
+<h1 id="Data-Consistency-Model-for-S3"><a href="#Data-Consistency-Model-for-S3" class="headerlink" title="Data Consistency Model for S3"></a>Data Consistency Model for S3</h1><ul>
+<li><p>Read after consistency for PUTS of new Object (新增檔案後馬上就可以讀取)</p>
+</li>
+<li><p>Eventually Consistency for overwrite PUTS and DELETES(can take some time to propagate)</p>
+<blockquote>
+<p>若是針對已經存在的檔案進行修改 or 刪除，這樣的變更需要花點時間才會完全套用到所有的硬體設施中</p>
+</blockquote>
+</li>
+</ul>
+<h1 id="S3-is-a-simple-key-value-store"><a href="#S3-is-a-simple-key-value-store" class="headerlink" title="S3 is a simple key, value store"></a>S3 is a simple key, value store</h1><p>S3 is object based. 每個 object 都包含以下資訊：</p>
+<ul>
+<li><p><strong>Key</strong>: object name (檔案會依照字母順序排序，新增時要考量這個問題，建議在每個檔案名稱前 random 一個字串作為開始)</p>
+</li>
+<li><p><strong>Value</strong>: 基本上就是此檔案的資料本身</p>
+</li>
+<li><p><strong>Version ID</strong>: 作為版本控管之用</p>
+</li>
+<li><p><strong>Metadata</strong>: 額外用來記錄 object 相關資訊的資料(ex: 上傳檔案的時間、最後變更的時間…etc)</p>
+<blockquote>
+<p>使用者也可以自訂客製化的 metadata，藉此來為 object 標註不同的屬性值</p>
+</blockquote>
+</li>
+<li><p><strong>Subresources</strong></p>
+<ul>
+<li>Access Control Lists (用來做細部的存取控管)</li>
+<li>Torrent (S3 支援 bittorrent protocol)</li>
+</ul>
+</li>
+</ul>
+<h1 id="S3-vs-Glacier"><a href="#S3-vs-Glacier" class="headerlink" title="S3 vs Glacier"></a>S3 vs Glacier</h1><table>
+<thead>
+<tr>
+<th></th>
+<th style="text-align:center">Standard</th>
+<th style="text-align:center">Standard - IA</th>
+<th style="text-align:center">Glacier</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Designed for Durability</td>
+<td style="text-align:center">11 x 9’s</td>
+<td style="text-align:center">11 x 9’s</td>
+<td style="text-align:center">11 x 9’s</td>
+</tr>
+<tr>
+<td>Designed for Availability</td>
+<td style="text-align:center">99.99%</td>
+<td style="text-align:center">99.99%</td>
+<td style="text-align:center">N/A</td>
+</tr>
+<tr>
+<td>Availability SLA</td>
+<td style="text-align:center">99.9%</td>
+<td style="text-align:center">99%</td>
+<td style="text-align:center">N/A</td>
+</tr>
+<tr>
+<td>Minumum Object Size</td>
+<td style="text-align:center">N/A</td>
+<td style="text-align:center">128KB</td>
+<td style="text-align:center">N/A</td>
+</tr>
+<tr>
+<td>Minumum Storage Duration</td>
+<td style="text-align:center">N/A</td>
+<td style="text-align:center">30 days</td>
+<td style="text-align:center">90 days</td>
+</tr>
+<tr>
+<td>Retrieval Fee</td>
+<td style="text-align:center">N/A</td>
+<td style="text-align:center">per GB retrieved</td>
+<td style="text-align:center">per GB retrieved</td>
+</tr>
+<tr>
+<td>First Byte Latency</td>
+<td style="text-align:center">ms</td>
+<td style="text-align:center">ms</td>
+<td style="text-align:center">select minutes or hours</td>
+</tr>
+<tr>
+<td>Storage Class</td>
+<td style="text-align:center">object level</td>
+<td style="text-align:center">object level</td>
+<td style="text-align:center">object level</td>
+</tr>
+<tr>
+<td>Lifecycle Transitions</td>
+<td style="text-align:center">yes</td>
+<td style="text-align:center">yes</td>
+<td style="text-align:center">yes</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">S3</th>
+<th style="text-align:center">Glacier</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">up to 5TB object</td>
+<td style="text-align:center">up to 40TB archive</td>
+</tr>
+<tr>
+<td style="text-align:center">user-definable key</td>
+<td style="text-align:center">system-generated archive ID</td>
+</tr>
+<tr>
+<td style="text-align:center">encrypt is optional</td>
+<td style="text-align:center">automatically encrypted</td>
+</tr>
+</tbody>
+</table>
+<h1 id="S3-收費標準"><a href="#S3-收費標準" class="headerlink" title="S3 收費標準"></a>S3 收費標準</h1><ul>
+<li><p>Storage Pricing</p>
+</li>
+<li><p>Request Pricing</p>
+</li>
+<li><p>Storage Management Pricing</p>
+<blockquote>
+<p>例如：analysis, tagging, inventory check</p>
+</blockquote>
+</li>
+<li><p>Data Transfer Pricing</p>
+<blockquote>
+<p>資料存入 S3 免費，往其他地方傳則要付費，即使是 region 之間互傳</p>
+</blockquote>
+</li>
+<li><p>Transfer Acceleration</p>
+<blockquote>
+<p>Amazon S3 Transfer Acceleration enables fast, easy, and secure transfers of files over long distances between your client and an S3 bucket. Transfer Acceleration takes advantage of Amazon CloudFront’s globally distributed edge locations. As the data arrives at an edge location, data is routed to Amazon S3 over an optimized network path.</p>
+</blockquote>
+</li>
+</ul>
+<h1 id="Advanced-Features"><a href="#Advanced-Features" class="headerlink" title="Advanced Features"></a>Advanced Features</h1><h2 id="Prefix-amp-Delimiter"><a href="#Prefix-amp-Delimiter" class="headerlink" title="Prefix &amp; Delimiter"></a>Prefix &amp; Delimiter</h2><p>以下面的 object 名稱為例：</p>
+<blockquote>
+<p>logs/2016/January/server42.log<br>logs/2016/February/server42.log<br>logs/2016/March/server42.log</p>
+</blockquote>
+<ul>
+<li><p>S3 可透過 prefix &amp; delimiter 作到類似檔案階層的功能(hierachy &amp; folder)，但事實那些都只是透過 object 的檔名虛構出來的，並沒有實際階層功能</p>
+</li>
+<li><p>REST API, SDK, CLI, Management Console 都支援使用 prefix &amp; delimiter</p>
+</li>
+<li><p>與 IAM or S3 Bucket Plicies 搭配，可以在單一個 bucket 中達成像是 department subdirectories, user home directories … 等效果</p>
+</li>
+</ul>
+<h2 id="Storage-Tiers-Classes"><a href="#Storage-Tiers-Classes" class="headerlink" title="Storage Tiers/Classes"></a>Storage Tiers/Classes</h2><table>
+<thead>
+<tr>
+<th></th>
+<th style="text-align:center">Standard</th>
+<th style="text-align:center">Standard (Infrequent Access)</th>
+<th style="text-align:center">Reduced Redundancy Storage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Durability</td>
+<td style="text-align:center">99.999999999%</td>
+<td style="text-align:center">99.999999999%</td>
+<td style="text-align:center">99.99%</td>
+</tr>
+<tr>
+<td>Availability</td>
+<td style="text-align:center">99.99%</td>
+<td style="text-align:center">99.99%</td>
+<td style="text-align:center">99.99%</td>
+</tr>
+<tr>
+<td>Concurrect facility fault tolerance</td>
+<td style="text-align:center">2</td>
+<td style="text-align:center">2</td>
+<td style="text-align:center">1</td>
+</tr>
+<tr>
+<td>SSL support</td>
+<td style="text-align:center">Yes</td>
+<td style="text-align:center">Yes</td>
+<td style="text-align:center">Yes</td>
+</tr>
+<tr>
+<td>First byte latency</td>
+<td style="text-align:center">Miliseconds</td>
+<td style="text-align:center">Miliseconds</td>
+<td style="text-align:center">Miliseconds</td>
+</tr>
+<tr>
+<td>Lifecycle Management Policies</td>
+<td style="text-align:center">Yes</td>
+<td style="text-align:center">Yes</td>
+<td style="text-align:center">Yes</td>
+</tr>
+<tr>
+<td>附註</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">object 大小限制為最小 128KB, 最少要存放 30 天, 存取資料要額外收費</td>
+</tr>
+</tbody>
+</table>
+<h3 id="1-Standard"><a href="#1-Standard" class="headerlink" title="1. Standard"></a>1. Standard</h3><p>99.99 availability, 99.999999999% durability, stored redundantly across multiple devices in multiple facilities and is designed to sustain the loss of 2 facilities concurrently.</p>
+<h3 id="2-IA-Infrequently-Accessed"><a href="#2-IA-Infrequently-Accessed" class="headerlink" title="2. IA(Infrequently Accessed)"></a>2. IA(Infrequently Accessed)</h3><p>適合不常存取的資料，比 standard 便宜，要存取時可以馬上取得，但存取需要額外付費</p>
+<h3 id="3-Reduced-Redundancy-Storage-RRS"><a href="#3-Reduced-Redundancy-Storage-RRS" class="headerlink" title="3. Reduced Redundancy Storage (RRS)"></a>3. Reduced Redundancy Storage (RRS)</h3><p>Design to provide 99.99% durability and 99.99 availability of objects over a given year.</p>
+<blockquote>
+<p>durability 從 <strong>11 x 9’s</strong> 變成 <strong>4 x 9’s</strong>，適合存像是圖片的 thumb nails 之類的資料</p>
+</blockquote>
+<h3 id="4-Glacier"><a href="#4-Glacier" class="headerlink" title="4. Glacier"></a>4. Glacier</h3><ul>
+<li><p>very cheap, but used for archival only. </p>
+</li>
+<li><p>存取前需先執行 restore 命令，並需要等待 3~5 個小時的資料準備時間</p>
+</li>
+<li><p>Glacier 上的資料不會因為 restore 命令而刪除，除非明確執行刪除指令</p>
+</li>
+<li><p>資料還原時會放到 S3 <strong>RRS(Reduced Redundancy Storage)</strong> class</p>
+</li>
+<li><p>AWS 提供每個月免費取得 5% Glacier 資料的額度 (每日為單位計算)</p>
+<blockquote>
+<p>可透過設定 <strong>retrieval policy</strong> or <strong>設定 max GB-per-hour limit</strong> 來確保存取資料會在免費的額度下進行，來降低甚至避免還原費用的發生</p>
+</blockquote>
+</li>
+<li><p>雖然是 S3 Storage Class 的一個選項，但其實 Glacier 是個獨立服務且有獨立的 API，並提供一些 S3 沒有的功能</p>
+</li>
+<li><p>可用來作為取代傳統磁帶作為長期備份的選項 (在某些行業必須有保留資料 N 年的規定)</p>
+</li>
+<li><p>非常可靠，也是有 11 個 9 的 durability</p>
+</li>
+</ul>
+<h4 id="Archive"><a href="#Archive" class="headerlink" title="Archive"></a>Archive</h4><ul>
+<li><p>在 Glacier 上儲存的備份單位稱為 <strong>archive</strong>（等同 S3 上 object 的概念)</p>
+</li>
+<li><p>每個 archive 最大可以到 <strong>40TB</strong></p>
+</li>
+<li><p>使用者可以擁有無限數量的 archive</p>
+</li>
+<li><p>每個 archive 都會有一個 unique archive ID (無法自己取名字)</p>
+</li>
+<li><p>所有的 archive 都會被自動加密 &amp; 無法被修改</p>
+</li>
+</ul>
+<h4 id="Vault"><a href="#Vault" class="headerlink" title="Vault"></a>Vault</h4><ul>
+<li><p>在 Glacier 中存放 archive 的容器稱為 <strong>vault</strong> (等同 S3 上 bucket 的概念)</p>
+</li>
+<li><p>可透過設定 IAM policy or vault access policy 來限制存取</p>
+</li>
+</ul>
+<h4 id="Vaults-Locks"><a href="#Vaults-Locks" class="headerlink" title="Vaults    Locks"></a>Vaults    Locks</h4><ul>
+<li><p>使用者可透過 Vaults    Locks 針對 Glacier 設定強制管理</p>
+</li>
+<li><p>可藉由設定 Write Once Read Many(WORM) 在 vault lock policy 中來套用到未來所有存放到 valut 的 archive</p>
+</li>
+<li><p>一旦設定了 vault lock policy，就無法再度變更規則</p>
+</li>
+</ul>
+<h2 id="Lifecycle-Management"><a href="#Lifecycle-Management" class="headerlink" title="Lifecycle Management"></a>Lifecycle Management</h2><ul>
+<li><p>等同於傳統 IT storage infra 中的 <strong>automated storage tiering</strong> 功能，是一種 data 從 <code>hot</code>(frequently    accessed) -&gt; <code>warm</code>(less    frequently    accessed) -&gt; <code>cold</code>(long-term    backup    or    archive) 的概念</p>
+</li>
+<li><p>Can be used in conjuction with versioning.</p>
+</li>
+<li><p>Can be applied to current versions and previous versions</p>
+</li>
+<li><p>Following actions can now be done:</p>
+<ul>
+<li>Transition to the <strong>Standard - Infrequent Access</strong> storage class (128Kb and 30 days after the creation date)</li>
+<li>Archive to the <strong>Glacier</strong> storage class (30 days after IA, if relevent)</li>
+<li>Permanently Delete (若有移到 Glacier 要把刪除的日期設為 90 天以上，因為 Glacier 費用低消是 90 days)</li>
+</ul>
+</li>
+</ul>
+<h2 id="Encryption"><a href="#Encryption" class="headerlink" title="Encryption"></a>Encryption</h2><h3 id="1-In-Transit"><a href="#1-In-Transit" class="headerlink" title="1. In Transit"></a>1. In Transit</h3><p>透過 AWS SSL API endpoints 存取 S3 (<strong>HTTPS</strong>)，存取的流量都會被加密</p>
+<h3 id="2-At-Rest"><a href="#2-At-Rest" class="headerlink" title="2. At Rest"></a>2. At Rest</h3><h4 id="1-Server-Side-Encryption"><a href="#1-Server-Side-Encryption" class="headerlink" title="(1) Server Side Encryption"></a>(1) Server Side Encryption</h4><ul>
+<li><p>S3 Managed Keys (<code>SSE-S3</code>)</p>
+<blockquote>
+<p>AWS 會將資料用 master key(AES-256) 進行加密，且 key 會定期更換，全由 AWS 託管</p>
+</blockquote>
+</li>
+<li><p>AWS Key Management Service, Managed Keys (<code>SSE-KMS</code>)</p>
+<blockquote>
+<p>透過 KMS 指定 master key 來進行加密，<strong>需要額外支付 KMS 的費用</strong><br>但可以控管 S3 的存取，也可以確認存取 S3 的人是擁有 key 的使用者(可以搭配 AWS 的追蹤功能之道誰在何時存取了 S3 並解密，甚至可以檢視哪個沒有權限的使用者嘗試解密資料時發生的錯誤)</p>
+</blockquote>
+</li>
+<li><p>Server Side Encryption with Customer Provided Keys (<code>SSE-C</code>)</p>
+</li>
+</ul>
+<h4 id="2-Client-Side-Encryption-將資料加密後傳到-S3"><a href="#2-Client-Side-Encryption-將資料加密後傳到-S3" class="headerlink" title="(2) Client Side Encryption (將資料加密後傳到 S3)"></a>(2) Client Side Encryption (將資料加密後傳到 S3)</h4><p>AWS 可從兩個管道取得 data encryption key:</p>
+<ul>
+<li><p>AWS KMS-managed customer master key</p>
+</li>
+<li><p>client-side master key</p>
+</li>
+</ul>
+<h2 id="Versioning"><a href="#Versioning" class="headerlink" title="Versioning"></a>Versioning</h2><ul>
+<li><p>object 的所有版本資訊都會被保留下來，<strong>包含所有的寫入資訊甚至是刪除的資訊</strong>都會被完整保留 (<strong>同樣也要支付多倍的費用來儲存不同的版本</strong>)</p>
+</li>
+<li><p>Great backup tool</p>
+</li>
+<li><p>Once enabled, Versioning cannot be disabled, only suspended.</p>
+</li>
+<li><p>Integrates with Lifecycle rules</p>
+</li>
+<li><p>Versioning’s MFA Delete capability, which uses multi-factor authentication, can be used to provide an additional layer of security. (<strong>只能由 root 帳號啟用此功能</strong>)</p>
+<blockquote>
+<p>刪除 object 前必須提供 token or security code 來完成</p>
+</blockquote>
+</li>
+<li><p>Cross Region Replication, requires versioning enabled on the source bucket</p>
+</li>
+</ul>
+<h2 id="Pre-Signed-URLs"><a href="#Pre-Signed-URLs" class="headerlink" title="Pre-Signed URLs"></a>Pre-Signed URLs</h2><p>object owner 可以透過 <strong>pre-signed URL</strong> 的機制，提供給其他人<strong>暫時</strong>存取 object 的權限，而有效期限則是由 owner 自行指定；也可以透過來保護公開的網頁資料，避免未授權的惡意行為發生。</p>
+<h2 id="Multipart-Upload"><a href="#Multipart-Upload" class="headerlink" title="Multipart Upload"></a>Multipart Upload</h2><p>當使用者有大檔案要上傳時，可開啟 multipart upload 的功能，檔案會被切成多個部份同時上傳，到 S3 上後會自動重組而成原本的檔案。</p>
+<blockquote>
+<p>建議超過 100MB 的檔案使用 multipart upload；此外，超過 5GB 的檔案一定要用 multipart upload 才可以上傳</p>
+<p>可以針對未完成上傳的檔案設定 lifecycle policy，如此可以減少費用的支出，讓超過期限未完成上傳的檔案自動失效</p>
+</blockquote>
+<h2 id="Range-GETs"><a href="#Range-GETs" class="headerlink" title="Range    GETs"></a>Range    GETs</h2><p>可下載指定 object 的部份內容，透過指定 byte 的範圍來取得 object 的部份資料；而這功能必須透過 SDK 搭配 Range HTTP header 才能實現。</p>
+<blockquote>
+<p>若是網路品質很差，或是想要從很大的 Glacier 備份中取得部份資料時可能會用到</p>
+</blockquote>
+<h2 id="Cross-Region-Replication"><a href="#Cross-Region-Replication" class="headerlink" title="Cross-Region Replication"></a>Cross-Region Replication</h2><p>cross-region replication 允許使用者將指定 bucket 的 object 非同步的複製到其他的 region。</p>
+<ul>
+<li><p>啟用 cross-region replication 的功能前，必須先啟動 bucket 的 versioning 功能</p>
+</li>
+<li><p>任何與 object 相關的 metadata or ACL 設定更動時，都會觸發 replication 的發生</p>
+</li>
+<li><p>必須設定正確的 IAM policy 讓 S3 本身可以進行 replication 的工作</p>
+</li>
+<li><p>若是已經存在的 bucket 開啟 cross-region replication 的功能，原有的資料不會被複製，必須自行複製 or 透過額外的命令來進行資料搬移</p>
+</li>
+</ul>
+<blockquote>
+<p>此功能常被用來將 object 放在靠使用者較近的地方來減少延遲；或是滿足不同地理區域備份的需求</p>
+</blockquote>
+<h2 id="Logging"><a href="#Logging" class="headerlink" title="Logging"></a>Logging</h2><ul>
+<li><p>針對 bucket 存取的 logging 功能預設關閉，可透過 S3 server access logs 功能開啟</p>
+</li>
+<li><p>log 可儲存在同一個 bucket 內，也可以存在另外一個 bucket 中；但重點是設定 prefix(例如：<code>logs/</code> or <code>bucket_name/logs/</code>) 讓後續尋找 log 方便是很重要的</p>
+</li>
+<li><p>log 資訊包含：</p>
+<ul>
+<li>requestor account &amp; IP</li>
+<li>request time</li>
+<li>bucket name</li>
+<li>action (GET, PUT, LIST … etc)</li>
+<li>response status &amp; error code</li>
+</ul>
+</li>
+</ul>
+<h2 id="Event-Notification"><a href="#Event-Notification" class="headerlink" title="Event Notification"></a>Event Notification</h2><p>event notification 可以用來在 bucket 狀態有變更(例如：上傳 object)時驅動某些事件的發生，使用者可以透過此特性來加入到 workflow 的設計，發送警告，或是執行特定工作…等等。</p>
+<ul>
+<li><p>設定於 bucket level</p>
+</li>
+<li><p>可在 object 被建立(PUT, POST, COPY or multipart upload), 被刪除(DELETE)，或是偵測到有 RRS(Reduced Redundancy Storage) object 遺失的時候發送通知</p>
+</li>
+<li><p>可透過 Amazon SNS(Simple Notification Service) or SQS(Simple Queue Service) 發送通知，也可以直接呼叫 AWS Lambda function</p>
+</li>
+</ul>
+<h1 id="S3-Management-Console"><a href="#S3-Management-Console" class="headerlink" title="S3 Management Console"></a>S3 Management Console</h1><h2 id="Permissions"><a href="#Permissions" class="headerlink" title="Permissions"></a>Permissions</h2><p>在權限管理的部分，有分成 <code>Objects</code> &amp; <code>Object permissions</code> 兩種：</p>
+<ol>
+<li><p><strong>Objects</strong>: 對於 object 本身內容的存取權限</p>
+<blockquote>
+<p>Grant permissions to the user to list, create, overwrite, or delete objects in the bucket.</p>
+</blockquote>
+</li>
+<li><p><strong>Object permissions</strong>: 對於 object 的 ACL 的存取權限，並非 object 本身</p>
+<blockquote>
+<p>Grant permissions to the user to read or write to an access control list (ACL) for the bucket</p>
+</blockquote>
+</li>
+</ol>
+<p>即使 bucket 的權限被設定為 public readable，也不代表後續上傳到此 bucket 的 object 也是 public readable，權限是分開管理的</p>
+<h2 id="Versioning-1"><a href="#Versioning-1" class="headerlink" title="Versioning"></a>Versioning</h2><ul>
+<li><p>當此功能開啟後，之後無法移除，只能關閉</p>
+</li>
+<li><p>上傳相同名稱的檔案多次，S3 會在介面上看到一個檔案搭配多個 version 可選 (透過檢視 metadata 可以發現其實根本就是不同的 object)</p>
+<blockquote>
+<p>而使用容量的計算當然就是所有版本 object 的 size 總和 (<strong>計算成本的時候要特別注意這件事情</strong>)</p>
+</blockquote>
+</li>
+<li><p>若移除 object 的 version，永遠就會消失無法還原</p>
+</li>
+<li><p>刪除 object 之後，會在系統上留下一個 <code>Delete Marker</code>(需要在 Versions 的地方選 <strong>Show</strong> 藉以顯示所有歷程記錄)，刪除 Delete Marker 之後就可以回復原本被刪除的檔案 </p>
+<blockquote>
+<p>目前還原功能是在舊版的版面上找到的，新版的目前沒有看到類似的功能頁面</p>
+</blockquote>
+</li>
+</ul>
+<h1 id="S3-Transfer-Acceleration"><a href="#S3-Transfer-Acceleration" class="headerlink" title="S3 Transfer Acceleration"></a>S3 Transfer Acceleration</h1><h2 id="What-is-S3-Transfer-Acceleration"><a href="#What-is-S3-Transfer-Acceleration" class="headerlink" title="What is S3 Transfer Acceleration?"></a>What is S3 Transfer Acceleration?</h2><p>S3 Transfer Acceleration utilise the CloudFront Edge Network to accelerate your uploads to S3. Instead of uploading directly to your S3 bucket, you can use a distinct URL to upload directly to an edge location which will then transfer that file to S3. You will get a distinct URL to upload to:</p>
+<blockquote>
+<p>your-bucket-name.s3-accelerate.amazonaws.com</p>
+</blockquote>
+<p>若要上傳大量的資料到距離本地端很遠的 region，使用 S3 Transfer Acceleration 會很有幫助</p>
+<h1 id="Create-a-Static-Website-using-S3"><a href="#Create-a-Static-Website-using-S3" class="headerlink" title="Create a Static Website using S3"></a>Create a Static Website using S3</h1><h2 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h2><ol>
+<li><p>建立 bucket</p>
+</li>
+<li><p>啟用 <strong>Static website hosting</strong></p>
+</li>
+</ol>
+<blockquote>
+<p>這裡會取得一個 <strong><a href="http://your-bucket-name.s3-website.region-alias.amazonaws.com" target="_blank" rel="noopener">http://your-bucket-name.s3-website.region-alias.amazonaws.com</a></strong> 的 domain name</p>
+</blockquote>
+<ol>
+<li><p>可以額外設定 index/error pages.</p>
+</li>
+<li><p>依然要提供 object read permission 才可以</p>
+</li>
+</ol>
+<h1 id="Exam-Tips"><a href="#Exam-Tips" class="headerlink" title="Exam Tips"></a>Exam Tips</h1><h2 id="S3-101"><a href="#S3-101" class="headerlink" title="S3 101"></a>S3 101</h2><ul>
+<li><p>S3 is Object based.</p>
+</li>
+<li><p>Files can be from 0 Bytes ~ 5 TB.</p>
+</li>
+<li><p>There is unlimited storage.</p>
+</li>
+<li><p>Files are stored in Buckets.</p>
+</li>
+<li><p>S3 is a universal namespace, that is, names must be unique globally.</p>
+<blockquote>
+<p>網址的格式為: <a href="https://[RegionName].amazonaws.com/[YourBucketName" target="_blank" rel="noopener">https://[RegionName].amazonaws.com/[YourBucketName</a>]</p>
+</blockquote>
+</li>
+<li><p>Read after Write consistency for PUTS of new Object</p>
+</li>
+<li><p>Eventual Consistency for overwrite PUTS and DELETES (can take some time to propagate)</p>
+</li>
+<li><p>S3 Storage Classes/Tiers</p>
+<ul>
+<li>S3 (durable, immediately available, frequently accessed)</li>
+<li>S3 - IA (durable, immediately available, infrequently accessed)</li>
+<li>S3 - Reduced Redundancy Storage (data that is easily reproducible, such as thumb nails etc)</li>
+<li>Glacier - Archived data, where you can wait 3~5 hours before accessing</li>
+</ul>
+</li>
+<li><p>Remember the core fundamentals of an S3 object</p>
+<ul>
+<li>Key (name)<blockquote>
+<p>這是一個 1024 bytes 的 UTF-8 字元所組成，在同一個 bucket 內不會重複(但不同的 bucket 可能會有同樣的 key)</p>
+</blockquote>
+</li>
+<li>Value (data)</li>
+<li>version ID</li>
+<li>metadata</li>
+<li>subresource (ACL, torrent)</li>
+</ul>
+</li>
+<li><p>Object based storage only (for files).</p>
+</li>
+<li><p><strong>Not suitable to install an operating system</strong>.</p>
+</li>
+<li><p>Successfuly upload will generate a HTTP 200 status code.</p>
+</li>
+</ul>
+<h2 id="Versioning-2"><a href="#Versioning-2" class="headerlink" title="Versioning"></a>Versioning</h2><ul>
+<li><p>object 的所有版本資訊都會被保留下來，<strong>包含所有的寫入資訊甚至是刪除的資訊</strong>都會被完整保留 (<strong>同樣也要支付多倍的費用來儲存不同的版本</strong>)</p>
+</li>
+<li><p>Great backup tool</p>
+</li>
+<li><p>Once enabled, Versioning cannot be disabled, only suspended.</p>
+</li>
+<li><p>Integrates with Lifecycle rules</p>
+</li>
+<li><p>Versioning’s MFA Delete capability, which uses multi-factor authentication, can be used to provide an additional layer of security. (<strong>只能由 root 帳號啟用此功能</strong>)</p>
+<blockquote>
+<p>刪除 object 前必須提供 token or security code 來完成</p>
+</blockquote>
+</li>
+<li><p>Cross Region Replication, requires versioning enabled on the source bucket</p>
+</li>
+</ul>
+<h2 id="Cross-Region-Replication-1"><a href="#Cross-Region-Replication-1" class="headerlink" title="Cross Region Replication"></a>Cross Region Replication</h2><ul>
+<li><p>要啟用 cross region replication 的功能，source &amp; destination bucket 都必須要啟用 versioning 才可以</p>
+</li>
+<li><p>設定 replication 前已經存在的 object 不會自動被同步，只有後續上傳的 object 會被同步</p>
+<blockquote>
+<p>如果上傳新版的 object，原來所有版本的記錄都會一併被同步</p>
+</blockquote>
+</li>
+<li><p>任何與 object 相關的 metadata or ACL 被變更時，都會觸發 replication 的工作執行</p>
+</li>
+<li><p>必須設定 IAM policy，用以提供 S3 合適的權限進行 replication 工作</p>
+</li>
+<li><p>單一 bucket 無法同步到多個 region，但可透過 <code>region1_bucket -&gt; region2_bucket -&gt; region3_bucket</code> 的方式達成相同效果 (daisy chain 似乎也不行)</p>
+</li>
+<li><p>刪除 object 後，原本同步 region 上的 object 也會被刪除</p>
+<ul>
+<li>所從舊版的 console 刪除 delete maker 後可以恢復檔案，但刪除 delete marker 這動作不會被同步，因此同步的 destination bucket 上的檔案不會回復</li>
+<li>若使用 <code>region1_bucket -&gt; region2_bucket -&gt; region3_bucket</code> 同步到多個 region，delete marker 只會被同步到 region2，region3 只會得到檔案被刪除的結果，看不到 delete marker</li>
+</ul>
+</li>
+<li><p>Deleting individual versions or delete markers will not be replicated</p>
+<blockquote>
+<p>在 source bucket 中刪除 delete marker or 特定版本(在舊版的 console)的結果，不會被同步到 destination bucket</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="Lifecycle-Management-1"><a href="#Lifecycle-Management-1" class="headerlink" title="Lifecycle Management"></a>Lifecycle Management</h2><ul>
+<li><p>等同於傳統 IT storage infra 中的 <strong>automated storage tiering</strong> 功能，是一種 data 從 <code>hot</code>(frequently    accessed) -&gt; <code>warm</code>(less    frequently    accessed) -&gt; <code>cold</code>(long-term    backup    or    archive) 的概念</p>
+</li>
+<li><p>Can be used in conjuction with versioning.</p>
+</li>
+<li><p>Can be applied to current versions and previous versions</p>
+</li>
+<li><p>Following actions can now be done:</p>
+<ul>
+<li>Transition to the <strong>Standard - Infrequent Access</strong> storage class (128Kb and 30 days after the creation date)</li>
+<li>Archive to the <strong>Glacier</strong> storage class (30 days after IA, if relevent)</li>
+<li>Permanently Delete (若有移到 Glacier 要把刪除的日期設為 90 天以上，因為 Glacier 費用低消是 90 days)</li>
+</ul>
+</li>
+</ul>
+<h2 id="CloudFront"><a href="#CloudFront" class="headerlink" title="CloudFront"></a>CloudFront</h2><ul>
+<li><p>Edge Location: This is the location where content will be cached. This is separate to an AWS Region/AZ.</p>
+</li>
+<li><p>Origin: This is the origin of all the files that the CDN will distribute. This can be either an S3 bucket, an EC2 instance, an Elastic Load Balancer or Route53.</p>
+</li>
+<li><p>Distribution: This is the name given the CDN which consists of a collection of Edge Locations.</p>
+<ul>
+<li><strong>Web Distribution</strong>: Typically used for websites.</li>
+<li><strong>RTMP</strong>: Used for media streaming. (ex: Adobe Flash)</li>
+</ul>
+</li>
+<li><p>Edge Locations are <strong>not just READ only</strong>, you can write to them too. (ie. put an object on to them).</p>
+</li>
+<li><p>Objects are cached for the life of the TTL (Time to Live)</p>
+</li>
+<li><p>You can clear cached objects, but you will be charged. (不需要等到 TTL 結束)</p>
+</li>
+</ul>
+<h2 id="Security"><a href="#Security" class="headerlink" title="Security"></a>Security</h2><ul>
+<li><p>By default, all newly created buckets are <strong>PRIVATE</strong></p>
+</li>
+<li><p>You can setup access control to your buckets using:</p>
+<ul>
+<li>Bucket Policies</li>
+<li>Access Control Lists (可調整個別 object 的權限)</li>
+</ul>
+</li>
+<li><p>S3 buckets can be configured to create access logs which log all requests made to the S3 buckets. This can be done to another bucket. (也可以將 log 放到另一個 AWS 帳號 S3 bucket 中，需要進行跨帳號連結的設定) </p>
+</li>
+</ul>
+<h2 id="Encryption-1"><a href="#Encryption-1" class="headerlink" title="Encryption"></a>Encryption</h2><h3 id="1-In-Transit-SSL-TLS"><a href="#1-In-Transit-SSL-TLS" class="headerlink" title="1. In Transit (SSL/TLS)"></a>1. In Transit (SSL/TLS)</h3><h3 id="2-At-Rest-1"><a href="#2-At-Rest-1" class="headerlink" title="2. At Rest"></a>2. At Rest</h3><ul>
+<li><p>Server Side Encryption</p>
+<ul>
+<li>S3 Managed Keys (<code>SSE-S3</code>)</li>
+<li>AWS Key Management Service, Managed Keys (<code>SSE-KMS</code>)</li>
+<li>Server Side Encryption with Customer Provided Keys (<code>SSE-C</code>)</li>
+</ul>
+</li>
+<li><p>Client Side Encryption</p>
+</li>
+</ul>
+<h2 id="Storage-Gateway"><a href="#Storage-Gateway" class="headerlink" title="Storage Gateway"></a>Storage Gateway</h2><ul>
+<li><p><strong>File Gateway</strong>: For flat files, stored directly on S3</p>
+</li>
+<li><p><strong>Volume Gateway</strong></p>
+<ul>
+<li><strong>Stored Volumes</strong> - Entire Dataset is stored on site and is asynchronously backed up to S3.</li>
+<li><strong>Cached Volumes</strong> - Entire Dataset is stored on S3 and the most frequently accessed data is cached on site.</li>
+</ul>
+</li>
+<li><p><strong>Gateway Virtual Tape Library (VTL)</strong>: Used for backup and uses popular backup applications like NetBackup, Backup Exec, Veam etc</p>
+</li>
+</ul>
+<h2 id="Snowball"><a href="#Snowball" class="headerlink" title="Snowball"></a>Snowball</h2><ul>
+<li><p>Snowball</p>
+</li>
+<li><p>Snowball Edge</p>
+</li>
+<li><p>Snowmobile</p>
+</li>
+<li><p>Understand what Snowball is</p>
+</li>
+<li><p>Understand what Import Export is</p>
+</li>
+<li><p>Snowball can</p>
+<ul>
+<li>Import to S3</li>
+<li>Export from S3</li>
+</ul>
+</li>
+</ul>
+<h2 id="S3-Transfer-Acceleration-1"><a href="#S3-Transfer-Acceleration-1" class="headerlink" title="S3 Transfer Acceleration"></a>S3 Transfer Acceleration</h2><p>You can speed up transfers to S3 using S3 transfer acceleration. This cost extra, and has the greatest impact on people who are in far away location.</p>
+<h2 id="S3-Static-Websites"><a href="#S3-Static-Websites" class="headerlink" title="S3 Static Websites"></a>S3 Static Websites</h2><ul>
+<li><p>You can use S3 to hsot static websites</p>
+</li>
+<li><p>Serverless</p>
+</li>
+<li><p>Very cheap, scales automatically</p>
+</li>
+<li><p><strong>STATIC</strong> only, canonot host dynamic sites</p>
+</li>
+</ul>
+<h2 id="misc"><a href="#misc" class="headerlink" title="misc"></a>misc</h2><ul>
+<li><p>Write to S3 - HTTP 200 code for a successful write.</p>
+</li>
+<li><p>You can load files to S3 much faster by enabling multipart upload</p>
+</li>
+<li><p>Read the S3 FAQ before taking the exam. It comes up A LOT!</p>
+</li>
+</ul>
+<p>##　Best Practices, Patterns,    and    Performance</p>
+<ul>
+<li><p>S3 &amp; Glacier 非常適合在 hybrid cloud 的環境下作為異地備份的工具</p>
+</li>
+<li><p>另一個常見的應用是將 S3 作為大量 blob 檔案的儲存位置，而把這些 blob 的 index 存於其他的服務(例如：Amazon DynamoDB or Amazon RDS)，透過此方式可以針對 key name 提高搜尋的速度並支援複雜的查詢</p>
+</li>
+<li><p>S3 會自動 scale 來支援 high request rate，也會自動的根據需求針對 bucket 進行 repartition 的動作</p>
+</li>
+<li><p>若有每秒超過 100 個 reuqest 的需求，可參考 developer guide 中的資訊，讓 object key 可以隨機的分佈 (可透過像是使用 hash 值作為 key name prefix 的方式來達成)</p>
+</li>
+</ul>
+<h1 id="應考前建議"><a href="#應考前建議" class="headerlink" title="應考前建議"></a>應考前建議</h1><p>詳細閱讀下列資料：</p>
+<ul>
+<li><a href="https://aws.amazon.com/s3/faqs/" target="_blank" rel="noopener">Amazon Simple Storage Service (S3) FAQs</a> <a href="https://aws.amazon.com/tw/s3/faqs/" target="_blank" rel="noopener">(中文)</a></li>
+</ul>
+]]></content>
+      
+        <categories>
+            
+            <category> AWS </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> AWS </tag>
+            
+            <tag> S3 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[AWS 學習筆記 - IAM(Identity and Access Management)]]></title>
+      <url>/blog/2017/05/02/AWS/AWS-Learning-Notes-IAM/</url>
+      <content type="html"><![CDATA[<h1 id="What-is-IAM"><a href="#What-is-IAM" class="headerlink" title="What is IAM?"></a>What is IAM?</h1><p>AWS Identity and Access Management (IAM) enables you to securely control access to AWS services and resources for your users. Using IAM, you can create and manage AWS users and groups, and use permissions to allow and deny their access to AWS resources. </p>
+<p>IAM is a feature of your AWS account offered at no additional charge. You will be charged only for use of other AWS services by your users.</p>
+<h1 id="What-does-IAM-give-you"><a href="#What-does-IAM-give-you" class="headerlink" title="What does IAM give you?"></a>What does IAM give you?</h1><ul>
+<li><p>Centralized control of your AWS account</p>
+</li>
+<li><p>Shared Access to your AWS account</p>
+<blockquote>
+<p>可以分享權限到其他帳號去</p>
+</blockquote>
+</li>
+<li><p>Granular Permissions</p>
+<blockquote>
+<p>可以針對每個帳號可存取的資源權限進行很細部的控制，例如<strong>限制某人只能對 DynamoDB 進行唯讀的存取</strong></p>
+</blockquote>
+</li>
+<li><p>Identity Federation(including Active Directory, Facebook, Linkedin etc)</p>
+<blockquote>
+<p>可以透過其他服務(AD, Facebook, Linkedin etc)的帳號透過 SSO 登入 AWS</p>
+</blockquote>
+</li>
+<li><p>Multifactor Authentication</p>
+<blockquote>
+<p>AWS 建議為每個帳號都設定 multifactor authentication</p>
+</blockquote>
+</li>
+<li><p>Provide temporary access for users/devices and services where necessary</p>
+</li>
+<li><p>Allows you to set up your own password rotation policy</p>
+</li>
+<li><p>Integrates with many different AWS services</p>
+</li>
+<li><p>Supports PCI DSS(Payment Card Industry Data Security Standards) Compliance</p>
+<blockquote>
+<p>PCI DSS(支付卡產業資料安全標準)是在整合外部付費服務之用，為了提升線上支付的安全性</p>
+</blockquote>
+</li>
+</ul>
+<h1 id="Critical-Terms"><a href="#Critical-Terms" class="headerlink" title="Critical Terms"></a>Critical Terms</h1><ul>
+<li><p><strong>Users</strong> - End Users(think people)</p>
+</li>
+<li><p><strong>Group</strong> - A collection of userss under one set of permissions.</p>
+<blockquote>
+<p>A way to group our users and apply policies to them collectively</p>
+</blockquote>
+</li>
+<li><p><strong>Roles</strong> - You create roles and can then assign them to AWS resources</p>
+</li>
+<li><p><strong>Policies</strong> - A document that defined one(or more permission)</p>
+</li>
+</ul>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"Version"</span>: <span class="string">"2012-10-17"</span>,</span><br><span class="line">  <span class="attr">"Statement"</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">"Effect"</span>: <span class="string">"Allow"</span>,</span><br><span class="line">      <span class="attr">"Action"</span>: <span class="string">"s3:*"</span>,</span><br><span class="line">      <span class="attr">"Resource"</span>: <span class="string">"*"</span></span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="學習筆記"><a href="#學習筆記" class="headerlink" title="學習筆記"></a>學習筆記</h1><h2 id="IAM-is-global-universal"><a href="#IAM-is-global-universal" class="headerlink" title="IAM is global(universal)"></a>IAM is global(universal)</h2><p>從 management console 進入 IAM 的功能頁面後，Region 的部份會變成 <code>global</code>，表示 IAM 只需要設定一次，這個設定就可以用來套用到使用者在全球所有 region 中的 resource</p>
+<h3 id="IAM-users-sign-in-link"><a href="#IAM-users-sign-in-link" class="headerlink" title="IAM users sign-in link"></a>IAM users sign-in link</h3><p><img src="http://etutorialsworld.com/wp-content/uploads/2016/05/72.22BAWS2BIAM2BDashboard-1.png" alt="IAM users sign-in link"></p>
+<ol>
+<li><p>這是用來提供給其他使用者存取 AWS resource 之用，並非 root account，需要注意一下!</p>
+</li>
+<li><p>網址是動態產生的，可以透過 <strong>Customize</strong> 的 link 設定別名以方便記憶</p>
+</li>
+</ol>
+<h2 id="Security-Status"><a href="#Security-Status" class="headerlink" title="Security Status"></a>Security Status</h2><h3 id="1-Delete-your-root-access-keys"><a href="#1-Delete-your-root-access-keys" class="headerlink" title="(1) Delete your root access keys"></a>(1) Delete your root access keys</h3><p>AWS 建議儘量不要用 root account 進行資源的存取；正確的作法應該新增使用者，並為使用者設定所需要的資源存取權限。</p>
+<p>例如：一開始我在 root account 加了一把 access key，在這個部份就無法 pass 檢查了</p>
+<h3 id="2-Activate-MFA-on-your-root-account"><a href="#2-Activate-MFA-on-your-root-account" class="headerlink" title="(2) Activate MFA on your root account"></a>(2) Activate MFA on your root account</h3><p>選擇 <code>A virtual MFA device</code> 作為 MFA device type(Hardware 是要花錢買的)，接著可以選用 <code>Google Authenticator</code> 作為接收驗證碼之用。</p>
+<p>在 Google Authenticator 中可以設定很多個要用來作 MFA 的帳號，當然也就可以把 AWS IAM 設定進來。</p>
+<p>透過掃描 barcode 的方式，手機上會一直出現 random 的啟用碼(要等一下)，輸入兩個就可以用來啟用 AWS IAM MFA 了。</p>
+<h3 id="3-Create-individual-IAM-users"><a href="#3-Create-individual-IAM-users" class="headerlink" title="(3) Create individual IAM users"></a>(3) Create individual IAM users</h3><p>在建立 user 時，有幾點需要注意一下：</p>
+<ul>
+<li><p><strong>Access type</strong>：勾選 <code>Programmatic access</code> 才可以用這個帳號搭配 AWS API, CLI, SDK …. 等其他開發工具來存取 AWS 的資源；勾選 <code>AWS Management Console access</code> 才可以透過密碼登入的方式進入 AWS Management console</p>
+</li>
+<li><p>可在此時順便建立 or 指定特定的 group，也可以順便指定 policy 來設定權限</p>
+<blockquote>
+<p>policy 並非 group 專屬，也可以 attach 到單一 user</p>
+</blockquote>
+</li>
+<li><p>建立完成的 user(若有勾選 <strong>Programmatic access</strong>) 會得到 <code>Access key ID</code> &amp; <code>Secret access key</code>，這是開發用來存取 AWS 資源的程式需要的資訊</p>
+</li>
+</ul>
+<h3 id="4-Use-groups-to-assign-permissions"><a href="#4-Use-groups-to-assign-permissions" class="headerlink" title="(4) Use groups to assign permissions"></a>(4) Use groups to assign permissions</h3><p>目前 AWS 已經提供了很多內建的權限清單可以用，例如：S3 唯讀, Glacier 唯讀….等等，但目前還不確定能不能自訂權限的選項。。</p>
+<h3 id="5-Apply-an-IAM-password-policy"><a href="#5-Apply-an-IAM-password-policy" class="headerlink" title="(5) Apply an IAM password policy"></a>(5) Apply an IAM password policy</h3><p>這沒什麼特別，就是設定密碼的規則….(長度, rotation period…等等)</p>
+<h2 id="Add-Role"><a href="#Add-Role" class="headerlink" title="Add Role"></a>Add Role</h2><h3 id="1-Role-Type"><a href="#1-Role-Type" class="headerlink" title="(1) Role Type"></a>(1) Role Type</h3><ul>
+<li><p><strong>AWS Service Role</strong>: 用來指定 AWS 上面的特定 service</p>
+<blockquote>
+<p>這可以設定的非常細，例如：只讓 EC2 對 S3 完全存取，無其他 service 的存取權限</p>
+</blockquote>
+</li>
+<li><p><strong>Role for Cross-Account Access</strong>: 可以用來讓特定帳號去存取其他帳號的 management console</p>
+</li>
+<li><p><strong>Role for Identity Provider Access</strong>: 作 SSO, 整合 FB, Linkedin 帳號時才會用到的部份</p>
+</li>
+</ul>
+<h3 id="2-Attach-Policy"><a href="#2-Attach-Policy" class="headerlink" title="(2) Attach Policy"></a>(2) Attach Policy</h3><h1 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h1><ul>
+<li><p>IAM is universal. It does not apply to regions at this time.</p>
+</li>
+<li><p>The <strong>root account</strong> is simplely the account created when first setup your AWS account. It has complete Admin access.</p>
+</li>
+<li><p>New Users have <strong>NO</strong> permissions when first created.</p>
+</li>
+<li><p>New Users are assigned <strong>Access Key ID</strong> &amp; <strong>Secrect Access Keys</strong> when first created.</p>
+</li>
+<li><p>These are not the same as a password, and you cannot use the Access Key ID &amp; Secret Access Key to Login in to the console. You can use this to access AWS via the APIs, SDK and Command Line however.</p>
+</li>
+<li><p>You only get to view these once. If you lose them, you have to regenerate them. So save them in a secure location.</p>
+</li>
+<li><p>Always setup Multifactor Authentication on your root account.</p>
+</li>
+<li><p>You can create and customize your own password rotation policies.</p>
+</li>
+</ul>
+]]></content>
+      
+        <categories>
+            
+            <category> AWS </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> AWS </tag>
+            
+            <tag> IAM </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[[Linux KVM] Template & Snapshot 的運用]]></title>
+      <url>/blog/2017/01/01/KVM/KVM-Template-And-Snapshot/</url>
+      <content type="html"><![CDATA[<p>此篇文章介紹如何使用 KVM 中的 template &amp; snapshot 功能</p>
+<h1 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h1><p>虛擬化技術有些非常吸引人使用的特性，例如：</p>
+<ul>
+<li><p>Fast Provisioning</p>
+</li>
+<li><p>Snapshots</p>
+</li>
+<li><p>不複雜的 backup &amp; recovery 方式</p>
+</li>
+</ul>
+<p>以上這些特性都不是在實體環境上容易實現的，但透過 KVM 中的 template，可以實現 fast provisioning，而透過 snapshot 則可簡單實現 backup &amp; recovery。</p>
+<hr>
+<h1 id="VM-Templates"><a href="#VM-Templates" class="headerlink" title="VM Templates"></a>VM Templates</h1><p>template 有別於一般的 VM clone，clone 只是從其他 VM 複製成另外一個完整的 VM；而 template 則是可以作為其他 VM 的 master copy，並用來產生很多個 clone</p>
+<h2 id="建立-template"><a href="#建立-template" class="headerlink" title="建立 template"></a>建立 template</h2><p>template 是由以存在的 VM 所轉換過來的，因此在建立 template 之前，我們必須先完成以下步驟：</p>
+<ol>
+<li><p>安裝 &amp; 設定 VM，確認上面已經安裝所需要的所有軟體套件</p>
+</li>
+<li><p>移除所有系統特定的設定，確保只與此 VM 相關的設定(例如：固定 IP)不會被複製到其他 VM 上</p>
+</li>
+<li><p>修改 VM 名稱讓其容易辨識，例如以 <strong>template</strong> 作為開頭</p>
+</li>
+</ol>
+<h3 id="1-建立-Centos-Template"><a href="#1-建立-Centos-Template" class="headerlink" title="(1) 建立 Centos Template"></a>(1) 建立 Centos Template</h3><p>要建立 Linux template，必須透過 <code>virt-sysprep</code> 工具的協助。</p>
+<p>這工具由 <code>libguestfs-tools-s</code> 套件所提供，可以移除 VM 中系統特定的資訊，以便於轉換成 template 之用；此外也可以客製化 VM，例如加上 SSH Key、加入使用者、設定 Logo …. 等等。</p>
+<p>輸入 <code>virt-prep --help</code> 可以知道 virt-sysprep 支援哪些調整選項：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">[root@ocp-kvm-host ~]<span class="comment"># virt-sysprep -help</span></span><br><span class="line">virt-sysprep: reset or unconfigure a virtual machine so clones can be made</span><br><span class="line"></span><br><span class="line"> virt-sysprep [--options] -d domname</span><br><span class="line"></span><br><span class="line"> virt-sysprep [--options] -a disk.img [-a disk.img ...]</span><br><span class="line"></span><br><span class="line">A short summary of the options is given below.  For detailed <span class="built_in">help</span> please</span><br><span class="line"><span class="built_in">read</span> the man page virt-sysprep(1).</span><br><span class="line"></span><br><span class="line">  -a file                             Add disk image file</span><br><span class="line">  --add file                          Add disk image file</span><br><span class="line">  -c uri                              Set libvirt URI</span><br><span class="line">  --chmod PERMISSIONS:FILE            Change the permissions of a file</span><br><span class="line">  --connect uri                       Set libvirt URI</span><br><span class="line">  -d domain                           Set libvirt guest name</span><br><span class="line">  --debug-gc                          Debug GC and memory allocations (internal)</span><br><span class="line">  --delete PATH                       Delete a file or directory</span><br><span class="line">  --domain domain                     Set libvirt guest name</span><br><span class="line">  --dry-run                           Perform a dry run</span><br><span class="line">  --dryrun                            Perform a dry run</span><br><span class="line">  --dump-pod                          Dump POD (internal)</span><br><span class="line">.....</span><br></pre></td></tr></table></figure>
+<p>從 help 中的說明可以看出，virt-sysprep 有兩個參數分別是 <code>-d</code> &amp; <code>-a</code>，其中 <code>-d</code> 所處理的對象是 VM，而 <code>-a</code> 所處理的對象則是獨立的 virtual disk。</p>
+<p>以下使用對 VM 為範例來操作：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">[root@ocp-kvm-host ~]<span class="comment"># virsh list --all</span></span><br><span class="line"> Id    Name                           State</span><br><span class="line">----------------------------------------------------</span><br><span class="line"> -     centos7                        shut off</span><br><span class="line">.....</span><br><span class="line"></span><br><span class="line">[root@ocp-kvm-host ~]<span class="comment"># virt-sysprep -d centos7</span></span><br><span class="line">[   0.0] Examining the guest ...</span><br><span class="line">[  43.0] Performing <span class="string">"abrt-data"</span> ...</span><br><span class="line">[  43.0] Performing <span class="string">"bash-history"</span> ...</span><br><span class="line">........</span><br><span class="line">[  43.0] Performing <span class="string">"udev-persistent-net"</span> ...</span><br><span class="line">[  43.0] Performing <span class="string">"utmp"</span> ...</span><br><span class="line">[  43.0] Performing <span class="string">"yum-uuid"</span> ...</span><br><span class="line">[  43.0] Performing <span class="string">"customize"</span> ...</span><br><span class="line">[  43.0] Setting a random seed</span><br><span class="line">[  43.0] Performing <span class="string">"lvm-uuids"</span> ...</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>到此步驟時，VM template 已經準備完成；還有一點更重要的是，<strong>不要再啟動 template VM</strong>，否則將會失去之前 virt-sysprep 所完成的結果，甚至有可能會在使用 thin method(參考下方) 產生 VM 時發生問題 </p>
+</blockquote>
+<h3 id="2-建立-Windows-Template"><a href="#2-建立-Windows-Template" class="headerlink" title="(2) 建立 Windows Template"></a>(2) 建立 Windows Template</h3><p>要製作 template，可以透過 <code>virt-clone</code> + <code>virt-sysprep</code> 的方式</p>
+<p>要透過 template 建立新的 VM，有以下兩種方式可以進行：</p>
+<h2 id="透過-template-佈署-VM"><a href="#透過-template-佈署-VM" class="headerlink" title="透過 template 佈署 VM"></a>透過 template 佈署 VM</h2><ol>
+<li><p><strong>thin method</strong></p>
+<blockquote>
+<p>此方式會以 template image 為 base image以 read-only(template VM image) 搭配 copy-on-write(新的 VM) 來處理，所需要的磁碟空間比較小，但需要確保 base image 可以被存取</p>
+</blockquote>
+</li>
+<li><p><strong>clone method</strong></p>
+<blockquote>
+<p>此方式會完整複製一份 template image 作為 新 VM 的 image，會消耗較多的磁碟空間，但可以完全獨立不依賴原本的 base image</p>
+</blockquote>
+</li>
+</ol>
+<hr>
+<h1 id="Snapshots"><a href="#Snapshots" class="headerlink" title="Snapshots"></a>Snapshots</h1><p>snapshot 是以檔案為基礎，用來表示 VM 在某個特定時間點的狀態，包含了相關設定檔 &amp; disk 資料；而透過 snapshot，管理者可以隨時將 VM 還原到當時建立 snapshot 時的狀態，而這功能在進行對於 VM 要進行重大變更前時特別好用。</p>
+<p>此外，libvirt 還提供了 live snapshot 的功能，可以針對執行中的 VM 進行 snapshot，但這功能不建議使用在 I/O 工作頻繁的 VM 上，建議這類的 VM 還是 shutdown or suspend 之後再來做 snapshot 會較好。</p>
+<p>libvirt 支援兩種 snapshop，分別如下：</p>
+<h3 id="internal-snapshot"><a href="#internal-snapshot" class="headerlink" title="internal snapshot"></a>internal snapshot</h3><p>internal snapshot 的 snapshot 資訊會存在於同一個 qcow2 檔案中(before/after snapshot bit)，有以下的限制需要注意：</p>
+<ul>
+<li><p>僅支援 qcow2 format</p>
+</li>
+<li><p>當建立 snapshot 時，VM 會進入暫停狀態</p>
+</li>
+<li><p>無法使用在 LVM storage pool 上</p>
+</li>
+</ul>
+<h3 id="external-snapshot"><a href="#external-snapshot" class="headerlink" title="external snapshot"></a>external snapshot</h3><p>external snapshot 是以 copy-on-write 的概念進行的，當 VM 進行 snapshot 後，system disk 就會進入 read-only 的模式，後續 VM guest 新增的資料就會放在 overlay disk image 上，以下有個圖示來說明：</p>
+<p><img src="https://github.com/godleon/godleon.github.io/blob/master/_posts/images/2017/KVM-Template-And-Snapshot/copy-on-write_overlay-disk0-image.png?raw=true" alt="copy-on-write overlay disk image"></p>
+<p>external snapshot 也有以下特點：</p>
+<ol>
+<li><p>overlay disk image 的起始大小為 0，最大可以到 original disk 的大小</p>
+</li>
+<li><p>base disk 可以是任何的格式(例如：raw, qcow2, 或是其他 libvirt 支援的格式)</p>
+</li>
+<li><p>overlay disk image 一定是 qcow2 格式</p>
+</li>
+</ol>
+<h2 id="VM-Disk-Image-Format"><a href="#VM-Disk-Image-Format" class="headerlink" title="VM Disk Image Format"></a>VM Disk Image Format</h2><p>libvirt 支援很多種不同的 disk foramt，包含 iso, dmg, qcow2, raw, vmdk, vpc … 等等，但與 libvirt 搭配起來運作的最好的是 <strong>raw</strong> &amp; <strong>qcow2</strong> 兩種：</p>
+<h3 id="1-raw"><a href="#1-raw" class="headerlink" title="(1) raw"></a>(1) <strong>raw</strong></h3><ul>
+<li><p>效能最佳，performace overhead 最低，適合給有高度 I/O 需求的 VM 使用</p>
+</li>
+<li><p>完全佔據 disk 所指定的空間</p>
+</li>
+<li><p>沒有 snapshot &amp; compression 的功能</p>
+</li>
+</ul>
+<h3 id="2-qcow2"><a href="#2-qcow2" class="headerlink" title="(2) qcow2"></a>(2) <strong>qcow2</strong></h3><ul>
+<li><p>完全以 cloud 架構出發所設計的格式</p>
+</li>
+<li><p>支援 read-only backing、snapshot、compression、encryption、pre-allocation … 等功能</p>
+</li>
+</ul>
+<h2 id="轉換-Disk-Image-Format"><a href="#轉換-Disk-Image-Format" class="headerlink" title="轉換 Disk Image Format"></a>轉換 Disk Image Format</h2><p>以下介紹如何透過 <code>qemu-img</code> 指令在 <strong>raw</strong> &amp; <strong>qcow2</strong> 之間進行轉換：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># raw -&gt; qcow2</span></span><br><span class="line">$ qemu-img convert -f raw -O qcow2 vm_disk.img vm_disk.qcow2</span><br><span class="line"></span><br><span class="line"><span class="comment"># qcow2 -&gt; raw</span></span><br><span class="line">$ qemu-img convert -f qcow2 -O ram vm_disk.qcow2 vm_disk.img</span><br></pre></td></tr></table></figure>
+<h2 id="操作-Internal-Snapshot"><a href="#操作-Internal-Snapshot" class="headerlink" title="操作 Internal Snapshot"></a>操作 Internal Snapshot</h2><h3 id="1-建立-amp-檢視-snapshot"><a href="#1-建立-amp-檢視-snapshot" class="headerlink" title="(1) 建立 &amp; 檢視 snapshot"></a>(1) 建立 &amp; 檢視 snapshot</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line">$ virsh snapshot-list rhel7.3</span><br><span class="line"> Name                 Creation Time             State</span><br><span class="line">------------------------------------------------------------</span><br><span class="line"></span><br><span class="line"><span class="comment"># 建立 internal snapshot</span></span><br><span class="line">$ virsh snapshot-create rhel7.3</span><br><span class="line">Domain snapshot 1481514143 created</span><br><span class="line"></span><br><span class="line"><span class="comment"># 建立 internal snapshot (使用 snapshot-create-as 搭配 --name, --description 等參數)</span></span><br><span class="line"><span class="comment"># --atomic 可以確保 snapshot 是可以用的 (若是 snapshot 無法使用，建立時就會 fail)</span></span><br><span class="line">$ virsh snapshot-create-as rhel7.3 --name <span class="string">"rhel7.3_snapshot_1"</span> --description <span class="string">"First named snapshot"</span> --atomic</span><br><span class="line">Domain snapshot rhel7.3_snapshot_1 created</span><br><span class="line"></span><br><span class="line">$ virsh snapshot-list rhel7.3</span><br><span class="line"> Name                 Creation Time             State</span><br><span class="line">------------------------------------------------------------</span><br><span class="line"> 1481514143           2016-12-12 11:42:23 +0800 shutoff</span><br><span class="line"> rhel7.3_snapshot_1   2016-12-14 08:32:23 +0800 shutoff</span><br><span class="line"></span><br><span class="line"><span class="comment"># 顯示 snapshot 資訊</span></span><br><span class="line">$ virsh snapshot-info rhel7.3 --snapshotname 1481514143</span><br><span class="line">Name:           1481514143</span><br><span class="line">Domain:         rhel7.3</span><br><span class="line">Current:        no</span><br><span class="line">State:          shutoff</span><br><span class="line">Location:       internal</span><br><span class="line">Parent:         -</span><br><span class="line">Children:       1</span><br><span class="line">Descendants:    1</span><br><span class="line">Metadata:       yes</span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視指定 VM 的 current snapshot 資訊</span></span><br><span class="line">$ virsh snapshot-current rhel7.3</span><br><span class="line">&lt;domainsnapshot&gt;</span><br><span class="line">  &lt;name&gt;rhel7.3_snapshot_1&lt;/name&gt;</span><br><span class="line">  &lt;description&gt;First named snapshot&lt;/description&gt;</span><br><span class="line">  &lt;state&gt;shutoff&lt;/state&gt;</span><br><span class="line">  &lt;parent&gt;</span><br><span class="line">    &lt;name&gt;1481514143&lt;/name&gt;</span><br><span class="line">  &lt;/parent&gt;</span><br><span class="line">  &lt;creationTime&gt;1481675543&lt;/creationTime&gt;</span><br><span class="line">  &lt;memory snapshot=<span class="string">'no'</span>/&gt;</span><br><span class="line">  &lt;disks&gt;</span><br><span class="line">    &lt;disk name=<span class="string">'vda'</span> snapshot=<span class="string">'internal'</span>/&gt;</span><br><span class="line">  &lt;/disks&gt;</span><br><span class="line">  &lt;domain <span class="built_in">type</span>=<span class="string">'kvm'</span>&gt;</span><br><span class="line">    ....</span><br><span class="line">  &lt;/domain&gt;</span><br><span class="line">&lt;/domainsnapshot&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 顯示 snapshot XML 資訊</span></span><br><span class="line">$ virsh snapshot-dumpxml rhel7.3 --snapshotname 1481514143</span><br><span class="line">&lt;domainsnapshot&gt;</span><br><span class="line">  .... 與上面類似</span><br><span class="line">&lt;/domainsnapshot&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 顯示 snapshot 的 parent snapshot (第一個 snapshot 沒有 parent snapshot)</span></span><br><span class="line">$ virsh snapshot-parent rhel7.3 --snapshotname 1481514143</span><br><span class="line">error: snapshot <span class="string">'1481514143'</span> has no parent</span><br><span class="line"></span><br><span class="line"><span class="comment"># 第二個 snapshot 就有 parent snapshot 了</span></span><br><span class="line">$ virsh snapshot-parent rhel7.3 --snapshotname rhel7.3_snapshot_1</span><br><span class="line">1481514143</span><br><span class="line"></span><br><span class="line"><span class="comment"># 顯示每個 snapshot 的 parent</span></span><br><span class="line">$ virsh snapshot-list rhel7.3 --parent</span><br><span class="line"> Name                 Creation Time             State           Parent</span><br><span class="line">------------------------------------------------------------</span><br><span class="line"> 1481514143           2016-12-12 11:42:23 +0800 shutoff         (null)</span><br><span class="line"> rhel7.3_snapshot_1   2016-12-14 08:32:23 +0800 shutoff         1481514143</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以樹狀結構顯示每個 snapshot 的關係</span></span><br><span class="line">$ virsh snapshot-list rhel7.3 --tree</span><br><span class="line">1481514143</span><br><span class="line">  |</span><br><span class="line">  +- rhel7.3_snapshot_1</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>若是在 VM 正在 running 的狀態下建立 snapshot，會需要多花一點時間，因為 VM 必須先進入到 <strong>pause</strong> 的狀態，當 snapshot 完成後才會回到 running 的狀態；而這一段時間的長短取決於 VM 當時耗用了多少記憶體，以及當時對記憶體存取的頻繁程度。</p>
+</blockquote>
+<p>另外還可以透過 <code>qemu-image</code> 工具來查詢 VM image 的狀態：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查詢 image 的狀態</span></span><br><span class="line">$ qemu-img info /var/lib/libvirt/images/rhel-guest-image-7.3-35.x86_64.qcow2 </span><br><span class="line">image: /var/lib/libvirt/images/rhel-guest-image-7.3-35.x86_64.qcow2</span><br><span class="line">file format: qcow2</span><br><span class="line">virtual size: 40G (42949672960 bytes)</span><br><span class="line">disk size: 572M</span><br><span class="line">cluster_size: 65536</span><br><span class="line">Snapshot list:</span><br><span class="line">ID        TAG                 VM SIZE                DATE       VM CLOCK</span><br><span class="line">1         1481514143                0 2016-12-12 11:42:23   00:00:00.000</span><br><span class="line">2         rhel7.3_snapshot_1        0 2016-12-14 08:32:23   00:00:00.000</span><br><span class="line">Format specific information:</span><br><span class="line">    compat: 0.10</span><br><span class="line">    refcount bits: 16</span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢查 image 是否有錯誤</span></span><br><span class="line"><span class="comment"># 適合用在 running 過程中建立 snapshot 後，檢查有無錯誤發生</span></span><br><span class="line">$ qemu-img check /var/lib/libvirt/images/rhel-guest-image-7.3-35.x86_64.qcow2 </span><br><span class="line">No errors were found on the image.</span><br><span class="line">19467/655360 = 2.97% allocated, 93.71% fragmented, 90.63% compressed clusters</span><br><span class="line">Image end offset: 599916544</span><br></pre></td></tr></table></figure>
+<h3 id="2-透過-snapshot-還原-VM"><a href="#2-透過-snapshot-還原-VM" class="headerlink" title="(2) 透過 snapshot 還原 VM"></a>(2) 透過 snapshot 還原 VM</h3><p>接著介紹如何透過 internal snapshot 還原 VM：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 從指定的 snapshot 還原 VM</span></span><br><span class="line">$ virsh snapshot-revert rhel7.3 --snapshotname rhel7.3_snapshot_1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 從指定的 snapshot 還原 &amp; 自動啟動 VM</span></span><br><span class="line">$ virsh snapshot-revert rhel7.3 --snapshotname rhel7.3_snapshot_1 --running</span><br></pre></td></tr></table></figure>
+<h3 id="3-刪除-snapshot"><a href="#3-刪除-snapshot" class="headerlink" title="(3) 刪除 snapshot"></a>(3) 刪除 snapshot</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 刪除指定的 snapshot</span></span><br><span class="line">$ virsh snapshot-delete rhel7.3 1481514143</span><br><span class="line">Domain snapshot 1481514143 deleted</span><br><span class="line"></span><br><span class="line"><span class="comment"># 顯示目前 snapshot 的狀態</span></span><br><span class="line">[root@ocp-kvm-host ~]<span class="comment"># virsh snapshot-list rhel7.3 --parent</span></span><br><span class="line"> Name                 Creation Time             State           Parent</span><br><span class="line">------------------------------------------------------------</span><br><span class="line"> rhel7.3_snapshot_1   2016-12-14 08:32:23 +0800 shutoff         (null)</span><br></pre></td></tr></table></figure>
+<h2 id="操作-External-Snapshot"><a href="#操作-External-Snapshot" class="headerlink" title="操作 External Snapshot"></a>操作 External Snapshot</h2><p>external snapshot 的原理是由 <code>overlay_image</code> &amp; <code>backing_file</code> 兩個所組成；其中 backing file 會變成 read-only，後續使用者針對 VM 的變更都會寫到 overlay_image 中。</p>
+<p>而 external snapshot 比較有優勢的地方，在於支援各種不同的 disk image type(raw, qcow, vmdk … etc)，不僅有 qcow2 而已。</p>
+<p>但由於目前 virsh 還不完全支援 external snapshot 的操作，這邊就先保留，等到 virsh 可以完整支援 external snapshot 之後再來補。</p>
+<h3 id="1-建立-external-snapshot"><a href="#1-建立-external-snapshot" class="headerlink" title="(1) 建立 external snapshot"></a>(1) 建立 external snapshot</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">$ virsh list</span><br><span class="line"> Id    Name                           State</span><br><span class="line">----------------------------------------------------</span><br><span class="line"> 32    rhel7.3                        running</span><br><span class="line"></span><br><span class="line">$ virsh domblklist rhel7.3 --details</span><br><span class="line">Type       Device     Target     Source</span><br><span class="line">------------------------------------------------</span><br><span class="line">file       disk       vda        /var/lib/libvirt/images/rhel-guest-image-7.3-35.x86_64.qcow2</span><br><span class="line"></span><br><span class="line">$ virsh snapshot-create-as rhel7.3 ext_snapshot1 <span class="string">"first external snapshot"</span> --disk-only --atomic</span><br><span class="line">Domain snapshot ext_snapshot1 created</span><br><span class="line"></span><br><span class="line">$ virsh snapshot-list rhel7.3</span><br><span class="line">Name                 Creation Time             State</span><br><span class="line">------------------------------------------------------------</span><br><span class="line">ext_snapshot1        2016-12-31 21:00:23 +0800 disk-snapshot</span><br><span class="line"></span><br><span class="line">$ virsh snapshot-info rhel7.3 ext_snapshot1</span><br><span class="line">Name:           ext_snapshot1</span><br><span class="line">Domain:         rhel7.3</span><br><span class="line">Current:        yes</span><br><span class="line">State:          disk-snapshot</span><br><span class="line">Location:       external</span><br><span class="line">Parent:         -</span><br><span class="line">Children:       0</span><br><span class="line">Descendants:    0</span><br><span class="line">Metadata:       yes</span><br></pre></td></tr></table></figure>
+<p>利用上面的命令就可以建立 VM external snapshot；此外，還有幾點需要注意：</p>
+<ol>
+<li><p>external snapshot 可以在 VM running 的狀態下建立(若是 disk I/O 頻繁的 VM，建議還是 shutdown 之後再作)</p>
+</li>
+<li><p><code>--disk-only</code> 表示只針對 disk 作 snapshot</p>
+</li>
+<li><p><code>--atomic</code> 會確保 snapshot 建立的工作執行成功後會得到一個可用的 snapshot；若是中途發生任何問題，就不會有 snapshot 的產生，也不會對原有的 VM 產生任何異動，藉此確保建立 snapshot 不會損壞原有的 VM</p>
+</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 檢視目前 VM disk 資訊</span></span><br><span class="line"><span class="comment"># 已經被 external disk 取代了!</span></span><br><span class="line">$ virsh domblklist rhel7.3 --details</span><br><span class="line">Type       Device     Target     Source</span><br><span class="line">------------------------------------------------</span><br><span class="line">file       disk       vda        /var/lib/libvirt/images/rhel-guest-image-7.3-35.x86_64.ext_snapshot1</span><br><span class="line"> </span><br><span class="line"><span class="comment"># 可看出原本的 disk 已經變成了 backing file</span></span><br><span class="line">$ qemu-img info /var/lib/libvirt/images/rhel-guest-image-7.3-35.x86_64.ext_snapshot1</span><br><span class="line">image: /var/lib/libvirt/images/rhel-guest-image-7.3-35.x86_64.ext_snapshot1</span><br><span class="line">file format: qcow2</span><br><span class="line">virtual size: 40G (42949672960 bytes)</span><br><span class="line">disk size: 2.0M</span><br><span class="line">cluster_size: 65536</span><br><span class="line">backing file: /var/lib/libvirt/images/rhel-guest-image-7.3-35.x86_64.qcow2</span><br><span class="line">backing file format: qcow2</span><br><span class="line">Format specific information:</span><br><span class="line">    compat: 1.1</span><br><span class="line">    lazy refcounts: <span class="literal">false</span></span><br><span class="line">    refcount bits: 16</span><br><span class="line">    corrupt: <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+<p>從上面可看出，從此刻開始對 VM 的變更將會直接寫入 external snapshot，而原本的 disk image 變成了 backing file。</p>
+<p>接著再建立兩個 external snapshot 試試看：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">$ virsh snapshot-create-as rhel7.3 ext_snapshot2 <span class="string">"second external snapshot"</span> --disk-only --atomic</span><br><span class="line">Domain snapshot ext_snapshot2 created</span><br><span class="line"></span><br><span class="line"><span class="comment"># 透過 "--quiesce" 參數，確保連同記憶體內的資訊都一併進入到 snapshot 中</span></span><br><span class="line">$ virsh snapshot-create-as rhel7.3 ext_snapshot3 <span class="string">"third external snapshot"</span> --disk-only --quiesce</span><br><span class="line">Domain snapshot ext_snapshot3 created</span><br><span class="line"></span><br><span class="line">$ virsh snapshot-list rhel7.3</span><br><span class="line"> Name                 Creation Time             State</span><br><span class="line">------------------------------------------------------------</span><br><span class="line"> ext_snapshot1        2016-12-31 21:00:23 +0800 disk-snapshot</span><br><span class="line"> ext_snapshot2        2016-12-31 22:16:42 +0800 disk-snapshot</span><br><span class="line"> ext_snapshot3        2016-12-31 22:17:53 +0800 disk-snapshot</span><br></pre></td></tr></table></figure>
+<p>在第三個 snapshot 中使用了 <code>--quiesce</code> 參數，目的就是要讓尚未寫入 disk(記憶體中的資料) 一併進入到 snapshot 中，這樣就可以確保 snapshot 是最完整的狀態，但要使用這參數必須預先在 VM 上安裝 <code>qemu-guest agent</code> 才可以。</p>
+<p>最後，每個 snapshot 的相依性可以使用下列命令觀察：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ qemu-img info --backing-chain /var/lib/libvirt/images/rhel-guest-image-7.3-35.x86_64.ext_snapshot3 | grep backing</span><br><span class="line">backing file: /var/lib/libvirt/images/rhel-guest-image-7.3-35.x86_64.ext_snapshot2</span><br><span class="line">backing file format: qcow2</span><br><span class="line">backing file: /var/lib/libvirt/images/rhel-guest-image-7.3-35.x86_64.ext_snapshot1</span><br><span class="line">backing file format: qcow2</span><br><span class="line">backing file: /var/lib/libvirt/images/rhel-guest-image-7.3-35.x86_64.qcow2</span><br><span class="line">backing file format: qcow2</span><br></pre></td></tr></table></figure>
+<h3 id="2-從-external-snapshot-還原"><a href="#2-從-external-snapshot-還原" class="headerlink" title="(2) 從 external snapshot 還原"></a>(2) 從 external snapshot 還原</h3><p>external snapshot 看似不錯，但其實無法透過 virsh 指令直接還原 VM：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ virsh snapshot-revert rhel7.3 --snapshotname <span class="string">"ext_snapshot3"</span></span><br><span class="line">error: unsupported configuration: revert to external snapshot not supported yet</span><br></pre></td></tr></table></figure>
+<p>但這並不代表沒辦法從 external snapshot 還原，只是要透過以下步驟來完成：(假設要還原到 <code>ext_snapshot2</code>)</p>
+<ol>
+<li><p>關閉 VM (<strong>這是必須的!</strong>)</p>
+</li>
+<li><p>檢查要還原的 external snapshot overlay image 有無損毀</p>
+</li>
+<li><p>若 snapshot 完整無誤，編輯 VM XML 定義檔，將 boot disk 指向 <code>ext_snapshot2</code></p>
+</li>
+<li><p>確認 external snapshot image 格式</p>
+</li>
+<li><p>從 VM XML 定義中移除原本的 disk，改成指定要還原的 <code>ext_snapshot2</code></p>
+</li>
+<li><p>透過 <code>domblklist</code> 參數確認 VM 使用的 disk 已經指向 ext_snapshot2</p>
+</li>
+<li><p>重新啟動 VM</p>
+</li>
+</ol>
+<p>以下是實際操作步驟：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 關閉 VM</span></span><br><span class="line">$ virsh shutdown rhel7.3</span><br><span class="line"></span><br><span class="line"><span class="comment"># 取得 ext_snapshot2 的詳細路徑</span></span><br><span class="line">$ virsh snapshot-dumpxml rhel7.3 --snapshotname ext_snapshot2 | grep ext_snapshot2</span><br><span class="line">  &lt;name&gt;ext_snapshot2&lt;/name&gt;</span><br><span class="line">      &lt;<span class="built_in">source</span> file=<span class="string">'/var/lib/libvirt/images/rhel-guest-image-7.3-35.x86_64.ext_snapshot2'</span>/&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 先使用 qemu-img 工具檢查 overlay image 有無損毀</span></span><br><span class="line">$ qemu-img check /var/lib/libvirt/images/rhel-guest-image-7.3-35.x86_64.ext_snapshot2</span><br><span class="line">No errors were found on the image.</span><br><span class="line">11/655360 = 0.00% allocated, 36.36% fragmented, 0.00% compressed clusters</span><br><span class="line"></span><br><span class="line"><span class="comment"># 確認 overlay image 格式</span></span><br><span class="line">$ qemu-img info /var/lib/libvirt/images/rhel-guest-image-7.3-35.x86_64.ext_snapshot2 | grep backing</span><br><span class="line">backing file: /var/lib/libvirt/images/rhel-guest-image-7.3-35.x86_64.ext_snapshot1</span><br><span class="line">backing file format: qcow2</span><br><span class="line"></span><br><span class="line"><span class="comment"># 移除原本的 disk</span></span><br><span class="line">$ virt-xml rhel7.3 --remove-device --disk target=vda</span><br><span class="line">Domain <span class="string">'rhel7.3'</span> defined successfully.</span><br><span class="line"></span><br><span class="line"><span class="comment"># 換上要還原的 ext_snapshot2</span></span><br><span class="line">$ virt-xml rhel7.3 --add-device --disk /var/lib/libvirt/images/rhel-guest-image-7.3-35.x86_64.ext_snapshot2,format=qcow2,bus=virtio</span><br><span class="line">Domain <span class="string">'rhel7.3'</span> defined successfully.</span><br><span class="line"></span><br><span class="line"><span class="comment"># 確認目前 VM 所使用的 disk</span></span><br><span class="line">$ virsh domblklist rhel7.3</span><br><span class="line">Target     Source</span><br><span class="line">------------------------------------------------</span><br><span class="line">vda        /var/lib/libvirt/images/rhel-guest-image-7.3-35.x86_64.ext_snapshot2</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重新啟動 VM</span></span><br><span class="line">$ virsh start rhel7.3</span><br><span class="line">Domain rhel7.3 started</span><br></pre></td></tr></table></figure>
+<h3 id="3-刪除-external-snapshot"><a href="#3-刪除-external-snapshot" class="headerlink" title="(3) 刪除 external snapshot"></a>(3) 刪除 external snapshot</h3><p>由於 virsh 不支援 external snapshot 的刪除，所以刪除 snapshot 就必須自己來了!</p>
+<p>假設要移除所有的 snapshot，但又想要保留在 snapshot 上完整的變更，此時必須把 snapshot merge 到 base image 上，以下是操作步驟：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 目前 disk 所使用的 snapshot</span></span><br><span class="line">$ virsh domblklist rhel7.3</span><br><span class="line">Target     Source</span><br><span class="line">------------------------------------------------</span><br><span class="line">vda        /var/lib/libvirt/images/rhel-guest-image-7.3-35.x86_64.ext_snapshot2</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查詢 snapshot overlay image 的相依關係</span></span><br><span class="line">$ qemu-img info --backing-chain /var/lib/libvirt/images/rhel-guest-image-7.3-35.x86_64.ext_snapshot2 | grep backing</span><br><span class="line">backing file: /var/lib/libvirt/images/rhel-guest-image-7.3-35.x86_64.ext_snapshot1</span><br><span class="line">backing file format: qcow2</span><br><span class="line">backing file: /var/lib/libvirt/images/rhel-guest-image-7.3-35.x86_64.qcow2</span><br><span class="line">backing file format: qcow2</span><br><span class="line"></span><br><span class="line"><span class="comment"># 將 base image &amp; snapshot overlay image 合併!</span></span><br><span class="line">$ virsh blockcommit rhel7.3 vda --verbose --pivot --active</span><br><span class="line">Block commit: [100 %]</span><br><span class="line">Successfully pivoted</span><br><span class="line"></span><br><span class="line"><span class="comment"># 可看出 VM disk 已經變成 base image</span></span><br><span class="line">$ virsh domblklist rhel7.3</span><br><span class="line">Target     Source</span><br><span class="line">------------------------------------------------</span><br><span class="line">vda        /var/lib/libvirt/images/rhel-guest-image-7.3-35.x86_64.qcow2</span><br><span class="line"></span><br><span class="line">$ virsh snapshot-list rhel7.3</span><br><span class="line"> Name                 Creation Time             State</span><br><span class="line">------------------------------------------------------------</span><br><span class="line"> ext_snapshot1        2016-12-31 21:00:23 +0800 disk-snapshot</span><br><span class="line"> ext_snapshot2        2016-12-31 22:16:42 +0800 disk-snapshot</span><br><span class="line"> ext_snapshot3        2016-12-31 22:17:53 +0800 disk-snapshot</span><br></pre></td></tr></table></figure>
+<p>確認好 VM disk 已經不是指向 external snapshot 了，就可以開始進行刪除 snapshot 的動作，而刪除 external snapshot 必須從 metadata 下手，以下為操作範例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 指定刪除從 ext_snapshot1 開始的所有 children snapshot 的 metadata &amp; image</span></span><br><span class="line">$ virsh snapshot-delete rhel7.3 ext_snapshot1 --children --metadata</span><br><span class="line">Domain snapshot ext_snapshot1 deleted</span><br><span class="line"></span><br><span class="line"><span class="comment"># 確認所有 external snapshot 都已經被刪除</span></span><br><span class="line">$ virsh snapshot-list rhel7.3</span><br><span class="line"> Name                 Creation Time             State</span><br><span class="line">------------------------------------------------------------</span><br></pre></td></tr></table></figure>
+<h2 id="使用-snapshot-時所需的正確觀念"><a href="#使用-snapshot-時所需的正確觀念" class="headerlink" title="使用 snapshot 時所需的正確觀念"></a>使用 snapshot 時所需的正確觀念</h2><ol>
+<li><p>不建議在 production 的環境中讓 VM 去 attach 之前做好的 snapshot 來使用</p>
+</li>
+<li><p>不要把 snapshot 當作是備份的方式，只是用來留下當時 VM 的狀態做後續使用而已</p>
+</li>
+<li><p>snapshot 不要保留太久，若確定不需要的就把 snapshot commit(for external snapshot) or 刪除</p>
+</li>
+<li><p>external snapshot 出現故障的機率比 internal snapshot 還低，因此建議優先使用 external snapshot</p>
+</li>
+<li><p>snapshot 數量要控制，太多的 snapshot 可能會倒置系統效能低落</p>
+</li>
+<li><p>建立 snapshot 前要先安裝 guest agent</p>
+</li>
+<li><p>建立 snapshot 確認都有帶上 <code>--quiesce</code> &amp;&amp; <code>--atomic</code> 兩個參數</p>
+</li>
+</ol>
+]]></content>
+      
+        <categories>
+            
+            <category> KVM </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Linux </tag>
+            
+            <tag> KVM </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
       <title><![CDATA[[VMware] 免費的 vSphere ESXi VM 備份方案 - XSIBACKUP]]></title>
       <url>/blog/2014/11/14/VMware/free-vsphere-esxi-vm-backup-solution-xsibackup/</url>
       <content type="html"><![CDATA[<p>最近公司在找給 VMware vSphere ESXi 用的 shared storage，想當然爾也會考慮到備份的問題</p>
-<p>後來學長提供了 <a href="http://sourceforge.net/projects/xsibackup/" target="_blank" rel="external">xsibackup</a> 這個 opensource 的免費軟體，雖然是免費，可是備份功能也不差呢。</p>
+<p>後來學長提供了 <a href="http://sourceforge.net/projects/xsibackup/" target="_blank" rel="noopener">xsibackup</a> 這個 opensource 的免費軟體，雖然是免費，可是備份功能也不差呢。</p>
 <h2 id="環境設定"><a href="#環境設定" class="headerlink" title="環境設定"></a>環境設定</h2><ul>
 <li>vSphere ESXi <strong>5.5 Update 2</strong></li>
 <li>esxibackup <strong>4.1.6</strong></li>
@@ -310,11 +1300,11 @@
 </li>
 </ol>
 <h2 id="參考資料"><a href="#參考資料" class="headerlink" title="參考資料"></a>參考資料</h2><ul>
-<li><p><a href="http://sourceforge.net/projects/xsibackup/" target="_blank" rel="external">Free Backup Software for VMware ESXi VMs | SourceForge.net</a></p>
+<li><p><a href="http://sourceforge.net/projects/xsibackup/" target="_blank" rel="noopener">Free Backup Software for VMware ESXi VMs | SourceForge.net</a></p>
 </li>
-<li><p><a href="http://blog.depicus.com/add-outbound-port-25-for-smtp-in-vmware-esxi-v5/" target="_blank" rel="external">Add outbound port 25 for SMTP in VMware ESXi v5 – depicus</a></p>
+<li><p><a href="http://blog.depicus.com/add-outbound-port-25-for-smtp-in-vmware-esxi-v5/" target="_blank" rel="noopener">Add outbound port 25 for SMTP in VMware ESXi v5 – depicus</a></p>
 </li>
-<li><p><a href="http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&amp;cmd=displayKC&amp;externalId=2008226" target="_blank" rel="external">VMware KB: Creating custom firewall rules in VMware ESXi 5.x</a></p>
+<li><p><a href="http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&amp;cmd=displayKC&amp;externalId=2008226" target="_blank" rel="noopener">VMware KB: Creating custom firewall rules in VMware ESXi 5.x</a></p>
 </li>
 </ul>
 ]]></content>

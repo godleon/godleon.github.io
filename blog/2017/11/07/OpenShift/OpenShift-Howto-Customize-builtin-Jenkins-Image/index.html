@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="小信豬的原始部落">
 <meta property="og:description" content="This article introduces how to customize OpenShift built-in Jenkins image">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2017-11-14T01:08:41.215Z">
+<meta property="og:updated_time" content="2017-11-16T22:02:58.152Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[OpenShift] How-to customize built-in Jenkins image">
 <meta name="twitter:description" content="This article introduces how to customize OpenShift built-in Jenkins image">
@@ -432,29 +432,29 @@
 <p>由於新版的 OpenShift pipeline plugin for Jenkins 目前僅在 CentOS 版本的 Jenkins image 支援，因此後面的範例將會以 CentOS 版本為主，並提供將原有的 Jenkins image 從 Red Hat 版本改成 CentOS 版本的方法。</p>
 <hr>
 <h1 id="安裝額外的-Jenkins-plugin"><a href="#安裝額外的-Jenkins-plugin" class="headerlink" title="安裝額外的 Jenkins plugin"></a>安裝額外的 Jenkins plugin</h1><p>由於 OpenShift 提供的 Jenkins image 本身就是一個具有 s2i 功能的 docker image，因此我們可以透過 s2i 的流程，將所需要安裝的 plugin 以 source code injection 的方式指定進來並安裝。</p>
-<p>以下的範例將會安裝 <strong>redmine</strong>, <strong>gitlab-plugin</strong>, <strong>testlink</strong> 三個 plugin：(詳細版本可參考<a href="https://github.com/godleon/learning_openshift/blob/master/jenkins_customization/plugins.txt" target="_blank" rel="external">原始碼</a>)</p>
+<p>以下的範例將會安裝 <strong>redmine</strong>, <strong>gitlab-plugin</strong>, <strong>testlink</strong> 三個 plugin：(詳細版本可參考<a href="https://github.com/godleon/learning_openshift/blob/master/jenkins_customization/plugins.txt" target="_blank" rel="noopener">原始碼</a>)</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 取得原始碼</span></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/godleon/learning_openshift.git</span><br><span class="line"></span><br><span class="line"><span class="comment"># 建立 ImageStream(custom-jenkins-2-centos7) BuildConfig(custom-jenkins-build)</span></span><br><span class="line">$ oc create -f learning_openshift/Jenkins_Customization/</span><br><span class="line"></span><br><span class="line">$ oc -n openshift start-build custom-jenkins-build</span><br><span class="line"></span><br><span class="line">$ oc -n openshift get pods</span><br><span class="line">NAME                           READY     STATUS      RESTARTS   AGE</span><br><span class="line">custom-jenkins-build-1-build   0/1       Completed   0          22m</span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視 build log</span></span><br><span class="line">$ oc logs -f custom-jenkins-build-1-build</span><br></pre></td></tr></table></figure>
 <blockquote>
-<p>使用者必須先安裝 <a href="https://github.com/openshift/origin/releases" target="_blank" rel="external">OpenShift CLI tool</a> 才可以執行上述的 oc 指令</p>
+<p>使用者必須先安裝 <a href="https://github.com/openshift/origin/releases" target="_blank" rel="noopener">OpenShift CLI tool</a> 才可以執行上述的 oc 指令</p>
 </blockquote>
 <p>在最後一行指令中檢視 build log 時，就可以看見 OpenShift 透過 s2i 流程將我們在程式碼中所指定的 plugin 都已經安裝完成，此時我們就可以透過 ImageStream <code>custom-jenkins-2-centos7</code>(定義於 <strong>Jenkins_Customization/bc_custom-jenkins-build.yml</strong> 中) 來作為啟動 Jenkins server 的 default image。</p>
 <hr>
-<h1 id="更換原有的-Jenkins-Image"><a href="#更換原有的-Jenkins-Image" class="headerlink" title="更換原有的 Jenkins Image"></a>更換原有的 Jenkins Image</h1><p>今天在測試設計較為複雜的 Jenkins pipeline 時，發現 <a href="https://github.com/openshift/origin/tree/master/examples/jenkins/pipeline" target="_blank" rel="external">OpenShift 在 GitHub 提供的範例</a> 無法正常的使用，會出現 openshift class 不存在的錯誤，後來仔細的查了一下，發現原來裡面的範例需要搭配 <a href="https://github.com/openshift/jenkins-client-plugin" target="_blank" rel="external">OpenShift Jenkins Pipeline (DSL) Plugin</a> 一起使用。</p>
+<h1 id="更換原有的-Jenkins-Image"><a href="#更換原有的-Jenkins-Image" class="headerlink" title="更換原有的 Jenkins Image"></a>更換原有的 Jenkins Image</h1><p>今天在測試設計較為複雜的 Jenkins pipeline 時，發現 <a href="https://github.com/openshift/origin/tree/master/examples/jenkins/pipeline" target="_blank" rel="noopener">OpenShift 在 GitHub 提供的範例</a> 無法正常的使用，會出現 openshift class 不存在的錯誤，後來仔細的查了一下，發現原來裡面的範例需要搭配 <a href="https://github.com/openshift/jenkins-client-plugin" target="_blank" rel="noopener">OpenShift Jenkins Pipeline (DSL) Plugin</a> 一起使用。</p>
 <p><strong>問題是，Red Hat 版本的 Jenkins image 並沒有內建這一個 plugin，此 plugin 目前僅有內建在 Centos 版本的 Jenkins image 中。</strong></p>
 <p>而在上一個步驟中，我們使用了 CentOS 版本的 Jenkins image，並安裝了額外的 plugin 作為後續使用，因此以下便使用已經客製化完成的 Jenkins image 來作為啟動 Jenkins server 的 image。</p>
 <p>為了更改自動佈署的 Jenkins server 所使用的 docker image，需要調整 <code>jenkins-ephemeral</code> 的內容，將 image 從 Red Hat 版本改到在上一個步驟完成的客製化 CentOS 版本，執行以下指令：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ oc edit template/jenkins-ephemeral -n openshift</span><br></pre></td></tr></table></figure>
 <p>找到 <code>parameters</code> –&gt; <code>JENKINS_IMAGE_STREAM_TAG</code>，將 <strong>value</strong> 從 <code>jenkins:latest</code> 改為 <code>custom-jenkins-2-centos7:latest</code>，存檔即可。</p>
-<p>經過了以上的設定，後面自動佈署出來的 Jenkins server 都會是 CentOS7 的版本，也會同時預載好 <a href="https://github.com/openshift/jenkins-client-plugin" target="_blank" rel="external">OpenShift Jenkins Pipeline (DSL) Plugin</a> 以及在上一個步驟額外安裝好的 plugin。</p>
+<p>經過了以上的設定，後面自動佈署出來的 Jenkins server 都會是 CentOS7 的版本，也會同時預載好 <a href="https://github.com/openshift/jenkins-client-plugin" target="_blank" rel="noopener">OpenShift Jenkins Pipeline (DSL) Plugin</a> 以及在上一個步驟額外安裝好的 plugin。</p>
 <hr>
 <h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
-<li><p><a href="https://github.com/jenkinsci/openshift-pipeline-plugin" target="_blank" rel="external">OpenShift V3 Plugin for Jenkins (based on Kubernetes plugin)</a></p>
+<li><p><a href="https://github.com/jenkinsci/openshift-pipeline-plugin" target="_blank" rel="noopener">OpenShift V3 Plugin for Jenkins (based on Kubernetes plugin)</a></p>
 </li>
-<li><p><a href="https://github.com/openshift/jenkins-client-plugin" target="_blank" rel="external">OpenShift Jenkins Pipeline (DSL) Plugin (newly design)</a></p>
+<li><p><a href="https://github.com/openshift/jenkins-client-plugin" target="_blank" rel="noopener">OpenShift Jenkins Pipeline (DSL) Plugin (newly design)</a></p>
 </li>
-<li><p><a href="https://github.com/openshift/origin/tree/master/examples/jenkins/pipeline" target="_blank" rel="external">Using Jenkins Pipelines with OpenShift @GitbHub</a></p>
+<li><p><a href="https://github.com/openshift/origin/tree/master/examples/jenkins/pipeline" target="_blank" rel="noopener">Using Jenkins Pipelines with OpenShift @GitbHub</a></p>
 </li>
-<li><p><a href="https://docs.openshift.com/container-platform/3.6/using_images/other_images/jenkins.html" target="_blank" rel="external">Jenkins - Other Images | Using Images | OpenShift Container Platform 3.6</a></p>
+<li><p><a href="https://docs.openshift.com/container-platform/3.6/using_images/other_images/jenkins.html" target="_blank" rel="noopener">Jenkins - Other Images | Using Images | OpenShift Container Platform 3.6</a></p>
 </li>
 </ul>
 
@@ -584,7 +584,7 @@
               
                 <a href="/blog/archives/">
               
-                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-count">8</span>
                   <span class="site-state-item-name">文章</span>
                 </a>
               </div>
@@ -595,7 +595,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/blog/categories/index.html">
-                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-count">6</span>
                   <span class="site-state-item-name">分類</span>
                 </a>
               </div>
@@ -606,7 +606,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/blog/tags/index.html">
-                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-count">12</span>
                   <span class="site-state-item-name">標籤</span>
                 </a>
               </div>
