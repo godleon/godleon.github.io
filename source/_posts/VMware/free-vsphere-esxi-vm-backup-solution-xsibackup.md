@@ -1,6 +1,7 @@
 ---
 layout: post
 title:  "[VMware] 免費的 vSphere ESXi VM 備份方案 - XSIBACKUP"
+description: "介紹可用來備份 VMware ESXi 中 virtual machine 的免費備份方案 - xsibackup"
 date:   2014-11-14 11:45:00
 comments: true
 categories:
