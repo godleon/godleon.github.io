@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="OpenShift,Jenkins," />
+  <meta name="keywords" content="Linux,KVM,SPICE,VNC," />
 
 
 
@@ -79,18 +79,18 @@
 
 
 
-<meta name="description" content="This article introduces how to customize OpenShift built-in Jenkins image">
-<meta name="keywords" content="OpenShift,Jenkins">
+<meta name="description" content="This article introduces how to manage the lifecycle of virtual machines in KVM">
+<meta name="keywords" content="Linux,KVM,SPICE,VNC">
 <meta property="og:type" content="article">
-<meta property="og:title" content="[OpenShift] How-to customize built-in Jenkins image">
-<meta property="og:url" content="https://godleon.github.io/blog/2017/11/07/OpenShift/OpenShift-Howto-Customize-builtin-Jenkins-Image/index.html">
+<meta property="og:title" content="[Linux KVM] VM Life Cycle 管理">
+<meta property="og:url" content="https://godleon.github.io/blog/2016/11/30/KVM/KVM-Lifecycle-Management/index.html">
 <meta property="og:site_name" content="小信豬的原始部落">
-<meta property="og:description" content="This article introduces how to customize OpenShift built-in Jenkins image">
+<meta property="og:description" content="This article introduces how to manage the lifecycle of virtual machines in KVM">
 <meta property="og:locale" content="zh-tw">
 <meta property="og:updated_time" content="2017-11-29T05:59:29.224Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="[OpenShift] How-to customize built-in Jenkins image">
-<meta name="twitter:description" content="This article introduces how to customize OpenShift built-in Jenkins image">
+<meta name="twitter:title" content="[Linux KVM] VM Life Cycle 管理">
+<meta name="twitter:description" content="This article introduces how to manage the lifecycle of virtual machines in KVM">
 
 
 
@@ -120,13 +120,13 @@
 
 
 
-  <link rel="canonical" href="https://godleon.github.io/blog/2017/11/07/OpenShift/OpenShift-Howto-Customize-builtin-Jenkins-Image/"/>
+  <link rel="canonical" href="https://godleon.github.io/blog/2016/11/30/KVM/KVM-Lifecycle-Management/"/>
 
 
 
 
 
-  <title>[OpenShift] How-to customize built-in Jenkins image | 小信豬的原始部落</title>
+  <title>[Linux KVM] VM Life Cycle 管理 | 小信豬的原始部落</title>
   
 
 
@@ -287,7 +287,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/blog/2017/11/07/OpenShift/OpenShift-Howto-Customize-builtin-Jenkins-Image/">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/blog/2016/11/30/KVM/KVM-Lifecycle-Management/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="godleon">
@@ -304,7 +304,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">[OpenShift] How-to customize built-in Jenkins image</h1>
+          <h1 class="post-title" itemprop="name headline">[Linux KVM] VM Life Cycle 管理</h1>
         
 
         <div class="post-meta">
@@ -316,8 +316,8 @@
               
                 <span class="post-meta-item-text">發表於</span>
               
-              <time title="創建於" itemprop="dateCreated datePublished" datetime="2017-11-07T07:20:00+00:00">
-                2017-11-07
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2016-11-30T00:30:00+00:00">
+                2016-11-30
               </time>
             
 
@@ -339,8 +339,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/blog/categories/OpenShift/" itemprop="url" rel="index">
-                    <span itemprop="name">OpenShift</span>
+                  <a href="/blog/categories/KVM/" itemprop="url" rel="index">
+                    <span itemprop="name">KVM</span>
                   </a>
                 </span>
 
@@ -357,9 +357,9 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/blog/2017/11/07/OpenShift/OpenShift-Howto-Customize-builtin-Jenkins-Image/#comments" itemprop="discussionUrl">
+                <a href="/blog/2016/11/30/KVM/KVM-Lifecycle-Management/#comments" itemprop="discussionUrl">
                   <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2017/11/07/OpenShift/OpenShift-Howto-Customize-builtin-Jenkins-Image/" itemprop="commentCount"></span>
+                        data-disqus-identifier="2016/11/30/KVM/KVM-Lifecycle-Management/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -374,7 +374,7 @@
 
           
               <div class="post-description">
-                  This article introduces how to customize OpenShift built-in Jenkins image
+                  This article introduces how to manage the lifecycle of virtual machines in KVM
               </div>
           
 
@@ -391,80 +391,130 @@
       
 
       
-        <p>本文章的主題在於如何將客製化 OpenShift 原生提供的 Jenkins image</p>
-<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>Openshift 在 DevOps 的方面的確是下了不少功夫，使用 OpenShift 的確可以讓 DevOps engineer 省下不少工，但相對的也有蠻多新東西要學的! XD</p>
-<p>在 OpenShift 建立第一個 BuildConfig(pipeline) 時，它會自動幫使用者佈署一個用來驅動 build pipeline 的 Jenkins server(此 container 會由 OpenShift 本身納管，因此掛了會自己再起一個新的)，佈署的行為如下：</p>
-<ol>
-<li><p>使用 <code>openshift</code> namespace 中的 template <code>jenkins-ephemeral</code> 為範本產生 Jenkins server</p>
-</li>
-<li><p>此 tempate 使用的 image stream 為 <code>jenkins:latest</code></p>
-</li>
-<li><p>Image Stream <code>jenkins:latest</code> 則是指到 Red Hat 官方所提供的 Jenkins image(<strong>registry.access.redhat.com/openshift3/jenkins-2-rhel7</strong>)</p>
-</li>
-</ol>
-<p>當 Jenkins server 佈署好之後，就會自動的與 OpenShift 本身的認証機制進行整合，完全不用使用者進行額外的設定，相關的 credential 也都會設定在 Jenkins server 內部，使用者需要做的就是開始設計 pipeline 就對了!</p>
-<hr>
-<h1 id="Jenkins-image-for-OpenShift"><a href="#Jenkins-image-for-OpenShift" class="headerlink" title="Jenkins image for OpenShift"></a>Jenkins image for OpenShift</h1><p>由於 Jenkins 並不是一個很容易入門上手的系統，因此為了提供使用者能更方便的使用 Jenkins，OpenShift 將 Jenkins 系統打包成 docker image，並加入了許多常用的 plugin 以及與 OpenShift 整合所需要的 plugin，還很貼心的做好相關整合的設定，讓使用者在建立 pipeline 時就會同時產生相對應的 Jenkins server 來使用，省略許多繁複且容易造成錯誤的設定過程。</p>
-<p>目前使用者可能比較容易用到的 Jenkins image for OpenShift 可能會有以下兩種：</p>
+        <p>此篇文章將會介紹 VM 生命周期管理、Qemu Guest Agent、Virtual Video Card、Graphic Server … 等主題。</p>
+<h1 id="VM-Lifecycle"><a href="#VM-Lifecycle" class="headerlink" title="VM Lifecycle"></a>VM Lifecycle</h1><p>在 KVM 中的 virtual machine 共會有以下幾種狀態：</p>
 <ul>
-<li>Red Hat 版本：<code>registry.access.redhat.com/openshift3/jenkins-2-rhel7</code><br>本文章的主題在於如何將客製化 OpenShift 原生提供的 Jenkins image</li>
-</ul>
-<h1 id="前言-1"><a href="#前言-1" class="headerlink" title="前言"></a>前言</h1><p>Openshift 在 DevOps 的方面的確是下了不少功夫，使用 OpenShift 的確可以讓 DevOps engineer 省下不少工，但相對的也有蠻多新東西要學的! XD</p>
-<p>在 OpenShift 建立第一個 BuildConfig(pipeline) 時，它會自動幫使用者佈署一個用來驅動 build pipeline 的 Jenkins server(此 container 會由 OpenShift 本身納管，因此掛了會自己再起一個新的)，佈署的行為如下：</p>
-<ol>
-<li><p>使用 <code>openshift</code> namespace 中的 template <code>jenkins-ephemeral</code> 為範本產生 Jenkins server</p>
+<li><p><strong>Undefined</strong>：未定義</p>
 </li>
-<li><p>此 tempate 使用的 image stream 為 <code>jenkins:latest</code></p>
+<li><p><strong>Defined / Shutoff</strong>：已定義，libvirtd 已經知道有此 VM 存在，但狀態為關機中(Stopped or Shutdown)</p>
 </li>
-<li><p>Image Stream <code>jenkins:latest</code> 則是指到 Red Hat 官方所提供的 Jenkins image(<strong>registry.access.redhat.com/openshift3/jenkins-2-rhel7</strong>)</p>
+<li><p><strong>Running</strong>：執行中</p>
 </li>
-</ol>
-<p>當 Jenkins server 佈署好之後，就會自動的與 OpenShift 本身的認証機制進行整合，完全不用使用者進行額外的設定，相關的 credential 也都會設定在 Jenkins server 內部，使用者需要做的就是開始設計 pipeline 就對了!</p>
-<hr>
-<h1 id="Jenkins-image-for-OpenShift-1"><a href="#Jenkins-image-for-OpenShift-1" class="headerlink" title="Jenkins image for OpenShift"></a>Jenkins image for OpenShift</h1><p>由於 Jenkins 並不是一個很容易入門上手的系統，因此為了提供使用者能更方便的使用 Jenkins，OpenShift 將 Jenkins 系統打包成 docker image，並加入了許多常用的 plugin 以及與 OpenShift 整合所需要的 plugin，還很貼心的做好相關整合的設定，讓使用者在建立 pipeline 時就會同時產生相對應的 Jenkins server 來使用，省略許多繁複且容易造成錯誤的設定過程。</p>
-<p>目前使用者可能比較容易用到的 Jenkins image for OpenShift 可能會有以下兩種：</p>
-<ul>
-<li><p>Red Hat 版本：<code>registry.access.redhat.com/openshift3/jenkins-2-rhel7</code></p>
+<li><p><strong>Shutdown</strong>：關機中</p>
 </li>
-<li><p>CentOS 版本：<code>openshift/jenkins-2-centos7</code> (位於 DockerHub 上)</p>
+<li><p><strong>Paused</strong>：暫停中，VM 記憶體中的資料暫時被保留，並且可以在 guest OS 無法知悉的狀況下回復</p>
+</li>
+<li><p><strong>Saved</strong>：VM 處於完全暫停的狀態，記憶體中的資料被存到一般檔案中，並存在於 persistent storage (可回復到進行 save 時的狀態)</p>
+</li>
+<li><p><strong>Idle</strong>：等待 I/O，或是因為沒有工作需要進行而休眠中</p>
+</li>
+<li><p><strong>Crashed</strong>：可能因為 QEMU process 被強制移除 or core dump 所造成的 VM 損毀</p>
+</li>
+<li><p><strong>Dying</strong>：在 shutdown 的過程中失敗所產生的況狀</p>
+</li>
+<li><p><strong>Pmsuspended</strong>：透過 guest OS 中的電源管理功能進行 suspend 後進入的狀態</p>
 </li>
 </ul>
-<p>由於新版的 OpenShift pipeline plugin for Jenkins 目前僅在 CentOS 版本的 Jenkins image 支援，因此後面的範例將會以 CentOS 版本為主，並提供將原有的 Jenkins image 從 Red Hat 版本改成 CentOS 版本的方法。</p>
+<p>有了上面概念後，可以透過 virsh 來檢視目前 domain(virtual machine) 的狀態：</p>
 <hr>
-<h1 id="安裝額外的-Jenkins-plugin"><a href="#安裝額外的-Jenkins-plugin" class="headerlink" title="安裝額外的 Jenkins plugin"></a>安裝額外的 Jenkins plugin</h1><p>由於 OpenShift 提供的 Jenkins image 本身就是一個具有 s2i 功能的 docker image，因此我們可以透過 s2i 的流程，將所需要安裝的 plugin 以 source code injection 的方式指定進來並安裝。</p>
-<p>以下的範例將會進行以下的客製化：</p>
-<ol>
-<li><p>安裝 <strong>redmine</strong>, <strong>gitlab-plugin</strong>, <strong>testlink</strong> 三個 plugin (詳細版本可參考<a href="https://github.com/godleon/learning_openshift/blob/master/jenkins_customization/plugins.txt" target="_blank" rel="noopener">原始碼</a>)</p>
-</li>
-<li><p>預先加入 <strong>scriptApproval.xml</strong> 檔案，讓某些 method 可在 sandbox 的環境中執行 (詳細清單可參考<a href="https://github.com/godleon/learning_openshift/blob/master/jenkins_customization/configuration/scriptApproval.xml" target="_blank" rel="noopener">原始碼</a>)</p>
-</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 取得原始碼</span></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/godleon/learning_openshift.git</span><br><span class="line"></span><br><span class="line"><span class="comment"># 建立 ImageStream(custom-jenkins-2-centos7) BuildConfig(custom-jenkins-build)</span></span><br><span class="line">$ oc create -f learning_openshift/jenkins_customization/</span><br><span class="line"></span><br><span class="line">$ oc -n openshift start-build custom-jenkins-build</span><br><span class="line"></span><br><span class="line">$ oc -n openshift get pods</span><br><span class="line">NAME                           READY     STATUS      RESTARTS   AGE</span><br><span class="line">custom-jenkins-build-1-build   0/1       Completed   0          22m</span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視 build log</span></span><br><span class="line">$ oc logs -f custom-jenkins-build-1-build</span><br></pre></td></tr></table></figure>
+<h1 id="檢視-VM"><a href="#檢視-VM" class="headerlink" title="檢視 VM"></a>檢視 VM</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 顯示所有 VM (包含關機中的)</span></span><br><span class="line">$ virsh -c qemu+ssh://root@10.20.190.3/system list --all</span><br><span class="line"></span><br><span class="line"><span class="comment"># 顯示特定狀態的 VM</span></span><br><span class="line">$ virsh -c qemu+ssh://root@10.20.190.3/system list --state-[running|paused|shutoff|]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 顯示(未)包含 snapshot 的 VM</span></span><br><span class="line">$ virsh -c qemu+ssh://root@10.20.190.3/system list --[with|without]-snapshot</span><br><span class="line"></span><br><span class="line"><span class="comment"># 顯示(未)包含 managed save 狀態的 VM</span></span><br><span class="line">$ virsh -c qemu+ssh://root@10.20.190.3/system list --[with|without]-managed-save</span><br><span class="line"></span><br><span class="line"><span class="comment"># 僅顯示 uuid or name</span></span><br><span class="line">$ virsh -c qemu+ssh://root@10.20.190.3/system list --[uuid|name]</span><br></pre></td></tr></table></figure>
 <blockquote>
-<p>使用者必須先安裝 <a href="https://github.com/openshift/origin/releases" target="_blank" rel="noopener">OpenShift CLI tool</a> 才可以執行上述的 oc 指令</p>
+<p>還有許多其他參數可用，使用者可透過 <code>virsh help</code> or <code>virsh help list</code> 來查詢更多使用方式</p>
 </blockquote>
-<p>在最後一行指令中檢視 build log 時，就可以看見 OpenShift 透過 s2i 流程將我們在程式碼中所指定的 plugin 都已經安裝完成，此時我們就可以透過 ImageStream <code>custom-jenkins-2-centos7</code>(定義於 <strong>Jenkins_Customization/bc_custom-jenkins-build.yml</strong> 中) 來作為啟動 Jenkins server 的 default image。</p>
 <hr>
-<h1 id="更換原有的-Jenkins-Image"><a href="#更換原有的-Jenkins-Image" class="headerlink" title="更換原有的 Jenkins Image"></a>更換原有的 Jenkins Image</h1><p>今天在測試設計較為複雜的 Jenkins pipeline 時，發現 <a href="https://github.com/openshift/origin/tree/master/examples/jenkins/pipeline" target="_blank" rel="noopener">OpenShift 在 GitHub 提供的範例</a> 無法正常的使用，會出現 openshift class 不存在的錯誤，後來仔細的查了一下，發現原來裡面的範例需要搭配 <a href="https://github.com/openshift/jenkins-client-plugin" target="_blank" rel="noopener">OpenShift Jenkins Pipeline (DSL) Plugin</a> 一起使用。</p>
-<p><strong>問題是，Red Hat 版本的 Jenkins image 並沒有內建這一個 plugin，此 plugin 目前僅有內建在 Centos 版本的 Jenkins image 中。</strong></p>
-<p>而在上一個步驟中，我們使用了 CentOS 版本的 Jenkins image，並安裝了額外的 plugin 作為後續使用，因此以下便使用已經客製化完成的 Jenkins image 來作為啟動 Jenkins server 的 image。</p>
-<p>為了更改自動佈署的 Jenkins server 所使用的 docker image，需要調整 <code>jenkins-ephemeral</code> 的內容，將 image 從 Red Hat 版本改到在上一個步驟完成的客製化 CentOS 版本，執行以下指令：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ oc edit template/jenkins-ephemeral -n openshift</span><br></pre></td></tr></table></figure>
-<p>找到 <code>parameters</code> –&gt; <code>JENKINS_IMAGE_STREAM_TAG</code>，將 <strong>value</strong> 從 <code>jenkins:latest</code> 改為 <code>custom-jenkins-2-centos7:latest</code>，存檔即可。</p>
-<p>經過了以上的設定，後面自動佈署出來的 Jenkins server 都會是 CentOS7 的版本，也會同時預載好 <a href="https://github.com/openshift/jenkins-client-plugin" target="_blank" rel="noopener">OpenShift Jenkins Pipeline (DSL) Plugin</a> 以及在上一個步驟額外安裝好的 plugin。</p>
+<h1 id="操作-VM"><a href="#操作-VM" class="headerlink" title="操作 VM"></a>操作 VM</h1><p>了解 VM 有這麼多狀態之後，自然就會有相對應的操作了，virsh 提供以下幾項對 VM 的操作：</p>
+<ul>
+<li><p><strong>start</strong>：啟動 VM</p>
+</li>
+<li><p><strong>shutdown</strong>：關閉 VM (正常關機程序)</p>
+</li>
+<li><p><strong>reboot</strong>：重新啟動 VM</p>
+</li>
+<li><p><strong>reset</strong>：與 power cycle 相同效果</p>
+</li>
+<li><p><strong>save</strong>：將 VM 狀態儲存到檔案中，並關閉 VM</p>
+</li>
+<li><p><strong>restore</strong>：從指定的檔案將 VM 狀態回復為執行中</p>
+</li>
+<li><p><strong>suspend</strong>：暫停 VM 運作</p>
+</li>
+<li><p><strong>resume</strong>：回復 VM 運作</p>
+</li>
+<li><p><strong>destroy</strong>：直接刪除 QEMU process (類似直接拔掉電腦電源線的效果)</p>
+</li>
+<li><p><strong>create</strong>：使用指定的 XML 建立 VM，並啟動 VM</p>
+</li>
+<li><p><strong>define</strong>：使用指定的 XML 建立 VM，但不啟動 VM</p>
+</li>
+<li><p><strong>undefine</strong>：將 VM 從 libvird 的控制中移除</p>
+</li>
+</ul>
+<hr>
+<h1 id="QEMU-guest-agent"><a href="#QEMU-guest-agent" class="headerlink" title="QEMU guest agent"></a>QEMU guest agent</h1><p>在安裝 virtualbox or VMware 的 VM 時，安裝結束之後都會詢問要不要額外安裝 agent 在 guest VM 中，透過這個 agent，hypervisor 可以更有效率的管理每一個 VM；同樣的在 KVM 中，也是有相同的作法，稱為 <strong>QEMU guest agent</strong>。</p>
+<p><strong>QEMU guest agent</strong> 是一個裝在 guest VM 中的套件，會以 service 的形式存在於背景，接著 service 就變成了 hypervisor &amp; guest OS 之間溝通的橋樑(channel)，hypervisor 會透過這個 channle 取得 VM 的資訊，以及對 VM 進行後續更多的操作；而兩者相互通訊的協定稱為 <strong>Qemu Machine Protocol(QMP)</strong>。</p>
+<p>其中 Hypervisor 與 guest agent 是透過一個名稱為 <code>org.qemu.guest_agent.0</code> 的 virtio-serial channel 或是 isa-serial channel 來處理；而在 Hypervisor 這一端，相對應處理這些資訊交換的 socket file 則是存在於 <code>/var/lib/libvirt/qemu/channel/target</code> 目錄中，且同一個 socket file 可以同時被多個 VM 所共享，因此不會產生太多檔案。</p>
+<p>若 guest VM 為 Linux，可安裝名稱為 <code>qemu-guest-agent</code> 的套件，若是 windows，則可以參考以下連結：</p>
+<ul>
+<li><p><a href="http://www.linux-kvm.org/page/WindowsGuestDrivers/Download_Drivers" target="_blank" rel="noopener">WindowsGuestDrivers/Download Drivers - KVM</a></p>
+</li>
+<li><p><a href="https://fedoraproject.org/wiki/Windows_Virtio_Drivers" target="_blank" rel="noopener">Windows Virtio Drivers - FedoraProject</a></p>
+</li>
+</ul>
+<p>除了安裝 <code>qemu-guest-agent</code> 套件之外，還要確認 <code>qemu-guest-agent</code> service 是否有正確啟動：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ systemctl status qemu-guest-agent</span><br><span class="line">● qemu-guest-agent.service - QEMU Guest Agent</span><br><span class="line">   Loaded: loaded (/usr/lib/systemd/system/qemu-guest-agent.service; enabled; vendor preset: enabled)</span><br><span class="line">   Active: active (running) since Thu 2016-11-24 22:25:07 EST; 35min ago</span><br><span class="line">   ......</span><br></pre></td></tr></table></figure>
+<p>確認服務沒有問題，我們就可以使用類似以下的命令在 KVM host 端取得 guest VM 的相關資訊：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$ virsh qemu-agent-command &lt;GUEST_VM_NAME&gt; <span class="string">'&#123;"execute": "guest-info"&#125;'</span> --pretty</span><br><span class="line">&#123;</span><br><span class="line">    <span class="string">"return"</span>: &#123;</span><br><span class="line">        <span class="string">"version"</span>: <span class="string">"2.3.0"</span>,</span><br><span class="line">        <span class="string">"supported_commands"</span>: [</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="string">"enabled"</span>: <span class="literal">true</span>,</span><br><span class="line">                <span class="string">"name"</span>: <span class="string">"guest-get-memory-block-info"</span>,</span><br><span class="line">                <span class="string">"success-response"</span>: <span class="literal">true</span></span><br><span class="line">            &#125;,</span><br><span class="line">.......</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>QMP 資料通訊使用 JSON format</p>
+</blockquote>
+<hr>
+<h1 id="Virtual-Video-cards-amp-graphics"><a href="#Virtual-Video-cards-amp-graphics" class="headerlink" title="Virtual Video cards &amp; graphics"></a>Virtual Video cards &amp; graphics</h1><p>為了可以”看見” VM 的運作狀態，QEMU 需要提供兩個元素來達成這件任務：</p>
+<ol>
+<li><p><strong>virtual video card</strong>：讓每個 VM 都擁有一張虛擬的顯示卡</p>
+</li>
+<li><p>從遠端存取 VM 虛擬顯示卡的方式 or 協定</p>
+</li>
+</ol>
+<h2 id="Virtual-Video-Card"><a href="#Virtual-Video-Card" class="headerlink" title="Virtual Video Card"></a>Virtual Video Card</h2><p>顯示卡的用途在於顯示圖形資料到顯示設備上，而虛擬顯示卡同樣也是為了這個目的而存在的。</p>
+<p>然而在虛擬環境中當然沒有實體顯示卡，因此 QEMU 支援模擬以下幾種顯示卡：</p>
+<ul>
+<li><p><strong>Cirrus</strong>：libvirt 預設的顯示卡，可模擬 <strong>Cirrus Logic GD5446</strong> 顯示卡，Windows 95 之後的作業系統都支援這張顯示卡</p>
+</li>
+<li><p><strong>VGA</strong>：搭配 Bochs VBE extensions 的標準顯示卡，Windows XP 以後的作業系統可以支援(可設定 &gt;= 1280x1024x16 解析度 &amp; 大小的畫質)</p>
+</li>
+<li><p><strong>VMVGA</strong>：在 VGA 再更高階的虛擬顯示卡</p>
+</li>
+<li><p><strong>QXL</strong>：半虛擬化顯示卡，搭配在 VM 內安裝 QXL guest driver，可得到很不錯的顯示效果，而且是搭配 <strong>spice</strong> protocol 的最佳選擇</p>
+</li>
+</ul>
+<p>在安裝 VM 時，libvirt 就會根據安裝的 OS，協助選擇一個最合適的顯示卡，通常安裝最近發佈的 OS，都會直接選配 QXL；若是 Windows 或是比較舊版的 Linux，可能就會使用 Cirrus。</p>
+<h2 id="Graphics"><a href="#Graphics" class="headerlink" title="Graphics"></a>Graphics</h2><p>當 VM 有了顯示卡之後，接著需要一個可以存取圖形訊號的方法，在 KVM 中是透過 <strong>graphic server</strong> 的方式，目前提供了 <strong>VNC</strong> &amp; <em>*SPICE</em> 兩種 graphic server。</p>
+<p>當 VM 確定好顯示卡之後，QEMU 就會啟動相對應的 Spice or VNC server，並與 VM 的顯示卡進行連接，以便讓外部的 client 可以使用圖形化的方式存取 VM。</p>
+<h3 id="1-VNC"><a href="#1-VNC" class="headerlink" title="(1) VNC"></a>(1) VNC</h3><p>要為 VM 設定一個 VNC graphic server，可在 XML 定義檔中的 <code>&lt;device&gt;</code> section 內部加入類似以下的定義：(IP &amp; port 都可以自己定義)</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">graphics</span> <span class="attr">type</span>=<span class="string">'vnc'</span> <span class="attr">port</span>=<span class="string">'-1'</span> <span class="attr">autoport</span>=<span class="string">'yes'</span> <span class="attr">listen</span>=<span class="string">'192.168.122.1'</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">listen</span> <span class="attr">type</span>=<span class="string">'address'</span> <span class="attr">address</span>=<span class="string">'192.168.122.1'</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">graphics</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="2-SPICE"><a href="#2-SPICE" class="headerlink" title="(2) SPICE"></a>(2) SPICE</h3><p>SPICE(Simple Protocol for Independent Computing Environment) 僅有在 Linux 上支援，有以下特色：</p>
+<ol>
+<li><p>可以提供雙向的 audio</p>
+</li>
+<li><p>高效率的 2D 圖像繪製能力</p>
+</li>
+<li><p>可利用到 client 端的顯示卡的能力</p>
+</li>
+<li><p>支援加密、資料壓縮</p>
+</li>
+<li><p>支援透過網路的 USB passthrough</p>
+</li>
+</ol>
+<p>因此若要規劃把 KVM 用在 VDI 的應用上，使用 <code>QXL</code> + <code>SPICE</code> 目前是最好的組合。</p>
+<p>要為 VM 設定一個 SPICE graphic server，可在 XML 定義檔中的 <code>&lt;device&gt;</code> section 內部加入類似以下的定義：(IP &amp; port 都可以自己定義)</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">graphics</span> <span class="attr">type</span>=<span class="string">'spice'</span> <span class="attr">autoport</span>=<span class="string">'yes'</span> <span class="attr">listen</span>=<span class="string">'0.0.0.0'</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">listen</span> <span class="attr">type</span>=<span class="string">'address'</span> <span class="attr">address</span>=<span class="string">'0.0.0.0'</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">graphics</span>&gt;</span></span><br></pre></td></tr></table></figure>
 <hr>
 <h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
-<li><p><a href="https://github.com/jenkinsci/openshift-pipeline-plugin" target="_blank" rel="noopener">OpenShift V3 Plugin for Jenkins (based on Kubernetes plugin)</a></p>
+<li><p><a href="https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/6/html/Virtualization_Administration_Guide/sect-QEMU_Guest_Agent-Running_the_QEMU_guest_agent_on_a_Windows_guest.html" target="_blank" rel="noopener">Virtualization Administration Guide &gt; Running the QEMU Guest Agent on a Windows Guest</a></p>
 </li>
-<li><p><a href="https://github.com/openshift/jenkins-client-plugin" target="_blank" rel="noopener">OpenShift Jenkins Pipeline (DSL) Plugin (newly design)</a></p>
+<li><p><a href="http://www.linux-kvm.org/page/WindowsGuestDrivers/Download_Drivers" target="_blank" rel="noopener">WindowsGuestDrivers/Download Drivers - KVM</a></p>
 </li>
-<li><p><a href="https://github.com/openshift/origin/tree/master/examples/jenkins/pipeline" target="_blank" rel="noopener">Using Jenkins Pipelines with OpenShift @GitbHub</a></p>
-</li>
-<li><p><a href="https://docs.openshift.com/container-platform/3.6/using_images/other_images/jenkins.html" target="_blank" rel="noopener">Jenkins - Other Images | Using Images | OpenShift Container Platform 3.6</a></p>
-</li>
-<li><p><a href="https://github.com/openshift/jenkins-sync-plugin/issues/57" target="_blank" rel="noopener">Script approvals needed for changes to build config Jenkinsfile · Issue #57 · openshift/jenkins-sync-plugin</a></p>
-</li>
-<li><p><a href="https://github.com/fabric8io/jenkins-docker" target="_blank" rel="noopener">fabric8io/jenkins-docker: docker file for a jenkins docker image</a></p>
+<li><p><a href="https://fedoraproject.org/wiki/Windows_Virtio_Drivers" target="_blank" rel="noopener">Windows Virtio Drivers - FedoraProject</a></p>
 </li>
 </ul>
 
@@ -484,9 +534,13 @@
       
         <div class="post-tags">
           
-            <a href="/blog/tags/OpenShift/" rel="tag"># OpenShift</a>
+            <a href="/blog/tags/Linux/" rel="tag"># Linux</a>
           
-            <a href="/blog/tags/Jenkins/" rel="tag"># Jenkins</a>
+            <a href="/blog/tags/KVM/" rel="tag"># KVM</a>
+          
+            <a href="/blog/tags/SPICE/" rel="tag"># SPICE</a>
+          
+            <a href="/blog/tags/VNC/" rel="tag"># VNC</a>
           
         </div>
       
@@ -499,8 +553,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/blog/2017/11/06/OpenShift/OpenShift-Concept-ImageStream/" rel="next" title="[OpenShift] Concept - Image Stream">
-                <i class="fa fa-chevron-left"></i> [OpenShift] Concept - Image Stream
+              <a href="/blog/2014/11/14/VMware/free-vsphere-esxi-vm-backup-solution-xsibackup/" rel="next" title="[VMware] 免費的 vSphere ESXi VM 備份方案 - XSIBACKUP">
+                <i class="fa fa-chevron-left"></i> [VMware] 免費的 vSphere ESXi VM 備份方案 - XSIBACKUP
               </a>
             
           </div>
@@ -509,8 +563,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/blog/2017/11/29/OpenShift/OpenShift-Howto-Calculate-Time-Duration-in-Jenkins/" rel="prev" title="[OpenShift] How-to customize built-in Jenkins image">
-                [OpenShift] How-to customize built-in Jenkins image <i class="fa fa-chevron-right"></i>
+              <a href="/blog/2017/01/01/KVM/KVM-Template-And-Snapshot/" rel="prev" title="[Linux KVM] Template & Snapshot 的運用">
+                [Linux KVM] Template & Snapshot 的運用 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -675,7 +729,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Jenkins-image-for-OpenShift"><span class="nav-number">2.</span> <span class="nav-text">Jenkins image for OpenShift</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#前言-1"><span class="nav-number">3.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Jenkins-image-for-OpenShift-1"><span class="nav-number">4.</span> <span class="nav-text">Jenkins image for OpenShift</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#安裝額外的-Jenkins-plugin"><span class="nav-number">5.</span> <span class="nav-text">安裝額外的 Jenkins plugin</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#更換原有的-Jenkins-Image"><span class="nav-number">6.</span> <span class="nav-text">更換原有的 Jenkins Image</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">7.</span> <span class="nav-text">References</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#VM-Lifecycle"><span class="nav-number">1.</span> <span class="nav-text">VM Lifecycle</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#檢視-VM"><span class="nav-number">2.</span> <span class="nav-text">檢視 VM</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#操作-VM"><span class="nav-number">3.</span> <span class="nav-text">操作 VM</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#QEMU-guest-agent"><span class="nav-number">4.</span> <span class="nav-text">QEMU guest agent</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Virtual-Video-cards-amp-graphics"><span class="nav-number">5.</span> <span class="nav-text">Virtual Video cards & graphics</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Virtual-Video-Card"><span class="nav-number">5.1.</span> <span class="nav-text">Virtual Video Card</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Graphics"><span class="nav-number">5.2.</span> <span class="nav-text">Graphics</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-VNC"><span class="nav-number">5.2.1.</span> <span class="nav-text">(1) VNC</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-SPICE"><span class="nav-number">5.2.2.</span> <span class="nav-text">(2) SPICE</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text">References</span></a></li></ol></div>
             
 
           </div>
@@ -838,9 +892,9 @@
     
       <script type="text/javascript">
         var disqus_config = function () {
-          this.page.url = 'https://godleon.github.io/blog/2017/11/07/OpenShift/OpenShift-Howto-Customize-builtin-Jenkins-Image/';
-          this.page.identifier = '2017/11/07/OpenShift/OpenShift-Howto-Customize-builtin-Jenkins-Image/';
-          this.page.title = '[OpenShift] How-to customize built-in Jenkins image';
+          this.page.url = 'https://godleon.github.io/blog/2016/11/30/KVM/KVM-Lifecycle-Management/';
+          this.page.identifier = '2016/11/30/KVM/KVM-Lifecycle-Management/';
+          this.page.title = '[Linux KVM] VM Life Cycle 管理';
         };
         var d = document, s = d.createElement('script');
         s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
