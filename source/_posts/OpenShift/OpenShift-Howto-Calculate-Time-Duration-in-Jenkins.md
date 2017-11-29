@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[OpenShift] How-to customize built-in Jenkins image"
+title: "[OpenShift] 如何計算在 Jenkins pipeline 中工作所花費的時間"
 description: "本文章介紹如何在 Jenkins pipeline 中計算工作執行的時間"
 date: 2017-11-29 13:50:00
 comments: true

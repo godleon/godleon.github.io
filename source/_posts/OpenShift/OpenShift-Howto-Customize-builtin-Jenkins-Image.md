@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[OpenShift] How-to customize built-in Jenkins image"
+title: "[OpenShift] 如何客製化 Jenkins Image"
 description: "This article introduces how to customize OpenShift built-in Jenkins image"
 date: 2017-11-07 15:20:00
 comments: true
