@@ -3,7 +3,7 @@
   
     
     <entry>
-      <title><![CDATA[[OpenShift] How-to customize built-in Jenkins image]]></title>
+      <title><![CDATA[[OpenShift] 如何計算在 Jenkins pipeline 中工作所花費的時間]]></title>
       <url>/blog/2017/11/29/OpenShift/OpenShift-Howto-Calculate-Time-Duration-in-Jenkins/</url>
       <content type="html"><![CDATA[<p>最近的工作都是使用 OpenShift + Jenkins 在進行 CI/CD 的相關工作，在時間的顯示上遇到了兩個問題：</p>
 <ol>
@@ -39,7 +39,7 @@
     </entry>
     
     <entry>
-      <title><![CDATA[[OpenShift] How-to customize built-in Jenkins image]]></title>
+      <title><![CDATA[[OpenShift] 如何客製化 Jenkins Image]]></title>
       <url>/blog/2017/11/07/OpenShift/OpenShift-Howto-Customize-builtin-Jenkins-Image/</url>
       <content type="html"><![CDATA[<p>本文章的主題在於如何將客製化 OpenShift 原生提供的 Jenkins image</p>
 <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>Openshift 在 DevOps 的方面的確是下了不少功夫，使用 OpenShift 的確可以讓 DevOps engineer 省下不少工，但相對的也有蠻多新東西要學的! XD</p>
