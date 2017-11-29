@@ -83,14 +83,18 @@ Jenkins image for OpenShift
 
 由於 OpenShift 提供的 Jenkins image 本身就是一個具有 s2i 功能的 docker image，因此我們可以透過 s2i 的流程，將所需要安裝的 plugin 以 source code injection 的方式指定進來並安裝。
 
-以下的範例將會安裝 **redmine**, **gitlab-plugin**, **testlink** 三個 plugin：(詳細版本可參考[原始碼](https://github.com/godleon/learning_openshift/blob/master/jenkins_customization/plugins.txt))
+以下的範例將會進行以下的客製化：
+
+1. 安裝 **redmine**, **gitlab-plugin**, **testlink** 三個 plugin (詳細版本可參考[原始碼](https://github.com/godleon/learning_openshift/blob/master/jenkins_customization/plugins.txt))
+
+2. 預先加入 **scriptApproval.xml** 檔案，讓某些 method 可在 sandbox 的環境中執行 (詳細清單可參考[原始碼](https://github.com/godleon/learning_openshift/blob/master/jenkins_customization/configuration/scriptApproval.xml))
 
 ```bash
 # 取得原始碼
 $ git clone https://github.com/godleon/learning_openshift.git
 
 # 建立 ImageStream(custom-jenkins-2-centos7) BuildConfig(custom-jenkins-build)
-$ oc create -f learning_openshift/Jenkins_Customization/
+$ oc create -f learning_openshift/jenkins_customization/
 
 $ oc -n openshift start-build custom-jenkins-build
 
@@ -141,3 +145,7 @@ References
 - [Using Jenkins Pipelines with OpenShift @GitbHub](https://github.com/openshift/origin/tree/master/examples/jenkins/pipeline)
 
 - [Jenkins - Other Images \| Using Images \| OpenShift Container Platform 3.6](https://docs.openshift.com/container-platform/3.6/using_images/other_images/jenkins.html)
+
+- [Script approvals needed for changes to build config Jenkinsfile · Issue #57 · openshift/jenkins-sync-plugin](https://github.com/openshift/jenkins-sync-plugin/issues/57)
+
+- [fabric8io/jenkins-docker: docker file for a jenkins docker image](https://github.com/fabric8io/jenkins-docker)
