@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-tw">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/blog/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/blog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/blog/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/blog/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Linux,KVM," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="This article introduces how to initialize a kvm-enhanced virtual machine by usung QEMU/KVM">
+<meta name="keywords" content="Linux,KVM">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[Linux KVM] 使用 Linux KVM 啟用第一個 virtual machine">
+<meta property="og:url" content="https://godleon.github.io/blog/2016/07/26/KVM/QEMU-KVM-In-CentOS7-GettingStart/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="This article introduces how to initialize a kvm-enhanced virtual machine by usung QEMU/KVM">
+<meta property="og:locale" content="zh-tw">
+<meta property="og:image" content="https://lh3.googleusercontent.com/Or8AH3hxAJbdXsIMADxmVkvUKlFYe_-DwTpSuw878fpP3bDAqyLv_ql_7W_HIrLYGHqc1hha7aecKMM6lytj2Wkv-NEyoXsZPuHE5RKa9mp_6apKEoPn7h-tp2DSjLcHaj72ByMefPKXRFKFYCLmYdbhsax0Ro8A-UCjSweOuB03zEL44VM7YbkxNE85vTmFv-JMUUERlX3CAdDotSWpvzl-ztgHzoU2E0iqwgLawhHAhn1JOX19Mn0ib3J0vxqZyLI6CNqaXEIc-7v5QNhAmAysEdWd3AMVKqkPVI41v8FDiUam2G_MDUkWOsAW4aQjnwrAbiw3-Ljpi72gjsM_iJWnsLF5nCuREGQxWC_LOrhRo7-AKLgU_XmzJuobqLRi6LoMzy_BKva5jI7nSgmgAfXDDTWpsXyGoKSgexpg_J7SRuLVZR1iZZ8HCZ9FZpre9qNIdr6xsvnH1NoUobJ73IKMbKn4YmGD0Z9Odi51bpWSh9eV1kOyCMFnF7Q5KZoPk-9lZwChK0gVUj6eObbJDKhlrFTpSvO7vYGJOmIBtfgCfKB9tAZ1-fpDSWxv8tGP38OQmKirl5oh0ozkGGQ-Z9QAr0mC31U=w642-h143-no">
+<meta property="og:updated_time" content="2017-11-30T02:40:18.880Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[Linux KVM] 使用 Linux KVM 啟用第一個 virtual machine">
+<meta name="twitter:description" content="This article introduces how to initialize a kvm-enhanced virtual machine by usung QEMU/KVM">
+<meta name="twitter:image" content="https://lh3.googleusercontent.com/Or8AH3hxAJbdXsIMADxmVkvUKlFYe_-DwTpSuw878fpP3bDAqyLv_ql_7W_HIrLYGHqc1hha7aecKMM6lytj2Wkv-NEyoXsZPuHE5RKa9mp_6apKEoPn7h-tp2DSjLcHaj72ByMefPKXRFKFYCLmYdbhsax0Ro8A-UCjSweOuB03zEL44VM7YbkxNE85vTmFv-JMUUERlX3CAdDotSWpvzl-ztgHzoU2E0iqwgLawhHAhn1JOX19Mn0ib3J0vxqZyLI6CNqaXEIc-7v5QNhAmAysEdWd3AMVKqkPVI41v8FDiUam2G_MDUkWOsAW4aQjnwrAbiw3-Ljpi72gjsM_iJWnsLF5nCuREGQxWC_LOrhRo7-AKLgU_XmzJuobqLRi6LoMzy_BKva5jI7nSgmgAfXDDTWpsXyGoKSgexpg_J7SRuLVZR1iZZ8HCZ9FZpre9qNIdr6xsvnH1NoUobJ73IKMbKn4YmGD0Z9Odi51bpWSh9eV1kOyCMFnF7Q5KZoPk-9lZwChK0gVUj6eObbJDKhlrFTpSvO7vYGJOmIBtfgCfKB9tAZ1-fpDSWxv8tGP38OQmKirl5oh0ozkGGQ-Z9QAr0mC31U=w642-h143-no">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://godleon.github.io/blog/2016/07/26/KVM/QEMU-KVM-In-CentOS7-GettingStart/"/>
+
+
+
+
+
+  <title>[Linux KVM] 使用 Linux KVM 啟用第一個 virtual machine | 小信豬的原始部落</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-tw">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">小信豬的原始部落</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/blog/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首頁
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/blog/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            標籤
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/blog/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分類
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/blog/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            歸檔
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            檢索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/blog/2016/07/26/KVM/QEMU-KVM-In-CentOS7-GettingStart/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">[Linux KVM] 使用 Linux KVM 啟用第一個 virtual machine</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">發表於</span>
+              
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2016-07-26T22:00:00+00:00">
+                2016-07-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分類於</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/KVM/" itemprop="url" rel="index">
+                    <span itemprop="name">KVM</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/2016/07/26/KVM/QEMU-KVM-In-CentOS7-GettingStart/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2016/07/26/KVM/QEMU-KVM-In-CentOS7-GettingStart/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  This article introduces how to initialize a kvm-enhanced virtual machine by usung QEMU/KVM
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>介紹如何使用 QEMU/KVM 在 Linux 上啟用第一個 virtual machine</p>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><h2 id="KVM"><a href="#KVM" class="headerlink" title="KVM"></a>KVM</h2><p>KVM 屬於全虛擬化(Full Virtualization) 的技術，因此在上面運行的 OS 不需要經過任何修改。</p>
+<p>原本因為 Full Virtualization 效能應該是很差的，但因為硬體虛擬化的支援(例如：<a href="http://stenlyho.blogspot.tw/2009/01/vt-xvt-d-intel.html" target="_blank" rel="noopener">Intel VT-d</a>，因此大幅提升了 KVM 的效能；此外 KVM 與 QEMU(負責周邊設備的模擬) 的搭配，提供了使用者在 CPU、Memory、Storage、Network、Display 上都有完全相同的虛擬化體驗。</p>
+<h2 id="Linux-kernel"><a href="#Linux-kernel" class="headerlink" title="Linux kernel"></a>Linux kernel</h2><p>關於 Linux kernel 上，建議使用目前較新的 kernel，在以下的環境中，會選用安裝 CentOS 7 作為 host machine，搭配 3.10 版的 Linux kernel 做為測試環境之用。</p>
+<h2 id="環境說明"><a href="#環境說明" class="headerlink" title="環境說明"></a>環境說明</h2><h3 id="硬體"><a href="#硬體" class="headerlink" title="硬體"></a>硬體</h3><p>CPU：Intel(R) Xeon(R) CPU E5-2660 v3 @ 2.60GHz</p>
+<h3 id="軟體"><a href="#軟體" class="headerlink" title="軟體"></a>軟體</h3><ul>
+<li><p>OS: CentOS 7</p>
+</li>
+<li><p>Linux Kernel: 3.10</p>
+</li>
+<li><p>qemu-kvm: 1.5.3 (預設開啟 KVM 加速)</p>
+</li>
+<li><p>qemu-img: 1.5.3</p>
+</li>
+</ul>
+<hr>
+<h1 id="前置環境設定"><a href="#前置環境設定" class="headerlink" title="前置環境設定"></a>前置環境設定</h1><h2 id="安裝套件"><a href="#安裝套件" class="headerlink" title="安裝套件"></a>安裝套件</h2><p>首先要安裝 KVM、QEMU、libvirtd 相關套件 &amp; 啟動 libvirtd service：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># KVM v2.3 需要使用此 repository</span></span><br><span class="line">$ bash -c <span class="string">"echo '[kvm-common]</span></span><br><span class="line"><span class="string">name=Latest KVM rpms</span></span><br><span class="line"><span class="string">baseurl=http://mirror.centos.org/centos-7/7/virt/x86_64/kvm-common/</span></span><br><span class="line"><span class="string">enabled=1</span></span><br><span class="line"><span class="string">gpgcheck=0' &gt; /etc/yum.repos.d/kvm.repo"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 安裝 KVM 1.5</span></span><br><span class="line">$ yum install -y qemu-kvm \</span><br><span class="line">    qemu-img \</span><br><span class="line">    qemu-system-x86 \</span><br><span class="line">    libvirt \</span><br><span class="line">    virt-install \</span><br><span class="line">    libvirt-python \</span><br><span class="line">    virt-manager \</span><br><span class="line">    python-virtinst \</span><br><span class="line">    libvirt-client \</span><br><span class="line">    bridge-utils \</span><br><span class="line">    net-tools \</span><br><span class="line">    libguestfs-tools-c \</span><br><span class="line">    iptables-services</span><br><span class="line"></span><br><span class="line"><span class="comment"># 也可使用 groupinstall 來批次安裝</span></span><br><span class="line">$ yum groupinstall <span class="string">"virtualization"</span> -y</span><br><span class="line"></span><br><span class="line"><span class="comment"># 若要安裝 KVM 2.3 可使用下面指令</span></span><br><span class="line">$ yum install -y qemu-kvm-ev \</span><br><span class="line">    qemu-img-ev \</span><br><span class="line">    qemu-system-x86 \</span><br><span class="line">    libvirt \</span><br><span class="line">    virt-install \</span><br><span class="line">    libvirt-python \</span><br><span class="line">    virt-manager \</span><br><span class="line">    python-virtinst \</span><br><span class="line">    libvirt-client \</span><br><span class="line">    bridge-utils \</span><br><span class="line">    net-tools \</span><br><span class="line">    libguestfs-tools-c \</span><br><span class="line">    iptables-services</span><br></pre></td></tr></table></figure>
+<p>也可以順便設定 <a href="http://www.linux-kvm.org/images/3/33/02x03-NestedVirtualization.pdf" target="_blank" rel="noopener">nested virtualization</a>，可以在虛擬環境中再虛擬一層而不會有太多的 performance lose：(此步驟可以略過)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 目前 nested virtualization 是關閉的 </span></span><br><span class="line">$ cat /sys/module/kvm_intel/parameters/nested</span><br><span class="line">N</span><br><span class="line"></span><br><span class="line"><span class="comment"># 開啟 nested virtualization</span></span><br><span class="line">$ sudo rmmod kvm-intel</span><br><span class="line">$ sudo sh -c <span class="string">"echo 'options kvm-intel nested=y' &gt;&gt; /etc/modprobe.d/dist.conf"</span></span><br><span class="line">$ sudo modprobe kvm-intel</span><br><span class="line"></span><br><span class="line"><span class="comment"># 開啟 nested virtualization 成功</span></span><br><span class="line">$ cat /sys/module/kvm_intel/parameters/nested</span><br><span class="line">Y</span><br></pre></td></tr></table></figure>
+<h2 id="防火牆設定"><a href="#防火牆設定" class="headerlink" title="防火牆設定"></a>防火牆設定</h2><p>停用預設的 <strong>firewalld.service</strong>，並啟用 <strong>iptables.service</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 關閉 firewalld</span></span><br><span class="line">$ systemctl stop firewalld.service</span><br><span class="line">$ systemctl <span class="built_in">disable</span> firewalld.service</span><br><span class="line"></span><br><span class="line"><span class="comment"># 啟用 iptables</span></span><br><span class="line">$ systemctl stop iptables.service</span><br><span class="line">$ systemctl <span class="built_in">disable</span> iptables.service</span><br></pre></td></tr></table></figure>
+<p>改用傳統的 itpables 來進行防火牆設定，並使用以下 script 建立防火牆：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># global variables</span></span><br><span class="line">IIF=<span class="string">"ens1f0"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 防止 sync flooding 攻擊(開啟 tcp sync cookie)</span></span><br><span class="line"><span class="built_in">echo</span> 1 &gt; /proc/sys/net/ipv4/tcp_syncookies</span><br><span class="line"></span><br><span class="line">iptables -t filter -F</span><br><span class="line"></span><br><span class="line"><span class="comment"># 設定 connection track</span></span><br><span class="line">iptables -t filter -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT</span><br><span class="line"><span class="comment"># 避免 INVALID 封包被其他服務所接收</span></span><br><span class="line">iptables -t filter -A INPUT -m state --state INVALID -j DROP</span><br><span class="line"></span><br><span class="line">iptables -t filter -A INPUT -p tcp --dport 22 -j ACCEPT</span><br><span class="line"><span class="comment"># 提供 vnc access</span></span><br><span class="line">iptables -t filter -A INPUT -p tcp --dport 5900:5910 -j ACCEPT</span><br><span class="line"></span><br><span class="line"><span class="comment"># 用來取代 chain default policy</span></span><br><span class="line">iptables -t filter -A INPUT -i <span class="variable">$&#123;IIF&#125;</span> -j DROP</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>上面的套件安裝 &amp; 防火牆設定完成後，要將 KVM host 重新開啟，並啟動 <strong><font color="red">libvirtd.service</font></strong></p>
+</blockquote>
+<hr>
+<h1 id="驗證環境"><a href="#驗證環境" class="headerlink" title="驗證環境"></a>驗證環境</h1><p>安裝好 QEMU/KVM 相關套件後，我們可以來檢查目前的環境是否可以正確的運行虛擬化功能：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ virt-host-validate</span><br><span class="line">  QEMU: Checking <span class="keyword">for</span> hardware virtualization                                 : PASS</span><br><span class="line">  QEMU: Checking <span class="keyword">for</span> device /dev/kvm                                         : PASS</span><br><span class="line">  QEMU: Checking <span class="keyword">for</span> device /dev/vhost-net                                   : PASS</span><br><span class="line">  QEMU: Checking <span class="keyword">for</span> device /dev/net/tun                                     : PASS</span><br><span class="line">   LXC: Checking <span class="keyword">for</span> Linux &gt;= 2.6.26                                         : PASS</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line">$ virsh nodeinfo</span><br><span class="line">CPU model:           x86_64</span><br><span class="line">CPU(s):              48</span><br><span class="line">CPU frequency:       1200 MHz</span><br><span class="line">CPU socket(s):       1</span><br><span class="line">Core(s) per socket:  12</span><br><span class="line">Thread(s) per core:  2</span><br><span class="line">NUMA cell(s):        2</span><br><span class="line">Memory size:         263930636 KiB</span><br><span class="line"></span><br><span class="line">$ virsh domcapabilities</span><br><span class="line">&lt;domainCapabilities&gt;</span><br><span class="line">  &lt;path&gt;/usr/bin/qemu-system-x86_64&lt;/path&gt;</span><br><span class="line">  &lt;domain&gt;qemu&lt;/domain&gt;</span><br><span class="line">  &lt;machine&gt;pc-i440fx-2.0&lt;/machine&gt;</span><br><span class="line">  &lt;arch&gt;x86_64&lt;/arch&gt;</span><br><span class="line">  &lt;vcpu max=<span class="string">'255'</span>/&gt;</span><br><span class="line">  &lt;os supported=<span class="string">'yes'</span>&gt;</span><br><span class="line">    &lt;loader supported=<span class="string">'yes'</span>&gt;</span><br><span class="line">      &lt;enum name=<span class="string">'type'</span>&gt;</span><br><span class="line">        &lt;value&gt;rom&lt;/value&gt;</span><br><span class="line">        &lt;value&gt;pflash&lt;/value&gt;</span><br><span class="line">      &lt;/enum&gt;</span><br><span class="line">      &lt;enum name=<span class="string">'readonly'</span>&gt;</span><br><span class="line">        &lt;value&gt;yes&lt;/value&gt;</span><br><span class="line">        &lt;value&gt;no&lt;/value&gt;</span><br><span class="line">      &lt;/enum&gt;</span><br><span class="line">    &lt;/loader&gt;</span><br><span class="line">  &lt;/os&gt;</span><br><span class="line">  &lt;devices&gt;</span><br><span class="line">    &lt;disk supported=<span class="string">'yes'</span>&gt;</span><br><span class="line">      &lt;enum name=<span class="string">'diskDevice'</span>&gt;</span><br><span class="line">        &lt;value&gt;disk&lt;/value&gt;</span><br><span class="line">        &lt;value&gt;cdrom&lt;/value&gt;</span><br><span class="line">        &lt;value&gt;floppy&lt;/value&gt;</span><br><span class="line">        &lt;value&gt;lun&lt;/value&gt;</span><br><span class="line">      &lt;/enum&gt;</span><br><span class="line">      &lt;enum name=<span class="string">'bus'</span>&gt;</span><br><span class="line">        &lt;value&gt;ide&lt;/value&gt;</span><br><span class="line">        &lt;value&gt;fdc&lt;/value&gt;</span><br><span class="line">        &lt;value&gt;scsi&lt;/value&gt;</span><br><span class="line">        &lt;value&gt;virtio&lt;/value&gt;</span><br><span class="line">        &lt;value&gt;usb&lt;/value&gt;</span><br><span class="line">      &lt;/enum&gt;</span><br><span class="line">    &lt;/disk&gt;</span><br><span class="line">    &lt;hostdev supported=<span class="string">'yes'</span>&gt;</span><br><span class="line">      &lt;enum name=<span class="string">'mode'</span>&gt;</span><br><span class="line">        &lt;value&gt;subsystem&lt;/value&gt;</span><br><span class="line">      &lt;/enum&gt;</span><br><span class="line">      &lt;enum name=<span class="string">'startupPolicy'</span>&gt;</span><br><span class="line">        &lt;value&gt;default&lt;/value&gt;</span><br><span class="line">        &lt;value&gt;mandatory&lt;/value&gt;</span><br><span class="line">        &lt;value&gt;requisite&lt;/value&gt;</span><br><span class="line">        &lt;value&gt;optional&lt;/value&gt;</span><br><span class="line">      &lt;/enum&gt;</span><br><span class="line">      &lt;enum name=<span class="string">'subsysType'</span>&gt;</span><br><span class="line">        &lt;value&gt;usb&lt;/value&gt;</span><br><span class="line">        &lt;value&gt;pci&lt;/value&gt;</span><br><span class="line">        &lt;value&gt;scsi&lt;/value&gt;</span><br><span class="line">      &lt;/enum&gt;</span><br><span class="line">      &lt;enum name=<span class="string">'capsType'</span>/&gt;</span><br><span class="line">      &lt;enum name=<span class="string">'pciBackend'</span>&gt;</span><br><span class="line">        &lt;value&gt;default&lt;/value&gt;</span><br><span class="line">        &lt;value&gt;vfio&lt;/value&gt;</span><br><span class="line">      &lt;/enum&gt;</span><br><span class="line">    &lt;/hostdev&gt;</span><br><span class="line">  &lt;/devices&gt;</span><br><span class="line">&lt;/domainCapabilities&gt;</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="啟動第一個-virtual-machine"><a href="#啟動第一個-virtual-machine" class="headerlink" title="啟動第一個 virtual machine"></a>啟動第一個 virtual machine</h1><p>由於 RedHat 建議使用 virsh，因此 <strong><font color="red">qemu-kvm</font></strong> 就不存在於預設路徑中，用以下指令把它找出來：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 將 qemu-kvm 以 symlink 的形式複製到 $PATH</span></span><br><span class="line"><span class="comment"># qemu-kvm 指令已經預設啟用 KVM 支援</span></span><br><span class="line">$ ln -sf /usr/libexec/qemu-kvm /usr/bin/kvm</span><br><span class="line"></span><br><span class="line"><span class="comment"># 製作一個 size = 8GB 的 raw image 作為 virtual machine disk</span></span><br><span class="line">$ dd <span class="keyword">if</span>=/dev/zero of=/kvm/storage/vm_disks/ubnutu1604.img bs=1M count=8192</span><br><span class="line"></span><br><span class="line"><span class="comment"># 目前系統中存在的 iso</span></span><br><span class="line">$ ls /kvm/os_images</span><br><span class="line">ubuntu-16.04.1-server-amd64.iso</span><br><span class="line"></span><br><span class="line"><span class="comment"># 啟動 VM (以光碟開機，安裝作業系統)</span></span><br><span class="line"><span class="comment"># -smp 4 =&gt; vCPU=4</span></span><br><span class="line"><span class="comment"># -m 2048 =&gt; RAM=2048MB</span></span><br><span class="line"><span class="comment"># -vnc 0.0.0.0:5 =&gt; 將 vnc 開在第五個 console，因此透過 vnc viewer 連線要使用 "ip:5" 來進行連線</span></span><br><span class="line"><span class="comment"># -boot order=cd =&gt; 開機順序為 cdrom &gt; hdd</span></span><br><span class="line"><span class="comment"># -hda /kvm/storage/vm_disks/ubnutu1604.img =&gt; 指定 hdd raw image</span></span><br><span class="line"><span class="comment"># -cdrom /kvm/os_images/ubuntu-16.04.1-server-amd64.iso =&gt; 指定開機光碟 iso</span></span><br><span class="line">$ kvm -smp 4 -m 2048 \</span><br><span class="line">  -vnc 0.0.0.0:5 -boot order=<span class="built_in">cd</span> \</span><br><span class="line">  -hda /kvm/storage/vm_disks/ubnutu1604.img \</span><br><span class="line">  -cdrom /kvm/os_images/ubuntu-16.04.1-server-amd64.iso</span><br></pre></td></tr></table></figure>
+<p>接著可以使用 <a href="http://tigervnc.org/" target="_blank" rel="noopener">TigerVNC</a> or <a href="https://chrome.google.com/webstore/detail/vnc%C2%AE-viewer-for-google-ch/iabmpiboiopbgfabjmgeedhcmjenhbla" target="_blank" rel="noopener">VNC® Viewer for Google Chrome</a> 來進行連線，使用的的連線位置為 <code>server_ip:5</code>；連線進入後，就可以按照一般程序進行 OS 的安裝。</p>
+<p>安裝完成後，<code>/kvm/storage/vm_disks/ubnutu1604.img</code> 將會是一個已經安裝好 OS 的硬碟 image 檔案，我們可以透過以下指令使用此 image 檔案來啟動系統：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -smp 4 =&gt; vCPU=4</span></span><br><span class="line"><span class="comment"># -m 2048 =&gt; RAM=2048MB</span></span><br><span class="line"><span class="comment"># -vnc 0.0.0.0:5 =&gt; 將 vnc 開在第五個 console，因此透過 vnc viewer 連線要使用 "ip:5" 來進行連線</span></span><br><span class="line">$ kvm -smp 4 -m 2048 -vnc 0.0.0.0:5 -hda /kvm/storage/vm_disks/ubnutu1604.img</span><br></pre></td></tr></table></figure>
+<p>使用 VNC viewer 連到 virtual machine 之後，可使用 <code>Ctrl + Alt + 2</code> 切到 QEMU monitor，輸入 <code>kvm info</code> 就可以檢視目前 KVM 是否被使用，或是完全在 QEMU 模擬下產生：</p>
+<p><img src="https://lh3.googleusercontent.com/Or8AH3hxAJbdXsIMADxmVkvUKlFYe_-DwTpSuw878fpP3bDAqyLv_ql_7W_HIrLYGHqc1hha7aecKMM6lytj2Wkv-NEyoXsZPuHE5RKa9mp_6apKEoPn7h-tp2DSjLcHaj72ByMefPKXRFKFYCLmYdbhsax0Ro8A-UCjSweOuB03zEL44VM7YbkxNE85vTmFv-JMUUERlX3CAdDotSWpvzl-ztgHzoU2E0iqwgLawhHAhn1JOX19Mn0ib3J0vxqZyLI6CNqaXEIc-7v5QNhAmAysEdWd3AMVKqkPVI41v8FDiUam2G_MDUkWOsAW4aQjnwrAbiw3-Ljpi72gjsM_iJWnsLF5nCuREGQxWC_LOrhRo7-AKLgU_XmzJuobqLRi6LoMzy_BKva5jI7nSgmgAfXDDTWpsXyGoKSgexpg_J7SRuLVZR1iZZ8HCZ9FZpre9qNIdr6xsvnH1NoUobJ73IKMbKn4YmGD0Z9Odi51bpWSh9eV1kOyCMFnF7Q5KZoPk-9lZwChK0gVUj6eObbJDKhlrFTpSvO7vYGJOmIBtfgCfKB9tAZ1-fpDSWxv8tGP38OQmKirl5oh0ozkGGQ-Z9QAr0mC31U=w642-h143-no" alt="QEMU Monitor"></p>
+<blockquote>
+<p>從上圖來看，可看出關鍵字 <code>kvm support: enabled</code>，表示 KVM 加速是開啟的</p>
+<p>由於我們在上面所產生的 kvm 指令是來自於 qemu-kvm，因此已經預設啟用 KVM 加速 (若單純使用 QEMU，可搭配 <code>--enable-kvm</code> 參數來啟用 KVM 加速)</p>
+</blockquote>
+<hr>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><h2 id="Installation"><a href="#Installation" class="headerlink" title="Installation"></a>Installation</h2><ul>
+<li><p><a href="http://newtoypia.blogspot.tw/2015/02/qemu-kvm.html" target="_blank" rel="noopener">玩具烏托邦: 五分鐘開始玩 qemu-kvm 虛擬機</a></p>
+</li>
+<li><p><a href="http://www.vpsee.com/2012/04/install-kvm-on-centos-6-2/" target="_blank" rel="noopener">在 CentOS 6.2 上安装和配置 KVM @vpsee.com</a></p>
+</li>
+<li><p><a href="http://ot-note.logdown.com/posts/64644/launch-a-vm-with-qemu-kvm" target="_blank" rel="noopener">使用 libvirt 與 qemu-kvm 開啓 VM (內含 libvirt sample XML for KVM ) « OT Coding Note</a></p>
+</li>
+</ul>
+<h2 id="VNC"><a href="#VNC" class="headerlink" title="VNC"></a>VNC</h2><ul>
+<li><a href="http://jamyy.us.to/blog/2011/10/3365.html" target="_blank" rel="noopener">KVM/QEMU 設置 VNC 連線密碼 « Jamyy’s Weblog</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog/tags/Linux/" rel="tag"># Linux</a>
+          
+            <a href="/blog/tags/KVM/" rel="tag"># KVM</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/2016/07/01/Linux/Linux-PXE-Booting/" rel="next" title="[Linux] PXE Booting">
+                <i class="fa fa-chevron-left"></i> [Linux] PXE Booting
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/2016/07/30/KVM/KVM-Basic-Concept-CPU/" rel="prev" title="[Linux KVM] Linux KVM concept - CPU">
+                [Linux KVM] Linux KVM concept - CPU <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            本站概覽
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">godleon</p>
+              <p class="site-description motion-element" itemprop="description">把時間花在哪裡，成就就在哪裡</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/blog/archives/">
+              
+                  <span class="site-state-item-count">22</span>
+                  <span class="site-state-item-name">文章</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/blog/categories/index.html">
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">分類</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/blog/tags/index.html">
+                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-name">標籤</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/godleon" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:godleon@gmail.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-globe"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://plus.google.com/godleon" target="_blank" title="Google">
+                    
+                      <i class="fa fa-fw fa-google"></i>Google</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#KVM"><span class="nav-number">1.1.</span> <span class="nav-text">KVM</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Linux-kernel"><span class="nav-number">1.2.</span> <span class="nav-text">Linux kernel</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#環境說明"><span class="nav-number">1.3.</span> <span class="nav-text">環境說明</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#硬體"><span class="nav-number">1.3.1.</span> <span class="nav-text">硬體</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#軟體"><span class="nav-number">1.3.2.</span> <span class="nav-text">軟體</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#前置環境設定"><span class="nav-number">2.</span> <span class="nav-text">前置環境設定</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#安裝套件"><span class="nav-number">2.1.</span> <span class="nav-text">安裝套件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#防火牆設定"><span class="nav-number">2.2.</span> <span class="nav-text">防火牆設定</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#驗證環境"><span class="nav-number">3.</span> <span class="nav-text">驗證環境</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#啟動第一個-virtual-machine"><span class="nav-number">4.</span> <span class="nav-text">啟動第一個 virtual machine</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Installation"><span class="nav-number">5.1.</span> <span class="nav-text">Installation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VNC"><span class="nav-number">5.2.</span> <span class="nav-text">VNC</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 強力驅動</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主題 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/blog/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://godleon-blog-hexo.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'https://godleon.github.io/blog/2016/07/26/KVM/QEMU-KVM-In-CentOS7-GettingStart/';
+          this.page.identifier = '2016/07/26/KVM/QEMU-KVM-In-CentOS7-GettingStart/';
+          this.page.title = '[Linux KVM] 使用 Linux KVM 啟用第一個 virtual machine';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/blog/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

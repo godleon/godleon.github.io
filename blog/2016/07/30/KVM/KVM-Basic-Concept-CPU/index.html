@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-tw">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/blog/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/blog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/blog/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/blog/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Linux,KVM," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="This article introduces what should to learn about CPU when learning Linux KVM virtualization">
+<meta name="keywords" content="Linux,KVM">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[Linux KVM] Linux KVM concept - CPU">
+<meta property="og:url" content="https://godleon.github.io/blog/2016/07/30/KVM/KVM-Basic-Concept-CPU/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="This article introduces what should to learn about CPU when learning Linux KVM virtualization">
+<meta property="og:locale" content="zh-tw">
+<meta property="og:image" content="http://image.slidesharecdn.com/els305-100323102407-phpapp02/95/virtualization-with-kvm-kernelbased-virtual-machine-4-728.jpg">
+<meta property="og:image" content="http://benjr.tw/wp-content/uploads/2013/11/kvm_qemu01.png">
+<meta property="og:image" content="https://lh3.googleusercontent.com/hHP9T9hWydFXixyMUCuCVFDkl7hlZ6Yv_lbljFDdv_azyt_rh01M6X8bHI1fRMV82a2UObBH6wQgAElavdVxByZ99u0cDBToT-t9OIqgWpSY6ZGreqooEuin8WvQqXpQ9g84uwed3-qO2akJatJTCJqpY0Xt_xU9J1ak4702nyJicXQ7h6HqppYXz0G_86NhyQMd6tv2w5venHGgaBoOF46L8UcYYTskX5rPptWqlmhJtNQSkFGj8F6t3DVVGpOJQfgErjdrfFm162spjhQGwZJ6OWiKTsdBAuXbeUscC-NUTPtGbVjSvAHXa-MVo3-h6jjWZ-TlNkjSmQYCICiRiTGIcFsLAkbIVMGw7-PXkPdqXhJyaC9bEWplxhPzhgGptGUeJCAOrdIhvF_l8lXzaSqeWGL-BSnBbA5qCuV-9UUZVGrcHgiQo2p5_Q_iUBBazlkqnRuM69ULxGEeM-q82gIztEmQiqqOrynKeAf9w5MZnJeb_w29u6qu6B-6d81hRGXwc68A1YHKH256EWxgtrd7_aVfsu08fLEIsPwo5qEuDnkef9G_hGNUHccLcWMSIOIr4J1ViP1vOrDsLpAA_qW-08QfZ4Q=w463-h210-no">
+<meta property="og:image" content="https://lh3.googleusercontent.com/mD_mnwyxWHinCr-2GSCfaMs-kyhi7p5c9cspDW5go_wM_76oHUj0Phj4n5dAahx39fazYXbMYa5xknxe1oRcoErP0cG84fMRu0WRwm9A1-_p4_bH0XediFmabBPzQQ6omUqJeBgJkwuyj0YRQ8-5kQ6zrE6elocc5sAt4q4tVKOXISDO0CZzSiYU9jHr6HeQVWO4xyLcBBkEUTZEeCfeR_tIrJzZF23nMGWDLI9CSu84ADbuL6KilIp4zDwQPNGrZmxNEwi2kUWyKcxC9-iZBm1W3wNdDYdIESmnVkTQuMe19XnTYsGdPiyRiOtMYv01WQ_KmBoCdRRZ1vfn0syyYdkt9PagLY3TjJ75dt57p918PI4z04YUZomaZ0lZ6Pqb8bt1Iaz1oljrslZpyveJ2AtAGWIdO9hFvE_9r3uvzK-ND77ZL1nAMbvuBPcD3rxuAGGr9ZqZTH_RACGOKtUN44cffI9VMvDp261xOj2NvYUDAVKxLogUNUj_ltOSyLGZ3uSffQtBkybY8OBAR3o3ycSsVy6Riwk8x2n6buCDR05dA4oTlaUqmR_o39TyTKsF6c1hzgoiJN9d_tc4cLS2c1PINXUh7W8=w785-h194-no">
+<meta property="og:image" content="https://lh3.googleusercontent.com/JmmR_lsIlsIsr66SlLZXaBJfVKdo6gim3rLxj7oMrVrTbDEYnluhtz-uj5FdlYwUAN4_W-FZDL2a6ykDgFBdwIlYNVrorpLPc7olTSl7oOsHlEoUVT1U9o9yDroSYZFNEGoJVJaMcKoIrtRr9HKB7R9uKrz5VNLR6iX_n2OZs5gL_UxPrxL5UOeYeqyyuZwswNDTyqh61qmqlJ2i0KBAHkSauTcUbASZScuk1rCL_wlp0B0VguRIhd2WZtq2oEe_G9nL6zRMclrXsOqhWsVBy0DyBibyGtqsUPIG7-7rYHcSGs1ao8j_fuTELJVA0P4nWoPpAX5sRI9p84M32vGuppudVSkFDdzACIo43FdB6ZkFftc4sPfRLk-qLXldYJ5ss_waqmqcIA2Qr-be1M443d0QiqYV6BF4XkIn6cKud7gCzy15I30CdM31gVZwK7rkQ6O_eWSCLYhiQoBR1y-B9jXV5qnN7axQfTC8hL46gRlQSyozEG4HXp-X2UmU12rfMWv8rZop2alI6pLa29CE5oywHl40BYI8qKgok52V0znrX1klcmgiCn5iYYdEFPYELqHwDW_EQv0-Z8oAXxmyIpk8tKnSR0E=w777-h190-no">
+<meta property="og:updated_time" content="2017-11-30T02:40:18.880Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[Linux KVM] Linux KVM concept - CPU">
+<meta name="twitter:description" content="This article introduces what should to learn about CPU when learning Linux KVM virtualization">
+<meta name="twitter:image" content="http://image.slidesharecdn.com/els305-100323102407-phpapp02/95/virtualization-with-kvm-kernelbased-virtual-machine-4-728.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://godleon.github.io/blog/2016/07/30/KVM/KVM-Basic-Concept-CPU/"/>
+
+
+
+
+
+  <title>[Linux KVM] Linux KVM concept - CPU | 小信豬的原始部落</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-tw">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">小信豬的原始部落</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/blog/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首頁
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/blog/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            標籤
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/blog/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分類
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/blog/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            歸檔
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            檢索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/blog/2016/07/30/KVM/KVM-Basic-Concept-CPU/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">[Linux KVM] Linux KVM concept - CPU</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">發表於</span>
+              
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2016-07-30T14:25:00+00:00">
+                2016-07-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分類於</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/KVM/" itemprop="url" rel="index">
+                    <span itemprop="name">KVM</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/2016/07/30/KVM/KVM-Basic-Concept-CPU/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2016/07/30/KVM/KVM-Basic-Concept-CPU/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  This article introduces what should to learn about CPU when learning Linux KVM virtualization
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>此篇文章介紹學習 Linux KVM 時所需要了解的 CPU 相關知識</p>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>KVM 在 Linux x86 硬體平台上提供了全虛擬化(Full Virtualization)的 solution，透過 QEMU 的模擬，顯示特定數量的 CPU &amp; 相關 feature 給使用者，而在支援 KVM 的前提下，virtual machine 的 CPU 指令則是直接由 CPU 來輔助執行，藉此大幅提升運作效率。</p>
+<hr>
+<h1 id="vCPU"><a href="#vCPU" class="headerlink" title="vCPU"></a>vCPU</h1><p>QEMU/KVM 提供每一台 virtual machine 有一個模擬的完整硬體環境，在 virual machine 中所看到的 CPU，即是 host machine 上的 vCPU。</p>
+<p>在 KVM 環境中，每一台 virtual machine 都是一個的 QEMU userspace process，而 vCPU 則是 QEMU process 中的 thread。</p>
+<p><img src="http://image.slidesharecdn.com/els305-100323102407-phpapp02/95/virtualization-with-kvm-kernelbased-virtual-machine-4-728.jpg" alt="KVM environment"></p>
+<p>vCPU 一共有以下三種執行模式：</p>
+<ol>
+<li><p>User Mode</p>
+</li>
+<li><p>Kernel Mode</p>
+</li>
+<li><p>Guest Mode</p>
+</li>
+</ol>
+<p>其中前兩個執行模式(<strong>User Mode</strong> &amp; <strong>Kernel Mode</strong>)是一般的 process 所擁有的執行模式，詳細的說明可以參考下面連結：</p>
+<ul>
+<li><p><a href="https://www.ptt.cc/bbs/b97902HW/M.1267018497.A.3B1.html" target="_blank" rel="noopener">[系程] 教學: 簡介 Kernel/User Mode 的概念 - 看板 b97902HW - 批踢踢實業坊</a></p>
+</li>
+<li><p><a href="http://peachwaneversay.blogspot.tw/2007/05/user-mode-vs-kernel-mode.html" target="_blank" rel="noopener">企鵝幫魚，魚幫兔: User mode vs. Kernel mode</a></p>
+</li>
+</ul>
+<p>而 KVM 多了一個 <strong>Guest Mode</strong>，功能是用來<strong>執行關於 virtual machine 中的相關 I/O request</strong>，無法直接；所有 Memory &amp; CPU 的 I/O request，會透過 <strong>/dev/kvm(QUME)</strong> 來模擬完成，並可透過 QEMU 執行一些特權指令來存取 host machine 的資源。</p>
+<p><img src="http://benjr.tw/wp-content/uploads/2013/11/kvm_qemu01.png" alt="KVM Guest Mode"></p>
+<hr>
+<h1 id="SMP-Symmetric-Multi-Processor"><a href="#SMP-Symmetric-Multi-Processor" class="headerlink" title="SMP(Symmetric Multi-Processor)"></a>SMP(Symmetric Multi-Processor)</h1><p>由於現在 multiple core、hyper threading 等相關技術已經很普遍，這讓作業系統可以進行真正的平行處理；而現在較新的作業系統都已經有對 SMP 的支援(Linux kernel 2.6 以上)，這對虛擬化的推展有相當大的助益。</p>
+<p>透過以下指令，可以用來檢查目前 host machine 對 SMP 的支援程度：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查詢 logic cpu 數量</span></span><br><span class="line">$ cat /proc/cpuinfo | grep <span class="string">"processor"</span> | wc -l</span><br><span class="line"></span><br><span class="line"><span class="comment"># 實體 CPU 數量</span></span><br><span class="line">$ cat /proc/cpuinfo | grep <span class="string">"physical id"</span> | sort | uniq | wc -l</span><br><span class="line"></span><br><span class="line"><span class="comment"># 每個 CPU 上的 core 數量</span></span><br><span class="line">$ cat /proc/cpuinfo | grep <span class="string">"core id"</span> | sort | uniq | wc -l</span><br><span class="line"></span><br><span class="line"><span class="comment"># 每個 physical cpu 上分配的 logic cpu 的數量</span></span><br><span class="line">$ cat /proc/cpuinfo | grep <span class="string">"siblings"</span> | sort | uniq | awk -F: <span class="string">'&#123;print $2&#125;'</span></span><br></pre></td></tr></table></figure>
+<p>以上一篇文章中的範例來說明：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ kvm -smp 4 -m 2048 \</span><br><span class="line">  -vnc 0.0.0.0:5 -boot order=<span class="built_in">cd</span> \</span><br><span class="line">  -hda /kvm/storage/vm_disks/ubnutu1604.img \</span><br><span class="line">  -cdrom /kvm/os_images/ubuntu-16.04.1-server-amd64.iso</span><br></pre></td></tr></table></figure>
+<p>其中 <code>-smp</code> 參數就是指定要使用多少的 vCPU 支援，完整的使用設定如下：(上例為使用 4 個 vCPU)</p>
+<blockquote>
+<p>-smp n[,<strong>cores=</strong>cores][,<strong>threads=</strong>threads][,<strong>sockets=</strong>sockets][,<strong>maxcpus=</strong>maxcpus]</p>
+</blockquote>
+<h2 id="範例-1-僅使用-smp"><a href="#範例-1-僅使用-smp" class="headerlink" title="範例 1 (僅使用 -smp)"></a>範例 1 (僅使用 -smp)</h2><p>而在 Linux 系統中，每一個 vCPU 的分配都會成為一個 process 運行在 host machine 中，以下開啟一個 vCPU=8 的 virtual machine：</p>
+<blockquote>
+<p>kvm -vnc 0.0.0.0:1 -smp 8 -m 2048 -hda /kvm/storage/vm_disks/ubnutu1604.img</p>
+</blockquote>
+<p>可以從 QEMU monitor 中觀察 vCPU 對應到 kvm 的 process：</p>
+<p><img src="https://lh3.googleusercontent.com/hHP9T9hWydFXixyMUCuCVFDkl7hlZ6Yv_lbljFDdv_azyt_rh01M6X8bHI1fRMV82a2UObBH6wQgAElavdVxByZ99u0cDBToT-t9OIqgWpSY6ZGreqooEuin8WvQqXpQ9g84uwed3-qO2akJatJTCJqpY0Xt_xU9J1ak4702nyJicXQ7h6HqppYXz0G_86NhyQMd6tv2w5venHGgaBoOF46L8UcYYTskX5rPptWqlmhJtNQSkFGj8F6t3DVVGpOJQfgErjdrfFm162spjhQGwZJ6OWiKTsdBAuXbeUscC-NUTPtGbVjSvAHXa-MVo3-h6jjWZ-TlNkjSmQYCICiRiTGIcFsLAkbIVMGw7-PXkPdqXhJyaC9bEWplxhPzhgGptGUeJCAOrdIhvF_l8lXzaSqeWGL-BSnBbA5qCuV-9UUZVGrcHgiQo2p5_Q_iUBBazlkqnRuM69ULxGEeM-q82gIztEmQiqqOrynKeAf9w5MZnJeb_w29u6qu6B-6d81hRGXwc68A1YHKH256EWxgtrd7_aVfsu08fLEIsPwo5qEuDnkef9G_hGNUHccLcWMSIOIr4J1ViP1vOrDsLpAA_qW-08QfZ4Q=w463-h210-no" alt="QEMU monitor - cpu infos"></p>
+<p>以下則可以看出在 host machine 有相對應的 process 存在：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">ps -efL | grep kvm</span><br><span class="line">root      1122     2  1122  0    1 Jul27 ?        00:00:00 [kvm-irqfd-clean]</span><br><span class="line">root     14606 11601 14606  3   11 17:46 pts/0    00:00:02 kvm -vnc 0.0.0.0:1 -smp 8 -m 2048 -hda /kvm/storage/vm_disks/ubnutu1604.img</span><br><span class="line">root     14606 11601 14610 10   11 17:46 pts/0    00:00:06 kvm -vnc 0.0.0.0:1 -smp 8 -m 2048 -hda /kvm/storage/vm_disks/ubnutu1604.img</span><br><span class="line">root     14606 11601 14611  2   11 17:46 pts/0    00:00:01 kvm -vnc 0.0.0.0:1 -smp 8 -m 2048 -hda /kvm/storage/vm_disks/ubnutu1604.img</span><br><span class="line">root     14606 11601 14612  1   11 17:46 pts/0    00:00:01 kvm -vnc 0.0.0.0:1 -smp 8 -m 2048 -hda /kvm/storage/vm_disks/ubnutu1604.img</span><br><span class="line">root     14606 11601 14613  1   11 17:46 pts/0    00:00:00 kvm -vnc 0.0.0.0:1 -smp 8 -m 2048 -hda /kvm/storage/vm_disks/ubnutu1604.img</span><br><span class="line">root     14606 11601 14614  1   11 17:46 pts/0    00:00:00 kvm -vnc 0.0.0.0:1 -smp 8 -m 2048 -hda /kvm/storage/vm_disks/ubnutu1604.img</span><br><span class="line">root     14606 11601 14615  1   11 17:46 pts/0    00:00:00 kvm -vnc 0.0.0.0:1 -smp 8 -m 2048 -hda /kvm/storage/vm_disks/ubnutu1604.img</span><br><span class="line">root     14606 11601 14616  1   11 17:46 pts/0    00:00:00 kvm -vnc 0.0.0.0:1 -smp 8 -m 2048 -hda /kvm/storage/vm_disks/ubnutu1604.img</span><br><span class="line">root     14606 11601 14617  1   11 17:46 pts/0    00:00:01 kvm -vnc 0.0.0.0:1 -smp 8 -m 2048 -hda /kvm/storage/vm_disks/ubnutu1604.img</span><br><span class="line">root     14606 11601 14619  1   11 17:46 pts/0    00:00:00 kvm -vnc 0.0.0.0:1 -smp 8 -m 2048 -hda /kvm/storage/vm_disks/ubnutu1604.img</span><br><span class="line">root     14606 11601 14631  0   11 17:46 pts/0    00:00:00 kvm -vnc 0.0.0.0:1 -smp 8 -m 2048 -hda /kvm/storage/vm_disks/ubnutu1604.img</span><br><span class="line">root     14618     2 14618  0    1 17:46 ?        00:00:00 [kvm-pit/14606]</span><br><span class="line">root     14633 12908 14633  0    1 17:47 pts/1    00:00:00 grep --color=auto kvm</span><br></pre></td></tr></table></figure>
+<p>最後可以用上面的 grep 查詢 physical / cores / threads 等資訊：</p>
+<p><img src="https://lh3.googleusercontent.com/mD_mnwyxWHinCr-2GSCfaMs-kyhi7p5c9cspDW5go_wM_76oHUj0Phj4n5dAahx39fazYXbMYa5xknxe1oRcoErP0cG84fMRu0WRwm9A1-_p4_bH0XediFmabBPzQQ6omUqJeBgJkwuyj0YRQ8-5kQ6zrE6elocc5sAt4q4tVKOXISDO0CZzSiYU9jHr6HeQVWO4xyLcBBkEUTZEeCfeR_tIrJzZF23nMGWDLI9CSu84ADbuL6KilIp4zDwQPNGrZmxNEwi2kUWyKcxC9-iZBm1W3wNdDYdIESmnVkTQuMe19XnTYsGdPiyRiOtMYv01WQ_KmBoCdRRZ1vfn0syyYdkt9PagLY3TjJ75dt57p918PI4z04YUZomaZ0lZ6Pqb8bt1Iaz1oljrslZpyveJ2AtAGWIdO9hFvE_9r3uvzK-ND77ZL1nAMbvuBPcD3rxuAGGr9ZqZTH_RACGOKtUN44cffI9VMvDp261xOj2NvYUDAVKxLogUNUj_ltOSyLGZ3uSffQtBkybY8OBAR3o3ycSsVy6Riwk8x2n6buCDR05dA4oTlaUqmR_o39TyTKsF6c1hzgoiJN9d_tc4cLS2c1PINXUh7W8=w785-h194-no" alt="SMP only"></p>
+<ul>
+<li>logic cpu = 8</li>
+<li>physical cpu = 8</li>
+<li>每個 CPU 上的 core 數量 = 1</li>
+<li>每個 physical cpu 上分配的 logic cpu 的數量 = 1</li>
+</ul>
+<h2 id="範例-2-使用-smp，搭配-sockets-2-cores-2-threads-2"><a href="#範例-2-使用-smp，搭配-sockets-2-cores-2-threads-2" class="headerlink" title="範例 2 (使用 -smp，搭配 sockets=2,cores=2,threads=2)"></a>範例 2 (使用 -smp，搭配 sockets=2,cores=2,threads=2)</h2><p>此範例搭配 socket, cores, threads 等 smp 相關參數</p>
+<blockquote>
+<p> kvm -vnc 0.0.0.0:1 -smp 8,sockets=2,cores=2,threads=2 -m 2048 -hda /kvm/storage/vm_disks/ubnutu1604.img</p>
+</blockquote>
+<p>用 grep 查詢 physical / cores / threads 等資訊：</p>
+<p><img src="https://lh3.googleusercontent.com/JmmR_lsIlsIsr66SlLZXaBJfVKdo6gim3rLxj7oMrVrTbDEYnluhtz-uj5FdlYwUAN4_W-FZDL2a6ykDgFBdwIlYNVrorpLPc7olTSl7oOsHlEoUVT1U9o9yDroSYZFNEGoJVJaMcKoIrtRr9HKB7R9uKrz5VNLR6iX_n2OZs5gL_UxPrxL5UOeYeqyyuZwswNDTyqh61qmqlJ2i0KBAHkSauTcUbASZScuk1rCL_wlp0B0VguRIhd2WZtq2oEe_G9nL6zRMclrXsOqhWsVBy0DyBibyGtqsUPIG7-7rYHcSGs1ao8j_fuTELJVA0P4nWoPpAX5sRI9p84M32vGuppudVSkFDdzACIo43FdB6ZkFftc4sPfRLk-qLXldYJ5ss_waqmqcIA2Qr-be1M443d0QiqYV6BF4XkIn6cKud7gCzy15I30CdM31gVZwK7rkQ6O_eWSCLYhiQoBR1y-B9jXV5qnN7axQfTC8hL46gRlQSyozEG4HXp-X2UmU12rfMWv8rZop2alI6pLa29CE5oywHl40BYI8qKgok52V0znrX1klcmgiCn5iYYdEFPYELqHwDW_EQv0-Z8oAXxmyIpk8tKnSR0E=w777-h190-no" alt="SMP with sockets, cores, and threads"></p>
+<ul>
+<li>logic cpu = 8</li>
+<li>physical cpu = 2</li>
+<li>每個 CPU 上的 core 數量 = 2</li>
+<li>每個 physical cpu 上分配的 logic cpu 的數量 = 4</li>
+</ul>
+<hr>
+<h1 id="Over-Commit"><a href="#Over-Commit" class="headerlink" title="Over-Commit"></a>Over-Commit</h1><p>一般正常使用情況下，每一台 virtual machine 不會總是在高負載狀況，很多時間會是閒置的；此時透過 over-commit 的方式，可以分配比 host machine 中所有的 vCPU 給 virtual machine。</p>
+<p>但不建議分配給單一 virtual machine 超過 host machine 所有 vCPU 的數量，因為這會大大降低 virtual machine 的效能，例如：host machine 總共有 4 個 vCPU，但分配 8 個 vCPU 給 virtual machine。</p>
+<p>若是 4 個 vCPU，分配 1 個 vCPU 給 virtual machine，但分配到 8 台 virtual machine，這樣的效能會比上面的配置更有效率。</p>
+<blockquote>
+<p>若是在 production 的環境，建議還是不要 over-commit</p>
+</blockquote>
+<hr>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a href="http://linux.die.net/man/1/qemu-kvm" target="_blank" rel="noopener">qemu-kvm(1): QEMU Emulator User Documentation - Linux man page</a></p>
+</li>
+<li><p><a href="https://ncucsie.hackpad.com/ep/pad/static/QrwxkWD88gd" target="_blank" rel="noopener">虛擬化技術與應用</a></p>
+</li>
+<li><p><a href="https://www.ptt.cc/bbs/b97902HW/M.1267018497.A.3B1.html" target="_blank" rel="noopener">[系程] 教學: 簡介 Kernel/User Mode 的概念 - 看板 b97902HW - 批踢踢實業坊</a></p>
+</li>
+<li><p><a href="http://peachwaneversay.blogspot.tw/2007/05/user-mode-vs-kernel-mode.html" target="_blank" rel="noopener">企鵝幫魚，魚幫兔: User mode vs. Kernel mode</a></p>
+</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog/tags/Linux/" rel="tag"># Linux</a>
+          
+            <a href="/blog/tags/KVM/" rel="tag"># KVM</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/2016/07/26/KVM/QEMU-KVM-In-CentOS7-GettingStart/" rel="next" title="[Linux KVM] 使用 Linux KVM 啟用第一個 virtual machine">
+                <i class="fa fa-chevron-left"></i> [Linux KVM] 使用 Linux KVM 啟用第一個 virtual machine
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/2016/08/01/KVM/KVM-Basic-Concept-Memory/" rel="prev" title="[Linux KVM] Linux KVM concept - Memory">
+                [Linux KVM] Linux KVM concept - Memory <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            本站概覽
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">godleon</p>
+              <p class="site-description motion-element" itemprop="description">把時間花在哪裡，成就就在哪裡</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/blog/archives/">
+              
+                  <span class="site-state-item-count">22</span>
+                  <span class="site-state-item-name">文章</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/blog/categories/index.html">
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">分類</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/blog/tags/index.html">
+                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-name">標籤</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/godleon" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:godleon@gmail.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-globe"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://plus.google.com/godleon" target="_blank" title="Google">
+                    
+                      <i class="fa fa-fw fa-google"></i>Google</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#vCPU"><span class="nav-number">2.</span> <span class="nav-text">vCPU</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SMP-Symmetric-Multi-Processor"><span class="nav-number">3.</span> <span class="nav-text">SMP(Symmetric Multi-Processor)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#範例-1-僅使用-smp"><span class="nav-number">3.1.</span> <span class="nav-text">範例 1 (僅使用 -smp)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#範例-2-使用-smp，搭配-sockets-2-cores-2-threads-2"><span class="nav-number">3.2.</span> <span class="nav-text">範例 2 (使用 -smp，搭配 sockets=2,cores=2,threads=2)</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Over-Commit"><span class="nav-number">4.</span> <span class="nav-text">Over-Commit</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 強力驅動</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主題 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/blog/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://godleon-blog-hexo.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'https://godleon.github.io/blog/2016/07/30/KVM/KVM-Basic-Concept-CPU/';
+          this.page.identifier = '2016/07/30/KVM/KVM-Basic-Concept-CPU/';
+          this.page.title = '[Linux KVM] Linux KVM concept - CPU';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/blog/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

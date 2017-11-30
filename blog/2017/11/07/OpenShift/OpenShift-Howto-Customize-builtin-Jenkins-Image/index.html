@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="小信豬的原始部落">
 <meta property="og:description" content="This article introduces how to customize OpenShift built-in Jenkins image">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2017-11-29T06:04:50.054Z">
+<meta property="og:updated_time" content="2017-11-30T02:40:18.880Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[OpenShift] 如何客製化 Jenkins Image">
 <meta name="twitter:description" content="This article introduces how to customize OpenShift built-in Jenkins image">
@@ -439,7 +439,7 @@
 <li><p>預先加入 <strong>scriptApproval.xml</strong> 檔案，讓某些 method 可在 sandbox 的環境中執行 (詳細清單可參考<a href="https://github.com/godleon/learning_openshift/blob/master/jenkins_customization/configuration/scriptApproval.xml" target="_blank" rel="noopener">原始碼</a>)</p>
 </li>
 </ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 取得原始碼</span></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/godleon/learning_openshift.git</span><br><span class="line"></span><br><span class="line"><span class="comment"># 建立 ImageStream(custom-jenkins-2-centos7) BuildConfig(custom-jenkins-build)</span></span><br><span class="line">$ oc create -f learning_openshift/jenkins_customization/</span><br><span class="line"></span><br><span class="line">$ oc -n openshift start-build custom-jenkins-build</span><br><span class="line"></span><br><span class="line">$ oc -n openshift get pods</span><br><span class="line">NAME                           READY     STATUS      RESTARTS   AGE</span><br><span class="line">custom-jenkins-build-1-build   0/1       Completed   0          22m</span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視 build log</span></span><br><span class="line">$ oc logs -f custom-jenkins-build-1-build</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 取得原始碼</span></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/godleon/openshift-jenkins-customization.git</span><br><span class="line"></span><br><span class="line"><span class="comment"># 建立 ImageStream(custom-jenkins-2-centos7) BuildConfig(custom-jenkins-build)</span></span><br><span class="line">$ oc create -f openshift-jenkins-customization/openshift-objects/</span><br><span class="line"></span><br><span class="line">$ oc -n openshift start-build custom-jenkins-build</span><br><span class="line"></span><br><span class="line">$ oc -n openshift get pods</span><br><span class="line">NAME                           READY     STATUS      RESTARTS   AGE</span><br><span class="line">custom-jenkins-build-1-build   0/1       Completed   0          22m</span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視 build log</span></span><br><span class="line">$ oc logs -f custom-jenkins-build-1-build</span><br></pre></td></tr></table></figure>
 <blockquote>
 <p>使用者必須先安裝 <a href="https://github.com/openshift/origin/releases" target="_blank" rel="noopener">OpenShift CLI tool</a> 才可以執行上述的 oc 指令</p>
 </blockquote>
@@ -598,7 +598,7 @@
               
                 <a href="/blog/archives/">
               
-                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-count">22</span>
                   <span class="site-state-item-name">文章</span>
                 </a>
               </div>
@@ -609,7 +609,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/blog/categories/index.html">
-                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-count">9</span>
                   <span class="site-state-item-name">分類</span>
                 </a>
               </div>
@@ -620,7 +620,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/blog/tags/index.html">
-                  <span class="site-state-item-count">14</span>
+                  <span class="site-state-item-count">18</span>
                   <span class="site-state-item-name">標籤</span>
                 </a>
               </div>

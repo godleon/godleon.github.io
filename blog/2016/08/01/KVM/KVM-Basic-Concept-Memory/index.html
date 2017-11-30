@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-tw">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/blog/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/blog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/blog/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/blog/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Linux,KVM," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="This article introduces what should to learn about memory when learning Linux KVM virtualization">
+<meta name="keywords" content="Linux,KVM">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[Linux KVM] Linux KVM concept - Memory">
+<meta property="og:url" content="https://godleon.github.io/blog/2016/08/01/KVM/KVM-Basic-Concept-Memory/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="This article introduces what should to learn about memory when learning Linux KVM virtualization">
+<meta property="og:locale" content="zh-tw">
+<meta property="og:image" content="http://m.eet.com/media/1200411/CloudFig4a.jpg">
+<meta property="og:image" content="http://image.slidesharecdn.com/windays-virtualization-090428034228-phpapp01/95/windows-server-virtualization-hyperv-2008-r2-30-728.jpg?cb=1240890219">
+<meta property="og:image" content="http://virtualization.info/images/EPT-716833.png">
+<meta property="og:updated_time" content="2017-11-30T02:40:18.880Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[Linux KVM] Linux KVM concept - Memory">
+<meta name="twitter:description" content="This article introduces what should to learn about memory when learning Linux KVM virtualization">
+<meta name="twitter:image" content="http://m.eet.com/media/1200411/CloudFig4a.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://godleon.github.io/blog/2016/08/01/KVM/KVM-Basic-Concept-Memory/"/>
+
+
+
+
+
+  <title>[Linux KVM] Linux KVM concept - Memory | 小信豬的原始部落</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-tw">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">小信豬的原始部落</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/blog/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首頁
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/blog/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            標籤
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/blog/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分類
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/blog/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            歸檔
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            檢索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/blog/2016/08/01/KVM/KVM-Basic-Concept-Memory/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">[Linux KVM] Linux KVM concept - Memory</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">發表於</span>
+              
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2016-08-01T19:40:00+00:00">
+                2016-08-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分類於</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/KVM/" itemprop="url" rel="index">
+                    <span itemprop="name">KVM</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/2016/08/01/KVM/KVM-Basic-Concept-Memory/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2016/08/01/KVM/KVM-Basic-Concept-Memory/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  This article introduces what should to learn about memory when learning Linux KVM virtualization
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>此篇文章介紹學習 Linux KVM 時所需要了解的 Memory 相關知識</p>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>Memory 在作業系統是用來暫時存放 cpu 要執行的指令以及資料，所有 process 都必須先載入到 memory 中才能正確執行。</p>
+<p>而在虛擬化的環境中，virtual machine 中 memory 的使用是需要額外的 mapping 機制對應到 host machine，在這個部分的效率的高低，當然也就會決定 virtual machine 整體的系統性能。</p>
+<hr>
+<h1 id="VM-可以使用多少記憶體"><a href="#VM-可以使用多少記憶體" class="headerlink" title="VM 可以使用多少記憶體?"></a>VM 可以使用多少記憶體?</h1><p>也許這是很多人想要了解的，在 host machine 上安裝了一大堆實體記憶體，究竟可以分配給 VM 的可以有多少呢? 以下有兩個簡單公式可以計算：</p>
+<ol>
+<li><p>實體記憶體 &lt;= 64 GB</p>
+<blockquote>
+<p>RAM - 2 GB = Amount of RAM available to VMs in GBs</p>
+</blockquote>
+</li>
+<li><p>實體記憶體 &gt; 64GB</p>
+<blockquote>
+<p>RAM - (2 GiB + .5* (RAM/64)) = Amount of RAM available to VMs in GBs</p>
+</blockquote>
+</li>
+</ol>
+<p>假設 host machine 記憶體有 32GB，則一共可以配置 <code>32 - 2 = 10</code>GB 的記憶體給 VM。</p>
+<p>假設 host machine 記憶體有 256GB，則一共可以配置 <code>256 - (2 + 0.5 * (256 / 64)) = 252</code>GB 的記憶體給 VM</p>
+<hr>
+<h1 id="配置-VM-記憶體"><a href="#配置-VM-記憶體" class="headerlink" title="配置 VM 記憶體"></a>配置 VM 記憶體</h1><p>幫 virtual machine 配置記憶體是很容易的，只要使用 <strong><font color="red">-m</font></strong> 參數即可，預設的格式是：</p>
+<blockquote>
+<p>-m megs</p>
+</blockquote>
+<p>預設是以 <strong><font color="red">MB</font></strong> 作為預設的單位，也可以使用 <strong><font color="red">G</font></strong> 表示要使用 GB 為單位，例如：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 記憶體大小為 2048 MB</span></span><br><span class="line">$ kvm -vnc 0.0.0.0:1 -m 2048 -hda /kvm/storage/vm_disks/ubnutu1604.img</span><br><span class="line"></span><br><span class="line"><span class="comment"># 記憶體大小為 4 GB</span></span><br><span class="line">$ kvm -vnc 0.0.0.0:1 -m 4G -hda /kvm/storage/vm_disks/ubnutu1604.img</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="EPT"><a href="#EPT" class="headerlink" title="EPT"></a>EPT</h1><p>傳統要把 virtual machine 中運行的應用程式所使用的 memory 對應到 host machine 的 memory，一共是有三層關係的，下圖可做個簡單說明：</p>
+<p><img src="http://m.eet.com/media/1200411/CloudFig4a.jpg" alt="VM memory mapping"></p>
+<blockquote>
+<p>Guest Virtual Address(GVA) &lt;–&gt; Guest Physical Address(GPA) &lt;–&gt; Host Physical Address(HPA)</p>
+</blockquote>
+<p>但由於上面三層的轉換效率是很差的，因此後來透過軟體實作了稱為 <strong><font color="red">Shadow Page Tables</font></strong> 的機制，將三層中的第二層拿掉，直接讓 Guest Virtual Address 與 Host Physical Address 可以有直接對應的機制：</p>
+<p><img src="http://image.slidesharecdn.com/windays-virtualization-090428034228-phpapp01/95/windows-server-virtualization-hyperv-2008-r2-30-728.jpg?cb=1240890219" alt="Shadow Page Tables"></p>
+<p>此時 hypervisor 就可以把 shadow page tables 載入到 MMU(Memory Management Unit) 中進行 address translation 的工作。</p>
+<p>但 shadow page tables 實作起來不僅複雜，也會 memory 的額外消耗(每一個 virtual machine 都需要一個 shadow page table)；因此 Intel 提出了 EPT(Extended Page Tables)，AMD 提出了 NPT(Nested Page Tables)，在硬體層直接提供了 <code>GVA &lt;--&gt; GPA &lt;--&gt; HPA</code> 的轉換，不僅提升了 memory 虛擬化的效能，也降低了 memory 虛擬化的複雜度。</p>
+<p>以下是 Intel EPT 技術的概觀：</p>
+<p><img src="http://virtualization.info/images/EPT-716833.png" alt="Intel EPT"></p>
+<p>其中可以看到 Intel 在硬體中增加了 CR3(Control Registor 3) 來處理 GVA &lt;–&gt; GPA 的轉換，以及 EPT 來處理 GPA &lt;–&gt; HPA 的轉換。</p>
+<p>由於所有的轉換都在硬體層級完成，因此速度很快；而且由於整個轉換過程只需要一個 EPT Page Table，因此在 memory 的消耗上也相對的低。</p>
+<hr>
+<h1 id="VPID"><a href="#VPID" class="headerlink" title="VPID"></a>VPID</h1><p>要了解 VPID，首先要知道 TLB(Translation Lookaside Buffer) 是什麼? 可以參考以下連結：</p>
+<ul>
+<li><a href="http://www.wikiwand.com/zh-hk/%E8%BD%89%E8%AD%AF%E5%BE%8C%E5%82%99%E7%B7%A9%E8%A1%9D%E5%8D%80" target="_blank" rel="noopener">TLB 轉譯後備緩衝區 - Wikiwand</a></li>
+</ul>
+<blockquote>
+<p>分配給 virtual machine 的每一個 vCPU 都會有一個 TLB</p>
+</blockquote>
+<p>而 VPID 則是在硬體層級對 TLB 資源管理的優化，在 virtual machine 進行 migration / VM Entry / VM Exit 時，避免對 TLB 進行轉存 &amp; 清除，進而降低 memory 的額外消耗，對於 live migration 有顯著的效能提升。</p>
+<hr>
+<h1 id="查詢-EPT-amp-VPID-的支援度"><a href="#查詢-EPT-amp-VPID-的支援度" class="headerlink" title="查詢 EPT &amp; VPID 的支援度"></a>查詢 EPT &amp; VPID 的支援度</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查詢 CPU 是否支援 EPT &amp; VPID</span></span><br><span class="line">$  grep -E <span class="string">"\sept\s|\svpid\s"</span> /proc/cpuinfo | uniq</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查詢 kvm_intel 模組是否有開啟 EPT &amp; VPID 的功能</span></span><br><span class="line">$ cat /sys/module/kvm_intel/parameters/ept</span><br><span class="line">Y</span><br><span class="line">$ cat /sys/module/kvm_intel/parameters/vpid</span><br><span class="line">Y</span><br><span class="line"></span><br><span class="line"><span class="comment"># 開啟 kvm_intel 模組 EPT &amp; VPID 的功能</span></span><br><span class="line">$ modprobe kvm_intel ept=1,vpid=1</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="Huge-Page"><a href="#Huge-Page" class="headerlink" title="Huge Page"></a>Huge Page</h1><p>x86 架構的 CPU 預設的 memory page table 大小為 4KB，而 x86-64 則可以支援到 2MB 大小的 memory page table(亦稱為 <strong><font color="red">Huge Page</font></strong>)，在 Linux 2.6 以上的 kernel 都支援這個特性。</p>
+<p>而使用 Huge Page 有何優缺點呢?</p>
+<h3 id="優點："><a href="#優點：" class="headerlink" title="優點："></a>優點：</h3><ul>
+<li><p>page table 數量減少，更節省 memory</p>
+</li>
+<li><p>由於 memory address translation 的工作減少了，因此 page fault 機率降低為 <strong><font color="red">Huge Page Size / 4KB</font></strong> 分之一</p>
+</li>
+<li><p>提升了 memory 存取的效能</p>
+</li>
+<li><p>提高 TLB 命中率，因而減少 CPU cache 的使用，最後提升了系統整體效能</p>
+</li>
+<li><p>適合用在 memory 存取密集的 virtual machine 上</p>
+</li>
+</ul>
+<h3 id="缺點："><a href="#缺點：" class="headerlink" title="缺點："></a>缺點：</h3><ul>
+<li><p>Huge Page 無法被 swap out 到硬碟上</p>
+</li>
+<li><p>無法使用 Ballooning 的方式自動增長</p>
+</li>
+<li><p>並非適合所有不同工作類型的 virtual machine</p>
+</li>
+</ul>
+<h2 id="在-KVM-中使用-Huge-Page"><a href="#在-KVM-中使用-Huge-Page" class="headerlink" title="在 KVM 中使用 Huge Page"></a>在 KVM 中使用 Huge Page</h2><h3 id="1、檢查-host-machine-中-Huge-Page-的設定資訊："><a href="#1、檢查-host-machine-中-Huge-Page-的設定資訊：" class="headerlink" title="1、檢查 host machine 中 Huge Page 的設定資訊："></a>1、檢查 host machine 中 Huge Page 的設定資訊：</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 目前預設的 page size</span></span><br><span class="line">$ getconf PAGESIZE</span><br><span class="line">4096</span><br><span class="line"></span><br><span class="line"><span class="comment"># 記憶體資訊中 Huge Page 的相關資訊 (size = 2048 KB)</span></span><br><span class="line">$ cat /proc/meminfo | grep Huge</span><br><span class="line">AnonHugePages:     14336 kB</span><br><span class="line">HugePages_Total:       0</span><br><span class="line">HugePages_Free:        0</span><br><span class="line">HugePages_Rsvd:        0</span><br><span class="line">HugePages_Surp:        0</span><br><span class="line">Hugepagesize:       2048 kB</span><br></pre></td></tr></table></figure>
+<h3 id="2、掛載-hugetlbfs-檔案系統"><a href="#2、掛載-hugetlbfs-檔案系統" class="headerlink" title="2、掛載 hugetlbfs 檔案系統"></a>2、掛載 hugetlbfs 檔案系統</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 掛載 hugetlbfs 檔案系統</span></span><br><span class="line">$ mount -t hugetlbfs hugetlbfs /dev/hugepages</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查詢檔案系統資訊</span></span><br><span class="line">$ mount | grep huge</span><br><span class="line">cgroup on /sys/fs/cgroup/hugetlb <span class="built_in">type</span> cgroup (rw,nosuid,nodev,noexec,relatime,hugetlb)</span><br><span class="line">hugetlbfs on /dev/hugepages <span class="built_in">type</span> hugetlbfs (rw,relatime,seclabel)</span><br><span class="line">hugetlbfs on /dev/hugepages <span class="built_in">type</span> hugetlbfs (rw,relatime,seclabel)</span><br></pre></td></tr></table></figure>
+<h3 id="3、設定-Huge-Page-的數量"><a href="#3、設定-Huge-Page-的數量" class="headerlink" title="3、設定 Huge Page 的數量"></a>3、設定 Huge Page 的數量</h3><p>假設要啟動一個 memory 為 2048 MB 的 virtual machine，可以算出 Huge Page(2048 KB) 的數量為：</p>
+<blockquote>
+<p>2048 * 1024 / 2048 = 1024</p>
+</blockquote>
+<p>因此這邊設定 Huge Page 的數量為 1024 個：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 設定 Huge Page 的數量為 1024 個</span></span><br><span class="line">$ sysctl vm.nr_hugepages=1024</span><br><span class="line">vm.nr_hugepages = 1024</span><br><span class="line"></span><br><span class="line"><span class="comment"># 此時 host machine 中的記憶體資訊已經有 Huge Page 的數量資訊</span></span><br><span class="line">$ cat /proc/meminfo | grep Huge</span><br><span class="line">AnonHugePages:     14336 kB</span><br><span class="line">HugePages_Total:    1024</span><br><span class="line">HugePages_Free:     1024</span><br><span class="line">HugePages_Rsvd:        0</span><br><span class="line">HugePages_Surp:        0</span><br><span class="line">Hugepagesize:       2048 kB</span><br></pre></td></tr></table></figure>
+<h3 id="4、啟動-virtual-machine-使用-Huge-Page"><a href="#4、啟動-virtual-machine-使用-Huge-Page" class="headerlink" title="4、啟動 virtual machine 使用 Huge Page"></a>4、啟動 virtual machine 使用 Huge Page</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$ kvm -vnc 0.0.0.0:1 -smp 4 -m 2048 -hda /kvm/storage/vm_disks/ubnutu1604.img -mem-path /dev/hugepages</span><br><span class="line"></span><br><span class="line">$ cat /proc/meminfo | grep Huge</span><br><span class="line">AnonHugePages:     26624 kB</span><br><span class="line">HugePages_Total:    1024</span><br><span class="line">HugePages_Free:      738</span><br><span class="line">HugePages_Rsvd:      738</span><br><span class="line">HugePages_Surp:        0</span><br><span class="line">Hugepagesize:       2048 kB</span><br></pre></td></tr></table></figure>
+<p>可以看出 virtual machine 的確消耗了一些 huge page，但其實並不是全部，因為 virtual machine 實際上並沒有完整分配到 2048 MB 的 memory；若要完整分配指定的 memory，則需要加上 <code>-mem-prealloc</code> 參數。</p>
+<hr>
+<h1 id="Memory-Overcommit"><a href="#Memory-Overcommit" class="headerlink" title="Memory Overcommit"></a>Memory Overcommit</h1><p>除了之前介紹 CPU 可以 overcommit 之外，memory 也可以設定一定程度的 overcommit，原因是因為每台電腦在運作時一般都不會耗盡記憶體。對 host machine 來說，virtual machine 也只是一個 QEMU process，在啟動的當下是不會分配完整記憶體的，而是隨著 virtual machine 的更多要求下逐步分配到位，因此可以在此行為的前提下設定 memory overcommit。</p>
+<p>在 KVM 中有三種方式可以達到 memory overcommit：</p>
+<ol>
+<li><p><strong><font color="red">Swapping</font></strong>：透過 system swap(一般為硬碟空間) 來彌補 memory 不足的問題</p>
+</li>
+<li><p><strong><font color="red">Ballooning</font></strong>：透過 <code>virtio_balloon</code> driver 來達成</p>
+</li>
+<li><p><strong><font color="red">Page Sharing</font></strong>：使用 <code>KSM(Kernel Samepage Merging)</code> 合併多台 virtual machine 中相同的 memory page</p>
+</li>
+</ol>
+<p>關於第一個方式的 swap，根據 <a href="https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Storage_Administration_Guide/ch-swapspace.html#tb-recommended-system-swap-space" target="_blank" rel="noopener">RedHat RHEL 7 官方文件</a>所提供的建議，swap 大小的設定建議如下：</p>
+<table>
+<thead>
+<tr>
+<th>系統記憶體</th>
+<th>建議 swap 大小</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>⩽ 2 GB</td>
+<td>2 x memory size</td>
+</tr>
+<tr>
+<td>&gt; 2 GB – 8 GB</td>
+<td>等同 memory size</td>
+</tr>
+<tr>
+<td>&gt; 8 GB – 64 GB</td>
+<td>至少 4 GB</td>
+</tr>
+<tr>
+<td>&gt; 64 GB</td>
+<td>至少 4 GB</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a href="http://linux.die.net/man/1/qemu-kvm" target="_blank" rel="noopener">qemu-kvm(1): QEMU Emulator User Documentation - Linux man page</a></p>
+</li>
+<li><p><a href="http://www.gegugu.com/2016/03/22/9088.html" target="_blank" rel="noopener">精品：KVM學習筆記 : 歌穀穀</a></p>
+</li>
+<li><p><a href="http://tc.wangchao.net.cn/it/detail_128378.html" target="_blank" rel="noopener">Huge Page 是否是拯救性能的萬能良藥？ - 王朝網路 - wangchao.net.cn</a></p>
+</li>
+<li><p><a href="http://brandon-hy-lin.blogspot.tw/2016/04/compound-page-huge-page-transparent.html" target="_blank" rel="noopener">隨意寫寫: Compound Page, Huge Page, 和Transparent Huge Page(THP)</a></p>
+</li>
+<li><p><a href="http://jaychu649.blogspot.tw/2014/09/linux-huge-memory-greater-then-hundred.html" target="_blank" rel="noopener">IT 研究室 ( 前IT DBA’s 資訊站): 如何在Linux 使用大記憶體(huge memory greater then hundred of GB)</a></p>
+</li>
+<li><p><a href="https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Storage_Administration_Guide/ch-swapspace.html#tb-recommended-system-swap-space" target="_blank" rel="noopener">RedHat RHEL 7 Support &gt; Product Documentation &gt; Storage &gt; Administration Guide</a></p>
+</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog/tags/Linux/" rel="tag"># Linux</a>
+          
+            <a href="/blog/tags/KVM/" rel="tag"># KVM</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/2016/07/30/KVM/KVM-Basic-Concept-CPU/" rel="next" title="[Linux KVM] Linux KVM concept - CPU">
+                <i class="fa fa-chevron-left"></i> [Linux KVM] Linux KVM concept - CPU
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/2016/08/03/KVM/KVM-Basic-Concept-Storage/" rel="prev" title="[Linux KVM] Linux KVM concept - Storage">
+                [Linux KVM] Linux KVM concept - Storage <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            本站概覽
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">godleon</p>
+              <p class="site-description motion-element" itemprop="description">把時間花在哪裡，成就就在哪裡</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/blog/archives/">
+              
+                  <span class="site-state-item-count">22</span>
+                  <span class="site-state-item-name">文章</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/blog/categories/index.html">
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">分類</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/blog/tags/index.html">
+                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-name">標籤</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/godleon" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:godleon@gmail.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-globe"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://plus.google.com/godleon" target="_blank" title="Google">
+                    
+                      <i class="fa fa-fw fa-google"></i>Google</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#VM-可以使用多少記憶體"><span class="nav-number">2.</span> <span class="nav-text">VM 可以使用多少記憶體?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#配置-VM-記憶體"><span class="nav-number">3.</span> <span class="nav-text">配置 VM 記憶體</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EPT"><span class="nav-number">4.</span> <span class="nav-text">EPT</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#VPID"><span class="nav-number">5.</span> <span class="nav-text">VPID</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#查詢-EPT-amp-VPID-的支援度"><span class="nav-number">6.</span> <span class="nav-text">查詢 EPT & VPID 的支援度</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Huge-Page"><span class="nav-number">7.</span> <span class="nav-text">Huge Page</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#優點："><span class="nav-number">7.0.1.</span> <span class="nav-text">優點：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#缺點："><span class="nav-number">7.0.2.</span> <span class="nav-text">缺點：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#在-KVM-中使用-Huge-Page"><span class="nav-number">7.1.</span> <span class="nav-text">在 KVM 中使用 Huge Page</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1、檢查-host-machine-中-Huge-Page-的設定資訊："><span class="nav-number">7.1.1.</span> <span class="nav-text">1、檢查 host machine 中 Huge Page 的設定資訊：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2、掛載-hugetlbfs-檔案系統"><span class="nav-number">7.1.2.</span> <span class="nav-text">2、掛載 hugetlbfs 檔案系統</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3、設定-Huge-Page-的數量"><span class="nav-number">7.1.3.</span> <span class="nav-text">3、設定 Huge Page 的數量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4、啟動-virtual-machine-使用-Huge-Page"><span class="nav-number">7.1.4.</span> <span class="nav-text">4、啟動 virtual machine 使用 Huge Page</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Memory-Overcommit"><span class="nav-number">8.</span> <span class="nav-text">Memory Overcommit</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">9.</span> <span class="nav-text">References</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 強力驅動</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主題 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/blog/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://godleon-blog-hexo.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'https://godleon.github.io/blog/2016/08/01/KVM/KVM-Basic-Concept-Memory/';
+          this.page.identifier = '2016/08/01/KVM/KVM-Basic-Concept-Memory/';
+          this.page.title = '[Linux KVM] Linux KVM concept - Memory';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/blog/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
