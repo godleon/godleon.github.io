@@ -103,7 +103,7 @@ NAME                           READY     STATUS      RESTARTS   AGE
 custom-jenkins-build-1-build   0/1       Completed   0          22m
 
 # 檢視 build log
-$ oc logs -f custom-jenkins-build-1-build
+$ oc -n openshift logs -f custom-jenkins-build-1-build
 ```
 
 > 使用者必須先安裝 [OpenShift CLI tool](https://github.com/openshift/origin/releases) 才可以執行上述的 oc 指令
