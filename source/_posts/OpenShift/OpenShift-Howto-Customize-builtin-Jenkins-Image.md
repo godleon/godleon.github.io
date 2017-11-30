@@ -91,10 +91,10 @@ Jenkins image for OpenShift
 
 ```bash
 # 取得原始碼
-$ git clone https://github.com/godleon/learning_openshift.git
+$ git clone https://github.com/godleon/openshift-jenkins-customization.git
 
 # 建立 ImageStream(custom-jenkins-2-centos7) BuildConfig(custom-jenkins-build)
-$ oc create -f learning_openshift/jenkins_customization/
+$ oc create -f openshift-jenkins-customization/openshift-objects/
 
 $ oc -n openshift start-build custom-jenkins-build
 

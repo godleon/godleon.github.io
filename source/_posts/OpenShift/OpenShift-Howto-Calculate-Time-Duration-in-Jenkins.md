@@ -58,9 +58,9 @@ openshift.withCluster() {
 透過以下步驟，可以直接使用我放在 GitHub 上面的範例，直接建立一個 build job 來測試：
 
 ```bash
-$ git clone https://github.com/godleon/learning_openshift.git
+$ git clone https://github.com/godleon/openshift-jenkins-customization.git
 
-$ oc create -f learning_openshift/examples/pipeline-calculate-time-duration/bc-calculate-time-duration.yml
+$ oc create -f openshift-objects/
 
 $ oc start-build calculate-time-duration
 ```
