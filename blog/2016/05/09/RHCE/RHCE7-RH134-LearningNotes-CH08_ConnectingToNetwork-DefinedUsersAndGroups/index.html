@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-tw">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/blog/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/blog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/blog/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/blog/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Linux,RHCE,RH134," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="此文章記錄學習 RHCE7 RH134 Chapter 08. Connecting to Network-defined Users and Groups 留下的內容">
+<meta name="keywords" content="Linux,RHCE,RH134">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[RHCE7] RH134 Chapter 08. Connecting to Network-defined Users and Groups 學習筆記">
+<meta property="og:url" content="https://godleon.github.io/blog/2016/05/09/RHCE/RHCE7-RH134-LearningNotes-CH08_ConnectingToNetwork-DefinedUsersAndGroups/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此文章記錄學習 RHCE7 RH134 Chapter 08. Connecting to Network-defined Users and Groups 留下的內容">
+<meta property="og:locale" content="zh-tw">
+<meta property="og:image" content="https://lh3.googleusercontent.com/yrIOq6ZotETj8rEMxH3hnoBqJzUmaF4A_aYQQlvMTuqU6u2-xBCA7aUMIkVBUi_uwjiSOcEr5V_TXrlv0jYDX_ikqhPjZVWPiXo5XKIoWUovuYNtbyPu4nibuVU1sZ150Y43kME_1dExiLtYF3cowhoHA_ex4CbHBDGULMGkfPJQnJkoWM_PVlb-xk1ENpKjElCw0If4VUMnyk6QsSjWTeKrUt6gl8A9Szi-DEWgh2FuhnXFFfL2BOlUmcvLeUDDDu7cT1v09QRqQI1usK3bDKIjrmNUaSAYQ8hPoxDqZaT0-KMycPnDwc8SWJXmm4En8uQMHSGMqFKlx1LmJqufLKZMaFZgF3rM1BN8pCYFxkUkws2nNuG-tmzHi0yxVq7T0vYFerWX66XTvhrOHiReMjLKp3IEm7ue4-AUNY9bcwlPgyjoOBJXId1vT4AgyHeR7sivsMFvwfw2jTwZdEEp2723scmSxiYoO0baKp7rrSnls11b9SI_ZIPd7gAD_42AqnstDCEWWsKzXCpGLXuAXFFjk14lO5g0MHtCd73J2aJmsz8QN_rMZK_Hd9YW44VJ6AEQF3rB4Sxq09bT6q8HPF9ht-ak_qg=w474-h710-no">
+<meta property="og:updated_time" content="2017-12-20T03:22:24.323Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[RHCE7] RH134 Chapter 08. Connecting to Network-defined Users and Groups 學習筆記">
+<meta name="twitter:description" content="此文章記錄學習 RHCE7 RH134 Chapter 08. Connecting to Network-defined Users and Groups 留下的內容">
+<meta name="twitter:image" content="https://lh3.googleusercontent.com/yrIOq6ZotETj8rEMxH3hnoBqJzUmaF4A_aYQQlvMTuqU6u2-xBCA7aUMIkVBUi_uwjiSOcEr5V_TXrlv0jYDX_ikqhPjZVWPiXo5XKIoWUovuYNtbyPu4nibuVU1sZ150Y43kME_1dExiLtYF3cowhoHA_ex4CbHBDGULMGkfPJQnJkoWM_PVlb-xk1ENpKjElCw0If4VUMnyk6QsSjWTeKrUt6gl8A9Szi-DEWgh2FuhnXFFfL2BOlUmcvLeUDDDu7cT1v09QRqQI1usK3bDKIjrmNUaSAYQ8hPoxDqZaT0-KMycPnDwc8SWJXmm4En8uQMHSGMqFKlx1LmJqufLKZMaFZgF3rM1BN8pCYFxkUkws2nNuG-tmzHi0yxVq7T0vYFerWX66XTvhrOHiReMjLKp3IEm7ue4-AUNY9bcwlPgyjoOBJXId1vT4AgyHeR7sivsMFvwfw2jTwZdEEp2723scmSxiYoO0baKp7rrSnls11b9SI_ZIPd7gAD_42AqnstDCEWWsKzXCpGLXuAXFFjk14lO5g0MHtCd73J2aJmsz8QN_rMZK_Hd9YW44VJ6AEQF3rB4Sxq09bT6q8HPF9ht-ak_qg=w474-h710-no">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://godleon.github.io/blog/2016/05/09/RHCE/RHCE7-RH134-LearningNotes-CH08_ConnectingToNetwork-DefinedUsersAndGroups/"/>
+
+
+
+
+
+  <title>[RHCE7] RH134 Chapter 08. Connecting to Network-defined Users and Groups 學習筆記 | 小信豬的原始部落</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-tw">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">小信豬的原始部落</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/blog/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首頁
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/blog/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            標籤
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/blog/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分類
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/blog/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            歸檔
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            檢索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/blog/2016/05/09/RHCE/RHCE7-RH134-LearningNotes-CH08_ConnectingToNetwork-DefinedUsersAndGroups/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">[RHCE7] RH134 Chapter 08. Connecting to Network-defined Users and Groups 學習筆記</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">發表於</span>
+              
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2016-05-09T20:45:00+00:00">
+                2016-05-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分類於</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/RHCE/" itemprop="url" rel="index">
+                    <span itemprop="name">RHCE</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/2016/05/09/RHCE/RHCE7-RH134-LearningNotes-CH08_ConnectingToNetwork-DefinedUsersAndGroups/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2016/05/09/RHCE/RHCE7-RH134-LearningNotes-CH08_ConnectingToNetwork-DefinedUsersAndGroups/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  此文章記錄學習 RHCE7 RH134 Chapter 08. Connecting to Network-defined Users and Groups 留下的內容
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="老師補充"><a href="#老師補充" class="headerlink" title="老師補充"></a>老師補充</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 取得使用者資訊(跟 /etc/passwd 沒有絕對關係)</span></span><br><span class="line">[vagrant@server tmp]$ getent passwd user1</span><br><span class="line">user1:x:1001:1001::/home/user1:/bin/bash</span><br><span class="line"></span><br><span class="line"><span class="comment"># 取得群組資訊</span></span><br><span class="line">[vagrant@server tmp]$ getent group user1</span><br><span class="line">user1:x:1001:</span><br></pre></td></tr></table></figure>
+<p>驗證是否通過：</p>
+<ol>
+<li><p>帳號 &amp; 密碼正確</p>
+</li>
+<li><p>可以正確取得使用者資訊</p>
+</li>
+</ol>
+<p>NIS &amp; LDAP 單獨可做到：</p>
+<ol>
+<li><p>可提供使用者資訊</p>
+</li>
+<li><p>可提供帳號密碼的驗證方法</p>
+</li>
+</ol>
+<blockquote>
+<p>但 Kerberos 僅能提供帳號密碼驗證，無法提供使用者資訊，因此一般會與 LDAP 搭配來解決提供使用者資訊的問題，Windows AD 目前就是依照這種方式達成，安全性提高，且提供了 SSO 的能力)</p>
+<p>目前使用 LDAP + Kerberos 架構的產品有 Windows AD, SAMBA 4.x, RedHat IDM(IPA)</p>
+</blockquote>
+<hr>
+<h1 id="8-1-Using-Identity-Management-Services"><a href="#8-1-Using-Identity-Management-Services" class="headerlink" title="8.1 Using Identity Management Services"></a>8.1 Using Identity Management Services</h1><h2 id="8-1-1-User-information-and-authentication-services"><a href="#8-1-1-User-information-and-authentication-services" class="headerlink" title="8.1.1 User information and authentication services"></a>8.1.1 User information and authentication services</h2><p>中央認證系統會包含兩個部分：</p>
+<h3 id="1-Account-information"><a href="#1-Account-information" class="headerlink" title="1. Account information"></a>1. Account information</h3><p>此部分用來存放使用者帳號的資訊，以及使用者權限等相關資訊。(例如：<strong>/etc/passwd</strong>)</p>
+<h3 id="2-Authentication-information"><a href="#2-Authentication-information" class="headerlink" title="2. Authentication information"></a>2. Authentication information</h3><p>此部分的目的則是驗證使用者是否為其所宣稱的使用者，因此會包含密碼資訊，但這些密碼資訊通常會透過密碼學的技術輔助來加密，避免以明碼的方式呈現。(例如：<strong>/etc/shadow</strong>)</p>
+<h3 id="其他補充"><a href="#其他補充" class="headerlink" title="其他補充"></a>其他補充</h3><p>Kerberos 僅能提供安全的驗證功能，無法提供使用者資訊；若需要使用者資訊，需要搭配 LDAP/NIS …. 等服務來提供。</p>
+<p>目前 LDAP + Kerberos 的選擇有 Windows AD / SAMBA 4.x / RedHat IDM … 等。</p>
+<p>透過調整 <code>/etc/nsswitch.conf</code>，可以調整驗證的順序</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[vagrant@localhost ~]$ cat /etc/nsswitch.conf | grep <span class="string">'^[^#]'</span></span><br><span class="line">passwd:     files sss</span><br><span class="line">shadow:     files sss</span><br><span class="line">group:      files sss</span><br><span class="line">hosts:      files dns</span><br><span class="line">bootparams: nisplus [NOTFOUND=<span class="built_in">return</span>] files</span><br><span class="line">ethers:     files</span><br><span class="line">netmasks:   files</span><br><span class="line">networks:   files</span><br><span class="line">protocols:  files</span><br><span class="line">rpc:        files</span><br><span class="line">services:   files sss</span><br><span class="line">netgroup:   files sss</span><br><span class="line">publickey:  nisplus</span><br><span class="line">automount:  files</span><br><span class="line">aliases:    files nisplus</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>NSS 設定中的 sss 表示指向系統中的 sssd(security system daemon, for cache)，即使在沒網路的狀態下也還是可以進行認証</p>
+</blockquote>
+<p>RedHat 設計的工具大多以 <code>system-config</code> 開頭：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[vagrant@localhost ~]$ system-config-</span><br><span class="line">system-config-authentication  system-config-firewall-tui    system-config-kickstart       system-config-printer-applet  </span><br><span class="line">system-config-date            system-config-kdump           system-config-language        system-config-users           </span><br><span class="line">system-config-firewall        system-config-keyboard        system-config-printer</span><br></pre></td></tr></table></figure>
+<p>安裝 <code>system-config-authentication</code> 相關的工具：<code>sudo yum -y install authconfig-gtk sssd krb5-workstation</code></p>
+<p>若 LDAP 過程中要加密，LDAP server 設定時就不能使用 IP，必須使用 domain name，否則 CA 憑證檢查不會過</p>
+<blockquote>
+<p>設定 Kerneros 要把 <code>Use DNS to resolve hosts to realm</code> &amp; <code>Use DNS to locate KDCs for realm</code> 兩個選項拿掉</p>
+</blockquote>
+<h2 id="8-1-2-Attaching-a-system-to-centralized-LDAP-and-Kerberos-servers"><a href="#8-1-2-Attaching-a-system-to-centralized-LDAP-and-Kerberos-servers" class="headerlink" title="8.1.2 Attaching a system to centralized LDAP and Kerberos servers"></a>8.1.2 Attaching a system to centralized LDAP and Kerberos servers</h2><p>設定時建議安裝套件：<code>authconfig-gtk</code>, <code>sssd</code>, <code>krb5-workstation</code></p>
+<h3 id="Authconfig"><a href="#Authconfig" class="headerlink" title="Authconfig"></a>Authconfig</h3><p>RHCE 中的示範以 LDAP + Kerberos 為組合，有一些設定資訊是必須了解的：</p>
+<ul>
+<li><p><strong>/etc/ldap.conf</strong>：提供 LDAP 服務的 server 的相關設定</p>
+</li>
+<li><p><strong>/etc/krb5.conf</strong>：Kerberos 的相關設定</p>
+</li>
+<li><p><strong>/etc/sssd/sssd.conf</strong>：system security services daemon(sssd) 的設定，負責用來取得 &amp; 快取使用者的認證資訊</p>
+</li>
+<li><p><strong>/etc/nsswitch.conf</strong>：用來設定認證使用者所要使用的服務 or 系統</p>
+</li>
+<li><p><strong>/etc/pam.d</strong>：此目錄包含了提供了不同驗證機制的模組</p>
+</li>
+<li><p>/etc/openldap/cacerts：儲存 certificate 用</p>
+</li>
+</ul>
+<blockquote>
+<p>認證設定的過程建議使用 <code>authconfig-gtk</code>(提供 <strong>system-config-authentication</strong> 指令) or <code>authconfig-tui</code> 套件來協助，有圖形介面較為容易設定；不建議使用 <code>authconfig</code> 套件</p>
+</blockquote>
+<h3 id="LDAP"><a href="#LDAP" class="headerlink" title="LDAP"></a>LDAP</h3><p>LDAP 帳號描述範例：<code>cn=kevin,ou=sales,ou=tp,ou=tw,dc=example,dc=com</code> (DN, Distinguish Name)</p>
+<p>LDAP 認証可用 SSL/TLS 加密</p>
+<p><strong>要使用 LDAP 服務，要提供以下必要資訊</strong>：</p>
+<ol>
+<li><p>LDAP server hostname</p>
+</li>
+<li><p>base DN(即是上面的 <code>ou=tp,ou=tw,dc=example,dc=com</code>，依據要認證到的層級而定)</p>
+</li>
+<li><p>若要加密則必須 CA</p>
+</li>
+</ol>
+<h3 id="Kerberos"><a href="#Kerberos" class="headerlink" title="Kerberos"></a>Kerberos</h3><p>兩大訴求：</p>
+<ol>
+<li><p>SSO (Single Sign On)</p>
+</li>
+<li><p>安全性高(驗證過程中，帳號密碼不會在網路上傳遞)</p>
+</li>
+</ol>
+<p>密碼儲存 &amp; 認証方式：</p>
+<ol>
+<li><p>Server 儲存 hash 過後的密碼</p>
+</li>
+<li><p>client 認証時，會將輸入的密碼 hash 後的結果作為加密帳號資訊的對稱式金鑰，將資訊(user_account,time,….)加密後傳到 server 驗證</p>
+</li>
+<li><p>server 收到加密結果後，會拿資料庫中的 hash value 並進行解密，若是有符合則通過</p>
+</li>
+<li><p>為防止重送攻擊，被加密的資料有包含時間資訊(因此系統時間很重要)</p>
+</li>
+<li><p>假設驗證通過，server 會發送一個 ticket 給 client，之後 client 要存取其他 resource 只要提供 account &amp; ticket 即可，resource owner 會自動去找 KDC(Kerberos Key Distribution Center) 驗證 ticket 是否有效</p>
+</li>
+</ol>
+<p><strong>要使用 Kerberos 服務，要提供以下必要資訊</strong>：</p>
+<ol>
+<li><p>Kerberos realm，類似 domain name 的概念</p>
+</li>
+<li><p>至少一個 key distribution center(KDC)，即為 Kerberos hostname</p>
+</li>
+<li><p>Admin server hostname(用來協助使用者密碼及其他資訊變更之用)，通常與 KDC 會是相同一台機器</p>
+</li>
+</ol>
+<h2 id="8-1-3-Attaching-a-System-to-an-IPA-Server"><a href="#8-1-3-Attaching-a-System-to-an-IPA-Server" class="headerlink" title="8.1.3 Attaching a System to an IPA Server"></a>8.1.3 Attaching a System to an IPA Server</h2><p>在 RHEL 7 中提供了方便工具設定，安裝 <code>ipa-client</code> 套件即可。</p>
+<p>以 non-interactive 的方式設定 IPA server 認証：<code>sudo ipa-client-install --domain=serverX.example.com --no-ntp --mkhomedir -p admin -w redhat123 -U</code></p>
+<hr>
+<h1 id="Practice-Connecting-to-a-Central-LDAP-and-Kerberos-Server"><a href="#Practice-Connecting-to-a-Central-LDAP-and-Kerberos-Server" class="headerlink" title="Practice: Connecting to a Central LDAP and Kerberos Server"></a>Practice: Connecting to a Central LDAP and Kerberos Server</h1><p>設定 LDAP + Kerberos 驗證的步驟：</p>
+<p>1、安裝相關套件：<code>sudo yum -y install sssd authconfig-gtk krb5-workstation</code></p>
+<p>2、使用圖形工具進行設定(設定如下)</p>
+<p><img src="https://lh3.googleusercontent.com/yrIOq6ZotETj8rEMxH3hnoBqJzUmaF4A_aYQQlvMTuqU6u2-xBCA7aUMIkVBUi_uwjiSOcEr5V_TXrlv0jYDX_ikqhPjZVWPiXo5XKIoWUovuYNtbyPu4nibuVU1sZ150Y43kME_1dExiLtYF3cowhoHA_ex4CbHBDGULMGkfPJQnJkoWM_PVlb-xk1ENpKjElCw0If4VUMnyk6QsSjWTeKrUt6gl8A9Szi-DEWgh2FuhnXFFfL2BOlUmcvLeUDDDu7cT1v09QRqQI1usK3bDKIjrmNUaSAYQ8hPoxDqZaT0-KMycPnDwc8SWJXmm4En8uQMHSGMqFKlx1LmJqufLKZMaFZgF3rM1BN8pCYFxkUkws2nNuG-tmzHi0yxVq7T0vYFerWX66XTvhrOHiReMjLKp3IEm7ue4-AUNY9bcwlPgyjoOBJXId1vT4AgyHeR7sivsMFvwfw2jTwZdEEp2723scmSxiYoO0baKp7rrSnls11b9SI_ZIPd7gAD_42AqnstDCEWWsKzXCpGLXuAXFFjk14lO5g0MHtCd73J2aJmsz8QN_rMZK_Hd9YW44VJ6AEQF3rB4Sxq09bT6q8HPF9ht-ak_qg=w474-h710-no" alt="system-config-authentication"></p>
+<p>3、驗證設定結果：<code>sudo getent passwd ldapuser1</code> or <code>ssh ldapuser1@server1</code>(密碼 <code>kerberos</code>)</p>
+<hr>
+<h1 id="Lab-Connecting-to-Network-defined-Users-and-Groups"><a href="#Lab-Connecting-to-Network-defined-Users-and-Groups" class="headerlink" title="Lab: Connecting to Network-defined Users and Groups"></a>Lab: Connecting to Network-defined Users and Groups</h1><p>Lab 設計為連線到 IPA server 進行驗證，步驟如下：</p>
+<p>1、安裝相關套件：<code>sudo yum -y install ipa-client</code></p>
+<p>2、設定連線：<code>sudo ipa-client-install --domain=server1.example.com --no-ntp --mkhomedir</code></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">$ sudo ipa-client-install --domain=server0.example.com --no-ntp --mkhomedir</span><br><span class="line"></span><br><span class="line">Discovery was successful!</span><br><span class="line">Hostname: desktop1.example.com</span><br><span class="line">Realm: SERVER0.EXAMPLE.COM</span><br><span class="line">DNS Domain: server1.example.com</span><br><span class="line">IPA Server: server1.example.com</span><br><span class="line">BaseDN: dc=server1,dc=example,dc=com</span><br><span class="line"></span><br><span class="line">Continue to configure the system with these values? [no]: yes</span><br><span class="line">User authorized to enroll computers: admin</span><br><span class="line">Synchronizing time with KDC...</span><br><span class="line">Unable to sync time with IPA NTP server, assuming the time is <span class="keyword">in</span> sync. Please check that 123 UDP port is opened.</span><br><span class="line">Password <span class="keyword">for</span> admin@SERVER1.EXAMPLE.COM:</span><br><span class="line">Successfully retrieved CA cert</span><br><span class="line">    Subject:     CN=Certificate Authority,O=SERVER1.EXAMPLE.COM</span><br><span class="line">    Issuer:      CN=Certificate Authority,O=SERVER1.EXAMPLE.COM</span><br><span class="line">    Valid From:  Tue May 17 20:31:07 2016 UTC</span><br><span class="line">    Valid Until: Sat May 17 20:31:07 2036 UTC</span><br><span class="line"></span><br><span class="line">Enrolled <span class="keyword">in</span> IPA realm SERVER1.EXAMPLE.COM</span><br><span class="line">Created /etc/ipa/default.conf</span><br><span class="line">New SSSD config will be created</span><br><span class="line">Configured /etc/sssd/sssd.conf</span><br><span class="line">Configured /etc/krb5.conf <span class="keyword">for</span> IPA realm SERVER1.EXAMPLE.COM</span><br><span class="line">trying https://server1.example.com/ipa/xml</span><br><span class="line">Forwarding <span class="string">'ping'</span> to server <span class="string">'https://server1.example.com/ipa/xml'</span></span><br><span class="line">Forwarding <span class="string">'env'</span> to server <span class="string">'https://server1.example.com/ipa/xml'</span></span><br><span class="line">Adding SSH public key from /etc/ssh/ssh_host_rsa_key.pub</span><br><span class="line">Adding SSH public key from /etc/ssh/ssh_host_ecdsa_key.pub</span><br><span class="line">Forwarding <span class="string">'host_mod'</span> to server <span class="string">'https://server1.example.com/ipa/xml'</span></span><br><span class="line">Could not update DNS SSHFP records.</span><br><span class="line">SSSD enabled</span><br><span class="line">Configured /etc/openldap/ldap.conf</span><br><span class="line">Configured /etc/ssh/ssh_config</span><br><span class="line">Configured /etc/ssh/sshd_config</span><br><span class="line">Client configuration complete.</span><br></pre></td></tr></table></figure>
+<p>3、驗證設定結果：<code>sudo getent passwd ipauser</code> &amp; <code>ssh ipauser@localhost</code>(原本密碼為 <code>password</code>，改為 <code>redhat123</code>)</p>
+<p>4、程式驗證：<code>lab ipaclient grade</code> (@desktop)</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog/tags/Linux/" rel="tag"># Linux</a>
+          
+            <a href="/blog/tags/RHCE/" rel="tag"># RHCE</a>
+          
+            <a href="/blog/tags/RH134/" rel="tag"># RH134</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/2016/05/09/KVM/Linux-KVM-GettingStart/" rel="next" title="[KVM] Linux KVM 基本觀念">
+                <i class="fa fa-chevron-left"></i> [KVM] Linux KVM 基本觀念
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/2016/06/22/CoreOS/CoreOS-Introduction-Of-etcd-fleet-and-flannel/" rel="prev" title="[CoreOS] etcd、fleet & flannel 簡介">
+                [CoreOS] etcd、fleet & flannel 簡介 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            本站概覽
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">godleon</p>
+              <p class="site-description motion-element" itemprop="description">把時間花在哪裡，成就就在哪裡</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/blog/archives/">
+              
+                  <span class="site-state-item-count">41</span>
+                  <span class="site-state-item-name">文章</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/blog/categories/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">分類</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/blog/tags/index.html">
+                  <span class="site-state-item-count">22</span>
+                  <span class="site-state-item-name">標籤</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/godleon" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:godleon@gmail.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-globe"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://plus.google.com/godleon" target="_blank" title="Google">
+                    
+                      <i class="fa fa-fw fa-google"></i>Google</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#老師補充"><span class="nav-number">1.</span> <span class="nav-text"><a href="#&#x8001;&#x5E2B;&#x88DC;&#x5145;" class="headerlink" title="&#x8001;&#x5E2B;&#x88DC;&#x5145;"></a>&#x8001;&#x5E2B;&#x88DC;&#x5145;</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#8-1-Using-Identity-Management-Services"><span class="nav-number">2.</span> <span class="nav-text"><a href="#8-1-Using-Identity-Management-Services" class="headerlink" title="8.1 Using Identity Management Services"></a>8.1 Using Identity Management Services</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#8-1-1-User-information-and-authentication-services"><span class="nav-number">2.1.</span> <span class="nav-text"><a href="#8-1-1-User-information-and-authentication-services" class="headerlink" title="8.1.1 User information and authentication services"></a>8.1.1 User information and authentication services</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Account-information"><span class="nav-number">2.1.1.</span> <span class="nav-text"><a href="#1-Account-information" class="headerlink" title="1. Account information"></a>1. Account information</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Authentication-information"><span class="nav-number">2.1.2.</span> <span class="nav-text"><a href="#2-Authentication-information" class="headerlink" title="2. Authentication information"></a>2. Authentication information</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#其他補充"><span class="nav-number">2.1.3.</span> <span class="nav-text"><a href="#&#x5176;&#x4ED6;&#x88DC;&#x5145;" class="headerlink" title="&#x5176;&#x4ED6;&#x88DC;&#x5145;"></a>&#x5176;&#x4ED6;&#x88DC;&#x5145;</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-1-2-Attaching-a-system-to-centralized-LDAP-and-Kerberos-servers"><span class="nav-number">2.2.</span> <span class="nav-text"><a href="#8-1-2-Attaching-a-system-to-centralized-LDAP-and-Kerberos-servers" class="headerlink" title="8.1.2 Attaching a system to centralized LDAP and Kerberos servers"></a>8.1.2 Attaching a system to centralized LDAP and Kerberos servers</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Authconfig"><span class="nav-number">2.2.1.</span> <span class="nav-text"><a href="#Authconfig" class="headerlink" title="Authconfig"></a>Authconfig</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LDAP"><span class="nav-number">2.2.2.</span> <span class="nav-text"><a href="#LDAP" class="headerlink" title="LDAP"></a>LDAP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kerberos"><span class="nav-number">2.2.3.</span> <span class="nav-text"><a href="#Kerberos" class="headerlink" title="Kerberos"></a>Kerberos</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-1-3-Attaching-a-System-to-an-IPA-Server"><span class="nav-number">2.3.</span> <span class="nav-text"><a href="#8-1-3-Attaching-a-System-to-an-IPA-Server" class="headerlink" title="8.1.3 Attaching a System to an IPA Server"></a>8.1.3 Attaching a System to an IPA Server</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Practice-Connecting-to-a-Central-LDAP-and-Kerberos-Server"><span class="nav-number">3.</span> <span class="nav-text"><a href="#Practice-Connecting-to-a-Central-LDAP-and-Kerberos-Server" class="headerlink" title="Practice: Connecting to a Central LDAP and Kerberos Server"></a>Practice: Connecting to a Central LDAP and Kerberos Server</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Lab-Connecting-to-Network-defined-Users-and-Groups"><span class="nav-number">4.</span> <span class="nav-text"><a href="#Lab-Connecting-to-Network-defined-Users-and-Groups" class="headerlink" title="Lab: Connecting to Network-defined Users and Groups"></a>Lab: Connecting to Network-defined Users and Groups</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 強力驅動</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主題 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/blog/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://godleon-blog-hexo.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'https://godleon.github.io/blog/2016/05/09/RHCE/RHCE7-RH134-LearningNotes-CH08_ConnectingToNetwork-DefinedUsersAndGroups/';
+          this.page.identifier = '2016/05/09/RHCE/RHCE7-RH134-LearningNotes-CH08_ConnectingToNetwork-DefinedUsersAndGroups/';
+          this.page.title = '[RHCE7] RH134 Chapter 08. Connecting to Network-defined Users and Groups 學習筆記';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/blog/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

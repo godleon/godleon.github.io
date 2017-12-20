@@ -3,14 +3,6 @@
   
     
     <entry>
-      <title></title>
-      <url>/blog/2017/12/20/RHCE/RHCE7-RH134-LearningNotes-CH01_AutomatingInstallationWithKickstart/</url>
-      <content type="html"></content>
-      
-        
-    </entry>
-    
-    <entry>
       <title><![CDATA[[OpenShift] 如何計算在 Jenkins pipeline 中工作所花費的時間]]></title>
       <url>/blog/2017/11/29/OpenShift/OpenShift-Howto-Calculate-Time-Duration-in-Jenkins/</url>
       <content type="html"><![CDATA[<p>最近的工作都是使用 OpenShift + Jenkins 在進行 CI/CD 的相關工作，在時間的顯示上遇到了兩個問題：</p>
@@ -3041,6 +3033,141 @@
     </entry>
     
     <entry>
+      <title><![CDATA[[RHCE7] RH134 Chapter 08. Connecting to Network-defined Users and Groups 學習筆記]]></title>
+      <url>/blog/2016/05/09/RHCE/RHCE7-RH134-LearningNotes-CH08_ConnectingToNetwork-DefinedUsersAndGroups/</url>
+      <content type="html"><![CDATA[<h1 id="老師補充"><a href="#老師補充" class="headerlink" title="老師補充"></a>老師補充</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 取得使用者資訊(跟 /etc/passwd 沒有絕對關係)</span></span><br><span class="line">[vagrant@server tmp]$ getent passwd user1</span><br><span class="line">user1:x:1001:1001::/home/user1:/bin/bash</span><br><span class="line"></span><br><span class="line"><span class="comment"># 取得群組資訊</span></span><br><span class="line">[vagrant@server tmp]$ getent group user1</span><br><span class="line">user1:x:1001:</span><br></pre></td></tr></table></figure>
+<p>驗證是否通過：</p>
+<ol>
+<li><p>帳號 &amp; 密碼正確</p>
+</li>
+<li><p>可以正確取得使用者資訊</p>
+</li>
+</ol>
+<p>NIS &amp; LDAP 單獨可做到：</p>
+<ol>
+<li><p>可提供使用者資訊</p>
+</li>
+<li><p>可提供帳號密碼的驗證方法</p>
+</li>
+</ol>
+<blockquote>
+<p>但 Kerberos 僅能提供帳號密碼驗證，無法提供使用者資訊，因此一般會與 LDAP 搭配來解決提供使用者資訊的問題，Windows AD 目前就是依照這種方式達成，安全性提高，且提供了 SSO 的能力)</p>
+<p>目前使用 LDAP + Kerberos 架構的產品有 Windows AD, SAMBA 4.x, RedHat IDM(IPA)</p>
+</blockquote>
+<hr>
+<h1 id="8-1-Using-Identity-Management-Services"><a href="#8-1-Using-Identity-Management-Services" class="headerlink" title="8.1 Using Identity Management Services"></a>8.1 Using Identity Management Services</h1><h2 id="8-1-1-User-information-and-authentication-services"><a href="#8-1-1-User-information-and-authentication-services" class="headerlink" title="8.1.1 User information and authentication services"></a>8.1.1 User information and authentication services</h2><p>中央認證系統會包含兩個部分：</p>
+<h3 id="1-Account-information"><a href="#1-Account-information" class="headerlink" title="1. Account information"></a>1. Account information</h3><p>此部分用來存放使用者帳號的資訊，以及使用者權限等相關資訊。(例如：<strong>/etc/passwd</strong>)</p>
+<h3 id="2-Authentication-information"><a href="#2-Authentication-information" class="headerlink" title="2. Authentication information"></a>2. Authentication information</h3><p>此部分的目的則是驗證使用者是否為其所宣稱的使用者，因此會包含密碼資訊，但這些密碼資訊通常會透過密碼學的技術輔助來加密，避免以明碼的方式呈現。(例如：<strong>/etc/shadow</strong>)</p>
+<h3 id="其他補充"><a href="#其他補充" class="headerlink" title="其他補充"></a>其他補充</h3><p>Kerberos 僅能提供安全的驗證功能，無法提供使用者資訊；若需要使用者資訊，需要搭配 LDAP/NIS …. 等服務來提供。</p>
+<p>目前 LDAP + Kerberos 的選擇有 Windows AD / SAMBA 4.x / RedHat IDM … 等。</p>
+<p>透過調整 <code>/etc/nsswitch.conf</code>，可以調整驗證的順序</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[vagrant@localhost ~]$ cat /etc/nsswitch.conf | grep <span class="string">'^[^#]'</span></span><br><span class="line">passwd:     files sss</span><br><span class="line">shadow:     files sss</span><br><span class="line">group:      files sss</span><br><span class="line">hosts:      files dns</span><br><span class="line">bootparams: nisplus [NOTFOUND=<span class="built_in">return</span>] files</span><br><span class="line">ethers:     files</span><br><span class="line">netmasks:   files</span><br><span class="line">networks:   files</span><br><span class="line">protocols:  files</span><br><span class="line">rpc:        files</span><br><span class="line">services:   files sss</span><br><span class="line">netgroup:   files sss</span><br><span class="line">publickey:  nisplus</span><br><span class="line">automount:  files</span><br><span class="line">aliases:    files nisplus</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>NSS 設定中的 sss 表示指向系統中的 sssd(security system daemon, for cache)，即使在沒網路的狀態下也還是可以進行認証</p>
+</blockquote>
+<p>RedHat 設計的工具大多以 <code>system-config</code> 開頭：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[vagrant@localhost ~]$ system-config-</span><br><span class="line">system-config-authentication  system-config-firewall-tui    system-config-kickstart       system-config-printer-applet  </span><br><span class="line">system-config-date            system-config-kdump           system-config-language        system-config-users           </span><br><span class="line">system-config-firewall        system-config-keyboard        system-config-printer</span><br></pre></td></tr></table></figure>
+<p>安裝 <code>system-config-authentication</code> 相關的工具：<code>sudo yum -y install authconfig-gtk sssd krb5-workstation</code></p>
+<p>若 LDAP 過程中要加密，LDAP server 設定時就不能使用 IP，必須使用 domain name，否則 CA 憑證檢查不會過</p>
+<blockquote>
+<p>設定 Kerneros 要把 <code>Use DNS to resolve hosts to realm</code> &amp; <code>Use DNS to locate KDCs for realm</code> 兩個選項拿掉</p>
+</blockquote>
+<h2 id="8-1-2-Attaching-a-system-to-centralized-LDAP-and-Kerberos-servers"><a href="#8-1-2-Attaching-a-system-to-centralized-LDAP-and-Kerberos-servers" class="headerlink" title="8.1.2 Attaching a system to centralized LDAP and Kerberos servers"></a>8.1.2 Attaching a system to centralized LDAP and Kerberos servers</h2><p>設定時建議安裝套件：<code>authconfig-gtk</code>, <code>sssd</code>, <code>krb5-workstation</code></p>
+<h3 id="Authconfig"><a href="#Authconfig" class="headerlink" title="Authconfig"></a>Authconfig</h3><p>RHCE 中的示範以 LDAP + Kerberos 為組合，有一些設定資訊是必須了解的：</p>
+<ul>
+<li><p><strong>/etc/ldap.conf</strong>：提供 LDAP 服務的 server 的相關設定</p>
+</li>
+<li><p><strong>/etc/krb5.conf</strong>：Kerberos 的相關設定</p>
+</li>
+<li><p><strong>/etc/sssd/sssd.conf</strong>：system security services daemon(sssd) 的設定，負責用來取得 &amp; 快取使用者的認證資訊</p>
+</li>
+<li><p><strong>/etc/nsswitch.conf</strong>：用來設定認證使用者所要使用的服務 or 系統</p>
+</li>
+<li><p><strong>/etc/pam.d</strong>：此目錄包含了提供了不同驗證機制的模組</p>
+</li>
+<li><p>/etc/openldap/cacerts：儲存 certificate 用</p>
+</li>
+</ul>
+<blockquote>
+<p>認證設定的過程建議使用 <code>authconfig-gtk</code>(提供 <strong>system-config-authentication</strong> 指令) or <code>authconfig-tui</code> 套件來協助，有圖形介面較為容易設定；不建議使用 <code>authconfig</code> 套件</p>
+</blockquote>
+<h3 id="LDAP"><a href="#LDAP" class="headerlink" title="LDAP"></a>LDAP</h3><p>LDAP 帳號描述範例：<code>cn=kevin,ou=sales,ou=tp,ou=tw,dc=example,dc=com</code> (DN, Distinguish Name)</p>
+<p>LDAP 認証可用 SSL/TLS 加密</p>
+<p><strong>要使用 LDAP 服務，要提供以下必要資訊</strong>：</p>
+<ol>
+<li><p>LDAP server hostname</p>
+</li>
+<li><p>base DN(即是上面的 <code>ou=tp,ou=tw,dc=example,dc=com</code>，依據要認證到的層級而定)</p>
+</li>
+<li><p>若要加密則必須 CA</p>
+</li>
+</ol>
+<h3 id="Kerberos"><a href="#Kerberos" class="headerlink" title="Kerberos"></a>Kerberos</h3><p>兩大訴求：</p>
+<ol>
+<li><p>SSO (Single Sign On)</p>
+</li>
+<li><p>安全性高(驗證過程中，帳號密碼不會在網路上傳遞)</p>
+</li>
+</ol>
+<p>密碼儲存 &amp; 認証方式：</p>
+<ol>
+<li><p>Server 儲存 hash 過後的密碼</p>
+</li>
+<li><p>client 認証時，會將輸入的密碼 hash 後的結果作為加密帳號資訊的對稱式金鑰，將資訊(user_account,time,….)加密後傳到 server 驗證</p>
+</li>
+<li><p>server 收到加密結果後，會拿資料庫中的 hash value 並進行解密，若是有符合則通過</p>
+</li>
+<li><p>為防止重送攻擊，被加密的資料有包含時間資訊(因此系統時間很重要)</p>
+</li>
+<li><p>假設驗證通過，server 會發送一個 ticket 給 client，之後 client 要存取其他 resource 只要提供 account &amp; ticket 即可，resource owner 會自動去找 KDC(Kerberos Key Distribution Center) 驗證 ticket 是否有效</p>
+</li>
+</ol>
+<p><strong>要使用 Kerberos 服務，要提供以下必要資訊</strong>：</p>
+<ol>
+<li><p>Kerberos realm，類似 domain name 的概念</p>
+</li>
+<li><p>至少一個 key distribution center(KDC)，即為 Kerberos hostname</p>
+</li>
+<li><p>Admin server hostname(用來協助使用者密碼及其他資訊變更之用)，通常與 KDC 會是相同一台機器</p>
+</li>
+</ol>
+<h2 id="8-1-3-Attaching-a-System-to-an-IPA-Server"><a href="#8-1-3-Attaching-a-System-to-an-IPA-Server" class="headerlink" title="8.1.3 Attaching a System to an IPA Server"></a>8.1.3 Attaching a System to an IPA Server</h2><p>在 RHEL 7 中提供了方便工具設定，安裝 <code>ipa-client</code> 套件即可。</p>
+<p>以 non-interactive 的方式設定 IPA server 認証：<code>sudo ipa-client-install --domain=serverX.example.com --no-ntp --mkhomedir -p admin -w redhat123 -U</code></p>
+<hr>
+<h1 id="Practice-Connecting-to-a-Central-LDAP-and-Kerberos-Server"><a href="#Practice-Connecting-to-a-Central-LDAP-and-Kerberos-Server" class="headerlink" title="Practice: Connecting to a Central LDAP and Kerberos Server"></a>Practice: Connecting to a Central LDAP and Kerberos Server</h1><p>設定 LDAP + Kerberos 驗證的步驟：</p>
+<p>1、安裝相關套件：<code>sudo yum -y install sssd authconfig-gtk krb5-workstation</code></p>
+<p>2、使用圖形工具進行設定(設定如下)</p>
+<p><img src="https://lh3.googleusercontent.com/yrIOq6ZotETj8rEMxH3hnoBqJzUmaF4A_aYQQlvMTuqU6u2-xBCA7aUMIkVBUi_uwjiSOcEr5V_TXrlv0jYDX_ikqhPjZVWPiXo5XKIoWUovuYNtbyPu4nibuVU1sZ150Y43kME_1dExiLtYF3cowhoHA_ex4CbHBDGULMGkfPJQnJkoWM_PVlb-xk1ENpKjElCw0If4VUMnyk6QsSjWTeKrUt6gl8A9Szi-DEWgh2FuhnXFFfL2BOlUmcvLeUDDDu7cT1v09QRqQI1usK3bDKIjrmNUaSAYQ8hPoxDqZaT0-KMycPnDwc8SWJXmm4En8uQMHSGMqFKlx1LmJqufLKZMaFZgF3rM1BN8pCYFxkUkws2nNuG-tmzHi0yxVq7T0vYFerWX66XTvhrOHiReMjLKp3IEm7ue4-AUNY9bcwlPgyjoOBJXId1vT4AgyHeR7sivsMFvwfw2jTwZdEEp2723scmSxiYoO0baKp7rrSnls11b9SI_ZIPd7gAD_42AqnstDCEWWsKzXCpGLXuAXFFjk14lO5g0MHtCd73J2aJmsz8QN_rMZK_Hd9YW44VJ6AEQF3rB4Sxq09bT6q8HPF9ht-ak_qg=w474-h710-no" alt="system-config-authentication"></p>
+<p>3、驗證設定結果：<code>sudo getent passwd ldapuser1</code> or <code>ssh ldapuser1@server1</code>(密碼 <code>kerberos</code>)</p>
+<hr>
+<h1 id="Lab-Connecting-to-Network-defined-Users-and-Groups"><a href="#Lab-Connecting-to-Network-defined-Users-and-Groups" class="headerlink" title="Lab: Connecting to Network-defined Users and Groups"></a>Lab: Connecting to Network-defined Users and Groups</h1><p>Lab 設計為連線到 IPA server 進行驗證，步驟如下：</p>
+<p>1、安裝相關套件：<code>sudo yum -y install ipa-client</code></p>
+<p>2、設定連線：<code>sudo ipa-client-install --domain=server1.example.com --no-ntp --mkhomedir</code></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">$ sudo ipa-client-install --domain=server0.example.com --no-ntp --mkhomedir</span><br><span class="line"></span><br><span class="line">Discovery was successful!</span><br><span class="line">Hostname: desktop1.example.com</span><br><span class="line">Realm: SERVER0.EXAMPLE.COM</span><br><span class="line">DNS Domain: server1.example.com</span><br><span class="line">IPA Server: server1.example.com</span><br><span class="line">BaseDN: dc=server1,dc=example,dc=com</span><br><span class="line"></span><br><span class="line">Continue to configure the system with these values? [no]: yes</span><br><span class="line">User authorized to enroll computers: admin</span><br><span class="line">Synchronizing time with KDC...</span><br><span class="line">Unable to sync time with IPA NTP server, assuming the time is <span class="keyword">in</span> sync. Please check that 123 UDP port is opened.</span><br><span class="line">Password <span class="keyword">for</span> admin@SERVER1.EXAMPLE.COM:</span><br><span class="line">Successfully retrieved CA cert</span><br><span class="line">    Subject:     CN=Certificate Authority,O=SERVER1.EXAMPLE.COM</span><br><span class="line">    Issuer:      CN=Certificate Authority,O=SERVER1.EXAMPLE.COM</span><br><span class="line">    Valid From:  Tue May 17 20:31:07 2016 UTC</span><br><span class="line">    Valid Until: Sat May 17 20:31:07 2036 UTC</span><br><span class="line"></span><br><span class="line">Enrolled <span class="keyword">in</span> IPA realm SERVER1.EXAMPLE.COM</span><br><span class="line">Created /etc/ipa/default.conf</span><br><span class="line">New SSSD config will be created</span><br><span class="line">Configured /etc/sssd/sssd.conf</span><br><span class="line">Configured /etc/krb5.conf <span class="keyword">for</span> IPA realm SERVER1.EXAMPLE.COM</span><br><span class="line">trying https://server1.example.com/ipa/xml</span><br><span class="line">Forwarding <span class="string">'ping'</span> to server <span class="string">'https://server1.example.com/ipa/xml'</span></span><br><span class="line">Forwarding <span class="string">'env'</span> to server <span class="string">'https://server1.example.com/ipa/xml'</span></span><br><span class="line">Adding SSH public key from /etc/ssh/ssh_host_rsa_key.pub</span><br><span class="line">Adding SSH public key from /etc/ssh/ssh_host_ecdsa_key.pub</span><br><span class="line">Forwarding <span class="string">'host_mod'</span> to server <span class="string">'https://server1.example.com/ipa/xml'</span></span><br><span class="line">Could not update DNS SSHFP records.</span><br><span class="line">SSSD enabled</span><br><span class="line">Configured /etc/openldap/ldap.conf</span><br><span class="line">Configured /etc/ssh/ssh_config</span><br><span class="line">Configured /etc/ssh/sshd_config</span><br><span class="line">Client configuration complete.</span><br></pre></td></tr></table></figure>
+<p>3、驗證設定結果：<code>sudo getent passwd ipauser</code> &amp; <code>ssh ipauser@localhost</code>(原本密碼為 <code>password</code>，改為 <code>redhat123</code>)</p>
+<p>4、程式驗證：<code>lab ipaclient grade</code> (@desktop)</p>
+]]></content>
+      
+        <categories>
+            
+            <category> RHCE </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Linux </tag>
+            
+            <tag> RHCE </tag>
+            
+            <tag> RH134 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
       <title><![CDATA[[KVM] Linux KVM 基本觀念]]></title>
       <url>/blog/2016/05/09/KVM/Linux-KVM-GettingStart/</url>
       <content type="html"><![CDATA[<h1 id="1、libvirt-and-libvirt-tools"><a href="#1、libvirt-and-libvirt-tools" class="headerlink" title="1、libvirt and libvirt tools"></a>1、libvirt and libvirt tools</h1><h2 id="libvirt"><a href="#libvirt" class="headerlink" title="libvirt"></a>libvirt</h2><p><code>libvirt</code> 是一組獨立於 hypervisor 之外的 API：</p>
@@ -3108,7 +3235,124 @@
     </entry>
     
     <entry>
-      <title><![CDATA[[RHCE7] RH134 Chapter 06. Controlling Access to Files with Access Control Lists(ACLs) 學習筆記]]></title>
+      <title><![CDATA[[RHCE7] RH134 Chapter 7. Managing SELinux Security 學習筆記]]></title>
+      <url>/blog/2016/05/08/RHCE/RHCE7-RH134-LearningNotes-CH07_ManagingSELinuxSecurity/</url>
+      <content type="html"><![CDATA[<p><a name="ch7.1"></a></p>
+<h1 id="7-1-Enabling-and-Monitoring-Security-Enhanced-Linux-SELinux"><a href="#7-1-Enabling-and-Monitoring-Security-Enhanced-Linux-SELinux" class="headerlink" title="7.1 Enabling and Monitoring Security Enhanced Linux (SELinux)"></a>7.1 Enabling and Monitoring Security Enhanced Linux (SELinux)</h1><h2 id="7-1-1-Basic-SELinux-security-concepts"><a href="#7-1-1-Basic-SELinux-security-concepts" class="headerlink" title="7.1.1 Basic SELinux security concepts"></a>7.1.1 Basic SELinux security concepts</h2><p>SELinux 為系統安全提供了多一層的保護，目的在於當系統服務被攻陷後，還有另外一層機制(object-based)可以保護使用者的資料。</p>
+<p><img src="https://lh3.googleusercontent.com/bR6HlmRdHb9TosMXahqB3BxjdVdlFnfgpHh3bYbHeOmr2xGY_tvnAd7YBE4S4UWVzO_DX56XWwh6ytRqH1V27HhfcgRVlSHI5il3oCrJDaq0CRj_SBKElh8LLtCi4oDh3X1YXTK0gRX3p39i0soYp_ILkDBUku85ao5bYgFwmADGGN7S4Hd2FCQaREgbk9SFKgXQRJgMsvpfwmCg3KBKR6yEhG9T9iiQZg2cxZdXxELuzOFLx0jjrbgn84jxtXNnkNJJlWaOKQKtq8qGReElZkvZy2F1ZaJTcJtO208xPgEtoHHbI4N9GJyGUIcQzDhQ3rlXBuPbcuo0TT_W1yULLmLxA-uGR_JnA4cm9wv16tJZs3zMdeUKsFNxALBFZptxtOkOcpi1jopCJUEvCw4NAHhExPVHVHkVdFS2a-KUjRMBRyrFX-sa-xC5Ey3l7dbgKgjHjYta11VozADz7WIUV1FUVkR2tUmdXv6_XJVwVpclaD2PXnd7tHbOmM8Mnf4mwMP4E6yjjWiuTk9YVpoGx_2_8Nyw3xzzJ9CHYJy-WVPgSI1Q-m0Co6ZcR2bK_6p02bE8h9nft0354PiugpLIqV6dKQ0SW6g=w888-h225-no" alt="SELinux"></p>
+<p>在傳統架構下，當 web server 被攻陷後，駭客取得 <strong>apache</strong> 使用者的權限，就可以自由地存取 <strong>/var/www/html</strong>, <strong>/tmp</strong>, <strong>/var/tmp</strong> 等目錄；但若是在 SELinux 的限制下，就僅有 <strong>/var/www/html</strong> 可以存取。</p>
+<p>從上面就不難看出，SELinux 定義了特定服務可以存取的特定 file、directory、port …. 等資訊，用以限縮 service owner 可以存取檔案的範圍；而方法就在於每一個 file, directory, process, port 都有所謂的 <code>SELinux context</code>。</p>
+<p>而 context 大概長這樣 =&gt; <code>system_u:object_r:httpd_sys_content_t:s0</code></p>
+<p>以 <strong>:</strong> 作為分隔，分別是 user(system_u), role(object_r), type(httpd_sys_content_t), sensitvity(s0)；而 SELinux rule 的制定則是以 type 為主來設計的。</p>
+<p>舉例來說，與 Apache 相關的檔案位於 <strong>/var/www/html</strong> 中，而這裡檔案的 context type 則為 <code>httpd_sys_content_t</code> or <code>httpd_t</code>，與 Apache 服務運行相關的檔案則為 <code>http_port_t</code>，這些 context type　的檔案都可以讓 Apache service 存取；但若是 <strong>/tmp</strong> 與 <strong>/var/tmp</strong> 中的檔案，其 context type 則為 <code>tmp_t</code>，而 Apache service 要嘗試存取時就會被拒絕。</p>
+<p>許多指令都可以透過 <code>-Z</code> 參數取得 SELinux context 資訊，例如：<code>ps axZ</code>, <code>ps -ZC httpd</code>, <code>ls -Z /var/www</code> … 等等。</p>
+<h2 id="7-1-2-SELinux-modes"><a href="#7-1-2-SELinux-modes" class="headerlink" title="7.1.2 SELinux modes"></a>7.1.2 SELinux modes</h2><p>預設為 <strong>enforcing</strong> mode，但若是基於臨時性的需求而需要關掉 SELinux，可轉換成 <strong>permissive</strong> mode，此時只會有警告 &amp; Log，但不會被安全機制阻擋，且可以 online 切換，不須 reboot；但如果要完全 disable SELinux ，就需要重開機。</p>
+<blockquote>
+<p>使用 <code>getenforce</code> 指令就可以知道目前的 SELinux mode</p>
+</blockquote>
+<h2 id="7-1-3-SELinux-Booleans"><a href="#7-1-3-SELinux-Booleans" class="headerlink" title="7.1.3 SELinux Booleans"></a>7.1.3 SELinux Booleans</h2><p><strong>SELinux Booleans</strong> 是用來設定 SELinux Rules 是否啟用，可以用來調整 SELinux 的原始設定；若要檢視 SELinux Booleans 目前的設定值，可使用 <code>getsebool -a</code> 取得。</p>
+<hr>
+<p><a name="ch7.2"></a></p>
+<h1 id="7-2-Changing-SELinux-Modes"><a href="#7-2-Changing-SELinux-Modes" class="headerlink" title="7.2 Changing SELinux Modes"></a>7.2 Changing SELinux Modes</h1><h2 id="7-2-1-Changing-the-current-SELinux-mode"><a href="#7-2-1-Changing-the-current-SELinux-mode" class="headerlink" title="7.2.1 Changing the current SELinux mode"></a>7.2.1 Changing the current SELinux mode</h2><p>檢視目前 SELinux 狀態：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[vagrant@server tmp]$ getenforce</span><br><span class="line">Permissive</span><br><span class="line"></span><br><span class="line"><span class="comment"># 1(enforcing), 0(permissive)</span></span><br><span class="line">[vagrant@server tmp]$ sudo setenforce 1</span><br><span class="line">[vagrant@server tmp]$ getenforce</span><br><span class="line">Enforcing</span><br></pre></td></tr></table></figure>
+<h2 id="7-2-2-Setting-the-default-SELinux-mode"><a href="#7-2-2-Setting-the-default-SELinux-mode" class="headerlink" title="7.2.2 Setting the default SELinux mode"></a>7.2.2 Setting the default SELinux mode</h2><p>SELinux 的設定檔位於 <code>/etc/selinux/config</code></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[vagrant@server tmp]$ cat /etc/selinux/config</span><br><span class="line"></span><br><span class="line"><span class="comment"># This file controls the state of SELinux on the system.</span></span><br><span class="line"><span class="comment"># SELINUX= can take one of these three values:</span></span><br><span class="line"><span class="comment">#     enforcing - SELinux security policy is enforced.</span></span><br><span class="line"><span class="comment">#     permissive - SELinux prints warnings instead of enforcing.</span></span><br><span class="line"><span class="comment">#     disabled - No SELinux policy is loaded.</span></span><br><span class="line">SELINUX=permissive</span><br><span class="line"><span class="comment"># SELINUXTYPE= can take one of three two values:</span></span><br><span class="line"><span class="comment">#     targeted - Targeted processes are protected,</span></span><br><span class="line"><span class="comment">#     minimum - Modification of targeted policy. Only selected processes are protected.</span></span><br><span class="line"><span class="comment">#     mls - Multi Level Security protection.</span></span><br><span class="line">SELINUXTYPE=targeted</span><br></pre></td></tr></table></figure>
+<p><code>permissive</code>：僅會 log 不會限制存取</p>
+<p><code>enforcing</code>：會 log &amp; 限制存取</p>
+<blockquote>
+<p>SELINUXTYPE 預設為 targeted, 也許在少數狀況下會使用另外兩個</p>
+<p>變更完設定後必須重新啟動，設定才會生效</p>
+</blockquote>
+<hr>
+<p><a name="ch7.3"></a></p>
+<h2 id="7-3-Chaging-SELinux-Contexts"><a href="#7-3-Chaging-SELinux-Contexts" class="headerlink" title="7.3 Chaging SELinux Contexts"></a>7.3 Chaging SELinux Contexts</h2><p>在開始這個部分之前，需要先安裝兩個必要套件，分別是 <code>policycoreutils</code> &amp; <code>policycoreutils-python</code>(semanage)</p>
+<h3 id="7-3-1-Initial-SELinux-context"><a href="#7-3-1-Initial-SELinux-context" class="headerlink" title="7.3.1 Initial SELinux context"></a>7.3.1 Initial SELinux context</h3><p>在 RHEL7 中，檔案預設的 SELinux context 會由其所在的目錄所決定，新產生的檔案都會繼承目錄的 context(<code>vim</code>, <code>cp</code>, <code>touch</code> 適用)，但若是非新建的或是特別情況則不會(<code>mv</code>, <code>cp -a</code>)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># context =&gt; httpd_sys_content_t</span></span><br><span class="line">[student@server0 ~]$ ls -Zd /var/www/html</span><br><span class="line">drwxr-xr-x. root root system_u:object_r:httpd_sys_content_t:s0 /var/www/html</span><br><span class="line"></span><br><span class="line"><span class="comment"># 產生兩個檔案</span></span><br><span class="line">[student@server0 ~]$ sudo touch /var/www/html/index.html</span><br><span class="line">[student@server0 ~]$ sudo cp -a /tmp/rht /var/www/html/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 新建的繼承目錄的 context，透過 cp -a 的則保留原有的 context</span></span><br><span class="line">[student@server0 ~]$ ls -laZ /var/www/html/</span><br><span class="line">drwxr-xr-x. root root system_u:object_r:httpd_sys_content_t:s0 .</span><br><span class="line">drwxr-xr-x. root root system_u:object_r:httpd_sys_content_t:s0 ..</span><br><span class="line">-rw-r--r--. root root unconfined_u:object_r:httpd_sys_content_t:s0 index.html</span><br><span class="line">-rw-r--r--. root root system_u:object_r:init_tmp_t:s0  rht</span><br></pre></td></tr></table></figure>
+<h3 id="7-3-2-Changing-the-SELinux-context-of-a-file"><a href="#7-3-2-Changing-the-SELinux-context-of-a-file" class="headerlink" title="7.3.2 Changing the SELinux context of a file"></a>7.3.2 Changing the SELinux context of a file</h3><p>有兩種方式可以改變 SELinux context：</p>
+<ol>
+<li><p><code>chcon</code>：搭配 <code>-t</code> 參數指定所要變更的 context</p>
+</li>
+<li><p><code>restorecon</code>：直接將 context 改為預設 context (根據檔案 or 目錄所在的位置而定)</p>
+</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 顯示目錄(/var/www/html)的預設 SELinux context</span></span><br><span class="line">[student@server0 ~]$ ls -laZ /var/www/html/</span><br><span class="line">drwxr-xr-x. root root system_u:object_r:httpd_sys_content_t:s0 .</span><br><span class="line">drwxr-xr-x. root root system_u:object_r:httpd_sys_content_t:s0 ..</span><br><span class="line">-rw-r--r--. root root unconfined_u:object_r:httpd_sys_content_t:s0 index.html</span><br><span class="line">-rw-r--r--. root root system_u:object_r:init_tmp_t:s0  rht</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 chcon 變更檔案的 context</span></span><br><span class="line">[student@server0 ~]$ sudo chcon -t tmp_t /var/www/html/index.html</span><br><span class="line">[student@server0 ~]$ ls -laZ /var/www/html/</span><br><span class="line">drwxr-xr-x. root root system_u:object_r:httpd_sys_content_t:s0 .</span><br><span class="line">drwxr-xr-x. root root system_u:object_r:httpd_sys_content_t:s0 ..</span><br><span class="line">-rw-r--r--. root root unconfined_u:object_r:tmp_t:s0   index.html</span><br><span class="line">-rw-r--r--. root root system_u:object_r:init_tmp_t:s0  rht</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 restorecon 直接將檔案變成為預設值</span></span><br><span class="line">[student@server0 ~]$ sudo restorecon -vR /var/www/html</span><br><span class="line">restorecon reset /var/www/html/index.html context unconfined_u:object_r:tmp_t:s0-&gt;unconfined_u:object_r:httpd_sys_content_t:s0</span><br><span class="line">restorecon reset /var/www/html/rht context system_u:object_r:init_tmp_t:s0-&gt;system_u:object_r:httpd_sys_content_t:s0</span><br><span class="line">[student@server0 ~]$ ls -laZ /var/www/html/</span><br><span class="line">drwxr-xr-x. root root system_u:object_r:httpd_sys_content_t:s0 .</span><br><span class="line">drwxr-xr-x. root root system_u:object_r:httpd_sys_content_t:s0 ..</span><br><span class="line">-rw-r--r--. root root unconfined_u:object_r:httpd_sys_content_t:s0 index.html</span><br><span class="line">-rw-r--r--. root root system_u:object_r:httpd_sys_content_t:s0 rht</span><br></pre></td></tr></table></figure>
+<h3 id="7-3-3-Defining-SELinux-default-file-context-rules"><a href="#7-3-3-Defining-SELinux-default-file-context-rules" class="headerlink" title="7.3.3 Defining SELinux default file context rules"></a>7.3.3 Defining SELinux default file context rules</h3><p>使用 <code>semanage fcontext</code> 可以顯示(<code>-l</code>) or 修改(<code>-a</code>) 目錄的預設 SELinux context：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在 / 建立新的目錄，其預設 SELinux context 為 default_t</span></span><br><span class="line">[student@server0 ~]$ sudo mkdir /virtual</span><br><span class="line"><span class="comment"># 在此目錄建立的檔案，context 也會變成 default_t</span></span><br><span class="line">[student@server0 ~]$ sudo touch /virtual/index.html</span><br><span class="line">[student@server0 ~]$ ls -alZ /virtual</span><br><span class="line">drwxr-xr-x. root root unconfined_u:object_r:default_t:s0 .</span><br><span class="line">drwxr-xr-x. root root system_u:object_r:root_t:s0      ..</span><br><span class="line">-rw-r--r--. root root unconfined_u:object_r:default_t:s0 index.html</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 semanage fcontext 修改 /virtual 目錄的預設 SELinux context</span></span><br><span class="line">[student@server0 ~]$ sudo semanage fcontext -a -t httpd_sys_content_t <span class="string">'/virtual(/.*)?'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 透過 restorecon 將 /virtual 目錄下的檔案還原為預設值</span></span><br><span class="line">[student@server0 ~]$ sudo restorecon -Rv /virtual</span><br><span class="line">restorecon reset /virtual context unconfined_u:object_r:default_t:s0-&gt;unconfined_u:object_r:httpd_sys_content_t:s0</span><br><span class="line">restorecon reset /virtual/index.html context unconfined_u:object_r:default_t:s0-&gt;unconfined_u:object_r:httpd_sys_content_t:s0</span><br><span class="line">[student@server0 ~]$ ls -alZ /virtual</span><br><span class="line">drwxr-xr-x. root root unconfined_u:object_r:httpd_sys_content_t:s0 .</span><br><span class="line">drwxr-xr-x. root root system_u:object_r:root_t:s0      ..</span><br><span class="line">-rw-r--r--. root root unconfined_u:object_r:httpd_sys_content_t:s0 index.html</span><br></pre></td></tr></table></figure>
+<hr>
+<p><a name="ch7.3"></a></p>
+<h1 id="7-4-Chaging-SELinux-Booleans"><a href="#7-4-Chaging-SELinux-Booleans" class="headerlink" title="7.4 Chaging SELinux Booleans"></a>7.4 Chaging SELinux Booleans</h1><p>安裝 <code>selinux-policy-devel</code> 套件可取得與 SELinux Booleans 相關的說明資訊，位於 <strong>selinux(8)</strong>，可使用 <code>man -k _selinux</code> 來查詢目前系統中存在的文件。</p>
+<p>SELinux Booleans 是用來決定 rule 是否啟用的設定值，可透過 <code>getsebool</code> &amp; <code>setsebool</code> 兩個指令來設定：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 取得 SELinux Booleans 資訊('-a' 參數表示顯示全木)</span></span><br><span class="line">[student@server0 ~]$ getsebool -a | grep httpd_enable_homedir</span><br><span class="line">httpd_enable_homedirs --&gt; off</span><br><span class="line">[student@server0 ~]$ getsebool httpd_enable_homedirs</span><br><span class="line">httpd_enable_homedirs --&gt; off</span><br><span class="line"></span><br><span class="line"><span class="comment"># 修改 SELinux Boolean</span></span><br><span class="line">[student@server0 ~]$ sudo setsebool httpd_enable_homedirs on</span><br><span class="line"></span><br><span class="line"><span class="comment"># 透過 'semanage boolean -l' 可以查詢 SELinux Boolean 是否永久被更改(第二個結果)</span></span><br><span class="line">[student@server0 ~]$ sudo semanage boolean -l | grep httpd_enable_homedirs</span><br><span class="line">httpd_enable_homedirs          (on   ,  off)  Allow httpd to <span class="built_in">read</span> home directories</span><br><span class="line">[student@server0 ~]$ getsebool -a | grep httpd_enable_homedir</span><br><span class="line">httpd_enable_homedirs --&gt; on</span><br><span class="line"></span><br><span class="line"><span class="comment"># 透過 '-P' 參數永久變更 SELinux Boolean 的設定</span></span><br><span class="line">[student@server0 ~]$ sudo setsebool -P httpd_enable_homedirs on</span><br><span class="line">[student@server0 ~]$ getsebool -a | grep httpd_enable_homedir</span><br><span class="line">httpd_enable_homedirs --&gt; on</span><br><span class="line">[student@server0 ~]$ sudo semanage boolean -l | grep httpd_enable_homedirs</span><br><span class="line">httpd_enable_homedirs          (on   ,   on)  Allow httpd to <span class="built_in">read</span> home directories</span><br></pre></td></tr></table></figure>
+<hr>
+<p><a name="ch7.3"></a></p>
+<h1 id="7-5-Troublshooting-SELinux"><a href="#7-5-Troublshooting-SELinux" class="headerlink" title="7.5 Troublshooting SELinux"></a>7.5 Troublshooting SELinux</h1><h2 id="7-5-1-Troubleshooting-SELinux-issues"><a href="#7-5-1-Troubleshooting-SELinux-issues" class="headerlink" title="7.5.1 Troubleshooting SELinux issues"></a>7.5.1 Troubleshooting SELinux issues</h2><p>關於 SELinux 會造成的 issue，大概會有幾個原因 &amp; 方向可以思考：</p>
+<ol>
+<li><p>服務是否有特定目錄 or 檔案的存取權限</p>
+</li>
+<li><p>可能是錯誤的 file context 造成的，此時可用 <code>restorecon</code> 解決</p>
+</li>
+<li><p>可能是太嚴格的 SELinux Boolean 設定所造成(例如 <code>ftpd_anon_write</code> 限制了匿名使用者對 FTP 服務的存取)</p>
+</li>
+<li><p>可能是 SELinux policy 的 bug 所造成</p>
+</li>
+</ol>
+<h2 id="7-5-2-Monitoring-SELinux-violations"><a href="#7-5-2-Monitoring-SELinux-violations" class="headerlink" title="7.5.2 Monitoring SELinux violations"></a>7.5.2 Monitoring SELinux violations</h2><p>套件 <code>setroubleshoot-server</code> 必須安裝，才有辦法紀錄 SELinux 所產生的相關 log 資訊(存在於 <strong>/var/log/audit/audit.log</strong>)。</p>
+<ul>
+<li><p><code>sealert -l UUID</code>：檢視指定 UUID 的報告</p>
+</li>
+<li><p><code>sealert -a /var/log/audit/audit.log</code>：檢視 log 中所有的稽核報告</p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br></pre></td><td class="code"><pre><span class="line">[student@server0 ~]$ sudo systemctl start httpd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在 /root 下新增檔案，並移到 /var/www/html 目錄</span></span><br><span class="line">[student@server0 ~]$ sudo touch /root/file3</span><br><span class="line">[student@server0 ~]$ sudo mv /root/file3 /var/www/html/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 嘗試透過瀏覽器存取 file3</span></span><br><span class="line">[student@server0 ~]$ curl http://localhost/file3</span><br><span class="line">&lt;!DOCTYPE HTML PUBLIC <span class="string">"-//IETF//DTD HTML 2.0//EN"</span>&gt;</span><br><span class="line">&lt;html&gt;&lt;head&gt;</span><br><span class="line">&lt;title&gt;403 Forbidden&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;&lt;body&gt;</span><br><span class="line">&lt;h1&gt;Forbidden&lt;/h1&gt;</span><br><span class="line">&lt;p&gt;You don\<span class="string">'t have permission to access /file3</span></span><br><span class="line"><span class="string">on this server.&lt;/p&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;&lt;/html&gt;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"># 從 /var/log/audit/audit.log 中尋找相關的錯誤資訊</span></span><br><span class="line"><span class="string">[student@server0 ~]$ sudo tail /var/log/audit/audit.log</span></span><br><span class="line"><span class="string">......</span></span><br><span class="line"><span class="string">type=AVC msg=audit(1462720907.786:517): avc:  denied  &#123; getattr &#125; for  pid=1754 comm="httpd" path="/var/www/html/file3" dev="vda1" ino=8846767 scontext=system_u:system_r:httpd_t:s0 tcontext=unconfined_u:object_r:admin_home_t:s0 tclass=file</span></span><br><span class="line"><span class="string">type=SYSCALL msg=audit(1462720907.786:517): arch=c000003e syscall=4 success=no exit=-13 a0=7fd102869b48 a1=7fff0049e4f0 a2=7fff0049e4f0 a3=7fd0f7202752 items=0 ppid=1751 pid=1754 auid=4294967295 uid=48 gid=48 euid=48 suid=48 fsuid=48 egid=48 sgid=48 fsgid=48 tty=(none) ses=4294967295 comm="httpd" exe="/usr/sbin/httpd" subj=system_u:system_r:httpd_t:s0 key=(null)</span></span><br><span class="line"><span class="string">type=AVC msg=audit(1462720907.786:518): avc:  denied  &#123; getattr &#125; for  pid=1754 comm="httpd" path="/var/www/html/file3" dev="vda1" ino=8846767 scontext=system_u:system_r:httpd_t:s0 tcontext=unconfined_u:object_r:admin_home_t:s0 tclass=file</span></span><br><span class="line"><span class="string">type=SYSCALL msg=audit(1462720907.786:518): arch=c000003e syscall=6 success=no exit=-13 a0=7fd102869c18 a1=7fff0049e4f0 a2=7fff0049e4f0 a3=0 items=0 ppid=1751 pid=1754 auid=4294967295 uid=48 gid=48 euid=48 suid=48 fsuid=48 egid=48 sgid=48 fsgid=48 tty=(none) ses=4294967295 comm="httpd" exe="/usr/sbin/httpd" subj=system_u:system_r:httpd_t:s0 key=(null)</span></span><br><span class="line"><span class="string">.......</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"># 找到 SELinux 相關的 UUID</span></span><br><span class="line"><span class="string">[student@server0 ~]$ sudo tail -50 /var/log/messages</span></span><br><span class="line"><span class="string">.....</span></span><br><span class="line"><span class="string">May  8 11:21:48 localhost setroubleshoot: Plugin Exception restorecon_source</span></span><br><span class="line"><span class="string">May  8 11:21:48 localhost setroubleshoot: SELinux is preventing /usr/sbin/httpd from getattr access on the file . For complete SELinux messages. run sealert -l 26a423d9-3dbd-413b-8048-3e7abec01df1</span></span><br><span class="line"><span class="string">May  8 11:21:48 localhost python: SELinux is preventing /usr/sbin/httpd from getattr access on the file .</span></span><br><span class="line"><span class="string">.....</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"># 透過 sealert -l 檢視詳細的報告內容</span></span><br><span class="line"><span class="string">[student@server0 ~]$ sudo sealert -l 26a423d9-3dbd-413b-8048-3e7abec01df1</span></span><br><span class="line"><span class="string">SELinux is preventing /usr/sbin/httpd from getattr access on the file .</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">*****  Plugin catchall (100. confidence) suggests   **************************</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">If you believe that httpd should be allowed getattr access on the  file by default.</span></span><br><span class="line"><span class="string">Then you should report this as a bug.</span></span><br><span class="line"><span class="string">You can generate a local policy module to allow this access.</span></span><br><span class="line"><span class="string">Do</span></span><br><span class="line"><span class="string">allow this access for now by executing:</span></span><br><span class="line"><span class="string"># grep httpd /var/log/audit/audit.log | audit2allow -M mypol</span></span><br><span class="line"><span class="string"># semodule -i mypol.pp</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">Additional Information:</span></span><br><span class="line"><span class="string">Source Context                system_u:system_r:httpd_t:s0</span></span><br><span class="line"><span class="string">Target Context                unconfined_u:object_r:admin_home_t:s0</span></span><br><span class="line"><span class="string">Target Objects                 [ file ]</span></span><br><span class="line"><span class="string">Source                        httpd</span></span><br><span class="line"><span class="string">Source Path                   /usr/sbin/httpd</span></span><br><span class="line"><span class="string">Port                          &lt;Unknown&gt;</span></span><br><span class="line"><span class="string">Host                          localhost</span></span><br><span class="line"><span class="string">Source RPM Packages           httpd-2.4.6-17.el7.x86_64</span></span><br><span class="line"><span class="string">Target RPM Packages</span></span><br><span class="line"><span class="string">Policy RPM                    selinux-policy-3.12.1-153.el7.noarch</span></span><br><span class="line"><span class="string">Selinux Enabled               True</span></span><br><span class="line"><span class="string">Policy Type                   targeted</span></span><br><span class="line"><span class="string">Enforcing Mode                Enforcing</span></span><br><span class="line"><span class="string">Host Name                     server0.example.com</span></span><br><span class="line"><span class="string">Platform                      Linux server0.example.com 3.10.0-123.el7.x86_64 #1</span></span><br><span class="line"><span class="string">                              SMP Mon May 5 11:16:57 EDT 2014 x86_64 x86_64</span></span><br><span class="line"><span class="string">Alert Count                   1</span></span><br><span class="line"><span class="string">First Seen                    2016-05-09 00:21:47 JST</span></span><br><span class="line"><span class="string">Last Seen                     2016-05-09 00:21:47 JST</span></span><br><span class="line"><span class="string">Local ID                      26a423d9-3dbd-413b-8048-3e7abec01df1</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">Raw Audit Messages</span></span><br><span class="line"><span class="string">type=AVC msg=audit(1462720907.786:518): avc:  denied  &#123; getattr &#125; for  pid=1754 comm="httpd" path="/var/www/html/file3" dev="vda1" ino=8846767 scontext=system_u:system_r:httpd_t:s0 tcontext=unconfined_u:object_r:admin_home_t:s0 tclass=file</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">type=SYSCALL msg=audit(1462720907.786:518): arch=x86_64 syscall=lstat success=no exit=EACCES a0=7fd102869c18 a1=7fff0049e4f0 a2=7fff0049e4f0 a3=0 items=0 ppid=1751 pid=1754 auid=4294967295 uid=48 gid=48 euid=48 suid=48 fsuid=48 egid=48 sgid=48 fsgid=48 tty=(none) ses=4294967295 comm=httpd exe=/usr/sbin/httpd subj=system_u:system_r:httpd_t:s0 key=(null)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">Hash: httpd,httpd_t,admin_home_t,file,getattr</span></span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="補充教材"><a href="#補充教材" class="headerlink" title="補充教材"></a>補充教材</h1><h2 id="初階篇"><a href="#初階篇" class="headerlink" title="初階篇"></a>初階篇</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[vagrant@server tmp]$ id -Z</span><br><span class="line">unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023</span><br><span class="line"></span><br><span class="line">[vagrant@server tmp]$ ls</span><br><span class="line">ABC  hosts  passwd  vagrant-shell</span><br><span class="line"></span><br><span class="line">[vagrant@server tmp]$ ls -Z</span><br><span class="line">drwxrwxrwx+ vagrant vagrant unconfined_u:object_r:user_tmp_t:s0 ABC</span><br><span class="line">-rw-r--r--. vagrant vagrant unconfined_u:object_r:user_tmp_t:s0 hosts</span><br><span class="line">-rw-r-xr--+ vagrant vagrant unconfined_u:object_r:user_tmp_t:s0 passwd</span><br><span class="line">-rwx--x--x. vagrant vagrant unconfined_u:object_r:user_tmp_t:s0 vagrant-shell</span><br></pre></td></tr></table></figure>
+<p>以上權限對應 =&gt; system_r:object_r:var_t:s0</p>
+<ol>
+<li>User</li>
+<li>Role</li>
+<li>Type<br>若 SELinux 設定為 enforcing，只要看 type 即可</li>
+</ol>
+<p>SELinux 的 check policy 存放於 <code>/etc/selinux/targeted/policy/policy.29</code></p>
+<p>安裝 <code>setools-console</code> 後就可以查詢 SELinux policy</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">[vagrant@server tmp]$ ps auxZ | grep httpd</span><br><span class="line">system_u:system_r:httpd_t:s0    root     14773  0.0  0.2 221904  4968 ?        Ss   05:44   0:00 /usr/sbin/httpd -DFOREGROUND</span><br><span class="line">system_u:system_r:httpd_t:s0    apache   14774  0.0  0.1 221904  2972 ?        S    05:44   0:00 /usr/sbin/httpd -DFOREGROUND</span><br><span class="line">system_u:system_r:httpd_t:s0    apache   14775  0.0  0.1 221904  2972 ?        S    05:44   0:00 /usr/sbin/httpd -DFOREGROUND</span><br><span class="line">system_u:system_r:httpd_t:s0    apache   14776  0.0  0.1 221904  2972 ?        S    05:44   0:00 /usr/sbin/httpd -DFOREGROUND</span><br><span class="line">system_u:system_r:httpd_t:s0    apache   14777  0.0  0.1 221904  2972 ?        S    05:44   0:00 /usr/sbin/httpd -DFOREGROUND</span><br><span class="line">system_u:system_r:httpd_t:s0    apache   14778  0.0  0.1 221904  2972 ?        S    05:44   0:00 /usr/sbin/httpd -DFOREGROUND</span><br><span class="line"></span><br><span class="line"><span class="comment"># 可查詢來源端為 httpd_t 相關的權限設定</span></span><br><span class="line">[vagrant@server tmp]$ sesearch -A -s httpd_t</span><br><span class="line">....more</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查詢來源端為 httpd_t，目的端為 lib_t 的權限設定</span></span><br><span class="line">[vagrant@server tmp]$ sesearch -A -s httpd_t -t lib_t</span><br><span class="line">Found 13 semantic av rules:</span><br><span class="line">   allow domain base_ro_file_type : file \&#123; ioctl <span class="built_in">read</span> getattr lock open \&#125; ;</span><br><span class="line">   allow domain base_ro_file_type : dir \&#123; ioctl <span class="built_in">read</span> getattr lock search open \&#125; ;</span><br><span class="line">   allow domain base_ro_file_type : lnk_file \&#123; <span class="built_in">read</span> getattr \&#125; ;</span><br><span class="line">.... more</span><br></pre></td></tr></table></figure>
+<h2 id="進階篇"><a href="#進階篇" class="headerlink" title="進階篇"></a>進階篇</h2><h3 id="限制-Process-對檔案目錄的存取"><a href="#限制-Process-對檔案目錄的存取" class="headerlink" title="限制 Process 對檔案目錄的存取"></a>限制 Process 對檔案目錄的存取</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[vagrant@server tmp]$ ls -ldZ /var/www/html</span><br><span class="line">drwxr-xr-x. root root system_u:object_r:httpd_sys_content_t:s0 /var/www/html</span><br><span class="line"></span><br><span class="line">[vagrant@server tmp]$ ls -lZ passwd</span><br><span class="line">-rw-r--r--. vagrant vagrant unconfined_u:object_r:user_tmp_t:s0 passwd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 變更 SELinux context user/role/type</span></span><br><span class="line">[vagrant@server tmp]$ chcon -u system_u passwd</span><br><span class="line">[vagrant@server tmp]$ chcon -r object_r passwd</span><br><span class="line">[vagrant@server tmp]$ chcon -t httpd_sys_content_t passwd</span><br><span class="line">[vagrant@server tmp]$ ls -lZ passwd</span><br><span class="line">-rw-r--r--. vagrant vagrant system_u:object_r:httpd_sys_content_t:s0 passwd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 同時變更 SELinux context user/role/type</span></span><br><span class="line">[vagrant@server tmp]$ chcon system_u:object_r:httpd_sys_content_t:s0 passwd</span><br></pre></td></tr></table></figure>
+<p><code>policycoreutils-python</code> 套件是用來尋找正確的 SELinux Context type 之用</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 尋找系統中已經存在的檔案 or 目錄的 context type</span></span><br><span class="line">[vagrant@server tmp]$ sudo semanage fcontext -l | grep /var/www</span><br><span class="line">/var/www(/.*)?                                     all files          system_u:object_r:httpd_sys_content_t:s0</span><br><span class="line">/var/www(/.*)?/logs(/.*)?                          all files          system_u:object_r:httpd_log_t:s0</span><br><span class="line">/var/www/[^/]*/cgi-bin(/.*)?                       all files          system_u:object_r:httpd_sys_script_exec_t:s0</span><br><span class="line">/var/www/svn(/.*)?                                 all files          system_u:object_r:httpd_sys_rw_content_t:s0</span><br><span class="line">/var/www/git(/.*)?                                 all files          system_u:object_r:git_content_t:s0</span><br><span class="line">/var/www/perl(/.*)?                                all files          system_u:object_r:httpd_sys_script_exec_t:s0</span><br><span class="line">.... more</span><br><span class="line"></span><br><span class="line"><span class="comment"># 參考同性質檔案 or 目錄的 context type</span></span><br><span class="line">[vagrant@server tmp]$ ls -ldZ /var/www</span><br><span class="line">drwxr-xr-x. root root system_u:object_r:httpd_sys_content_t:s0 /var/www</span><br></pre></td></tr></table></figure>
+<p><code>policycoreutils</code> 中的 <code>restorecon</code> 工具可幫助恢復成原有的標籤：例如：<code>restorecon -Rv /var/www/html/</code></p>
+<blockquote>
+<p>前提是資料庫必須要有相關資料</p>
+</blockquote>
+<h3 id="修改資料庫"><a href="#修改資料庫" class="headerlink" title="修改資料庫"></a>修改資料庫</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[vagrant@server tmp]$ sudo mkdir /WWW</span><br><span class="line">[vagrant@server tmp]$ ls -ldZ /WWW</span><br><span class="line">drwxr-xr-x. root root unconfined_u:object_r:default_t:s0 /WWW</span><br><span class="line"></span><br><span class="line"><span class="comment"># 透過 semanage fcontext 修改目錄預設的 SELinux context</span></span><br><span class="line">[vagrant@server tmp]$ sudo semanage fcontext -a -f a -t httpd_sys_content_t <span class="string">'/WWW(/.*)?'</span></span><br><span class="line">[vagrant@server tmp]$ sudo semanage fcontext -l | grep WWW</span><br><span class="line">/WWW(/.*)?                                         all files          system_u:object_r:httpd_sys_content_t:s0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 恢復原有設定</span></span><br><span class="line">[vagrant@server tmp]$ sudo restorecon -Rv /WWW</span><br><span class="line">restorecon reset /WWW context unconfined_u:object_r:default_t:s0-&gt;unconfined_u:object_r:httpd_sys_content_t:s0</span><br><span class="line">restorecon reset /WWW/aaa context unconfined_u:object_r:default_t:s0-&gt;unconfined_u:object_r:httpd_sys_content_t:s0</span><br><span class="line">[vagrant@server tmp]$ ls -ldZ /WWW</span><br><span class="line">drwxr-xr-x. root root unconfined_u:object_r:httpd_sys_content_t:s0 /WWW</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[vagrant@server tmp]$ sudo cp /etc/shadow /WWW/</span><br><span class="line">[vagrant@server tmp]$ ls -ldZ /WWW/</span><br><span class="line">drwxr-xr-x. root root unconfined_u:object_r:httpd_sys_content_t:s0 /WWW/</span><br><span class="line"></span><br><span class="line">[vagrant@server tmp]$ ls -ldZ /WWW/*</span><br><span class="line">----------. root root unconfined_u:object_r:httpd_sys_content_t:s0 /WWW/shadow</span><br><span class="line"></span><br><span class="line"><span class="comment"># -a 會保留原檔案的相關 metadata，因此不會被 dest dir 的 SELinux context 複寫</span></span><br><span class="line">[vagrant@server tmp]$ sudo cp -a /etc/shadow /WWW/shadow_a</span><br><span class="line">[vagrant@server tmp]$ ls -ldZ /WWW/*</span><br><span class="line">----------. root root unconfined_u:object_r:httpd_sys_content_t:s0 /WWW/shadow</span><br><span class="line">----------. root root system_u:object_r:shadow_t:s0    /WWW/shadow_a</span><br></pre></td></tr></table></figure>
+<p>查詢 SELinux 相關的 log 可到 /var/log/audit/audit.log 查詢</p>
+<h3 id="限制應用程式的特定功能是否能夠啟用"><a href="#限制應用程式的特定功能是否能夠啟用" class="headerlink" title="限制應用程式的特定功能是否能夠啟用"></a>限制應用程式的特定功能是否能夠啟用</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[vagrant@server tmp]$ sudo semanage boolean -l | grep ftp</span><br><span class="line">ftp_home_dir                   (off  ,  off)  Allow ftp to home dir</span><br><span class="line">ftpd_use_cifs                  (off  ,  off)  Allow ftpd to use cifs</span><br><span class="line">sftpd_write_ssh_home           (off  ,  off)  Allow sftpd to write ssh home</span><br><span class="line">ftpd_use_fusefs                (off  ,  off)  Allow ftpd to use fusefs</span><br><span class="line">..... more</span><br><span class="line"></span><br><span class="line"><span class="comment"># 加了 -P 會永久儲存，沒加就只會存到記憶體中</span></span><br><span class="line">[vagrant@server tmp]$ sudo setsebool -P ftp_home_dir 1</span><br><span class="line">[vagrant@server tmp]$ sudo semanage boolean -l | grep ftp</span><br><span class="line">ftp_home_dir                   (on   ,   on)  Allow ftp to home dir</span><br></pre></td></tr></table></figure>
+<h3 id="限制應用程式所能夠存取的-port"><a href="#限制應用程式所能夠存取的-port" class="headerlink" title="限制應用程式所能夠存取的 port"></a>限制應用程式所能夠存取的 port</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[vagrant@server tmp]$ sudo semanage port -l | grep http</span><br><span class="line">http_cache_port_t              tcp      8080, 8118, 8123, 10001-10010</span><br><span class="line">http_cache_port_t              udp      3130</span><br><span class="line">http_port_t                    tcp      80, 81, 443, 488, 8008, 8009, 8443, 9000</span><br><span class="line">pegasus_http_port_t            tcp      5988</span><br><span class="line">pegasus_https_port_t           tcp      5989</span><br><span class="line"></span><br><span class="line"><span class="comment"># -a 增加 port, -d 刪除 port</span></span><br><span class="line">[vagrant@server tmp]$ sudo semanage port -a -t http_port_t -p tcp 5678</span><br><span class="line">[vagrant@server tmp] manage port -l | grep http_port_t</span><br><span class="line">http_port_t                    tcp      5678, 80, 81, 443, 488, 8008, 8009, 8443, 9000</span><br><span class="line">pegasus_http_port_t            tcp      5988</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="Practice-Changing-SELinux-Booleans"><a href="#Practice-Changing-SELinux-Booleans" class="headerlink" title="Practice: Changing SELinux Booleans"></a>Practice: Changing SELinux Booleans</h1><p>啟用 web server 的使用者家目錄 web 功能</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安裝 apache</span></span><br><span class="line">$ sudo yum -y install httpd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 啟動 apache server</span></span><br><span class="line">$ sudo systemctl <span class="built_in">enable</span> httpd.service</span><br><span class="line">ln -s <span class="string">'/usr/lib/systemd/system/httpd.service'</span> <span class="string">'/etc/systemd/system/multi-user.target.wants/httpd.service'</span></span><br><span class="line">$ sudo systemctl start httpd.service</span><br><span class="line">$ sudo systemctl status httpd.service</span><br><span class="line">httpd.service - The Apache HTTP Server</span><br><span class="line">   Loaded: loaded (/usr/lib/systemd/system/httpd.service; enabled)</span><br><span class="line">   Active: active (running) since Mon 2016-05-16 17:55:59 JST; 5s ago</span><br><span class="line">.......</span><br><span class="line"></span><br><span class="line"><span class="comment"># 開啟使用者 web 目錄為 ~/public_html</span></span><br><span class="line">$ sudo sed -i <span class="string">'s/^\s*#\(UserDir public_html\)/    \1/g'</span> /etc/httpd/conf.d/userdir.conf</span><br><span class="line">$ sudo sed -i <span class="string">'s/^\s*\(UserDir\sdisabled\)/    # \1/g'</span> /etc/httpd/conf.d/userdir.conf</span><br><span class="line">$ sudo systemctl restart httpd.service</span><br><span class="line"></span><br><span class="line"><span class="comment"># 建立 index.html，但還是沒有權限可以存取</span></span><br><span class="line">$ mkdir ~/public_html</span><br><span class="line">$ <span class="built_in">echo</span> <span class="string">"Hello Internet"</span> | sudo tee /home/student/public_html/index.html</span><br><span class="line">Hello Internet</span><br><span class="line">$ chmod 711 /home/student</span><br><span class="line">$ curl http://localhost/~student/index.html</span><br><span class="line">&lt;!DOCTYPE HTML PUBLIC <span class="string">"-//IETF//DTD HTML 2.0//EN"</span>&gt;</span><br><span class="line">&lt;html&gt;&lt;head&gt;</span><br><span class="line">&lt;title&gt;403 Forbidden&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;&lt;body&gt;</span><br><span class="line">&lt;h1&gt;Forbidden&lt;/h1&gt;</span><br><span class="line">&lt;p&gt;You don\<span class="string">'t have permission to access /~student/index.html</span></span><br><span class="line"><span class="string">on this server.&lt;/p&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;&lt;/html&gt;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"># 檢視 SELinux Boolean 設定</span></span><br><span class="line"><span class="string">$ getsebool -a | grep httpd | grep home</span></span><br><span class="line"><span class="string">httpd_enable_homedirs --&gt; off</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"># 開啟 httpd_enable_homedirs</span></span><br><span class="line"><span class="string">$ sudo setsebool -P httpd_enable_homedirs on</span></span><br><span class="line"><span class="string">$ getsebool -a | grep httpd | grep home</span></span><br><span class="line"><span class="string">httpd_enable_homedirs --&gt; on</span></span><br><span class="line"><span class="string">$ curl http://localhost/~student/index.html</span></span><br><span class="line"><span class="string">Hello Internet</span></span><br></pre></td></tr></table></figure>
+]]></content>
+      
+        <categories>
+            
+            <category> RHCE </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Linux </tag>
+            
+            <tag> RHCE </tag>
+            
+            <tag> RH134 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[[RHCE7] RH134 Chapter 6. Controlling Access to Files with Access Control Lists(ACLs) 學習筆記]]></title>
       <url>/blog/2016/05/07/RHCE/RHCE7-RH134-LearningNotes-CH06_ControllingAccessToFilesWithAccessControlLists/</url>
       <content type="html"><![CDATA[<p>透過 ACL 的機制，可以讓一個檔案同時有多個 Owner or Group</p>
 <p><a name="ch6.1"></a></p>
@@ -3389,6 +3633,184 @@
 </ol>
 <blockquote>
 <p>加上 <strong><font color="red">-i</font></strong> 參數會將實際的改變反應到檔案中(原本預設是不會變更檔案內容)</p>
+</blockquote>
+]]></content>
+      
+        <categories>
+            
+            <category> RHCE </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Linux </tag>
+            
+            <tag> RHCE </tag>
+            
+            <tag> RH134 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[[RHCE7] RH134 Chapter 1 Automating Installation with Kickstart 學習筆記]]></title>
+      <url>/blog/2016/04/29/RHCE/RHCE7-RH134-LearningNotes-CH01_AutomatingInstallationWithKickstart/</url>
+      <content type="html"><![CDATA[<p><code>dmesg</code> 觀察由 Linux Kernel 所產生的 log 檔</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 製作 USB 安裝裝置</span></span><br><span class="line"><span class="comment"># /dev/sr0 為光碟機裝置</span></span><br><span class="line"><span class="comment"># /dev/sdb1 為 USB 裝置</span></span><br><span class="line">dd <span class="keyword">if</span>=/dev/sr0 of=/dev/sdb1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 將 DVD 光碟轉成 iso 檔</span></span><br><span class="line">$ dd <span class="keyword">if</span>=/dev/sr0 of=/tmp/rhel_dvd.iso</span><br></pre></td></tr></table></figure>
+<p>安裝 Linux 方式：</p>
+<ul>
+<li>DVD/USB</li>
+<li>Hard Disk</li>
+<li>Network (必須先安裝 YUM server)<ul>
+<li>FTP</li>
+<li>HTTP</li>
+<li>NFS</li>
+</ul>
+</li>
+<li>PXE boot (找 CentOS PXE server)</li>
+</ul>
+<p>Kickstart:</p>
+<ol>
+<li>使用 boot.iso 開機</li>
+<li>準備好 <code>ks.cfg</code>(安裝中需要的設定參數)</li>
+<li>會進入到 <code>Boot:</code>，並輸入 <code>Boot: linux ks=floppy</code>，接著程式就會去找 <strong><font color="red">ks.cfg</font></strong> 並開始安裝</li>
+</ol>
+<blockquote>
+<p>ks.cfg 也可以放置於其他地方，不一定要放在磁碟片中</p>
+</blockquote>
+<p><a name="ch1.1"></a></p>
+<h1 id="1-1-Defining-the-Anaconda-Kickstart-System"><a href="#1-1-Defining-the-Anaconda-Kickstart-System" class="headerlink" title="1.1 Defining the Anaconda Kickstart System"></a>1.1 Defining the Anaconda Kickstart System</h1><h2 id="1-1-1-Introduction-to-Kickstart-installations"><a href="#1-1-1-Introduction-to-Kickstart-installations" class="headerlink" title="1.1.1 Introduction to Kickstart installations"></a>1.1.1 Introduction to Kickstart installations</h2><p>每個 seciton 由 <code>%</code> 開頭，並用 <code>%end</code> 結尾</p>
+<p><code>%package</code> section 指定要所安裝的軟體</p>
+<p><code>@</code> 開頭的設定表示指定 <code>package group</code>，可指定安裝 RedHat 預先設定的軟體群組，例如 core、Web Server …. 等等</p>
+<p><code>@^</code>開頭表示指定 <code>enrironmental group</code>(group in package group)</p>
+<p>其他客製化的需求可以放到 <code>%pre</code> &amp; <code>%post</code> script 中</p>
+<h2 id="1-1-2-Kickstart-configuration-file-commands"><a href="#1-1-2-Kickstart-configuration-file-commands" class="headerlink" title="1.1.2 Kickstart configuration file commands"></a>1.1.2 Kickstart configuration file commands</h2><h3 id="Installation-commands"><a href="#Installation-commands" class="headerlink" title="Installation commands:"></a>Installation commands:</h3><ul>
+<li><p><code>url</code>：用來指定安裝媒體的位置(FTP/HTTP/NFS …. etc)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用 --url 指定來源</span></span><br><span class="line">url --url=<span class="string">"ftp://installserver.example.com/pub/RHEL7/dvd"</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>repo</code>：用來指定要額外安裝的 package repository</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># --name 指定名稱，--baseurl 指定 repository 位置</span></span><br><span class="line">repo --name=<span class="string">"Custom Packages"</span> --baseurl=<span class="string">"ftp://repo.example.com/custom"</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>text</code>：預設以圖形模式顯示，用 text 可改成強制文字模式顯示</p>
+</li>
+<li><p><code>vnc</code>：設定 vnc 密碼</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vnc --password=redhat</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="Partition-commands"><a href="#Partition-commands" class="headerlink" title="Partition commands"></a>Partition commands</h3><ul>
+<li><p><code>clearpart</code>：安裝前清除硬碟上所有的 partition</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 指定清除 sda, sdb 兩顆硬碟</span></span><br><span class="line">clearpart --all --drivers=sda,sdb --initlabel</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>part</code>：設定 partition 要如何分割</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 指定 partition 目錄、檔案型態、大小....等資訊</span></span><br><span class="line">part /home --fstype=ext4 --label=homes --size=4096 --maxsize=8192 --grow</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>ignoredisk</code>：安裝時忽略特定硬碟</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 忽略 sdc</span></span><br><span class="line">ignoredisk --drivers=sdc</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>bootloader</code>：指定安裝 bootloader 的地方</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在 sda 上的 mbr 位置安裝 bootloader</span></span><br><span class="line">bootloader --location=mbr --boot-driver=sda</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>volgroup</code>, <code>logvol</code>：建立 LVM volume groups &amp; logical volumes</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">part pv.01 --size=8192</span><br><span class="line">volgroup myvg pv.01</span><br><span class="line">logvol / --vgname=myvg --fstype=xfs --size=2048 --name=rootvol -grow</span><br><span class="line">logvol /var --vgname=myvg --fstype=xfs --size=4096 --name=varvol</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>zerombr</code>：清除原有的 mbr 設定</p>
+</li>
+</ul>
+<h3 id="Network-commands"><a href="#Network-commands" class="headerlink" title="Network commands"></a>Network commands</h3><ul>
+<li><p><code>network</code>：設定網路</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 設定 eth0 為 DHCP</span></span><br><span class="line">network --device=eth0 --bootproto=dhcp</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>firewall</code>：設定防火牆，指定開啟(or 關閉)特定服務</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">firewall --enabled --services=ssh,cups</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>lang</code>：語系設定</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lang en_US.UTF-8</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>keyboard</code>：鍵盤設定</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">keyboard --vckeymap=us --xlayouts=<span class="string">'us'</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>timezon</code>：設定時區、NTP server 以及是否使用 UTC</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用 UTC, 指定 NTP server, 並設定時區</span></span><br><span class="line">timezon --utc --ntpservers=time.example.com Asia/Taipei</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>auth</code>：認證方式的設定</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 設定使用一般登入方式 &amp; 加密強度</span></span><br><span class="line">auth --useshadow --enablemd5 --passalgo=sha512</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>rootpw</code>：設定 root 密碼</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 也可以使用 "--uscrypted" 參數搭配加密過的密碼</span></span><br><span class="line">rootpwd --plaintext redhat</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>selinux</code>：設定 SELinux 的狀態</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">selinux --enforcing</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>services</code>：設定各種 service 的預設狀態</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">services --disabled=network,iptables,ip6tables</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>group</code>, <code>user</code>：建立指定的群組與使用者</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">group --name=admins --gid=10001</span><br><span class="line">user --name=jdoe --gecos=<span class="string">"John Doe"</span> --group=admins --password=changeme --plaintext</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="Miscelaneous-commands"><a href="#Miscelaneous-commands" class="headerlink" title="Miscelaneous commands"></a>Miscelaneous commands</h3><ul>
+<li><p><code>logging</code>：定義安裝時的 log 如何處理，可指定 remote logging server</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 指定 log level &amp; 要儲存的地方</span></span><br><span class="line">logging --host=loghost.example.com --level=INFO</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>reboot</code>, <code>poweroff</code>, <code>halt</code>：系統安裝完執行的動作</p>
+</li>
+</ul>
+<blockquote>
+<p>一堆設定不用記，需要的時候再到 <a href="https://access.redhat.com/documentation" target="_blank" rel="noopener">RedHat 官方網站</a> 查詢(Getting Started -&gt; Installation Guide)就好</p>
+</blockquote>
+<p>產生 ks.cfg 方式：</p>
+<ol>
+<li><p>透過 <code>system-config-kickstart</code> 可以透過圖形介面產生 ks.cfg</p>
+<blockquote>
+<p>必須在 /etc/yum.repos.d/rhel-dvd.repo 中要有 <code>rawhide</code> section 的設定，不然出來的圖形介面會沒有 package 可以選</p>
+</blockquote>
+</li>
+<li><p>安裝好一台新的 RHEL，並找到 <code>/root/anaconda-ks.cfg</code> 檔案，拿出來用</p>
+</li>
+</ol>
+<hr>
+<p><a name="ch1.2"></a></p>
+<h1 id="1-2-Deploying-a-New-Virtual-System-with-Kickstart"><a href="#1-2-Deploying-a-New-Virtual-System-with-Kickstart" class="headerlink" title="1.2 Deploying a New Virtual System with Kickstart"></a>1.2 Deploying a New Virtual System with Kickstart</h1><p><code>ksvalidator</code> 可用來檢查 ks.cfg 的格式是否正確 (什麼都結果都沒有表示正確)</p>
+<h3 id="Publish-the-Kickstart-configuration-file-to-Anaconda"><a href="#Publish-the-Kickstart-configuration-file-to-Anaconda" class="headerlink" title="Publish the Kickstart configuration file to Anaconda"></a>Publish the Kickstart configuration file to Anaconda</h3><p>ks.cfg 可以放在很多不同的地方：</p>
+<ul>
+<li><p>可放在 FTP/HTTP/NFS … 等服務上</p>
+</li>
+<li><p>DHCP/TFTP server</p>
+</li>
+<li><p>USB disk or CD-ROM</p>
+</li>
+<li><p>Local disk</p>
+</li>
+<li><p>與 PXE server 結合</p>
+</li>
+</ul>
+<h2 id="補充說明"><a href="#補充說明" class="headerlink" title="補充說明"></a>補充說明</h2><h3 id="遠端安裝-scenario-1"><a href="#遠端安裝-scenario-1" class="headerlink" title="遠端安裝 scenario 1"></a>遠端安裝 scenario 1</h3><ul>
+<li><p>client: private/puiblic IP</p>
+</li>
+<li><p>remote server: public IP</p>
+</li>
+</ul>
+<p>在 remote server 端執行如下：(光碟開機 -&gt; ESC 跳到 boot 選項)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 光碟開機 -&gt; ESC 跳到 boot 選項：</span></span><br><span class="line">boot: linux vncpassword=redhat ip=172.25.0.11 netmask=255.255.255.0 gateway=172.25.0.254</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>以上 IP 組態設定會根據不同的地點而不同</p>
+</blockquote>
+<h3 id="遠端安裝-scenario-2"><a href="#遠端安裝-scenario-2" class="headerlink" title="遠端安裝 scenario 2"></a>遠端安裝 scenario 2</h3><ul>
+<li><p>client: public IP</p>
+</li>
+<li><p>remote server: private IP</p>
+</li>
+</ul>
+<p>在 client 端下指令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ vncviewer --listen</span><br></pre></td></tr></table></figure>
+<p>在 remote server 端執行如下：(光碟開機 -&gt; ESC 跳到 boot 選項)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">boot: linux vnc vncconnect=172.25.254.250 ip=172.25.0.11 netmask=255.255.255.0 gateway=172.25.0.254 dns=8.8.8.8</span><br></pre></td></tr></table></figure>
+<p>按下 Enter 後，client 會自動跑一個 VNC console 出來，並顯示 remote server 的安裝畫面。</p>
+<blockquote>
+<p>也可以通過 direct TCP port 5901 達成第一個方式</p>
 </blockquote>
 ]]></content>
       
