@@ -3033,6 +3033,533 @@
     </entry>
     
     <entry>
+      <title><![CDATA[[RHCE] RH124 Chapter 10 Analyzing and Storing Logs 學習筆記]]></title>
+      <url>/blog/2016/04/24/RHCE/RHCE7-RH124-LearningNotes-CH10_AnalyzingAndStoringLogs/</url>
+      <content type="html"><![CDATA[<h1 id="10-1-System-Log-Architecture"><a href="#10-1-System-Log-Architecture" class="headerlink" title="10.1 System Log Architecture"></a>10.1 System Log Architecture</h1><h2 id="10-1-1-System-logging"><a href="#10-1-1-System-logging" class="headerlink" title="10.1.1 System logging"></a>10.1.1 System logging</h2><hr>
+<p>RHEL 7 有兩支 daemon 管理 log：</p>
+<ul>
+<li>systemd-journald</li>
+<li>rsyslog<ul>
+<li>紀錄 message type(or facility) &amp; priority 在 <code>/var/log</code> 內</li>
+<li>facility.severity (facility 很多種，severity 則是標準)</li>
+</ul>
+</li>
+</ul>
+<h3 id="systemd-journald"><a href="#systemd-journald" class="headerlink" title="systemd-journald"></a>systemd-journald</h3><p>systemd-journald daemon 蒐集以下的訊息:(並且會把資料寫進 structured database)</p>
+<ul>
+<li><p>kernel 相關的訊息</p>
+</li>
+<li><p>開機流程中早期的訊息</p>
+</li>
+<li><p>daemon 啟動時的標準輸出 &amp; 錯誤訊息</p>
+</li>
+<li><p>syslog (會被 forward 給 rsyslog 處理)</p>
+</li>
+</ul>
+<h3 id="rsyslog"><a href="#rsyslog" class="headerlink" title="rsyslog"></a>rsyslog</h3><p>rsyslog 會把從 syslog 來的資料放到 <strong>/var/log</strong> 中，除了 <strong>/var/log/secure</strong>、<strong>/var/log/maillog</strong>、<strong>/var/log/cron</strong>、<strong>/var/log/boot.log</strong> 四類訊息，其他訊息都會放在 <strong>/var/log/messages</strong> 中</p>
+<hr>
+<h1 id="10-2-Reviewing-Syslog-Files"><a href="#10-2-Reviewing-Syslog-Files" class="headerlink" title="10.2 Reviewing Syslog Files"></a>10.2 Reviewing Syslog Files</h1><p>rsyslogd 使用 <code>facility</code>(type) &amp; <code>priority</code>(severity) 來決定如何處理 log message，透過設定檔 <code>/etc/rsyslog.config</code> &amp; <code>/etc/rsyslog.d/\*.conf</code> 定義處理方式</p>
+<h2 id="10-2-2-Sample-rule-section-of-rsyslog-config"><a href="#10-2-2-Sample-rule-section-of-rsyslog-config" class="headerlink" title="10.2.2 Sample rule section of rsyslog.config"></a>10.2.2 Sample rule section of rsyslog.config</h2><p>左邊的部份指定哪些 facility.severity 要被記錄，右邊的部份則是指定 log message 要存到哪個檔案</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 所有 severity INFO 以上的訊息都送往 /var/log/message</span></span><br><span class="line"><span class="comment"># 但 facility mail / authpriv / cron 除外</span></span><br><span class="line"><span class="comment"># boot log message 也會送</span></span><br><span class="line">*.info;mail.none;authpriv.none;cron.none    /var/<span class="built_in">log</span>/messages</span><br><span class="line"></span><br><span class="line"><span class="comment"># kernel facility 的 log message 會往 /dev/console 送</span></span><br><span class="line">kernel.*    /dev/console</span><br><span class="line"></span><br><span class="line"><span class="comment"># authpriv facility 相關的 log message 都會往 /var/log/secure 送</span></span><br><span class="line">authpriv.*  /var/<span class="built_in">log</span>/secure</span><br><span class="line"></span><br><span class="line"><span class="comment"># mail facility 的訊息會先存在於記憶體中，一段時間後詞才會存到檔案中</span></span><br><span class="line">mail.*      -/var/<span class="built_in">log</span>/maillog</span><br><span class="line"></span><br><span class="line"><span class="comment"># severity Emergency 的 log message 會送到目前所有登入使用者的 terminal 上</span></span><br><span class="line">*.emerg     :omusrmsg:*</span><br><span class="line"></span><br><span class="line"><span class="comment"># 開機相關的訊息送往 /var/log/boot.log</span></span><br><span class="line">local7.*    /var/<span class="built_in">log</span>/boot.log</span><br></pre></td></tr></table></figure>
+<p>設定完成後，可透過 <code>logger -p [facility].[severity] &quot;log message&quot;</code> 來測試，例如：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ logger -p local7.emerg <span class="string">"boot emergency log message test"</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>可安裝 <strong><font color="red">rsyslog-doc</font></strong> 套件取得 rsyslogd 相關的 man page，很有幫助</p>
+</blockquote>
+<h3 id="10-2-3-Log-file-rotation"><a href="#10-2-3-Log-file-rotation" class="headerlink" title="10.2.3 Log file rotation"></a>10.2.3 Log file rotation</h3><p>透過 <code>/etc/logrotate.conf</code> 進行設定的修改</p>
+<p><code>/etc/cron.daily</code> 目錄中有一支 logrotate 的 shell script 作為每天執行的工作</p>
+<h3 id="10-2-6-Send-a-syslog-message-with-logger"><a href="#10-2-6-Send-a-syslog-message-with-logger" class="headerlink" title="10.2.6 Send a syslog message with logger"></a>10.2.6 Send a syslog message with logger</h3><p>若是有修改過 rsyslog 的設定後，可用 <code>logger</code> 程式手動發送 log 進行驗證，是否 log 有正確的被記錄：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[student@server0 ~]$ sudo tail -3 /var/<span class="built_in">log</span>/boot.log</span><br><span class="line">[  OK  ] Started GNOME Display Manager.</span><br><span class="line">[  OK  ] Started LSB: Start the ipr dump daemon.</span><br><span class="line">[  OK  ] Started Dynamic System Tuning Daemon.</span><br><span class="line"></span><br><span class="line"><span class="comment"># 手動產生一個 local7.notice 的 log message</span></span><br><span class="line">[student@server0 ~]$ logger -p local7.notice <span class="string">"Log entry created on server0"</span></span><br><span class="line"></span><br><span class="line">[student@server0 ~]$ tail -3 /var/<span class="built_in">log</span>/boot.log</span><br><span class="line">[  OK  ] Started LSB: Start the ipr dump daemon.</span><br><span class="line">[  OK  ] Started Dynamic System Tuning Daemon.</span><br><span class="line">Apr 23 23:26:04 server0 student: Log entry created on server0</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="10-3-Reviewing-systemd-Journal-Entries"><a href="#10-3-Reviewing-systemd-Journal-Entries" class="headerlink" title="10.3 Reviewing systemd Journal Entries"></a>10.3 Reviewing systemd Journal Entries</h1><p>特點：</p>
+<ul>
+<li><p>存放在 <code>/run/log</code> 目錄中 (表示重開機之後就會消失)</p>
+</li>
+<li><p>最多使用系統 10% 的空間，超過的話，舊的 journal 就會被砍掉</p>
+</li>
+<li><p>使用 <code>journalctl</code> 命令來查詢 (<font color="red"><strong>只有 root 可用</strong></font>)</p>
+</li>
+<li><p>severity <code>notice</code> or <code>warning</code> 會以粗體顯示，<code>error</code> 以上會以紅色表示</p>
+</li>
+</ul>
+<h2 id="10-3-1-Finding-events-with-journalctl"><a href="#10-3-1-Finding-events-with-journalctl" class="headerlink" title="10.3.1 Finding events with journalctl"></a>10.3.1 Finding events with journalctl</h2><p><strong><font color="red">journalctl</font></strong> 的使用方式：</p>
+<ul>
+<li><p><code>sudo journalctl</code>：顯示所有的 system journal</p>
+</li>
+<li><p><code>sudo journalctl -n 5</code>：使用 <code>-n</code> 參數，顯示最新五筆的 system journal</p>
+</li>
+<li><p><code>sudo journalctl -p err</code>：使用 <code>-p</code> 參數，指定要顯示 priority 為 error 的 system journal</p>
+</li>
+<li><p><code>sudo journalctl -f</code>：類似 <code>tail -f</code>，但持續顯示最新十筆</p>
+</li>
+<li><p><code>sudo journalctl --since today</code>：顯示今天發生的 system journal</p>
+</li>
+<li><p><code>sudo journalctl --since &#39;2016-04-24 00:00:00&#39; --until &#39;2016-04-24 01:00:00&#39;</code>：顯示特定時段內的 system journal</p>
+</li>
+<li><p><code>sudo journalctl --since=&quot;$(date -d &quot;-30 minutes&quot; +%F&#39; &#39;%H:%M:%S)&quot;</code>：尋找 30 分鐘前的 system journal</p>
+</li>
+<li><p><code>sudo journalctl -o verbose</code>：顯示完整 system journal 訊息</p>
+</li>
+<li><p><code>sudo journalctl _PID=1</code>：顯示 pid=1 的 system journal</p>
+</li>
+<li><p><code>sudo journalctl -b</code>：顯示上一次開機到目前所存在的 system journal</p>
+</li>
+</ul>
+<hr>
+<h1 id="10-4-Preserving-the-systemd-Journal"><a href="#10-4-Preserving-the-systemd-Journal" class="headerlink" title="10.4 Preserving the systemd Journal"></a>10.4 Preserving the systemd Journal</h1><p>保留 systemd journal 的方式：</p>
+<ol>
+<li><code>/var/log/journal</code> 目錄存在</li>
+<li>目錄的 owner 必須為 <code>root</code>，owner_group 必須為 <code>systemd-journal</code>，並設定權限為 <code>2755</code></li>
+</ol>
+<hr>
+<h1 id="10-5-Maintain-Accurate-Time"><a href="#10-5-Maintain-Accurate-Time" class="headerlink" title="10.5 Maintain Accurate Time"></a>10.5 Maintain Accurate Time</h1><h2 id="10-5-1-Set-local-clocks-and-time-zone"><a href="#10-5-1-Set-local-clocks-and-time-zone" class="headerlink" title="10.5.1 Set local clocks and time zone"></a>10.5.1 Set local clocks and time zone</h2><ul>
+<li><p><code>timedatectl</code>：顯示目前時區設定</p>
+</li>
+<li><p><code>timedatectl list-timezones</code>：顯示所有時區</p>
+</li>
+<li><p><code>timedatectl set-timezone Asia/Taipei</code>：更改時區</p>
+</li>
+<li><p><code>sudo timedatectl set-ntp true</code>：設定自動 NTP 教時</p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 看目前機器上的時間</span></span><br><span class="line">$ timedatectl</span><br><span class="line">      Local time: Thu 2016-01-21 06:35:27 UTC</span><br><span class="line">  Universal time: Thu 2016-01-21 06:35:27 UTC</span><br><span class="line">        RTC time: Thu 2016-01-21 06:35:26</span><br><span class="line">       Time zone: UTC (UTC, +0000)</span><br><span class="line">     NTP enabled: n/a</span><br><span class="line">NTP synchronized: no</span><br><span class="line"> RTC <span class="keyword">in</span> <span class="built_in">local</span> TZ: yes</span><br><span class="line">      DST active: n/a</span><br><span class="line"></span><br><span class="line"><span class="comment"># 設定時區</span></span><br><span class="line">$ sudo timedatectl <span class="built_in">set</span>-timezone Asis/Taipei</span><br><span class="line"></span><br><span class="line"><span class="comment"># 啟用 NTP 校時</span></span><br><span class="line">$ sudo timedatectl <span class="built_in">set</span>-ntp <span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 透過互動的方式選擇時區(Time Zone)</span></span><br><span class="line">$ tzselect</span><br></pre></td></tr></table></figure>
+<h2 id="10-5-2-Configuring-and-monitoring-chronyd"><a href="#10-5-2-Configuring-and-monitoring-chronyd" class="headerlink" title="10.5.2 Configuring and monitoring chronyd"></a>10.5.2 Configuring and monitoring chronyd</h2><p>這個是用在沒有網路環境時，會由一台主要的 NTP server 去取得正確的資料，其他主機再透過 chronyd.service 進行時間同步。</p>
+<p>加上 <code>iburst</code> 選項會讓網路校時更快，且更正確</p>
+<p><code>sudo hwclock -w</code>：強制將時間資訊寫入硬體</p>
+<h2 id="補充：設定-NTP-校時的完整步驟-很重要"><a href="#補充：設定-NTP-校時的完整步驟-很重要" class="headerlink" title="補充：設定 NTP 校時的完整步驟 (很重要)"></a>補充：設定 NTP 校時的完整步驟 (<strong>很重要</strong>)</h2><ul>
+<li>NTP server：<code>classroom.example.com</code></li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">$ sudo timedatectl <span class="built_in">set</span>-ntp <span class="literal">true</span></span><br><span class="line"></span><br><span class="line">$ <span class="built_in">echo</span> <span class="string">"server classroom.example.com iburst"</span> | sudo tee --append /etc/chrony.conf</span><br><span class="line">$ sudo systemctl restart chronyd.service</span><br><span class="line"></span><br><span class="line"><span class="comment"># 驗證設定結果</span></span><br><span class="line">$ chronyc sources -v</span><br><span class="line">210 Number of sources = 1</span><br><span class="line"></span><br><span class="line">  .-- Source mode  <span class="string">'^'</span> = server, <span class="string">'='</span> = peer, <span class="string">'#'</span> = <span class="built_in">local</span> clock.</span><br><span class="line"> / .- Source state <span class="string">'*'</span> = current synced, <span class="string">'+'</span> = combined , <span class="string">'-'</span> = not combined,</span><br><span class="line">| /   <span class="string">'?'</span> = unreachable, <span class="string">'x'</span> = time may be <span class="keyword">in</span> error, <span class="string">'~'</span> = time too variable.</span><br><span class="line">||                                                 .- xxxx [ yyyy ] +/- zzzz</span><br><span class="line">||                                                /   xxxx = adjusted offset,</span><br><span class="line">||         Log2(Polling interval) -.             |    yyyy = measured offset,</span><br><span class="line">||                                  \            |    zzzz = estimated error.</span><br><span class="line">||                                   |           |                         </span><br><span class="line">MS Name/IP address         Stratum Poll Reach LastRx Last sample</span><br><span class="line">===============================================================================</span><br><span class="line">^* classroom.example.com         8   6    17    18  +2830us[+3050us] +/- 3509us</span><br></pre></td></tr></table></figure>
+]]></content>
+      
+        <categories>
+            
+            <category> RHCE </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Linux </tag>
+            
+            <tag> RHCE </tag>
+            
+            <tag> RH124 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[[RHCE] RH124 Chapter 9 Controlling and Securing OpenSSH Service 學習筆記]]></title>
+      <url>/blog/2016/04/19/RHCE/RHCE7-RH124-LearningNotes-CH09_ConfiguringAndSecuringOpenSSHService/</url>
+      <content type="html"><![CDATA[<h1 id="9-1-Accessing-the-Remote-Command-Line-with-SSH"><a href="#9-1-Accessing-the-Remote-Command-Line-with-SSH" class="headerlink" title="9.1 Accessing the Remote Command Line with SSH"></a>9.1 Accessing the Remote Command Line with SSH</h1><h2 id="9-1-1-SSH-Host-Keys"><a href="#9-1-1-SSH-Host-Keys" class="headerlink" title="9.1.1 SSH Host Keys"></a>9.1.1 SSH Host Keys</h2><p>server 會將 public key copy 送到 client 端，有兩個功能：</p>
+<ol>
+<li>用來加密 ssh connection 用</li>
+<li>用來驗證 server</li>
+</ol>
+<ul>
+<li><p>server public key 會存在於 client 端的 <code>~/.ssh/known_hosts</code> 檔案中</p>
+</li>
+<li><p>server 端會把 key pair 儲存在 <code>/etc/ssh/ssh_host_key*</code> 目錄下</p>
+</li>
+<li><p>當 client 透過 ssh 連到 server 時，會把 server 的 public 儲存在 <strong><font color="red">~/.ssh/known_hosts</font></strong> 內，且每次連線都會檢查，若發現內容不會就會警告且中斷連線!</p>
+</li>
+</ul>
+<hr>
+<h1 id="9-2-Conguring-SSH-Key-based-Authentication"><a href="#9-2-Conguring-SSH-Key-based-Authentication" class="headerlink" title="9.2 Conguring SSH Key-based Authentication"></a>9.2 Conguring SSH Key-based Authentication</h1><p><code>ssh-copy-id</code>：上傳 <font color="red"><strong>~/.ssh/id_rsa.pub</strong></font> 到 remote server 的 <font color="red"><strong>~user/.ssh/authorized_keys</strong></font> 檔案中：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 將指定的 public key 加入到 remote server 的 student 帳號下</span></span><br><span class="line">[student@server0 ~]$ ssh-copy-id -i ~/.ssh/id_rsa.pub student@172.25.0.10</span><br><span class="line"><span class="comment"># 將指定的 public key 加入到 remote server 的 root 帳號下</span></span><br><span class="line">[student@server0 ~]$ ssh-copy-id -i ~/.ssh/id_rsa.pub root@172.25.0.10</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>若沒有使用 <code>-i</code> 指定 public key 位置，則就預設為 <code>~/.ssh/id_rsa.pub</code></p>
+</blockquote>
+<p>若要使用 key-based 認證但又希望在 private key 上加密碼，並達成 password-less 的效果時：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 產生一個新的 ssh agent 並將 private key 驗證加入</span></span><br><span class="line">$ ssh-agent bash</span><br><span class="line">$ ssh-add</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="9-3-Customize-SSH-Service-Configuration"><a href="#9-3-Customize-SSH-Service-Configuration" class="headerlink" title="9.3 Customize SSH Service Configuration"></a>9.3 Customize SSH Service Configuration</h1><p>修改 <code>/etc/ssh/sshd_config</code> 中，調整使用者登入方式：</p>
+<ol>
+<li><p><code>PermitRootLogin no</code>：禁止 root 使用 ssh 登入</p>
+</li>
+<li><p><code>PermitRootLogin without-password</code>：root 只能透過 key-based 的方式登入</p>
+</li>
+<li><p><code>PasswordAuthentication no</code>：關閉密碼登入功能(只能透過 key-based 的方式登入)</p>
+</li>
+</ol>
+<blockquote>
+<p>要重新 reload sshd.service 讓設定變更生效 (<code>sudo systemctl restart sshd.service</code>)</p>
+</blockquote>
+]]></content>
+      
+        <categories>
+            
+            <category> RHCE </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Linux </tag>
+            
+            <tag> RHCE </tag>
+            
+            <tag> RH124 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[[RHCE] RH124 Chapter 8 Controlling Services and Daemons 學習筆記]]></title>
+      <url>/blog/2016/04/18/RHCE/RHCE7-RH124-LearningNotes-CH08_ControllingServicesAndDaemons/</url>
+      <content type="html"><![CDATA[<h1 id="8-1-Identifying-Automatically-Started-System-Processes"><a href="#8-1-Identifying-Automatically-Started-System-Processes" class="headerlink" title="8.1 Identifying Automatically Started System Processes"></a>8.1 Identifying Automatically Started System Processes</h1><h2 id="8-1-1-Introduction-to-systemd"><a href="#8-1-1-Introduction-to-systemd" class="headerlink" title="8.1.1 Introduction to systemd"></a>8.1.1 Introduction to systemd</h2><p>systemd(是一個小型的 kernel) 跟開機流程很有關係</p>
+<p>通常一個 service 是由一個或多個 daemon 提供。</p>
+<p>多年前，Linux &amp; UNIX 系統中 PID=1 是屬於一支稱為 <code>init</code>(載入 kernel 之後執行) 的 process；當 kernel 載入後執行。</p>
+<p>在 RHEL 7 中，PID=1 的 process 已經變成 systemd：</p>
+<ul>
+<li>有平行處理的能力，可提升系統開機的速度</li>
+<li>有些先前需要的 daemon 會自動啟動</li>
+<li>自動管理 service 相依性</li>
+<li>LCG (Linux control group)</li>
+</ul>
+<blockquote>
+<p>現在的 <code>/usr/sbin/init</code> 已經改由 symbolic link 指到 systemd</p>
+</blockquote>
+<p>systemd 用來管理各式各樣不同的型態的 object，稱為 <strong>systemd unit</strong>，可以用 <code>systemctl -t help</code> 查詢目前 systemd 可管理的 unit 有那些：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[student@server0 ~]$ systemctl -t <span class="built_in">help</span></span><br><span class="line">Available unit types:</span><br><span class="line">service</span><br><span class="line">socket</span><br><span class="line">target  <span class="comment"># 取代原先 Run Level 的概念</span></span><br><span class="line">device</span><br><span class="line">mount</span><br><span class="line">automount</span><br><span class="line">snapshot</span><br><span class="line">timer   <span class="comment"># 自動排程的功能</span></span><br><span class="line">.....</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>service</code>：用來表示系統服務</li>
+<li><code>socket</code>：表示 IPC(inter-process communication) socket</li>
+<li><code>timer</code>：自動排程工作是由 timer unit 來處理</li>
+<li><code>target</code>：取代原先 Run Level 的概念</li>
+<li><code>path</code>：通常用來以特定檔案有無變化為前提下，延遲服務發生，例如：列印服務(print pool 的概念)</li>
+</ul>
+<h3 id="Service-status"><a href="#Service-status" class="headerlink" title="Service status"></a>Service status</h3><p>systemd service unit 有以下幾種狀態：</p>
+<ul>
+<li><strong>loaded</strong>：unit 設定被處理後(套件剛裝好時，會處於此狀態)</li>
+<li><strong>active</strong>：啟用狀態</li>
+<li><strong>inactive</strong>：非啟用狀態</li>
+<li><strong>enabled</strong>：開機時會自動啟動</li>
+<li><strong>disabled</strong>：開機時不會自動啟動</li>
+<li><strong>static</strong>：無法控管的狀態，必須由其他 unit 來自動的 enable</li>
+</ul>
+<h2 id="8-1-2-systemctl-使用方式"><a href="#8-1-2-systemctl-使用方式" class="headerlink" title="8.1.2 systemctl 使用方式"></a>8.1.2 systemctl 使用方式</h2><p><code>systemctl</code> 是用來管理不同 systemd unit 的指令，使用方式大概如下：</p>
+<p>列表相關的指令：</p>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sudo systemctl -l</code></td>
+<td>檢視所有的 systemd unit 的狀態，但不包含狀態為 inactive 的(加上 <code>--all</code> or <code>-a</code> 可看到全部)</td>
+</tr>
+<tr>
+<td><code>sudo systemctl status sshd.service</code></td>
+<td>檢查 ssh service unit 的狀態<p>(透過 <code>systemctl status name.type</code> 可以檢視 unit 狀態，<code>type</code> 可以不輸入，則預設為 <strong>service</strong>)</p></td>
+</tr>
+<tr>
+<td><code>sudo systemctl --type=service</code></td>
+<td>檢視 type 屬於 service 的 systemd unit</td>
+</tr>
+<tr>
+<td><code>sudo systemctl is-active sshd.service</code></td>
+<td>檢視 sshd service 是否為 active 狀態</td>
+</tr>
+<tr>
+<td><code>sudo systemctl is-enabled sshd.service</code></td>
+<td>檢視 sshd service 是否為 enabled 狀態</td>
+</tr>
+<tr>
+<td><code>sudo systemctl list-unit-files --type=service</code></td>
+<td>檢視 service type 所有的 unit 設定</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h1 id="8-2-Controlling-System-Services"><a href="#8-2-Controlling-System-Services" class="headerlink" title="8.2 Controlling System Services"></a>8.2 Controlling System Services</h1><h2 id="8-2-1-Starting-and-stopping-daemons-on-a-running-system"><a href="#8-2-1-Starting-and-stopping-daemons-on-a-running-system" class="headerlink" title="8.2.1 Starting and stopping daemons on a running system"></a>8.2.1 Starting and stopping daemons on a running system</h2><p>安裝 apache2，檢視狀態，並啟動服務：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">$ sudo yum -y install httpd</span><br><span class="line"></span><br><span class="line"><span class="comment"># inactive + disabled</span></span><br><span class="line">$ sudo systemctl status httpd.service</span><br><span class="line"></span><br><span class="line"><span class="comment"># active(running) + disabled</span></span><br><span class="line">$ sudo systemctl start httpd.service</span><br><span class="line"></span><br><span class="line"><span class="comment"># active(running) + enabled</span></span><br><span class="line">$ sudo systemctl <span class="built_in">enable</span> httpd.service</span><br></pre></td></tr></table></figure>
+<p>系統中有 exited &amp; waiting 狀態的 system unit：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 觀察 active(exited) 狀態</span></span><br><span class="line">$ sudo systemctl status network.service</span><br><span class="line"></span><br><span class="line"><span class="comment"># 觀察 active(waiting) 狀態</span></span><br><span class="line">$ sudo systemctl status cups.path</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 以下兩行指令相同</span></span><br><span class="line">$ sudo service sshd restart</span><br><span class="line">$ sudo /bin/systemctl restart sshd.service</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以下兩行指令相同</span></span><br><span class="line">$ sudo systemctl --<span class="built_in">type</span>=service</span><br><span class="line">$ sudo systemctl list-unit --<span class="built_in">type</span>=service</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>service reload 時，PID 不會換</p>
+</blockquote>
+<h3 id="Unit-dependencies"><a href="#Unit-dependencies" class="headerlink" title="Unit dependencies"></a>Unit dependencies</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 檢視該 system unit 被那些 systen unit 所依賴</span></span><br><span class="line">$ sudo systemctl list-dependencies graphical.target | grep target</span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視指定的 system unit 依賴那些其他的 system unit</span></span><br><span class="line">$ sudo systemctl list-dependencies multi-user.target --reverse</span><br></pre></td></tr></table></figure>
+<h3 id="Masking-services"><a href="#Masking-services" class="headerlink" title="Masking services"></a>Masking services</h3><ul>
+<li><p><code>disabled</code> 的 service 開機時不會自動啟動，但可以手動啟動</p>
+</li>
+<li><p><code>mask</code> 的 service 無法透過手動或自動的方式啟動(會在 <code>/etc/systemd/system</code> 目錄中產生指定 system unit 的 symbolic link 並指向 /dev/null)</p>
+</li>
+</ul>
+]]></content>
+      
+        <categories>
+            
+            <category> RHCE </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Linux </tag>
+            
+            <tag> RHCE </tag>
+            
+            <tag> RH124 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[[RHCE] RH124 Chapter 7 Monitoring and Managing Linux Processes 學習筆記]]></title>
+      <url>/blog/2016/04/13/RHCE/RHCE7-RH124-LearningNotes-CH07_MonitoringAndManagingLinuxProcesses/</url>
+      <content type="html"><![CDATA[<h1 id="7-1-Process"><a href="#7-1-Process" class="headerlink" title="7.1 Process"></a>7.1 Process</h1><h2 id="7-1-1-What-is-a-process"><a href="#7-1-1-What-is-a-process" class="headerlink" title="7.1.1 What is a process?"></a>7.1.1 What is a process?</h2><p>每個 process 都會有個獨一無二的 PID，而 parent process ID(PPID) 則為 PID 的父程序所擁有的 ID；process 可透過 <code>fork</code> 的方式產生 child process，而這些 child process 則會繼承 parent process 的 security identifiers, file descriptors, port, resource privileges, 環境變數….等等，整個 process lifeycle 可以參考下圖：</p>
+<p><img src="https://www.freebsd.org/doc/en_US.ISO8859-1/books/design-44bsd/fig1.png" alt="Process Lifecycle"></p>
+<p>在 RHEL7 中，所有的 process 都是 <strong><font color="red">systemd(1)</font></strong> 的 child process。</p>
+<h2 id="7-1-2-Process-States"><a href="#7-1-2-Process-States" class="headerlink" title="7.1.2 Process States"></a>7.1.2 Process States</h2><p><img src="http://4.bp.blogspot.com/-5jYQDgc6Z4M/UyV1ni478uI/AAAAAAAADZw/rpBf813wpbg/s1600/ProcessStates.JPG" alt="Linux Process States"></p>
+<table>
+<thead>
+<tr>
+<th>狀態</th>
+<th>Flag</th>
+<th>kernel-defined state and description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Running</td>
+<td>R</td>
+<td><strong><font color="red">TASK_RUNNING</font></strong>：正在等待執行 or 正在執行的 process，正在執行的又包含執行 user routine &amp; kernel routine(system calls)。例如：Data -&gt; Memory</td>
+</tr>
+<tr>
+<td>Sleeping</td>
+<td>S</td>
+<td><strong><font color="red">TASK_INTERRUPTIBLE</font></strong>：等待特定的情況(硬體要求、系統資源存取、信號….等)發生，當條件滿足時就會回到 Running 的狀態</td>
+</tr>
+<tr>
+<td>Sleeping</td>
+<td>D</td>
+<td><strong><font color="red">TASK_UNINTERRUPTIBLE</font></strong>：與 <strong><font color="red">S</font></strong> 類似，但不會回應從其他地方送來的信號。例如：寫資料到外接儲存裝置時(Memory -&gt; USB)</td>
+</tr>
+<tr>
+<td>Sleeping</td>
+<td>K</td>
+<td><strong><font color="red">TASK_KILLABLE</font></strong>：與 <strong><font color="red">D</font></strong> 相反，可以接收來自其他地方的信號，例如：掛載網路磁碟機</td>
+</tr>
+<tr>
+<td>Stopped</td>
+<td>T</td>
+<td><strong><font color="red">TASK_STOPPED</font></strong>：可能因為 user 或是其他 process 送來訊號而進入 Stopped 狀態，也可能因為特定訊號而返回 Running 狀態</td>
+</tr>
+<tr>
+<td>Stopped</td>
+<td>T</td>
+<td><strong><font color="red">TASK_TRACED</font></strong>：同上，但可 debug</td>
+</tr>
+<tr>
+<td>Zombie</td>
+<td>Z</td>
+<td><strong><font color="red">EXIT_ZOMBIE</font></strong>：已通知 parent process 準備離開後的狀態，除了 process identity 之外的資源都會被釋放</td>
+</tr>
+<tr>
+<td>Zombie</td>
+<td>X</td>
+<td><strong><font color="red">EXIT_DEAD</font></strong>：所有資源都被釋放，ps 也看不見了</td>
+</tr>
+</tbody>
+</table>
+<h2 id="7-1-2-Listing-processes"><a href="#7-1-2-Listing-processes" class="headerlink" title="7.1.2 Listing processes"></a>7.1.2 Listing processes</h2><p>ps 指定常用的參數：</p>
+<ul>
+<li><code>aux</code></li>
+<li><code>las</code></li>
+<li><code>afx</code> (含階層)</li>
+<li><code>-O</code> (指定要顯示的欄位)</li>
+<li><code>--sort</code>：排序</li>
+</ul>
+<p><code>ps</code> 可用來觀察目前 process 的狀態，有以下幾種格式</p>
+<ul>
+<li><p>UNIX(POSIX)：參數加上一個 <code>-</code></p>
+</li>
+<li><p>BSD：參數不加上 <code>-</code></p>
+</li>
+<li><p>GNU long：參數加上兩個 <code>-</code></p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># BSD</span></span><br><span class="line">[student@server0 ~]$ ps f</span><br><span class="line">  PID TTY      STAT   TIME COMMAND</span><br><span class="line"> 1986 pts/0    Ss     0:00 -bash</span><br><span class="line"> 2072 pts/0    R+     0:00  \_ ps f</span><br><span class="line"></span><br><span class="line"> <span class="comment"># 以階層顯示(顯示往上五階)</span></span><br><span class="line">[student@server0 ~]$ ps afx | grep -B5 ssh-agent</span><br><span class="line">  1130 ?        Ss     0:00 /usr/sbin/sshd -D</span><br><span class="line">  2823 ?        Ss     0:00  \_ sshd: student [priv]</span><br><span class="line">  2827 ?        S      0:00      \_ sshd: student@pts/0</span><br><span class="line">  2829 pts/0    Ss     0:00          \_ -bash</span><br><span class="line">  3110 pts/0    R+     0:00              \_ ps afx</span><br><span class="line">  3111 pts/0    S+     0:00              \_ grep --color=auto -B5 ssh-agent</span><br><span class="line"></span><br><span class="line"> <span class="comment"># UNIX(POSIX)</span></span><br><span class="line">[student@server0 ~]$ ps -f</span><br><span class="line">UID        PID  PPID  C STIME TTY          TIME CMD</span><br><span class="line">student   1986  1983  0 05:28 pts/0    00:00:00 -bash</span><br><span class="line">student   2073  1986  0 05:30 pts/0    00:00:00 ps -f</span><br><span class="line">[student@server0 ~]$ ps --f</span><br></pre></td></tr></table></figure>
+<p>檢視全部的 process 常用 <code>aux</code> 選項 or <code>alx</code>(較為詳細)，若想要檢視 process 之間的父子關係可使用 <code>afx</code>(關鍵是 <code>f</code> 參數)</p>
+<p>關於 ps 還有幾個重點：</p>
+<ul>
+<li>若 ps 不加上任何參數，就僅會顯示與目前這個 user terminal 有關係的 process：</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[student@server0 ~]$ ps</span><br><span class="line">  PID TTY          TIME CMD</span><br><span class="line"> 1986 pts/0    00:00:00 bash</span><br><span class="line"> 2326 pts/0    00:00:00 ps</span><br></pre></td></tr></table></figure>
+<ul>
+<li>顯示結果中，若是以 <strong><font color="red">[ ]</font></strong> 包覆的，表示為 kernel thread</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[student@server0 ~]$ ps aux</span><br><span class="line">USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND</span><br><span class="line">root         1  0.2  0.3  52328  6484 ?        Ss   04:55   0:06 /usr/lib/systemd/systemd --switched-root --system --deserialize 21</span><br><span class="line">root         2  0.0  0.0      0     0 ?        S    04:55   0:00 [kthreadd]</span><br><span class="line">root         3  0.0  0.0      0     0 ?        S    04:55   0:00 [ksoftirqd/0]</span><br><span class="line">root         5  0.0  0.0      0     0 ?        S&lt;   04:55   0:00 [kworker/0:0H]</span><br><span class="line">root         6  0.0  0.0      0     0 ?        S    04:55   0:00 [kworker/u2:0]</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>透過 <code>ps afx</code> or <code>pstree</code> 可看到 process 之間的 parent/child 關係</p>
+</li>
+<li><p>若要排序 ps 出來的結果，可透過 <code>--sort</code> 選項 (<a href="http://alvinalexander.com/linux/unix-linux-process-memory-sort-ps-command-cpu" target="_blank" rel="noopener">參考網址(Linux process memory usage - how to sort the ps command)</a>)</p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 根據 CPU 遞增排序</span></span><br><span class="line">$ ps au --sort=%cpu</span><br><span class="line"></span><br><span class="line"><span class="comment"># 根據 CPU 遞減排序</span></span><br><span class="line">$ ps au --sort=-%cpu</span><br><span class="line"></span><br><span class="line"><span class="comment"># PID 從小到大排序</span></span><br><span class="line">[student@server0 ~]$ ps aux --sort pid</span><br><span class="line">USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND</span><br><span class="line">root         1  0.5  0.3  52328  6472 ?        Ss   19:53   0:09 /usr/lib/systemd/systemd --switched-root --system --deserialize 21</span><br><span class="line">root         2  0.0  0.0      0     0 ?        S    19:53   0:00 [kthreadd]</span><br><span class="line">root         3  0.0  0.0      0     0 ?        S    19:53   0:00 [ksoftirqd/0]</span><br><span class="line"></span><br><span class="line"><span class="comment"># PID 從大到小排序</span></span><br><span class="line">[student@server0 ~]$ ps aux --sort -pid</span><br><span class="line">USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND</span><br><span class="line">student   2065  0.0  0.0 123516  1448 pts/0    R+   20:24   0:00 ps aux --sort -pid</span><br><span class="line">root      2064  0.0  0.0 107892   364 ?        S    20:24   0:00 sleep 60</span><br><span class="line">root      2001  0.0  0.0      0     0 ?        S    20:19   0:00 [kworker/0:0]</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="7-2-Controlling-Jobs"><a href="#7-2-Controlling-Jobs" class="headerlink" title="7.2 Controlling Jobs"></a>7.2 Controlling Jobs</h1><p><code>jobs</code> 指令只會顯示目前 session 中的 job</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$ gedit &amp;</span><br><span class="line">$ <span class="built_in">jobs</span></span><br><span class="line">$ nautilus &amp;</span><br><span class="line">$ <span class="built_in">jobs</span></span><br><span class="line">$ sleep 1000 &amp;</span><br><span class="line">$ <span class="built_in">jobs</span></span><br><span class="line">$ <span class="built_in">fg</span></span><br><span class="line">CTRL + C (終止目前前景執行的程式)</span><br><span class="line">$ <span class="built_in">jobs</span></span><br><span class="line">$ <span class="built_in">fg</span> %1</span><br><span class="line">CTRL + C (終止目前前景執行的程式)</span><br></pre></td></tr></table></figure>
+<h2 id="7-2-1-Jobs-and-sessions"><a href="#7-2-1-Jobs-and-sessions" class="headerlink" title="7.2.1 Jobs and sessions"></a>7.2.1 Jobs and sessions</h2><p>當 terminal or console 被開啟時，會產生一個 process session，所以透過同一個 terminal or console 產生出來的 process，都會使用相同的 session ID，而每個 session 中，一次只能有一個 process 在前景執行。</p>
+<p>service daemon 或是 kernel process thread 在 <code>ps</code> 出來的結果中，<code>TTY</code> 欄位會以 <code>?</code> 來呈現，因為此類的 background process 並沒有 controlling terminal。</p>
+<h2 id="7-2-2-Running-jobs-in-the-background"><a href="#7-2-2-Running-jobs-in-the-background" class="headerlink" title="7.2.2 Running jobs in the background"></a>7.2.2 Running jobs in the background</h2><p><code>Ctrl + z</code>：可送出 suspend 要求，用來讓 process 進入 Stopped 狀態(T)</p>
+<p><code>Ctrl + c</code>：中斷 process 執行</p>
+<p><code>bg %JOB_ID</code>：可讓 process 恢復執行。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 一個執行中的範例</span></span><br><span class="line">$ dd &lt; /dev/zero &gt; /dev/null</span><br><span class="line"></span><br><span class="line"><span class="comment"># R(Running) 狀態</span></span><br><span class="line">$ ps au | grep dd</span><br><span class="line"></span><br><span class="line">Ctrl + Z</span><br><span class="line"></span><br><span class="line"><span class="comment"># 變成 S(Sleeping, TASK_INTERRUPTIBLE) 狀態</span></span><br><span class="line">$ ps au | grep dd</span><br><span class="line"></span><br><span class="line">$ sleep 1000</span><br><span class="line"></span><br><span class="line"><span class="comment"># S(Sleep) 狀態</span></span><br><span class="line">$ ps au | grep sleep</span><br><span class="line"></span><br><span class="line"><span class="comment"># 用來驗證 D(Sleeping, TASK_UNINTERRUPTIBLE) 狀態</span></span><br><span class="line">$ dd <span class="keyword">if</span>=/dev/zero bs=1M count=50 of=/run/media/...../test.txt</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="7-3-Killing-Processes"><a href="#7-3-Killing-Processes" class="headerlink" title="7.3 Killing Processes"></a>7.3 Killing Processes</h1><h2 id="7-3-1-Process-control-using-signals"><a href="#7-3-1-Process-control-using-signals" class="headerlink" title="7.3.1 Process control using signals"></a>7.3.1 Process control using signals</h2><p>signal 是送到 process 的一種軟體型式的中斷，有以下幾種：</p>
+<table>
+<thead>
+<tr>
+<th>Signal number</th>
+<th>Short name</th>
+<th>Definition</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>1</code></td>
+<td><code>HUP</code></td>
+<td>Hangup</td>
+<td></td>
+</tr>
+<tr>
+<td><code>2</code></td>
+<td><code>INT</code></td>
+<td>Keyboard interrupt</td>
+<td>讓程式中止，等同按下 <code>Ctrl + c</code></td>
+</tr>
+<tr>
+<td><code>3</code></td>
+<td><code>QUIT</code></td>
+<td>Keyboard quit</td>
+<td>讓 process 中止，但會執行 core dump 的動作，等同按下 <code>Ctrl + \</code></td>
+</tr>
+<tr>
+<td><code>9</code></td>
+<td><code>KILL</code></td>
+<td>Kill, unblockable</td>
+<td>強行中止</td>
+</tr>
+<tr>
+<td><code>15</code>(default)</td>
+<td><code>TERM</code></td>
+<td>Terminate</td>
+<td>通知程式中止，允許 process 完成 self-cleanup 後才中止</td>
+</tr>
+<tr>
+<td><code>20</code></td>
+<td><code>TSTP</code></td>
+<td>Keyboard stop</td>
+<td>讓 process 中斷執行(但可恢復)，效果等同按下 <code>Ctrl + z</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>詳細的 signal 列表可使用 <code>kill -l</code> 查詢</p>
+<p>基本上砍掉 process 時先嘗試用 <code>SIGTERM</code>，不行的話才改用 <code>SIGKILL</code>，會是比較穩妥的作法‧</p>
+<p>沒指定 SIG 則預設給 <font color="red"><strong>SIGTERM(15)</strong></font></p>
+</blockquote>
+<h3 id="Logging-users-out-administratively"><a href="#Logging-users-out-administratively" class="headerlink" title="Logging users out administratively"></a>Logging users out administratively</h3><p><code>w</code> 指令是用來檢視目前登入到系統的使用者以及累積到現在的資源使用狀況：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[kiosk@foundation0 ~]$ w -f</span><br><span class="line"> 06:19:29 up  1:27,  3 users,  load average: 0.04, 0.07, 0.06</span><br><span class="line">USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT</span><br><span class="line">kiosk    :0       :0               04:52   ?xdm?  11:36   0.20s gdm-session-worker [pam/gdm-autologin]</span><br><span class="line">kiosk    pts/3    :0               05:27   52:14   0.03s  0.03s bash</span><br><span class="line">kiosk    pts/4    192.168.1.190    06:11    1.00s  0.03s  0.01s w -f</span><br></pre></td></tr></table></figure>
+<p><code>pkill</code> 是個強大的關閉 process 的指令，可透過以下方式過濾：</p>
+<ul>
+<li>command</li>
+<li>UID</li>
+<li>GID</li>
+<li>parent</li>
+<li>terminal</li>
+</ul>
+<p><code>pgrep</code> 指定 user 作 grep</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 刪除使用者 bboop 相關的 process</span></span><br><span class="line">$ pkill -u bboop</span><br><span class="line"></span><br><span class="line"><span class="comment"># 刪除使用者 bboop 相關的 process 並強制登出</span></span><br><span class="line">$ pkill -SIGKILL -u bboop</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">[student@server0 ~]$ sleep 1000 &amp;</span><br><span class="line">[1] 2893</span><br><span class="line">[student@server0 ~]$ sleep 1000 &amp;</span><br><span class="line">[2] 2894</span><br><span class="line">[student@server0 ~]$ sleep 1000 &amp;</span><br><span class="line">[3] 2895</span><br><span class="line"><span class="comment"># pgrep 視特定使用者</span></span><br><span class="line">[student@server0 ~]$ pgrep -l -u student</span><br><span class="line">2827 sshd</span><br><span class="line">2829 bash</span><br><span class="line">2893 sleep</span><br><span class="line">2894 sleep</span><br><span class="line">2895 sleep</span><br><span class="line"><span class="comment"># pstree 檢視特定使用者，使用 PID</span></span><br><span class="line">[student@server0 ~]$ pstree -p student</span><br><span class="line">sshd(2827)───bash(2829)─┬─pstree(2896)</span><br><span class="line">                        ├─sleep(2893)</span><br><span class="line">                        ├─sleep(2894)</span><br><span class="line">                        └─sleep(2895)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 指定 PPID(parent ID) 刪除 process</span></span><br><span class="line">[student@server0 ~]$ pkill -SIGKILL -P 2829</span><br><span class="line">[1]   Killed                  sleep 1000</span><br><span class="line">[2]-  Killed                  sleep 1000</span><br><span class="line">[3]+  Killed                  sleep 1000</span><br><span class="line">[student@server0 ~]$ pstree -p student</span><br><span class="line">sshd(2827)───bash(2829)───pstree(2945)</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="7-4-Monitoring-Process-Activity"><a href="#7-4-Monitoring-Process-Activity" class="headerlink" title="7.4 Monitoring Process Activity"></a>7.4 Monitoring Process Activity</h1><h2 id="7-4-1-Load-average"><a href="#7-4-1-Load-average" class="headerlink" title="7.4.1 Load average"></a>7.4.1 Load average</h2><p>靜態呈現，使用 <code>w -f</code> or <code>uptime</code>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查詢目前系統的 load average</span></span><br><span class="line">$ w -f</span><br><span class="line"> 16:37:45 up  7:29,  3 users,  load average: 0.20, 0.17, 0.14</span><br><span class="line">USER     TTY        LOGIN@   IDLE   JCPU   PCPU WHAT</span><br><span class="line">godleon  tty8      09:08    7:29m  9:30   0.37s mate-session</span><br><span class="line"></span><br><span class="line"><span class="comment"># $ uptime</span></span><br><span class="line"> 16:43:07 up  7:35,  3 users,  load average: 0.18, 0.15, 0.14</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>load average 超過 1 就表示系統負擔過重(要先除以 CPU 執行緒數量)</p>
+</blockquote>
+<h2 id="7-4-2-Real-time-process-monitoring"><a href="#7-4-2-Real-time-process-monitoring" class="headerlink" title="7.4.2 Real-time process monitoring"></a>7.4.2 Real-time process monitoring</h2><p>動態呈現，使用 <code>top</code>：</p>
+<ul>
+<li><p><code>VIRT</code>：process 消耗所有記憶體大小(包含實體 &amp; 虛擬)，等同 ps 指令中的 <code>VSZ</code></p>
+</li>
+<li><p><code>RES</code>：process 所使用的實體記憶體大小，等同 ps 指令中的 <code>RSS</code></p>
+</li>
+</ul>
+<p>在 top 中常用的按鍵：</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>l</code>, <code>t</code>, <code>m</code></td>
+<td>開啟 or 關閉 load, thread, memory 資訊</td>
+</tr>
+<tr>
+<td><code>M</code></td>
+<td>記憶體使用量從大排到小</td>
+</tr>
+<tr>
+<td><code>P</code></td>
+<td>CPU 使用量從大排到小</td>
+</tr>
+<tr>
+<td><code>k</code></td>
+<td>指定 PID 並 TERM 該 process</td>
+</tr>
+<tr>
+<td><code>r</code></td>
+<td>renice 指定 process</td>
+</tr>
+<tr>
+<td><code>W</code></td>
+<td>記錄目前的 top 觀察設定，並可作為下次使用 top 時的預設設定</td>
+</tr>
+<tr>
+<td><code>B</code></td>
+<td>header &amp; running process 會以粗體顯示</td>
+</tr>
+</tbody>
+</table>
+]]></content>
+      
+        <categories>
+            
+            <category> RHCE </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Linux </tag>
+            
+            <tag> RHCE </tag>
+            
+            <tag> RH124 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
       <title><![CDATA[[RHCE] RH124 Chapter 4~6 學習筆記]]></title>
       <url>/blog/2016/04/03/RHCE/RHCE7-RH124-LearningNotes-CH04_06/</url>
       <content type="html"><![CDATA[<h1 id="Chapter-4-Creating-Viewing-and-Editing-Text-Files"><a href="#Chapter-4-Creating-Viewing-and-Editing-Text-Files" class="headerlink" title="Chapter 4. Creating, Viewing, and Editing Text Files"></a>Chapter 4. Creating, Viewing, and Editing Text Files</h1><h2 id="4-1-Redirecting-Output-to-a-File-or-Program"><a href="#4-1-Redirecting-Output-to-a-File-or-Program" class="headerlink" title="4.1 Redirecting Output to a File or Program"></a>4.1 Redirecting Output to a File or Program</h2><h3 id="Standard-input-standard-output-and-standard-error"><a href="#Standard-input-standard-output-and-standard-error" class="headerlink" title="Standard input, standard output, and standard error"></a>Standard input, standard output, and standard error</h3><p><img src="https://upload.wikimedia.org/wikipedia/commons/7/70/Stdstreams-notitle.svg" alt="Process I/O Channel"></p>
