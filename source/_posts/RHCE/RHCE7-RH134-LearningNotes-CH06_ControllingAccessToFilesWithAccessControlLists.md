@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "[RHCE7] RH134 Chapter 06. Controlling Access to Files with Access Control Lists(ACLs) 學習筆記"
+title:  "[RHCE7] RH134 Chapter 6. Controlling Access to Files with Access Control Lists(ACLs) 學習筆記"
 description: "此文章記錄學習 RHCE7 RH134 Chapter 06. Controlling Access to Files with Access Control Lists(ACLs) 留下的內容"
 date: 2016-05-07 21:15:00
 published: true
