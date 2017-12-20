@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-tw">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/blog/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/blog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/blog/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/blog/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Linux,CoreOS," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="This article introduces the concepts of CoreOS main components - etcd、fleet &amp; flannel">
+<meta name="keywords" content="Linux,CoreOS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[CoreOS] etcd、fleet &amp; flannel 簡介">
+<meta property="og:url" content="https://godleon.github.io/blog/2016/06/22/CoreOS/CoreOS-Introduction-Of-etcd-fleet-and-flannel/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="This article introduces the concepts of CoreOS main components - etcd、fleet &amp; flannel">
+<meta property="og:locale" content="zh-tw">
+<meta property="og:updated_time" content="2017-12-20T02:21:39.282Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[CoreOS] etcd、fleet &amp; flannel 簡介">
+<meta name="twitter:description" content="This article introduces the concepts of CoreOS main components - etcd、fleet &amp; flannel">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://godleon.github.io/blog/2016/06/22/CoreOS/CoreOS-Introduction-Of-etcd-fleet-and-flannel/"/>
+
+
+
+
+
+  <title>[CoreOS] etcd、fleet & flannel 簡介 | 小信豬的原始部落</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-tw">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">小信豬的原始部落</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/blog/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首頁
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/blog/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            標籤
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/blog/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分類
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/blog/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            歸檔
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            檢索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/blog/2016/06/22/CoreOS/CoreOS-Introduction-Of-etcd-fleet-and-flannel/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">[CoreOS] etcd、fleet & flannel 簡介</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">發表於</span>
+              
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2016-06-22T06:30:00+00:00">
+                2016-06-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分類於</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/CoreOS/" itemprop="url" rel="index">
+                    <span itemprop="name">CoreOS</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/2016/06/22/CoreOS/CoreOS-Introduction-Of-etcd-fleet-and-flannel/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2016/06/22/CoreOS/CoreOS-Introduction-Of-etcd-fleet-and-flannel/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  This article introduces the concepts of CoreOS main components - etcd、fleet & flannel
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="環境說明"><a href="#環境說明" class="headerlink" title="環境說明"></a>環境說明</h1><p>測試環境建立於現有的 OpenStack infrastructure 上，使用以下設定：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#cloud-config</span></span><br><span class="line"></span><br><span class="line"><span class="attr">ssh_authorized_keys:</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">[YOUR</span> <span class="string">SSH</span> <span class="string">PUBLIC</span> <span class="string">KEY]</span></span><br><span class="line"></span><br><span class="line"><span class="attr">coreos:</span></span><br><span class="line"><span class="attr">  etcd2:</span></span><br><span class="line"><span class="attr">    discovery:</span> <span class="attr">https://discovery.etcd.io/ea524a83ed3f84e550417f0fb89e91c8</span></span><br><span class="line"><span class="attr">    advertise-client-urls:</span> <span class="attr">http://$private_ipv4:2379,http://$private_ipv4:4001</span></span><br><span class="line"><span class="attr">    initial-advertise-peer-urls:</span> <span class="attr">http://$private_ipv4:2380</span></span><br><span class="line"><span class="attr">    listen-client-urls:</span> <span class="attr">http://0.0.0.0:2379,http://0.0.0.0:4001</span></span><br><span class="line"><span class="attr">    listen-peer-urls:</span> <span class="attr">http://$private_ipv4:2380</span></span><br><span class="line"><span class="attr">  flannel:</span></span><br><span class="line"><span class="attr">    interface:</span> <span class="string">$public_ipv4</span></span><br><span class="line"></span><br><span class="line"><span class="attr">  units:</span></span><br><span class="line"><span class="attr">    - name:</span> <span class="string">etcd2.service</span></span><br><span class="line"><span class="attr">      command:</span> <span class="string">start</span></span><br><span class="line"><span class="attr">    - name:</span> <span class="string">fleet.service</span></span><br><span class="line"><span class="attr">      command:</span> <span class="string">start</span></span><br><span class="line"><span class="attr">    - name:</span> <span class="string">flanneld.service</span></span><br><span class="line"><span class="attr">      drop-ins:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="number">50</span><span class="bullet">-network-config.conf</span></span><br><span class="line"><span class="attr">          content:</span> <span class="string">|</span></span><br><span class="line"><span class="string">            [Service]</span></span><br><span class="line"><span class="string">            ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '&#123; "Network": "10.1.0.0/16" &#125;'</span></span><br><span class="line"><span class="string"></span><span class="attr">      command:</span> <span class="string">start</span></span><br><span class="line"><span class="attr">    - name:</span> <span class="string">redis.service</span></span><br><span class="line"><span class="attr">      content:</span> <span class="string">|</span></span><br><span class="line"><span class="string">        [Unit]</span></span><br><span class="line"><span class="string">        Requires=flanneld.service</span></span><br><span class="line"><span class="string">        After=flanneld.service</span></span><br><span class="line"><span class="string">        [Service]</span></span><br><span class="line"><span class="string">        ExecStart=/usr/bin/docker run redis</span></span><br><span class="line"><span class="string">        Restart=always</span></span><br><span class="line"><span class="string"></span><span class="attr">      command:</span> <span class="string">start</span></span><br></pre></td></tr></table></figure>
+<p>以上設定會把 <strong>etcd</strong>、<strong>fleet</strong>、<strong>flannel</strong>、<strong>docker</strong> 都啟動，還包含了一個執行 <strong>redis</strong> 服務的 container</p>
+<hr>
+<h1 id="驗證步驟"><a href="#驗證步驟" class="headerlink" title="驗證步驟"></a>驗證步驟</h1><p>當 CoreOS 安裝完成之後，首要之務就是驗證 CoreOS 是否安裝成功，以下測試三個主要的 service 分別是 <code>etcd</code>、<code>docker</code>、<code>fleet</code>：</p>
+<h2 id="etcd"><a href="#etcd" class="headerlink" title="etcd"></a>etcd</h2><p>在 Machine A 新增資訊到 etcd service：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">core@coreos ~ $ etcdctl <span class="built_in">set</span> /message <span class="string">"Hello CoreOS"</span></span><br><span class="line">Hello CoreOS</span><br><span class="line"></span><br><span class="line">core@coreos ~ $ curl -L http://127.0.0.1:2379/v2/keys/message -XPUT -d value=<span class="string">"Hello CoreOS"</span></span><br><span class="line">&#123;<span class="string">"action"</span>:<span class="string">"set"</span>,<span class="string">"node"</span>:&#123;<span class="string">"key"</span>:<span class="string">"/message"</span>,<span class="string">"value"</span>:<span class="string">"Hello CoreOS"</span>,<span class="string">"modifiedIndex"</span>:1641,<span class="string">"createdIndex"</span>:1641&#125;,<span class="string">"prevNode"</span>:&#123;<span class="string">"key"</span>:<span class="string">"/message"</span>,<span class="string">"value"</span>:<span class="string">"Hello CoreOS"</span>,<span class="string">"modifiedIndex"</span>:1455,<span class="string">"createdIndex"</span>:1455&#125;&#125;</span><br></pre></td></tr></table></figure>
+<p>可以從 Machine B 取得：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">core@coreos ~ $ etcdctl get /message   </span><br><span class="line">Hello CoreOS</span><br><span class="line"></span><br><span class="line">core@coreos ~ $ curl -L http://127.0.0.1:2379/v2/keys/message</span><br><span class="line">&#123;<span class="string">"action"</span>:<span class="string">"get"</span>,<span class="string">"node"</span>:&#123;<span class="string">"key"</span>:<span class="string">"/message"</span>,<span class="string">"value"</span>:<span class="string">"Hello CoreOS"</span>,<span class="string">"modifiedIndex"</span>:1641,<span class="string">"createdIndex"</span>:1641&#125;&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="docker"><a href="#docker" class="headerlink" title="docker"></a>docker</h2><p>由於 CoreOS 使用了 systemd port activate 的機制，因此一開始 docker service 是不會啟動的，直到有 container 啟動為止：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 一開始 docker service 不會啟動</span></span><br><span class="line">core@coreos ~ $ systemctl status docker</span><br><span class="line">● docker.service - Docker Application Container Engine</span><br><span class="line">   Loaded: loaded (/usr/lib64/systemd/system/docker.service; disabled; vendor preset: disabled)</span><br><span class="line">   Active: inactive (dead)</span><br><span class="line">     Docs: http://docs.docker.com</span><br><span class="line"></span><br><span class="line"><span class="comment"># 啟動 container busybox</span></span><br><span class="line">core@coreos ~ $ docker run busybox /bin/<span class="built_in">echo</span> Hello CoreOS</span><br><span class="line">Unable to find image <span class="string">'busybox:latest'</span> locally</span><br><span class="line">latest: Pulling from library/busybox</span><br><span class="line">385e281300cc: Pull complete</span><br><span class="line">a3ed95caeb02: Pull complete</span><br><span class="line">Digest: sha256:4a731fb46adc5cefe3ae374a8b6020fc1b6ad667a279647766e9a3cd89f6fa92</span><br><span class="line">Status: Downloaded newer image <span class="keyword">for</span> busybox:latest</span><br><span class="line">Hello CoreOS</span><br><span class="line"></span><br><span class="line"><span class="comment"># docker service 目前為啟動狀態</span></span><br><span class="line">core@coreos ~ $ systemctl status docker</span><br><span class="line">● docker.service - Docker Application Container Engine</span><br><span class="line">   Loaded: loaded (/usr/lib64/systemd/system/docker.service; disabled; vendor preset: disabled)</span><br><span class="line">   Active: active (running) since Mon 2016-06-20 07:58:52 UTC; 53s ago</span><br><span class="line">     Docs: http://docs.docker.com</span><br><span class="line"> Main PID: 1082 (docker)</span><br><span class="line">   Memory: 41.7M</span><br><span class="line">      CPU: 18.356s</span><br><span class="line">   CGroup: /system.slice/docker.service</span><br><span class="line">           └─1082 docker daemon --host=fd:// --<span class="built_in">exec</span>-opt native.cgroupdriver=systemd --selinux-enabled</span><br><span class="line">.........</span><br></pre></td></tr></table></figure>
+<h2 id="fleet"><a href="#fleet" class="headerlink" title="fleet"></a>fleet</h2><p>CoreOS 會使用 fleet 用來管理 container 的生命週期。</p>
+<p>fleet 是透過接收 <a href="https://coreos.com/os/docs/latest/getting-started-with-systemd.html" target="_blank" rel="noopener">systemd unit files</a> 為資訊來源進行工作，將 workload 分配到 cluster 中不同的機器執行；管理者可以透過 <code>fleetctl</code> 工具執行像是查詢 unit 的狀態、log 資訊等工作</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">core@coreos ~ $ cat &lt;&lt;EOF &gt;hello.service</span><br><span class="line">[Unit]</span><br><span class="line">Description=My Service</span><br><span class="line">After=docker.service</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">TimeoutStartSec=0</span><br><span class="line">ExecStartPre=-/usr/bin/docker <span class="built_in">kill</span> hello</span><br><span class="line">ExecStartPre=-/usr/bin/docker rm hello</span><br><span class="line">ExecStartPre=/usr/bin/docker pull busybox</span><br><span class="line">ExecStart=/usr/bin/docker run --name hello busybox /bin/sh -c <span class="string">"trap 'exit 0' INT TERM; while true; do echo Hello World; sleep 1; done"</span></span><br><span class="line">ExecStop=/usr/bin/docker stop hello</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">core@coreos ~ $ fleetctl load hello.service</span><br><span class="line">Unit hello.service inactive</span><br><span class="line">Unit hello.service loaded on 0682a8f2.../192.168.50.14</span><br><span class="line"></span><br><span class="line">core@coreos ~ $ fleetctl start hello.service</span><br><span class="line">Unit hello.service launched on 0682a8f2.../192.168.50.14</span><br><span class="line"></span><br><span class="line">core@coreos ~ $ fleetctl status hello.service</span><br><span class="line">● hello.service - My Service</span><br><span class="line">   Loaded: loaded (/run/fleet/units/hello.service; linked-runtime; vendor preset: disabled)</span><br><span class="line">   Active: active (running) since Mon 2016-06-20 08:52:43 UTC; 9s ago</span><br><span class="line">...........</span><br><span class="line">Jun 20 08:52:43 coreos docker[1355]: Status: Image is up to date <span class="keyword">for</span> busybox:latest</span><br><span class="line">Jun 20 08:52:43 coreos systemd[1]: Started My Service.</span><br><span class="line">Jun 20 08:52:50 coreos docker[1367]: Hello World</span><br><span class="line">...........</span><br><span class="line">Jun 20 08:52:52 coreos docker[1367]: Hello World</span><br><span class="line"></span><br><span class="line">core@coreos ~ $ fleetctl destroy hello.service</span><br><span class="line">Destroyed hello.service</span><br><span class="line"></span><br><span class="line">core@coreos ~ $ fleetctl status hello.service</span><br><span class="line">Unit hello.service does not exist.</span><br></pre></td></tr></table></figure>
+<h2 id="flannel"><a href="#flannel" class="headerlink" title="flannel"></a>flannel</h2><p>flannel 是用來提供 cross hosts 的 container 互相連結之用，在上面的 cloud-config 中，每個 host 預設會從 10.1.0.0/16 的區段中取得自己的 class C subnet。</p>
+<p>驗證 flannel 是否運作正常的的步驟如下：</p>
+<ol>
+<li><p>登入 machine A，並進入 redis container A 中，查詢到 IP A</p>
+</li>
+<li><p>登入 machine B，並進入 redis container B 中，查詢到 IP B</p>
+</li>
+<li><p>確認可以從 container A ping 到 container B</p>
+</li>
+</ol>
+<p>若是兩個位於不同機器的 container 可以互通，就表示 flannel 目前的運作是正常的!</p>
+<hr>
+<h1 id="etcd-1"><a href="#etcd-1" class="headerlink" title="etcd"></a>etcd</h1><p><strong>etcd</strong> 是種分散式 key/value 儲存服務，存在於每一台 CoreOS 機器中，並在 CoreOS cluster 中負責 shared configuration &amp; service discovery 的工作。</p>
+<p>而執行在 cluster 環境中的 application container 同樣可以使用 etcd 所提供的服務，可進行像是儲存資料庫連線設定、cache 設定、<a href="Feature Flag 功能發布控制 - 壹讀">feature flag</a> … 等不同的資訊。</p>
+<h2 id="在-etcd-讀寫資料"><a href="#在-etcd-讀寫資料" class="headerlink" title="在 etcd 讀寫資料"></a>在 etcd 讀寫資料</h2><p>當對 etcd service 寫入資料後，cluster 內的機器都可以讀取的到(所以說是分散式的)</p>
+<h3 id="寫入資料"><a href="#寫入資料" class="headerlink" title="寫入資料"></a>寫入資料</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">core@coreos ~ $ etcdctl <span class="built_in">set</span> /message Hello</span><br><span class="line">Hello</span><br><span class="line"></span><br><span class="line">core@coreos ~ $ curl -L -X PUT http://localhost:2379/v2/keys/message -d value=<span class="string">"Hello"</span></span><br><span class="line">&#123;<span class="string">"action"</span>:<span class="string">"set"</span>,<span class="string">"node"</span>:&#123;<span class="string">"key"</span>:<span class="string">"/message"</span>,<span class="string">"value"</span>:<span class="string">"Hello"</span>,<span class="string">"modifiedIndex"</span>:45040,<span class="string">"createdIndex"</span>:45040&#125;,<span class="string">"prevNode"</span>:&#123;<span class="string">"key"</span>:<span class="string">"/message"</span>,<span class="string">"value"</span>:<span class="string">"CoreOS"</span>,<span class="string">"modifiedIndex"</span>:44979,<span class="string">"createdIndex"</span>:44979&#125;&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="讀取資料"><a href="#讀取資料" class="headerlink" title="讀取資料"></a>讀取資料</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">core@coreos ~ $ etcdctl get /message</span><br><span class="line">Hello</span><br><span class="line"></span><br><span class="line">core@coreos ~ $ curl -L http://localhost:2379/v2/keys/message</span><br><span class="line">&#123;<span class="string">"action"</span>:<span class="string">"get"</span>,<span class="string">"node"</span>:&#123;<span class="string">"key"</span>:<span class="string">"/message"</span>,<span class="string">"value"</span>:<span class="string">"Hello"</span>,<span class="string">"modifiedIndex"</span>:45040,<span class="string">"createdIndex"</span>:45040&#125;&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="刪除資料"><a href="#刪除資料" class="headerlink" title="刪除資料"></a>刪除資料</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">core@coreos ~ $ etcdctl rm /message</span><br><span class="line">PrevNode.Value: Hello</span><br><span class="line"></span><br><span class="line">core@coreos ~ $ etcdctl <span class="built_in">set</span> /message Hello</span><br><span class="line">Hello</span><br><span class="line"></span><br><span class="line">core@coreos ~ $ curl -L -X DELETE http://localhost:2379/v2/keys/message</span><br><span class="line">&#123;<span class="string">"action"</span>:<span class="string">"delete"</span>,<span class="string">"node"</span>:&#123;<span class="string">"key"</span>:<span class="string">"/message"</span>,<span class="string">"modifiedIndex"</span>:45482,<span class="string">"createdIndex"</span>:45467&#125;,<span class="string">"prevNode"</span>:&#123;<span class="string">"key"</span>:<span class="string">"/message"</span>,<span class="string">"value"</span>:<span class="string">"Hello"</span>,<span class="string">"modifiedIndex"</span>:45467,<span class="string">"createdIndex"</span>:45467&#125;&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="從-container-中讀寫-etcd-中的資料"><a href="#從-container-中讀寫-etcd-中的資料" class="headerlink" title="從 container 中讀寫 etcd 中的資料"></a>從 container 中讀寫 etcd 中的資料</h2><p>要從 docker container 中對 etcd 讀寫資料，必須將 ip 指向 <code>docker0</code> interface，預設情況下 ip 為 <code>172.17.0.1</code></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">root@cb8e1cb26a7e:/<span class="comment"># curl -L http://172.17.0.1:2379/v2/keys</span></span><br><span class="line">&#123;<span class="string">"action"</span>:<span class="string">"get"</span>,<span class="string">"node"</span>:&#123;<span class="string">"dir"</span>:<span class="literal">true</span>,<span class="string">"nodes"</span>:[&#123;<span class="string">"key"</span>:<span class="string">"/coreos.com"</span>,<span class="string">"dir"</span>:<span class="literal">true</span>,<span class="string">"modifiedIndex"</span>:5,<span class="string">"createdIndex"</span>:5&#125;]&#125;&#125;</span><br><span class="line"></span><br><span class="line">root@cb8e1cb26a7e:/<span class="comment"># curl -L -X PUT http://172.17.0.1:2379/v2/keys/message -d value="I am container"</span></span><br><span class="line">&#123;<span class="string">"action"</span>:<span class="string">"set"</span>,<span class="string">"node"</span>:&#123;<span class="string">"key"</span>:<span class="string">"/message"</span>,<span class="string">"value"</span>:<span class="string">"I am container"</span>,<span class="string">"modifiedIndex"</span>:47075,<span class="string">"createdIndex"</span>:47075&#125;&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="監控-etcd-directory-的變化"><a href="#監控-etcd-directory-的變化" class="headerlink" title="監控 etcd directory 的變化"></a>監控 etcd directory 的變化</h2><h3 id="1、新增-etcd-directory"><a href="#1、新增-etcd-directory" class="headerlink" title="1、新增 etcd directory"></a>1、新增 etcd directory</h3><p>除了 <code>/</code> 之外，我們可以在 etcd 中自訂所需要的 directory 用來存放自訂的訊息，以下建立名稱為 <strong>foo-service</strong> 的 directory：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">core@coreos ~ $ etcdctl mkdir /foo-service</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在 etcd directory 中新增訊息</span></span><br><span class="line">core@coreos ~ $ etcdctl <span class="built_in">set</span> /foo-service/container1 localhost:1111</span><br><span class="line">localhost:1111</span><br></pre></td></tr></table></figure>
+<h3 id="2、監控-etcd-directory"><a href="#2、監控-etcd-directory" class="headerlink" title="2、監控 etcd directory"></a>2、監控 etcd directory</h3><p>當其他 CoreOS host 執行 <code>etcdctl set /foo-service/container2 localhost:2222</code>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">core@coreos ~ $ etcdctl watch --recursive /foo-service</span><br><span class="line">[<span class="built_in">set</span>] /foo-service/container2</span><br><span class="line">localhost:2222</span><br><span class="line"></span><br><span class="line">core@coreos ~ $ curl -L http://localhost:2379/v2/keys/foo-service?<span class="built_in">wait</span>=<span class="literal">true</span>\&amp;recursive=<span class="literal">true</span></span><br><span class="line">&#123;<span class="string">"action"</span>:<span class="string">"set"</span>,<span class="string">"node"</span>:&#123;<span class="string">"key"</span>:<span class="string">"/foo-service/container2"</span>,<span class="string">"value"</span>:<span class="string">"localhost:2222"</span>,<span class="string">"modifiedIndex"</span>:48468,<span class="string">"createdIndex"</span>:48468&#125;&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="3、監控-etcd-directory-並觸發執行特定任務"><a href="#3、監控-etcd-directory-並觸發執行特定任務" class="headerlink" title="3、監控 etcd directory 並觸發執行特定任務"></a>3、監控 etcd directory 並觸發執行特定任務</h3><p>當其他 CoreOS host 執行執行以下指令：</p>
+<ol>
+<li><p><code>etcdctl set /foo-service/container2 localhost:2222</code></p>
+</li>
+<li><p><code>etcdctl set /foo-service/container3 localhost:3333</code></p>
+</li>
+<li><p><code>etcdctl rm /foo-service/container2</code></p>
+</li>
+<li><p><code>etcdctl rm /foo-service/container3</code></p>
+</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">core@coreos ~ $ etcdctl <span class="built_in">exec</span>-watch --recursive /foo-service -- sh -c <span class="string">'echo "\"$ETCD_WATCH_KEY\" key was updated to \"$ETCD_WATCH_VALUE\" value by \"$ETCD_WATCH_ACTION\" action"'</span></span><br><span class="line"><span class="string">"/foo-service/container2"</span> key was updated to <span class="string">"localhost:2222"</span> value by <span class="string">"set"</span> action</span><br><span class="line"><span class="string">"/foo-service/container3"</span> key was updated to <span class="string">"localhost:3333"</span> value by <span class="string">"set"</span> action</span><br><span class="line"><span class="string">"/foo-service/container2"</span> key was updated to <span class="string">""</span> value by <span class="string">"delete"</span> action</span><br><span class="line"><span class="string">"/foo-service/container3"</span> key was updated to <span class="string">""</span> value by <span class="string">"delete"</span> action</span><br></pre></td></tr></table></figure>
+<h2 id="Test-and-Set"><a href="#Test-and-Set" class="headerlink" title="Test and Set"></a>Test and Set</h2><p>etcd 也可作為中央協調服務，提供 <strong>TestAndSet</strong> 功能；設定資料的人必須提供先前的值，有符合才可以變更值的內容</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 設定值為 Hello</span></span><br><span class="line">core@coreos ~ $ etcdctl <span class="built_in">set</span> /message <span class="string">"Hello"</span></span><br><span class="line">Hello</span><br><span class="line"></span><br><span class="line"><span class="comment"># 若是先前的值為 123，將值換為 Hi (操作失敗)</span></span><br><span class="line">core@coreos ~ $ etcdctl <span class="built_in">set</span> /message <span class="string">"Hi"</span> --swap-with-value=<span class="string">"123"</span></span><br><span class="line">Error:  101: Compare failed ([123 != Hello]) [48752]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 若是先前的值為 Hello，將值換為 Hi (操作成功)</span></span><br><span class="line">core@coreos ~ $ etcdctl <span class="built_in">set</span> /message <span class="string">"Hi"</span> --swap-with-value=<span class="string">"Hello"</span></span><br><span class="line">Hi</span><br><span class="line"></span><br><span class="line"><span class="comment"># 新值已經變成 Hi</span></span><br><span class="line">core@coreos ~ $ etcdctl get /message</span><br><span class="line">Hi</span><br></pre></td></tr></table></figure>
+<h2 id="TTL"><a href="#TTL" class="headerlink" title="TTL"></a>TTL</h2><p>將資料寫入 etcd 時，還可以設定 TTL，讓資料在一定的時間之後失效：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">core@coreos ~ $ etcdctl <span class="built_in">set</span> /foo <span class="string">"Expiring Soon"</span> --ttl 10</span><br><span class="line">Expiring Soon</span><br><span class="line">core@coreos ~ $ etcdctl get /foo</span><br><span class="line">Expiring Soon</span><br><span class="line">core@coreos ~ $ etcdctl get /foo</span><br><span class="line">Expiring Soon</span><br><span class="line">.........</span><br><span class="line">core@coreos ~ $ etcdctl get /foo</span><br><span class="line">Error:  100: Key not found (/foo) [49020]</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="systemd"><a href="#systemd" class="headerlink" title="systemd"></a>systemd</h1><p>systemd 提供了許多強大的功能作為啟動、停止、管理 process 之用，在 CoreOS 中，幾乎所有的 Docker container 的生命週期都是由 systemd 在管理的。</p>
+<p>CoreOS 預設所使用的 systemd target 為 <code>multi-user.target</code>，裡面包含了所有常用來管理 container 的 <code>systemd unit</code>。(<strong>target 由多個 unit symbolic link 所集合而成</strong>)</p>
+<blockquote>
+<p>systemd unit 是一個描述管理者所要執行的 process 的設定檔</p>
+</blockquote>
+<p>以下用一個簡單範例 <code>/etc/systemd/system/myweb.service</code> 來說明：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[Unit]</span></span><br><span class="line"><span class="attr">Description</span>=My Web Service</span><br><span class="line"><span class="attr">After</span>=etcd2.service</span><br><span class="line"><span class="attr">After</span>=docker.service</span><br><span class="line"></span><br><span class="line"><span class="section">[Service]</span></span><br><span class="line"><span class="attr">TimeoutStartSec</span>=<span class="number">0</span></span><br><span class="line"><span class="comment">; 在 ExecStart 所要執行的命令，"=-" 表示請 systemd 忽略執行命令時所發生的錯誤</span></span><br><span class="line"><span class="attr">ExecStartPre</span>=-/usr/bin/docker kill apache1</span><br><span class="line"><span class="attr">ExecStartPre</span>=-/usr/bin/docker rm apache1</span><br><span class="line"><span class="attr">ExecStartPre</span>=/usr/bin/docker pull coreos/apache</span><br><span class="line"><span class="comment">; service 啟動時所要執行的命令</span></span><br><span class="line"><span class="attr">ExecStart</span>=/usr/bin/docker run --name apache1 -p <span class="number">8081</span>:<span class="number">80</span> coreos/apache /usr/sbin/apache2ctl -D FOREGROUND</span><br><span class="line"><span class="comment">; service 啟動後要執行的指令 (以 machine ID 為 key，寫入訊息到 etcd /domains/example)</span></span><br><span class="line"><span class="attr">ExecStartPost</span>=/usr/bin/etcdctl set /domains/example.com/%m running</span><br><span class="line"><span class="comment">; service 停止時所要執行的指令 (停止 container apache1)</span></span><br><span class="line"><span class="attr">ExecStop</span>=/usr/bin/docker stop apache1</span><br><span class="line"><span class="comment">; service 停止後所要執行的步驟 (以 machine ID 為 key，移除 etcd /domains/example 上的訊息)</span></span><br><span class="line"><span class="attr">ExecStopPost</span>=/usr/bin/etcdctl rm /domains/example.com/%m</span><br><span class="line"></span><br><span class="line"><span class="section">[Install]</span></span><br><span class="line"><span class="attr">WantedBy</span>=multi-user.target</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>完整的設定參數可參考 =&gt; <a href="https://www.freedesktop.org/software/systemd/man/systemd.service.html" target="_blank" rel="noopener">systemd.service</a></p>
+</blockquote>
+<p>另外還可以在 system unit configuration 檔案中指定 <strong>specifiers</strong>，例如：</p>
+<ul>
+<li><p><code>%n</code>：Full Unit Name</p>
+</li>
+<li><p><code>%i</code>：Instance Name</p>
+</li>
+<li><p><code>%m</code>：Machine ID</p>
+</li>
+<li><p><code>%H</code>：Host Name</p>
+</li>
+</ul>
+<p>詳細的資料可以參考 =&gt; <a href="https://www.freedesktop.org/software/systemd/man/systemd.unit.html#Specifiers" target="_blank" rel="noopener">systemd.unit - Specifiers</a></p>
+<p>上述的 systemd service unit configuration 執行的結果如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">core@coreos ~ $ sudo systemctl <span class="built_in">enable</span> myweb.service</span><br><span class="line">Created symlink from /etc/systemd/system/multi-user.target.wants/myweb.service to /etc/systemd/system/myweb.service.</span><br><span class="line">core@coreos ~ $ sudo systemctl start myweb.service</span><br><span class="line"></span><br><span class="line">core@coreos ~ $ sudo systemctl status myweb.service</span><br><span class="line">● myweb.service - My Web Service</span><br><span class="line">   Loaded: loaded (/etc/systemd/system/myweb.service; enabled; vendor preset: disabled)</span><br><span class="line">   Active: active (running) since Tue 2016-06-21 07:36:22 UTC; 9s ago</span><br><span class="line">  Process: 2403 ExecStartPost=/usr/bin/etcdctl <span class="built_in">set</span> /domains/example.com/%m running (code=exited, status=0/SUCCESS)</span><br><span class="line">  Process: 2391 ExecStartPre=/usr/bin/docker pull coreos/apache (code=exited, status=0/SUCCESS)</span><br><span class="line">  Process: 2379 ExecStartPre=/usr/bin/docker rm apache1 (code=exited, status=0/SUCCESS)</span><br><span class="line">  Process: 2369 ExecStartPre=/usr/bin/docker <span class="built_in">kill</span> apache1 (code=exited, status=1/FAILURE)</span><br><span class="line"> Main PID: 2402 (docker)</span><br><span class="line">   Memory: 11.5M</span><br><span class="line">      CPU: 5.695s</span><br><span class="line">   CGroup: /system.slice/myweb.service</span><br><span class="line">           └─2402 /usr/bin/docker run --name apache1 -p 8081:80 coreos/apache /usr/sbin/apache2ctl -D FOREGROUND</span><br><span class="line">......</span><br><span class="line">Jun 21 07:36:19 coreos docker[2391]: Status: Image is up to date <span class="keyword">for</span> coreos/apache:latest</span><br><span class="line">Jun 21 07:36:22 coreos etcdctl[2403]: running</span><br><span class="line">Jun 21 07:36:22 coreos systemd[1]: Started My Web Service.</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查詢 container 運作狀態</span></span><br><span class="line">core@coreos ~ $ docker ps -a</span><br><span class="line">CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                  NAMES</span><br><span class="line">441cf4a6bf54        coreos/apache       <span class="string">"/usr/sbin/apache2ctl"</span>   35 seconds ago      Up 26 seconds       0.0.0.0:8081-&gt;80/tcp   apache1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 確認 web server 正常服務</span></span><br><span class="line">core@coreos ~ $ curl http://localhost:8081</span><br><span class="line">&lt;html&gt;&lt;body&gt;&lt;h1&gt;It works!&lt;/h1&gt;</span><br><span class="line">&lt;p&gt;This is the default web page <span class="keyword">for</span> this server.&lt;/p&gt;</span><br><span class="line">&lt;p&gt;The web server software is running but no content has been added, yet.&lt;/p&gt;</span><br><span class="line">&lt;/body&gt;&lt;/html&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查詢 systemd 寫入 etcd 中的資料</span></span><br><span class="line">core@coreos ~ $ etcdctl ls /domains/example.com</span><br><span class="line">/domains/example.com/72bda15890c14ee89b15214c1b87d71f</span><br><span class="line">core@coreos ~ $ etcdctl get /domains/example.com/72bda15890c14ee89b15214c1b87d71f</span><br><span class="line">running</span><br><span class="line"></span><br><span class="line"><span class="comment"># 停止 service</span></span><br><span class="line">core@coreos ~ $ sudo systemctl stop myweb.service</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查詢 container 狀態</span></span><br><span class="line">core@coreos ~ $ docker ps -a</span><br><span class="line">CONTAINER ID        IMAGE               COMMAND                  CREATED              STATUS                        PORTS               NAMES</span><br><span class="line">441cf4a6bf54        coreos/apache       <span class="string">"/usr/sbin/apache2ctl"</span>   About a minute ago   Exited (137) 13 seconds ago                       apache1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查詢 systemd 寫入 etcd 中的資料 (已經移除)</span></span><br><span class="line">core@coreos ~ $ etcdctl ls /domains/example.com</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="fleet-1"><a href="#fleet-1" class="headerlink" title="fleet"></a>fleet</h1><p>fleet 是個 cluster manager，用途是在 cluster level 上管理 systemd，因此要在 CoreOS cluster 上運行相關服務，正確的方式就是”<strong>使用標準的 systemd unit 搭配 fleet</strong>“來達成。</p>
+<h2 id="fleet-unit-type"><a href="#fleet-unit-type" class="headerlink" title="fleet unit type"></a>fleet unit type</h2><p>可以運行在 cluster 上的 unit 有兩種，分別是：</p>
+<ol>
+<li><p><strong>standard unit</strong>：會被分派到獨立的單一主機上長時間運行的 process，若是機器掛點了，standard unit 就會被轉移到其他正常的主機上重新啟動並繼續執行</p>
+</li>
+<li><p><strong>global unit</strong>：global unit 將會運行在 cluster 中所有的機器上，這種 unit 適合用在像是 monitoring agent，甚至像是 high level 的 orchestration tool，例如：Kubernetes、Mesos、OpenStack …. 等等。</p>
+</li>
+</ol>
+<h2 id="在-cluster-中啟動-container"><a href="#在-cluster-中啟動-container" class="headerlink" title="在 cluster 中啟動 container"></a>在 cluster 中啟動 container</h2><p>在這邊我們利用之前寫好的 <code>/etc/systemd/system/myweb.service</code> 作示範：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">core@coreos ~ $ fleetctl start /etc/systemd/system/myweb.service</span><br><span class="line">Unit myweb.service inactive</span><br><span class="line">Unit myweb.service launched on 0682a8f2.../192.168.50.14</span><br><span class="line"></span><br><span class="line">core@coreos ~ $ fleetctl list-units   </span><br><span class="line">UNIT		MACHINE				ACTIVE		SUB</span><br><span class="line">myweb.service	0682a8f2.../192.168.50.14	activating	start-pre</span><br><span class="line"></span><br><span class="line">(...... it takes some time to <span class="built_in">wait</span> .......)</span><br><span class="line"></span><br><span class="line">core@coreos ~ $ fleetctl list-units</span><br><span class="line">UNIT		MACHINE				ACTIVE	SUB</span><br><span class="line">myweb.service	0682a8f2.../192.168.50.14	active	running</span><br><span class="line"></span><br><span class="line">core@coreos ~ $ curl http://192.168.50.14:8081</span><br><span class="line">&lt;html&gt;&lt;body&gt;&lt;h1&gt;It works!&lt;/h1&gt;</span><br><span class="line">&lt;p&gt;This is the default web page <span class="keyword">for</span> this server.&lt;/p&gt;</span><br><span class="line">&lt;p&gt;The web server software is running but no content has been added, yet.&lt;/p&gt;</span><br><span class="line">&lt;/body&gt;&lt;/html&gt;</span><br><span class="line"></span><br><span class="line">core@coreos ~ $ fleetctl list-machines</span><br><span class="line">MACHINE		IP		METADATA</span><br><span class="line">0682a8f2...	192.168.50.14	-</span><br><span class="line">72bda158...	192.168.50.16	-</span><br><span class="line">90c1e40c...	192.168.50.15	-</span><br></pre></td></tr></table></figure>
+<h2 id="運行-High-Availability-Service"><a href="#運行-High-Availability-Service" class="headerlink" title="運行 High Availability Service"></a>運行 High Availability Service</h2><p>關於 fleet unit 的詳細設定方式，可以參考 =&gt; <a href="https://coreos.com/fleet/docs/latest/unit-files-and-scheduling.html" target="_blank" rel="noopener">fleet - Overview of Unit Files and Scheduling</a></p>
+<p>以下將會設計一個具有 High Availability 的 web service，其中較為重要的設定就是 <code>[X-Fleet]</code> 區塊部份的設定：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">core@coreos ~/demo $ cat &lt;&lt;EOF &gt;apache@.service</span><br><span class="line">[Unit]</span><br><span class="line">Description=My Apache Frontend</span><br><span class="line">After=docker.service</span><br><span class="line">Requires=docker.service</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">TimeoutStartSec=0</span><br><span class="line">ExecStartPre=-/usr/bin/docker <span class="built_in">kill</span> apache1</span><br><span class="line">ExecStartPre=-/usr/bin/docker rm apache1</span><br><span class="line">ExecStartPre=/usr/bin/docker pull coreos/apache</span><br><span class="line">ExecStart=/usr/bin/docker run --rm --name apache1 -p 80:80 coreos/apache /usr/sbin/apache2ctl -D FOREGROUND</span><br><span class="line">ExecStop=/usr/bin/docker stop apache1</span><br><span class="line"></span><br><span class="line">[X-Fleet]</span><br><span class="line">; 告知 fleet 不要把 apache@* 的 service 放在同一台機器上</span><br><span class="line">Conflicts=apache@*.service</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"><span class="comment"># 複製兩份 unit configuration file</span></span><br><span class="line">core@coreos ~/demo $ cp apache\@.service apache\@1.service</span><br><span class="line">core@coreos ~/demo $ cp apache\@.service apache\@2.service</span><br><span class="line">core@coreos ~/demo $ ls  </span><br><span class="line">apache@.service  apache@1.service  apache@2.service</span><br><span class="line"></span><br><span class="line"><span class="comment"># 啟動第 1 個 apache container</span></span><br><span class="line">core@coreos ~/demo $ fleetctl start apache@1</span><br><span class="line">Unit apache@1.service inactive</span><br><span class="line">Unit apache@1.service launched on 0682a8f2.../192.168.50.14</span><br><span class="line"></span><br><span class="line"><span class="comment"># 啟動第 2 個 apache container</span></span><br><span class="line">core@coreos ~/demo $ fleetctl start apache@2</span><br><span class="line">Unit apache@2.service inactive</span><br><span class="line">Unit apache@2.service launched on 72bda158.../192.168.50.16</span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視 units</span></span><br><span class="line">core@coreos ~/demo $ fleetctl list-units</span><br><span class="line">UNIT			MACHINE				ACTIVE	SUB</span><br><span class="line">apache@1.service	0682a8f2.../192.168.50.14	active	running</span><br><span class="line">apache@2.service	72bda158.../192.168.50.16	active	running</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 驗證 web 服務有正確啟動</span></span><br><span class="line">core@coreos ~/demo $ curl http://192.168.50.14</span><br><span class="line">&lt;html&gt;&lt;body&gt;&lt;h1&gt;It works!&lt;/h1&gt;</span><br><span class="line">&lt;p&gt;This is the default web page <span class="keyword">for</span> this server.&lt;/p&gt;</span><br><span class="line">&lt;p&gt;The web server software is running but no content has been added, yet.&lt;/p&gt;</span><br><span class="line">&lt;/body&gt;&lt;/html&gt;</span><br><span class="line">core@coreos ~/demo $ curl http://192.168.50.16</span><br><span class="line">&lt;html&gt;&lt;body&gt;&lt;h1&gt;It works!&lt;/h1&gt;</span><br><span class="line">&lt;p&gt;This is the default web page <span class="keyword">for</span> this server.&lt;/p&gt;</span><br><span class="line">&lt;p&gt;The web server software is running but no content has been added, yet.&lt;/p&gt;</span><br><span class="line">&lt;/body&gt;&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+<p>接著把 <code>192.168.50.14</code> 這台機器重新開機，此時 service 將會被 fleet 轉移到正常的機器上：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">core@coreos ~/demo $ fleetctl list-units</span><br><span class="line">UNIT			MACHINE				ACTIVE		SUB</span><br><span class="line">apache@1.service	90c1e40c.../192.168.50.15	activating	start-pre</span><br><span class="line">apache@2.service	72bda158.../192.168.50.16	active		running</span><br><span class="line"></span><br><span class="line">core@coreos ~/demo $ fleetctl list-units</span><br><span class="line">UNIT			MACHINE				ACTIVE		SUB</span><br><span class="line">apache@1.service	90c1e40c.../192.168.50.15	activating	start-pre</span><br><span class="line">apache@2.service	72bda158.../192.168.50.16	active		running</span><br><span class="line"></span><br><span class="line">core@coreos ~/demo $ fleetctl list-units</span><br><span class="line">UNIT			MACHINE				ACTIVE	SUB</span><br><span class="line">apache@1.service	90c1e40c.../192.168.50.15	active	running</span><br><span class="line">apache@2.service	72bda158.../192.168.50.16	active	running</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>存取這些 HA service 比較好的方式是透過 <strong>sidekick container</strong>，這類的 container 是用來提供像是 service discovery、load balancer、DNS 等工作，不建議直接存取 service container</p>
+</blockquote>
+<h2 id="運行-sidekick"><a href="#運行-sidekick" class="headerlink" title="運行 sidekick"></a>運行 sidekick</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">core@coreos ~/demo $ cat &lt;&lt;EOF &gt;apache_discovery@.service</span><br><span class="line">[Unit]</span><br><span class="line">Description=Announce Apache1</span><br><span class="line">BindsTo=apache@%i.service</span><br><span class="line">After=apache@%i.service</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">ExecStart=/bin/sh -c <span class="string">"while true; do etcdctl set /services/website/apache@%i '&#123; \"machine\": \"%m\", \"port\": 80, \"version\": \"52c7248a14\" &#125;' --ttl 60;sleep 45;done"</span></span><br><span class="line">ExecStop=/usr/bin/etcdctl rm /services/website/apache@%i</span><br><span class="line"></span><br><span class="line">[X-Fleet]</span><br><span class="line">MachineOf=apache@%i.service</span><br><span class="line">EOF</span><br><span class="line">core@coreos ~/demo $ cp apache_discovery\@.service apache_discovery\@1.service</span><br><span class="line">core@coreos ~/demo $ cp apache_discovery\@.service apache_discovery\@2.service</span><br><span class="line">core@coreos ~/demo $ ls</span><br><span class="line">apache@.service  apache@1.service  apache@2.service  apache_discovery@.service  apache_discovery@1.service  apache_discovery@2.service</span><br><span class="line"></span><br><span class="line"><span class="comment"># 啟動 service discovery</span></span><br><span class="line">core@coreos ~/demo $ fleetctl start apache_discovery@1         </span><br><span class="line">Unit apache_discovery@1.service inactive</span><br><span class="line">Unit apache_discovery@1.service launched on 90c1e40c.../192.168.50.15</span><br><span class="line"><span class="comment"># 啟動 service discovery</span></span><br><span class="line">core@coreos ~/demo $ fleetctl start apache_discovery@2</span><br><span class="line">Unit apache_discovery@2.service inactive</span><br><span class="line">Unit apache_discovery@2.service launched on 72bda158.../192.168.50.16</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">core@coreos ~/demo $ fleetctl list-units</span><br><span class="line">UNIT				MACHINE				ACTIVE	SUB</span><br><span class="line">apache@1.service		90c1e40c.../192.168.50.15	active	running</span><br><span class="line">apache@2.service		72bda158.../192.168.50.16	active	running</span><br><span class="line">apache_discovery@1.service	90c1e40c.../192.168.50.15	active	running</span><br><span class="line">apache_discovery@2.service	72bda158.../192.168.50.16	active	running</span><br><span class="line"></span><br><span class="line">core@coreos ~/demo $ etcdctl ls /services/ --recursive</span><br><span class="line">/services/website</span><br><span class="line">/services/website/apache@1</span><br><span class="line">/services/website/apache@2</span><br><span class="line"></span><br><span class="line">core@coreos ~/demo $ etcdctl get /services/website/apache@1</span><br><span class="line">&#123; <span class="string">"machine"</span>: <span class="string">"90c1e40ca1e749abbc23fa8b2391ce27"</span>, <span class="string">"port"</span>: 80, <span class="string">"version"</span>: <span class="string">"52c7248a14"</span> &#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Global-Unit"><a href="#Global-Unit" class="headerlink" title="Global Unit"></a>Global Unit</h2><p>Global Unit 與其他一般的 unit 沒什麼太大差別，只有在 <code>[X-Fleet]</code>區段中多加了 <code>Global=true</code> 設定而已，如此一來這個 system unit 就會在所有機器上執行</p>
+<blockquote>
+<p>若要把 Global Unit 執行在特定幾台機器上，可搭配 Machine Metadata 使用，就可以達到此目的</p>
+</blockquote>
+<h2 id="Machine-Metadata"><a href="#Machine-Metadata" class="headerlink" title="Machine Metadata"></a>Machine Metadata</h2><p>Mechine Metadata 的來源是從 cloud-config 所設定的，設定的語法如下：</p>
+<blockquote>
+<p>metadata=”platform=metal,provider=rackspace,region=east,disk=ssd”</p>
+</blockquote>
+<p>接著 Machine Metadata 會設定在 unit configuration 中，以下是幾個範例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[X-Fleet]</span><br><span class="line">MachineMetadata=disk=ssd</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[X-Fleet]</span><br><span class="line">Conflicts=webapp*</span><br><span class="line">MachineMetadata=provider=rackspace</span><br><span class="line">MachineMetadata=platform=metal</span><br><span class="line">MachineMetadata=region=east</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a href="https://coreos.com/os/docs/latest/quickstart.html" target="_blank" rel="noopener">CoreOS Quick Start</a></p>
+</li>
+<li><p><a href="https://coreos.com/etcd/docs/latest/getting-started-with-etcd.html" target="_blank" rel="noopener">Getting Started with etcd on CoreOS</a></p>
+</li>
+<li><p><a href="https://coreos.com/os/docs/latest/getting-started-with-docker.html" target="_blank" rel="noopener">Getting Started with docker</a></p>
+</li>
+<li><p><a href="https://coreos.com/os/docs/latest/getting-started-with-systemd.html" target="_blank" rel="noopener">Getting Started with systemd</a></p>
+</li>
+<li><p><a href="https://coreos.com/fleet/docs/latest/launching-containers-fleet.html" target="_blank" rel="noopener">Launching Containers with fleet</a></p>
+</li>
+<li><p><a href="https://github.com/coreos/unit-examples/tree/master/simple-fleet" target="_blank" rel="noopener">unit-examples/simple-fleet at master · coreos/unit-examples</a></p>
+</li>
+<li><p><a href="https://coreos.com/fleet/docs/latest/unit-files-and-scheduling.html" target="_blank" rel="noopener">fleet - Overview of Unit Files and Scheduling</a></p>
+</li>
+<li><p><a href="https://coreos.com/os/docs/latest/cloud-config.html" target="_blank" rel="noopener">Customize with Cloud-Config</a></p>
+</li>
+<li><p><a href="https://coreos.com/flannel/docs/latest/flannel-config.html" target="_blank" rel="noopener">Configuring flannel Networking for CoreOS</a></p>
+</li>
+<li><p><a href="http://dockone.io/article/618" target="_blank" rel="noopener">DockOne技术分享（十八）：一篇文章带你了解Flannel - DockOne.io</a></p>
+</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog/tags/Linux/" rel="tag"># Linux</a>
+          
+            <a href="/blog/tags/CoreOS/" rel="tag"># CoreOS</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/2014/11/14/VMware/free-vsphere-esxi-vm-backup-solution-xsibackup/" rel="next" title="[VMware] 免費的 vSphere ESXi VM 備份方案 - XSIBACKUP">
+                <i class="fa fa-chevron-left"></i> [VMware] 免費的 vSphere ESXi VM 備份方案 - XSIBACKUP
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/2016/07/01/Linux/Auto-Authenticate-with-Password-Protected-SSHKeypair/" rel="prev" title="[Linux] 解決使用帶有密碼的 SSH keypair 時需要重複輸入密碼的問題">
+                [Linux] 解決使用帶有密碼的 SSH keypair 時需要重複輸入密碼的問題 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            本站概覽
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">godleon</p>
+              <p class="site-description motion-element" itemprop="description">把時間花在哪裡，成就就在哪裡</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/blog/archives/">
+              
+                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-name">文章</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/blog/categories/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">分類</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/blog/tags/index.html">
+                  <span class="site-state-item-count">21</span>
+                  <span class="site-state-item-name">標籤</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/godleon" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:godleon@gmail.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-globe"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://plus.google.com/godleon" target="_blank" title="Google">
+                    
+                      <i class="fa fa-fw fa-google"></i>Google</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#環境說明"><span class="nav-number">1.</span> <span class="nav-text"><a href="#&#x74B0;&#x5883;&#x8AAA;&#x660E;" class="headerlink" title="&#x74B0;&#x5883;&#x8AAA;&#x660E;"></a>&#x74B0;&#x5883;&#x8AAA;&#x660E;</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#驗證步驟"><span class="nav-number">2.</span> <span class="nav-text"><a href="#&#x9A57;&#x8B49;&#x6B65;&#x9A5F;" class="headerlink" title="&#x9A57;&#x8B49;&#x6B65;&#x9A5F;"></a>&#x9A57;&#x8B49;&#x6B65;&#x9A5F;</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#etcd"><span class="nav-number">2.1.</span> <span class="nav-text"><a href="#etcd" class="headerlink" title="etcd"></a>etcd</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#docker"><span class="nav-number">2.2.</span> <span class="nav-text"><a href="#docker" class="headerlink" title="docker"></a>docker</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#fleet"><span class="nav-number">2.3.</span> <span class="nav-text"><a href="#fleet" class="headerlink" title="fleet"></a>fleet</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#flannel"><span class="nav-number">2.4.</span> <span class="nav-text"><a href="#flannel" class="headerlink" title="flannel"></a>flannel</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#etcd-1"><span class="nav-number">3.</span> <span class="nav-text"><a href="#etcd-1" class="headerlink" title="etcd"></a>etcd</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#在-etcd-讀寫資料"><span class="nav-number">3.1.</span> <span class="nav-text"><a href="#&#x5728;-etcd-&#x8B80;&#x5BEB;&#x8CC7;&#x6599;" class="headerlink" title="&#x5728; etcd &#x8B80;&#x5BEB;&#x8CC7;&#x6599;"></a>&#x5728; etcd &#x8B80;&#x5BEB;&#x8CC7;&#x6599;</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#寫入資料"><span class="nav-number">3.1.1.</span> <span class="nav-text"><a href="#&#x5BEB;&#x5165;&#x8CC7;&#x6599;" class="headerlink" title="&#x5BEB;&#x5165;&#x8CC7;&#x6599;"></a>&#x5BEB;&#x5165;&#x8CC7;&#x6599;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#讀取資料"><span class="nav-number">3.1.2.</span> <span class="nav-text"><a href="#&#x8B80;&#x53D6;&#x8CC7;&#x6599;" class="headerlink" title="&#x8B80;&#x53D6;&#x8CC7;&#x6599;"></a>&#x8B80;&#x53D6;&#x8CC7;&#x6599;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#刪除資料"><span class="nav-number">3.1.3.</span> <span class="nav-text"><a href="#&#x522A;&#x9664;&#x8CC7;&#x6599;" class="headerlink" title="&#x522A;&#x9664;&#x8CC7;&#x6599;"></a>&#x522A;&#x9664;&#x8CC7;&#x6599;</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#從-container-中讀寫-etcd-中的資料"><span class="nav-number">3.2.</span> <span class="nav-text"><a href="#&#x5F9E;-container-&#x4E2D;&#x8B80;&#x5BEB;-etcd-&#x4E2D;&#x7684;&#x8CC7;&#x6599;" class="headerlink" title="&#x5F9E; container &#x4E2D;&#x8B80;&#x5BEB; etcd &#x4E2D;&#x7684;&#x8CC7;&#x6599;"></a>&#x5F9E; container &#x4E2D;&#x8B80;&#x5BEB; etcd &#x4E2D;&#x7684;&#x8CC7;&#x6599;</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#監控-etcd-directory-的變化"><span class="nav-number">3.3.</span> <span class="nav-text"><a href="#&#x76E3;&#x63A7;-etcd-directory-&#x7684;&#x8B8A;&#x5316;" class="headerlink" title="&#x76E3;&#x63A7; etcd directory &#x7684;&#x8B8A;&#x5316;"></a>&#x76E3;&#x63A7; etcd directory &#x7684;&#x8B8A;&#x5316;</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1、新增-etcd-directory"><span class="nav-number">3.3.1.</span> <span class="nav-text"><a href="#1&#x3001;&#x65B0;&#x589E;-etcd-directory" class="headerlink" title="1&#x3001;&#x65B0;&#x589E; etcd directory"></a>1&#x3001;&#x65B0;&#x589E; etcd directory</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2、監控-etcd-directory"><span class="nav-number">3.3.2.</span> <span class="nav-text"><a href="#2&#x3001;&#x76E3;&#x63A7;-etcd-directory" class="headerlink" title="2&#x3001;&#x76E3;&#x63A7; etcd directory"></a>2&#x3001;&#x76E3;&#x63A7; etcd directory</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3、監控-etcd-directory-並觸發執行特定任務"><span class="nav-number">3.3.3.</span> <span class="nav-text"><a href="#3&#x3001;&#x76E3;&#x63A7;-etcd-directory-&#x4E26;&#x89F8;&#x767C;&#x57F7;&#x884C;&#x7279;&#x5B9A;&#x4EFB;&#x52D9;" class="headerlink" title="3&#x3001;&#x76E3;&#x63A7; etcd directory &#x4E26;&#x89F8;&#x767C;&#x57F7;&#x884C;&#x7279;&#x5B9A;&#x4EFB;&#x52D9;"></a>3&#x3001;&#x76E3;&#x63A7; etcd directory &#x4E26;&#x89F8;&#x767C;&#x57F7;&#x884C;&#x7279;&#x5B9A;&#x4EFB;&#x52D9;</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Test-and-Set"><span class="nav-number">3.4.</span> <span class="nav-text"><a href="#Test-and-Set" class="headerlink" title="Test and Set"></a>Test and Set</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TTL"><span class="nav-number">3.5.</span> <span class="nav-text"><a href="#TTL" class="headerlink" title="TTL"></a>TTL</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#systemd"><span class="nav-number">4.</span> <span class="nav-text"><a href="#systemd" class="headerlink" title="systemd"></a>systemd</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#fleet-1"><span class="nav-number">5.</span> <span class="nav-text"><a href="#fleet-1" class="headerlink" title="fleet"></a>fleet</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#fleet-unit-type"><span class="nav-number">5.1.</span> <span class="nav-text"><a href="#fleet-unit-type" class="headerlink" title="fleet unit type"></a>fleet unit type</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#在-cluster-中啟動-container"><span class="nav-number">5.2.</span> <span class="nav-text"><a href="#&#x5728;-cluster-&#x4E2D;&#x555F;&#x52D5;-container" class="headerlink" title="&#x5728; cluster &#x4E2D;&#x555F;&#x52D5; container"></a>&#x5728; cluster &#x4E2D;&#x555F;&#x52D5; container</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#運行-High-Availability-Service"><span class="nav-number">5.3.</span> <span class="nav-text"><a href="#&#x904B;&#x884C;-High-Availability-Service" class="headerlink" title="&#x904B;&#x884C; High Availability Service"></a>&#x904B;&#x884C; High Availability Service</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#運行-sidekick"><span class="nav-number">5.4.</span> <span class="nav-text"><a href="#&#x904B;&#x884C;-sidekick" class="headerlink" title="&#x904B;&#x884C; sidekick"></a>&#x904B;&#x884C; sidekick</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Global-Unit"><span class="nav-number">5.5.</span> <span class="nav-text"><a href="#Global-Unit" class="headerlink" title="Global Unit"></a>Global Unit</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Machine-Metadata"><span class="nav-number">5.6.</span> <span class="nav-text"><a href="#Machine-Metadata" class="headerlink" title="Machine Metadata"></a>Machine Metadata</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text"><a href="#References" class="headerlink" title="References"></a>References</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 強力驅動</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主題 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/blog/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://godleon-blog-hexo.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'https://godleon.github.io/blog/2016/06/22/CoreOS/CoreOS-Introduction-Of-etcd-fleet-and-flannel/';
+          this.page.identifier = '2016/06/22/CoreOS/CoreOS-Introduction-Of-etcd-fleet-and-flannel/';
+          this.page.title = '[CoreOS] etcd、fleet & flannel 簡介';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/blog/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

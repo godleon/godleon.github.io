@@ -92,7 +92,7 @@
 <meta property="og:image" content="https://github.com/godleon/godleon.github.io/blob/master/_posts/images/2016/KVM-libvirt/remote_access_libvirtd.png?raw=true">
 <meta property="og:image" content="https://github.com/godleon/godleon.github.io/blob/master/_posts/images/2016/KVM-Virtual-Networking/Linux_bridge_taps.png?raw=true">
 <meta property="og:image" content="https://github.com/godleon/godleon.github.io/blob/master/_posts/images/2016/KVM-libvirt/kvm_isolated-network.jpg?raw=true">
-<meta property="og:updated_time" content="2017-11-30T02:40:18.880Z">
+<meta property="og:updated_time" content="2017-12-20T02:21:39.286Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[Linux KVM] libvirt &amp; network">
 <meta name="twitter:description" content="This article introduces how to manage virtual network environment by libvirt in QEMU/KVM">
@@ -631,7 +631,7 @@
               
                 <a href="/blog/archives/">
               
-                  <span class="site-state-item-count">22</span>
+                  <span class="site-state-item-count">23</span>
                   <span class="site-state-item-name">文章</span>
                 </a>
               </div>
@@ -642,7 +642,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/blog/categories/index.html">
-                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-count">10</span>
                   <span class="site-state-item-name">分類</span>
                 </a>
               </div>
@@ -653,7 +653,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/blog/tags/index.html">
-                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-count">21</span>
                   <span class="site-state-item-name">標籤</span>
                 </a>
               </div>
@@ -708,7 +708,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Overview"><span class="nav-number">1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#遠端操作-libvirtd"><span class="nav-number">2.</span> <span class="nav-text">遠端操作 libvirtd</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Linux-Virtual-Networking"><span class="nav-number">3.</span> <span class="nav-text">Linux Virtual Networking</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Virtual-Network-Types"><span class="nav-number">4.</span> <span class="nav-text">Virtual Network Types</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用-libvirt-管理-virtual-network-Isolated"><span class="nav-number">5.</span> <span class="nav-text">使用 libvirt 管理 virtual network - Isolated</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#virtual-network-NATed-amp-Routed"><span class="nav-number">6.</span> <span class="nav-text">virtual network - NATed & Routed</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#NATed-virtual-network"><span class="nav-number">6.1.</span> <span class="nav-text">NATed virtual network</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Routed-virtual-network"><span class="nav-number">6.2.</span> <span class="nav-text">Routed virtual network</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">7.</span> <span class="nav-text">References</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Overview"><span class="nav-number">1.</span> <span class="nav-text"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#遠端操作-libvirtd"><span class="nav-number">2.</span> <span class="nav-text"><a href="#&#x9060;&#x7AEF;&#x64CD;&#x4F5C;-libvirtd" class="headerlink" title="&#x9060;&#x7AEF;&#x64CD;&#x4F5C; libvirtd"></a>&#x9060;&#x7AEF;&#x64CD;&#x4F5C; libvirtd</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Linux-Virtual-Networking"><span class="nav-number">3.</span> <span class="nav-text"><a href="#Linux-Virtual-Networking" class="headerlink" title="Linux Virtual Networking"></a>Linux Virtual Networking</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Virtual-Network-Types"><span class="nav-number">4.</span> <span class="nav-text"><a href="#Virtual-Network-Types" class="headerlink" title="Virtual Network Types"></a>Virtual Network Types</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用-libvirt-管理-virtual-network-Isolated"><span class="nav-number">5.</span> <span class="nav-text"><a href="#&#x4F7F;&#x7528;-libvirt-&#x7BA1;&#x7406;-virtual-network-Isolated" class="headerlink" title="&#x4F7F;&#x7528; libvirt &#x7BA1;&#x7406; virtual network - Isolated"></a>&#x4F7F;&#x7528; libvirt &#x7BA1;&#x7406; virtual network - Isolated</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#virtual-network-NATed-amp-Routed"><span class="nav-number">6.</span> <span class="nav-text"><a href="#virtual-network-NATed-amp-Routed" class="headerlink" title="virtual network - NATed &amp; Routed"></a>virtual network - NATed &amp; Routed</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#NATed-virtual-network"><span class="nav-number">6.1.</span> <span class="nav-text"><a href="#NATed-virtual-network" class="headerlink" title="NATed virtual network"></a>NATed virtual network</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Routed-virtual-network"><span class="nav-number">6.2.</span> <span class="nav-text"><a href="#Routed-virtual-network" class="headerlink" title="Routed virtual network"></a>Routed virtual network</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">7.</span> <span class="nav-text"><a href="#References" class="headerlink" title="References"></a>References</span></a></li></ol></div>
             
 
           </div>

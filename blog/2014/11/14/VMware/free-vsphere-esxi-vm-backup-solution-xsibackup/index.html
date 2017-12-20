@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="小信豬的原始部落">
 <meta property="og:description" content="介紹可用來備份 VMware ESXi 中 virtual machine 的免費備份方案 - xsibackup">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2017-11-30T02:40:18.880Z">
+<meta property="og:updated_time" content="2017-12-20T02:21:39.286Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[VMware] 免費的 vSphere ESXi VM 備份方案 - XSIBACKUP">
 <meta name="twitter:description" content="介紹可用來備份 VMware ESXi 中 virtual machine 的免費備份方案 - xsibackup">
@@ -492,8 +492,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/blog/2016/07/01/Linux/Auto-Authenticate-with-Password-Protected-SSHKeypair/" rel="prev" title="[Linux] 解決使用帶有密碼的 SSH keypair 時需要重複輸入密碼的問題">
-                [Linux] 解決使用帶有密碼的 SSH keypair 時需要重複輸入密碼的問題 <i class="fa fa-chevron-right"></i>
+              <a href="/blog/2016/06/22/CoreOS/CoreOS-Introduction-Of-etcd-fleet-and-flannel/" rel="prev" title="[CoreOS] etcd、fleet & flannel 簡介">
+                [CoreOS] etcd、fleet & flannel 簡介 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -581,7 +581,7 @@
               
                 <a href="/blog/archives/">
               
-                  <span class="site-state-item-count">22</span>
+                  <span class="site-state-item-count">23</span>
                   <span class="site-state-item-name">文章</span>
                 </a>
               </div>
@@ -592,7 +592,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/blog/categories/index.html">
-                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-count">10</span>
                   <span class="site-state-item-name">分類</span>
                 </a>
               </div>
@@ -603,7 +603,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/blog/tags/index.html">
-                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-count">21</span>
                   <span class="site-state-item-name">標籤</span>
                 </a>
               </div>
@@ -658,7 +658,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#環境設定"><span class="nav-number">1.</span> <span class="nav-text">環境設定</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用方式"><span class="nav-number">2.</span> <span class="nav-text">使用方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他參數"><span class="nav-number">3.</span> <span class="nav-text">其他參數</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#寄送-Mail-的問題"><span class="nav-number">4.</span> <span class="nav-text">寄送 Mail 的問題</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#排程備份"><span class="nav-number">5.</span> <span class="nav-text">排程備份</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#總結"><span class="nav-number">6.</span> <span class="nav-text">總結</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#優點"><span class="nav-number">6.1.</span> <span class="nav-text">優點</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#缺點"><span class="nav-number">6.2.</span> <span class="nav-text">缺點</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#參考資料"><span class="nav-number">7.</span> <span class="nav-text">參考資料</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#環境設定"><span class="nav-number">1.</span> <span class="nav-text"><a href="#&#x74B0;&#x5883;&#x8A2D;&#x5B9A;" class="headerlink" title="&#x74B0;&#x5883;&#x8A2D;&#x5B9A;"></a>&#x74B0;&#x5883;&#x8A2D;&#x5B9A;</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用方式"><span class="nav-number">2.</span> <span class="nav-text"><a href="#&#x4F7F;&#x7528;&#x65B9;&#x5F0F;" class="headerlink" title="&#x4F7F;&#x7528;&#x65B9;&#x5F0F;"></a>&#x4F7F;&#x7528;&#x65B9;&#x5F0F;</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他參數"><span class="nav-number">3.</span> <span class="nav-text"><a href="#&#x5176;&#x4ED6;&#x53C3;&#x6578;" class="headerlink" title="&#x5176;&#x4ED6;&#x53C3;&#x6578;"></a>&#x5176;&#x4ED6;&#x53C3;&#x6578;</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#寄送-Mail-的問題"><span class="nav-number">4.</span> <span class="nav-text"><a href="#&#x5BC4;&#x9001;-Mail-&#x7684;&#x554F;&#x984C;" class="headerlink" title="&#x5BC4;&#x9001; Mail &#x7684;&#x554F;&#x984C;"></a>&#x5BC4;&#x9001; Mail &#x7684;&#x554F;&#x984C;</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#排程備份"><span class="nav-number">5.</span> <span class="nav-text"><a href="#&#x6392;&#x7A0B;&#x5099;&#x4EFD;" class="headerlink" title="&#x6392;&#x7A0B;&#x5099;&#x4EFD;"></a>&#x6392;&#x7A0B;&#x5099;&#x4EFD;</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#總結"><span class="nav-number">6.</span> <span class="nav-text"><a href="#&#x7E3D;&#x7D50;" class="headerlink" title="&#x7E3D;&#x7D50;"></a>&#x7E3D;&#x7D50;</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#優點"><span class="nav-number">6.1.</span> <span class="nav-text"><a href="#&#x512A;&#x9EDE;" class="headerlink" title="&#x512A;&#x9EDE;"></a>&#x512A;&#x9EDE;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#缺點"><span class="nav-number">6.2.</span> <span class="nav-text"><a href="#&#x7F3A;&#x9EDE;" class="headerlink" title="&#x7F3A;&#x9EDE;"></a>&#x7F3A;&#x9EDE;</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#參考資料"><span class="nav-number">7.</span> <span class="nav-text"><a href="#&#x53C3;&#x8003;&#x8CC7;&#x6599;" class="headerlink" title="&#x53C3;&#x8003;&#x8CC7;&#x6599;"></a>&#x53C3;&#x8003;&#x8CC7;&#x6599;</span></a></li></ol></div>
             
 
           </div>
