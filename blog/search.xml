@@ -3033,6 +3033,366 @@
     </entry>
     
     <entry>
+      <title><![CDATA[[RHCE] RH124 Chapter 14 Accessing Linux File Systems 學習筆記]]></title>
+      <url>/blog/2016/04/28/RHCE/RHCE7-RH124-LearningNotes-CH14_AccessingLinuxFileSystems/</url>
+      <content type="html"><![CDATA[<p><a name="ch14.1"></a></p>
+<h1 id="14-1-Identifying-File-Systems-and-Devices"><a href="#14-1-Identifying-File-Systems-and-Devices" class="headerlink" title="14.1 Identifying File Systems and Devices"></a>14.1 Identifying File Systems and Devices</h1><p>常用指令：</p>
+<ul>
+<li><code>sudo du -h / --max-depth=1 2&gt;/dev/null | sort -h</code>：檢查 root directory 每個目錄所使用的容量</li>
+</ul>
+<hr>
+<p><a name="ch14.2"></a></p>
+<h1 id="14-2-Mounting-and-Unmounting-File-Systems"><a href="#14-2-Mounting-and-Unmounting-File-Systems" class="headerlink" title="14.2 Mounting and Unmounting File Systems"></a>14.2 Mounting and Unmounting File Systems</h1><p>常用指令：</p>
+<ul>
+<li><p><code>blkid</code>：顯示所有 block device 資訊</p>
+</li>
+<li><p><code>mount source_device destination_dir</code>：透過 device name 掛載</p>
+</li>
+<li><p><code>mount UUID destination_dir</code>：透過 UUID 掛載</p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查詢機器上的 block device</span></span><br><span class="line">$ sudo blkid</span><br><span class="line">/dev/vda1: UUID=<span class="string">"9bf6b9f7-92ad-441b-848e-0257cbb883d1"</span> TYPE=<span class="string">"xfs"</span> </span><br><span class="line">/dev/vdb1: UUID=<span class="string">"bffdaa4a-34f2-4a74-8455-a11aca40a6e1"</span> TYPE=<span class="string">"xfs"</span> </span><br><span class="line"></span><br><span class="line"><span class="comment"># 指定 UUID 掛載 block device</span></span><br><span class="line">$ sudo mkdir /mnt/newspace &amp;&amp; sudo mount UUID=<span class="string">"bffdaa4a-34f2-4a74-8455-a11aca40a6e1"</span> /mnt/newspace</span><br><span class="line"></span><br><span class="line"><span class="comment"># 卸離 block device</span></span><br><span class="line">$ sudo umount /mnt/newspace</span><br></pre></td></tr></table></figure>
+<hr>
+<p><a name="ch14.3"></a></p>
+<h1 id="14-3-Making-Links-Between-Files"><a href="#14-3-Making-Links-Between-Files" class="headerlink" title="14.3 Making Links Between Files"></a>14.3 Making Links Between Files</h1><h2 id="Partition-UUID-amp-inode"><a href="#Partition-UUID-amp-inode" class="headerlink" title="Partition UUID &amp; inode"></a>Partition UUID &amp; inode</h2><blockquote>
+<p>UUID 存於 super block 中</p>
+</blockquote>
+<p>inode block -&gt; inode table 結構：</p>
+<ol>
+<li>inode number</li>
+<li>Permission</li>
+<li>Hard Link Subdirectory 數量</li>
+<li>UID</li>
+<li>GID</li>
+<li>Size</li>
+<li>Timestamp</li>
+<li>Filename</li>
+<li>Pointer</li>
+</ol>
+<h2 id="Hard-Link"><a href="#Hard-Link" class="headerlink" title="Hard Link"></a>Hard Link</h2><p><strong><font color="red">inode 在 Linux 中是真正指向檔案實際內容的指標</font></strong></p>
+<p>透過 <code>ln</code> 可建立 Hard Link，這是個指向 inode 的連結</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 產生檔案</span></span><br><span class="line">[student@server0 ~]$ <span class="built_in">echo</span> <span class="string">"Hello World"</span> &gt; newfile.txt</span><br><span class="line">[student@server0 ~]$ ls -l</span><br><span class="line">total 4</span><br><span class="line">-rw-rw-r--. 1 student student 12  4月 28 15:05 newfile.txt</span><br><span class="line"></span><br><span class="line"><span class="comment"># 建立 hard link (注意數字從 1 變成 2, inode number 相同)</span></span><br><span class="line">[student@server0 ~]$ ln newfile.txt ~/newfile-hlink.txt</span><br><span class="line">[student@server0 ~]$ ls -li</span><br><span class="line">total 8</span><br><span class="line">12889 -rw-rw-r--. 2 student student 12  4月 28 15:05 newfile-hlink.txt</span><br><span class="line">12889 -rw-rw-r--. 2 student student 12  4月 28 15:05 newfile.txt</span><br></pre></td></tr></table></figure>
+<p>Hard Link 特性 &amp; 說明：</p>
+<ul>
+<li>上面建立 Hard Link 的示範，可看出指向同一個 inode 的連結，從一個變成兩個(可防止檔案誤刪)</li>
+<li>增加 hard link 不會增加磁碟空間</li>
+<li>不能跨 File System</li>
+<li>不能 link 目錄，只能建立在檔案上</li>
+</ul>
+<h2 id="Symbolic-Link"><a href="#Symbolic-Link" class="headerlink" title="Symbolic Link"></a>Symbolic Link</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 建立 symbolic link</span></span><br><span class="line">$ ln -s newfile.txt ~/newfile-symlink.txt</span><br><span class="line">$ ls -l</span><br><span class="line">total 8</span><br><span class="line">-rw-rw-r--. 2 student student 12  4月 28 15:05 newfile-hlink.txt</span><br><span class="line">lrwxrwxrwx. 1 student student 11  4月 28 15:19 newfile-symlink.txt -&gt; newfile.txt</span><br><span class="line">-rw-rw-r--. 2 student student 12  4月 28 15:05 newfile.txt</span><br><span class="line"></span><br><span class="line"><span class="comment"># 移除 symbolic link 指向的檔案(系統會標示連結失效)</span></span><br><span class="line">$ rm newfile.txt </span><br><span class="line">$ ls -l</span><br><span class="line">total 4</span><br><span class="line">-rw-rw-r--. 1 student student 12  4月 28 15:05 newfile-hlink.txt</span><br><span class="line">lrwxrwxrwx. 1 student student 11  4月 28 15:19 newfile-symlink.txt -&gt; newfile.txt (這裡會有底色標記連結失效)</span><br><span class="line"></span><br><span class="line"><span class="comment"># link 目錄</span></span><br><span class="line">$ ln -s /etc ~/config_files</span><br></pre></td></tr></table></figure>
+<p>特色：</p>
+<ol>
+<li>類似捷徑</li>
+<li>不能防止檔案誤刪</li>
+</ol>
+<hr>
+<p><a name="ch14.4"></a></p>
+<h1 id="14-4-Locating-Files-on-the-System"><a href="#14-4-Locating-Files-on-the-System" class="headerlink" title="14.4 Locating Files on the System"></a>14.4 Locating Files on the System</h1><h2 id="locate"><a href="#locate" class="headerlink" title="locate"></a>locate</h2><p>要使用 locate 之前必須先執行 <code>sudo updatedb</code>，才會有檔案資料庫可用，若要搜尋最新的檔案，也必須要執行 updatedb</p>
+<ul>
+<li><p><code>sudo locate passwd</code>：尋找檔名為 passwd 的檔案</p>
+</li>
+<li><p><code>sudo locate -n 5 passwd</code>：同上，但只列出 5 筆資料</p>
+</li>
+<li><p><code>sudo locate -i messages</code>：以 case-insensitive 的方式搜尋</p>
+</li>
+</ul>
+<h2 id="find"><a href="#find" class="headerlink" title="find"></a>find</h2><p>即時搜尋，可找到剛新增的檔案</p>
+<ul>
+<li><p><code>sudo find / -name sshd_config</code>：搜尋檔名為 sshd_config 的檔案</p>
+</li>
+<li><p><code>sudo find / -name &#39;*.txt&#39;</code>：在 / 目錄下尋找副檔名為 txt 的檔案</p>
+</li>
+<li><p><code>sudo find / -iname &#39;*messages*&#39;</code>：在 / 目錄下以 case-insensitive 的方式檔名尋找 <em>messages</em> 的檔案</p>
+</li>
+<li><p><code>sudo find -user student</code>：尋找 /home 目錄中，user 為 student 的檔案</p>
+</li>
+<li><p><code>sudo find -group student</code>：尋找 /home 目錄中，group 為 student 的檔案</p>
+</li>
+<li><p><code>sudo find / -user root -group mail</code>：在 / 目錄中尋找 user=root, group=mail 的檔案</p>
+</li>
+<li><p><code>sudo find /home -perm 764</code>：尋找 /home 中 permission=764 檔案</p>
+</li>
+<li><p><code>sudo find /home -perm -324</code>：尋找 /home 中，<strong><font color="red">至少</font></strong>有指定權限的檔案</p>
+</li>
+<li><p><code>sudo find /home -perm /442</code>：尋找 /home 中，user(read)/group(read)/others(write) 至少其中一個符合指定權限的檔案</p>
+</li>
+<li><p><code>sudo find / -perm /7000</code>：搜尋檔案當中含有 SGID 或 SUID 或 SBIT 的屬性</p>
+</li>
+<li><p><code>sudo find /run -type s</code>：找出 /run 目錄中，檔案類型為 Socket 的檔名有哪些</p>
+<blockquote>
+<p>type 選項可以有 f(一般檔案) / d(目錄) / l(symbolic link) / b(block device)</p>
+</blockquote>
+</li>
+<li><p><code>sudo find -size -10M</code>：尋找小於 10MB 的檔案</p>
+</li>
+<li><p><code>sudo find / -type f -links +1</code>：尋找擁有超過 1 個 hard link 的一般檔案</p>
+</li>
+</ul>
+<h3 id="find-的特別功能"><a href="#find-的特別功能" class="headerlink" title="find 的特別功能"></a>find 的特別功能</h3><p>find 還可以針對搜尋結果加上 action：</p>
+<p><code>sudo find /etc/yum.repos.d/ -type f -exec mv {} {}1 \;</code></p>
+<p>以上指令表示：</p>
+<ol>
+<li><p>搜尋 /etc/yum.repos.d/ 目錄中的一般檔案</p>
+</li>
+<li><p>將每個檔案進行改名，在檔名後面多加一個 1</p>
+</li>
+</ol>
+<hr>
+<h1 id="參考資料"><a href="#參考資料" class="headerlink" title="參考資料"></a>參考資料</h1><ul>
+<li><a href="http://linux.vbird.org/linux_basic/0230filesystem.php#link" target="_blank" rel="noopener">鳥哥的 Linux 私房菜 – 第七章、Linux 磁碟與檔案系統管理 &gt;&gt; 7.2.2 實體連結與符號連結： ln</a></li>
+<li><a href="http://linux.vbird.org/linux_basic/0220filemanager.php#file_find" target="_blank" rel="noopener">鳥哥的 Linux 私房菜 – 第六章、Linux 檔案與目錄管理 &gt;&gt; 6.5 指令與檔案的搜尋</a></li>
+</ul>
+]]></content>
+      
+        <categories>
+            
+            <category> RHCE </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Linux </tag>
+            
+            <tag> RHCE </tag>
+            
+            <tag> RH124 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[[RHCE] RH124 Chapter 13 Installing and Updating Software Packages 學習筆記]]></title>
+      <url>/blog/2016/04/27/RHCE/RHCE7-RH124-LearningNotes-CH13_InstallingAndUpdatingSoftwarePackages/</url>
+      <content type="html"><![CDATA[<p><a name="ch13.2"></a></p>
+<h1 id="13-2-RPM-Software-Packages-and-YUM"><a href="#13-2-RPM-Software-Packages-and-YUM" class="headerlink" title="13.2 RPM Software Packages and YUM"></a>13.2 RPM Software Packages and YUM</h1><table>
+<thead>
+<tr>
+<th>功能</th>
+<th>yum</th>
+<th>rpm</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>查詢</td>
+<td>yum list &#124; grep <font color="blue"><em>KEYWORD</em></font> <br>yum search <font color="blue"><em>KEYWORD</em></font> <br>yum info <font color="blue"><em>PACKAGE_NAME</em></font> <br>yum provides <font color="blue"><em>FILE_PATH_NAME</em></font></td>
+<td>rpm -qa &#124; grep <font color="blue"><em>KEYWORD</em></font> <br>rpm [ -qi &#124; -ql &#124; -qc &#124; -gd &#124; -q –scripts &#124; -q –changelog ] <font color="blue"><em>PACKAGE_NAME</em></font> <br> rpm -qf <font color="blue"><em>FILE_PATH</em></font></td>
+</tr>
+<tr>
+<td>查詢(Group)</td>
+<td>yum groups [ list &#124; info ]</td>
+<td>rpm [ -qpi &#124; -qpl &#124; -qpc &#124; -qpd &#124; -qp –scripts &#124; -qp –changelog] <font color="blue"><em>PACKAGE_NAME</em></font></td>
+</tr>
+<tr>
+<td>安裝</td>
+<td>yum -y [group] install <font color="blue"><em>PACKAGE_NAME</em></font></td>
+<td>rpm -ivh <font color="blue"><em>PACKAGE_NAME</em></font> <br>yum -y localinstall <font color="blue"><em>PACKAGE_NAME</em></font></td>
+</tr>
+<tr>
+<td>更新</td>
+<td>yum -y update <font color="blue"><em>PACKAGE_NAME</em></font></td>
+<td>rpm -Uvh <font color="blue"><em>PACKAGE_NAME</em></font></td>
+</tr>
+<tr>
+<td>移除</td>
+<td>yum -y [group] remove <font color="blue"><em>PACKAGE_NAME</em></font></td>
+<td>rpm -e <font color="blue"><em>PACKAGE_NAME</em></font></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a name="ch13.3"></a></p>
+<h1 id="13-3-Managing-Software-Updates-with-yum"><a href="#13-3-Managing-Software-Updates-with-yum" class="headerlink" title="13.3 Managing Software Updates with yum"></a>13.3 Managing Software Updates with yum</h1><ul>
+<li><p><code>sudo yum group install &quot;Development Tools&quot;</code>：安裝整包 Development Tools</p>
+</li>
+<li><p><code>yum list kernel</code>：列出 kernel 清單 (包含已經安裝 &amp; 可安裝的)</p>
+</li>
+<li><p><code>uname -r</code>：列出 kenal 版本</p>
+</li>
+<li><p><code>uname -a</code>：列出 kernel 詳細資訊</p>
+</li>
+<li><p><code>sudo yum history</code>：檢視 yum 歷程記錄</p>
+</li>
+<li><p><code>sudo yum undo 5</code>：取消 ID=5 所紀錄的 yum 工作</p>
+</li>
+</ul>
+<hr>
+<p><a name="ch13.4"></a></p>
+<h1 id="13-4-Enabling-yum-Software-Repositories"><a href="#13-4-Enabling-yum-Software-Repositories" class="headerlink" title="13.4 Enabling yum Software Repositories"></a>13.4 Enabling yum Software Repositories</h1><p><code>/etc/yum.repos.d/*.repo</code>：此目錄內的附檔名必須都是 <strong>repo</strong></p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[ID]</span></span><br><span class="line"><span class="attr">name</span>=</span><br><span class="line"><span class="attr">baseurl</span>= YUM server 上的容器</span><br><span class="line"><span class="attr">enabled</span>=</span><br><span class="line"><span class="attr">gpgcheck</span>=</span><br></pre></td></tr></table></figure>
+<p>常用指令：</p>
+<ul>
+<li><p><code>yum repolist all</code>：列出目前所有 repository</p>
+</li>
+<li><p><code>sudo yum-config-manager --disable rhel_dvd</code>：停用 “rhel_dvd” repository</p>
+</li>
+<li><p><code>sudo yum-config-manager --add-repo=&quot;http://content.example.com/rhel7.0/x86_64/rht/&quot;</code>：直接指定路徑增加 repository</p>
+</li>
+<li><p><code>sudo rpm --import http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7</code>：加入 GPG Key</p>
+</li>
+<li><p><code>sudo yum -y install http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm</code>：透過 rpm 安裝方式加入 repository</p>
+</li>
+</ul>
+<p>其他：</p>
+<ul>
+<li><p><code>EPEL</code>：Extra Package for Enterprise Linux</p>
+</li>
+<li><p>使用 yum-config-manager 搭配 <code>--nogpgcheck</code> 表示忽略 GPG key 的檢查，可能會有安全性上的風險</p>
+</li>
+</ul>
+<h3 id="非常重要-Practice-非常重要"><a href="#非常重要-Practice-非常重要" class="headerlink" title="(非常重要) ===== Practice ====== (非常重要)"></a>(<strong><font color="red">非常重要</font></strong>) ===== Practice ====== (<strong><font color="red">非常重要</font></strong>)</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ sudo yum-config-manager --add-repo=<span class="string">"http://content.example.com/rhel7.0/x86_64/rht"</span></span><br><span class="line">[content.example.com_rhel7.0_x86_64_rht]</span><br><span class="line">name=added from: http://content.example.com/rhel7.0/x86_64/rht</span><br><span class="line">baseurl=http://content.example.com/rhel7.0/x86_64/rht</span><br><span class="line">enabled=1</span><br></pre></td></tr></table></figure>
+<p>編輯 <strong><font color="red">/etc/yum.repo.d/errata.repo</font></strong> 內容如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[updates]</span><br><span class="line">name=RedHat updates</span><br><span class="line">baseurl=http://content.example.com/rhel7.0/x86_64/errata</span><br><span class="line">enabled=1</span><br><span class="line">gpgcheck=0</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 檢查詢所有的 repository (包含 enabled &amp; disabled)</span></span><br><span class="line">$ yum repolist all</span><br><span class="line"></span><br><span class="line"><span class="comment"># 停用指定 repository</span></span><br><span class="line">$ sudo yum-config-manager --<span class="built_in">disable</span> content.example.com_rhel7.0_x86_64_rht</span><br><span class="line"></span><br><span class="line"><span class="comment"># 再次確認 repository 狀態</span></span><br><span class="line">$ yum repolist all</span><br><span class="line"></span><br><span class="line"><span class="comment"># 套件升級(會發現有個 kernel 的 update 來自剛剛的 errata repo)</span></span><br><span class="line">$ sudo yum -y update</span><br><span class="line"><span class="comment"># 檢視目前系統中所有的 kernel 清單</span></span><br><span class="line">$ yum list kernel</span><br></pre></td></tr></table></figure>
+<hr>
+<p><a name="ch13.5"></a></p>
+<h1 id="13-5-Examining-RPM-Package-Files"><a href="#13-5-Examining-RPM-Package-Files" class="headerlink" title="13.5 Examining RPM Package Files"></a>13.5 Examining RPM Package Files</h1><p>rpm 常用參數：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查詢指定套件</span></span><br><span class="line">$ rpm -q yum</span><br><span class="line">yum-3.4.3-118.el7.noarch</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查詢指定檔案(or 目錄)屬於哪個套件</span></span><br><span class="line">$ rpm -q -f /etc/yum.repos.d</span><br><span class="line">yum-3.4.3-118.el7.noarch</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查詢套件資訊，類似 "yum info" 的功能</span></span><br><span class="line">$ rpm -q -i yum</span><br><span class="line">Name        : yum</span><br><span class="line">Version     : 3.4.3</span><br><span class="line">Release     : 118.el7</span><br><span class="line">Architecture: noarch</span><br><span class="line">......</span><br><span class="line"></span><br><span class="line"><span class="comment"># 列出安裝指定套件所產生的檔案列表</span></span><br><span class="line">$ rpm -q -l yum</span><br><span class="line">.....</span><br><span class="line">/etc/yum.conf</span><br><span class="line">/etc/yum.repos.d</span><br><span class="line"></span><br><span class="line"><span class="comment"># 列出指定套件相關的文件資訊</span></span><br><span class="line">$ rpm -q -d yum</span><br><span class="line">/usr/share/doc/yum-3.4.3/AUTHORS</span><br><span class="line">/usr/share/doc/yum-3.4.3/COPYING</span><br><span class="line">/usr/share/doc/yum-3.4.3/ChangeLog</span><br><span class="line">/usr/share/doc/yum-3.4.3/INSTALL</span><br><span class="line">.......</span><br><span class="line"></span><br><span class="line"><span class="comment"># 列出安裝指定套件所會執行的相關 script 內容</span></span><br><span class="line">$ rpm -q --scripts openssh-server</span><br><span class="line">preinstall scriptlet (using /bin/sh):</span><br><span class="line">getent group sshd &gt;/dev/null || groupadd -g 74 -r sshd || :</span><br><span class="line">.......</span><br><span class="line">postinstall scriptlet (using /bin/sh):</span><br><span class="line">.......</span><br><span class="line">.....</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查詢套件所包含的設定檔</span></span><br><span class="line">$ rpm -q -c yum</span><br><span class="line">/etc/logrotate.d/yum</span><br><span class="line">/etc/yum.conf</span><br><span class="line">/etc/yum/version-groups.conf</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查詢指定套件的 changelog 資訊</span></span><br><span class="line">$ rpm -q --changelog yum</span><br></pre></td></tr></table></figure>
+]]></content>
+      
+        <categories>
+            
+            <category> RHCE </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Linux </tag>
+            
+            <tag> RHCE </tag>
+            
+            <tag> RH124 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[[RHCE] RH124 Chapter 11 Managing Red Hat Enterprise Linux Networking 學習筆記]]></title>
+      <url>/blog/2016/04/26/RHCE/RHCE7-RH124-LearningNotes-CH11_ManagingRedHatEnterpriseLinuxNetworking/</url>
+      <content type="html"><![CDATA[<p><a name="ch11.1"></a></p>
+<h1 id="11-1-Network-Concepts"><a href="#11-1-Network-Concepts" class="headerlink" title="11.1 Network Concepts"></a>11.1 Network Concepts</h1><h2 id="11-1-2-Network-interface-names"><a href="#11-1-2-Network-interface-names" class="headerlink" title="11.1.2 Network interface names"></a>11.1.2 Network interface names</h2><p>網卡命名原則：</p>
+<ul>
+<li><p>Ethernet 介面卡，開頭為 <code>en</code></p>
+<blockquote>
+<p>onboard 的網卡名稱為 eno1, eno2 … etc<br>可插拔(PCI 介面)的網卡名稱為 enp2s0</p>
+</blockquote>
+</li>
+<li><p>無線網路卡，開頭為 <code>wl</code></p>
+</li>
+<li><p>3G/4G 網路卡，開頭為 <code>ww</code></p>
+</li>
+</ul>
+<blockquote>
+<p>虛擬機則一律為 <code>eth0</code>, <code>eth1</code>, <code>eth2</code> … etc</p>
+</blockquote>
+<hr>
+<p><a name="ch11.2"></a></p>
+<h1 id="11-2-Validating-Network-Configuration"><a href="#11-2-Validating-Network-Configuration" class="headerlink" title="11.2 Validating Network Configuration"></a>11.2 Validating Network Configuration</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 顯示 enp0s8 資訊</span></span><br><span class="line">[student@server0 ~]$ ip addr show eth0</span><br><span class="line">2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast state UP qlen 1000</span><br><span class="line">    link/ether 52:54:00:00:00:0b brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 172.25.0.11/24 brd 172.25.0.255 scope global dynamic eth0</span><br><span class="line">       valid_lft 16494sec preferred_lft 16494sec</span><br><span class="line">    inet6 fe80::5054:ff:fe00:b/64 scope link</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line"></span><br><span class="line"><span class="comment"># 顯示網路介面的統計紀錄</span></span><br><span class="line">[student@server0 ~]$ ip -s link show eth0</span><br><span class="line">2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast state UP mode DEFAULT qlen 1000</span><br><span class="line">    link/ether 52:54:00:00:00:0b brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    RX: bytes  packets  errors  dropped overrun mcast   </span><br><span class="line">    5641965    4752     0       0       0       0      </span><br><span class="line">    TX: bytes  packets  errors  dropped carrier collsns</span><br><span class="line">    611742     3112     0       0       0       0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視路由</span></span><br><span class="line">[student@server0 ~]$ ip route</span><br><span class="line">default via 172.25.0.254 dev eth0  proto static  metric 1024</span><br><span class="line">172.25.0.0/24 dev eth0  proto kernel  scope link  src 172.25.0.11</span><br><span class="line">172.25.253.254 via 172.25.0.254 dev eth0  proto static  metric 1</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 列出所有資訊</span></span><br><span class="line">$ sudo ss</span><br><span class="line"></span><br><span class="line"><span class="comment"># 列出已經建立的 connection</span></span><br><span class="line">$ sudo ss -t</span><br><span class="line"></span><br><span class="line"><span class="comment"># 列出包含 listen 的 port &amp; connection</span></span><br><span class="line">$ sudo ss -ta</span><br><span class="line"></span><br><span class="line"><span class="comment"># 列出 listening 的 tcp socket</span></span><br><span class="line">$ sudo ss -lt</span><br></pre></td></tr></table></figure>
+<hr>
+<p><a name="ch11.3"></a></p>
+<h1 id="11-3-Configuring-Network-with-nmcli"><a href="#11-3-Configuring-Network-with-nmcli" class="headerlink" title="11.3 Configuring Network with nmcli"></a>11.3 Configuring Network with nmcli</h1><p>在 RHEL 7 中提供了 <strong><font color="red">nmcli</font></strong>(NetworkManager) 作為網路設定管理之用。</p>
+<h2 id="11-3-1-Network-Manager"><a href="#11-3-1-Network-Manager" class="headerlink" title="11.3.1 Network Manager"></a>11.3.1 Network Manager</h2><p><code>nmcli</code> 命令是修改 <code>/etc/sysconfig/network-scripts/ifcfg-*</code> 中的內容，有兩個觀念必須弄清楚，分別是 <strong><font color="red">device</font></strong> &amp; <strong><font color="red">connection</font></strong>：</p>
+<ul>
+<li><p><code>device</code>：每一個網路卡(介面)都屬於一個 device</p>
+</li>
+<li><p><code>connection</code>：每一個 device 可以同時有多個 connection 設定(每次只有一種可以生效)，可快速因應在不同場景所需要的網路設定變更</p>
+</li>
+</ul>
+<h2 id="11-3-2-Viewing-network-information-with-nmcli"><a href="#11-3-2-Viewing-network-information-with-nmcli" class="headerlink" title="11.3.2 Viewing network information with nmcli"></a>11.3.2 Viewing network information with nmcli</h2><ul>
+<li><p><code>sudo systemctl status NetworkManager.service</code>：檢查 Network Manager 目前服務狀態</p>
+</li>
+<li><p><code>nmcli connection show</code>：列出目前所有的 connection</p>
+</li>
+<li><p><code>nmcli connection show --active</code>：顯示出目前狀態為 active 的 connection</p>
+</li>
+<li><p><code>nmcli connection show &quot;System eth0&quot;</code>：顯示指定 connection 的詳細內容 (小寫的部分可以變更、大寫的部分無法變更)</p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[student@server0 ~]$ nmcli connection show --active</span><br><span class="line">NAME         UUID                                  TYPE            DEVICE</span><br><span class="line">System eth0  5fb06bd0-0bb0-7ffb-45f1-d6edd65f3e03  802-3-ethernet  eth0</span><br><span class="line">[student@server0 ~]$ nmcli connection show <span class="string">"System eth0"</span></span><br><span class="line">connection.id:                          System eth0</span><br><span class="line">connection.uuid:                        5fb06bd0-0bb0-7ffb-45f1-d6edd65f3e03</span><br><span class="line">connection.interface-name:              eth0</span><br><span class="line">connection.type:                        802-3-ethernet</span><br><span class="line">.....</span><br><span class="line">GENERAL.NAME:                           System eth0</span><br><span class="line">GENERAL.UUID:                           5fb06bd0-0bb0-7ffb-45f1-d6edd65f3e03</span><br><span class="line">GENERAL.DEVICES:                        eth0</span><br><span class="line">GENERAL.STATE:                          activated</span><br><span class="line">.....</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p><code>nmcli device status</code>：顯示目前 device 的狀態</p>
+</li>
+<li><p><code>nmcli device show eth0</code>：顯示指定 device 的詳細狀態</p>
+</li>
+</ul>
+<h2 id="11-3-3-Creating-network-connections-with-nmcli"><a href="#11-3-3-Creating-network-connections-with-nmcli" class="headerlink" title="11.3.3 Creating network connections with nmcli"></a>11.3.3 Creating network connections with nmcli</h2><ul>
+<li><p><code>sudo nmcli connection add con-name &quot;my-connect-name&quot; type ethernet ifname eth0</code></p>
+<blockquote>
+<p>device: eth0<br><br>connection: my-connect-name<br><br>設定內容：DHCP</p>
+</blockquote>
+</li>
+<li><p><code>sudo nmcli connection add con-name &quot;static&quot; ifname eth0 type ethernet autoconnect no ip4 172.25.40.11/24 gw4 172.25.40.254</code></p>
+<blockquote>
+<p>device: eth0 <br><br>connection: static <br><br>設定內容: 開機時不套用 | IPv4 | IP: 172.25.40.11/24 | Gateway: 172.25.40.254 <br><br><strong><font color="red">但 connection add 無法增加 DNS 設定</font></strong></p>
+</blockquote>
+</li>
+<li><p><code>sudo nmcli connection up static</code>：套用 “staic” connection 設定</p>
+</li>
+<li><p><code>sudo nmcli connection reload</code>：reload 所有的 connection(設定檔)，不會套用到網路介面上(設定完建議 reload 以確保設定有被 Network Manager 抓到)</p>
+</li>
+</ul>
+<h2 id="11-3-4-Modifying-network-interfaces-with-nmcli"><a href="#11-3-4-Modifying-network-interfaces-with-nmcli" class="headerlink" title="11.3.4 Modifying network interfaces with nmcli"></a>11.3.4 Modifying network interfaces with nmcli</h2><ul>
+<li><p><code>sudo nmcli connection modify &quot;static&quot; ipv4.dns 8.8.8.8</code>：在指定的 connection 中設定 DNS(作完要重新 up connection 才會生效)</p>
+</li>
+<li><p><code>sudo nmcli connection modify &quot;static&quot; +ipv4.dns 8.8.4.4</code>：在指定的 connection 中增加 DNS 設定</p>
+</li>
+<li><p><code>sudo nmcli connection modify &quot;static&quot; connection.autoconnect on</code>：設定開機自動套用指定 connection</p>
+</li>
+<li><p><code>sudo nmcli connection delete &quot;static&quot;</code>：刪除指定的 connection</p>
+</li>
+<li><p><code>sudo nmcli connection down</code>：網路斷掉後，Network Manager 會嘗試找到另外一個 autoconnect=on 的 connection 並套用其設定</p>
+</li>
+<li><p><code>sudo nmcli device disconnect eth0</code>：強制停用指定 device 的網路設定(不會自動套用設定)</p>
+</li>
+<li><p><code>sudo nmcli net off</code>：停止所有的網路介面</p>
+</li>
+</ul>
+<hr>
+<p><a name="ch11.4"></a></p>
+<h1 id="11-4-Editing-Network-Configuration-Files"><a href="#11-4-Editing-Network-Configuration-Files" class="headerlink" title="11.4 Editing Network Configuration Files"></a>11.4 Editing Network Configuration Files</h1><p>直接修改 <code>/etc/sysconfig/network-scripts/ifcfg-*</code> 檔案中的內容，再使用 <code>sudo nmcli connection reload</code>，就可以讓 Network Manager 取得新的設定。</p>
+<hr>
+<p><a name="ch11.5"></a></p>
+<h1 id="11-5-Configuring-Host-Names-and-Name-Resolution"><a href="#11-5-Configuring-Host-Names-and-Name-Resolution" class="headerlink" title="11.5 Configuring Host Names and Name Resolution"></a>11.5 Configuring Host Names and Name Resolution</h1><h2 id="11-5-1-Changing-the-System-host-name"><a href="#11-5-1-Changing-the-System-host-name" class="headerlink" title="11.5.1 Changing the System host name"></a>11.5.1 Changing the System host name</h2><p>若 <code>/etc/hostname</code> 不存在，則系統在網卡被分配到 ip 後，就會進行一個 DNS 的反向查詢</p>
+<p>hostname 可透過 <code>hostnamectl</code> 命令來設定</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">$ hostname</span><br><span class="line">server5.example.com</span><br><span class="line"></span><br><span class="line">$ sudo hostnamectl <span class="built_in">set</span>-hostname sercerX.example.com</span><br><span class="line"></span><br><span class="line">$ hostnamectl status</span><br><span class="line">   Static hostname: sercerx.example.com</span><br><span class="line">   Pretty hostname: sercerX.example.com</span><br><span class="line">         Icon name: computer-vm</span><br><span class="line">           Chassis: vm</span><br><span class="line">        Machine ID: adf65a29af58497b8bb516fc6d366b8d</span><br><span class="line">           Boot ID: 963e5bc0e26a42e8acf285616ed9c9b6</span><br><span class="line">    Virtualization: kvm</span><br><span class="line">  Operating System: CentOS Linux 7 (Core)</span><br><span class="line">       CPE OS Name: cpe:/o:centos:centos:7</span><br><span class="line">            Kernel: Linux 3.10.0-327.3.1.el7.x86_64</span><br><span class="line">      Architecture: x86-64</span><br></pre></td></tr></table></figure>
+<h2 id="11-5-2-Configuring-name-resolution"><a href="#11-5-2-Configuring-name-resolution" class="headerlink" title="11.5.2 Configuring name resolution"></a>11.5.2 Configuring name resolution</h2><blockquote>
+<p>若查詢簡短名稱，系統會自動戴上 <code>/etc/resolv.conf</code> 中的 <code>domain</code> or <code>search</code> 的值再查詢</p>
+</blockquote>
+<p>使用 <code>getent</code> &amp; <code>host</code> 測試 DNS 設定：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># getenv 主要以 IPv6 為主</span></span><br><span class="line">$ getent hosts tw.yahoo.com</span><br><span class="line">2406:2000:ec:601::1009 fd-fp3.wg1.b.yahoo.com tw.yahoo.com</span><br><span class="line"></span><br><span class="line"><span class="comment"># 沒有 IPv6 的設定，則回傳 IPv4</span></span><br><span class="line">$ getent hosts ptt.cc</span><br><span class="line">140.112.172.3   ptt.cc</span><br><span class="line">140.112.172.4   ptt.cc</span><br><span class="line">140.112.172.2   ptt.cc</span><br><span class="line">140.112.172.11  ptt.cc</span><br><span class="line">140.112.172.5   ptt.cc</span><br><span class="line">140.112.172.1   ptt.cc</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 host 查詢 google</span></span><br><span class="line">$ host www.google.com</span><br><span class="line">www.google.com has address 210.242.127.104</span><br><span class="line">www.google.com has address 210.242.127.88</span><br><span class="line">........</span><br><span class="line">www.google.com has address 210.242.127.109</span><br><span class="line">www.google.com has IPv6 address 2404:6800:4008:c01::6a</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 getent 查詢 google</span></span><br><span class="line">$ getent hosts www.google.com</span><br><span class="line">2404:6800:4008:c04::6a www.google.com</span><br></pre></td></tr></table></figure>
+<p>另外，一般網路設定若使用 DHCP，會把原有的 DNS 設定覆蓋，若要避免此情況，可用 <code>sudo nmcli connection &quot;System eth0&quot; ipv4.ignore-auto-dns yes</code> 來避免這樣的狀況發生。</p>
+<blockquote>
+<p>也可以用 nslookup 來測試 DNS，但需要額外加裝 <code>bind-utils</code> 套件</p>
+</blockquote>
+]]></content>
+      
+        <categories>
+            
+            <category> RHCE </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Linux </tag>
+            
+            <tag> RHCE </tag>
+            
+            <tag> RH124 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
       <title><![CDATA[[RHCE] RH124 Chapter 10 Analyzing and Storing Logs 學習筆記]]></title>
       <url>/blog/2016/04/24/RHCE/RHCE7-RH124-LearningNotes-CH10_AnalyzingAndStoringLogs/</url>
       <content type="html"><![CDATA[<h1 id="10-1-System-Log-Architecture"><a href="#10-1-System-Log-Architecture" class="headerlink" title="10.1 System Log Architecture"></a>10.1 System Log Architecture</h1><h2 id="10-1-1-System-logging"><a href="#10-1-1-System-logging" class="headerlink" title="10.1.1 System logging"></a>10.1.1 System logging</h2><hr>
