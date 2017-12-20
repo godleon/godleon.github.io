@@ -3,7 +3,7 @@ layout: post
 title:  "[RHCE] RH124 Chapter 7 Monitoring and Managing Linux Processes 學習筆記"
 description: "此文章記錄學習 RHCE RH124 Chapter 7 Monitoring and Managing Linux Processes 所留下的內容"
 date: 2016-04-14 04:30:00
-published: false
+published: true
 comments: true
 categories: [RHCE]
 tags: [Linux, RHCE, RH124]
