@@ -5,7 +5,7 @@ description: "This article introduces the informations for getting started with 
 date: 2016-10-29 23:50:00
 published: true
 comments: true
-categories: [git]
+categories: [Git]
 tags: [Git]
 ---
 

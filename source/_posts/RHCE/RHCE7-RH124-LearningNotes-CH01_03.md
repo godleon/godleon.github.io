@@ -5,7 +5,7 @@ description: "此文章記錄學習 RHCE RH124 所留下的內容，此篇包含
 date: 2016-02-17 23:20:00
 published: true
 comments: true
-categories: [Linux]
+categories: [RHCE]
 tags: [Linux, RHCE, RH124]
 ---
 
