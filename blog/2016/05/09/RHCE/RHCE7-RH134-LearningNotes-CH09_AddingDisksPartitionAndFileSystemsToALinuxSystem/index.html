@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-tw">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/blog/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/blog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/blog/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/blog/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Linux,RHCE,RH134," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="此文章記錄學習 RHCE7 RH134 Chapter 09. Adding Disks, Partitions, and File Systems to a Linux System 留下的內容">
+<meta name="keywords" content="Linux,RHCE,RH134">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[RHCE7] RH134 Chapter 09. Adding Disks, Partitions, and File Systems to a Linux System 學習筆記">
+<meta property="og:url" content="https://godleon.github.io/blog/2016/05/09/RHCE/RHCE7-RH134-LearningNotes-CH09_AddingDisksPartitionAndFileSystemsToALinuxSystem/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此文章記錄學習 RHCE7 RH134 Chapter 09. Adding Disks, Partitions, and File Systems to a Linux System 留下的內容">
+<meta property="og:locale" content="zh-tw">
+<meta property="og:updated_time" content="2017-12-20T03:27:11.629Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[RHCE7] RH134 Chapter 09. Adding Disks, Partitions, and File Systems to a Linux System 學習筆記">
+<meta name="twitter:description" content="此文章記錄學習 RHCE7 RH134 Chapter 09. Adding Disks, Partitions, and File Systems to a Linux System 留下的內容">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://godleon.github.io/blog/2016/05/09/RHCE/RHCE7-RH134-LearningNotes-CH09_AddingDisksPartitionAndFileSystemsToALinuxSystem/"/>
+
+
+
+
+
+  <title>[RHCE7] RH134 Chapter 09. Adding Disks, Partitions, and File Systems to a Linux System 學習筆記 | 小信豬的原始部落</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-tw">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">小信豬的原始部落</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/blog/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首頁
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/blog/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            標籤
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/blog/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分類
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/blog/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            歸檔
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            檢索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/blog/2016/05/09/RHCE/RHCE7-RH134-LearningNotes-CH09_AddingDisksPartitionAndFileSystemsToALinuxSystem/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">[RHCE7] RH134 Chapter 09. Adding Disks, Partitions, and File Systems to a Linux System 學習筆記</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">發表於</span>
+              
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2016-05-09T20:45:00+00:00">
+                2016-05-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分類於</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/RHCE/" itemprop="url" rel="index">
+                    <span itemprop="name">RHCE</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/2016/05/09/RHCE/RHCE7-RH134-LearningNotes-CH09_AddingDisksPartitionAndFileSystemsToALinuxSystem/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2016/05/09/RHCE/RHCE7-RH134-LearningNotes-CH09_AddingDisksPartitionAndFileSystemsToALinuxSystem/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  此文章記錄學習 RHCE7 RH134 Chapter 09. Adding Disks, Partitions, and File Systems to a Linux System 留下的內容
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="9-1-Adding-Partitions-File-Systems-and-Persistent-Mounts"><a href="#9-1-Adding-Partitions-File-Systems-and-Persistent-Mounts" class="headerlink" title="9.1 Adding Partitions, File Systems, and Persistent Mounts"></a>9.1 Adding Partitions, File Systems, and Persistent Mounts</h1><h2 id="9-1-1-Disk-partitioning"><a href="#9-1-1-Disk-partitioning" class="headerlink" title="9.1.1 Disk partitioning"></a>9.1.1 Disk partitioning</h2><p>Hard Disk 的分割結構：(從頭到尾)</p>
+<ol>
+<li>MBR(512 bytes) = Boot Loader(446 byte) + Partition Table(64 bytes)</li>
+</ol>
+<p>Partition Type：</p>
+<ul>
+<li><p><code>Primary</code>：一個硬碟最多可以切 4 個 primary partition (系統要啟動必須裝載 Primary Partition)</p>
+</li>
+<li><p><code>Extended</code>：若要超過 4 個 partition，則要將 primary partition 來換成 extended partition</p>
+</li>
+<li><p><code>Logical</code>：在 extended partition 中的 partition (Logical Partition Table 存在 Extended Partition 的前面)，且<strong><font color="red">代碼從 5 開始(/dev/sda5)</font></strong></p>
+</li>
+</ul>
+<p>備份 /dev/sda1：<code>dd if=/dev/sda1 of=/tmp/sda1.dd</code></p>
+<p>還原 /dev/sda1：<code>dd if=/tmp/sda1.dd of=/dev/sda1</code></p>
+<h3 id="MBR-Partition"><a href="#MBR-Partition" class="headerlink" title="MBR Partition"></a>MBR Partition</h3><ul>
+<li><p>支援 2^32 個定址空間</p>
+</li>
+<li><p>傳統硬碟最大容量為 2T：2^32 x 512 bytes / 1024 / 1024 /1024 / 1024 = 2T</p>
+</li>
+<li><p>超過 2T 的硬碟 -&gt; Advanced Format(block size 從 512 bytes 變成 4K) = 最大可支援到 16T (過渡時期的解決方案)</p>
+</li>
+<li><p>備份 MBR：<code>dd if=/dev/sda of=/tmp/mbr.dd bs=512 count=1</code></p>
+</li>
+</ul>
+<h3 id="GPT-Partition"><a href="#GPT-Partition" class="headerlink" title="GPT Partition"></a>GPT Partition</h3><ul>
+<li><p>若 OS 裝在 GPT Partition 上，沒辦法在舊電腦上用(因為傳統的 int 13h 問題)；但開機後，OS level 可以認得超過 2T 的硬碟</p>
+</li>
+<li><p>UEFI BIOS 上的 int 13h 改寫過，因此同時支援 MBR &amp; GPT 兩種 partition</p>
+</li>
+<li><p>最多支援 128 個 partition，支援 2^64 個定址空間，因此最大可以支援到 8ZB(512 bytes block size)，若是使用 4K block size 則可支援到 64ZB</p>
+</li>
+<li><p>GPT 為每一個 partition 提供 128 bits GUID 作為辨識之用</p>
+</li>
+<li><p>GPT partition table 在硬碟的頭尾各有一個，並搭配 CRC checksum，因此有備援的機制</p>
+</li>
+</ul>
+<h2 id="9-1-2-Managing-MBR-partitions-with-fdisk-gdisk"><a href="#9-1-2-Managing-MBR-partitions-with-fdisk-gdisk" class="headerlink" title="9.1.2 Managing MBR partitions with fdisk/gdisk"></a>9.1.2 Managing MBR partitions with fdisk/gdisk</h2><ul>
+<li>若沒有使用 <code>w</code> 儲存 partition 分割設定，就不會實際切割硬碟</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查詢目前的 partition table</span></span><br><span class="line">[vagrant@localhost ~]$ cat /proc/partitions</span><br><span class="line">major minor  <span class="comment">#blocks  name</span></span><br><span class="line"></span><br><span class="line">   8        0   83886080 sda</span><br><span class="line">   8        1     512000 sda1</span><br><span class="line">   8        2   83373056 sda2</span><br><span class="line"> 253        0   52428800 dm-0</span><br><span class="line"> 253        1    1048576 dm-1</span><br><span class="line"> 253        2   29827072 dm-2</span><br></pre></td></tr></table></figure>
+<p>切割完 partition 後，記得執行 <code>sudo partprobe [device name]</code> or <code>sudo partprobe -s</code> 強制 kernel 重新讀取最新的 partition table</p>
+<h2 id="9-1-4-Creating-file-systems"><a href="#9-1-4-Creating-file-systems" class="headerlink" title="9.1.4 Creating file systems"></a>9.1.4 Creating file systems</h2><p>硬碟分割完後需要進行格式化，一般會使用 <code>mkfs</code> 指令：</p>
+<p><code>sudo mkfs -t xfs /dev/vdb1</code>：格式化成 XFS，也可以寫成 <code>sudo mkfs.xfs /dev/vdb1</code></p>
+<h2 id="9-1-4-Mounting-file-systems"><a href="#9-1-4-Mounting-file-systems" class="headerlink" title="9.1.4 Mounting file systems"></a>9.1.4 Mounting file systems</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">$ sudo mkdir /XFS</span><br><span class="line"></span><br><span class="line">$ sudo mkdir /EXT4</span><br><span class="line"></span><br><span class="line"><span class="comment"># 掛載 XFS partition</span></span><br><span class="line">$ sudo mount /dev/vdb1 /XFS</span><br><span class="line"></span><br><span class="line"><span class="comment"># 掛載 EXT4 partition</span></span><br><span class="line">$ sudo mount /dev/vdb2 /EXT4-t</span><br><span class="line"></span><br><span class="line"><span class="comment"># 顯示 partition type(-T) &amp; human readable(-h)</span></span><br><span class="line">$ df -T -h</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查詢目前在 mount point 的 user 有哪些</span></span><br><span class="line">$ sudo fuser -v /XFS</span><br><span class="line">                     USER        PID ACCESS COMMAND</span><br><span class="line">/mnt:                root     kernel mount /XFS</span><br><span class="line">                     student    1663 ..c.. bash</span><br><span class="line">                     root       1936 ..c.. sudo</span><br><span class="line"></span><br><span class="line"><span class="comment"># 踢掉目前在指定 mount point 的 user</span></span><br><span class="line">$ sudo fuser -km /NFS</span><br></pre></td></tr></table></figure>
+<h3 id="etc-fstab"><a href="#etc-fstab" class="headerlink" title="/etc/fstab"></a>/etc/fstab</h3><p>若要讓 partition 開機後就固定掛載在指定目錄，就要使用 <strong>/etc/fstab</strong> 來達成：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[vagrant@server ~]$ cat /etc/fstab | grep <span class="string">'^[^#]'</span></span><br><span class="line"><span class="comment"># 1. partition = /dev/mapper/centos-root (也可以用 partition UUID)</span></span><br><span class="line"><span class="comment"># 2. mount point = /</span></span><br><span class="line"><span class="comment"># 3. partition type = xfs</span></span><br><span class="line"><span class="comment"># 4. mount options = defaults (rw,suid,dev,exec,auto,nouser,async)</span></span><br><span class="line"><span class="comment"># 5. 指定是否需要 dump = 0 (不需 dump)</span></span><br><span class="line"><span class="comment"># 6. 系統開機時進行 fsck 檢查的順序</span></span><br><span class="line">/dev/mapper/centos-root /                       xfs     defaults        0 0</span><br><span class="line">UUID=cb6b4419-b7cc-4315-b5bd-5926d21e944e   /boot    xfs     defaults        0 0</span><br><span class="line">/dev/mapper/centos-home /home                   xfs     defaults        0 0</span><br><span class="line">/dev/mapper/centos-swap swap                    swap    defaults        0 0</span><br><span class="line"></span><br><span class="line">/dev/vdb1   /XFS    xfs   defaults    1   2</span><br><span class="line">/dev/vdb2   /EXT4   ext4  defaults    1   2</span><br></pre></td></tr></table></figure>
+<p>編輯完 <code>/etc/fstab</code> 後，必須執行 <code>sudo mount -a</code> 檢查是否 partition 可以正確掛載</p>
+<blockquote>
+<p>建議 partition 透過 UUID 指定，可使用 <code>blkid [partition_name]</code> 來取得 partition UUID 的資訊(但似乎只對已經 mount 到特定目錄的 partition 有效)</p>
+</blockquote>
+<p>也可以使用 LABEL 的方式設定在 /etc/fstab 中：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 為 XFS partition 命名</span></span><br><span class="line">$ sudo xfs_admin -L XFS /dev/vdb1</span><br><span class="line"><span class="comment"># 為 EXT4 partition 命名</span></span><br><span class="line">$ sudo e2label /dev/vdb2 EXT4</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查詢結果</span></span><br><span class="line">$ sudo blkid</span><br><span class="line"></span><br><span class="line">$ sudo mount -L XFS /XFS</span><br><span class="line">$ sudo mount -L EXT4 /EXT4</span><br><span class="line"></span><br><span class="line"><span class="comment"># /etc/fstab 的設定可以改成如下</span></span><br><span class="line">LABEL=XFS   /XFS    xfs   defaults    1   2</span><br><span class="line">LABEL=EXT4  /EXT4   ext4  defaults    1   2</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>Label 還是有可能重複，因此原廠建議用上面的 UUID 掛載，是最保險沒問題的</p>
+</blockquote>
+<hr>
+<h1 id="Practice-Adding-Partitions-File-Systems-and-Persistent-Mounts"><a href="#Practice-Adding-Partitions-File-Systems-and-Persistent-Mounts" class="headerlink" title="Practice: Adding Partitions, File Systems, and Persistent Mounts"></a>Practice: Adding Partitions, File Systems, and Persistent Mounts</h1><h2 id="目標：從-dev-vdb-中切割-1GB-的空間，並掛載在-archive-目錄"><a href="#目標：從-dev-vdb-中切割-1GB-的空間，並掛載在-archive-目錄" class="headerlink" title="目標：從 /dev/vdb 中切割 1GB 的空間，並掛載在 /archive 目錄"></a>目標：從 <code>/dev/vdb</code> 中切割 1GB 的空間，並掛載在 <code>/archive</code> 目錄</h2><h3 id="1、切割-1GB-partition"><a href="#1、切割-1GB-partition" class="headerlink" title="1、切割 1GB partition"></a>1、切割 1GB partition</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 從 /dev/vdb 中切割出 1GB 空間</span></span><br><span class="line">$ sudo fdisk /dev/vdb</span><br><span class="line">Welcome to fdisk (util-linux 2.23.2).</span><br><span class="line"></span><br><span class="line">Changes will remain <span class="keyword">in</span> memory only, until you decide to write them.</span><br><span class="line">Be careful before using the write <span class="built_in">command</span>.</span><br><span class="line"></span><br><span class="line">Device does not contain a recognized partition table</span><br><span class="line">Building a new DOS disklabel with disk identifier 0x1825a331.</span><br><span class="line"></span><br><span class="line">Command (m <span class="keyword">for</span> <span class="built_in">help</span>): bn</span><br><span class="line">Partition <span class="built_in">type</span>:</span><br><span class="line">   p   primary (0 primary, 0 extended, 4 free)</span><br><span class="line">   e   extended</span><br><span class="line">Select (default p): p</span><br><span class="line">Partition number (1-4, default 1):</span><br><span class="line">First sector (2048-20971519, default 2048):</span><br><span class="line">Using default value 2048</span><br><span class="line">Last sector, +sectors or +size&#123;K,M,G&#125; (2048-20971519, default 20971519): +1G</span><br><span class="line">Partition 1 of <span class="built_in">type</span> Linux and of size 1 GiB is <span class="built_in">set</span></span><br><span class="line"></span><br><span class="line">Command (m <span class="keyword">for</span> <span class="built_in">help</span>): w</span><br><span class="line">The partition table has been altered!</span><br><span class="line"></span><br><span class="line">Calling ioctl() to re-read partition table.</span><br><span class="line">Syncing disks.</span><br><span class="line"></span><br><span class="line"><span class="comment"># 強制 kernel 重新讀取 partition Table</span></span><br><span class="line">$ sudo partprobe -s</span><br><span class="line">/dev/vda: msdos partitions 1</span><br><span class="line">/dev/vdb: msdos partitions 1</span><br><span class="line"></span><br><span class="line">$ cat /proc/partitions</span><br><span class="line">major minor  <span class="comment">#blocks  name</span></span><br><span class="line"></span><br><span class="line"> 253        0   10485760 vda</span><br><span class="line"> 253        1   10484142 vda1</span><br><span class="line"> 253       16   10485760 vdb</span><br><span class="line"> 253       17    1048576 vdb1</span><br></pre></td></tr></table></figure>
+<h3 id="2、格式化-partition"><a href="#2、格式化-partition" class="headerlink" title="2、格式化 partition"></a>2、格式化 partition</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 格式化 partition</span></span><br><span class="line">$ sudo mkfs.ext4 /dev/vdb1</span><br><span class="line">$ sudo blkid /dev/vdb1</span><br><span class="line">/dev/vdb1: UUID=<span class="string">"200ad7d4-aeef-4ffc-ac27-25fbcef5d5b2"</span> TYPE=<span class="string">"ext4"</span></span><br></pre></td></tr></table></figure>
+<h3 id="3、建立目錄並掛載"><a href="#3、建立目錄並掛載" class="headerlink" title="3、建立目錄並掛載"></a>3、建立目錄並掛載</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 建立掛載目錄</span></span><br><span class="line">$ sudo mkdir /archive</span><br><span class="line"></span><br><span class="line"><span class="comment"># 編輯 /etc/fstab 以達成永久掛載的目的</span></span><br><span class="line">$ <span class="built_in">echo</span> <span class="string">"UUID=200ad7d4-aeef-4ffc-ac27-25fbcef5d5b2 /archive ext4 defaults 0 2"</span> | sudo tee --append /etc/fstab</span><br><span class="line">$ sudo mount -a</span><br><span class="line">$ df -h</span><br><span class="line">Filesystem      Size  Used Avail Use% Mounted on</span><br><span class="line">......</span><br><span class="line">/dev/vdb1       976M  2.6M  907M   1% /archive</span><br><span class="line">$ mount</span><br><span class="line">.....</span><br><span class="line">/dev/vdb1 on /archive <span class="built_in">type</span> ext4 (rw,relatime,seclabel,data=ordered)</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="9-2-Managing-Swap-Space"><a href="#9-2-Managing-Swap-Space" class="headerlink" title="9.2 Managing Swap Space"></a>9.2 Managing Swap Space</h1><p>以下以切割 /dev/vdb 為例：</p>
+<ol>
+<li><p>使用 <code>fdisk</code>(82) or <code>gdisk</code>(8200) 進行硬碟分割</p>
+</li>
+<li><p>將 partition 格式化為 swap：<code>sudo mkswap /dev/vdb1</code></p>
+</li>
+<li><p>掛載 swap partition：<code>sudo swapon /dev/vdb1</code></p>
+</li>
+</ol>
+<p>若是要在 <strong>/etc/fstab</strong> 中掛載 fstab，在 dump &amp; fsck 的欄位都要給 0，標準設定方式如下：</p>
+<p><code>UUID=e02aae2f-70a9-4b1b-a1e1-9016b0acc3e4  swap  swap  defaults  0 0</code></p>
+<h3 id="其他-swap-相關指令"><a href="#其他-swap-相關指令" class="headerlink" title="其他 swap 相關指令"></a>其他 swap 相關指令</h3><ul>
+<li><p><code>sudo swapon -a</code>：檢查 <code>/etc/fstab</code> 中的 swap partition 設定並掛載</p>
+</li>
+<li><p><code>sudo swapon -s</code>：檢視目前系統中 swap partition 的資訊以及使用優先權</p>
+</li>
+</ul>
+<hr>
+<h1 id="Practice-Adding-and-Enabling-Swap-Space"><a href="#Practice-Adding-and-Enabling-Swap-Space" class="headerlink" title="Practice: Adding and Enabling Swap Space"></a>Practice: Adding and Enabling Swap Space</h1><h2 id="目標：在第二個硬碟中切割出-500-MB-的空間作為-swap"><a href="#目標：在第二個硬碟中切割出-500-MB-的空間作為-swap" class="headerlink" title="目標：在第二個硬碟中切割出 500 MB 的空間作為 swap"></a>目標：在第二個硬碟中切割出 500 MB 的空間作為 swap</h2><h3 id="1、切割-500MB-partition"><a href="#1、切割-500MB-partition" class="headerlink" title="1、切割 500MB partition"></a>1、切割 500MB partition</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">$ sudo fdisk /dev/vdb</span><br><span class="line">Welcome to fdisk (util-linux 2.23.2).</span><br><span class="line"></span><br><span class="line">Changes will remain <span class="keyword">in</span> memory only, until you decide to write them.</span><br><span class="line">Be careful before using the write <span class="built_in">command</span>.</span><br><span class="line"></span><br><span class="line">Device does not contain a recognized partition table</span><br><span class="line">Building a new DOS disklabel with disk identifier 0x7db6d48a.</span><br><span class="line"></span><br><span class="line">Command (m <span class="keyword">for</span> <span class="built_in">help</span>): n</span><br><span class="line">Partition <span class="built_in">type</span>:</span><br><span class="line">   p   primary (0 primary, 0 extended, 4 free)</span><br><span class="line">   e   extended</span><br><span class="line">Select (default p): p</span><br><span class="line">Partition number (1-4, default 1):</span><br><span class="line">First sector (2048-20971519, default 2048):</span><br><span class="line">Using default value 2048</span><br><span class="line">Last sector, +sectors or +size&#123;K,M,G&#125; (2048-20971519, default 20971519): +500MB</span><br><span class="line">Partition 1 of <span class="built_in">type</span> Linux and of size 500 MiB is <span class="built_in">set</span></span><br><span class="line"></span><br><span class="line">Command (m <span class="keyword">for</span> <span class="built_in">help</span>): t</span><br><span class="line">Selected partition 1</span><br><span class="line">Hex code (<span class="built_in">type</span> L to list all codes): 82</span><br><span class="line">Changed <span class="built_in">type</span> of partition <span class="string">'Linux'</span> to <span class="string">'Linux swap / Solaris'</span></span><br><span class="line"></span><br><span class="line">Command (m <span class="keyword">for</span> <span class="built_in">help</span>): p</span><br><span class="line"></span><br><span class="line">Disk /dev/vdb: 10.7 GB, 10737418240 bytes, 20971520 sectors</span><br><span class="line">Units = sectors of 1 * 512 = 512 bytes</span><br><span class="line">Sector size (logical/physical): 512 bytes / 512 bytes</span><br><span class="line">I/O size (minimum/optimal): 512 bytes / 512 bytes</span><br><span class="line">Disk label <span class="built_in">type</span>: dos</span><br><span class="line">Disk identifier: 0x7db6d48a</span><br><span class="line"></span><br><span class="line">   Device Boot      Start         End      Blocks   Id  System</span><br><span class="line">/dev/vdb1            2048     1026047      512000   82  Linux swap / Solaris</span><br><span class="line"></span><br><span class="line">Command (m <span class="keyword">for</span> <span class="built_in">help</span>): w</span><br><span class="line">The partition table has been altered!</span><br><span class="line"></span><br><span class="line">Calling ioctl() to re-read partition table.</span><br><span class="line">Syncing disks.</span><br></pre></td></tr></table></figure>
+<h3 id="2、格式化-partition-1"><a href="#2、格式化-partition-1" class="headerlink" title="2、格式化 partition"></a>2、格式化 partition</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ sudo mkswap /dev/vdb1</span><br><span class="line">Setting up swapspace version 1, size = 511996 KiB</span><br><span class="line">no label, UUID=ffb162b9-c1e6-4ce9-bde7-964b3ce9c43a</span><br></pre></td></tr></table></figure>
+<h3 id="3、編輯-etc-fstab-並掛載"><a href="#3、編輯-etc-fstab-並掛載" class="headerlink" title="3、編輯 /etc/fstab 並掛載"></a>3、編輯 /etc/fstab 並掛載</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">$ sudo mkswap /dev/vdb1</span><br><span class="line">Setting up swapspace version 1, size = 511996 KiB</span><br><span class="line">no label, UUID=ffb162b9-c1e6-4ce9-bde7-964b3ce9c43a</span><br><span class="line"></span><br><span class="line">$ sudo blkid /dev/vdb1</span><br><span class="line">/dev/vdb1: UUID=<span class="string">"ffb162b9-c1e6-4ce9-bde7-964b3ce9c43a"</span> TYPE=<span class="string">"swap"</span></span><br><span class="line"></span><br><span class="line">[student@desktop0 ~]$ <span class="built_in">echo</span> <span class="string">"UUID=ffb162b9-c1e6-4ce9-bde7-964b3ce9c43a swap swap defaults 0 0"</span> | sudo tee --append /etc/fstab</span><br><span class="line">UUID=ffb162b9-c1e6-4ce9-bde7-964b3ce9c43a swap swap defaults 0 0</span><br><span class="line"></span><br><span class="line">$ sudo mount -a</span><br><span class="line">$ sudo swapon /dev/vdb1</span><br><span class="line">$ sudo swapon -s</span><br><span class="line">Filename                                Type            Size    Used    Priority</span><br><span class="line">/dev/vdb1                               partition       511996  0       -1</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="Lab-Adding-Disks-Partitions-and-File-Systems-to-a-Linux-System"><a href="#Lab-Adding-Disks-Partitions-and-File-Systems-to-a-Linux-System" class="headerlink" title="Lab: Adding Disks, Partitions, and File Systems to a Linux System"></a>Lab: Adding Disks, Partitions, and File Systems to a Linux System</h1><h2 id="目標："><a href="#目標：" class="headerlink" title="目標："></a>目標：</h2><ol>
+<li><p>在第二個硬碟中新增一個 2GB 的 XFS partition，並永久掛載於 /backup 目錄</p>
+</li>
+<li><p>在第二個硬碟中新增 512MB swap，擁有預設的 priority</p>
+</li>
+<li><p>在第二個硬碟中新增 512MB swap，priority 為 1</p>
+</li>
+</ol>
+<h3 id="1、建立三個-partition"><a href="#1、建立三個-partition" class="headerlink" title="1、建立三個 partition"></a>1、建立三個 partition</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">$ sudo gdisk /dev/vdb</span><br><span class="line">Command (? <span class="keyword">for</span> <span class="built_in">help</span>): n</span><br><span class="line">Partition number (1-128, default 1):</span><br><span class="line">First sector (34-20971486, default = 2048) or &#123;+-&#125;size&#123;KMGTP&#125;:</span><br><span class="line">Last sector (2048-20971486, default = 20971486) or &#123;+-&#125;size&#123;KMGTP&#125;: +2G</span><br><span class="line">Current <span class="built_in">type</span> is <span class="string">'Linux filesystem'</span></span><br><span class="line">Hex code or GUID (L to show codes, Enter = 8300):</span><br><span class="line">Changed <span class="built_in">type</span> of partition to <span class="string">'Linux filesystem'</span></span><br><span class="line"></span><br><span class="line">Command (? <span class="keyword">for</span> <span class="built_in">help</span>): n</span><br><span class="line">Partition number (2-128, default 2):</span><br><span class="line">First sector (34-20971486, default = 4196352) or &#123;+-&#125;size&#123;KMGTP&#125;:</span><br><span class="line">Last sector (4196352-20971486, default = 20971486) or &#123;+-&#125;size&#123;KMGTP&#125;: +512M</span><br><span class="line">Current <span class="built_in">type</span> is <span class="string">'Linux filesystem'</span></span><br><span class="line">Hex code or GUID (L to show codes, Enter = 8300): 8200</span><br><span class="line">Changed <span class="built_in">type</span> of partition to <span class="string">'Linux swap'</span></span><br><span class="line"></span><br><span class="line">Command (? <span class="keyword">for</span> <span class="built_in">help</span>): n</span><br><span class="line">Partition number (3-128, default 3):</span><br><span class="line">First sector (34-20971486, default = 5244928) or &#123;+-&#125;size&#123;KMGTP&#125;:</span><br><span class="line">Last sector (5244928-20971486, default = 20971486) or &#123;+-&#125;size&#123;KMGTP&#125;: +512M</span><br><span class="line">Current <span class="built_in">type</span> is <span class="string">'Linux filesystem'</span></span><br><span class="line">Hex code or GUID (L to show codes, Enter = 8300): 8200</span><br><span class="line">Changed <span class="built_in">type</span> of partition to <span class="string">'Linux swap'</span></span><br><span class="line"></span><br><span class="line">Command (? <span class="keyword">for</span> <span class="built_in">help</span>): w</span><br><span class="line"></span><br><span class="line">Final checks complete. About to write GPT data. THIS WILL OVERWRITE EXISTING</span><br><span class="line">PARTITIONS!!</span><br><span class="line"></span><br><span class="line">Do you want to proceed? (Y/N): y</span><br><span class="line">OK; writing new GUID partition table (GPT) to /dev/vdb.</span><br><span class="line">The operation has completed successfully.</span><br></pre></td></tr></table></figure>
+<h3 id="2、格式化硬碟"><a href="#2、格式化硬碟" class="headerlink" title="2、格式化硬碟"></a>2、格式化硬碟</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">$ sudo partprobe -s</span><br><span class="line">/dev/vda: msdos partitions 1</span><br><span class="line">/dev/vdb: gpt partitions 1 2 3</span><br><span class="line"></span><br><span class="line">$ cat /proc/partitions</span><br><span class="line">major minor  <span class="comment">#blocks  name</span></span><br><span class="line"></span><br><span class="line"> 253        0   10485760 vda</span><br><span class="line"> 253        1   10484142 vda1</span><br><span class="line"> 253       16   10485760 vdb</span><br><span class="line"> 253       17    2097152 vdb1</span><br><span class="line"> 253       18     524288 vdb2</span><br><span class="line"> 253       19     524288 vdb3</span><br><span class="line"></span><br><span class="line"> $ sudo mkfs.xfs /dev/vdb1</span><br><span class="line">meta-data=/dev/vdb1              isize=256    agcount=4, agsize=131072 blks</span><br><span class="line">         =                       sectsz=512   attr=2, projid32bit=1</span><br><span class="line">         =                       crc=0</span><br><span class="line">data     =                       bsize=4096   blocks=524288, imaxpct=25</span><br><span class="line">         =                       sunit=0      swidth=0 blks</span><br><span class="line">naming   =version 2              bsize=4096   ascii-ci=0 ftype=0</span><br><span class="line"><span class="built_in">log</span>      =internal <span class="built_in">log</span>           bsize=4096   blocks=2560, version=2</span><br><span class="line">         =                       sectsz=512   sunit=0 blks, lazy-count=1</span><br><span class="line">realtime =none                   extsz=4096   blocks=0, rtextents=0</span><br><span class="line"></span><br><span class="line">$ sudo mkswap /dev/vdb2</span><br><span class="line">Setting up swapspace version 1, size = 524284 KiB</span><br><span class="line">no label, UUID=a875704a-d0ba-4542-98a6-f201f1b3a539</span><br><span class="line"></span><br><span class="line">$ sudo mkswap /dev/vdb3</span><br><span class="line">Setting up swapspace version 1, size = 524284 KiB</span><br><span class="line">no label, UUID=9a906cce-e50e-44ee-a880-b3811252e5e1</span><br><span class="line"></span><br><span class="line">$ sudo blkid</span><br><span class="line">/dev/vda1: UUID=<span class="string">"9bf6b9f7-92ad-441b-848e-0257cbb883d1"</span> TYPE=<span class="string">"xfs"</span></span><br><span class="line">/dev/vdb1: UUID=<span class="string">"796676d5-0e5c-4023-82e3-3417e8d00952"</span> TYPE=<span class="string">"xfs"</span> PARTLABEL=<span class="string">"Linux filesystem"</span> PARTUUID=<span class="string">"bf36a837-22e7-44c5-8c74-9d9fe8161aa3"</span></span><br><span class="line">/dev/vdb2: UUID=<span class="string">"a875704a-d0ba-4542-98a6-f201f1b3a539"</span> TYPE=<span class="string">"swap"</span> PARTLABEL=<span class="string">"Linux swap"</span> PARTUUID=<span class="string">"794f5ef2-2fec-410d-a72d-9195ded90386"</span></span><br><span class="line">/dev/vdb3: UUID=<span class="string">"9a906cce-e50e-44ee-a880-b3811252e5e1"</span> TYPE=<span class="string">"swap"</span> PARTLABEL=<span class="string">"Linux swap"</span> PARTUUID=<span class="string">"ff0fe2fa-a946-4d83-9290-4a0629767548"</span></span><br></pre></td></tr></table></figure>
+<h3 id="3、建立目錄並掛載-partition"><a href="#3、建立目錄並掛載-partition" class="headerlink" title="3、建立目錄並掛載 partition"></a>3、建立目錄並掛載 partition</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ sudo mkdir /backup</span><br><span class="line">$ <span class="built_in">echo</span> <span class="string">"UUID=796676d5-0e5c-4023-82e3-3417e8d00952 /backup xfs defaults 0 2"</span> | sudo tee --append /etc/fstab</span><br><span class="line">$ <span class="built_in">echo</span> <span class="string">"UUID=a875704a-d0ba-4542-98a6-f201f1b3a539 swap swap defaults 0 0"</span> | sudo tee --append /etc/fstab</span><br><span class="line">$ <span class="built_in">echo</span> <span class="string">"UUID=9a906cce-e50e-44ee-a880-b3811252e5e1 swap swap pri=1 0 0"</span> | sudo tee --append /etc/fstab</span><br><span class="line"></span><br><span class="line">$ sudo mount -a</span><br><span class="line">$ sudo swapon -a</span><br></pre></td></tr></table></figure>
+<h3 id="4、驗證是否設定完成"><a href="#4、驗證是否設定完成" class="headerlink" title="4、驗證是否設定完成"></a>4、驗證是否設定完成</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ sudo swapon -s</span><br><span class="line">Filename                                Type            Size    Used    Priority</span><br><span class="line">/dev/vdb2                               partition       524284  0       -1</span><br><span class="line">/dev/vdb3                               partition       524284  0       1</span><br><span class="line"></span><br><span class="line">$ sudo mount</span><br><span class="line">...</span><br><span class="line">/dev/vdb1 on /backup <span class="built_in">type</span> xfs (rw,relatime,seclabel,attr2,inode64,noquota)</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog/tags/Linux/" rel="tag"># Linux</a>
+          
+            <a href="/blog/tags/RHCE/" rel="tag"># RHCE</a>
+          
+            <a href="/blog/tags/RH134/" rel="tag"># RH134</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/2016/05/09/KVM/Linux-KVM-GettingStart/" rel="next" title="[KVM] Linux KVM 基本觀念">
+                <i class="fa fa-chevron-left"></i> [KVM] Linux KVM 基本觀念
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/2016/05/09/RHCE/RHCE7-RH134-LearningNotes-CH08_ConnectingToNetwork-DefinedUsersAndGroups/" rel="prev" title="[RHCE7] RH134 Chapter 08. Connecting to Network-defined Users and Groups 學習筆記">
+                [RHCE7] RH134 Chapter 08. Connecting to Network-defined Users and Groups 學習筆記 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            本站概覽
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">godleon</p>
+              <p class="site-description motion-element" itemprop="description">把時間花在哪裡，成就就在哪裡</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/blog/archives/">
+              
+                  <span class="site-state-item-count">46</span>
+                  <span class="site-state-item-name">文章</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/blog/categories/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">分類</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/blog/tags/index.html">
+                  <span class="site-state-item-count">22</span>
+                  <span class="site-state-item-name">標籤</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/godleon" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:godleon@gmail.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-globe"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://plus.google.com/godleon" target="_blank" title="Google">
+                    
+                      <i class="fa fa-fw fa-google"></i>Google</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#9-1-Adding-Partitions-File-Systems-and-Persistent-Mounts"><span class="nav-number">1.</span> <span class="nav-text"><a href="#9-1-Adding-Partitions-File-Systems-and-Persistent-Mounts" class="headerlink" title="9.1 Adding Partitions, File Systems, and Persistent Mounts"></a>9.1 Adding Partitions, File Systems, and Persistent Mounts</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#9-1-1-Disk-partitioning"><span class="nav-number">1.1.</span> <span class="nav-text"><a href="#9-1-1-Disk-partitioning" class="headerlink" title="9.1.1 Disk partitioning"></a>9.1.1 Disk partitioning</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MBR-Partition"><span class="nav-number">1.1.1.</span> <span class="nav-text"><a href="#MBR-Partition" class="headerlink" title="MBR Partition"></a>MBR Partition</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GPT-Partition"><span class="nav-number">1.1.2.</span> <span class="nav-text"><a href="#GPT-Partition" class="headerlink" title="GPT Partition"></a>GPT Partition</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-1-2-Managing-MBR-partitions-with-fdisk-gdisk"><span class="nav-number">1.2.</span> <span class="nav-text"><a href="#9-1-2-Managing-MBR-partitions-with-fdisk-gdisk" class="headerlink" title="9.1.2 Managing MBR partitions with fdisk/gdisk"></a>9.1.2 Managing MBR partitions with fdisk/gdisk</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-1-4-Creating-file-systems"><span class="nav-number">1.3.</span> <span class="nav-text"><a href="#9-1-4-Creating-file-systems" class="headerlink" title="9.1.4 Creating file systems"></a>9.1.4 Creating file systems</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-1-4-Mounting-file-systems"><span class="nav-number">1.4.</span> <span class="nav-text"><a href="#9-1-4-Mounting-file-systems" class="headerlink" title="9.1.4 Mounting file systems"></a>9.1.4 Mounting file systems</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#etc-fstab"><span class="nav-number">1.4.1.</span> <span class="nav-text"><a href="#etc-fstab" class="headerlink" title="/etc/fstab"></a>/etc/fstab</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Practice-Adding-Partitions-File-Systems-and-Persistent-Mounts"><span class="nav-number">2.</span> <span class="nav-text"><a href="#Practice-Adding-Partitions-File-Systems-and-Persistent-Mounts" class="headerlink" title="Practice: Adding Partitions, File Systems, and Persistent Mounts"></a>Practice: Adding Partitions, File Systems, and Persistent Mounts</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#目標：從-dev-vdb-中切割-1GB-的空間，並掛載在-archive-目錄"><span class="nav-number">2.1.</span> <span class="nav-text"><a href="#&#x76EE;&#x6A19;&#xFF1A;&#x5F9E;-dev-vdb-&#x4E2D;&#x5207;&#x5272;-1GB-&#x7684;&#x7A7A;&#x9593;&#xFF0C;&#x4E26;&#x639B;&#x8F09;&#x5728;-archive-&#x76EE;&#x9304;" class="headerlink" title="&#x76EE;&#x6A19;&#xFF1A;&#x5F9E; /dev/vdb &#x4E2D;&#x5207;&#x5272; 1GB &#x7684;&#x7A7A;&#x9593;&#xFF0C;&#x4E26;&#x639B;&#x8F09;&#x5728; /archive &#x76EE;&#x9304;"></a>&#x76EE;&#x6A19;&#xFF1A;&#x5F9E; <code>/dev/vdb</code> &#x4E2D;&#x5207;&#x5272; 1GB &#x7684;&#x7A7A;&#x9593;&#xFF0C;&#x4E26;&#x639B;&#x8F09;&#x5728; <code>/archive</code> &#x76EE;&#x9304;</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1、切割-1GB-partition"><span class="nav-number">2.1.1.</span> <span class="nav-text"><a href="#1&#x3001;&#x5207;&#x5272;-1GB-partition" class="headerlink" title="1&#x3001;&#x5207;&#x5272; 1GB partition"></a>1&#x3001;&#x5207;&#x5272; 1GB partition</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2、格式化-partition"><span class="nav-number">2.1.2.</span> <span class="nav-text"><a href="#2&#x3001;&#x683C;&#x5F0F;&#x5316;-partition" class="headerlink" title="2&#x3001;&#x683C;&#x5F0F;&#x5316; partition"></a>2&#x3001;&#x683C;&#x5F0F;&#x5316; partition</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3、建立目錄並掛載"><span class="nav-number">2.1.3.</span> <span class="nav-text"><a href="#3&#x3001;&#x5EFA;&#x7ACB;&#x76EE;&#x9304;&#x4E26;&#x639B;&#x8F09;" class="headerlink" title="3&#x3001;&#x5EFA;&#x7ACB;&#x76EE;&#x9304;&#x4E26;&#x639B;&#x8F09;"></a>3&#x3001;&#x5EFA;&#x7ACB;&#x76EE;&#x9304;&#x4E26;&#x639B;&#x8F09;</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#9-2-Managing-Swap-Space"><span class="nav-number">3.</span> <span class="nav-text"><a href="#9-2-Managing-Swap-Space" class="headerlink" title="9.2 Managing Swap Space"></a>9.2 Managing Swap Space</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#其他-swap-相關指令"><span class="nav-number">3.0.1.</span> <span class="nav-text"><a href="#&#x5176;&#x4ED6;-swap-&#x76F8;&#x95DC;&#x6307;&#x4EE4;" class="headerlink" title="&#x5176;&#x4ED6; swap &#x76F8;&#x95DC;&#x6307;&#x4EE4;"></a>&#x5176;&#x4ED6; swap &#x76F8;&#x95DC;&#x6307;&#x4EE4;</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Practice-Adding-and-Enabling-Swap-Space"><span class="nav-number">4.</span> <span class="nav-text"><a href="#Practice-Adding-and-Enabling-Swap-Space" class="headerlink" title="Practice: Adding and Enabling Swap Space"></a>Practice: Adding and Enabling Swap Space</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#目標：在第二個硬碟中切割出-500-MB-的空間作為-swap"><span class="nav-number">4.1.</span> <span class="nav-text"><a href="#&#x76EE;&#x6A19;&#xFF1A;&#x5728;&#x7B2C;&#x4E8C;&#x500B;&#x786C;&#x789F;&#x4E2D;&#x5207;&#x5272;&#x51FA;-500-MB-&#x7684;&#x7A7A;&#x9593;&#x4F5C;&#x70BA;-swap" class="headerlink" title="&#x76EE;&#x6A19;&#xFF1A;&#x5728;&#x7B2C;&#x4E8C;&#x500B;&#x786C;&#x789F;&#x4E2D;&#x5207;&#x5272;&#x51FA; 500 MB &#x7684;&#x7A7A;&#x9593;&#x4F5C;&#x70BA; swap"></a>&#x76EE;&#x6A19;&#xFF1A;&#x5728;&#x7B2C;&#x4E8C;&#x500B;&#x786C;&#x789F;&#x4E2D;&#x5207;&#x5272;&#x51FA; 500 MB &#x7684;&#x7A7A;&#x9593;&#x4F5C;&#x70BA; swap</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1、切割-500MB-partition"><span class="nav-number">4.1.1.</span> <span class="nav-text"><a href="#1&#x3001;&#x5207;&#x5272;-500MB-partition" class="headerlink" title="1&#x3001;&#x5207;&#x5272; 500MB partition"></a>1&#x3001;&#x5207;&#x5272; 500MB partition</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2、格式化-partition-1"><span class="nav-number">4.1.2.</span> <span class="nav-text"><a href="#2&#x3001;&#x683C;&#x5F0F;&#x5316;-partition-1" class="headerlink" title="2&#x3001;&#x683C;&#x5F0F;&#x5316; partition"></a>2&#x3001;&#x683C;&#x5F0F;&#x5316; partition</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3、編輯-etc-fstab-並掛載"><span class="nav-number">4.1.3.</span> <span class="nav-text"><a href="#3&#x3001;&#x7DE8;&#x8F2F;-etc-fstab-&#x4E26;&#x639B;&#x8F09;" class="headerlink" title="3&#x3001;&#x7DE8;&#x8F2F; /etc/fstab &#x4E26;&#x639B;&#x8F09;"></a>3&#x3001;&#x7DE8;&#x8F2F; /etc/fstab &#x4E26;&#x639B;&#x8F09;</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Lab-Adding-Disks-Partitions-and-File-Systems-to-a-Linux-System"><span class="nav-number">5.</span> <span class="nav-text"><a href="#Lab-Adding-Disks-Partitions-and-File-Systems-to-a-Linux-System" class="headerlink" title="Lab: Adding Disks, Partitions, and File Systems to a Linux System"></a>Lab: Adding Disks, Partitions, and File Systems to a Linux System</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#目標："><span class="nav-number">5.1.</span> <span class="nav-text"><a href="#&#x76EE;&#x6A19;&#xFF1A;" class="headerlink" title="&#x76EE;&#x6A19;&#xFF1A;"></a>&#x76EE;&#x6A19;&#xFF1A;</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1、建立三個-partition"><span class="nav-number">5.1.1.</span> <span class="nav-text"><a href="#1&#x3001;&#x5EFA;&#x7ACB;&#x4E09;&#x500B;-partition" class="headerlink" title="1&#x3001;&#x5EFA;&#x7ACB;&#x4E09;&#x500B; partition"></a>1&#x3001;&#x5EFA;&#x7ACB;&#x4E09;&#x500B; partition</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2、格式化硬碟"><span class="nav-number">5.1.2.</span> <span class="nav-text"><a href="#2&#x3001;&#x683C;&#x5F0F;&#x5316;&#x786C;&#x789F;" class="headerlink" title="2&#x3001;&#x683C;&#x5F0F;&#x5316;&#x786C;&#x789F;"></a>2&#x3001;&#x683C;&#x5F0F;&#x5316;&#x786C;&#x789F;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3、建立目錄並掛載-partition"><span class="nav-number">5.1.3.</span> <span class="nav-text"><a href="#3&#x3001;&#x5EFA;&#x7ACB;&#x76EE;&#x9304;&#x4E26;&#x639B;&#x8F09;-partition" class="headerlink" title="3&#x3001;&#x5EFA;&#x7ACB;&#x76EE;&#x9304;&#x4E26;&#x639B;&#x8F09; partition"></a>3&#x3001;&#x5EFA;&#x7ACB;&#x76EE;&#x9304;&#x4E26;&#x639B;&#x8F09; partition</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4、驗證是否設定完成"><span class="nav-number">5.1.4.</span> <span class="nav-text"><a href="#4&#x3001;&#x9A57;&#x8B49;&#x662F;&#x5426;&#x8A2D;&#x5B9A;&#x5B8C;&#x6210;" class="headerlink" title="4&#x3001;&#x9A57;&#x8B49;&#x662F;&#x5426;&#x8A2D;&#x5B9A;&#x5B8C;&#x6210;"></a>4&#x3001;&#x9A57;&#x8B49;&#x662F;&#x5426;&#x8A2D;&#x5B9A;&#x5B8C;&#x6210;</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 強力驅動</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主題 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/blog/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://godleon-blog-hexo.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'https://godleon.github.io/blog/2016/05/09/RHCE/RHCE7-RH134-LearningNotes-CH09_AddingDisksPartitionAndFileSystemsToALinuxSystem/';
+          this.page.identifier = '2016/05/09/RHCE/RHCE7-RH134-LearningNotes-CH09_AddingDisksPartitionAndFileSystemsToALinuxSystem/';
+          this.page.title = '[RHCE7] RH134 Chapter 09. Adding Disks, Partitions, and File Systems to a Linux System 學習筆記';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/blog/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

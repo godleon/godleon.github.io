@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-tw">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/blog/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/blog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/blog/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/blog/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Linux,RHCE,RH134," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="此文章記錄學習 RHCE7 RH134 Chapter 11. Accessing Network Storage with Network File System (NFS) 留下的內容">
+<meta name="keywords" content="Linux,RHCE,RH134">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[RHCE7] RH134 Chapter 11. Accessing Network Storage with Network File System (NFS) 學習筆記">
+<meta property="og:url" content="https://godleon.github.io/blog/2016/05/12/RHCE/RHCE7-RH134-LearningNotes-CH11_AccessingNetworkStorageWithNetworkFileSystem(NFS)/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此文章記錄學習 RHCE7 RH134 Chapter 11. Accessing Network Storage with Network File System (NFS) 留下的內容">
+<meta property="og:locale" content="zh-tw">
+<meta property="og:updated_time" content="2017-12-20T03:27:11.629Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[RHCE7] RH134 Chapter 11. Accessing Network Storage with Network File System (NFS) 學習筆記">
+<meta name="twitter:description" content="此文章記錄學習 RHCE7 RH134 Chapter 11. Accessing Network Storage with Network File System (NFS) 留下的內容">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://godleon.github.io/blog/2016/05/12/RHCE/RHCE7-RH134-LearningNotes-CH11_AccessingNetworkStorageWithNetworkFileSystem(NFS)/"/>
+
+
+
+
+
+  <title>[RHCE7] RH134 Chapter 11. Accessing Network Storage with Network File System (NFS) 學習筆記 | 小信豬的原始部落</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-tw">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">小信豬的原始部落</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/blog/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首頁
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/blog/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            標籤
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/blog/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分類
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/blog/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            歸檔
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            檢索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/blog/2016/05/12/RHCE/RHCE7-RH134-LearningNotes-CH11_AccessingNetworkStorageWithNetworkFileSystem(NFS)/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">[RHCE7] RH134 Chapter 11. Accessing Network Storage with Network File System (NFS) 學習筆記</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">發表於</span>
+              
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2016-05-12T20:45:00+00:00">
+                2016-05-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分類於</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/RHCE/" itemprop="url" rel="index">
+                    <span itemprop="name">RHCE</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/2016/05/12/RHCE/RHCE7-RH134-LearningNotes-CH11_AccessingNetworkStorageWithNetworkFileSystem(NFS)/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2016/05/12/RHCE/RHCE7-RH134-LearningNotes-CH11_AccessingNetworkStorageWithNetworkFileSystem(NFS)/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  此文章記錄學習 RHCE7 RH134 Chapter 11. Accessing Network Storage with Network File System (NFS) 留下的內容
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="11-1-Mounting-Network-Storage-with-NFS"><a href="#11-1-Mounting-Network-Storage-with-NFS" class="headerlink" title="11.1 Mounting Network Storage with NFS"></a>11.1 Mounting Network Storage with NFS</h1><h2 id="11-1-1-Manualling-mouting-and-unmouting-NFS-shares"><a href="#11-1-1-Manualling-mouting-and-unmouting-NFS-shares" class="headerlink" title="11.1.1 Manualling mouting and unmouting NFS shares"></a>11.1.1 Manualling mouting and unmouting NFS shares</h2><h3 id="NFS-4-0-之前："><a href="#NFS-4-0-之前：" class="headerlink" title="NFS 4.0 之前："></a>NFS 4.0 之前：</h3><ul>
+<li><p>NFS 啟動時會向 rpcbind 註冊</p>
+</li>
+<li><p>NFS 的 port 是 rpcbind(TCP 111) 所配發的</p>
+</li>
+<li><p>rpcbind restart，NFS 也要跟著 restart</p>
+</li>
+<li><p>查詢遠端主機開放的目錄：<code>sudo showmount -e [remote_host_name or IP]</code></p>
+</li>
+<li><p>掛載：<code>sudo mount -t nfs [remote_host_name or IP]:/content /mnt</code></p>
+</li>
+</ul>
+<h3 id="NFS-4-0："><a href="#NFS-4-0：" class="headerlink" title="NFS 4.0："></a>NFS 4.0：</h3><ul>
+<li><p>固定使用 TCP port 2049</p>
+</li>
+<li><p>無法使用 <strong>showmount</strong>，因此必須預先知道開放的目錄</p>
+</li>
+<li><p>同時掛載所有開放的目錄：<code>mount -t nfs [remote_host_name or IP]:/ /mnt</code> (確定路徑也可以 mount 特定目錄)</p>
+</li>
+</ul>
+<blockquote>
+<p>NFSv2, NFSv3, NFSv4 預設是同時開啟的</p>
+</blockquote>
+<p>RHEL 7 預設會使用 NFSv4，若不支援才會往下降；NFSv4 使用 TCP，舊版本則會用 TCP or UDP</p>
+<p>掛載 NFS 方式：</p>
+<ul>
+<li><p>手動下命令</p>
+</li>
+<li><p>加到 <code>/etc/fstab</code> 中：<code>[remote_host_name]:/content  /mnt  nfs   default,sync,sec=xxx   0 0</code></p>
+</li>
+</ul>
+<blockquote>
+<p>網路磁碟機建議使用 sync 選項，確保資料完整性 (另外了解 soft &amp; hard 的差異)</p>
+<p>使用 fsck 檢查的設備，必須是 umount or readonly 的狀態所，所出來的結果才是正確的</p>
+</blockquote>
+<h2 id="11-1-2-Security-methods"><a href="#11-1-2-Security-methods" class="headerlink" title="11.1.2 Security methods"></a>11.1.2 Security methods</h2><ul>
+<li><p><code>none</code>：client 匿名存取(送來的身份會被忽略)，身份全部都會轉成 <strong>nfsnobody</strong></p>
+</li>
+<li><p><code>sys</code>：client 存取時會把身份送進來(例如：UID 1000)，NFS server 會找到對應的身份 &amp; 權限 (<strong><font color="red">預設值</font></strong>，但其實不安全)</p>
+</li>
+<li><p><code>krb5</code>：使用 kerberos ticket，但通訊時以明碼傳遞</p>
+</li>
+<li><p><code>krb5i</code>：同上，但加上完整性驗證，可判斷傳輸的資料是否被修改</p>
+</li>
+<li><p><code>krb5p</code>：同上，但傳輸的資料會被加密</p>
+</li>
+</ul>
+<blockquote>
+<p>若要讓 NFS 可以向 Kerberos 進行驗證，也同時需要有 <code>nfs-secure</code> 服務(在 <code>nfs-utils</code> 套件中)</p>
+<p>使用 <code>klist</code> 可以查詢目前所擁有的 kerberos ticket</p>
+</blockquote>
+<hr>
+<h1 id="Practice-Mounting-and-Unmounting-NFS"><a href="#Practice-Mounting-and-Unmounting-NFS" class="headerlink" title="Practice: Mounting and Unmounting NFS"></a>Practice: Mounting and Unmounting NFS</h1><h2 id="目前已存在設定"><a href="#目前已存在設定" class="headerlink" title="目前已存在設定"></a>目前已存在設定</h2><ol>
+<li><p>server1 分享 <code>/shares/manual</code> &amp; <code>/shares/public</code> 兩個目錄</p>
+</li>
+<li><p>desktop1 掛載點為 <code>/mnt/manual</code> &amp; <code>/mnt/public</code></p>
+</li>
+<li><p><code>public</code> 分享目錄需要使用 <code>krb5p</code> 認證，<code>manual</code> 分享目錄則是使用 <code>sys</code> 認證</p>
+</li>
+<li><p><code>krb5.keytab</code> 位置位於 <code>http://classroom.example.com/pub/keytabs/desktop1.keytab</code></p>
+</li>
+</ol>
+<h2 id="實作過程"><a href="#實作過程" class="headerlink" title="實作過程"></a>實作過程</h2><p>1、取得 krb5.keytab</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ sudo wget -O /etc/krb5.keytab http://classroom.example.com/pub/keytabs/desktop1.keytab</span><br><span class="line">$ ls -lZ /etc/krb5.keytab</span><br><span class="line">-rw-r--r--. root root unconfined_u:object_r:krb5_keytab_t:s0 /etc/krb5.keytab</span><br></pre></td></tr></table></figure>
+<p>2、啟動 <code>nfs-secure.service</code></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ sudo systemctl <span class="built_in">enable</span> nfs-secure.service</span><br><span class="line">ln -s <span class="string">'/usr/lib/systemd/system/nfs-secure.service'</span> <span class="string">'/etc/systemd/system/nfs.target.wants/nfs-secure.service'</span></span><br><span class="line">[student@desktop0 ~]$ sudo systemctl restart nfs-secure.service</span><br></pre></td></tr></table></figure>
+<p>3、建立目錄並設定掛載資訊</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">echo</span> <span class="string">"server1:/shares/public /mnt/public nfs sec=krb5p,sync 0 0"</span> | sudo tee --append /etc/fstab</span><br><span class="line"></span><br><span class="line">$ <span class="built_in">echo</span> <span class="string">"server1:/shares/manual /mnt/manual nfs sec=sys,sync 0 0"</span> | sudo tee --append /etc/fstab</span><br><span class="line"></span><br><span class="line">$ sudo mount -a</span><br><span class="line">$ $ sudo df -hT</span><br><span class="line">Filesystem             Type      Size  Used Avail Use% Mounted on</span><br><span class="line">/dev/vda1              xfs        10G  3.1G  7.0G  31% /</span><br><span class="line">devtmpfs               devtmpfs  906M     0  906M   0% /dev</span><br><span class="line">tmpfs                  tmpfs     921M   80K  921M   1% /dev/shm</span><br><span class="line">tmpfs                  tmpfs     921M   17M  904M   2% /run</span><br><span class="line">tmpfs                  tmpfs     921M     0  921M   0% /sys/fs/cgroup</span><br><span class="line">server1:/shares/public nfs4       10G  3.1G  7.0G  31% /mnt/public</span><br><span class="line">server1:/shares/manual nfs4       10G  3.1G  7.0G  31% /mnt/manual</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="11-2-Automounting-Network-Storage-with-NFS"><a href="#11-2-Automounting-Network-Storage-with-NFS" class="headerlink" title="11.2 Automounting Network Storage with NFS"></a>11.2 Automounting Network Storage with NFS</h1><p>需要安裝套件 <code>autofs</code>，會在系統中提供一個 autofs system service</p>
+<p><strong>優點：</strong></p>
+<ul>
+<li><p>使用者不需要 root 權限來執行 mount &amp; unmount 指令</p>
+</li>
+<li><p>automounter 的設定對所有使用者皆有效，主要是著重在存取權限的調整</p>
+</li>
+<li><p>不會與 NFS server 一直持續保持連線，節省網路 &amp; 系統資源</p>
+</li>
+<li><p>與原本 mount 所使用的設定參數相同</p>
+</li>
+<li><p>提供 direct &amp; indirect 兩種目錄 mapping 模式，以提供 mount point 一定程度的彈性</p>
+</li>
+<li><p>indirect 模式下，目錄會被自動生成，降低手動的需求</p>
+</li>
+<li><p>automounter 其實可以用在 NFS 之外的其他檔案系統上</p>
+</li>
+</ul>
+<h2 id="direct-map"><a href="#direct-map" class="headerlink" title="direct-map"></a>direct-map</h2><p>目錄 <code>/etc/auto.master.d</code>，檔名不拘，副檔名必須是 <code>.autofs</code></p>
+<p><code>/etc/sysconfig/autofs</code> 中有 <code>TIMEOUT</code> 參數可以用，表示離開目錄多久會自動 unmount</p>
+<p>自動掛載光碟機：<code>/mnt/cdrom   -ro,iso9660   :/dev/sr0</code></p>
+<h2 id="indirect-map"><a href="#indirect-map" class="headerlink" title="indirect-map"></a>indirect-map</h2><p>掛載的目錄都會在同一個目錄下</p>
+<p>可用萬用字元</p>
+<h2 id="掛載方式"><a href="#掛載方式" class="headerlink" title="掛載方式"></a>掛載方式</h2><h3 id="1、安裝套件"><a href="#1、安裝套件" class="headerlink" title="1、安裝套件"></a>1、安裝套件</h3><p>首先要安裝 <code>autofs</code> 套件</p>
+<h3 id="2、編輯-master-map-檔案"><a href="#2、編輯-master-map-檔案" class="headerlink" title="2、編輯 master-map 檔案"></a>2、編輯 master-map 檔案</h3><p>master-map 檔案名稱必須是 <code>.autofs</code> 結尾，並存放於 <code>/etc/auto.master.d</code> 目錄中，以下舉例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ sudo cat /etc/auto.master.d/demo.autofs</span><br><span class="line"><span class="comment"># indirect-map，並以 "/share" 目錄作為掛載目錄的基底，詳細設定檔內容位於 /etc/auto.demo 檔案中</span></span><br><span class="line">/shares   /etc/auto.demo</span><br><span class="line"><span class="comment"># direct-map，以 "/-" 作為掛載基底，詳細設定檔內容位於 /etc/auto.direct 檔案中</span></span><br><span class="line">/-        /etc/auto.direct</span><br></pre></td></tr></table></figure>
+<h3 id="3、設定-mapping-檔案"><a href="#3、設定-mapping-檔案" class="headerlink" title="3、設定 mapping 檔案"></a>3、設定 mapping 檔案</h3><p>mapping 檔案則是要撰寫詳細的設定內容：</p>
+<p><code>/etc/auto.demo</code> indirect-map 設定檔內容：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用本地目錄 /shares/work，掛載遠端目錄 serverX:/shares/work</span></span><br><span class="line">work  -rw,sync  serverX:/shares/work</span><br><span class="line"><span class="comment"># 使用本地目錄 /shares，掛載遠端目錄 serverX:/shares 下的所有目錄(會一一取得對應)</span></span><br><span class="line">*     -rw,sync  serverX:/shares/&amp;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>indirect-map 設定使用的是相對路徑的設計概念</p>
+</blockquote>
+<p><code>/etc/auto.direct</code> direct-map 設定檔內容：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用本地目錄 /mnt/docs，掛載遠端目錄 serverX:/shares/docs</span></span><br><span class="line">/mnt/docs   -rw,sync  serverX:/shares/docs</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>由此可看出 direct-map 就是很明確的指定完整路徑</p>
+</blockquote>
+<h3 id="4、啟動-autofs-服務"><a href="#4、啟動-autofs-服務" class="headerlink" title="4、啟動 autofs 服務"></a>4、啟動 autofs 服務</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ sudo systemctl <span class="built_in">enable</span> autofs</span><br><span class="line"></span><br><span class="line">$ sudo systemctl start autofs</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="Practice-Automounting-NFS"><a href="#Practice-Automounting-NFS" class="headerlink" title="Practice: Automounting NFS"></a>Practice: Automounting NFS</h1><h2 id="環境設定"><a href="#環境設定" class="headerlink" title="環境設定"></a>環境設定</h2><ol>
+<li><p>遠端主機 <code>server1</code> 使用 NFS 分享了 <code>/shares/{docs,work,public}</code> 三個目錄</p>
+</li>
+<li><p>存取遠端主機必須使用 Kerberos 協定，使用的是 <code>krb5p</code></p>
+</li>
+<li><p>本地主機 <code>desktop1</code> 使用 <code>/shares/{docs,work}</code> &amp; <code>/mnt/public</code> 目錄進行掛載</p>
+</li>
+<li><p><code>krb5.keytab</code> 檔案可到 <code>http://classroom.example.com/pub/keytabs/desktop1.keytab</code> 下載</p>
+</li>
+<li><p>必須要設定成永久性掛載</p>
+</li>
+</ol>
+<h2 id="設定方式"><a href="#設定方式" class="headerlink" title="設定方式"></a>設定方式</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安裝 autofs 套件</span></span><br><span class="line">$ sudo yum -y install autofs</span><br><span class="line"></span><br><span class="line"><span class="comment"># 建立掛載用目錄</span></span><br><span class="line">$ sudo mkdir /shares</span><br><span class="line"></span><br><span class="line"><span class="comment"># 取得 krb5.keytab</span></span><br><span class="line">$ sudo wget -O /etc/krb5.keytab http://classroom.example.com/pub/keytabs/desktop0.keytab</span><br><span class="line"><span class="comment"># 驗證 SElinux context 是否正確</span></span><br><span class="line">$ ls -lZ /etc/krb5.keytab</span><br><span class="line">-rw-r--r--. root root unconfined_u:object_r:krb5_keytab_t:s0 /etc/krb5.keytab</span><br><span class="line"></span><br><span class="line"><span class="comment"># 編輯 master-map 檔案</span></span><br><span class="line">$ <span class="built_in">echo</span> <span class="string">"/shares   /etc/autofs.indirect"</span> | sudo tee --append /etc/auto.master.d/practice.autofs</span><br><span class="line">$ <span class="built_in">echo</span> <span class="string">"/-   /etc/autofs.direct"</span> | sudo tee --append /etc/auto.master.d/practice.autofs</span><br><span class="line"></span><br><span class="line"><span class="comment"># 編輯 indrect-map 檔案</span></span><br><span class="line">$ <span class="built_in">echo</span> <span class="string">"docs  -rx,sync,sec=krb5p  server1:/shares/docs"</span> | sudo tee --append /etc/autofs.indirect</span><br><span class="line">$ <span class="built_in">echo</span> <span class="string">"work  -rx,sync,sec=krb5p  server1:/shares/work"</span> | sudo tee --append /etc/autofs.indirect</span><br><span class="line"></span><br><span class="line"><span class="comment"># 編輯 direct-map 檔案</span></span><br><span class="line">$ <span class="built_in">echo</span> <span class="string">"/mnt/public  -rx,sync,sec=krb5p  server1:/shares/public"</span> | sudo tee --append /etc/autofs.direct</span><br><span class="line"></span><br><span class="line"><span class="comment"># 啟動 nfs-secure 服務(為了進行 Kerberos 認證)</span></span><br><span class="line">$ sudo systemctl start nfs-secure.service</span><br><span class="line">$ sudo systemctl restart autofs.service</span><br><span class="line"></span><br><span class="line"><span class="comment"># 啟動 autofs 服務</span></span><br><span class="line">$ sudo systemctl <span class="built_in">enable</span> autofs.service</span><br><span class="line">$ sudo systemctl start autofs.service</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="Lab-Accessing-Network-Storage-with-Network-File-System-NFS"><a href="#Lab-Accessing-Network-Storage-with-Network-File-System-NFS" class="headerlink" title="Lab: Accessing Network Storage with Network File System(NFS)"></a>Lab: Accessing Network Storage with Network File System(NFS)</h1><h2 id="目標"><a href="#目標" class="headerlink" title="目標"></a>目標</h2><ol>
+<li><p><code>desktop1</code> 已經設定好 LDAP &amp; Kerberos 認証，遠端主機為 <code>classroom.example.com</code></p>
+</li>
+<li><p>遠端主機分享了 <code>ldapuserX</code> 所有的家目錄，分享路徑為 <code>/home/guests</code> 底下</p>
+</li>
+<li><p>掛載於本地端的 <code>/home/guests</code> 下</p>
+</li>
+<li><p>ldapuserX 登入後會位於 <code>/home/guests/ldapuserX</code> 家目錄中</p>
+</li>
+</ol>
+<h2 id="實作過程-1"><a href="#實作過程-1" class="headerlink" title="實作過程"></a>實作過程</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">$ sudo mkdir /home/guests</span><br><span class="line">$ sudo yum -y install autofs</span><br><span class="line"></span><br><span class="line"><span class="comment"># autofs 設定</span></span><br><span class="line">$ <span class="built_in">echo</span> <span class="string">"/home/guests    /etc/autofs.indirect"</span> | sudo tee --append /etc/auto.master.d/lab.autofs</span><br><span class="line">$ <span class="built_in">echo</span> <span class="string">"*   -rw,sync    classroom.example.com:/home/guests/&amp;"</span> | sudo tee --append /etc/autofs.indirect</span><br><span class="line"></span><br><span class="line"><span class="comment"># 啟用服務</span></span><br><span class="line">$ sudo systemctl <span class="built_in">enable</span> autofs.service</span><br><span class="line">$ sudo systemctl restart autofs.service</span><br><span class="line"></span><br><span class="line"><span class="comment"># 登入驗證</span></span><br><span class="line">$ ssh ldapuser1@localhost</span><br><span class="line">[ldapuser1@desktop1 ~]$ <span class="built_in">pwd</span></span><br><span class="line">/home/guests/ldapuser1</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog/tags/Linux/" rel="tag"># Linux</a>
+          
+            <a href="/blog/tags/RHCE/" rel="tag"># RHCE</a>
+          
+            <a href="/blog/tags/RH134/" rel="tag"># RH134</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/2016/05/12/RHCE/RHCE7-RH134-LearningNotes-CH12_AccessingNetworkStorageWithSMB/" rel="next" title="[RHCE7] RH134 Chapter 12. Accessing Network Storage with SMB 學習筆記">
+                <i class="fa fa-chevron-left"></i> [RHCE7] RH134 Chapter 12. Accessing Network Storage with SMB 學習筆記
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/2016/06/22/CoreOS/CoreOS-Introduction-Of-etcd-fleet-and-flannel/" rel="prev" title="[CoreOS] etcd、fleet & flannel 簡介">
+                [CoreOS] etcd、fleet & flannel 簡介 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            本站概覽
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">godleon</p>
+              <p class="site-description motion-element" itemprop="description">把時間花在哪裡，成就就在哪裡</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/blog/archives/">
+              
+                  <span class="site-state-item-count">46</span>
+                  <span class="site-state-item-name">文章</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/blog/categories/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">分類</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/blog/tags/index.html">
+                  <span class="site-state-item-count">22</span>
+                  <span class="site-state-item-name">標籤</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/godleon" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:godleon@gmail.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-globe"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://plus.google.com/godleon" target="_blank" title="Google">
+                    
+                      <i class="fa fa-fw fa-google"></i>Google</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#11-1-Mounting-Network-Storage-with-NFS"><span class="nav-number">1.</span> <span class="nav-text"><a href="#11-1-Mounting-Network-Storage-with-NFS" class="headerlink" title="11.1 Mounting Network Storage with NFS"></a>11.1 Mounting Network Storage with NFS</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#11-1-1-Manualling-mouting-and-unmouting-NFS-shares"><span class="nav-number">1.1.</span> <span class="nav-text"><a href="#11-1-1-Manualling-mouting-and-unmouting-NFS-shares" class="headerlink" title="11.1.1 Manualling mouting and unmouting NFS shares"></a>11.1.1 Manualling mouting and unmouting NFS shares</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#NFS-4-0-之前："><span class="nav-number">1.1.1.</span> <span class="nav-text"><a href="#NFS-4-0-&#x4E4B;&#x524D;&#xFF1A;" class="headerlink" title="NFS 4.0 &#x4E4B;&#x524D;&#xFF1A;"></a>NFS 4.0 &#x4E4B;&#x524D;&#xFF1A;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NFS-4-0："><span class="nav-number">1.1.2.</span> <span class="nav-text"><a href="#NFS-4-0&#xFF1A;" class="headerlink" title="NFS 4.0&#xFF1A;"></a>NFS 4.0&#xFF1A;</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-1-2-Security-methods"><span class="nav-number">1.2.</span> <span class="nav-text"><a href="#11-1-2-Security-methods" class="headerlink" title="11.1.2 Security methods"></a>11.1.2 Security methods</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Practice-Mounting-and-Unmounting-NFS"><span class="nav-number">2.</span> <span class="nav-text"><a href="#Practice-Mounting-and-Unmounting-NFS" class="headerlink" title="Practice: Mounting and Unmounting NFS"></a>Practice: Mounting and Unmounting NFS</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#目前已存在設定"><span class="nav-number">2.1.</span> <span class="nav-text"><a href="#&#x76EE;&#x524D;&#x5DF2;&#x5B58;&#x5728;&#x8A2D;&#x5B9A;" class="headerlink" title="&#x76EE;&#x524D;&#x5DF2;&#x5B58;&#x5728;&#x8A2D;&#x5B9A;"></a>&#x76EE;&#x524D;&#x5DF2;&#x5B58;&#x5728;&#x8A2D;&#x5B9A;</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#實作過程"><span class="nav-number">2.2.</span> <span class="nav-text"><a href="#&#x5BE6;&#x4F5C;&#x904E;&#x7A0B;" class="headerlink" title="&#x5BE6;&#x4F5C;&#x904E;&#x7A0B;"></a>&#x5BE6;&#x4F5C;&#x904E;&#x7A0B;</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#11-2-Automounting-Network-Storage-with-NFS"><span class="nav-number">3.</span> <span class="nav-text"><a href="#11-2-Automounting-Network-Storage-with-NFS" class="headerlink" title="11.2 Automounting Network Storage with NFS"></a>11.2 Automounting Network Storage with NFS</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#direct-map"><span class="nav-number">3.1.</span> <span class="nav-text"><a href="#direct-map" class="headerlink" title="direct-map"></a>direct-map</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#indirect-map"><span class="nav-number">3.2.</span> <span class="nav-text"><a href="#indirect-map" class="headerlink" title="indirect-map"></a>indirect-map</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#掛載方式"><span class="nav-number">3.3.</span> <span class="nav-text"><a href="#&#x639B;&#x8F09;&#x65B9;&#x5F0F;" class="headerlink" title="&#x639B;&#x8F09;&#x65B9;&#x5F0F;"></a>&#x639B;&#x8F09;&#x65B9;&#x5F0F;</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1、安裝套件"><span class="nav-number">3.3.1.</span> <span class="nav-text"><a href="#1&#x3001;&#x5B89;&#x88DD;&#x5957;&#x4EF6;" class="headerlink" title="1&#x3001;&#x5B89;&#x88DD;&#x5957;&#x4EF6;"></a>1&#x3001;&#x5B89;&#x88DD;&#x5957;&#x4EF6;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2、編輯-master-map-檔案"><span class="nav-number">3.3.2.</span> <span class="nav-text"><a href="#2&#x3001;&#x7DE8;&#x8F2F;-master-map-&#x6A94;&#x6848;" class="headerlink" title="2&#x3001;&#x7DE8;&#x8F2F; master-map &#x6A94;&#x6848;"></a>2&#x3001;&#x7DE8;&#x8F2F; master-map &#x6A94;&#x6848;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3、設定-mapping-檔案"><span class="nav-number">3.3.3.</span> <span class="nav-text"><a href="#3&#x3001;&#x8A2D;&#x5B9A;-mapping-&#x6A94;&#x6848;" class="headerlink" title="3&#x3001;&#x8A2D;&#x5B9A; mapping &#x6A94;&#x6848;"></a>3&#x3001;&#x8A2D;&#x5B9A; mapping &#x6A94;&#x6848;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4、啟動-autofs-服務"><span class="nav-number">3.3.4.</span> <span class="nav-text"><a href="#4&#x3001;&#x555F;&#x52D5;-autofs-&#x670D;&#x52D9;" class="headerlink" title="4&#x3001;&#x555F;&#x52D5; autofs &#x670D;&#x52D9;"></a>4&#x3001;&#x555F;&#x52D5; autofs &#x670D;&#x52D9;</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Practice-Automounting-NFS"><span class="nav-number">4.</span> <span class="nav-text"><a href="#Practice-Automounting-NFS" class="headerlink" title="Practice: Automounting NFS"></a>Practice: Automounting NFS</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#環境設定"><span class="nav-number">4.1.</span> <span class="nav-text"><a href="#&#x74B0;&#x5883;&#x8A2D;&#x5B9A;" class="headerlink" title="&#x74B0;&#x5883;&#x8A2D;&#x5B9A;"></a>&#x74B0;&#x5883;&#x8A2D;&#x5B9A;</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#設定方式"><span class="nav-number">4.2.</span> <span class="nav-text"><a href="#&#x8A2D;&#x5B9A;&#x65B9;&#x5F0F;" class="headerlink" title="&#x8A2D;&#x5B9A;&#x65B9;&#x5F0F;"></a>&#x8A2D;&#x5B9A;&#x65B9;&#x5F0F;</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Lab-Accessing-Network-Storage-with-Network-File-System-NFS"><span class="nav-number">5.</span> <span class="nav-text"><a href="#Lab-Accessing-Network-Storage-with-Network-File-System-NFS" class="headerlink" title="Lab: Accessing Network Storage with Network File System(NFS)"></a>Lab: Accessing Network Storage with Network File System(NFS)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#目標"><span class="nav-number">5.1.</span> <span class="nav-text"><a href="#&#x76EE;&#x6A19;" class="headerlink" title="&#x76EE;&#x6A19;"></a>&#x76EE;&#x6A19;</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#實作過程-1"><span class="nav-number">5.2.</span> <span class="nav-text"><a href="#&#x5BE6;&#x4F5C;&#x904E;&#x7A0B;-1" class="headerlink" title="&#x5BE6;&#x4F5C;&#x904E;&#x7A0B;"></a>&#x5BE6;&#x4F5C;&#x904E;&#x7A0B;</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 強力驅動</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主題 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/blog/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://godleon-blog-hexo.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'https://godleon.github.io/blog/2016/05/12/RHCE/RHCE7-RH134-LearningNotes-CH11_AccessingNetworkStorageWithNetworkFileSystem(NFS)/';
+          this.page.identifier = '2016/05/12/RHCE/RHCE7-RH134-LearningNotes-CH11_AccessingNetworkStorageWithNetworkFileSystem(NFS)/';
+          this.page.title = '[RHCE7] RH134 Chapter 11. Accessing Network Storage with Network File System (NFS) 學習筆記';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/blog/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
