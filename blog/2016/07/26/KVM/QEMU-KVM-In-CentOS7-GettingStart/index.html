@@ -88,7 +88,7 @@
 <meta property="og:description" content="This article introduces how to initialize a kvm-enhanced virtual machine by usung QEMU/KVM">
 <meta property="og:locale" content="zh-tw">
 <meta property="og:image" content="https://lh3.googleusercontent.com/Or8AH3hxAJbdXsIMADxmVkvUKlFYe_-DwTpSuw878fpP3bDAqyLv_ql_7W_HIrLYGHqc1hha7aecKMM6lytj2Wkv-NEyoXsZPuHE5RKa9mp_6apKEoPn7h-tp2DSjLcHaj72ByMefPKXRFKFYCLmYdbhsax0Ro8A-UCjSweOuB03zEL44VM7YbkxNE85vTmFv-JMUUERlX3CAdDotSWpvzl-ztgHzoU2E0iqwgLawhHAhn1JOX19Mn0ib3J0vxqZyLI6CNqaXEIc-7v5QNhAmAysEdWd3AMVKqkPVI41v8FDiUam2G_MDUkWOsAW4aQjnwrAbiw3-Ljpi72gjsM_iJWnsLF5nCuREGQxWC_LOrhRo7-AKLgU_XmzJuobqLRi6LoMzy_BKva5jI7nSgmgAfXDDTWpsXyGoKSgexpg_J7SRuLVZR1iZZ8HCZ9FZpre9qNIdr6xsvnH1NoUobJ73IKMbKn4YmGD0Z9Odi51bpWSh9eV1kOyCMFnF7Q5KZoPk-9lZwChK0gVUj6eObbJDKhlrFTpSvO7vYGJOmIBtfgCfKB9tAZ1-fpDSWxv8tGP38OQmKirl5oh0ozkGGQ-Z9QAr0mC31U=w642-h143-no">
-<meta property="og:updated_time" content="2017-12-20T03:31:16.812Z">
+<meta property="og:updated_time" content="2018-06-07T01:54:28.777Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[Linux KVM] 使用 Linux KVM 啟用第一個 virtual machine">
 <meta name="twitter:description" content="This article introduces how to initialize a kvm-enhanced virtual machine by usung QEMU/KVM">
@@ -434,6 +434,8 @@
 <p><img src="https://lh3.googleusercontent.com/Or8AH3hxAJbdXsIMADxmVkvUKlFYe_-DwTpSuw878fpP3bDAqyLv_ql_7W_HIrLYGHqc1hha7aecKMM6lytj2Wkv-NEyoXsZPuHE5RKa9mp_6apKEoPn7h-tp2DSjLcHaj72ByMefPKXRFKFYCLmYdbhsax0Ro8A-UCjSweOuB03zEL44VM7YbkxNE85vTmFv-JMUUERlX3CAdDotSWpvzl-ztgHzoU2E0iqwgLawhHAhn1JOX19Mn0ib3J0vxqZyLI6CNqaXEIc-7v5QNhAmAysEdWd3AMVKqkPVI41v8FDiUam2G_MDUkWOsAW4aQjnwrAbiw3-Ljpi72gjsM_iJWnsLF5nCuREGQxWC_LOrhRo7-AKLgU_XmzJuobqLRi6LoMzy_BKva5jI7nSgmgAfXDDTWpsXyGoKSgexpg_J7SRuLVZR1iZZ8HCZ9FZpre9qNIdr6xsvnH1NoUobJ73IKMbKn4YmGD0Z9Odi51bpWSh9eV1kOyCMFnF7Q5KZoPk-9lZwChK0gVUj6eObbJDKhlrFTpSvO7vYGJOmIBtfgCfKB9tAZ1-fpDSWxv8tGP38OQmKirl5oh0ozkGGQ-Z9QAr0mC31U=w642-h143-no" alt="QEMU Monitor"></p>
 <blockquote>
 <p>從上圖來看，可看出關鍵字 <code>kvm support: enabled</code>，表示 KVM 加速是開啟的</p>
+</blockquote>
+<blockquote>
 <p>由於我們在上面所產生的 kvm 指令是來自於 qemu-kvm，因此已經預設啟用 KVM 加速 (若單純使用 QEMU，可搭配 <code>--enable-kvm</code> 參數來啟用 KVM 加速)</p>
 </blockquote>
 <hr>
@@ -579,7 +581,7 @@
               
                 <a href="/blog/archives/">
               
-                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-count">53</span>
                   <span class="site-state-item-name">文章</span>
                 </a>
               </div>
@@ -590,7 +592,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/blog/categories/index.html">
-                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-count">11</span>
                   <span class="site-state-item-name">分類</span>
                 </a>
               </div>
@@ -601,7 +603,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/blog/tags/index.html">
-                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-count">25</span>
                   <span class="site-state-item-name">標籤</span>
                 </a>
               </div>
@@ -656,7 +658,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text"><a href="#&#x524D;&#x8A00;" class="headerlink" title="&#x524D;&#x8A00;"></a>&#x524D;&#x8A00;</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#KVM"><span class="nav-number">1.1.</span> <span class="nav-text"><a href="#KVM" class="headerlink" title="KVM"></a>KVM</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Linux-kernel"><span class="nav-number">1.2.</span> <span class="nav-text"><a href="#Linux-kernel" class="headerlink" title="Linux kernel"></a>Linux kernel</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#環境說明"><span class="nav-number">1.3.</span> <span class="nav-text"><a href="#&#x74B0;&#x5883;&#x8AAA;&#x660E;" class="headerlink" title="&#x74B0;&#x5883;&#x8AAA;&#x660E;"></a>&#x74B0;&#x5883;&#x8AAA;&#x660E;</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#硬體"><span class="nav-number">1.3.1.</span> <span class="nav-text"><a href="#&#x786C;&#x9AD4;" class="headerlink" title="&#x786C;&#x9AD4;"></a>&#x786C;&#x9AD4;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#軟體"><span class="nav-number">1.3.2.</span> <span class="nav-text"><a href="#&#x8EDF;&#x9AD4;" class="headerlink" title="&#x8EDF;&#x9AD4;"></a>&#x8EDF;&#x9AD4;</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#前置環境設定"><span class="nav-number">2.</span> <span class="nav-text"><a href="#&#x524D;&#x7F6E;&#x74B0;&#x5883;&#x8A2D;&#x5B9A;" class="headerlink" title="&#x524D;&#x7F6E;&#x74B0;&#x5883;&#x8A2D;&#x5B9A;"></a>&#x524D;&#x7F6E;&#x74B0;&#x5883;&#x8A2D;&#x5B9A;</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#安裝套件"><span class="nav-number">2.1.</span> <span class="nav-text"><a href="#&#x5B89;&#x88DD;&#x5957;&#x4EF6;" class="headerlink" title="&#x5B89;&#x88DD;&#x5957;&#x4EF6;"></a>&#x5B89;&#x88DD;&#x5957;&#x4EF6;</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#防火牆設定"><span class="nav-number">2.2.</span> <span class="nav-text"><a href="#&#x9632;&#x706B;&#x7246;&#x8A2D;&#x5B9A;" class="headerlink" title="&#x9632;&#x706B;&#x7246;&#x8A2D;&#x5B9A;"></a>&#x9632;&#x706B;&#x7246;&#x8A2D;&#x5B9A;</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#驗證環境"><span class="nav-number">3.</span> <span class="nav-text"><a href="#&#x9A57;&#x8B49;&#x74B0;&#x5883;" class="headerlink" title="&#x9A57;&#x8B49;&#x74B0;&#x5883;"></a>&#x9A57;&#x8B49;&#x74B0;&#x5883;</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#啟動第一個-virtual-machine"><span class="nav-number">4.</span> <span class="nav-text"><a href="#&#x555F;&#x52D5;&#x7B2C;&#x4E00;&#x500B;-virtual-machine" class="headerlink" title="&#x555F;&#x52D5;&#x7B2C;&#x4E00;&#x500B; virtual machine"></a>&#x555F;&#x52D5;&#x7B2C;&#x4E00;&#x500B; virtual machine</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text"><a href="#References" class="headerlink" title="References"></a>References</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Installation"><span class="nav-number">5.1.</span> <span class="nav-text"><a href="#Installation" class="headerlink" title="Installation"></a>Installation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VNC"><span class="nav-number">5.2.</span> <span class="nav-text"><a href="#VNC" class="headerlink" title="VNC"></a>VNC</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#KVM"><span class="nav-number">1.1.</span> <span class="nav-text">KVM</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Linux-kernel"><span class="nav-number">1.2.</span> <span class="nav-text">Linux kernel</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#環境說明"><span class="nav-number">1.3.</span> <span class="nav-text">環境說明</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#硬體"><span class="nav-number">1.3.1.</span> <span class="nav-text">硬體</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#軟體"><span class="nav-number">1.3.2.</span> <span class="nav-text">軟體</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#前置環境設定"><span class="nav-number">2.</span> <span class="nav-text">前置環境設定</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#安裝套件"><span class="nav-number">2.1.</span> <span class="nav-text">安裝套件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#防火牆設定"><span class="nav-number">2.2.</span> <span class="nav-text">防火牆設定</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#驗證環境"><span class="nav-number">3.</span> <span class="nav-text">驗證環境</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#啟動第一個-virtual-machine"><span class="nav-number">4.</span> <span class="nav-text">啟動第一個 virtual machine</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Installation"><span class="nav-number">5.1.</span> <span class="nav-text">Installation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VNC"><span class="nav-number">5.2.</span> <span class="nav-text">VNC</span></a></li></ol></li></ol></div>
             
 
           </div>
@@ -676,7 +678,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

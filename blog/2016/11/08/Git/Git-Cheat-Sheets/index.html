@@ -94,7 +94,7 @@
 <meta property="og:image" content="http://rypress.com/tutorials/git/media/11-2.png">
 <meta property="og:image" content="http://rypress.com/tutorials/git/media/12-1.png">
 <meta property="og:image" content="http://rypress.com/tutorials/git/media/12-2.png">
-<meta property="og:updated_time" content="2017-12-20T03:31:16.808Z">
+<meta property="og:updated_time" content="2018-06-07T01:54:28.773Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[Git] Cheat Sheet">
 <meta name="twitter:description" content="Git Cheat Sheet">
@@ -422,6 +422,8 @@
 <p>!3-way merge](<a href="http://rypress.com/tutorials/git/media/4-1.png" target="_blank" rel="noopener">http://rypress.com/tutorials/git/media/4-1.png</a>)</p>
 <blockquote>
 <p>3-way merge 在當要合併兩個擁有不同 commit snapshot 時會發生，此時 Git 會額外建立一個 merge commit snapshot，並同時指向兩個不同的 branch(如上圖中的 <strong>After</strong>，紅色圈圈表示這個 commit snapshot 同時來自 crazy &amp; master 兩個 branch)</p>
+</blockquote>
+<blockquote>
 <p>fast-forward merge 不會在 project history 中看到，這是與 3-way merge 不同的地方</p>
 </blockquote>
 <hr>
@@ -596,7 +598,7 @@
               
                 <a href="/blog/archives/">
               
-                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-count">53</span>
                   <span class="site-state-item-name">文章</span>
                 </a>
               </div>
@@ -607,7 +609,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/blog/categories/index.html">
-                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-count">11</span>
                   <span class="site-state-item-name">分類</span>
                 </a>
               </div>
@@ -618,7 +620,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/blog/tags/index.html">
-                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-count">25</span>
                   <span class="site-state-item-name">標籤</span>
                 </a>
               </div>
@@ -673,7 +675,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#The-Basics"><span class="nav-number">1.</span> <span class="nav-text"><a href="#The-Basics" class="headerlink" title="The Basics"></a>The Basics</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Undoing-Changes"><span class="nav-number">2.</span> <span class="nav-text"><a href="#Undoing-Changes" class="headerlink" title="Undoing Changes"></a>Undoing Changes</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Branches"><span class="nav-number">3.</span> <span class="nav-text"><a href="#Branches" class="headerlink" title="Branches"></a>Branches</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Rebasing"><span class="nav-number">4.</span> <span class="nav-text"><a href="#Rebasing" class="headerlink" title="Rebasing"></a>Rebasing</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Rewriting-History"><span class="nav-number">5.</span> <span class="nav-text"><a href="#Rewriting-History" class="headerlink" title="Rewriting History"></a>Rewriting History</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Remotes"><span class="nav-number">6.</span> <span class="nav-text"><a href="#Remotes" class="headerlink" title="Remotes"></a>Remotes</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Centralized-Workflows"><span class="nav-number">7.</span> <span class="nav-text"><a href="#Centralized-Workflows" class="headerlink" title="Centralized Workflows"></a>Centralized Workflows</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Patch-Workflows"><span class="nav-number">8.</span> <span class="nav-text"><a href="#Patch-Workflows" class="headerlink" title="Patch Workflows"></a>Patch Workflows</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Tips-amp-Tricks"><span class="nav-number">9.</span> <span class="nav-text"><a href="#Tips-amp-Tricks" class="headerlink" title="Tips &amp; Tricks"></a>Tips &amp; Tricks</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Plumbing"><span class="nav-number">10.</span> <span class="nav-text"><a href="#Plumbing" class="headerlink" title="Plumbing"></a>Plumbing</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">11.</span> <span class="nav-text"><a href="#References" class="headerlink" title="References"></a>References</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#The-Basics"><span class="nav-number">1.</span> <span class="nav-text">The Basics</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Undoing-Changes"><span class="nav-number">2.</span> <span class="nav-text">Undoing Changes</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Branches"><span class="nav-number">3.</span> <span class="nav-text">Branches</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Rebasing"><span class="nav-number">4.</span> <span class="nav-text">Rebasing</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Rewriting-History"><span class="nav-number">5.</span> <span class="nav-text">Rewriting History</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Remotes"><span class="nav-number">6.</span> <span class="nav-text">Remotes</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Centralized-Workflows"><span class="nav-number">7.</span> <span class="nav-text">Centralized Workflows</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Patch-Workflows"><span class="nav-number">8.</span> <span class="nav-text">Patch Workflows</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Tips-amp-Tricks"><span class="nav-number">9.</span> <span class="nav-text">Tips &amp; Tricks</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Plumbing"><span class="nav-number">10.</span> <span class="nav-text">Plumbing</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">11.</span> <span class="nav-text">References</span></a></li></ol></div>
             
 
           </div>
@@ -693,7 +695,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="小信豬的原始部落">
 <meta property="og:description" content="此文章記錄學習 RHCE7 RH134 Chapter 4 Scheduling Future Linux Tasks 留下的內容">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2017-12-20T03:31:16.816Z">
+<meta property="og:updated_time" content="2018-06-07T01:54:28.781Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[RHCE7] RH134 Chapter 4 Scheduling Future Linux Tasks 學習筆記">
 <meta name="twitter:description" content="此文章記錄學習 RHCE7 RH134 Chapter 4 Scheduling Future Linux Tasks 留下的內容">
@@ -574,7 +574,7 @@
               
                 <a href="/blog/archives/">
               
-                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-count">53</span>
                   <span class="site-state-item-name">文章</span>
                 </a>
               </div>
@@ -585,7 +585,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/blog/categories/index.html">
-                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-count">11</span>
                   <span class="site-state-item-name">分類</span>
                 </a>
               </div>
@@ -596,7 +596,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/blog/tags/index.html">
-                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-count">25</span>
                   <span class="site-state-item-name">標籤</span>
                 </a>
               </div>
@@ -651,7 +651,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#4-1-Scheduling-One-Time-Tasks-with-at"><span class="nav-number">1.</span> <span class="nav-text"><a href="#4-1-Scheduling-One-Time-Tasks-with-at" class="headerlink" title="4.1 Scheduling One-Time Tasks with at"></a>4.1 Scheduling One-Time Tasks with at</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Practice"><span class="nav-number">1.0.1.</span> <span class="nav-text"><a href="#Practice" class="headerlink" title="Practice"></a>Practice</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-2-Scheduling-Recurring-Jobs-with-cron-User-cron"><span class="nav-number">2.</span> <span class="nav-text"><a href="#4-2-Scheduling-Recurring-Jobs-with-cron-User-cron" class="headerlink" title="4.2 Scheduling Recurring Jobs with cron (User cron)"></a>4.2 Scheduling Recurring Jobs with cron (User cron)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Practice-1"><span class="nav-number">2.0.1.</span> <span class="nav-text"><a href="#Practice-1" class="headerlink" title="Practice"></a>Practice</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-3-Scheduling-System-cron-Jobs"><span class="nav-number">3.</span> <span class="nav-text"><a href="#4-3-Scheduling-System-cron-Jobs" class="headerlink" title="4.3 Scheduling System cron Jobs"></a>4.3 Scheduling System cron Jobs</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-4-Managing-Temporary-Files"><span class="nav-number">4.</span> <span class="nav-text"><a href="#4-4-Managing-Temporary-Files" class="headerlink" title="4.4 Managing Temporary Files"></a>4.4 Managing Temporary Files</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-4-1-Managing-temporary-files-with-systemd-tmpfiles"><span class="nav-number">4.0.1.</span> <span class="nav-text"><a href="#4-4-1-Managing-temporary-files-with-systemd-tmpfiles" class="headerlink" title="4.4.1 Managing temporary files with systemd-tmpfiles"></a>4.4.1 Managing temporary files with systemd-tmpfiles</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#補充"><span class="nav-number">4.0.2.</span> <span class="nav-text"><a href="#&#x88DC;&#x5145;" class="headerlink" title="&#x88DC;&#x5145;"></a>&#x88DC;&#x5145;</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Practice-Managing-Temporary-Files"><span class="nav-number">5.</span> <span class="nav-text"><a href="#Practice-Managing-Temporary-Files" class="headerlink" title="Practice: Managing Temporary Files"></a>Practice: Managing Temporary Files</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#4-1-Scheduling-One-Time-Tasks-with-at"><span class="nav-number">1.</span> <span class="nav-text">4.1 Scheduling One-Time Tasks with at</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Practice"><span class="nav-number">1.0.1.</span> <span class="nav-text">Practice</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-2-Scheduling-Recurring-Jobs-with-cron-User-cron"><span class="nav-number">2.</span> <span class="nav-text">4.2 Scheduling Recurring Jobs with cron (User cron)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Practice-1"><span class="nav-number">2.0.1.</span> <span class="nav-text">Practice</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-3-Scheduling-System-cron-Jobs"><span class="nav-number">3.</span> <span class="nav-text">4.3 Scheduling System cron Jobs</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-4-Managing-Temporary-Files"><span class="nav-number">4.</span> <span class="nav-text">4.4 Managing Temporary Files</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-4-1-Managing-temporary-files-with-systemd-tmpfiles"><span class="nav-number">4.0.1.</span> <span class="nav-text">4.4.1 Managing temporary files with systemd-tmpfiles</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#補充"><span class="nav-number">4.0.2.</span> <span class="nav-text">補充</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Practice-Managing-Temporary-Files"><span class="nav-number">5.</span> <span class="nav-text">Practice: Managing Temporary Files</span></a></li></ol></div>
             
 
           </div>
@@ -671,7 +671,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

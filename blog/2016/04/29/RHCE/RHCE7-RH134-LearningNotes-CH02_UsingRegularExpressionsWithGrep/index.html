@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="小信豬的原始部落">
 <meta property="og:description" content="此文章記錄學習 RHCE7 RH134 Chapter 2 Using Regular Expressions with grep 留下的內容">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2017-12-20T03:31:16.816Z">
+<meta property="og:updated_time" content="2018-06-07T01:54:28.781Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[RHCE7] RH134 Chapter 2 Using Regular Expressions with grep 學習筆記">
 <meta name="twitter:description" content="此文章記錄學習 RHCE7 RH134 Chapter 2 Using Regular Expressions with grep 留下的內容">
@@ -472,8 +472,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/blog/2016/04/29/RHCE/RHCE7-RH134-LearningNotes-CH01_AutomatingInstallationWithKickstart/" rel="next" title="[RHCE7] RH134 Chapter 1 Automating Installation with Kickstart 學習筆記">
-                <i class="fa fa-chevron-left"></i> [RHCE7] RH134 Chapter 1 Automating Installation with Kickstart 學習筆記
+              <a href="/blog/2016/04/28/RHCE/RHCE7-RH124-LearningNotes-CH14_AccessingLinuxFileSystems/" rel="next" title="[RHCE] RH124 Chapter 14 Accessing Linux File Systems 學習筆記">
+                <i class="fa fa-chevron-left"></i> [RHCE] RH124 Chapter 14 Accessing Linux File Systems 學習筆記
               </a>
             
           </div>
@@ -482,8 +482,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/blog/2016/05/04/RHCE/RHCE7-RH134-LearningNotes-CH03_CreatingAndEditingTextFilesWithVim/" rel="prev" title="[RHCE7] RH134 Chapter 3 Creating and Editing Text Files with vim 學習筆記">
-                [RHCE7] RH134 Chapter 3 Creating and Editing Text Files with vim 學習筆記 <i class="fa fa-chevron-right"></i>
+              <a href="/blog/2016/04/29/RHCE/RHCE7-RH134-LearningNotes-CH01_AutomatingInstallationWithKickstart/" rel="prev" title="[RHCE7] RH134 Chapter 1 Automating Installation with Kickstart 學習筆記">
+                [RHCE7] RH134 Chapter 1 Automating Installation with Kickstart 學習筆記 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -571,7 +571,7 @@
               
                 <a href="/blog/archives/">
               
-                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-count">53</span>
                   <span class="site-state-item-name">文章</span>
                 </a>
               </div>
@@ -582,7 +582,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/blog/categories/index.html">
-                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-count">11</span>
                   <span class="site-state-item-name">分類</span>
                 </a>
               </div>
@@ -593,7 +593,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/blog/tags/index.html">
-                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-count">25</span>
                   <span class="site-state-item-name">標籤</span>
                 </a>
               </div>
@@ -648,7 +648,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#2-2-Matching-Text-with-grep"><span class="nav-number">1.</span> <span class="nav-text"><a href="#2-2-Matching-Text-with-grep" class="headerlink" title="2.2 Matching Text with grep"></a>2.2 Matching Text with grep</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#練習：尋找包含-IP-address-的行"><span class="nav-number">1.0.1.</span> <span class="nav-text"><a href="#&#x7DF4;&#x7FD2;&#xFF1A;&#x5C0B;&#x627E;&#x5305;&#x542B;-IP-address-&#x7684;&#x884C;" class="headerlink" title="&#x7DF4;&#x7FD2;&#xFF1A;&#x5C0B;&#x627E;&#x5305;&#x542B; IP address &#x7684;&#x884C;"></a>&#x7DF4;&#x7FD2;&#xFF1A;&#x5C0B;&#x627E;&#x5305;&#x542B; IP address &#x7684;&#x884C;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sed"><span class="nav-number">1.0.2.</span> <span class="nav-text"><a href="#sed" class="headerlink" title="sed"></a>sed</span></a></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#2-2-Matching-Text-with-grep"><span class="nav-number">1.</span> <span class="nav-text">2.2 Matching Text with grep</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#練習：尋找包含-IP-address-的行"><span class="nav-number">1.0.1.</span> <span class="nav-text">練習：尋找包含 IP address 的行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sed"><span class="nav-number">1.0.2.</span> <span class="nav-text">sed</span></a></li></ol></li></ol></li></ol></div>
             
 
           </div>
@@ -668,7 +668,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

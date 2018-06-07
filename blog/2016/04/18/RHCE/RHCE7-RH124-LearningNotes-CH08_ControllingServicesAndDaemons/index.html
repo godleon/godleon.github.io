@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="小信豬的原始部落">
 <meta property="og:description" content="此文章記錄學習 RHCE RH124 Chapter 8 Controlling Services and Daemons 所留下的內容">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2017-12-20T03:31:16.812Z">
+<meta property="og:updated_time" content="2018-06-07T01:54:28.777Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[RHCE] RH124 Chapter 8 Controlling Services and Daemons 學習筆記">
 <meta name="twitter:description" content="此文章記錄學習 RHCE RH124 Chapter 8 Controlling Services and Daemons 所留下的內容">
@@ -607,7 +607,7 @@
               
                 <a href="/blog/archives/">
               
-                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-count">53</span>
                   <span class="site-state-item-name">文章</span>
                 </a>
               </div>
@@ -618,7 +618,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/blog/categories/index.html">
-                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-count">11</span>
                   <span class="site-state-item-name">分類</span>
                 </a>
               </div>
@@ -629,7 +629,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/blog/tags/index.html">
-                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-count">25</span>
                   <span class="site-state-item-name">標籤</span>
                 </a>
               </div>
@@ -684,7 +684,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#8-1-Identifying-Automatically-Started-System-Processes"><span class="nav-number">1.</span> <span class="nav-text"><a href="#8-1-Identifying-Automatically-Started-System-Processes" class="headerlink" title="8.1 Identifying Automatically Started System Processes"></a>8.1 Identifying Automatically Started System Processes</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#8-1-1-Introduction-to-systemd"><span class="nav-number">1.1.</span> <span class="nav-text"><a href="#8-1-1-Introduction-to-systemd" class="headerlink" title="8.1.1 Introduction to systemd"></a>8.1.1 Introduction to systemd</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Service-status"><span class="nav-number">1.1.1.</span> <span class="nav-text"><a href="#Service-status" class="headerlink" title="Service status"></a>Service status</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-1-2-systemctl-使用方式"><span class="nav-number">1.2.</span> <span class="nav-text"><a href="#8-1-2-systemctl-&#x4F7F;&#x7528;&#x65B9;&#x5F0F;" class="headerlink" title="8.1.2 systemctl &#x4F7F;&#x7528;&#x65B9;&#x5F0F;"></a>8.1.2 systemctl &#x4F7F;&#x7528;&#x65B9;&#x5F0F;</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#8-2-Controlling-System-Services"><span class="nav-number">2.</span> <span class="nav-text"><a href="#8-2-Controlling-System-Services" class="headerlink" title="8.2 Controlling System Services"></a>8.2 Controlling System Services</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#8-2-1-Starting-and-stopping-daemons-on-a-running-system"><span class="nav-number">2.1.</span> <span class="nav-text"><a href="#8-2-1-Starting-and-stopping-daemons-on-a-running-system" class="headerlink" title="8.2.1 Starting and stopping daemons on a running system"></a>8.2.1 Starting and stopping daemons on a running system</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Unit-dependencies"><span class="nav-number">2.1.1.</span> <span class="nav-text"><a href="#Unit-dependencies" class="headerlink" title="Unit dependencies"></a>Unit dependencies</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Masking-services"><span class="nav-number">2.1.2.</span> <span class="nav-text"><a href="#Masking-services" class="headerlink" title="Masking services"></a>Masking services</span></a></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#8-1-Identifying-Automatically-Started-System-Processes"><span class="nav-number">1.</span> <span class="nav-text">8.1 Identifying Automatically Started System Processes</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#8-1-1-Introduction-to-systemd"><span class="nav-number">1.1.</span> <span class="nav-text">8.1.1 Introduction to systemd</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Service-status"><span class="nav-number">1.1.1.</span> <span class="nav-text">Service status</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-1-2-systemctl-使用方式"><span class="nav-number">1.2.</span> <span class="nav-text">8.1.2 systemctl 使用方式</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#8-2-Controlling-System-Services"><span class="nav-number">2.</span> <span class="nav-text">8.2 Controlling System Services</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#8-2-1-Starting-and-stopping-daemons-on-a-running-system"><span class="nav-number">2.1.</span> <span class="nav-text">8.2.1 Starting and stopping daemons on a running system</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Unit-dependencies"><span class="nav-number">2.1.1.</span> <span class="nav-text">Unit dependencies</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Masking-services"><span class="nav-number">2.1.2.</span> <span class="nav-text">Masking services</span></a></li></ol></li></ol></li></ol></div>
             
 
           </div>
@@ -704,7 +704,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

@@ -88,7 +88,7 @@
 <meta property="og:description" content="此文章記錄學習 RHCE7 RH134 Chapter 08. Connecting to Network-defined Users and Groups 留下的內容">
 <meta property="og:locale" content="zh-tw">
 <meta property="og:image" content="https://lh3.googleusercontent.com/yrIOq6ZotETj8rEMxH3hnoBqJzUmaF4A_aYQQlvMTuqU6u2-xBCA7aUMIkVBUi_uwjiSOcEr5V_TXrlv0jYDX_ikqhPjZVWPiXo5XKIoWUovuYNtbyPu4nibuVU1sZ150Y43kME_1dExiLtYF3cowhoHA_ex4CbHBDGULMGkfPJQnJkoWM_PVlb-xk1ENpKjElCw0If4VUMnyk6QsSjWTeKrUt6gl8A9Szi-DEWgh2FuhnXFFfL2BOlUmcvLeUDDDu7cT1v09QRqQI1usK3bDKIjrmNUaSAYQ8hPoxDqZaT0-KMycPnDwc8SWJXmm4En8uQMHSGMqFKlx1LmJqufLKZMaFZgF3rM1BN8pCYFxkUkws2nNuG-tmzHi0yxVq7T0vYFerWX66XTvhrOHiReMjLKp3IEm7ue4-AUNY9bcwlPgyjoOBJXId1vT4AgyHeR7sivsMFvwfw2jTwZdEEp2723scmSxiYoO0baKp7rrSnls11b9SI_ZIPd7gAD_42AqnstDCEWWsKzXCpGLXuAXFFjk14lO5g0MHtCd73J2aJmsz8QN_rMZK_Hd9YW44VJ6AEQF3rB4Sxq09bT6q8HPF9ht-ak_qg=w474-h710-no">
-<meta property="og:updated_time" content="2017-12-20T03:31:16.816Z">
+<meta property="og:updated_time" content="2018-06-07T01:54:28.781Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[RHCE7] RH134 Chapter 08. Connecting to Network-defined Users and Groups 學習筆記">
 <meta name="twitter:description" content="此文章記錄學習 RHCE7 RH134 Chapter 08. Connecting to Network-defined Users and Groups 留下的內容">
@@ -410,6 +410,8 @@
 </ol>
 <blockquote>
 <p>但 Kerberos 僅能提供帳號密碼驗證，無法提供使用者資訊，因此一般會與 LDAP 搭配來解決提供使用者資訊的問題，Windows AD 目前就是依照這種方式達成，安全性提高，且提供了 SSO 的能力)</p>
+</blockquote>
+<blockquote>
 <p>目前使用 LDAP + Kerberos 架構的產品有 Windows AD, SAMBA 4.x, RedHat IDM(IPA)</p>
 </blockquote>
 <hr>
@@ -637,7 +639,7 @@
               
                 <a href="/blog/archives/">
               
-                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-count">53</span>
                   <span class="site-state-item-name">文章</span>
                 </a>
               </div>
@@ -648,7 +650,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/blog/categories/index.html">
-                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-count">11</span>
                   <span class="site-state-item-name">分類</span>
                 </a>
               </div>
@@ -659,7 +661,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/blog/tags/index.html">
-                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-count">25</span>
                   <span class="site-state-item-name">標籤</span>
                 </a>
               </div>
@@ -714,7 +716,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#老師補充"><span class="nav-number">1.</span> <span class="nav-text"><a href="#&#x8001;&#x5E2B;&#x88DC;&#x5145;" class="headerlink" title="&#x8001;&#x5E2B;&#x88DC;&#x5145;"></a>&#x8001;&#x5E2B;&#x88DC;&#x5145;</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#8-1-Using-Identity-Management-Services"><span class="nav-number">2.</span> <span class="nav-text"><a href="#8-1-Using-Identity-Management-Services" class="headerlink" title="8.1 Using Identity Management Services"></a>8.1 Using Identity Management Services</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#8-1-1-User-information-and-authentication-services"><span class="nav-number">2.1.</span> <span class="nav-text"><a href="#8-1-1-User-information-and-authentication-services" class="headerlink" title="8.1.1 User information and authentication services"></a>8.1.1 User information and authentication services</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Account-information"><span class="nav-number">2.1.1.</span> <span class="nav-text"><a href="#1-Account-information" class="headerlink" title="1. Account information"></a>1. Account information</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Authentication-information"><span class="nav-number">2.1.2.</span> <span class="nav-text"><a href="#2-Authentication-information" class="headerlink" title="2. Authentication information"></a>2. Authentication information</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#其他補充"><span class="nav-number">2.1.3.</span> <span class="nav-text"><a href="#&#x5176;&#x4ED6;&#x88DC;&#x5145;" class="headerlink" title="&#x5176;&#x4ED6;&#x88DC;&#x5145;"></a>&#x5176;&#x4ED6;&#x88DC;&#x5145;</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-1-2-Attaching-a-system-to-centralized-LDAP-and-Kerberos-servers"><span class="nav-number">2.2.</span> <span class="nav-text"><a href="#8-1-2-Attaching-a-system-to-centralized-LDAP-and-Kerberos-servers" class="headerlink" title="8.1.2 Attaching a system to centralized LDAP and Kerberos servers"></a>8.1.2 Attaching a system to centralized LDAP and Kerberos servers</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Authconfig"><span class="nav-number">2.2.1.</span> <span class="nav-text"><a href="#Authconfig" class="headerlink" title="Authconfig"></a>Authconfig</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LDAP"><span class="nav-number">2.2.2.</span> <span class="nav-text"><a href="#LDAP" class="headerlink" title="LDAP"></a>LDAP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kerberos"><span class="nav-number">2.2.3.</span> <span class="nav-text"><a href="#Kerberos" class="headerlink" title="Kerberos"></a>Kerberos</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-1-3-Attaching-a-System-to-an-IPA-Server"><span class="nav-number">2.3.</span> <span class="nav-text"><a href="#8-1-3-Attaching-a-System-to-an-IPA-Server" class="headerlink" title="8.1.3 Attaching a System to an IPA Server"></a>8.1.3 Attaching a System to an IPA Server</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Practice-Connecting-to-a-Central-LDAP-and-Kerberos-Server"><span class="nav-number">3.</span> <span class="nav-text"><a href="#Practice-Connecting-to-a-Central-LDAP-and-Kerberos-Server" class="headerlink" title="Practice: Connecting to a Central LDAP and Kerberos Server"></a>Practice: Connecting to a Central LDAP and Kerberos Server</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Lab-Connecting-to-Network-defined-Users-and-Groups"><span class="nav-number">4.</span> <span class="nav-text"><a href="#Lab-Connecting-to-Network-defined-Users-and-Groups" class="headerlink" title="Lab: Connecting to Network-defined Users and Groups"></a>Lab: Connecting to Network-defined Users and Groups</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#老師補充"><span class="nav-number">1.</span> <span class="nav-text">老師補充</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#8-1-Using-Identity-Management-Services"><span class="nav-number">2.</span> <span class="nav-text">8.1 Using Identity Management Services</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#8-1-1-User-information-and-authentication-services"><span class="nav-number">2.1.</span> <span class="nav-text">8.1.1 User information and authentication services</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Account-information"><span class="nav-number">2.1.1.</span> <span class="nav-text">1. Account information</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Authentication-information"><span class="nav-number">2.1.2.</span> <span class="nav-text">2. Authentication information</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#其他補充"><span class="nav-number">2.1.3.</span> <span class="nav-text">其他補充</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-1-2-Attaching-a-system-to-centralized-LDAP-and-Kerberos-servers"><span class="nav-number">2.2.</span> <span class="nav-text">8.1.2 Attaching a system to centralized LDAP and Kerberos servers</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Authconfig"><span class="nav-number">2.2.1.</span> <span class="nav-text">Authconfig</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LDAP"><span class="nav-number">2.2.2.</span> <span class="nav-text">LDAP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kerberos"><span class="nav-number">2.2.3.</span> <span class="nav-text">Kerberos</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-1-3-Attaching-a-System-to-an-IPA-Server"><span class="nav-number">2.3.</span> <span class="nav-text">8.1.3 Attaching a System to an IPA Server</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Practice-Connecting-to-a-Central-LDAP-and-Kerberos-Server"><span class="nav-number">3.</span> <span class="nav-text">Practice: Connecting to a Central LDAP and Kerberos Server</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Lab-Connecting-to-Network-defined-Users-and-Groups"><span class="nav-number">4.</span> <span class="nav-text">Lab: Connecting to Network-defined Users and Groups</span></a></li></ol></div>
             
 
           </div>
@@ -734,7 +736,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

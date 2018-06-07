@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="小信豬的原始部落">
 <meta property="og:description" content="This article introduces how to manage the lifecycle of virtual machines in KVM">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2017-12-20T03:31:16.812Z">
+<meta property="og:updated_time" content="2018-06-07T01:54:28.777Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[Linux KVM] VM Life Cycle 管理">
 <meta name="twitter:description" content="This article introduces how to manage the lifecycle of virtual machines in KVM">
@@ -488,7 +488,7 @@
 </li>
 </ul>
 <p>在安裝 VM 時，libvirt 就會根據安裝的 OS，協助選擇一個最合適的顯示卡，通常安裝最近發佈的 OS，都會直接選配 QXL；若是 Windows 或是比較舊版的 Linux，可能就會使用 Cirrus。</p>
-<h2 id="Graphics"><a href="#Graphics" class="headerlink" title="Graphics"></a>Graphics</h2><p>當 VM 有了顯示卡之後，接著需要一個可以存取圖形訊號的方法，在 KVM 中是透過 <strong>graphic server</strong> 的方式，目前提供了 <strong>VNC</strong> &amp; <em>*SPICE</em> 兩種 graphic server。</p>
+<h2 id="Graphics"><a href="#Graphics" class="headerlink" title="Graphics"></a>Graphics</h2><p>當 VM 有了顯示卡之後，接著需要一個可以存取圖形訊號的方法，在 KVM 中是透過 <strong>graphic server</strong> 的方式，目前提供了 <strong>VNC</strong> &amp; *<em>SPICE</em> 兩種 graphic server。</p>
 <p>當 VM 確定好顯示卡之後，QEMU 就會啟動相對應的 Spice or VNC server，並與 VM 的顯示卡進行連接，以便讓外部的 client 可以使用圖形化的方式存取 VM。</p>
 <h3 id="1-VNC"><a href="#1-VNC" class="headerlink" title="(1) VNC"></a>(1) VNC</h3><p>要為 VM 設定一個 VNC graphic server，可在 XML 定義檔中的 <code>&lt;device&gt;</code> section 內部加入類似以下的定義：(IP &amp; port 都可以自己定義)</p>
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">graphics</span> <span class="attr">type</span>=<span class="string">'vnc'</span> <span class="attr">port</span>=<span class="string">'-1'</span> <span class="attr">autoport</span>=<span class="string">'yes'</span> <span class="attr">listen</span>=<span class="string">'192.168.122.1'</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">listen</span> <span class="attr">type</span>=<span class="string">'address'</span> <span class="attr">address</span>=<span class="string">'192.168.122.1'</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">graphics</span>&gt;</span></span><br></pre></td></tr></table></figure>
@@ -652,7 +652,7 @@
               
                 <a href="/blog/archives/">
               
-                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-count">53</span>
                   <span class="site-state-item-name">文章</span>
                 </a>
               </div>
@@ -663,7 +663,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/blog/categories/index.html">
-                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-count">11</span>
                   <span class="site-state-item-name">分類</span>
                 </a>
               </div>
@@ -674,7 +674,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/blog/tags/index.html">
-                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-count">25</span>
                   <span class="site-state-item-name">標籤</span>
                 </a>
               </div>
@@ -729,7 +729,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#VM-Lifecycle"><span class="nav-number">1.</span> <span class="nav-text"><a href="#VM-Lifecycle" class="headerlink" title="VM Lifecycle"></a>VM Lifecycle</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#檢視-VM"><span class="nav-number">2.</span> <span class="nav-text"><a href="#&#x6AA2;&#x8996;-VM" class="headerlink" title="&#x6AA2;&#x8996; VM"></a>&#x6AA2;&#x8996; VM</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#操作-VM"><span class="nav-number">3.</span> <span class="nav-text"><a href="#&#x64CD;&#x4F5C;-VM" class="headerlink" title="&#x64CD;&#x4F5C; VM"></a>&#x64CD;&#x4F5C; VM</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#QEMU-guest-agent"><span class="nav-number">4.</span> <span class="nav-text"><a href="#QEMU-guest-agent" class="headerlink" title="QEMU guest agent"></a>QEMU guest agent</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Virtual-Video-cards-amp-graphics"><span class="nav-number">5.</span> <span class="nav-text"><a href="#Virtual-Video-cards-amp-graphics" class="headerlink" title="Virtual Video cards &amp; graphics"></a>Virtual Video cards &amp; graphics</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Virtual-Video-Card"><span class="nav-number">5.1.</span> <span class="nav-text"><a href="#Virtual-Video-Card" class="headerlink" title="Virtual Video Card"></a>Virtual Video Card</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Graphics"><span class="nav-number">5.2.</span> <span class="nav-text"><a href="#Graphics" class="headerlink" title="Graphics"></a>Graphics</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-VNC"><span class="nav-number">5.2.1.</span> <span class="nav-text"><a href="#1-VNC" class="headerlink" title="(1) VNC"></a>(1) VNC</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-SPICE"><span class="nav-number">5.2.2.</span> <span class="nav-text"><a href="#2-SPICE" class="headerlink" title="(2) SPICE"></a>(2) SPICE</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text"><a href="#References" class="headerlink" title="References"></a>References</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#VM-Lifecycle"><span class="nav-number">1.</span> <span class="nav-text">VM Lifecycle</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#檢視-VM"><span class="nav-number">2.</span> <span class="nav-text">檢視 VM</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#操作-VM"><span class="nav-number">3.</span> <span class="nav-text">操作 VM</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#QEMU-guest-agent"><span class="nav-number">4.</span> <span class="nav-text">QEMU guest agent</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Virtual-Video-cards-amp-graphics"><span class="nav-number">5.</span> <span class="nav-text">Virtual Video cards &amp; graphics</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Virtual-Video-Card"><span class="nav-number">5.1.</span> <span class="nav-text">Virtual Video Card</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Graphics"><span class="nav-number">5.2.</span> <span class="nav-text">Graphics</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-VNC"><span class="nav-number">5.2.1.</span> <span class="nav-text">(1) VNC</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-SPICE"><span class="nav-number">5.2.2.</span> <span class="nav-text">(2) SPICE</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text">References</span></a></li></ol></div>
             
 
           </div>
@@ -749,7 +749,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

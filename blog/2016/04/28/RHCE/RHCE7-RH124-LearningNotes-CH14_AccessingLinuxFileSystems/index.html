@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="小信豬的原始部落">
 <meta property="og:description" content="此文章記錄學習 RHCE7 RH124 Chapter 14 Accessing Linux File System 留下的內容">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2017-12-20T03:31:16.816Z">
+<meta property="og:updated_time" content="2018-06-07T01:54:28.777Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[RHCE] RH124 Chapter 14 Accessing Linux File Systems 學習筆記">
 <meta name="twitter:description" content="此文章記錄學習 RHCE7 RH124 Chapter 14 Accessing Linux File System 留下的內容">
@@ -542,8 +542,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/blog/2016/04/29/RHCE/RHCE7-RH134-LearningNotes-CH01_AutomatingInstallationWithKickstart/" rel="prev" title="[RHCE7] RH134 Chapter 1 Automating Installation with Kickstart 學習筆記">
-                [RHCE7] RH134 Chapter 1 Automating Installation with Kickstart 學習筆記 <i class="fa fa-chevron-right"></i>
+              <a href="/blog/2016/04/29/RHCE/RHCE7-RH134-LearningNotes-CH02_UsingRegularExpressionsWithGrep/" rel="prev" title="[RHCE7] RH134 Chapter 2 Using Regular Expressions with grep 學習筆記">
+                [RHCE7] RH134 Chapter 2 Using Regular Expressions with grep 學習筆記 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -631,7 +631,7 @@
               
                 <a href="/blog/archives/">
               
-                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-count">53</span>
                   <span class="site-state-item-name">文章</span>
                 </a>
               </div>
@@ -642,7 +642,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/blog/categories/index.html">
-                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-count">11</span>
                   <span class="site-state-item-name">分類</span>
                 </a>
               </div>
@@ -653,7 +653,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/blog/tags/index.html">
-                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-count">25</span>
                   <span class="site-state-item-name">標籤</span>
                 </a>
               </div>
@@ -708,7 +708,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#14-1-Identifying-File-Systems-and-Devices"><span class="nav-number">1.</span> <span class="nav-text"><a href="#14-1-Identifying-File-Systems-and-Devices" class="headerlink" title="14.1 Identifying File Systems and Devices"></a>14.1 Identifying File Systems and Devices</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#14-2-Mounting-and-Unmounting-File-Systems"><span class="nav-number">2.</span> <span class="nav-text"><a href="#14-2-Mounting-and-Unmounting-File-Systems" class="headerlink" title="14.2 Mounting and Unmounting File Systems"></a>14.2 Mounting and Unmounting File Systems</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#14-3-Making-Links-Between-Files"><span class="nav-number">3.</span> <span class="nav-text"><a href="#14-3-Making-Links-Between-Files" class="headerlink" title="14.3 Making Links Between Files"></a>14.3 Making Links Between Files</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Partition-UUID-amp-inode"><span class="nav-number">3.1.</span> <span class="nav-text"><a href="#Partition-UUID-amp-inode" class="headerlink" title="Partition UUID &amp; inode"></a>Partition UUID &amp; inode</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hard-Link"><span class="nav-number">3.2.</span> <span class="nav-text"><a href="#Hard-Link" class="headerlink" title="Hard Link"></a>Hard Link</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Symbolic-Link"><span class="nav-number">3.3.</span> <span class="nav-text"><a href="#Symbolic-Link" class="headerlink" title="Symbolic Link"></a>Symbolic Link</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#14-4-Locating-Files-on-the-System"><span class="nav-number">4.</span> <span class="nav-text"><a href="#14-4-Locating-Files-on-the-System" class="headerlink" title="14.4 Locating Files on the System"></a>14.4 Locating Files on the System</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#locate"><span class="nav-number">4.1.</span> <span class="nav-text"><a href="#locate" class="headerlink" title="locate"></a>locate</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#find"><span class="nav-number">4.2.</span> <span class="nav-text"><a href="#find" class="headerlink" title="find"></a>find</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#find-的特別功能"><span class="nav-number">4.2.1.</span> <span class="nav-text"><a href="#find-&#x7684;&#x7279;&#x5225;&#x529F;&#x80FD;" class="headerlink" title="find &#x7684;&#x7279;&#x5225;&#x529F;&#x80FD;"></a>find &#x7684;&#x7279;&#x5225;&#x529F;&#x80FD;</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#參考資料"><span class="nav-number">5.</span> <span class="nav-text"><a href="#&#x53C3;&#x8003;&#x8CC7;&#x6599;" class="headerlink" title="&#x53C3;&#x8003;&#x8CC7;&#x6599;"></a>&#x53C3;&#x8003;&#x8CC7;&#x6599;</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#14-1-Identifying-File-Systems-and-Devices"><span class="nav-number">1.</span> <span class="nav-text">14.1 Identifying File Systems and Devices</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#14-2-Mounting-and-Unmounting-File-Systems"><span class="nav-number">2.</span> <span class="nav-text">14.2 Mounting and Unmounting File Systems</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#14-3-Making-Links-Between-Files"><span class="nav-number">3.</span> <span class="nav-text">14.3 Making Links Between Files</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Partition-UUID-amp-inode"><span class="nav-number">3.1.</span> <span class="nav-text">Partition UUID &amp; inode</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hard-Link"><span class="nav-number">3.2.</span> <span class="nav-text">Hard Link</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Symbolic-Link"><span class="nav-number">3.3.</span> <span class="nav-text">Symbolic Link</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#14-4-Locating-Files-on-the-System"><span class="nav-number">4.</span> <span class="nav-text">14.4 Locating Files on the System</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#locate"><span class="nav-number">4.1.</span> <span class="nav-text">locate</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#find"><span class="nav-number">4.2.</span> <span class="nav-text">find</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#find-的特別功能"><span class="nav-number">4.2.1.</span> <span class="nav-text">find 的特別功能</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#參考資料"><span class="nav-number">5.</span> <span class="nav-text">參考資料</span></a></li></ol></div>
             
 
           </div>
@@ -728,7 +728,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

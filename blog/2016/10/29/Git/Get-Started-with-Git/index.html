@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="小信豬的原始部落">
 <meta property="og:description" content="This article introduces the informations for getting started with Git">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2017-12-20T03:31:16.808Z">
+<meta property="og:updated_time" content="2018-06-07T01:54:28.773Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[Git] Get Started with Git">
 <meta name="twitter:description" content="This article introduces the informations for getting started with Git">
@@ -585,7 +585,7 @@
               
                 <a href="/blog/archives/">
               
-                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-count">53</span>
                   <span class="site-state-item-name">文章</span>
                 </a>
               </div>
@@ -596,7 +596,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/blog/categories/index.html">
-                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-count">11</span>
                   <span class="site-state-item-name">分類</span>
                 </a>
               </div>
@@ -607,7 +607,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/blog/tags/index.html">
-                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-count">25</span>
                   <span class="site-state-item-name">標籤</span>
                 </a>
               </div>
@@ -662,7 +662,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#初始化-Git-Repository"><span class="nav-number">1.</span> <span class="nav-text"><a href="#&#x521D;&#x59CB;&#x5316;-Git-Repository" class="headerlink" title="&#x521D;&#x59CB;&#x5316; Git Repository"></a>&#x521D;&#x59CB;&#x5316; Git Repository</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Git-config"><span class="nav-number">2.</span> <span class="nav-text"><a href="#Git-config" class="headerlink" title="Git config"></a>Git config</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#常用-Git-config-gitconfig"><span class="nav-number">2.1.</span> <span class="nav-text"><a href="#&#x5E38;&#x7528;-Git-config-gitconfig" class="headerlink" title="&#x5E38;&#x7528; Git config (~/.gitconfig)"></a>&#x5E38;&#x7528; Git config (~/.gitconfig)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Git-config-優先權"><span class="nav-number">2.2.</span> <span class="nav-text"><a href="#Git-config-&#x512A;&#x5148;&#x6B0A;" class="headerlink" title="Git config &#x512A;&#x5148;&#x6B0A;"></a>Git config &#x512A;&#x5148;&#x6B0A;</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#設定-amp-移除-git-config"><span class="nav-number">2.3.</span> <span class="nav-text"><a href="#&#x8A2D;&#x5B9A;-amp-&#x79FB;&#x9664;-git-config" class="headerlink" title="&#x8A2D;&#x5B9A; &amp; &#x79FB;&#x9664; git config"></a>&#x8A2D;&#x5B9A; &amp; &#x79FB;&#x9664; git config</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#設定-Git-alias"><span class="nav-number">2.4.</span> <span class="nav-text"><a href="#&#x8A2D;&#x5B9A;-Git-alias" class="headerlink" title="&#x8A2D;&#x5B9A; Git alias"></a>&#x8A2D;&#x5B9A; Git alias</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#設定-editor-amp-diff-tool"><span class="nav-number">2.5.</span> <span class="nav-text"><a href="#&#x8A2D;&#x5B9A;-editor-amp-diff-tool" class="headerlink" title="&#x8A2D;&#x5B9A; editor &amp; diff tool"></a>&#x8A2D;&#x5B9A; editor &amp; diff tool</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#將檔案存入-Git-Repository"><span class="nav-number">3.</span> <span class="nav-text"><a href="#&#x5C07;&#x6A94;&#x6848;&#x5B58;&#x5165;-Git-Repository" class="headerlink" title="&#x5C07;&#x6A94;&#x6848;&#x5B58;&#x5165; Git Repository"></a>&#x5C07;&#x6A94;&#x6848;&#x5B58;&#x5165; Git Repository</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#gitignore"><span class="nav-number">3.1.</span> <span class="nav-text"><a href="#gitignore" class="headerlink" title=".gitignore"></a>.gitignore</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#git-commit"><span class="nav-number">3.2.</span> <span class="nav-text"><a href="#git-commit" class="headerlink" title="git commit"></a>git commit</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1、從-tracked-復原到-untracked"><span class="nav-number">3.2.1.</span> <span class="nav-text"><a href="#1&#x3001;&#x5F9E;-tracked-&#x5FA9;&#x539F;&#x5230;-untracked" class="headerlink" title="1&#x3001;&#x5F9E; tracked &#x5FA9;&#x539F;&#x5230; untracked"></a>1&#x3001;&#x5F9E; tracked &#x5FA9;&#x539F;&#x5230; untracked</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2、從已經-commit-後的狀態回復原狀"><span class="nav-number">3.2.2.</span> <span class="nav-text"><a href="#2&#x3001;&#x5F9E;&#x5DF2;&#x7D93;-commit-&#x5F8C;&#x7684;&#x72C0;&#x614B;&#x56DE;&#x5FA9;&#x539F;&#x72C0;" class="headerlink" title="2&#x3001;&#x5F9E;&#x5DF2;&#x7D93; commit &#x5F8C;&#x7684;&#x72C0;&#x614B;&#x56DE;&#x5FA9;&#x539F;&#x72C0;"></a>2&#x3001;&#x5F9E;&#x5DF2;&#x7D93; commit &#x5F8C;&#x7684;&#x72C0;&#x614B;&#x56DE;&#x5FA9;&#x539F;&#x72C0;</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#比較檔案差異-amp-從-Git-Repository-取回檔案"><span class="nav-number">4.</span> <span class="nav-text"><a href="#&#x6BD4;&#x8F03;&#x6A94;&#x6848;&#x5DEE;&#x7570;-amp-&#x5F9E;-Git-Repository-&#x53D6;&#x56DE;&#x6A94;&#x6848;" class="headerlink" title="&#x6BD4;&#x8F03;&#x6A94;&#x6848;&#x5DEE;&#x7570; &amp; &#x5F9E; Git Repository &#x53D6;&#x56DE;&#x6A94;&#x6848;"></a>&#x6BD4;&#x8F03;&#x6A94;&#x6848;&#x5DEE;&#x7570; &amp; &#x5F9E; Git Repository &#x53D6;&#x56DE;&#x6A94;&#x6848;</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#比較檔案差異"><span class="nav-number">4.1.</span> <span class="nav-text"><a href="#&#x6BD4;&#x8F03;&#x6A94;&#x6848;&#x5DEE;&#x7570;" class="headerlink" title="&#x6BD4;&#x8F03;&#x6A94;&#x6848;&#x5DEE;&#x7570;"></a>&#x6BD4;&#x8F03;&#x6A94;&#x6848;&#x5DEE;&#x7570;</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text"><a href="#References" class="headerlink" title="References"></a>References</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#初始化-Git-Repository"><span class="nav-number">1.</span> <span class="nav-text">初始化 Git Repository</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Git-config"><span class="nav-number">2.</span> <span class="nav-text">Git config</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#常用-Git-config-gitconfig"><span class="nav-number">2.1.</span> <span class="nav-text">常用 Git config (~/.gitconfig)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Git-config-優先權"><span class="nav-number">2.2.</span> <span class="nav-text">Git config 優先權</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#設定-amp-移除-git-config"><span class="nav-number">2.3.</span> <span class="nav-text">設定 &amp; 移除 git config</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#設定-Git-alias"><span class="nav-number">2.4.</span> <span class="nav-text">設定 Git alias</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#設定-editor-amp-diff-tool"><span class="nav-number">2.5.</span> <span class="nav-text">設定 editor &amp; diff tool</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#將檔案存入-Git-Repository"><span class="nav-number">3.</span> <span class="nav-text">將檔案存入 Git Repository</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#gitignore"><span class="nav-number">3.1.</span> <span class="nav-text">.gitignore</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#git-commit"><span class="nav-number">3.2.</span> <span class="nav-text">git commit</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1、從-tracked-復原到-untracked"><span class="nav-number">3.2.1.</span> <span class="nav-text">1、從 tracked 復原到 untracked</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2、從已經-commit-後的狀態回復原狀"><span class="nav-number">3.2.2.</span> <span class="nav-text">2、從已經 commit 後的狀態回復原狀</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#比較檔案差異-amp-從-Git-Repository-取回檔案"><span class="nav-number">4.</span> <span class="nav-text">比較檔案差異 &amp; 從 Git Repository 取回檔案</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#比較檔案差異"><span class="nav-number">4.1.</span> <span class="nav-text">比較檔案差異</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a></li></ol></div>
             
 
           </div>
@@ -682,7 +682,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

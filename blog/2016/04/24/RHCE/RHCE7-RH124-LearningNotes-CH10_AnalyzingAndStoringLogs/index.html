@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="小信豬的原始部落">
 <meta property="og:description" content="此文章記錄學習 RHCE RH124 Chapter 10 Analyzing and Storing Logs 留下的內容">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2017-12-20T03:31:16.812Z">
+<meta property="og:updated_time" content="2018-06-07T01:54:28.777Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[RHCE] RH124 Chapter 10 Analyzing and Storing Logs 學習筆記">
 <meta name="twitter:description" content="此文章記錄學習 RHCE RH124 Chapter 10 Analyzing and Storing Logs 留下的內容">
@@ -619,7 +619,7 @@
               
                 <a href="/blog/archives/">
               
-                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-count">53</span>
                   <span class="site-state-item-name">文章</span>
                 </a>
               </div>
@@ -630,7 +630,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/blog/categories/index.html">
-                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-count">11</span>
                   <span class="site-state-item-name">分類</span>
                 </a>
               </div>
@@ -641,7 +641,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/blog/tags/index.html">
-                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-count">25</span>
                   <span class="site-state-item-name">標籤</span>
                 </a>
               </div>
@@ -696,7 +696,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#10-1-System-Log-Architecture"><span class="nav-number">1.</span> <span class="nav-text"><a href="#10-1-System-Log-Architecture" class="headerlink" title="10.1 System Log Architecture"></a>10.1 System Log Architecture</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#10-1-1-System-logging"><span class="nav-number">1.1.</span> <span class="nav-text"><a href="#10-1-1-System-logging" class="headerlink" title="10.1.1 System logging"></a>10.1.1 System logging</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#systemd-journald"><span class="nav-number">1.1.1.</span> <span class="nav-text"><a href="#systemd-journald" class="headerlink" title="systemd-journald"></a>systemd-journald</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#rsyslog"><span class="nav-number">1.1.2.</span> <span class="nav-text"><a href="#rsyslog" class="headerlink" title="rsyslog"></a>rsyslog</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#10-2-Reviewing-Syslog-Files"><span class="nav-number">2.</span> <span class="nav-text"><a href="#10-2-Reviewing-Syslog-Files" class="headerlink" title="10.2 Reviewing Syslog Files"></a>10.2 Reviewing Syslog Files</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#10-2-2-Sample-rule-section-of-rsyslog-config"><span class="nav-number">2.1.</span> <span class="nav-text"><a href="#10-2-2-Sample-rule-section-of-rsyslog-config" class="headerlink" title="10.2.2 Sample rule section of rsyslog.config"></a>10.2.2 Sample rule section of rsyslog.config</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#10-2-3-Log-file-rotation"><span class="nav-number">2.1.1.</span> <span class="nav-text"><a href="#10-2-3-Log-file-rotation" class="headerlink" title="10.2.3 Log file rotation"></a>10.2.3 Log file rotation</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-2-6-Send-a-syslog-message-with-logger"><span class="nav-number">2.1.2.</span> <span class="nav-text"><a href="#10-2-6-Send-a-syslog-message-with-logger" class="headerlink" title="10.2.6 Send a syslog message with logger"></a>10.2.6 Send a syslog message with logger</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#10-3-Reviewing-systemd-Journal-Entries"><span class="nav-number">3.</span> <span class="nav-text"><a href="#10-3-Reviewing-systemd-Journal-Entries" class="headerlink" title="10.3 Reviewing systemd Journal Entries"></a>10.3 Reviewing systemd Journal Entries</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#10-3-1-Finding-events-with-journalctl"><span class="nav-number">3.1.</span> <span class="nav-text"><a href="#10-3-1-Finding-events-with-journalctl" class="headerlink" title="10.3.1 Finding events with journalctl"></a>10.3.1 Finding events with journalctl</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#10-4-Preserving-the-systemd-Journal"><span class="nav-number">4.</span> <span class="nav-text"><a href="#10-4-Preserving-the-systemd-Journal" class="headerlink" title="10.4 Preserving the systemd Journal"></a>10.4 Preserving the systemd Journal</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#10-5-Maintain-Accurate-Time"><span class="nav-number">5.</span> <span class="nav-text"><a href="#10-5-Maintain-Accurate-Time" class="headerlink" title="10.5 Maintain Accurate Time"></a>10.5 Maintain Accurate Time</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#10-5-1-Set-local-clocks-and-time-zone"><span class="nav-number">5.1.</span> <span class="nav-text"><a href="#10-5-1-Set-local-clocks-and-time-zone" class="headerlink" title="10.5.1 Set local clocks and time zone"></a>10.5.1 Set local clocks and time zone</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-5-2-Configuring-and-monitoring-chronyd"><span class="nav-number">5.2.</span> <span class="nav-text"><a href="#10-5-2-Configuring-and-monitoring-chronyd" class="headerlink" title="10.5.2 Configuring and monitoring chronyd"></a>10.5.2 Configuring and monitoring chronyd</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#補充：設定-NTP-校時的完整步驟-很重要"><span class="nav-number">5.3.</span> <span class="nav-text"><a href="#&#x88DC;&#x5145;&#xFF1A;&#x8A2D;&#x5B9A;-NTP-&#x6821;&#x6642;&#x7684;&#x5B8C;&#x6574;&#x6B65;&#x9A5F;-&#x5F88;&#x91CD;&#x8981;" class="headerlink" title="&#x88DC;&#x5145;&#xFF1A;&#x8A2D;&#x5B9A; NTP &#x6821;&#x6642;&#x7684;&#x5B8C;&#x6574;&#x6B65;&#x9A5F; (&#x5F88;&#x91CD;&#x8981;)"></a>&#x88DC;&#x5145;&#xFF1A;&#x8A2D;&#x5B9A; NTP &#x6821;&#x6642;&#x7684;&#x5B8C;&#x6574;&#x6B65;&#x9A5F; (<strong>&#x5F88;&#x91CD;&#x8981;</strong>)</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#10-1-System-Log-Architecture"><span class="nav-number">1.</span> <span class="nav-text">10.1 System Log Architecture</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#10-1-1-System-logging"><span class="nav-number">1.1.</span> <span class="nav-text">10.1.1 System logging</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#systemd-journald"><span class="nav-number">1.1.1.</span> <span class="nav-text">systemd-journald</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#rsyslog"><span class="nav-number">1.1.2.</span> <span class="nav-text">rsyslog</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#10-2-Reviewing-Syslog-Files"><span class="nav-number">2.</span> <span class="nav-text">10.2 Reviewing Syslog Files</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#10-2-2-Sample-rule-section-of-rsyslog-config"><span class="nav-number">2.1.</span> <span class="nav-text">10.2.2 Sample rule section of rsyslog.config</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#10-2-3-Log-file-rotation"><span class="nav-number">2.1.1.</span> <span class="nav-text">10.2.3 Log file rotation</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-2-6-Send-a-syslog-message-with-logger"><span class="nav-number">2.1.2.</span> <span class="nav-text">10.2.6 Send a syslog message with logger</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#10-3-Reviewing-systemd-Journal-Entries"><span class="nav-number">3.</span> <span class="nav-text">10.3 Reviewing systemd Journal Entries</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#10-3-1-Finding-events-with-journalctl"><span class="nav-number">3.1.</span> <span class="nav-text">10.3.1 Finding events with journalctl</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#10-4-Preserving-the-systemd-Journal"><span class="nav-number">4.</span> <span class="nav-text">10.4 Preserving the systemd Journal</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#10-5-Maintain-Accurate-Time"><span class="nav-number">5.</span> <span class="nav-text">10.5 Maintain Accurate Time</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#10-5-1-Set-local-clocks-and-time-zone"><span class="nav-number">5.1.</span> <span class="nav-text">10.5.1 Set local clocks and time zone</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-5-2-Configuring-and-monitoring-chronyd"><span class="nav-number">5.2.</span> <span class="nav-text">10.5.2 Configuring and monitoring chronyd</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#補充：設定-NTP-校時的完整步驟-很重要"><span class="nav-number">5.3.</span> <span class="nav-text">補充：設定 NTP 校時的完整步驟 (很重要)</span></a></li></ol></li></ol></div>
             
 
           </div>
@@ -716,7 +716,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

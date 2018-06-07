@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="小信豬的原始部落">
 <meta property="og:description" content="This article introduces what should to learn about storage when learning Linux KVM virtualization">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2017-12-20T03:31:16.812Z">
+<meta property="og:updated_time" content="2018-06-07T01:54:28.777Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[Linux KVM] Linux KVM concept - Storage">
 <meta name="twitter:description" content="This article introduces what should to learn about storage when learning Linux KVM virtualization">
@@ -690,7 +690,7 @@
               
                 <a href="/blog/archives/">
               
-                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-count">53</span>
                   <span class="site-state-item-name">文章</span>
                 </a>
               </div>
@@ -701,7 +701,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/blog/categories/index.html">
-                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-count">11</span>
                   <span class="site-state-item-name">分類</span>
                 </a>
               </div>
@@ -712,7 +712,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/blog/tags/index.html">
-                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-count">25</span>
                   <span class="site-state-item-name">標籤</span>
                 </a>
               </div>
@@ -767,7 +767,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text"><a href="#&#x524D;&#x8A00;" class="headerlink" title="&#x524D;&#x8A00;"></a>&#x524D;&#x8A00;</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Host-Machine-Swap-空間應該要設定多大"><span class="nav-number">2.</span> <span class="nav-text"><a href="#Host-Machine-Swap-&#x7A7A;&#x9593;&#x61C9;&#x8A72;&#x8981;&#x8A2D;&#x5B9A;&#x591A;&#x5927;" class="headerlink" title="Host Machine Swap &#x7A7A;&#x9593;&#x61C9;&#x8A72;&#x8981;&#x8A2D;&#x5B9A;&#x591A;&#x5927;?"></a>Host Machine Swap &#x7A7A;&#x9593;&#x61C9;&#x8A72;&#x8981;&#x8A2D;&#x5B9A;&#x591A;&#x5927;?</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#不使用-memory-overcommit"><span class="nav-number">2.0.1.</span> <span class="nav-text"><a href="#&#x4E0D;&#x4F7F;&#x7528;-memory-overcommit" class="headerlink" title="&#x4E0D;&#x4F7F;&#x7528; memory overcommit"></a>&#x4E0D;&#x4F7F;&#x7528; memory overcommit</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用-memory-overcommit"><span class="nav-number">2.0.2.</span> <span class="nav-text"><a href="#&#x4F7F;&#x7528;-memory-overcommit" class="headerlink" title="&#x4F7F;&#x7528; memory overcommit"></a>&#x4F7F;&#x7528; memory overcommit</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Storage-Device-amp-開機順序的配置"><span class="nav-number">3.</span> <span class="nav-text"><a href="#Storage-Device-amp-&#x958B;&#x6A5F;&#x9806;&#x5E8F;&#x7684;&#x914D;&#x7F6E;" class="headerlink" title="Storage Device &amp; &#x958B;&#x6A5F;&#x9806;&#x5E8F;&#x7684;&#x914D;&#x7F6E;"></a>Storage Device &amp; &#x958B;&#x6A5F;&#x9806;&#x5E8F;&#x7684;&#x914D;&#x7F6E;</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Storage-Devices"><span class="nav-number">3.1.</span> <span class="nav-text"><a href="#Storage-Devices" class="headerlink" title="Storage Devices"></a>Storage Devices</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#開機順率"><span class="nav-number">3.2.</span> <span class="nav-text"><a href="#&#x958B;&#x6A5F;&#x9806;&#x7387;" class="headerlink" title="&#x958B;&#x6A5F;&#x9806;&#x7387;"></a>&#x958B;&#x6A5F;&#x9806;&#x7387;</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#qemu-img"><span class="nav-number">4.</span> <span class="nav-text"><a href="#qemu-img" class="headerlink" title="qemu-img"></a>qemu-img</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Storage-Types"><span class="nav-number">5.</span> <span class="nav-text"><a href="#Storage-Types" class="headerlink" title="Storage Types"></a>Storage Types</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text"><a href="#References" class="headerlink" title="References"></a>References</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Host-Machine-Swap-空間應該要設定多大"><span class="nav-number">2.</span> <span class="nav-text">Host Machine Swap 空間應該要設定多大?</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#不使用-memory-overcommit"><span class="nav-number">2.0.1.</span> <span class="nav-text">不使用 memory overcommit</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用-memory-overcommit"><span class="nav-number">2.0.2.</span> <span class="nav-text">使用 memory overcommit</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Storage-Device-amp-開機順序的配置"><span class="nav-number">3.</span> <span class="nav-text">Storage Device &amp; 開機順序的配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Storage-Devices"><span class="nav-number">3.1.</span> <span class="nav-text">Storage Devices</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#開機順率"><span class="nav-number">3.2.</span> <span class="nav-text">開機順率</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#qemu-img"><span class="nav-number">4.</span> <span class="nav-text">qemu-img</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Storage-Types"><span class="nav-number">5.</span> <span class="nav-text">Storage Types</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text">References</span></a></li></ol></div>
             
 
           </div>
@@ -787,7 +787,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

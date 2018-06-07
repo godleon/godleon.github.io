@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="小信豬的原始部落">
 <meta property="og:description" content="此文章記錄學習 RHCE RH124 Chapter 11 Managing Red Hat Enterprise Linux Networking 留下的內容">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2017-12-20T03:31:16.812Z">
+<meta property="og:updated_time" content="2018-06-07T01:54:28.777Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[RHCE] RH124 Chapter 11 Managing Red Hat Enterprise Linux Networking 學習筆記">
 <meta name="twitter:description" content="此文章記錄學習 RHCE RH124 Chapter 11 Managing Red Hat Enterprise Linux Networking 留下的內容">
@@ -620,7 +620,7 @@
               
                 <a href="/blog/archives/">
               
-                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-count">53</span>
                   <span class="site-state-item-name">文章</span>
                 </a>
               </div>
@@ -631,7 +631,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/blog/categories/index.html">
-                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-count">11</span>
                   <span class="site-state-item-name">分類</span>
                 </a>
               </div>
@@ -642,7 +642,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/blog/tags/index.html">
-                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-count">25</span>
                   <span class="site-state-item-name">標籤</span>
                 </a>
               </div>
@@ -697,7 +697,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#11-1-Network-Concepts"><span class="nav-number">1.</span> <span class="nav-text"><a href="#11-1-Network-Concepts" class="headerlink" title="11.1 Network Concepts"></a>11.1 Network Concepts</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#11-1-2-Network-interface-names"><span class="nav-number">1.1.</span> <span class="nav-text"><a href="#11-1-2-Network-interface-names" class="headerlink" title="11.1.2 Network interface names"></a>11.1.2 Network interface names</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#11-2-Validating-Network-Configuration"><span class="nav-number">2.</span> <span class="nav-text"><a href="#11-2-Validating-Network-Configuration" class="headerlink" title="11.2 Validating Network Configuration"></a>11.2 Validating Network Configuration</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#11-3-Configuring-Network-with-nmcli"><span class="nav-number">3.</span> <span class="nav-text"><a href="#11-3-Configuring-Network-with-nmcli" class="headerlink" title="11.3 Configuring Network with nmcli"></a>11.3 Configuring Network with nmcli</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#11-3-1-Network-Manager"><span class="nav-number">3.1.</span> <span class="nav-text"><a href="#11-3-1-Network-Manager" class="headerlink" title="11.3.1 Network Manager"></a>11.3.1 Network Manager</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-3-2-Viewing-network-information-with-nmcli"><span class="nav-number">3.2.</span> <span class="nav-text"><a href="#11-3-2-Viewing-network-information-with-nmcli" class="headerlink" title="11.3.2 Viewing network information with nmcli"></a>11.3.2 Viewing network information with nmcli</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-3-3-Creating-network-connections-with-nmcli"><span class="nav-number">3.3.</span> <span class="nav-text"><a href="#11-3-3-Creating-network-connections-with-nmcli" class="headerlink" title="11.3.3 Creating network connections with nmcli"></a>11.3.3 Creating network connections with nmcli</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-3-4-Modifying-network-interfaces-with-nmcli"><span class="nav-number">3.4.</span> <span class="nav-text"><a href="#11-3-4-Modifying-network-interfaces-with-nmcli" class="headerlink" title="11.3.4 Modifying network interfaces with nmcli"></a>11.3.4 Modifying network interfaces with nmcli</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#11-4-Editing-Network-Configuration-Files"><span class="nav-number">4.</span> <span class="nav-text"><a href="#11-4-Editing-Network-Configuration-Files" class="headerlink" title="11.4 Editing Network Configuration Files"></a>11.4 Editing Network Configuration Files</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#11-5-Configuring-Host-Names-and-Name-Resolution"><span class="nav-number">5.</span> <span class="nav-text"><a href="#11-5-Configuring-Host-Names-and-Name-Resolution" class="headerlink" title="11.5 Configuring Host Names and Name Resolution"></a>11.5 Configuring Host Names and Name Resolution</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#11-5-1-Changing-the-System-host-name"><span class="nav-number">5.1.</span> <span class="nav-text"><a href="#11-5-1-Changing-the-System-host-name" class="headerlink" title="11.5.1 Changing the System host name"></a>11.5.1 Changing the System host name</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-5-2-Configuring-name-resolution"><span class="nav-number">5.2.</span> <span class="nav-text"><a href="#11-5-2-Configuring-name-resolution" class="headerlink" title="11.5.2 Configuring name resolution"></a>11.5.2 Configuring name resolution</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#11-1-Network-Concepts"><span class="nav-number">1.</span> <span class="nav-text">11.1 Network Concepts</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#11-1-2-Network-interface-names"><span class="nav-number">1.1.</span> <span class="nav-text">11.1.2 Network interface names</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#11-2-Validating-Network-Configuration"><span class="nav-number">2.</span> <span class="nav-text">11.2 Validating Network Configuration</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#11-3-Configuring-Network-with-nmcli"><span class="nav-number">3.</span> <span class="nav-text">11.3 Configuring Network with nmcli</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#11-3-1-Network-Manager"><span class="nav-number">3.1.</span> <span class="nav-text">11.3.1 Network Manager</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-3-2-Viewing-network-information-with-nmcli"><span class="nav-number">3.2.</span> <span class="nav-text">11.3.2 Viewing network information with nmcli</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-3-3-Creating-network-connections-with-nmcli"><span class="nav-number">3.3.</span> <span class="nav-text">11.3.3 Creating network connections with nmcli</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-3-4-Modifying-network-interfaces-with-nmcli"><span class="nav-number">3.4.</span> <span class="nav-text">11.3.4 Modifying network interfaces with nmcli</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#11-4-Editing-Network-Configuration-Files"><span class="nav-number">4.</span> <span class="nav-text">11.4 Editing Network Configuration Files</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#11-5-Configuring-Host-Names-and-Name-Resolution"><span class="nav-number">5.</span> <span class="nav-text">11.5 Configuring Host Names and Name Resolution</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#11-5-1-Changing-the-System-host-name"><span class="nav-number">5.1.</span> <span class="nav-text">11.5.1 Changing the System host name</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-5-2-Configuring-name-resolution"><span class="nav-number">5.2.</span> <span class="nav-text">11.5.2 Configuring name resolution</span></a></li></ol></li></ol></div>
             
 
           </div>
@@ -717,7 +717,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

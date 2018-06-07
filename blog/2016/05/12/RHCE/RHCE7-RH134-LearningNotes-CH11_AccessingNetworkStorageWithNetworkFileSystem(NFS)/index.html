@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="小信豬的原始部落">
 <meta property="og:description" content="此文章記錄學習 RHCE7 RH134 Chapter 11. Accessing Network Storage with Network File System (NFS) 留下的內容">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2017-12-20T03:31:16.816Z">
+<meta property="og:updated_time" content="2018-06-07T01:54:28.781Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[RHCE7] RH134 Chapter 11. Accessing Network Storage with Network File System (NFS) 學習筆記">
 <meta name="twitter:description" content="此文章記錄學習 RHCE7 RH134 Chapter 11. Accessing Network Storage with Network File System (NFS) 留下的內容">
@@ -424,6 +424,8 @@
 </ul>
 <blockquote>
 <p>網路磁碟機建議使用 sync 選項，確保資料完整性 (另外了解 soft &amp; hard 的差異)</p>
+</blockquote>
+<blockquote>
 <p>使用 fsck 檢查的設備，必須是 umount or readonly 的狀態所，所出來的結果才是正確的</p>
 </blockquote>
 <h2 id="11-1-2-Security-methods"><a href="#11-1-2-Security-methods" class="headerlink" title="11.1.2 Security methods"></a>11.1.2 Security methods</h2><ul>
@@ -440,6 +442,8 @@
 </ul>
 <blockquote>
 <p>若要讓 NFS 可以向 Kerberos 進行驗證，也同時需要有 <code>nfs-secure</code> 服務(在 <code>nfs-utils</code> 套件中)</p>
+</blockquote>
+<blockquote>
 <p>使用 <code>klist</code> 可以查詢目前所擁有的 kerberos ticket</p>
 </blockquote>
 <hr>
@@ -558,8 +562,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/blog/2016/05/12/RHCE/RHCE7-RH134-LearningNotes-CH12_AccessingNetworkStorageWithSMB/" rel="next" title="[RHCE7] RH134 Chapter 12. Accessing Network Storage with SMB 學習筆記">
-                <i class="fa fa-chevron-left"></i> [RHCE7] RH134 Chapter 12. Accessing Network Storage with SMB 學習筆記
+              <a href="/blog/2016/05/11/RHCE/RHCE7-RH134-LearningNotes-CH10_ManagingLogicalVolumeManagement(LVM)Storage/" rel="next" title="[RHCE7] RH134 Chapter 10. Managing Logical Volume Management(LVM) Storage 學習筆記">
+                <i class="fa fa-chevron-left"></i> [RHCE7] RH134 Chapter 10. Managing Logical Volume Management(LVM) Storage 學習筆記
               </a>
             
           </div>
@@ -568,8 +572,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/blog/2016/05/13/RHCE/RHCE7-RH134-LearningNotes-CH13_ControllingAndTroubleshootingTheRHELBootProcess/" rel="prev" title="[RHCE7] RH134 Chapter 13. Controlling and Troubleshooting the RHEL Boot Process 學習筆記">
-                [RHCE7] RH134 Chapter 13. Controlling and Troubleshooting the RHEL Boot Process 學習筆記 <i class="fa fa-chevron-right"></i>
+              <a href="/blog/2016/05/12/RHCE/RHCE7-RH134-LearningNotes-CH12_AccessingNetworkStorageWithSMB/" rel="prev" title="[RHCE7] RH134 Chapter 12. Accessing Network Storage with SMB 學習筆記">
+                [RHCE7] RH134 Chapter 12. Accessing Network Storage with SMB 學習筆記 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -657,7 +661,7 @@
               
                 <a href="/blog/archives/">
               
-                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-count">53</span>
                   <span class="site-state-item-name">文章</span>
                 </a>
               </div>
@@ -668,7 +672,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/blog/categories/index.html">
-                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-count">11</span>
                   <span class="site-state-item-name">分類</span>
                 </a>
               </div>
@@ -679,7 +683,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/blog/tags/index.html">
-                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-count">25</span>
                   <span class="site-state-item-name">標籤</span>
                 </a>
               </div>
@@ -734,7 +738,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#11-1-Mounting-Network-Storage-with-NFS"><span class="nav-number">1.</span> <span class="nav-text"><a href="#11-1-Mounting-Network-Storage-with-NFS" class="headerlink" title="11.1 Mounting Network Storage with NFS"></a>11.1 Mounting Network Storage with NFS</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#11-1-1-Manualling-mouting-and-unmouting-NFS-shares"><span class="nav-number">1.1.</span> <span class="nav-text"><a href="#11-1-1-Manualling-mouting-and-unmouting-NFS-shares" class="headerlink" title="11.1.1 Manualling mouting and unmouting NFS shares"></a>11.1.1 Manualling mouting and unmouting NFS shares</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#NFS-4-0-之前："><span class="nav-number">1.1.1.</span> <span class="nav-text"><a href="#NFS-4-0-&#x4E4B;&#x524D;&#xFF1A;" class="headerlink" title="NFS 4.0 &#x4E4B;&#x524D;&#xFF1A;"></a>NFS 4.0 &#x4E4B;&#x524D;&#xFF1A;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NFS-4-0："><span class="nav-number">1.1.2.</span> <span class="nav-text"><a href="#NFS-4-0&#xFF1A;" class="headerlink" title="NFS 4.0&#xFF1A;"></a>NFS 4.0&#xFF1A;</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-1-2-Security-methods"><span class="nav-number">1.2.</span> <span class="nav-text"><a href="#11-1-2-Security-methods" class="headerlink" title="11.1.2 Security methods"></a>11.1.2 Security methods</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Practice-Mounting-and-Unmounting-NFS"><span class="nav-number">2.</span> <span class="nav-text"><a href="#Practice-Mounting-and-Unmounting-NFS" class="headerlink" title="Practice: Mounting and Unmounting NFS"></a>Practice: Mounting and Unmounting NFS</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#目前已存在設定"><span class="nav-number">2.1.</span> <span class="nav-text"><a href="#&#x76EE;&#x524D;&#x5DF2;&#x5B58;&#x5728;&#x8A2D;&#x5B9A;" class="headerlink" title="&#x76EE;&#x524D;&#x5DF2;&#x5B58;&#x5728;&#x8A2D;&#x5B9A;"></a>&#x76EE;&#x524D;&#x5DF2;&#x5B58;&#x5728;&#x8A2D;&#x5B9A;</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#實作過程"><span class="nav-number">2.2.</span> <span class="nav-text"><a href="#&#x5BE6;&#x4F5C;&#x904E;&#x7A0B;" class="headerlink" title="&#x5BE6;&#x4F5C;&#x904E;&#x7A0B;"></a>&#x5BE6;&#x4F5C;&#x904E;&#x7A0B;</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#11-2-Automounting-Network-Storage-with-NFS"><span class="nav-number">3.</span> <span class="nav-text"><a href="#11-2-Automounting-Network-Storage-with-NFS" class="headerlink" title="11.2 Automounting Network Storage with NFS"></a>11.2 Automounting Network Storage with NFS</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#direct-map"><span class="nav-number">3.1.</span> <span class="nav-text"><a href="#direct-map" class="headerlink" title="direct-map"></a>direct-map</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#indirect-map"><span class="nav-number">3.2.</span> <span class="nav-text"><a href="#indirect-map" class="headerlink" title="indirect-map"></a>indirect-map</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#掛載方式"><span class="nav-number">3.3.</span> <span class="nav-text"><a href="#&#x639B;&#x8F09;&#x65B9;&#x5F0F;" class="headerlink" title="&#x639B;&#x8F09;&#x65B9;&#x5F0F;"></a>&#x639B;&#x8F09;&#x65B9;&#x5F0F;</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1、安裝套件"><span class="nav-number">3.3.1.</span> <span class="nav-text"><a href="#1&#x3001;&#x5B89;&#x88DD;&#x5957;&#x4EF6;" class="headerlink" title="1&#x3001;&#x5B89;&#x88DD;&#x5957;&#x4EF6;"></a>1&#x3001;&#x5B89;&#x88DD;&#x5957;&#x4EF6;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2、編輯-master-map-檔案"><span class="nav-number">3.3.2.</span> <span class="nav-text"><a href="#2&#x3001;&#x7DE8;&#x8F2F;-master-map-&#x6A94;&#x6848;" class="headerlink" title="2&#x3001;&#x7DE8;&#x8F2F; master-map &#x6A94;&#x6848;"></a>2&#x3001;&#x7DE8;&#x8F2F; master-map &#x6A94;&#x6848;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3、設定-mapping-檔案"><span class="nav-number">3.3.3.</span> <span class="nav-text"><a href="#3&#x3001;&#x8A2D;&#x5B9A;-mapping-&#x6A94;&#x6848;" class="headerlink" title="3&#x3001;&#x8A2D;&#x5B9A; mapping &#x6A94;&#x6848;"></a>3&#x3001;&#x8A2D;&#x5B9A; mapping &#x6A94;&#x6848;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4、啟動-autofs-服務"><span class="nav-number">3.3.4.</span> <span class="nav-text"><a href="#4&#x3001;&#x555F;&#x52D5;-autofs-&#x670D;&#x52D9;" class="headerlink" title="4&#x3001;&#x555F;&#x52D5; autofs &#x670D;&#x52D9;"></a>4&#x3001;&#x555F;&#x52D5; autofs &#x670D;&#x52D9;</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Practice-Automounting-NFS"><span class="nav-number">4.</span> <span class="nav-text"><a href="#Practice-Automounting-NFS" class="headerlink" title="Practice: Automounting NFS"></a>Practice: Automounting NFS</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#環境設定"><span class="nav-number">4.1.</span> <span class="nav-text"><a href="#&#x74B0;&#x5883;&#x8A2D;&#x5B9A;" class="headerlink" title="&#x74B0;&#x5883;&#x8A2D;&#x5B9A;"></a>&#x74B0;&#x5883;&#x8A2D;&#x5B9A;</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#設定方式"><span class="nav-number">4.2.</span> <span class="nav-text"><a href="#&#x8A2D;&#x5B9A;&#x65B9;&#x5F0F;" class="headerlink" title="&#x8A2D;&#x5B9A;&#x65B9;&#x5F0F;"></a>&#x8A2D;&#x5B9A;&#x65B9;&#x5F0F;</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Lab-Accessing-Network-Storage-with-Network-File-System-NFS"><span class="nav-number">5.</span> <span class="nav-text"><a href="#Lab-Accessing-Network-Storage-with-Network-File-System-NFS" class="headerlink" title="Lab: Accessing Network Storage with Network File System(NFS)"></a>Lab: Accessing Network Storage with Network File System(NFS)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#目標"><span class="nav-number">5.1.</span> <span class="nav-text"><a href="#&#x76EE;&#x6A19;" class="headerlink" title="&#x76EE;&#x6A19;"></a>&#x76EE;&#x6A19;</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#實作過程-1"><span class="nav-number">5.2.</span> <span class="nav-text"><a href="#&#x5BE6;&#x4F5C;&#x904E;&#x7A0B;-1" class="headerlink" title="&#x5BE6;&#x4F5C;&#x904E;&#x7A0B;"></a>&#x5BE6;&#x4F5C;&#x904E;&#x7A0B;</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#11-1-Mounting-Network-Storage-with-NFS"><span class="nav-number">1.</span> <span class="nav-text">11.1 Mounting Network Storage with NFS</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#11-1-1-Manualling-mouting-and-unmouting-NFS-shares"><span class="nav-number">1.1.</span> <span class="nav-text">11.1.1 Manualling mouting and unmouting NFS shares</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#NFS-4-0-之前："><span class="nav-number">1.1.1.</span> <span class="nav-text">NFS 4.0 之前：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NFS-4-0："><span class="nav-number">1.1.2.</span> <span class="nav-text">NFS 4.0：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-1-2-Security-methods"><span class="nav-number">1.2.</span> <span class="nav-text">11.1.2 Security methods</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Practice-Mounting-and-Unmounting-NFS"><span class="nav-number">2.</span> <span class="nav-text">Practice: Mounting and Unmounting NFS</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#目前已存在設定"><span class="nav-number">2.1.</span> <span class="nav-text">目前已存在設定</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#實作過程"><span class="nav-number">2.2.</span> <span class="nav-text">實作過程</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#11-2-Automounting-Network-Storage-with-NFS"><span class="nav-number">3.</span> <span class="nav-text">11.2 Automounting Network Storage with NFS</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#direct-map"><span class="nav-number">3.1.</span> <span class="nav-text">direct-map</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#indirect-map"><span class="nav-number">3.2.</span> <span class="nav-text">indirect-map</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#掛載方式"><span class="nav-number">3.3.</span> <span class="nav-text">掛載方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1、安裝套件"><span class="nav-number">3.3.1.</span> <span class="nav-text">1、安裝套件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2、編輯-master-map-檔案"><span class="nav-number">3.3.2.</span> <span class="nav-text">2、編輯 master-map 檔案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3、設定-mapping-檔案"><span class="nav-number">3.3.3.</span> <span class="nav-text">3、設定 mapping 檔案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4、啟動-autofs-服務"><span class="nav-number">3.3.4.</span> <span class="nav-text">4、啟動 autofs 服務</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Practice-Automounting-NFS"><span class="nav-number">4.</span> <span class="nav-text">Practice: Automounting NFS</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#環境設定"><span class="nav-number">4.1.</span> <span class="nav-text">環境設定</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#設定方式"><span class="nav-number">4.2.</span> <span class="nav-text">設定方式</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Lab-Accessing-Network-Storage-with-Network-File-System-NFS"><span class="nav-number">5.</span> <span class="nav-text">Lab: Accessing Network Storage with Network File System(NFS)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#目標"><span class="nav-number">5.1.</span> <span class="nav-text">目標</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#實作過程-1"><span class="nav-number">5.2.</span> <span class="nav-text">實作過程</span></a></li></ol></li></ol></div>
             
 
           </div>
@@ -754,7 +758,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
