@@ -18,7 +18,7 @@ categories:
 前言
 ===
 
-使用 [Proxmox] 也有一段時間了，這套免費的 KVM virtualization platform 真是佛心來的，好用穩定又有 Web GUI，但唯一的缺憾就是要作 Infrastructure as code 真的有點困難，因為他本身並不具備 cloud-init 的功能。
+使用 [Proxmox](https://www.proxmox.com/en/proxmox-ve) 也有一段時間了，這套免費的 KVM virtualization platform 真是佛心來的，好用穩定又有 Web GUI，但唯一的缺憾就是要作 Infrastructure as code 真的有點困難，因為他本身並不具備 cloud-init 的功能。
 
 還好這個功能終於在 5.2 的時候被支援了，不過看起來還是很陽春，但基本使用上應該還算足夠。
 
