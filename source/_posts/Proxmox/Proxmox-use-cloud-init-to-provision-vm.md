@@ -75,6 +75,10 @@ qm template 9999
 ![Template VM cloud-init Information](/blog/images//proxmox/vm_cloud-init_info.png)
 
 
+產生 VM
+=======
+
+
 接著就可以使用這個 template VM 來快速產生 VM 了，以下用個簡單的 script 來完成：
 
 ```bash
