@@ -70,9 +70,9 @@ qm template 9999
 
 執行完成後就會有一個 VM ID=9999 的 template VM 產生，從系統上可以看到類似以下資訊：
 
-！[Template VM Hardware Information](/images/proxmox/vm_hw_info.png)
+！[](/blog/images/proxmox/vm_hw_info.png)
 
-！[Template VM cloud-init Information](../../../../../images/proxmox/vm_cloud-init_info.png)
+！[](/blog/images//proxmox/vm_cloud-init_info.png)
 
 
 接著就可以使用這個 template VM 來快速產生 VM 了，以下用個簡單的 script 來完成：
