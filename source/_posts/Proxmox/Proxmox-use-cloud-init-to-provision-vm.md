@@ -99,6 +99,11 @@ qm start 1001
 以上的 script 修改一下，放到 loop 中，一下子要產生多個 VM 其實就是一件很簡單的事情了!
 
 
+其他限制
+======
+
+目前 cloud-init 這個功能無法在 CentOS cloud image 上使用
+
 
 References
 ==========
