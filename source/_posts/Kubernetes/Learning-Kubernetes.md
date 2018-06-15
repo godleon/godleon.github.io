@@ -48,3 +48,10 @@ Operating
 ## Persistent Volume
 
 - [使用 Persistent Volume - 以 NFS 為例](https://github.com/godleon/learning_kubernetes/blob/master/operation/use_PersistentVolume_NFS.md)
+
+
+
+學習資源
+======
+
+- [Kubernetes（k8s）中文文档 目录_Kubernetes中文社区](https://www.kubernetes.org.cn/docs)
