@@ -279,4 +279,6 @@ References
 
 - [Kubernetes-- 漫谈kubernetes 中的认证 & 授权 & 准入机制 | Solar](https://zhangchenchen.github.io/2017/08/17/kubernetes-authentication-authorization-admission-control/)
 
+- [kubernetes 權限管理 – Cizixs Writes Here](http://cizixs.com/2017/06/16/kubernetes-authentication-and-authorization)
+
 - [https://k8smeetup.github.io/docs/admin/authorization/rbac/](https://k8smeetup.github.io/docs/admin/authorization/rbac/)
