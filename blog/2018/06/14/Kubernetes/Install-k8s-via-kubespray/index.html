@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="小信豬的原始部落">
 <meta property="og:description" content="此篇文章介紹如何使用 Kubespray 安裝 Kubernetes 1.10.4">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2018-06-15T01:42:46.730Z">
+<meta property="og:updated_time" content="2018-06-19T01:39:34.286Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="使用 Kubespray 安裝 Kubernetes 1.10.4">
 <meta name="twitter:description" content="此篇文章介紹如何使用 Kubespray 安裝 Kubernetes 1.10.4">
@@ -424,6 +424,9 @@
 <p>完成後執行簡單的指令：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl get nodes</span><br><span class="line">NAME            STATUS    ROLES          AGE       VERSION</span><br><span class="line">kube-ingress0   Ready     ingress,node   1h        v1.10.4</span><br><span class="line">kube-ingress1   Ready     ingress,node   1h        v1.10.4</span><br><span class="line">kube-master0    Ready     master         1h        v1.10.4</span><br><span class="line">kube-master1    Ready     master         1h        v1.10.4</span><br><span class="line">kube-master2    Ready     master         1h        v1.10.4</span><br><span class="line">kube-worker0    Ready     node           1h        v1.10.4</span><br><span class="line">kube-worker1    Ready     node           1h        v1.10.4</span><br><span class="line">kube-worker2    Ready     node           1h        v1.10.4</span><br></pre></td></tr></table></figure>
 <p>這樣大致上基本的 Kubernetes 就安裝完成了!</p>
+<blockquote>
+<p>若是要取得安裝時所產生的相關憑證檔案，可以到 master node 上的 <code>/etc/kubernetes/ssl</code> 目錄中尋找</p>
+</blockquote>
 <h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
 <li><a href="https://github.com/kubernetes-incubator/kubespray" target="_blank" rel="noopener">kubernetes-incubator/kubespray: Setup a kubernetes cluster</a></li>
 </ul>
