@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  "了解 Kubernetes 中的認証機制"
-description: "本篇文章介紹在 Kubernetes 中存取 API 時的認証機制"
+title:  "了解 Kubernetes 中的認證機制"
+description: "本篇文章介紹在 Kubernetes 中存取 API 時的認證機制"
 date: 2018-06-19 10:00:00
 published: true
 comments: true
@@ -12,15 +12,15 @@ tags:
 ---
 
 
-由於 Kubernetes 整體就是以 API 為基礎來設計的，因此要了解認証機制也就等同於要了解 k8s API server 的認証機制。
+由於 Kubernetes 整體就是以 API 為基礎來設計的，因此要了解認證機制也就等同於要了解 k8s API server 的認證機制。
 
 
-了解 Kubernetes API 認証機制
+了解 Kubernetes API 認證機制
 ==========================
 
-k8s 提供了多種的認証方式，管理者可以設定多種認証機制共存,只要任何一種通過就算通過。
+k8s 提供了多種的認證方式，管理者可以設定多種認證機制共存,只要任何一種通過就算通過。
 
-以 k8s 中各服務之間的認証為例，是以 x509 的認証，同時也是最嚴格的認証方式。透過 Kubespray 安裝好 k8s 後，我們可以在 master node 上檢視一下 api server 的啟動設定：(`/etc/kubernetes/manifests/kube-apiserver.manifest`)
+以 k8s 中各服務之間的認證為例，是以 x509 的認證，同時也是最嚴格的認證方式。透過 Kubespray 安裝好 k8s 後，我們可以在 master node 上檢視一下 api server 的啟動設定：(`/etc/kubernetes/manifests/kube-apiserver.manifest`)
 
 ```yaml
 apiVersion: v1
@@ -89,18 +89,18 @@ spec:
 
 從上面可以看出：
 
-1. 與各個服務相互認証所使用的憑證 (`*.pem`)
+1. 與各個服務相互認證所使用的憑證 (`*.pem`)
 
 2. 與本地端的其他服務則是透過 `--insecure-bind-address=127.0.0.1` & `--insecure-port=8080` 來溝通
 
 3. 憑證存放的位置其實就是在各個 node 的本機上 (`hostPath` 定義)
 
-4. 目前此 k8s cluster 支援的認証方式為 `[Node](https://kubernetes.io/docs/reference/access-authn-authz/node/)` & `[RBAC](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)`
+4. 目前此 k8s cluster 支援的認證方式為 `[Node](https://kubernetes.io/docs/reference/access-authn-authz/node/)` & `[RBAC](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)`
 
-5. pod 內部服務需要與 api server 互動時的認証方式，使用 `[Service Account Token](https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/)` 的方式，此處對應的設定是 `--service-account-key-file=/etc/kubernetes/ssl/service-account-key.pem`
+5. pod 內部服務需要與 api server 互動時的認證方式，使用 `[Service Account Token](https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/)` 的方式，此處對應的設定是 `--service-account-key-file=/etc/kubernetes/ssl/service-account-key.pem`
 
 
-Kubespray 預設設置了 `X509`, `Node` & `RBAC` 三種認証方式，但 Kubernetes 還支援了相當多其他的認証方式，例如：
+Kubespray 預設設置了 `X509`, `Node` & `RBAC` 三種認證方式，但 Kubernetes 還支援了相當多其他的認證方式，例如：
 
 - `Static Token File`
 
@@ -115,7 +115,7 @@ Kubespray 預設設置了 `X509`, `Node` & `RBAC` 三種認証方式，但 Kuber
 - `Keystone Password`
 
 
-以下會針對比較重要的認証機制詳細說明。 
+以下會針對比較重要的認證機制詳細說明。 
 
 
 
@@ -130,7 +130,7 @@ X509 Client Certs
 
 - `tls-cert-file`
 
-由於只有在 k8s cluster 內的 node 才會有這些憑證檔案，因此這樣的認証方式是在 cluster 內部不同 node 之間的服務相互存取時使用。
+由於只有在 k8s cluster 內的 node 才會有這些憑證檔案，因此這樣的認證方式是在 cluster 內部不同 node 之間的服務相互存取時使用。
 
 但若是與 API server 同在本地端(localhost)的服務要存取 API 呢? 就直接 pass 了.....(像是 `kube-scheduler` & `kube-controller-manager` 都屬於這一類的服務)
 
@@ -162,7 +162,7 @@ kube-system   deployment-controller                1         4d
 
 ```bash
 #
-# 名稱為 "default" 的 service account 其實就是帶著用來存取 API server 時認証用的 token
+# 名稱為 "default" 的 service account 其實就是帶著用來存取 API server 時認證用的 token
 #
 root@kube-master0:~# kubectl describe serviceaccount/default -n kube-system
 Name:                default
@@ -197,7 +197,7 @@ token:      eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2V
 ca.crt:     1090 bytes
 ```
 
-> Service Account 的認証方式主要是由 k8s 自行管理，當我們建立一個 namespace 時，就自動會產生一個名稱為 `default` 的 service account 並帶有新建立的 token；而未來在此 namespace 中所產生的 pod，都會自動使用此 token 與 API server 進行認証。
+> Service Account 的認證方式主要是由 k8s 自行管理，當我們建立一個 namespace 時，就自動會產生一個名稱為 `default` 的 service account 並帶有新建立的 token；而未來在此 namespace 中所產生的 pod，都會自動使用此 token 與 API server 進行認證。
 
 
 
