@@ -159,6 +159,8 @@ kube-worker2    Ready     node           1h        v1.10.4
 
 這樣大致上基本的 Kubernetes 就安裝完成了!
 
+> 若是要取得安裝時所產生的相關憑證檔案，可以到 master node 上的 `/etc/kubernetes/ssl` 目錄中尋找
+
 
 References
 ==========
