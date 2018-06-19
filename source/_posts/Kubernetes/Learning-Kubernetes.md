@@ -54,4 +54,4 @@ Operating
 學習資源
 ======
 
-- [Kubernetes（k8s）中文文档 目录_Kubernetes中文社区](https://www.kubernetes.org.cn/docs)
+- [Kubernetes(K8S)中文文档_Kubernetes中文社区](http://docs.kubernetes.org.cn/)

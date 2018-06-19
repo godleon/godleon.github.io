@@ -95,9 +95,9 @@ spec:
 
 3. 憑證存放的位置其實就是在各個 node 的本機上 (`hostPath` 定義)
 
-4. 目前此 k8s cluster 支援的認證方式為 `[Node](https://kubernetes.io/docs/reference/access-authn-authz/node/)` & `[RBAC](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)`
+4. 目前此 k8s cluster 支援的認證方式為 **[Node](https://kubernetes.io/docs/reference/access-authn-authz/node/)** & **[RBAC](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)**
 
-5. pod 內部服務需要與 api server 互動時的認證方式，使用 `[Service Account Token](https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/)` 的方式，此處對應的設定是 `--service-account-key-file=/etc/kubernetes/ssl/service-account-key.pem`
+5. pod 內部服務需要與 api server 互動時的認證方式，使用 **[Service Account Token](https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/)** 的方式，此處對應的設定是 `--service-account-key-file=/etc/kubernetes/ssl/service-account-key.pem`
 
 
 Kubespray 預設設置了 `X509`, `Node` & `RBAC` 三種認證方式，但 Kubernetes 還支援了相當多其他的認證方式，例如：
