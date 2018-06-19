@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Linux,KVM," />
+  <meta name="keywords" content="Kubernetes," />
 
 
 
@@ -79,22 +79,18 @@
 
 
 
-<meta name="description" content="This article introduces what should to learn about memory when learning Linux KVM virtualization">
-<meta name="keywords" content="Linux,KVM">
+<meta name="description" content="本篇文章介紹在 Kubernetes 中存取 API 時的授權機制">
+<meta name="keywords" content="Kubernetes">
 <meta property="og:type" content="article">
-<meta property="og:title" content="[Linux KVM] Linux KVM concept - Memory">
-<meta property="og:url" content="https://godleon.github.io/blog/2016/08/01/KVM/KVM-Basic-Concept-Memory/index.html">
+<meta property="og:title" content="了解 Kubernetes 中的授權機制">
+<meta property="og:url" content="https://godleon.github.io/blog/2018/06/19/Kubernetes/k8s-API-Authorization/index.html">
 <meta property="og:site_name" content="小信豬的原始部落">
-<meta property="og:description" content="This article introduces what should to learn about memory when learning Linux KVM virtualization">
+<meta property="og:description" content="本篇文章介紹在 Kubernetes 中存取 API 時的授權機制">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:image" content="http://m.eet.com/media/1200411/CloudFig4a.jpg">
-<meta property="og:image" content="http://image.slidesharecdn.com/windays-virtualization-090428034228-phpapp01/95/windows-server-virtualization-hyperv-2008-r2-30-728.jpg?cb=1240890219">
-<meta property="og:image" content="http://virtualization.info/images/EPT-716833.png">
 <meta property="og:updated_time" content="2018-06-19T08:35:25.780Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="[Linux KVM] Linux KVM concept - Memory">
-<meta name="twitter:description" content="This article introduces what should to learn about memory when learning Linux KVM virtualization">
-<meta name="twitter:image" content="http://m.eet.com/media/1200411/CloudFig4a.jpg">
+<meta name="twitter:title" content="了解 Kubernetes 中的授權機制">
+<meta name="twitter:description" content="本篇文章介紹在 Kubernetes 中存取 API 時的授權機制">
 
 
 
@@ -124,13 +120,13 @@
 
 
 
-  <link rel="canonical" href="https://godleon.github.io/blog/2016/08/01/KVM/KVM-Basic-Concept-Memory/"/>
+  <link rel="canonical" href="https://godleon.github.io/blog/2018/06/19/Kubernetes/k8s-API-Authorization/"/>
 
 
 
 
 
-  <title>[Linux KVM] Linux KVM concept - Memory | 小信豬的原始部落</title>
+  <title>了解 Kubernetes 中的授權機制 | 小信豬的原始部落</title>
   
 
 
@@ -291,7 +287,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/blog/2016/08/01/KVM/KVM-Basic-Concept-Memory/">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/blog/2018/06/19/Kubernetes/k8s-API-Authorization/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="godleon">
@@ -308,7 +304,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">[Linux KVM] Linux KVM concept - Memory</h1>
+          <h1 class="post-title" itemprop="name headline">了解 Kubernetes 中的授權機制</h1>
         
 
         <div class="post-meta">
@@ -320,8 +316,8 @@
               
                 <span class="post-meta-item-text">發表於</span>
               
-              <time title="創建於" itemprop="dateCreated datePublished" datetime="2016-08-01T19:40:00+00:00">
-                2016-08-02
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2018-06-19T08:30:00+00:00">
+                2018-06-19
               </time>
             
 
@@ -343,8 +339,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/blog/categories/KVM/" itemprop="url" rel="index">
-                    <span itemprop="name">KVM</span>
+                  <a href="/blog/categories/Kubernetes/" itemprop="url" rel="index">
+                    <span itemprop="name">Kubernetes</span>
                   </a>
                 </span>
 
@@ -361,9 +357,9 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/blog/2016/08/01/KVM/KVM-Basic-Concept-Memory/#comments" itemprop="discussionUrl">
+                <a href="/blog/2018/06/19/Kubernetes/k8s-API-Authorization/#comments" itemprop="discussionUrl">
                   <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2016/08/01/KVM/KVM-Basic-Concept-Memory/" itemprop="commentCount"></span>
+                        data-disqus-identifier="2018/06/19/Kubernetes/k8s-API-Authorization/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -378,7 +374,7 @@
 
           
               <div class="post-description">
-                  This article introduces what should to learn about memory when learning Linux KVM virtualization
+                  本篇文章介紹在 Kubernetes 中存取 API 時的授權機制
               </div>
           
 
@@ -395,141 +391,92 @@
       
 
       
-        <p>此篇文章介紹學習 Linux KVM 時所需要了解的 Memory 相關知識</p>
-<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>Memory 在作業系統是用來暫時存放 cpu 要執行的指令以及資料，所有 process 都必須先載入到 memory 中才能正確執行。</p>
-<p>而在虛擬化的環境中，virtual machine 中 memory 的使用是需要額外的 mapping 機制對應到 host machine，在這個部分的效率的高低，當然也就會決定 virtual machine 整體的系統性能。</p>
-<hr>
-<h1 id="VM-可以使用多少記憶體"><a href="#VM-可以使用多少記憶體" class="headerlink" title="VM 可以使用多少記憶體?"></a>VM 可以使用多少記憶體?</h1><p>也許這是很多人想要了解的，在 host machine 上安裝了一大堆實體記憶體，究竟可以分配給 VM 的可以有多少呢? 以下有兩個簡單公式可以計算：</p>
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>在進行授權(Authorization) 之前，一定要先完成認證(Authentication) 的過程，而認證的說明可以參考<a href="https://godleon.github.io/blog/2018/06/19/Kubernetes/k8s-API-Authentication/">上一篇文章</a>。</p>
+<p>k8s 對於 REST API request 的屬性要求是通用的，因此可以與企業中 or 公有雲平台中現存的管理控制系統進行整合。</p>
+<p>而在 k8s 中，負責對 API request 進行授權的是 API server，藉由檢查所有的 <strong>request attribute</strong> 並查詢所有的 policy 來決定是否允許或拒絕 API request 的存取。</p>
+<blockquote>
+<p>預設情況下所有權限都是預設關閉的</p>
+</blockquote>
+<p>k8s 支援同時多個授權機制，並且為循序式的進行檢查，若有任何一個授權機制通過檢查，就會馬上允許存取，若是沒有通過任何的授權機制檢查，此 API request 就會被拒絕存取；而被拒絕存取的 API request 都會收到 HTTP 403 error。</p>
+<h1 id="名詞釋疑"><a href="#名詞釋疑" class="headerlink" title="名詞釋疑"></a>名詞釋疑</h1><h2 id="NameSpace"><a href="#NameSpace" class="headerlink" title="NameSpace"></a>NameSpace</h2><p>用來進行資源的虛擬隔離之用，在 k8s 剛建立好的初期會有預設的 <code>default</code> &amp; <code>kube-system</code> 兩個 namespace</p>
+<h2 id="User-Account-amp-Service-Account"><a href="#User-Account-amp-Service-Account" class="headerlink" title="User Account &amp; Service Account"></a>User Account &amp; Service Account</h2><p>User Account &amp; Service Account 是用來區別作用的範圍，但會有以下的差別：</p>
 <ol>
-<li><p>實體記憶體 &lt;= 64 GB</p>
-<blockquote>
-<p>RAM - 2 GB = Amount of RAM available to VMs in GBs</p>
-</blockquote>
+<li><p>User Account 是用來辨識使用者，而 Service Account 則是用來辨識 k8s 中的各種服務</p>
 </li>
-<li><p>實體記憶體 &gt; 64GB</p>
-<blockquote>
-<p>RAM - (2 GiB + .5* (RAM/64)) = Amount of RAM available to VMs in GBs</p>
-</blockquote>
+<li><p>User Account 對應人的身份，因此是跨 namespace；而 Service Account 對應的是 service 的身份，因此是與 namespace 有相關</p>
 </li>
 </ol>
-<p>假設 host machine 記憶體有 32GB，則一共可以配置 <code>32 - 2 = 10</code>GB 的記憶體給 VM。</p>
-<p>假設 host machine 記憶體有 256GB，則一共可以配置 <code>256 - (2 + 0.5 * (256 / 64)) = 252</code>GB 的記憶體給 VM</p>
-<hr>
-<h1 id="配置-VM-記憶體"><a href="#配置-VM-記憶體" class="headerlink" title="配置 VM 記憶體"></a>配置 VM 記憶體</h1><p>幫 virtual machine 配置記憶體是很容易的，只要使用 <strong><font color="red">-m</font></strong> 參數即可，預設的格式是：</p>
-<blockquote>
-<p>-m megs</p>
-</blockquote>
-<p>預設是以 <strong><font color="red">MB</font></strong> 作為預設的單位，也可以使用 <strong><font color="red">G</font></strong> 表示要使用 GB 為單位，例如：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 記憶體大小為 2048 MB</span></span><br><span class="line">$ kvm -vnc 0.0.0.0:1 -m 2048 -hda /kvm/storage/vm_disks/ubnutu1604.img</span><br><span class="line"></span><br><span class="line"><span class="comment"># 記憶體大小為 4 GB</span></span><br><span class="line">$ kvm -vnc 0.0.0.0:1 -m 4G -hda /kvm/storage/vm_disks/ubnutu1604.img</span><br></pre></td></tr></table></figure>
-<hr>
-<h1 id="EPT"><a href="#EPT" class="headerlink" title="EPT"></a>EPT</h1><p>傳統要把 virtual machine 中運行的應用程式所使用的 memory 對應到 host machine 的 memory，一共是有三層關係的，下圖可做個簡單說明：</p>
-<p><img src="http://m.eet.com/media/1200411/CloudFig4a.jpg" alt="VM memory mapping"></p>
-<blockquote>
-<p>Guest Virtual Address(GVA) <--> Guest Physical Address(GPA) <--> Host Physical Address(HPA)</--></--></p>
-</blockquote>
-<p>但由於上面三層的轉換效率是很差的，因此後來透過軟體實作了稱為 <strong><font color="red">Shadow Page Tables</font></strong> 的機制，將三層中的第二層拿掉，直接讓 Guest Virtual Address 與 Host Physical Address 可以有直接對應的機制：</p>
-<p><img src="http://image.slidesharecdn.com/windays-virtualization-090428034228-phpapp01/95/windows-server-virtualization-hyperv-2008-r2-30-728.jpg?cb=1240890219" alt="Shadow Page Tables"></p>
-<p>此時 hypervisor 就可以把 shadow page tables 載入到 MMU(Memory Management Unit) 中進行 address translation 的工作。</p>
-<p>但 shadow page tables 實作起來不僅複雜，也會 memory 的額外消耗(每一個 virtual machine 都需要一個 shadow page table)；因此 Intel 提出了 EPT(Extended Page Tables)，AMD 提出了 NPT(Nested Page Tables)，在硬體層直接提供了 <code>GVA &lt;--&gt; GPA &lt;--&gt; HPA</code> 的轉換，不僅提升了 memory 虛擬化的效能，也降低了 memory 虛擬化的複雜度。</p>
-<p>以下是 Intel EPT 技術的概觀：</p>
-<p><img src="http://virtualization.info/images/EPT-716833.png" alt="Intel EPT"></p>
-<p>其中可以看到 Intel 在硬體中增加了 CR3(Control Registor 3) 來處理 GVA <--> GPA 的轉換，以及 EPT 來處理 GPA <--> HPA 的轉換。</--></--></p>
-<p>由於所有的轉換都在硬體層級完成，因此速度很快；而且由於整個轉換過程只需要一個 EPT Page Table，因此在 memory 的消耗上也相對的低。</p>
-<hr>
-<h1 id="VPID"><a href="#VPID" class="headerlink" title="VPID"></a>VPID</h1><p>要了解 VPID，首先要知道 TLB(Translation Lookaside Buffer) 是什麼? 可以參考以下連結：</p>
+<h1 id="Request-Attributes"><a href="#Request-Attributes" class="headerlink" title="Request Attributes"></a>Request Attributes</h1><p>上面有提到，API server 會檢查 <strong>API request attribute</strong> 來決定是否進行授權存取，在 k8s 有以下 API request attributes：</p>
 <ul>
-<li><a href="http://www.wikiwand.com/zh-hk/%E8%BD%89%E8%AD%AF%E5%BE%8C%E5%82%99%E7%B7%A9%E8%A1%9D%E5%8D%80" target="_blank" rel="noopener">TLB 轉譯後備緩衝區 - Wikiwand</a></li>
+<li><p>user, group, extra(額外的 key/value 資訊)</p>
+</li>
+<li><p>API、Request Path(/api, /healthz), API request verb(get, list, create, update, patch, watch … etc)</p>
+</li>
+<li><p>HTTP request verb(get, post, put, delete)</p>
+</li>
+<li><p>Resource, Subresource (存取 resource 時需要的資訊)</p>
+</li>
+<li><p>Namespace</p>
+</li>
+<li><p><a href="https://kubernetes.io/docs/concepts/overview/kubernetes-api/#api-groups" target="_blank" rel="noopener">API group</a> (存取 resource 時需要的資訊)</p>
+</li>
+</ul>
+<h1 id="Authorization-Modules"><a href="#Authorization-Modules" class="headerlink" title="Authorization Modules"></a>Authorization Modules</h1><p>目前 k8s 支援以下幾種 Authorization Modules：</p>
+<h2 id="Node"><a href="#Node" class="headerlink" title="Node"></a><a href="https://kubernetes.io/docs/reference/access-authn-authz/node/" target="_blank" rel="noopener">Node</a></h2><p>此模組是為了授權在每一個 node 上的 kubelet 所發出的 API request 所設計出來的，讓 kubelet 的 API request 可進行特定的權限控制；例如對於以下的 resource 的讀取的權限：</p>
+<ul>
+<li><p>services</p>
+</li>
+<li><p>endpoints</p>
+</li>
+<li><p>nodes</p>
+</li>
+<li><p>pods</p>
+</li>
+<li><p>secrets / configmaps / presistent volume (claim)</p>
+</li>
+</ul>
+<p>另外透過 NodeRestriction 的 plugin，可以針對以下 resource 進行寫入：</p>
+<ul>
+<li><p>node (status)</p>
+</li>
+<li><p>pod (status)</p>
+</li>
+<li><p>event</p>
+</li>
 </ul>
 <blockquote>
-<p>分配給 virtual machine 的每一個 vCPU 都會有一個 TLB</p>
+<p>未來可能還會繼續透過 Node Authorization 來對於 kubelet 進行更細膩的權限控管</p>
 </blockquote>
-<p>而 VPID 則是在硬體層級對 TLB 資源管理的優化，在 virtual machine 進行 migration / VM Entry / VM Exit 時，避免對 TLB 進行轉存 &amp; 清除，進而降低 memory 的額外消耗，對於 live migration 有顯著的效能提升。</p>
-<hr>
-<h1 id="查詢-EPT-amp-VPID-的支援度"><a href="#查詢-EPT-amp-VPID-的支援度" class="headerlink" title="查詢 EPT &amp; VPID 的支援度"></a>查詢 EPT &amp; VPID 的支援度</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查詢 CPU 是否支援 EPT &amp; VPID</span></span><br><span class="line">$  grep -E <span class="string">"\sept\s|\svpid\s"</span> /proc/cpuinfo | uniq</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查詢 kvm_intel 模組是否有開啟 EPT &amp; VPID 的功能</span></span><br><span class="line">$ cat /sys/module/kvm_intel/parameters/ept</span><br><span class="line">Y</span><br><span class="line">$ cat /sys/module/kvm_intel/parameters/vpid</span><br><span class="line">Y</span><br><span class="line"></span><br><span class="line"><span class="comment"># 開啟 kvm_intel 模組 EPT &amp; VPID 的功能</span></span><br><span class="line">$ modprobe kvm_intel ept=1,vpid=1</span><br></pre></td></tr></table></figure>
-<hr>
-<h1 id="Huge-Page"><a href="#Huge-Page" class="headerlink" title="Huge Page"></a>Huge Page</h1><p>x86 架構的 CPU 預設的 memory page table 大小為 4KB，而 x86-64 則可以支援到 2MB 大小的 memory page table(亦稱為 <strong><font color="red">Huge Page</font></strong>)，在 Linux 2.6 以上的 kernel 都支援這個特性。</p>
-<p>而使用 Huge Page 有何優缺點呢?</p>
-<h3 id="優點："><a href="#優點：" class="headerlink" title="優點："></a>優點：</h3><ul>
-<li><p>page table 數量減少，更節省 memory</p>
+<h2 id="ABAC-Attribute-based-access-control"><a href="#ABAC-Attribute-based-access-control" class="headerlink" title="ABAC (Attribute-based access control)"></a><a href="https://kubernetes.io/docs/reference/access-authn-authz/abac/" target="_blank" rel="noopener">ABAC (Attribute-based access control)</a></h2><p>此種方式就是在 master node 上保留一份 policy 文件，指定不同的使用者對於 resource 的存取權限，不彈性也不容易擴充，修改了 policy 文件之後還需要重新啟動 master node。</p>
+<h2 id="RBAC-Role-based-access-control"><a href="#RBAC-Role-based-access-control" class="headerlink" title="RBAC (Role-based access control)"></a><a href="https://kubernetes.io/docs/reference/access-authn-authz/rbac/" target="_blank" rel="noopener">RBAC (Role-based access control)</a></h2><p>RBAC 是目前 k8s 預設會啟動的 authorization module。</p>
+<p>在 RBAC API 中定義了 resource target，用來描述使用者以及 resource 之間的權限關係：</p>
+<ul>
+<li><p>Role：定義在特定 namespace 下的 resource 的存取權限</p>
 </li>
-<li><p>由於 memory address translation 的工作減少了，因此 page fault 機率降低為 <strong><font color="red">Huge Page Size / 4KB</font></strong> 分之一</p>
+<li><p>RoleBinding： 設定哪些使用者(or service account)與 role 綁定而擁有存取權限</p>
 </li>
-<li><p>提升了 memory 存取的效能</p>
+<li><p>ClusterRole：定義在整個 k8s cluster 下的 resource 的存取權限</p>
 </li>
-<li><p>提高 TLB 命中率，因而減少 CPU cache 的使用，最後提升了系統整體效能</p>
-</li>
-<li><p>適合用在 memory 存取密集的 virtual machine 上</p>
+<li><p>ClusterRoleBinding：設定哪些使用者(or service account)與 role 綁定而擁有存取權限</p>
 </li>
 </ul>
-<h3 id="缺點："><a href="#缺點：" class="headerlink" title="缺點："></a>缺點：</h3><ul>
-<li><p>Huge Page 無法被 swap out 到硬碟上</p>
-</li>
-<li><p>無法使用 Ballooning 的方式自動增長</p>
-</li>
-<li><p>並非適合所有不同工作類型的 virtual machine</p>
-</li>
-</ul>
-<h2 id="在-KVM-中使用-Huge-Page"><a href="#在-KVM-中使用-Huge-Page" class="headerlink" title="在 KVM 中使用 Huge Page"></a>在 KVM 中使用 Huge Page</h2><h3 id="1、檢查-host-machine-中-Huge-Page-的設定資訊："><a href="#1、檢查-host-machine-中-Huge-Page-的設定資訊：" class="headerlink" title="1、檢查 host machine 中 Huge Page 的設定資訊："></a>1、檢查 host machine 中 Huge Page 的設定資訊：</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 目前預設的 page size</span></span><br><span class="line">$ getconf PAGESIZE</span><br><span class="line">4096</span><br><span class="line"></span><br><span class="line"><span class="comment"># 記憶體資訊中 Huge Page 的相關資訊 (size = 2048 KB)</span></span><br><span class="line">$ cat /proc/meminfo | grep Huge</span><br><span class="line">AnonHugePages:     14336 kB</span><br><span class="line">HugePages_Total:       0</span><br><span class="line">HugePages_Free:        0</span><br><span class="line">HugePages_Rsvd:        0</span><br><span class="line">HugePages_Surp:        0</span><br><span class="line">Hugepagesize:       2048 kB</span><br></pre></td></tr></table></figure>
-<h3 id="2、掛載-hugetlbfs-檔案系統"><a href="#2、掛載-hugetlbfs-檔案系統" class="headerlink" title="2、掛載 hugetlbfs 檔案系統"></a>2、掛載 hugetlbfs 檔案系統</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 掛載 hugetlbfs 檔案系統</span></span><br><span class="line">$ mount -t hugetlbfs hugetlbfs /dev/hugepages</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查詢檔案系統資訊</span></span><br><span class="line">$ mount | grep huge</span><br><span class="line">cgroup on /sys/fs/cgroup/hugetlb <span class="built_in">type</span> cgroup (rw,nosuid,nodev,noexec,relatime,hugetlb)</span><br><span class="line">hugetlbfs on /dev/hugepages <span class="built_in">type</span> hugetlbfs (rw,relatime,seclabel)</span><br><span class="line">hugetlbfs on /dev/hugepages <span class="built_in">type</span> hugetlbfs (rw,relatime,seclabel)</span><br></pre></td></tr></table></figure>
-<h3 id="3、設定-Huge-Page-的數量"><a href="#3、設定-Huge-Page-的數量" class="headerlink" title="3、設定 Huge Page 的數量"></a>3、設定 Huge Page 的數量</h3><p>假設要啟動一個 memory 為 2048 MB 的 virtual machine，可以算出 Huge Page(2048 KB) 的數量為：</p>
+<p>接著以下以 role <strong>kubernetes-dashboard-minimal</strong> 做個簡單的示範：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">root@kube-master0:~<span class="comment"># kubectl get role --all-namespaces</span></span><br><span class="line">NAMESPACE     NAME                                             AGE</span><br><span class="line">default       pod-reader                                       4d</span><br><span class="line">kube-public   system:controller:bootstrap-signer               5d</span><br><span class="line">kube-system   extension-apiserver-authentication-reader        5d</span><br><span class="line">kube-system   kubernetes-dashboard-minimal                     5d</span><br><span class="line">..... (略)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl get rolebinding --all-namespaces</span></span><br><span class="line">NAMESPACE     NAME                                             AGE</span><br><span class="line">kube-public   system:controller:bootstrap-signer               5d</span><br><span class="line">kube-system   kubernetes-dashboard-minimal                     5d</span><br><span class="line">..... (略)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 檢視 role "kubernetes-dashboard-minimal" 中有那些 resource 的存取權限</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl describe role/kubernetes-dashboard-minimal -n kube-system</span></span><br><span class="line">Name:         kubernetes-dashboard-minimal</span><br><span class="line">Labels:       &lt;none&gt;</span><br><span class="line">Annotations:  kubectl.kubernetes.io/last-applied-configuration=&#123;<span class="string">"apiVersion"</span>:<span class="string">"rbac.authorization.k8s.io/v1"</span>,<span class="string">"kind"</span>:<span class="string">"Role"</span>,<span class="string">"metadata"</span>:&#123;<span class="string">"annotations"</span>:&#123;&#125;,<span class="string">"name"</span>:<span class="string">"kubernetes-dashboard-minimal"</span>,<span class="string">"namespace"</span>:<span class="string">"kube-system"</span>...</span><br><span class="line">PolicyRule:</span><br><span class="line">  Resources       Non-Resource URLs  Resource Names                     Verbs</span><br><span class="line">  ---------       -----------------  --------------                     -----</span><br><span class="line">  configmaps      []                 [kubernetes-dashboard-settings]    [get update]</span><br><span class="line">  configmaps      []                 []                                 [create]</span><br><span class="line">  secrets         []                 [kubernetes-dashboard-certs]       [get update delete]</span><br><span class="line">  secrets         []                 [kubernetes-dashboard-key-holder]  [get update delete]</span><br><span class="line">  secrets         []                 []                                 [create]</span><br><span class="line">  services        []                 [heapster]                         [proxy]</span><br><span class="line">  services/proxy  []                 [heapster]                         [get]</span><br><span class="line">  services/proxy  []                 [http:heapster:]                   [get]</span><br><span class="line">  services/proxy  []                 [https:heapster:]                  [get]</span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 檢視目前與 role "kubernetes-dashboard-minimal" 相關連的使用者(名稱為 "kubernetes-dashboard" 的 service account)</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl describe rolebinding/kubernetes-dashboard-minimal -n kube-system</span></span><br><span class="line">Name:         kubernetes-dashboard-minimal</span><br><span class="line">Labels:       &lt;none&gt;</span><br><span class="line">Annotations:  kubectl.kubernetes.io/last-applied-configuration=&#123;<span class="string">"apiVersion"</span>:<span class="string">"rbac.authorization.k8s.io/v1"</span>,<span class="string">"kind"</span>:<span class="string">"RoleBinding"</span>,<span class="string">"metadata"</span>:&#123;<span class="string">"annotations"</span>:&#123;&#125;,<span class="string">"name"</span>:<span class="string">"kubernetes-dashboard-minimal"</span>,<span class="string">"namespace"</span>:<span class="string">"kube-...</span></span><br><span class="line"><span class="string">Role:</span></span><br><span class="line"><span class="string">  Kind:  Role</span></span><br><span class="line"><span class="string">  Name:  kubernetes-dashboard-minimal</span></span><br><span class="line"><span class="string">Subjects:</span></span><br><span class="line"><span class="string">  Kind            Name                  Namespace</span></span><br><span class="line"><span class="string">  ----            ----                  ---------</span></span><br><span class="line"><span class="string">  ServiceAccount  kubernetes-dashboard  kube-system</span></span><br></pre></td></tr></table></figure>
+<p>接著以 clusterole <strong>system:controller:deployment-controller</strong> 做示範：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 檢視目前 k8s cluster 中的 ClusteRole 資訊</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl get clusterrole</span></span><br><span class="line">NAME                                                                   AGE</span><br><span class="line">admin                                                                  5d</span><br><span class="line">calico-node                                                            5d</span><br><span class="line">cluster-admin                                                          5d</span><br><span class="line">..... (略)</span><br><span class="line">system:controller:deployment-controller                                5d</span><br><span class="line">..... (略)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 檢視 "system:controller:deployment-controller" ClusteRole 的 resource 存取權限</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl describe clusterrole/system:controller:deployment-controller</span></span><br><span class="line">Name:         system:controller:deployment-controller</span><br><span class="line">Labels:       kubernetes.io/bootstrapping=rbac-defaults</span><br><span class="line">Annotations:  rbac.authorization.kubernetes.io/autoupdate=<span class="literal">true</span></span><br><span class="line">PolicyRule:</span><br><span class="line">  Resources                          Non-Resource URLs  Resource Names  Verbs</span><br><span class="line">  ---------                          -----------------  --------------  -----</span><br><span class="line">  events                             []                 []              [create patch update]</span><br><span class="line">  pods                               []                 []              [get list update watch]</span><br><span class="line">  deployments.apps                   []                 []              [get list update watch]</span><br><span class="line">  deployments.apps/finalizers        []                 []              [update]</span><br><span class="line">  deployments.apps/status            []                 []              [update]</span><br><span class="line">  replicasets.apps                   []                 []              [create delete get list patch update watch]</span><br><span class="line">  deployments.extensions             []                 []              [get list update watch]</span><br><span class="line">  deployments.extensions/finalizers  []                 []              [update]</span><br><span class="line">  deployments.extensions/status      []                 []              [update]</span><br><span class="line">  replicasets.extensions             []                 []              [create delete get list patch update watch]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 檢視目前 k8s cluster 中的 ClusteRoleBinding 資訊</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl get clusterrolebinding</span></span><br><span class="line">NAME                                                   AGE</span><br><span class="line">..... (略)</span><br><span class="line">system:controller:deployment-controller                5d</span><br><span class="line">..... (略)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 檢視目前 k8s cluster 中與 "system:controller:deployment-controller" ClusteRoleBinding 連結的使用者(or service account)</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl describe clusterrolebinding/system:controller:deployment-controller</span></span><br><span class="line">Name:         system:controller:deployment-controller</span><br><span class="line">Labels:       kubernetes.io/bootstrapping=rbac-defaults</span><br><span class="line">Annotations:  rbac.authorization.kubernetes.io/autoupdate=<span class="literal">true</span></span><br><span class="line">Role:</span><br><span class="line">  Kind:  ClusterRole</span><br><span class="line">  Name:  system:controller:deployment-controller</span><br><span class="line">Subjects:</span><br><span class="line">  Kind            Name                   Namespace</span><br><span class="line">  ----            ----                   ---------</span><br><span class="line">  ServiceAccount  deployment-controller  kube-system</span><br></pre></td></tr></table></figure>
+<p>API server 已經預先建立了一系列的 ClusterRole &amp; ClusteRoleBinding，名稱都以 <strong>system</strong> 開頭，並涵蓋了維持系統正常服務所需要的所有權限，因此整個 k8s cluster 都可以在 RBAC 的基礎下進行權限的管理與授權。</p>
 <blockquote>
-<p>2048 * 1024 / 2048 = 1024</p>
+<p>這也代表著隨意對 system 開頭的 ClusteRole 修改，可能會造成系統無法正常運作。</p>
 </blockquote>
-<p>因此這邊設定 Huge Page 的數量為 1024 個：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 設定 Huge Page 的數量為 1024 個</span></span><br><span class="line">$ sysctl vm.nr_hugepages=1024</span><br><span class="line">vm.nr_hugepages = 1024</span><br><span class="line"></span><br><span class="line"><span class="comment"># 此時 host machine 中的記憶體資訊已經有 Huge Page 的數量資訊</span></span><br><span class="line">$ cat /proc/meminfo | grep Huge</span><br><span class="line">AnonHugePages:     14336 kB</span><br><span class="line">HugePages_Total:    1024</span><br><span class="line">HugePages_Free:     1024</span><br><span class="line">HugePages_Rsvd:        0</span><br><span class="line">HugePages_Surp:        0</span><br><span class="line">Hugepagesize:       2048 kB</span><br></pre></td></tr></table></figure>
-<h3 id="4、啟動-virtual-machine-使用-Huge-Page"><a href="#4、啟動-virtual-machine-使用-Huge-Page" class="headerlink" title="4、啟動 virtual machine 使用 Huge Page"></a>4、啟動 virtual machine 使用 Huge Page</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$ kvm -vnc 0.0.0.0:1 -smp 4 -m 2048 -hda /kvm/storage/vm_disks/ubnutu1604.img -mem-path /dev/hugepages</span><br><span class="line"></span><br><span class="line">$ cat /proc/meminfo | grep Huge</span><br><span class="line">AnonHugePages:     26624 kB</span><br><span class="line">HugePages_Total:    1024</span><br><span class="line">HugePages_Free:      738</span><br><span class="line">HugePages_Rsvd:      738</span><br><span class="line">HugePages_Surp:        0</span><br><span class="line">Hugepagesize:       2048 kB</span><br></pre></td></tr></table></figure>
-<p>可以看出 virtual machine 的確消耗了一些 huge page，但其實並不是全部，因為 virtual machine 實際上並沒有完整分配到 2048 MB 的 memory；若要完整分配指定的 memory，則需要加上 <code>-mem-prealloc</code> 參數。</p>
-<hr>
-<h1 id="Memory-Overcommit"><a href="#Memory-Overcommit" class="headerlink" title="Memory Overcommit"></a>Memory Overcommit</h1><p>除了之前介紹 CPU 可以 overcommit 之外，memory 也可以設定一定程度的 overcommit，原因是因為每台電腦在運作時一般都不會耗盡記憶體。對 host machine 來說，virtual machine 也只是一個 QEMU process，在啟動的當下是不會分配完整記憶體的，而是隨著 virtual machine 的更多要求下逐步分配到位，因此可以在此行為的前提下設定 memory overcommit。</p>
-<p>在 KVM 中有三種方式可以達到 memory overcommit：</p>
-<ol>
-<li><p><strong><font color="red">Swapping</font></strong>：透過 system swap(一般為硬碟空間) 來彌補 memory 不足的問題</p>
-</li>
-<li><p><strong><font color="red">Ballooning</font></strong>：透過 <code>virtio_balloon</code> driver 來達成</p>
-</li>
-<li><p><strong><font color="red">Page Sharing</font></strong>：使用 <code>KSM(Kernel Samepage Merging)</code> 合併多台 virtual machine 中相同的 memory page</p>
-</li>
-</ol>
-<p>關於第一個方式的 swap，根據 <a href="https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Storage_Administration_Guide/ch-swapspace.html#tb-recommended-system-swap-space" target="_blank" rel="noopener">RedHat RHEL 7 官方文件</a>所提供的建議，swap 大小的設定建議如下：</p>
-<table>
-<thead>
-<tr>
-<th>系統記憶體</th>
-<th>建議 swap 大小</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>⩽ 2 GB</td>
-<td>2 x memory size</td>
-</tr>
-<tr>
-<td>&gt; 2 GB – 8 GB</td>
-<td>等同 memory size</td>
-</tr>
-<tr>
-<td>&gt; 8 GB – 64 GB</td>
-<td>至少 4 GB</td>
-</tr>
-<tr>
-<td>&gt; 64 GB</td>
-<td>至少 4 GB</td>
-</tr>
-</tbody>
-</table>
-<hr>
+<h2 id="Webhook"><a href="#Webhook" class="headerlink" title="Webhook"></a><a href="https://kubernetes.io/docs/reference/access-authn-authz/webhook/" target="_blank" rel="noopener">Webhook</a></h2><p>此模式是管理者在外部提供 HTTPS 授權服務，並設定 API server 透過與外部服務互動的方式進行授權。</p>
+<h1 id="檢查-API-存取權限"><a href="#檢查-API-存取權限" class="headerlink" title="檢查 API 存取權限"></a>檢查 API 存取權限</h1><p>kubectl 提供了 <code>auth can-i</code> 命令，可用來查詢當前的使用者有沒有特定 resource 的存取權限：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 檢查有無在 "dev" namespace 中建立 deployment 的權限</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl auth can-i create deployments --namespace dev</span></span><br><span class="line">yes</span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 檢查有無在 "prod" namespace 中建立 deployment 的權限</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl auth can-i create deployments --namespace prod</span></span><br><span class="line">yes</span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 檢查有無在 "dev" namespace 中以 dave 的身份來列出 secret 的權限</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl auth can-i list secrets --namespace dev --as dave</span></span><br><span class="line">yes</span><br></pre></td></tr></table></figure>
 <h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
-<li><p><a href="http://linux.die.net/man/1/qemu-kvm" target="_blank" rel="noopener">qemu-kvm(1): QEMU Emulator User Documentation - Linux man page</a></p>
+<li><p><a href="https://kubernetes.io/docs/reference/access-authn-authz/authorization/" target="_blank" rel="noopener">Authorization Overview - Kubernetes</a></p>
 </li>
-<li><p><a href="http://www.gegugu.com/2016/03/22/9088.html" target="_blank" rel="noopener">精品：KVM學習筆記 : 歌穀穀</a></p>
+<li><p><a href="https://zhangchenchen.github.io/2017/08/17/kubernetes-authentication-authorization-admission-control/" target="_blank" rel="noopener">Kubernetes– 漫谈kubernetes 中的认证 &amp; 授权 &amp; 准入机制 | Solar</a></p>
 </li>
-<li><p><a href="http://tc.wangchao.net.cn/it/detail_128378.html" target="_blank" rel="noopener">Huge Page 是否是拯救性能的萬能良藥？ - 王朝網路 - wangchao.net.cn</a></p>
-</li>
-<li><p><a href="http://brandon-hy-lin.blogspot.tw/2016/04/compound-page-huge-page-transparent.html" target="_blank" rel="noopener">隨意寫寫: Compound Page, Huge Page, 和Transparent Huge Page(THP)</a></p>
-</li>
-<li><p><a href="http://jaychu649.blogspot.tw/2014/09/linux-huge-memory-greater-then-hundred.html" target="_blank" rel="noopener">IT 研究室 ( 前IT DBA’s 資訊站): 如何在Linux 使用大記憶體(huge memory greater then hundred of GB)</a></p>
-</li>
-<li><p><a href="https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Storage_Administration_Guide/ch-swapspace.html#tb-recommended-system-swap-space" target="_blank" rel="noopener">RedHat RHEL 7 Support &gt; Product Documentation &gt; Storage &gt; Administration Guide</a></p>
+<li><p><a href="https://k8smeetup.github.io/docs/admin/authorization/rbac/" target="_blank" rel="noopener">https://k8smeetup.github.io/docs/admin/authorization/rbac/</a></p>
 </li>
 </ul>
 
@@ -549,9 +496,7 @@
       
         <div class="post-tags">
           
-            <a href="/blog/tags/Linux/" rel="tag"># Linux</a>
-          
-            <a href="/blog/tags/KVM/" rel="tag"># KVM</a>
+            <a href="/blog/tags/Kubernetes/" rel="tag"># Kubernetes</a>
           
         </div>
       
@@ -564,8 +509,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/blog/2016/07/30/KVM/KVM-Basic-Concept-CPU/" rel="next" title="[Linux KVM] Linux KVM concept - CPU">
-                <i class="fa fa-chevron-left"></i> [Linux KVM] Linux KVM concept - CPU
+              <a href="/blog/2018/06/19/Kubernetes/k8s-API-Authentication/" rel="next" title="了解 Kubernetes 中的認證機制">
+                <i class="fa fa-chevron-left"></i> 了解 Kubernetes 中的認證機制
               </a>
             
           </div>
@@ -573,10 +518,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/blog/2016/08/03/KVM/KVM-Basic-Concept-Storage/" rel="prev" title="[Linux KVM] Linux KVM concept - Storage">
-                [Linux KVM] Linux KVM concept - Storage <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -740,7 +681,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#VM-可以使用多少記憶體"><span class="nav-number">2.</span> <span class="nav-text">VM 可以使用多少記憶體?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#配置-VM-記憶體"><span class="nav-number">3.</span> <span class="nav-text">配置 VM 記憶體</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EPT"><span class="nav-number">4.</span> <span class="nav-text">EPT</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#VPID"><span class="nav-number">5.</span> <span class="nav-text">VPID</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#查詢-EPT-amp-VPID-的支援度"><span class="nav-number">6.</span> <span class="nav-text">查詢 EPT &amp; VPID 的支援度</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Huge-Page"><span class="nav-number">7.</span> <span class="nav-text">Huge Page</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#優點："><span class="nav-number">7.0.1.</span> <span class="nav-text">優點：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#缺點："><span class="nav-number">7.0.2.</span> <span class="nav-text">缺點：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#在-KVM-中使用-Huge-Page"><span class="nav-number">7.1.</span> <span class="nav-text">在 KVM 中使用 Huge Page</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1、檢查-host-machine-中-Huge-Page-的設定資訊："><span class="nav-number">7.1.1.</span> <span class="nav-text">1、檢查 host machine 中 Huge Page 的設定資訊：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2、掛載-hugetlbfs-檔案系統"><span class="nav-number">7.1.2.</span> <span class="nav-text">2、掛載 hugetlbfs 檔案系統</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3、設定-Huge-Page-的數量"><span class="nav-number">7.1.3.</span> <span class="nav-text">3、設定 Huge Page 的數量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4、啟動-virtual-machine-使用-Huge-Page"><span class="nav-number">7.1.4.</span> <span class="nav-text">4、啟動 virtual machine 使用 Huge Page</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Memory-Overcommit"><span class="nav-number">8.</span> <span class="nav-text">Memory Overcommit</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">9.</span> <span class="nav-text">References</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#名詞釋疑"><span class="nav-number">2.</span> <span class="nav-text">名詞釋疑</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#NameSpace"><span class="nav-number">2.1.</span> <span class="nav-text">NameSpace</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#User-Account-amp-Service-Account"><span class="nav-number">2.2.</span> <span class="nav-text">User Account &amp; Service Account</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Request-Attributes"><span class="nav-number">3.</span> <span class="nav-text">Request Attributes</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Authorization-Modules"><span class="nav-number">4.</span> <span class="nav-text">Authorization Modules</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Node"><span class="nav-number">4.1.</span> <span class="nav-text">Node</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ABAC-Attribute-based-access-control"><span class="nav-number">4.2.</span> <span class="nav-text">ABAC (Attribute-based access control)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RBAC-Role-based-access-control"><span class="nav-number">4.3.</span> <span class="nav-text">RBAC (Role-based access control)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Webhook"><span class="nav-number">4.4.</span> <span class="nav-text">Webhook</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#檢查-API-存取權限"><span class="nav-number">5.</span> <span class="nav-text">檢查 API 存取權限</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text">References</span></a></li></ol></div>
             
 
           </div>
@@ -903,9 +844,9 @@
     
       <script type="text/javascript">
         var disqus_config = function () {
-          this.page.url = 'https://godleon.github.io/blog/2016/08/01/KVM/KVM-Basic-Concept-Memory/';
-          this.page.identifier = '2016/08/01/KVM/KVM-Basic-Concept-Memory/';
-          this.page.title = '[Linux KVM] Linux KVM concept - Memory';
+          this.page.url = 'https://godleon.github.io/blog/2018/06/19/Kubernetes/k8s-API-Authorization/';
+          this.page.identifier = '2018/06/19/Kubernetes/k8s-API-Authorization/';
+          this.page.title = '了解 Kubernetes 中的授權機制';
         };
         var d = document, s = d.createElement('script');
         s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
