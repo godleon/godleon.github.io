@@ -43,6 +43,8 @@ Concepts
 Operating
 =========
 
+- [kubectl Cheat Sheet - Kubernetes](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
+
 - [Kubernetes 基本操作](https://github.com/godleon/learning_kubernetes/blob/master/operation/basic.md)
 
 ## Persistent Volume
