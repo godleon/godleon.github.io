@@ -125,7 +125,7 @@ kubeconfig_localhost: true
 
 ```bash
 $ cd /tmp/kubespray
-$ ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml
+$ ansible-playbook -b -i inventory/mycluster/hosts.ini cluster.yml
 ```
 
 安裝完之後可以在執行 ansible 指令的機器上找到 kubeconfig，位置在 `/tmp/kubespray/inventory/mycluster/artifacts/admin.conf`
