@@ -174,7 +174,7 @@ token:      [TOKEN_CONTENT]
 
 透過上面的 secret 取得 token 後，就可以選擇 login page 上的 `Token` 選項登入，進入後可以看到以下畫面：
 
-![Kubernetes Dashboard Overview Page](/blog/images//kubernetes/dashboard-overview-page.png)
+![Kubernetes Dashboard Overview Page](/blog/images/kubernetes/dashboard-overview-page.png)
 
 接著就可以以 Cluster Admin 的身份進行操作了。
 
