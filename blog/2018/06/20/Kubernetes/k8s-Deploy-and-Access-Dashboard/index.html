@@ -88,8 +88,8 @@
 <meta property="og:description" content="本篇文章介紹在 Kubernetes 中佈署 &amp; 存取 Dashboard">
 <meta property="og:locale" content="zh-tw">
 <meta property="og:image" content="https://godleon.github.io/blog/images//kubernetes/dashboard-login-page.png">
-<meta property="og:image" content="https://godleon.github.io/blog/images//kubernetes/dashboard-overview-page.png">
-<meta property="og:updated_time" content="2018-06-21T01:53:31.193Z">
+<meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/dashboard-overview-page.png">
+<meta property="og:updated_time" content="2018-06-27T02:38:20.035Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="佈署 &amp; 存取 Kubernetes Dashboard">
 <meta name="twitter:description" content="本篇文章介紹在 Kubernetes 中佈署 &amp; 存取 Dashboard">
@@ -426,7 +426,7 @@
 <p>當 Service Account 被建立完成時，Kubernetes Token Controller 就會自動的為其產生一個 <strong>secret</strong> resource(名稱為 <code>[SERVICE_ACCOUNT_NAME]-token-[RANDOM_STRING]</code>)，並使用裡面的 token 作為與 API server 認證用，可以用以下指令察看：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 檢視建立 service account 時產生的 secret</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl get secret -n kube-system | grep admin-user</span></span><br><span class="line">admin-user-token-572j8                           kubernetes.io/service-account-token   3         11m</span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 檢視 secret 細節，並取得 token 內容</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep admin-user | awk '&#123;print $1&#125;')</span></span><br><span class="line">Name:         admin-user-token-572j8</span><br><span class="line">Namespace:    kube-system</span><br><span class="line">Labels:       &lt;none&gt;</span><br><span class="line">Annotations:  kubernetes.io/service-account.name=admin-user</span><br><span class="line">              kubernetes.io/service-account.uid=ad79cce8-7453-11e8-b6b3-065296fdbf18</span><br><span class="line"></span><br><span class="line">Type:  kubernetes.io/service-account-token</span><br><span class="line"></span><br><span class="line">Data</span><br><span class="line">====</span><br><span class="line">ca.crt:     1090 bytes</span><br><span class="line">namespace:  11 bytes</span><br><span class="line">token:      [TOKEN_CONTENT]</span><br></pre></td></tr></table></figure>
 <h1 id="登入-Dashboard"><a href="#登入-Dashboard" class="headerlink" title="登入 Dashboard"></a>登入 Dashboard</h1><p>透過上面的 secret 取得 token 後，就可以選擇 login page 上的 <code>Token</code> 選項登入，進入後可以看到以下畫面：</p>
-<p><img src="/blog/images//kubernetes/dashboard-overview-page.png" alt="Kubernetes Dashboard Overview Page"></p>
+<p><img src="/blog/images/kubernetes/dashboard-overview-page.png" alt="Kubernetes Dashboard Overview Page"></p>
 <p>接著就可以以 Cluster Admin 的身份進行操作了。</p>
 <h1 id="後記"><a href="#後記" class="headerlink" title="後記"></a>後記</h1><p>由於 k8s 內部是不儲存使用者帳號的，它設計可以外接不同的帳號認證系統。因此若是要真的執行嚴格的權限管理，並不是像上面的建立一個擁有 cluster admin 權限的 Service Account(因為 Service Account 顧名思義是給 service 用的)，而是要與外部的認證系統串接(例如：OpenID, LDAP … etc)。</p>
 <p>因此之後將會找時間補上與外部認證系統串接這個部份，將使用者帳號獨立在 k8s cluster 外部。</p>
@@ -475,6 +475,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/2018/06/27/Kubernetes/k8s-Config-StorageClass-with-Ceph-RBD/" rel="prev" title="[Kubernetes] 設定 StorageClass (以 Ceph RBD 為例)">
+                [Kubernetes] 設定 StorageClass (以 Ceph RBD 為例) <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -561,7 +565,7 @@
               
                 <a href="/blog/archives/">
               
-                  <span class="site-state-item-count">57</span>
+                  <span class="site-state-item-count">58</span>
                   <span class="site-state-item-name">文章</span>
                 </a>
               </div>
