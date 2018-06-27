@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "[Kubernetes] 設定 StorageClass (以 Ceph RBD 為例)"
-description: "本篇文章介紹如何在 Kubernetes 上設定 StorageClass，以 Ceph 為例"
+description: "本篇文章介紹如何在 Kubernetes 上設定 StorageClass，以 Ceph RBD 為例"
 date: 2018-06-27 10:30:00
 published: true
 comments: true
