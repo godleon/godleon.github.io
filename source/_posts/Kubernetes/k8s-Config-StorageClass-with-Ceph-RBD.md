@@ -358,6 +358,11 @@ $ kubectl get pvc
 NAME       STATUS    VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
 ceph-pvc   Bound     pvc-426e7cc8-79b1-11e8-81d0-56277529c641   2Gi        RWO            ceph-dynamic   6s
 
+# 確認 pod 已經正常的執行中
+$ kubectl get pods
+NAME        READY     STATUS    RESTARTS   AGE
+ceph-pod1   1/1       Running   0          20m
+
 # 檢視與上面的 PVC 繫結的 PV 內容
 $ kubectl describe pv/pvc-426e7cc8-79b1-11e8-81d0-56277529c641
 Name:            pvc-426e7cc8-79b1-11e8-81d0-56277529c641
