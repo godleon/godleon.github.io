@@ -94,27 +94,11 @@ QVFDTmp6RmJONy9wRkJBQUZxN3QzQnVLaTJpb2YwR0dDZEJ2dEE9PQ==
 為了讓系統環境維持乾淨，接著建立一個獨立的 namespace(名稱為 `ceph-rbd-pv-lab`) 來進行以下測試：
 
 ```bash
-# 取得目前的 context 為 "admin-cluster.local"
-$ kubectl config view
-apiVersion: v1
-clusters:
-- cluster:
-    certificate-authority-data: REDACTED
-    server: https://10.103.10.51:6443
-  name: cluster.local
-contexts:
-- context:
-    cluster: cluster.local
-    user: admin-cluster.local
-  name: admin-cluster.local
-current-context: admin-cluster.local
-....(略)
-
 # 建立 namespace
 $ kubectl create namespace ceph-rbd-pv-lab
 
 # 指定預設的 namespace
-$ kubectl config set-context "admin-cluster.local" --namespace=ceph-rbd-pv-lab
+$ kubectl config set-context $(kubectl config current-context) --namespace==ceph-rbd-pv-lab
 ```
 
 
