@@ -267,6 +267,20 @@ spec:
 traefik 有個不錯的優點就是提供了一個還蠻不錯看的 Dashboard，當然也是需要透過設定 ingress 才有辦法連到，因此準備以下檔案(`traefik-ui.yaml`)：
 
 ```yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik-web-ui
+  namespace: kube-system
+spec:
+  selector:
+    k8s-app: traefik-ingress-lb
+  ports:
+  - port: 80
+    targetPort: 8080
+
+---
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
