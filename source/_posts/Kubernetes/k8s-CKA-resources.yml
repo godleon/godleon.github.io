@@ -1,0 +1,45 @@
+---
+layout: post
+title:  "CKA(Certified Kubernetes Administrator) 學習資源整理"
+description: "本篇文章蒐集與 CKA(Certified Kubernetes Administrator) 考試範圍的相關學習資源"
+date: 2018-08-26 17:40:00
+published: true
+comments: true
+categories:
+  - Kubernetes
+tags:
+  - Kubernetes
+  - CKA
+---
+
+本篇文章蒐集與 CKA(Certified Kubernetes Administrator) 考試範圍的相關學習資源整理....會根據學習進度陸續補上
+
+
+Core Concept
+============
+
+## 內容範圍
+
+- Understand the Kubernetes API primitives.
+
+- Understand the Kubernetes cluster architecture.
+
+- Understand Services and other network primitives.
+
+## 參考資料
+
+- [Kubernetes架构 · Kubernetes Handbook - Kubernetes中文指南/云原生应用架构实践手册 by Jimmy Song(宋净超)](https://jimmysong.io/kubernetes-handbook/concepts/)
+
+- [架构原理 · Kubernetes Handbook](https://kubernetes.feisky.xyz/zh/architecture/architecture.html)
+
+- [Kubernetes指南 - 架构原理 · Kubernetes Handbook](https://kubernetes.feisky.xyz/zh/architecture/architecture.html)
+
+
+
+
+References
+==========
+
+[K8S CKA Study Prep](https://www.youtube.com/watch?v=tqr581_bBM0&list=PLrKlqis8aRHbMYWrNTsbx_MD9zJxjRLIc)
+
+[CKA Study]](https://www.youtube.com/watch?v=zeS6OyDoy78&list=PLX-REfIYjgkzkWPRlLxSTuGn743cKD1GH)
