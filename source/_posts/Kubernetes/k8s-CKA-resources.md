@@ -40,6 +40,6 @@ Core Concept
 References
 ==========
 
-[K8S CKA Study Prep](https://www.youtube.com/watch?v=tqr581_bBM0&list=PLrKlqis8aRHbMYWrNTsbx_MD9zJxjRLIc)
+- [K8S CKA Study Prep](https://www.youtube.com/watch?v=tqr581_bBM0&list=PLrKlqis8aRHbMYWrNTsbx_MD9zJxjRLIc)
 
-[CKA Study]](https://www.youtube.com/watch?v=zeS6OyDoy78&list=PLX-REfIYjgkzkWPRlLxSTuGn743cKD1GH)
+- [CKA Study]](https://www.youtube.com/watch?v=zeS6OyDoy78&list=PLX-REfIYjgkzkWPRlLxSTuGn743cKD1GH)
