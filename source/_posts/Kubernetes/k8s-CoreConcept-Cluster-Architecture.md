@@ -24,26 +24,26 @@ Kubernetes 源自於 Google 內部的 Borg，因此看看原生的 Borg 會有�
 
 從上面的架構圖可以看出幾個重點：
 
-### BorgMaster
+## BorgMaster
 
 BorgMaster 是整個系統的大腦，用來負責與系統中的不同元件進行溝通，確保系統可以正常運作。
 
 
-### Borglet
+## Borglet
 
 這是在每個 host 中負責管理 container 生命周期的元件，接收來自 BorgMaster 的命令並進行相對應的操作。
 
 
-### Scheduer
+## Scheduer
 
 負責進行任務的調度，根據不同應用的需求，將 workload 調度到不同的機器去執行。
 
 
-### Paxos (persistent store)
+## Paxos (persistent store)
 
 由於整體系統在設計上就是預期會有某些 node 在某些時候會發生故障，因此當要儲存系統運作狀態時，就不會考慮儲存在自身的儲存空間上；因此 Paxos 就是在整個系統中負責儲存系統運作狀態的地方。
 
-### borgcfg
+## borgcfg
 
 用來操作 Borg 系統的 command line tool
 
