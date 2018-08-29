@@ -133,7 +133,7 @@ $ kubectl config set-context $(kubectl config current-context) --namespace=<inse
 
 當 [service](https://kubernetes.io/docs/concepts/services-networking/service/) 被建立後，為了讓 cluster 內部可以透過 domain name 存取 service，相對應的 [DNS entry](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/) 也同時會被建立，而這個 DNS entry 的格式如下：
 
-> <service-name>.<namespace-name>.svc.cluster.local
+> \<service-name\>.\<namespace-name\>.svc.cluster.local
 
 其中 `cluster.local` 是當初建立 cluster 的時候給入的設定，可以修改
 
@@ -157,7 +157,7 @@ Labels and Selectors
 
 Label 是個 key/value 的組合，使用者可以隨意為 object 賦予附加上自訂的 label(一個 or 多個)，作為每個 object 的屬性，來達成類似群組 or 分類的效果；此外，還可以透過 selector 進行 object 的選取。
 
-> 在 k8s 中有個 **annotation** 的機制，同樣也是 key/value 的型式 & 為 object 增加不同的屬性資料，但 annotation 可乘載的資料較為大量，甚至可以是結構性的資料，但無法透過 select 來進行屬性的過濾
+> 在 k8s 中有個 **annotation** 的機制，同樣也是 key/value 的型式 & 為 object 增加不同的屬性資料，但 annotation 可乘載的資料較為大量，甚至可以是結構性的資料或是一段 script，但也就無法透過 select 來進行屬性的過濾
 
 以下是幾個 Label 設定的範例：
 
@@ -225,7 +225,7 @@ spec:
 進階的 Label 用法
 ===============
 
-## 強化對 Application 的 Label 管理
+## 針對 Application 管理的 Label 使用方式
 
 除了 kubectl & dashboard 之外，若想要視覺化的管理 k8s object，透過套用 common set label 來為不同的 object 增加更多的 metadata & 管理資訊是相當有用的，特別是對那些想自己開發管理工具的人來說。
 
