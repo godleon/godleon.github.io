@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="小信豬的原始部落">
 <meta property="og:description" content="此篇文章介紹在 Kubernetes 中，提供了那些機制來管理各式各樣的 Resource Object">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2018-08-29T13:11:30.267Z">
+<meta property="og:updated_time" content="2018-08-29T13:12:28.318Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[Kubernetes] 如何管理 Resource Object">
 <meta name="twitter:description" content="此篇文章介紹在 Kubernetes 中，提供了那些機制來管理各式各樣的 Resource Object">
@@ -445,7 +445,7 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 取得指定 namespace 的 pod 清單</span></span><br><span class="line">$ kubectl --namespace=&lt;insert-namespace-name-here&gt; get pods</span><br><span class="line"></span><br><span class="line"><span class="comment"># 修改使用 kubectl 時預設的 namespace (若不修改，預設為 default)</span></span><br><span class="line">$ kubectl config <span class="built_in">set</span>-context $(kubectl config current-context) --namespace=&lt;insert-namespace-name-here&gt;</span><br></pre></td></tr></table></figure>
 <h2 id="namespace-amp-DNS-的關係"><a href="#namespace-amp-DNS-的關係" class="headerlink" title="namespace &amp; DNS 的關係"></a>namespace &amp; DNS 的關係</h2><p>當 <a href="https://kubernetes.io/docs/concepts/services-networking/service/" target="_blank" rel="noopener">service</a> 被建立後，為了讓 cluster 內部可以透過 domain name 存取 service，相對應的 <a href="https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/" target="_blank" rel="noopener">DNS entry</a> 也同時會被建立，而這個 DNS entry 的格式如下：</p>
 <blockquote>
-<p>\&lt;service-name>.\&lt;namespace-name>.svc.cluster.local</p>
+<p>&lt;service-name>.&lt;namespace-name>.svc.cluster.local</p>
 </blockquote>
 <p>其中 <code>cluster.local</code> 是當初建立 cluster 的時候給入的設定，可以修改</p>
 <blockquote>
