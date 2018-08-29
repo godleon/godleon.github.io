@@ -12,8 +12,8 @@ tags: [Kubernetes]
 此篇文章介紹在 Kubernetes 中，提供了那些機制來管理各式各樣的 Resource Object
 
 
-What are Kubernetes Objects?
-=============================
+What is Kubernetes Resource Object?
+===================================
 
 k8s object 是存在於 k8s 系統中的 persisten entity，用來描述 k8s cluster 中的狀態，例如：
 
@@ -66,6 +66,72 @@ spec:
 
 - [Pod](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#podspec-v1-core)
 
+
+Node
+====
+
+## What is Node?
+
+Node 在 k8s cluster 中的一個 worker node，以前稱為 `minion`，可以是實體機 or VM。在每個 node 中都包含數個服務元件，用來管理 pod 在上面運作的行為 & 狀態，這些管理用的 service 包含以下幾個：
+
+- container time: 可以是 [Docker](https://www.docker.com/), [rkt](https://coreos.com/rkt/), [runc](https://github.com/opencontainers/runc) 或是其他任何符合 [OCI 規範](https://github.com/opencontainers/runtime-spec)的 container runtime
+
+- kubelet: 負責接收來自 API server 的命令、維護 container 的生命周期，並負責 CSI(Container Storage Interface) & CNI(Container Network Interface) 的管理
+
+- kube-proxy: 負責為 service 提供 cluster 內部的 service discovery & load balance
+
+
+## Node Status
+
+為了可以讓 master 確保每個 node 是否正常運作，Node 本身就要自己回報狀態資訊，包含以下內容：
+
+### Address
+
+- HostName: 由系統的 kernel 主動回報的 資訊，可以被 kubelet 中的 `--hostname-override` 參數取代
+
+- ExternalIP：可被 cluster 外部存取的 IP
+
+- InternalIP: cluster 內部的 IP，無法從外部存取
+
+### Condition
+
+以下的狀態包含了所有用來描述運行中的 node 的狀態：
+
+- OutOfDisk: `True` 表示沒有足夠的磁碟空間可以正常運作
+
+- Ready: `True` 表示可正常運作並接受 pod scheduling，`False` 則表示不健康，`Unknown` 表示 node 沒有在 **node-monitor-grace-period**(預設 40 秒) 限制時間內主動回報訊息給 node controller
+
+- MemoryPressure: `True` 表示剩餘記憶體很低
+
+- PIDPressure: `True` 表示存在太多 process
+
+- DiskPressure: `True` 表示磁碟空間所剩無幾
+
+- NetworkUnavailable: `True` 表示 node 網路沒有正確設定
+
+- ConfigOK: `True` 表示 kubelet 有被正確的設定好
+
+### Capacity
+
+用來描述 node 上資源的可用程度，包含：
+
+- CPU
+
+- Memory
+
+- 可同時運行的 Pod 數量上限
+
+### Info
+
+關於 Node 的一般資訊，由 kubelet 蒐集，例如：
+
+- OS name
+
+- kernel version
+
+- Kubernetes version (包含 kubelet & kube-proxy)
+
+- Docker version (如果安裝的 container runtime 是 Docker)
 
 
 Name
