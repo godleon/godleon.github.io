@@ -133,7 +133,7 @@ $ kubectl config set-context $(kubectl config current-context) --namespace=<inse
 
 當 [service](https://kubernetes.io/docs/concepts/services-networking/service/) 被建立後，為了讓 cluster 內部可以透過 domain name 存取 service，相對應的 [DNS entry](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/) 也同時會被建立，而這個 DNS entry 的格式如下：
 
-> \<service-name\>.\<namespace-name\>.svc.cluster.local
+> <service-name\>.<namespace-name\>.svc.cluster.local
 
 其中 `cluster.local` 是當初建立 cluster 的時候給入的設定，可以修改
 
