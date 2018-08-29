@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="小信豬的原始部落">
 <meta property="og:description" content="此篇文章介紹在 Kubernetes 中，提供了那些機制來管理各式各樣的 Resource Object">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2018-08-29T13:12:28.318Z">
+<meta property="og:updated_time" content="2018-08-29T20:49:27.092Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[Kubernetes] 如何管理 Resource Object">
 <meta name="twitter:description" content="此篇文章介紹在 Kubernetes 中，提供了那些機制來管理各式各樣的 Resource Object">
@@ -392,7 +392,7 @@
 
       
         <p>此篇文章介紹在 Kubernetes 中，提供了那些機制來管理各式各樣的 Resource Object</p>
-<h1 id="What-are-Kubernetes-Objects"><a href="#What-are-Kubernetes-Objects" class="headerlink" title="What are Kubernetes Objects?"></a>What are Kubernetes Objects?</h1><p>k8s object 是存在於 k8s 系統中的 persisten entity，用來描述 k8s cluster 中的狀態，例如：</p>
+<h1 id="What-is-Kubernetes-Resource-Object"><a href="#What-is-Kubernetes-Resource-Object" class="headerlink" title="What is Kubernetes Resource Object?"></a>What is Kubernetes Resource Object?</h1><p>k8s object 是存在於 k8s 系統中的 persisten entity，用來描述 k8s cluster 中的狀態，例如：</p>
 <ul>
 <li><p>那一個 containerized application 正在運作?</p>
 </li>
@@ -416,6 +416,61 @@
 <li><p><a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#deploymentspec-v1-apps" target="_blank" rel="noopener">Deployment</a></p>
 </li>
 <li><p><a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#podspec-v1-core" target="_blank" rel="noopener">Pod</a></p>
+</li>
+</ul>
+<h1 id="Node"><a href="#Node" class="headerlink" title="Node"></a>Node</h1><h2 id="What-is-Node"><a href="#What-is-Node" class="headerlink" title="What is Node?"></a>What is Node?</h2><p>Node 在 k8s cluster 中的一個 worker node，以前稱為 <code>minion</code>，可以是實體機 or VM。在每個 node 中都包含數個服務元件，用來管理 pod 在上面運作的行為 &amp; 狀態，這些管理用的 service 包含以下幾個：</p>
+<ul>
+<li><p>container time: 可以是 <a href="https://www.docker.com/" target="_blank" rel="noopener">Docker</a>, <a href="https://coreos.com/rkt/" target="_blank" rel="noopener">rkt</a>, <a href="https://github.com/opencontainers/runc" target="_blank" rel="noopener">runc</a> 或是其他任何符合 <a href="https://github.com/opencontainers/runtime-spec" target="_blank" rel="noopener">OCI 規範</a>的 container runtime</p>
+</li>
+<li><p>kubelet: 負責接收來自 API server 的命令、維護 container 的生命周期，並負責 CSI(Container Storage Interface) &amp; CNI(Container Network Interface) 的管理</p>
+</li>
+<li><p>kube-proxy: 負責為 service 提供 cluster 內部的 service discovery &amp; load balance</p>
+</li>
+</ul>
+<h2 id="Node-Status"><a href="#Node-Status" class="headerlink" title="Node Status"></a>Node Status</h2><p>為了可以讓 master 確保每個 node 是否正常運作，Node 本身就要自己回報狀態資訊，包含以下內容：</p>
+<h3 id="Address"><a href="#Address" class="headerlink" title="Address"></a>Address</h3><ul>
+<li><p>HostName: 由系統的 kernel 主動回報的 資訊，可以被 kubelet 中的 <code>--hostname-override</code> 參數取代</p>
+</li>
+<li><p>ExternalIP：可被 cluster 外部存取的 IP</p>
+</li>
+<li><p>InternalIP: cluster 內部的 IP，無法從外部存取</p>
+</li>
+</ul>
+<h3 id="Condition"><a href="#Condition" class="headerlink" title="Condition"></a>Condition</h3><p>以下的狀態包含了所有用來描述運行中的 node 的狀態：</p>
+<ul>
+<li><p>OutOfDisk: <code>True</code> 表示沒有足夠的磁碟空間可以正常運作</p>
+</li>
+<li><p>Ready: <code>True</code> 表示可正常運作並接受 pod scheduling，<code>False</code> 則表示不健康，<code>Unknown</code> 表示 node 沒有在 <strong>node-monitor-grace-period</strong>(預設 40 秒) 限制時間內主動回報訊息給 node controller</p>
+</li>
+<li><p>MemoryPressure: <code>True</code> 表示剩餘記憶體很低</p>
+</li>
+<li><p>PIDPressure: <code>True</code> 表示存在太多 process</p>
+</li>
+<li><p>DiskPressure: <code>True</code> 表示磁碟空間所剩無幾</p>
+</li>
+<li><p>NetworkUnavailable: <code>True</code> 表示 node 網路沒有正確設定</p>
+</li>
+<li><p>ConfigOK: <code>True</code> 表示 kubelet 有被正確的設定好</p>
+</li>
+</ul>
+<h3 id="Capacity"><a href="#Capacity" class="headerlink" title="Capacity"></a>Capacity</h3><p>用來描述 node 上資源的可用程度，包含：</p>
+<ul>
+<li><p>CPU</p>
+</li>
+<li><p>Memory</p>
+</li>
+<li><p>可同時運行的 Pod 數量上限</p>
+</li>
+</ul>
+<h3 id="Info"><a href="#Info" class="headerlink" title="Info"></a>Info</h3><p>關於 Node 的一般資訊，由 kubelet 蒐集，例如：</p>
+<ul>
+<li><p>OS name</p>
+</li>
+<li><p>kernel version</p>
+</li>
+<li><p>Kubernetes version (包含 kubelet &amp; kube-proxy)</p>
+</li>
+<li><p>Docker version (如果安裝的 container runtime 是 Docker)</p>
 </li>
 </ul>
 <h1 id="Name"><a href="#Name" class="headerlink" title="Name"></a>Name</h1><p>每個在 K8s cluster 上的 object 都可以用 Name or UID 來識別，而在同一時間，每一種 <strong>kind(resource type)</strong> 的 object name 不能重複，例如：不能有兩個 name 同為 nginx 的 pod。</p>
@@ -823,7 +878,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#What-are-Kubernetes-Objects"><span class="nav-number">1.</span> <span class="nav-text">What are Kubernetes Objects?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Name"><span class="nav-number">2.</span> <span class="nav-text">Name</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Namespace"><span class="nav-number">3.</span> <span class="nav-text">Namespace</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#What-is-namespace"><span class="nav-number">3.1.</span> <span class="nav-text">What is namespace ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#檢視-cluster-中的-namespace"><span class="nav-number">3.2.</span> <span class="nav-text">檢視 cluster 中的 namespace</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-namespace"><span class="nav-number">3.3.</span> <span class="nav-text">使用 namespace</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#namespace-amp-DNS-的關係"><span class="nav-number">3.4.</span> <span class="nav-text">namespace &amp; DNS 的關係</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#不屬於任何-namespace-的-resource"><span class="nav-number">3.5.</span> <span class="nav-text">不屬於任何 namespace 的 resource</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Labels-and-Selectors"><span class="nav-number">4.</span> <span class="nav-text">Labels and Selectors</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Label"><span class="nav-number">4.1.</span> <span class="nav-text">Label</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Selector"><span class="nav-number">4.2.</span> <span class="nav-text">Selector</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#進階的-Label-用法"><span class="nav-number">5.</span> <span class="nav-text">進階的 Label 用法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#針對-Application-管理的-Label-使用方式"><span class="nav-number">5.1.</span> <span class="nav-text">針對 Application 管理的 Label 使用方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#相關的-Label-列表"><span class="nav-number">5.2.</span> <span class="nav-text">相關的 Label 列表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#當-Application-被多次佈署到-Kubernetes-Cluster-時"><span class="nav-number">5.3.</span> <span class="nav-text">當 Application 被多次佈署到 Kubernetes Cluster 時</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#範例"><span class="nav-number">5.4.</span> <span class="nav-text">範例</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Annotations"><span class="nav-number">6.</span> <span class="nav-text">Annotations</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#What-is-Annotations"><span class="nav-number">6.1.</span> <span class="nav-text">What is Annotations ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何設定-Annotations"><span class="nav-number">6.2.</span> <span class="nav-text">如何設定 Annotations</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#那些資訊適合用-Annotation-呈現"><span class="nav-number">6.3.</span> <span class="nav-text">那些資訊適合用 Annotation 呈現?</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Field-Selectors"><span class="nav-number">7.</span> <span class="nav-text">Field Selectors</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#What-is-Field-Selectors"><span class="nav-number">7.1.</span> <span class="nav-text">What is Field Selectors?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#那些-Field-支援搜尋功能"><span class="nav-number">7.2.</span> <span class="nav-text">那些 Field 支援搜尋功能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#進階搜尋"><span class="nav-number">7.3.</span> <span class="nav-text">進階搜尋</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Supported-operators"><span class="nav-number">7.3.1.</span> <span class="nav-text">Supported operators</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Chained-selectors"><span class="nav-number">7.3.2.</span> <span class="nav-text">Chained selectors</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Multiple-resource-types"><span class="nav-number">7.3.3.</span> <span class="nav-text">Multiple resource types</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">8.</span> <span class="nav-text">References</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#What-is-Kubernetes-Resource-Object"><span class="nav-number">1.</span> <span class="nav-text">What is Kubernetes Resource Object?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Node"><span class="nav-number">2.</span> <span class="nav-text">Node</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#What-is-Node"><span class="nav-number">2.1.</span> <span class="nav-text">What is Node?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Node-Status"><span class="nav-number">2.2.</span> <span class="nav-text">Node Status</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Address"><span class="nav-number">2.2.1.</span> <span class="nav-text">Address</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Condition"><span class="nav-number">2.2.2.</span> <span class="nav-text">Condition</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Capacity"><span class="nav-number">2.2.3.</span> <span class="nav-text">Capacity</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Info"><span class="nav-number">2.2.4.</span> <span class="nav-text">Info</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Name"><span class="nav-number">3.</span> <span class="nav-text">Name</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Namespace"><span class="nav-number">4.</span> <span class="nav-text">Namespace</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#What-is-namespace"><span class="nav-number">4.1.</span> <span class="nav-text">What is namespace ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#檢視-cluster-中的-namespace"><span class="nav-number">4.2.</span> <span class="nav-text">檢視 cluster 中的 namespace</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-namespace"><span class="nav-number">4.3.</span> <span class="nav-text">使用 namespace</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#namespace-amp-DNS-的關係"><span class="nav-number">4.4.</span> <span class="nav-text">namespace &amp; DNS 的關係</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#不屬於任何-namespace-的-resource"><span class="nav-number">4.5.</span> <span class="nav-text">不屬於任何 namespace 的 resource</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Labels-and-Selectors"><span class="nav-number">5.</span> <span class="nav-text">Labels and Selectors</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Label"><span class="nav-number">5.1.</span> <span class="nav-text">Label</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Selector"><span class="nav-number">5.2.</span> <span class="nav-text">Selector</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#進階的-Label-用法"><span class="nav-number">6.</span> <span class="nav-text">進階的 Label 用法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#針對-Application-管理的-Label-使用方式"><span class="nav-number">6.1.</span> <span class="nav-text">針對 Application 管理的 Label 使用方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#相關的-Label-列表"><span class="nav-number">6.2.</span> <span class="nav-text">相關的 Label 列表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#當-Application-被多次佈署到-Kubernetes-Cluster-時"><span class="nav-number">6.3.</span> <span class="nav-text">當 Application 被多次佈署到 Kubernetes Cluster 時</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#範例"><span class="nav-number">6.4.</span> <span class="nav-text">範例</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Annotations"><span class="nav-number">7.</span> <span class="nav-text">Annotations</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#What-is-Annotations"><span class="nav-number">7.1.</span> <span class="nav-text">What is Annotations ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何設定-Annotations"><span class="nav-number">7.2.</span> <span class="nav-text">如何設定 Annotations</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#那些資訊適合用-Annotation-呈現"><span class="nav-number">7.3.</span> <span class="nav-text">那些資訊適合用 Annotation 呈現?</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Field-Selectors"><span class="nav-number">8.</span> <span class="nav-text">Field Selectors</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#What-is-Field-Selectors"><span class="nav-number">8.1.</span> <span class="nav-text">What is Field Selectors?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#那些-Field-支援搜尋功能"><span class="nav-number">8.2.</span> <span class="nav-text">那些 Field 支援搜尋功能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#進階搜尋"><span class="nav-number">8.3.</span> <span class="nav-text">進階搜尋</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Supported-operators"><span class="nav-number">8.3.1.</span> <span class="nav-text">Supported operators</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Chained-selectors"><span class="nav-number">8.3.2.</span> <span class="nav-text">Chained selectors</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Multiple-resource-types"><span class="nav-number">8.3.3.</span> <span class="nav-text">Multiple resource types</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">9.</span> <span class="nav-text">References</span></a></li></ol></div>
             
 
           </div>
