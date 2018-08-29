@@ -480,3 +480,11 @@ References
 - [Names - Kubernetes](https://kubernetes.io/docs/concepts/overview/working-with-objects/names/)
 
 - [Namespaces - Kubernetes](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/)
+
+- [Labels and Selectors - Kubernetes](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/)
+
+- [Annotations - Kubernetes](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/)
+
+- [Field Selectors - Kubernetes](https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/)
+
+- [Recommended Labels - Kubernetes](https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/)
