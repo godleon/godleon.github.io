@@ -49,12 +49,6 @@ k8s 提供的 resource object 種類相當多，以下根據運用的類型作�
 | Policy | NetworkPolicy, SecurityContext, ResourceQuota, LimitRange |
 | Extension | CustomResourceDefinitions |
 
-
-| Resource | `Pod`, `ReplicaSet`, `ReplicationController`, `Deployment`, `StatefulSet`, `DaemonSet`, `Job`, `CronJob`, `HorizontalPodAutoscaling` |
-| Configuration | Node, Namespace, `Service`, `Secret`, `ConfigMap`, `Ingress`, Label, ThirdPartyResource,  `ServiceAccount` |
-| Storage | Volume, PersistentVolume, StorageClass |
-| Strategy | SecurityContext, ResourceQuota, LimitRange |
-
 從上面的分類可以看出，作為一個 multiple node 的 container orchestration platform，k8s 為了將 container 進行有效的管理，將很多管理概念抽象化，儘量隱藏底層複雜的實作細節，讓使用者可以根據自己的需求，專注在特定的 resource object 上，進而有效率的完成工作。
 
 
