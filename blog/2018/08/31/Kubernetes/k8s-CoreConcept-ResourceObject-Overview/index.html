@@ -89,7 +89,7 @@
 <meta property="og:locale" content="zh-tw">
 <meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/k8s-service.svg">
 <meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/dynamic-volume-provision.jpg">
-<meta property="og:updated_time" content="2018-08-31T15:03:22.325Z">
+<meta property="og:updated_time" content="2018-08-31T15:09:00.912Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[Kubernetes] Resource Object 概觀">
 <meta name="twitter:description" content="此篇文章從比較 high level 的角度來了解什麼是 Kubernetes Resource Object，以及 Kubernetes 中到底包含了那些 Resource Object &amp; 其用途">
@@ -449,7 +449,6 @@
 </tr>
 </tbody>
 </table>
-<p>| Resource | <code>Pod</code>, <code>ReplicaSet</code>, <code>ReplicationController</code>, <code>Deployment</code>, <code>StatefulSet</code>, <code>DaemonSet</code>, <code>Job</code>, <code>CronJob</code>, <code>HorizontalPodAutoscaling</code> |<br>| Configuration | Node, Namespace, <code>Service</code>, <code>Secret</code>, <code>ConfigMap</code>, <code>Ingress</code>, Label, ThirdPartyResource,  <code>ServiceAccount</code> |<br>| Storage | Volume, PersistentVolume, StorageClass |<br>| Strategy | SecurityContext, ResourceQuota, LimitRange |</p>
 <p>從上面的分類可以看出，作為一個 multiple node 的 container orchestration platform，k8s 為了將 container 進行有效的管理，將很多管理概念抽象化，儘量隱藏底層複雜的實作細節，讓使用者可以根據自己的需求，專注在特定的 resource object 上，進而有效率的完成工作。</p>
 <h1 id="Workload-類型的-Resource-Object"><a href="#Workload-類型的-Resource-Object" class="headerlink" title="Workload 類型的 Resource Object"></a>Workload 類型的 Resource Object</h1><p>以下針對各種不同的 Resource Object Type 作個簡單介紹：</p>
 <h2 id="Pod"><a href="#Pod" class="headerlink" title="Pod"></a>Pod</h2><p>Pod 是 k8s 中的最小運作單位，要了解 Pod 是什麼，則必須看看官網的定義：</p>
