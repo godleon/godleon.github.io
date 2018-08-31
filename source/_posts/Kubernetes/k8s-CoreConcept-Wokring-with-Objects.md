@@ -5,8 +5,11 @@ description: "此篇文章介紹在 Kubernetes 中，提供了那些機制來管
 date: 2018-08-29 09:45:00
 published: true
 comments: true
-categories: [Kubernetes]
-tags: [Kubernetes]
+categories:
+  - Kubernetes
+tags:
+  - Kubernetes
+  - CKA
 ---
 
 此篇文章介紹在 Kubernetes 中，提供了那些機制來管理各式各樣的 Resource Object
