@@ -15,6 +15,12 @@ tags:
 本篇文章蒐集與 CKA(Certified Kubernetes Administrator) 考試範圍的相關學習資源整理....會根據學習進度陸續補上
 
 
+Installation
+============
+
+- [Creating a Custom Cluster from Scratch - Kubernetes](https://kubernetes.io/docs/setup/scratch/)
+
+
 Core Concept
 ============
 
@@ -40,6 +46,8 @@ Core Concept
 
 完整學習資料整理
 =============
+
+- [Kubernetes Handbook——Kubernetes中文指南/云原生应用架构实践手册](https://jimmysong.io/kubernetes-handbook/)
 
 - [walidshaari/Kubernetes-Certified-Administrator: Online resources that will help you prepare for taking the CNCF CKA "Kubernetes Certified Administrator" Certification exam. with time, This is not likely the comprehensive up to date list - please make a pull request if there something that should be added here.](https://github.com/walidshaari/Kubernetes-Certified-Administrator)
 
