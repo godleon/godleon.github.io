@@ -48,7 +48,7 @@ Pod 在 k8s 中有兩種主要的使用方式：
 
 以下就是一個類似的應用範例：(一個 container 提供 web 服務，另一個則是負責 container management，從外面取得特定資料回來，並存到共享的 volume 中)
 
-![Multiple Containers in a Pod](/blog/images/kubernetes/multi-containers-in-a-pod.svg)
+![Multiple Containers in a Pod](/blog/images/kubernetes/multi-containers-in-a-pod.svg?sanitize=true)
 
 
 ## 單獨使用 Pod 需注意的事項
