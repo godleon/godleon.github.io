@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Linux,RHCE,RH134," />
+  <meta name="keywords" content="Kubernetes," />
 
 
 
@@ -79,18 +79,18 @@
 
 
 
-<meta name="description" content="此文章記錄學習 RHCE7 RH134 Chapter 5 Managing Priority of Linux Processes 留下的內容">
-<meta name="keywords" content="Linux,RHCE,RH134">
+<meta name="description" content="本篇文章的主題圍繞在 Kubernetes 中的 ReplicaSet resource object，並對其概念 &amp; 特性作概略的介紹">
+<meta name="keywords" content="Kubernetes">
 <meta property="og:type" content="article">
-<meta property="og:title" content="[RHCE7] RH134 Chapter 5 Managing Priority of Linux Processes 學習筆記">
-<meta property="og:url" content="https://godleon.github.io/blog/2016/05/04/RHCE/RHCE7-RH134-LearningNotes-CH05_ManagingPriorityOfLinuxProcesses/index.html">
+<meta property="og:title" content="[Kubernetes] ReplicaSet 介紹">
+<meta property="og:url" content="https://godleon.github.io/blog/2018/09/07/Kubernetes/k8s-ReplicaSet-Overview/index.html">
 <meta property="og:site_name" content="小信豬的原始部落">
-<meta property="og:description" content="此文章記錄學習 RHCE7 RH134 Chapter 5 Managing Priority of Linux Processes 留下的內容">
+<meta property="og:description" content="本篇文章的主題圍繞在 Kubernetes 中的 ReplicaSet resource object，並對其概念 &amp; 特性作概略的介紹">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2018-09-07T00:59:26.115Z">
+<meta property="og:updated_time" content="2018-09-07T00:59:26.111Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="[RHCE7] RH134 Chapter 5 Managing Priority of Linux Processes 學習筆記">
-<meta name="twitter:description" content="此文章記錄學習 RHCE7 RH134 Chapter 5 Managing Priority of Linux Processes 留下的內容">
+<meta name="twitter:title" content="[Kubernetes] ReplicaSet 介紹">
+<meta name="twitter:description" content="本篇文章的主題圍繞在 Kubernetes 中的 ReplicaSet resource object，並對其概念 &amp; 特性作概略的介紹">
 
 
 
@@ -120,13 +120,13 @@
 
 
 
-  <link rel="canonical" href="https://godleon.github.io/blog/2016/05/04/RHCE/RHCE7-RH134-LearningNotes-CH05_ManagingPriorityOfLinuxProcesses/"/>
+  <link rel="canonical" href="https://godleon.github.io/blog/2018/09/07/Kubernetes/k8s-ReplicaSet-Overview/"/>
 
 
 
 
 
-  <title>[RHCE7] RH134 Chapter 5 Managing Priority of Linux Processes 學習筆記 | 小信豬的原始部落</title>
+  <title>[Kubernetes] ReplicaSet 介紹 | 小信豬的原始部落</title>
   
 
 
@@ -287,7 +287,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/blog/2016/05/04/RHCE/RHCE7-RH134-LearningNotes-CH05_ManagingPriorityOfLinuxProcesses/">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/blog/2018/09/07/Kubernetes/k8s-ReplicaSet-Overview/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="godleon">
@@ -304,7 +304,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">[RHCE7] RH134 Chapter 5 Managing Priority of Linux Processes 學習筆記</h1>
+          <h1 class="post-title" itemprop="name headline">[Kubernetes] ReplicaSet 介紹</h1>
         
 
         <div class="post-meta">
@@ -316,8 +316,8 @@
               
                 <span class="post-meta-item-text">發表於</span>
               
-              <time title="創建於" itemprop="dateCreated datePublished" datetime="2016-05-04T20:50:00+00:00">
-                2016-05-05
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2018-09-07T01:00:00+00:00">
+                2018-09-07
               </time>
             
 
@@ -339,8 +339,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/blog/categories/RHCE/" itemprop="url" rel="index">
-                    <span itemprop="name">RHCE</span>
+                  <a href="/blog/categories/Kubernetes/" itemprop="url" rel="index">
+                    <span itemprop="name">Kubernetes</span>
                   </a>
                 </span>
 
@@ -357,9 +357,9 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/blog/2016/05/04/RHCE/RHCE7-RH134-LearningNotes-CH05_ManagingPriorityOfLinuxProcesses/#comments" itemprop="discussionUrl">
+                <a href="/blog/2018/09/07/Kubernetes/k8s-ReplicaSet-Overview/#comments" itemprop="discussionUrl">
                   <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2016/05/04/RHCE/RHCE7-RH134-LearningNotes-CH05_ManagingPriorityOfLinuxProcesses/" itemprop="commentCount"></span>
+                        data-disqus-identifier="2018/09/07/Kubernetes/k8s-ReplicaSet-Overview/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -374,7 +374,7 @@
 
           
               <div class="post-description">
-                  此文章記錄學習 RHCE7 RH134 Chapter 5 Managing Priority of Linux Processes 留下的內容
+                  本篇文章的主題圍繞在 Kubernetes 中的 ReplicaSet resource object，並對其概念 & 特性作概略的介紹
               </div>
           
 
@@ -391,36 +391,49 @@
       
 
       
-        <p><a name="ch5.1"></a></p>
-<h1 id="5-1-Process-Priority-and-“nice”-Concepts"><a href="#5-1-Process-Priority-and-“nice”-Concepts" class="headerlink" title="5.1 Process Priority and “nice” Concepts"></a>5.1 Process Priority and “nice” Concepts</h1><p>nice 值範圍 <code>-20</code> ~ <code>19</code>，沒指定預設就是 0，愈小表示 priority 愈高</p>
-<blockquote>
-<p>root 可以調大 or 調小 nice value，但一般使用者只能調大</p>
-</blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 加上參數 -l 可取得 nice value(NI)</span></span><br><span class="line">[vagrant@server ~]$ ps -l</span><br><span class="line">F S   UID   PID  PPID  C PRI  NI ADDR SZ WCHAN  TTY          TIME CMD</span><br><span class="line">0 S  1000 11502 11501  0  80   0 - 28845 <span class="built_in">wait</span>   pts/0    00:00:00 bash</span><br><span class="line">0 R  1000 11572 11502  0  80   0 - 34343 -      pts/0    00:00:00 ps</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>PR 20 = nice 0</p>
-</blockquote>
-<hr>
-<p><a name="ch5.2"></a></p>
-<h1 id="5-2-Using-nice-and-renice-to-Influence-Process-Priority"><a href="#5-2-Using-nice-and-renice-to-Influence-Process-Priority" class="headerlink" title="5.2 Using nice and renice to Influence Process Priority"></a>5.2 Using nice and renice to Influence Process Priority</h1><p>★★★★★★★★★ Very Important! ★★★★★★★★★ (start)</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># o format =&gt; 使用者自訂顯示欄位</span></span><br><span class="line">$ ps axo pid,comm,nice --sort=-nice</span><br><span class="line"> PID COMMAND          NI</span><br><span class="line">   26 khugepaged       19</span><br><span class="line">  476 alsactl          19</span><br><span class="line">   25 ksmd              5</span><br><span class="line">  537 rtkit-daemon      1</span><br><span class="line">    1 systemd           0</span><br><span class="line">......</span><br><span class="line">   11 rcuos/0           0</span><br><span class="line">   12 watchdog/0        -</span><br><span class="line">......</span><br><span class="line">29921 ps                0</span><br><span class="line">  449 auditd           -4</span><br><span class="line">  467 sedispatch       -4</span><br><span class="line">  462 audispd          -8</span><br><span class="line"> 1583 pulseaudio      -11</span><br><span class="line">    5 kworker/0:0H    -20</span><br><span class="line">.......</span><br></pre></td></tr></table></figure>
-<p>★★★★★★★★★ Very Important! ★★★★★★★★★ (end)</p>
-<p>啟動程式時指定 nice 值：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># nice 示範</span></span><br><span class="line">$ nice -n 10 top</span><br><span class="line">$ ps -al</span><br><span class="line">F S   UID   PID  PPID  C PRI  NI ADDR SZ WCHAN  TTY          TIME CMD</span><br><span class="line">0 S  1000 11626 11502  0  90  10 - 36537 poll_s pts/0    00:00:00 top</span><br><span class="line">0 R  1000 11627 11604  0  80   0 - 34343 -      pts/1    00:00:00 ps</span><br><span class="line"></span><br><span class="line"><span class="comment"># renice 示範</span></span><br><span class="line">$ renice -n 15 11604</span><br><span class="line">11604 (process ID) old priority 0, new priority 15</span><br><span class="line">$ ps -al</span><br><span class="line">F S   UID   PID  PPID  C PRI  NI ADDR SZ WCHAN  TTY          TIME CMD</span><br><span class="line">0 S  1000 11626 11502  0  90  10 - 36537 poll_s pts/0    00:00:00 top</span><br><span class="line">0 R  1000 11630 11604  0  95  15 - 34343 -      pts/1    00:00:00 ps</span><br></pre></td></tr></table></figure>
-<hr>
-<h1 id="補充：Hash-Algorithm-特性"><a href="#補充：Hash-Algorithm-特性" class="headerlink" title="補充：Hash Algorithm 特性"></a>補充：Hash Algorithm 特性</h1><ol>
-<li><p>計算的資料來源沒有長度限制</p>
+        <p>本篇文章的主題圍繞在 Kubernetes 中的 ReplicaSet resource object，並對其概念 &amp; 特性作概略的介紹</p>
+<h1 id="What-is-ReplicaSet"><a href="#What-is-ReplicaSet" class="headerlink" title="What is ReplicaSet ?"></a>What is ReplicaSet ?</h1><p>ReplicaSet 是用來確保在 k8s 中，在資源允許的前提下，指定的 pod 的數量會跟使用者所期望的一致，也就是所謂的 desired status。</p>
+<p>而 ReplicaSet 其實是 ReplicationController 的進化版，其中的差別僅在於 ReplicaSet 支援 set-based label selector，而 ReplicationController 僅支援 equality-based label selector。</p>
+<h1 id="如何使用-ReplicaSet"><a href="#如何使用-ReplicaSet" class="headerlink" title="如何使用 ReplicaSet?"></a>如何使用 ReplicaSet?</h1><p>官方建議 ReplicaSet 要搭配 Deployment 一起來使用，原因如下：</p>
+<ul>
+<li><p>若是有 <a href="https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#rolling-update" target="_blank" rel="noopener">rolling update</a> 的需求 只有在 Deployment 有相關的 kubectl 指令可以協助，單單使用 ReplicaSet 是沒有的</p>
 </li>
-<li><p>雜湊長度永遠固定</p>
+<li><p>Deployment 是個更上層的抽象概念，也因此支援了更多好用的 feature，因此官方才會建議不要單獨使用 ReplicaSet，而是使用 Deployment，並將 ReplicaSet 的資訊設定到 Deployment 的 spec 中</p>
 </li>
-<li><p>雜湊演算法為單向運算</p>
+</ul>
+<h1 id="ReplicaSet-定義說明"><a href="#ReplicaSet-定義說明" class="headerlink" title="ReplicaSet 定義說明"></a>ReplicaSet 定義說明</h1><h2 id="範例介紹"><a href="#範例介紹" class="headerlink" title="範例介紹"></a>範例介紹</h2><p>以下用一個簡單的範例來介紹 ReplicaSet 的結構定義：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># apiVersion, kind, metadata 是必備欄位</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ReplicaSet</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">frontend</span></span><br><span class="line">  <span class="comment"># replicaset 也可以定義 label</span></span><br><span class="line">  <span class="comment"># 一般會與 .spec.template.metadata.labels 設定相同，但不同其實也沒差</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">guestbook</span></span><br><span class="line"><span class="attr">    tier:</span> <span class="string">frontend</span></span><br><span class="line"><span class="comment"># 以下透過 spec 設定 replicaset 的規格 </span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="comment"># 要產生幾份副本(沒設定則預設為 1)</span></span><br><span class="line"><span class="attr">  replicas:</span> <span class="number">3</span></span><br><span class="line">  <span class="comment"># 設定 label selector，用來選擇產生副本用的 pod</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    matchLabels:</span></span><br><span class="line"><span class="attr">      tier:</span> <span class="string">frontend</span></span><br><span class="line"><span class="attr">    matchExpressions:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">&#123;key:</span> <span class="string">tier,</span> <span class="attr">operator:</span> <span class="string">In,</span> <span class="attr">values:</span> <span class="string">[frontend]&#125;</span></span><br><span class="line">  <span class="comment"># .spec.template 是 .spec 中唯一的必要欄位</span></span><br><span class="line">  <span class="comment"># 其實就是 pod template</span></span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line">      <span class="comment"># .spec.template.metadata.labels 必須符合 .spec.selector 中的設定才行</span></span><br><span class="line">      <span class="comment"># 否則 API server 會拒絕產生此物件</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        app:</span> <span class="string">guestbook</span></span><br><span class="line"><span class="attr">        tier:</span> <span class="string">frontend</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line">      <span class="comment"># 所有 .spec.template.spec.restartPolicy 的設定，僅能設定為 Always (同時也是預設值)</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">php-redis</span></span><br><span class="line"><span class="attr">        image:</span> <span class="string">gcr.io/google_samples/gb-frontend:v3</span></span><br><span class="line"><span class="attr">        resources:</span></span><br><span class="line"><span class="attr">          requests:</span></span><br><span class="line"><span class="attr">            cpu:</span> <span class="number">100</span><span class="string">m</span></span><br><span class="line"><span class="attr">            memory:</span> <span class="number">100</span><span class="string">Mi</span></span><br><span class="line"><span class="attr">        env:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">GET_HOSTS_FROM</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">dns</span></span><br><span class="line">          <span class="comment"># If your cluster config does not include a dns service, then to</span></span><br><span class="line">          <span class="comment"># instead access environment variables to find service host</span></span><br><span class="line">          <span class="comment"># info, comment out the 'value: dns' line above, and uncomment the</span></span><br><span class="line">          <span class="comment"># line below.</span></span><br><span class="line">          <span class="comment"># value: env</span></span><br><span class="line"><span class="attr">        ports:</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">80</span></span><br></pre></td></tr></table></figure>
+<h2 id="使用上需要注意的事情"><a href="#使用上需要注意的事情" class="headerlink" title="使用上需要注意的事情"></a>使用上需要注意的事情</h2><p>在設定 ReplicaSet 的時候，有幾點是必須注意的：</p>
+<ul>
+<li><p><code>.spec.template.metadata.labels</code> 的設定必須符合 <code>.spec.selector</code>，否則 API server 會拒絕產生此物件</p>
 </li>
-<li><p>不同的資料來源不會產出相同的雜湊值</p>
+<li><p>從 v1.9 後，apiVersion 已經從 <code>apps/v1beta2</code> 改為 <code>apps/v1</code></p>
 </li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ sha1sum /etc/passwd</span><br><span class="line">524dab4b600e8d87cb7aa5b21e4d57f8996a4374  /etc/passwd</span><br><span class="line"></span><br><span class="line">$ echo &quot;1234&quot; | sha1sum</span><br><span class="line">1be168ff837f043bde17c0314341c84271047b31  -</span><br></pre></td></tr></table></figure>
-<hr>
-<h1 id="Practice-Discovery-Process-Properties"><a href="#Practice-Discovery-Process-Properties" class="headerlink" title="Practice: Discovery Process Properties"></a>Practice: Discovery Process Properties</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 根據 cpu 的核心數，執行兩倍數量的運算工作</span></span><br><span class="line">$ <span class="keyword">for</span> i <span class="keyword">in</span> $( seq $(($(grep -c <span class="string">'^processor'</span> /proc/cpuinfo) * 2)) ); <span class="keyword">do</span> sha1sum /dev/zero &amp; <span class="keyword">done</span></span><br><span class="line">[1] 31701</span><br><span class="line">[2] 31702</span><br><span class="line"></span><br><span class="line">$ <span class="built_in">jobs</span></span><br><span class="line">[1]-  Running                 sha1sum /dev/zero &amp;</span><br><span class="line">[2]+  Running                 sha1sum /dev/zero &amp;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用參數 u 可檢視資源使用率</span></span><br><span class="line">$ ps u $(pgrep sha1sum)</span><br><span class="line">USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND</span><br><span class="line">student  31701 50.0  0.0 116096  1044 pts/0    R    14:26   1:29 sha1sum /dev/zero</span><br><span class="line">student  31702 50.0  0.0 116096  1044 pts/0    R    14:26   1:29 sha1sum /dev/zero</span><br><span class="line"></span><br><span class="line">$ nice -n 10 sha1sum /dev/zero &amp;</span><br><span class="line">[3] 31764</span><br><span class="line"></span><br><span class="line"><span class="comment"># 透過參數 o 指定顯示欄位 (nice value = 10 的 process 所佔的資源相對低)</span></span><br><span class="line">$ ps o pid,pcpu,nice,comm $(pgrep sha1sum)</span><br><span class="line">  PID %CPU  NI COMMAND</span><br><span class="line">31701 49.8   0 sha1sum</span><br><span class="line">31702 49.8   0 sha1sum</span><br><span class="line">31764  4.0  10 sha1sum</span><br><span class="line"></span><br><span class="line"><span class="comment"># 調整 process nice value，可看出資源使用率有提升</span></span><br><span class="line">$ sudo renice -n 5 31764</span><br><span class="line">$ ps o pid,pcpu,nice,comm $(pgrep sha1sum)</span><br><span class="line">  PID %CPU  NI COMMAND</span><br><span class="line">31701 48.8   0 sha1sum</span><br><span class="line">31702 48.8   0 sha1sum</span><br><span class="line">31764  6.2   5 sha1sum</span><br><span class="line"></span><br><span class="line"><span class="comment"># 移除所有使用 sha1sum 指令產生的 process</span></span><br><span class="line">$ killall sha1sum</span><br><span class="line">$ ps o pid,pcpu,nice,comm $(pgrep sha1sum)</span><br><span class="line">  PID %CPU  NI COMMAND</span><br><span class="line"> 2052  0.0   0 bash</span><br><span class="line">31825  0.0   0 ps</span><br><span class="line">[1]   Terminated              sha1sum /dev/zero</span><br><span class="line">[2]-  Terminated              sha1sum /dev/zero</span><br><span class="line">[3]+  Terminated              nice -n 10 sha1sum /dev/zero</span><br></pre></td></tr></table></figure>
+<li><p>當 ReplicaSet 物件建立後，不要建立帶有完全相同 label 組合設定的 pod, deployment 或是其他 replicaset，這樣會造成運作上的混淆 (k8s 並不會阻止你這麼做….) </p>
+</li>
+<li><p>如果有建立多個帶有相同 label selector 的 controller，<strong>刪除</strong>這件事情你就要自己動手了</p>
+</li>
+<li><p><code>.spec.replicas</code> 若沒有設定就預設為 <strong>1</strong></p>
+</li>
+<li><p>如果要運行一個執行完工作就自動終止的 pod，就不要使用 ReplicaSet，而是要改用 <a href="https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/" target="_blank" rel="noopener">Job</a></p>
+</li>
+<li><p>如果要運行一個 machine level 的功能(例如：monitoring, logging)，確保 pod lifetime 與 machine lifetime 一致，且希望這個 pod 可以比其他 pod 更早啟動，也不要使用 ReplicaSet，而是要改用 <a href="https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/" target="_blank" rel="noopener">DaemonSet</a></p>
+</li>
+</ul>
+<h1 id="ReplicaSet-相關操作"><a href="#ReplicaSet-相關操作" class="headerlink" title="ReplicaSet 相關操作"></a>ReplicaSet 相關操作</h1><h2 id="刪除-ReplicaSet-amp-相關的-Pod"><a href="#刪除-ReplicaSet-amp-相關的-Pod" class="headerlink" title="刪除 ReplicaSet &amp; 相關的 Pod"></a>刪除 ReplicaSet &amp; 相關的 Pod</h2><p>透過 <a href="https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#delete" target="_blank" rel="noopener">kubectl delete</a> 刪除，k8s 中的 <a href="https://kubernetes.io/docs/concepts/workloads/controllers/garbage-collection/" target="_blank" rel="noopener">Garbage Controller</a> 會自動的刪除相對應的 pod。</p>
+<p>但若是透過 REST API k的方式，則必須要將 <code>propagationPolicy</code> 設定為 <strong>Foreground</strong> 才可以：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl proxy --port=8080</span><br><span class="line"></span><br><span class="line">$ curl -X DELETE  <span class="string">'localhost:8080/apis/extensions/v1beta1/namespaces/default/replicasets/frontend'</span> \</span><br><span class="line">&gt; -d <span class="string">'&#123;"kind":"DeleteOptions","apiVersion":"v1","propagationPolicy":"Foreground"&#125;'</span> \</span><br><span class="line">&gt; -H <span class="string">"Content-Type: application/json"</span></span><br></pre></td></tr></table></figure>
+<h2 id="僅刪除-ReplicaSet"><a href="#僅刪除-ReplicaSet" class="headerlink" title="僅刪除 ReplicaSet"></a>僅刪除 ReplicaSet</h2><p>若只要刪除 ReplicaSet 而不影響 pod，透過 <a href="https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#delete" target="_blank" rel="noopener">kubectl delete</a> 搭配 <code>--cascade=false</code> 參數就可以完成。</p>
+<p>若使用 REST API，則必須要將 <code>propagationPolicy</code> 設定為 <strong>Orphan</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl proxy --port=8080</span><br><span class="line"></span><br><span class="line">$ curl -X DELETE  <span class="string">'localhost:8080/apis/extensions/v1beta1/namespaces/default/replicasets/frontend'</span> \</span><br><span class="line">&gt; -d <span class="string">'&#123;"kind":"DeleteOptions","apiVersion":"v1","propagationPolicy":"Orphan"&#125;'</span> \</span><br><span class="line">&gt; -H <span class="string">"Content-Type: application/json"</span></span><br></pre></td></tr></table></figure>
+<h2 id="將-ReplicaSet-與-Pod-隔離"><a href="#將-ReplicaSet-與-Pod-隔離" class="headerlink" title="將 ReplicaSet 與 Pod 隔離"></a>將 ReplicaSet 與 Pod 隔離</h2><p>通常會這麼做的目的大多在於進行 debugging 或是 data recovery。</p>
+<p>作法不困難，只要修改 pod label，讓 ReplicaSet 的 label selector 選不到該 pod 即可；但同時要搭配調整 ReplicaSet 中的 <code>.spec.replicas</code> 的設定，不然新的 pod 又會被產生出來。</p>
+<h2 id="ReplicaSet-Scaling"><a href="#ReplicaSet-Scaling" class="headerlink" title="ReplicaSet Scaling"></a>ReplicaSet Scaling</h2><p>調整 <code>.spec.replicas</code> 設定即可，k8s 會自動維護使用者所指定的 desired status。</p>
+<h2 id="與-HPA-Horizontal-Pod-Autoscaler-Target-的搭配"><a href="#與-HPA-Horizontal-Pod-Autoscaler-Target-的搭配" class="headerlink" title="與 HPA(Horizontal Pod Autoscaler Target) 的搭配"></a>與 HPA(Horizontal Pod Autoscaler Target) 的搭配</h2><p>透過與 <a href="https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/" target="_blank" rel="noopener">Horizontal Pod Autoscaler Target(HPA)</a> 搭配，可以指定 ReplicaSet Scaling 的上下限範圍，在資源使用率達到指定門檻時，讓 k8s 自動進行 scale out/in，以下是個簡單範例：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">autoscaling/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">HorizontalPodAutoscaler</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">frontend-scaler</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="comment"># 指定要搭配的 resource object，這裡是 ReplicaSet</span></span><br><span class="line"><span class="attr">  scaleTargetRef:</span></span><br><span class="line"><span class="attr">    kind:</span> <span class="string">ReplicaSet</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">frontend</span></span><br><span class="line">  <span class="comment"># 指定 scale in/out 的 pod 數量為 3~10 個</span></span><br><span class="line"><span class="attr">  minReplicas:</span> <span class="number">3</span></span><br><span class="line"><span class="attr">  maxReplicas:</span> <span class="number">10</span></span><br><span class="line">  <span class="comment"># 資源使用率門檻為 CPU 使用率 50%</span></span><br><span class="line"><span class="attr">  targetCPUUtilizationPercentage:</span> <span class="number">50</span></span><br></pre></td></tr></table></figure>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><a href="https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/" target="_blank" rel="noopener">ReplicaSet - Kubernetes</a></li>
+</ul>
 
       
     </div>
@@ -438,11 +451,7 @@
       
         <div class="post-tags">
           
-            <a href="/blog/tags/Linux/" rel="tag"># Linux</a>
-          
-            <a href="/blog/tags/RHCE/" rel="tag"># RHCE</a>
-          
-            <a href="/blog/tags/RH134/" rel="tag"># RH134</a>
+            <a href="/blog/tags/Kubernetes/" rel="tag"># Kubernetes</a>
           
         </div>
       
@@ -455,8 +464,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/blog/2016/05/04/RHCE/RHCE7-RH134-LearningNotes-CH04_SchedulingFutureLinuxTasks/" rel="next" title="[RHCE7] RH134 Chapter 4 Scheduling Future Linux Tasks 學習筆記">
-                <i class="fa fa-chevron-left"></i> [RHCE7] RH134 Chapter 4 Scheduling Future Linux Tasks 學習筆記
+              <a href="/blog/2018/09/05/Kubernetes/k8s-Pod-Overview/" rel="next" title="[Kubernetes] Pod 的設計 & 相關運作機制">
+                <i class="fa fa-chevron-left"></i> [Kubernetes] Pod 的設計 & 相關運作機制
               </a>
             
           </div>
@@ -464,10 +473,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/blog/2016/05/07/RHCE/RHCE7-RH134-LearningNotes-CH06_ControllingAccessToFilesWithAccessControlLists/" rel="prev" title="[RHCE7] RH134 Chapter 6. Controlling Access to Files with Access Control Lists(ACLs) 學習筆記">
-                [RHCE7] RH134 Chapter 6. Controlling Access to Files with Access Control Lists(ACLs) 學習筆記 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -631,7 +636,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#5-1-Process-Priority-and-“nice”-Concepts"><span class="nav-number">1.</span> <span class="nav-text">5.1 Process Priority and “nice” Concepts</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5-2-Using-nice-and-renice-to-Influence-Process-Priority"><span class="nav-number">2.</span> <span class="nav-text">5.2 Using nice and renice to Influence Process Priority</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#補充：Hash-Algorithm-特性"><span class="nav-number">3.</span> <span class="nav-text">補充：Hash Algorithm 特性</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Practice-Discovery-Process-Properties"><span class="nav-number">4.</span> <span class="nav-text">Practice: Discovery Process Properties</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#What-is-ReplicaSet"><span class="nav-number">1.</span> <span class="nav-text">What is ReplicaSet ?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#如何使用-ReplicaSet"><span class="nav-number">2.</span> <span class="nav-text">如何使用 ReplicaSet?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ReplicaSet-定義說明"><span class="nav-number">3.</span> <span class="nav-text">ReplicaSet 定義說明</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#範例介紹"><span class="nav-number">3.1.</span> <span class="nav-text">範例介紹</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用上需要注意的事情"><span class="nav-number">3.2.</span> <span class="nav-text">使用上需要注意的事情</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ReplicaSet-相關操作"><span class="nav-number">4.</span> <span class="nav-text">ReplicaSet 相關操作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#刪除-ReplicaSet-amp-相關的-Pod"><span class="nav-number">4.1.</span> <span class="nav-text">刪除 ReplicaSet &amp; 相關的 Pod</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#僅刪除-ReplicaSet"><span class="nav-number">4.2.</span> <span class="nav-text">僅刪除 ReplicaSet</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#將-ReplicaSet-與-Pod-隔離"><span class="nav-number">4.3.</span> <span class="nav-text">將 ReplicaSet 與 Pod 隔離</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ReplicaSet-Scaling"><span class="nav-number">4.4.</span> <span class="nav-text">ReplicaSet Scaling</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#與-HPA-Horizontal-Pod-Autoscaler-Target-的搭配"><span class="nav-number">4.5.</span> <span class="nav-text">與 HPA(Horizontal Pod Autoscaler Target) 的搭配</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a></li></ol></div>
             
 
           </div>
@@ -794,9 +799,9 @@
     
       <script type="text/javascript">
         var disqus_config = function () {
-          this.page.url = 'https://godleon.github.io/blog/2016/05/04/RHCE/RHCE7-RH134-LearningNotes-CH05_ManagingPriorityOfLinuxProcesses/';
-          this.page.identifier = '2016/05/04/RHCE/RHCE7-RH134-LearningNotes-CH05_ManagingPriorityOfLinuxProcesses/';
-          this.page.title = '[RHCE7] RH134 Chapter 5 Managing Priority of Linux Processes 學習筆記';
+          this.page.url = 'https://godleon.github.io/blog/2018/09/07/Kubernetes/k8s-ReplicaSet-Overview/';
+          this.page.identifier = '2018/09/07/Kubernetes/k8s-ReplicaSet-Overview/';
+          this.page.title = '[Kubernetes] ReplicaSet 介紹';
         };
         var d = document, s = d.createElement('script');
         s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
