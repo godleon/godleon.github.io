@@ -107,9 +107,9 @@ Kubernetes 的架構設計上也極為類似 Borg，如下圖所示：
 
 負責 container image 的管理並透過 [CRI(Container Runtime Interface)](https://github.com/kubernetes/community/blob/master/contributors/devel/container-runtime-interface.md) 來管理 pod 的運行。 
 
-大部份時候會以 Docker 作為 container runtime，但其實可以作為 container runtime 的除了 Docker 之外，還有以下幾個選項：https://github.com/rkt/rkt
+大部份時候會以 Docker 作為 container runtime，但其實可以作為 container runtime 的除了 Docker 之外，還有以下幾個選項：
 
-- [rkt - the pod-native container engine](https://github.com/rkt/rkt) 
+- [rkt - the pod-native container engine](https://github.com/rkt/rkt)
 
 - [CRI-O - OCI-based implementation of Kubernetes Container Runtime Interface](https://github.com/kubernetes-incubator/cri-o)
 
