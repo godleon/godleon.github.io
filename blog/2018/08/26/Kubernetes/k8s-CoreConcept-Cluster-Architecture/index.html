@@ -93,7 +93,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/kubernetes-master-arch.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/kubernetes-node-arch.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/CKA-CoreConcept-k8s-cluster-architecture-high-level.jpg">
-<meta property="og:updated_time" content="2018-09-07T00:59:26.111Z">
+<meta property="og:updated_time" content="2018-09-14T06:54:29.885Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[Kubernetes] Cluster Architecture">
 <meta name="twitter:description" content="本篇文章介紹 Kubernetes Cluster Architecture 以及內部元件的功能">
@@ -435,9 +435,9 @@
 <h2 id="Worker-Node"><a href="#Worker-Node" class="headerlink" title="Worker Node"></a><a href="https://github.com/kubernetes/community/blob/master/contributors/design-proposals/architecture/architecture.md#the-kubernetes-node" target="_blank" rel="noopener">Worker Node</a></h2><p>在 Kubernetes 中，worker node 也稱為 <strong>minion</strong>，可以是實體機或是 VM，以下是 worker node 的架構圖：</p>
 <p><img src="/blog/images/kubernetes/kubernetes-node-arch.png" alt="Abstract Kubernetes Architecture"></p>
 <h3 id="Container-Runtime"><a href="#Container-Runtime" class="headerlink" title="Container Runtime"></a>Container Runtime</h3><p>負責 container image 的管理並透過 <a href="https://github.com/kubernetes/community/blob/master/contributors/devel/container-runtime-interface.md" target="_blank" rel="noopener">CRI(Container Runtime Interface)</a> 來管理 pod 的運行。 </p>
-<p>大部份時候會以 Docker 作為 container runtime，但其實可以作為 container runtime 的除了 Docker 之外，還有以下幾個選項：<a href="https://github.com/rkt/rkt" target="_blank" rel="noopener">https://github.com/rkt/rkt</a></p>
+<p>大部份時候會以 Docker 作為 container runtime，但其實可以作為 container runtime 的除了 Docker 之外，還有以下幾個選項：</p>
 <ul>
-<li><p><a href="https://github.com/rkt/rkt" target="_blank" rel="noopener">rkt - the pod-native container engine</a> </p>
+<li><p><a href="https://github.com/rkt/rkt" target="_blank" rel="noopener">rkt - the pod-native container engine</a></p>
 </li>
 <li><p><a href="https://github.com/kubernetes-incubator/cri-o" target="_blank" rel="noopener">CRI-O - OCI-based implementation of Kubernetes Container Runtime Interface</a></p>
 </li>
