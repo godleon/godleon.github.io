@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-tw">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/blog/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/blog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/blog/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/blog/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Kubernetes,CKA," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="本篇文章的主題在介紹 Kubernetes 中的 Deployment resource object 是如何運作 &amp; 相關細節">
+<meta name="keywords" content="Kubernetes,CKA">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[Kubernetes] Deployment Overview">
+<meta property="og:url" content="https://godleon.github.io/blog/2018/09/16/Kubernetes/k8s-Deployment-Overview/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="本篇文章的主題在介紹 Kubernetes 中的 Deployment resource object 是如何運作 &amp; 相關細節">
+<meta property="og:locale" content="zh-tw">
+<meta property="og:updated_time" content="2018-09-16T12:22:44.166Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[Kubernetes] Deployment Overview">
+<meta name="twitter:description" content="本篇文章的主題在介紹 Kubernetes 中的 Deployment resource object 是如何運作 &amp; 相關細節">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://godleon.github.io/blog/2018/09/16/Kubernetes/k8s-Deployment-Overview/"/>
+
+
+
+
+
+  <title>[Kubernetes] Deployment Overview | 小信豬的原始部落</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-tw">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">小信豬的原始部落</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/blog/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首頁
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/blog/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            標籤
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/blog/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分類
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/blog/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            歸檔
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            檢索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/blog/2018/09/16/Kubernetes/k8s-Deployment-Overview/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">[Kubernetes] Deployment Overview</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">發表於</span>
+              
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2018-09-16T12:20:00+00:00">
+                2018-09-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分類於</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Kubernetes/" itemprop="url" rel="index">
+                    <span itemprop="name">Kubernetes</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/2018/09/16/Kubernetes/k8s-Deployment-Overview/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/09/16/Kubernetes/k8s-Deployment-Overview/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  本篇文章的主題在介紹 Kubernetes 中的 Deployment resource object 是如何運作 & 相關細節
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本篇文章的主題在介紹 Kubernetes 中的 Deployment resource object 是如何運作 &amp; 相關細節</p>
+<h1 id="What-is-Deployment"><a href="#What-is-Deployment" class="headerlink" title="What is Deployment ?"></a>What is Deployment ?</h1><p>Deployment 為 pod &amp; replicaset 提供了一個宣告式的設定 &amp; 更新方式，透過定義 desired status，Deployment controller 會在所謂的 <strong>controlled rate</strong> 下達到使用者所期望的狀態，這些機制是由 k8s 自動化完成，因此官方建議應該透過 Deployment 來佈署 pod &amp; replicaset。</p>
+<h1 id="使用案例"><a href="#使用案例" class="headerlink" title="使用案例"></a>使用案例</h1><p>了解什麼是 Deployment 後，接下來的問題是…….什麼情況下可以使用 Deployment 來解決問題?</p>
+<p>官方文件中列出了不少 use case，來回答此問題的答案：</p>
+<ul>
+<li><p><a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#creating-a-deployment" target="_blank" rel="noopener">Create a Deployment to rollout a ReplicaSet</a></p>
+</li>
+<li><p><a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#updating-a-deployment" target="_blank" rel="noopener">Declare the new state of the Pods</a></p>
+</li>
+<li><p><a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#rolling-back-a-deployment" target="_blank" rel="noopener">Rollback to an earlier Deployment revision</a></p>
+</li>
+<li><p><a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#scaling-a-deployment" target="_blank" rel="noopener">Scale up the Deployment to facilitate more load</a></p>
+</li>
+<li><p><a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#pausing-and-resuming-a-deployment" target="_blank" rel="noopener">Pause the Deployment</a></p>
+</li>
+<li><p><a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#deployment-status" target="_blank" rel="noopener">Use the status of the Deployment</a></p>
+</li>
+<li><p><a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#clean-up-policy" target="_blank" rel="noopener">Clean up older ReplicaSets</a></p>
+</li>
+</ul>
+<p>以下針對上面每個使用案例使用一個範例來說明。</p>
+<h1 id="建立-Deployment"><a href="#建立-Deployment" class="headerlink" title="建立 Deployment"></a>建立 Deployment</h1><p>以下是搭配 ReplicaSet 來產生 3 個 nginx pod：(假設檔名為 <code>nginx-deployment.yaml</code>)</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="comment"># deployment metadata</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="comment"># deployment name</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">nginx-deployment</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">nginx</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="comment"># 同時建立 3 個 nginx 的 pod </span></span><br><span class="line"><span class="attr">  replicas:</span> <span class="number">3</span></span><br><span class="line">  <span class="comment"># replicaset 的效果套用在帶有 app=nginx 的 pod 上</span></span><br><span class="line">  <span class="comment"># 必須要與下面的 pod label 有相符合</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    matchLabels:</span></span><br><span class="line"><span class="attr">      app:</span> <span class="string">nginx</span></span><br><span class="line">  <span class="comment"># .spec.template 其實就是 pod 的定義</span></span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line">    <span class="comment"># pod metadata</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line">      <span class="comment"># 設定給 pod 的 label 資訊</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        app:</span> <span class="string">nginx</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line">      <span class="comment"># 可看出這個 pod 只運行了一個 nginx container</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">nginx</span></span><br><span class="line"><span class="attr">        image:</span> <span class="attr">nginx:1.7.9</span></span><br><span class="line"><span class="attr">        ports:</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">80</span></span><br></pre></td></tr></table></figure>
+<p>使用以下指令佈署 deployment：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 透過 "--record" 參數來保留後續的 revision history</span></span><br><span class="line">$ kubectl apply -f nginx-deployment.yaml --record</span><br></pre></td></tr></table></figure>
+<p>接著透過 kubectl 來查詢剛剛佈署的 deployment 相關資訊：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># NAME： 列出了在目前 namespace 中的 deployment 清單</span></span><br><span class="line"><span class="comment"># DESIRED： 使用者所宣告的 desired status</span></span><br><span class="line"><span class="comment"># CURRENT： 表示目前有多少個 pod 副本在運行</span></span><br><span class="line"><span class="comment"># UP-TO-DATE： 表示目前有多個個 pod 副本已經達到 desired status</span></span><br><span class="line"><span class="comment"># AVAILABLE： 表示目前有多個 pod 副本已經可以開始提供服務</span></span><br><span class="line"><span class="comment"># AGE： 顯示目前 pod 運行的時間</span></span><br><span class="line">$ kubectl get deployment</span><br><span class="line">NAME               DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE</span><br><span class="line">nginx-deployment   3         3         3            0           15s</span><br></pre></td></tr></table></figure>
+<p>如果要即時監控 deployment 佈署的狀況，可以使用以下指令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl rollout status deployment/nginx-deployment</span><br><span class="line">Waiting <span class="keyword">for</span> deployment <span class="string">"nginx-deployment"</span> rollout to finish: 0 of 3 updated replicas are available...</span><br><span class="line">Waiting <span class="keyword">for</span> deployment <span class="string">"nginx-deployment"</span> rollout to finish: 1 of 3 updated replicas are available...</span><br><span class="line">Waiting <span class="keyword">for</span> deployment <span class="string">"nginx-deployment"</span> rollout to finish: 2 of 3 updated replicas are available...</span><br><span class="line">deployment <span class="string">"nginx-deployment"</span> successfully rolled out</span><br></pre></td></tr></table></figure>
+<p>完成之後，AVAILABLE 的數字就會與 DESIRED 相同了：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl get deployment</span><br><span class="line">NAME               DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE</span><br><span class="line">nginx-deployment   3         3         3            3           32s</span><br></pre></td></tr></table></figure>
+<p>接著繼續往下看關於 ReplicaSet 的細節：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ReplicaSet 的名稱會是 [DEPLOYMENT-NAME]-[POD-TEMPLATE-HASH-VALUE]</span></span><br><span class="line">$ kubectl get rs</span><br><span class="line">NAME                          DESIRED   CURRENT   READY     AGE</span><br><span class="line">nginx-deployment-67594d6bf6   3         3         3         9m</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視 ReplicaSet 的細節</span></span><br><span class="line">$ kubectl describe rs/nginx-deployment-67594d6bf6</span><br><span class="line">Name:           nginx-deployment-67594d6bf6</span><br><span class="line">Namespace:      default</span><br><span class="line"><span class="comment"># deployment controller 主動為 replicaset 新增了一個 "pod-template-hash" label</span></span><br><span class="line">Selector:       app=nginx,pod-template-hash=2315082692</span><br><span class="line">Labels:         app=nginx</span><br><span class="line">                pod-template-hash=2315082692</span><br><span class="line">Annotations:    deployment.kubernetes.io/desired-replicas=3</span><br><span class="line">                deployment.kubernetes.io/max-replicas=4</span><br><span class="line">                deployment.kubernetes.io/revision=1</span><br><span class="line">....(略)</span><br><span class="line">Pod Template:</span><br><span class="line">  Labels:  app=nginx</span><br><span class="line">           pod-template-hash=2315082692</span><br><span class="line">....(略)</span><br><span class="line">Events:</span><br><span class="line">  Type    Reason            Age   From                   Message</span><br><span class="line">  ----    ------            ----  ----                   -------</span><br><span class="line">  Normal  SuccessfulCreate  18m   replicaset-controller  Created pod: nginx-deployment-67594d6bf6-22nrx</span><br><span class="line">  Normal  SuccessfulCreate  18m   replicaset-controller  Created pod: nginx-deployment-67594d6bf6-rkztl</span><br><span class="line">  Normal  SuccessfulCreate  18m   replicaset-controller  Created pod: nginx-deployment-67594d6bf6-ccx87</span><br></pre></td></tr></table></figure>
+<p>透過 Deployment 建立的 ReplicaSet，名稱都會是 <strong>[DEPLOYMENT-NAME]-[POD-TEMPLATE-HASH-VALUE]</strong>，因此透過檢視 ReplicaSet name，其實很容易就可以知道這是由那一個 Deployment 所建立出來的。</p>
+<p>接著再往下看 Pod 的細節：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># deployment controller 同時也幫 pod 增加了一個 "pod-template-hash" label，hash value 也是相同的</span></span><br><span class="line">$ kubectl get pod --show-labels</span><br><span class="line">NAME                                READY     STATUS    RESTARTS   AGE       LABELS</span><br><span class="line">nginx-deployment-67594d6bf6-22nrx   1/1       Running   0          12s       app=nginx,pod-template-hash=2315082692</span><br><span class="line">nginx-deployment-67594d6bf6-ccx87   1/1       Running   0          12s       app=nginx,pod-template-hash=2315082692</span><br><span class="line">nginx-deployment-67594d6bf6-rkztl   1/1       Running   0          12s       app=nginx,pod-template-hash=2315082692</span><br></pre></td></tr></table></figure>
+<p>跟 ReplicaSet 相同，Pod 的命名則會是 <strong>[DEPLOYMENT-NAME]-[POD-TEMPLATE-HASH-VALUE]-[UNIQUE-ID]</strong>，而且會發現被多加了一個名稱為 <strong>pod-template-hash</strong> 的 label</p>
+<h2 id="Pod-Template-Hash-Label"><a href="#Pod-Template-Hash-Label" class="headerlink" title="Pod-Template-Hash Label"></a>Pod-Template-Hash Label</h2><p>關於 <strong>pod-template-hash</strong> label，有幾點：</p>
+<ul>
+<li><p>是由 deployment controller 加到每個 replicaset 的，主要是透過將 template 拿來計算 hash value 的方式來確保每個 replicaset 中的 template 定義不會有重複，</p>
+</li>
+<li><p>pod-template-hash label 同時會被 deployment controller 加到 replicaset &amp; pod 中，利用此 hash value 就可以確認那些 deploymen/replicaset/pod 是屬於同一組</p>
+</li>
+<li><p>replicaset 名稱的 hash value 跟 pod-template-hash 不一樣，但應該是不同的 hash 方法所導致(因為透過相同的 YAML 檔案重新建立 deployment 也還是會得到相同的結果)</p>
+</li>
+</ul>
+<h2 id="如果在另外一個-namespace-中建立相同的-Deployment"><a href="#如果在另外一個-namespace-中建立相同的-Deployment" class="headerlink" title="如果在另外一個 namespace 中建立相同的 Deployment ?"></a>如果在另外一個 namespace 中建立相同的 Deployment ?</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 建立一個新的 namespace，名稱為 deployment-test</span></span><br><span class="line">$ kubectl create namespace deployment-test</span><br><span class="line">namespace/deployment-test created</span><br><span class="line"></span><br><span class="line"><span class="comment"># 將同樣的 deployment 宣告佈署到 deployment-test namespace 中</span></span><br><span class="line">$ kubectl -n deployment-test apply -f nginx-deployment.yaml </span><br><span class="line">deployment.apps/nginx-deployment created</span><br><span class="line"></span><br><span class="line"><span class="comment"># 新的 deployment 佈署完成</span></span><br><span class="line">$ kubectl -n deployment-test get deployment</span><br><span class="line">NAME               DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE</span><br><span class="line">nginx-deployment   3         3         3            3           16s</span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視 replicaset 的狀態</span></span><br><span class="line">$ kubectl -n deployment-test get rs</span><br><span class="line">NAME                          DESIRED   CURRENT   READY     AGE</span><br><span class="line">nginx-deployment-67594d6bf6   3         3         3         21s</span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視 pod 的狀態(包含 label 資訊)</span></span><br><span class="line">$ kubectl -n deployment-test get pod --show-labels</span><br><span class="line">NAME                                READY     STATUS    RESTARTS   AGE       LABELS</span><br><span class="line">nginx-deployment-67594d6bf6-l2jg4   1/1       Running   0          29s       app=nginx,pod-template-hash=2315082692</span><br><span class="line">nginx-deployment-67594d6bf6-phhkg   1/1       Running   0          29s       app=nginx,pod-template-hash=2315082692</span><br><span class="line">nginx-deployment-67594d6bf6-vqptg   1/1       Running   0          29s       app=nginx,pod-template-hash=2315082692</span><br><span class="line"></span><br><span class="line"><span class="comment"># 完成實驗，移除 namespace</span></span><br><span class="line">$ kubectl delete ns/deployment-test</span><br></pre></td></tr></table></figure>
+<p>從上面不難看出，即使在新的 namespace，同樣的 deployment 宣告依然會拿到同樣 value 的 pod-template-hash，原因就是因為 <code>.spec.template</code> 並沒有改變，因此透過 hash 產生出來的 value 當然也不會改變。</p>
+<h1 id="更新-Deployment"><a href="#更新-Deployment" class="headerlink" title="更新 Deployment"></a>更新 Deployment</h1><p>剛使用者需要更新 deployment 內容時，就會考慮到這個問題，但更新的發生可能來自以下兩種變更：</p>
+<ol>
+<li><p>修改 replica 的數量 (<code>.spec.replicas</code>)</p>
+</li>
+<li><p>修改 template 的內容 (<code>.spec.template</code>)</p>
+</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 將 container image 的版本從上面的 nginx:1.7.9 改成 nginx:1.9.1</span></span><br><span class="line">$ kubectl <span class="built_in">set</span> image deployment/nginx-deployment nginx=nginx:1.9.1 --record</span><br><span class="line">deployment.extensions/nginx-deployment image updated</span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視 rollout status</span></span><br><span class="line">$ kubectl rollout status deployment/nginx-deployment</span><br><span class="line">Waiting <span class="keyword">for</span> deployment <span class="string">"nginx-deployment"</span> rollout to finish: 1 out of 3 new replicas have been updated...</span><br><span class="line">Waiting <span class="keyword">for</span> deployment <span class="string">"nginx-deployment"</span> rollout to finish: 1 out of 3 new replicas have been updated...</span><br><span class="line">Waiting <span class="keyword">for</span> deployment <span class="string">"nginx-deployment"</span> rollout to finish: 1 out of 3 new replicas have been updated...</span><br><span class="line">Waiting <span class="keyword">for</span> deployment <span class="string">"nginx-deployment"</span> rollout to finish: 2 out of 3 new replicas have been updated...</span><br><span class="line">Waiting <span class="keyword">for</span> deployment <span class="string">"nginx-deployment"</span> rollout to finish: 2 out of 3 new replicas have been updated...</span><br><span class="line">Waiting <span class="keyword">for</span> deployment <span class="string">"nginx-deployment"</span> rollout to finish: 2 out of 3 new replicas have been updated...</span><br><span class="line">Waiting <span class="keyword">for</span> deployment <span class="string">"nginx-deployment"</span> rollout to finish: 1 old replicas are pending termination...</span><br><span class="line">Waiting <span class="keyword">for</span> deployment <span class="string">"nginx-deployment"</span> rollout to finish: 1 old replicas are pending termination...</span><br><span class="line">deployment <span class="string">"nginx-deployment"</span> successfully rolled out</span><br><span class="line"></span><br><span class="line"><span class="comment"># 新的變更已經成功套用</span></span><br><span class="line">$ kubectl get deployment</span><br><span class="line">NAME               DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE</span><br><span class="line">nginx-deployment   3         3         3            3           1d</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>也可以透過 <code>kubectl edit deployment/nginx-deployment</code> 指令直接對 YAML 檔案進行修改。</p>
+</blockquote>
+<p>透過修改 replica 數量不會讓 <strong>pod-template-hash</strong> 有變動，但是修改 template 的內容就會造成 pod-template-hash 的變動了，由於上方已經變更了 container image version，因此來檢查一下目前 replicaset &amp; pod 的狀態資訊：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 檢視 replicaset 的狀態</span></span><br><span class="line"><span class="comment"># 可以發現 pod-template-hash 已經從 67594d6bf6 變為 6fdbb596db</span></span><br><span class="line">$ kubectl get rs</span><br><span class="line">NAME                          DESIRED   CURRENT   READY     AGE</span><br><span class="line">nginx-deployment-67594d6bf6   0         0         0         1d</span><br><span class="line">nginx-deployment-6fdbb596db   3         3         3         9m</span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視 replicaset 的細節</span></span><br><span class="line"><span class="comment"># pod-template-hash label 的值已經從 2315082692 變為 2986615286</span></span><br><span class="line">$ kubectl describe rs/nginx-deployment-6fdbb596db</span><br><span class="line">Name:           nginx-deployment-6fdbb596db</span><br><span class="line">Namespace:      default</span><br><span class="line">Selector:       app=nginx,pod-template-hash=2986615286</span><br><span class="line">Labels:         app=nginx</span><br><span class="line">                pod-template-hash=2986615286</span><br><span class="line">Annotations:    deployment.kubernetes.io/desired-replicas=3</span><br><span class="line">                deployment.kubernetes.io/max-replicas=4</span><br><span class="line">                deployment.kubernetes.io/revision=2</span><br><span class="line">Controlled By:  Deployment/nginx-deployment</span><br><span class="line">Replicas:       3 current / 3 desired</span><br><span class="line">Pods Status:    3 Running / 0 Waiting / 0 Succeeded / 0 Failed</span><br><span class="line">Pod Template:</span><br><span class="line">  Labels:  app=nginx</span><br><span class="line">           pod-template-hash=2986615286</span><br><span class="line">  Containers:</span><br><span class="line">   nginx:</span><br><span class="line">    Image:        nginx:1.9.1</span><br><span class="line">    Port:         80/TCP</span><br><span class="line">    Host Port:    0/TCP</span><br><span class="line">    Environment:  &lt;none&gt;</span><br><span class="line">    Mounts:       &lt;none&gt;</span><br><span class="line">  Volumes:        &lt;none&gt;</span><br><span class="line">Events:</span><br><span class="line">  Type    Reason            Age   From                   Message</span><br><span class="line">  ----    ------            ----  ----                   -------</span><br><span class="line">  Normal  SuccessfulCreate  9m    replicaset-controller  Created pod: nginx-deployment-6fdbb596db-67cwx</span><br><span class="line">  Normal  SuccessfulCreate  8m    replicaset-controller  Created pod: nginx-deployment-6fdbb596db-r9qmv</span><br><span class="line">  Normal  SuccessfulCreate  8m    replicaset-controller  Created pod: nginx-deployment-6fdbb596db-27dmh</span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視 pod 的狀態</span></span><br><span class="line"><span class="comment"># pod 的名稱也會跟著上面一起改變</span></span><br><span class="line">$ kubectl get pod --show-labels</span><br><span class="line">NAME                                READY     STATUS    RESTARTS   AGE       LABELS</span><br><span class="line">nginx-deployment-6fdbb596db-27dmh   1/1       Running   0          8m        app=nginx,pod-template-hash=2986615286</span><br><span class="line">nginx-deployment-6fdbb596db-67cwx   1/1       Running   0          9m        app=nginx,pod-template-hash=2986615286</span><br><span class="line">nginx-deployment-6fdbb596db-r9qmv   1/1       Running   0          9m        app=nginx,pod-template-hash=2986615286</span><br></pre></td></tr></table></figure>
+<p>從上面的結果可以看出，當 Deployment 中的 <code>.spec.template</code> 改變後，replicaset &amp; pod 中的 <strong>pod-template-hash</strong> 也會一併跟著改變。</p>
+<p>此外，關於 update deployment 這件事情，k8s 在運作機制上會遵守以下原則：</p>
+<ul>
+<li><p>至少會確保有 25% 以上的期望 pod 數量是維持可服務狀態的</p>
+</li>
+<li><p>最多不會讓超過 25% 的 pod 數量無法使用 (在 3 replicas 的條件下，create 會先執行，然後才是 delete)</p>
+</li>
+</ul>
+<p>檢視一下 deployment 的細節就可以看出詳細的運作流程：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl describe deployment/nginx-deployment</span><br><span class="line">Name:                   nginx-deployment</span><br><span class="line">.... (略)</span><br><span class="line">RollingUpdateStrategy:  25% max unavailable, 25% max surge</span><br><span class="line">Pod Template:</span><br><span class="line">  Labels:  app=nginx</span><br><span class="line">  Containers:</span><br><span class="line">   nginx:</span><br><span class="line">    Image:        nginx:1.9.1</span><br><span class="line">    Port:         80/TCP</span><br><span class="line">.... (略)</span><br><span class="line">OldReplicaSets:  &lt;none&gt;</span><br><span class="line">NewReplicaSet:   nginx-deployment-6fdbb596db (3/3 replicas created)</span><br><span class="line">Events:</span><br><span class="line">  Type    Reason             Age   From                   Message</span><br><span class="line">  ----    ------             ----  ----                   -------</span><br><span class="line">  <span class="comment"># available pod = 4(new 1, old 3)</span></span><br><span class="line">  Normal  ScalingReplicaSet  20m   deployment-controller  Scaled up replica <span class="built_in">set</span> nginx-deployment-6fdbb596db to 1</span><br><span class="line">  <span class="comment"># available pod = 3(new 1, old 2)</span></span><br><span class="line">  Normal  ScalingReplicaSet  19m   deployment-controller  Scaled down replica <span class="built_in">set</span> nginx-deployment-67594d6bf6 to 2</span><br><span class="line">  <span class="comment"># available pod = 4(new 2, old 2)</span></span><br><span class="line">  Normal  ScalingReplicaSet  19m   deployment-controller  Scaled up replica <span class="built_in">set</span> nginx-deployment-6fdbb596db to 2</span><br><span class="line">  <span class="comment"># available pod = 3(new 2, old 1)</span></span><br><span class="line">  Normal  ScalingReplicaSet  19m   deployment-controller  Scaled down replica <span class="built_in">set</span> nginx-deployment-67594d6bf6 to 1</span><br><span class="line">  <span class="comment"># available pod = 3(new 3, old 1)</span></span><br><span class="line">  Normal  ScalingReplicaSet  19m   deployment-controller  Scaled up replica <span class="built_in">set</span> nginx-deployment-6fdbb596db to 3</span><br><span class="line">  <span class="comment"># available pod = 3(new 3, old 0)</span></span><br><span class="line">  Normal  ScalingReplicaSet  19m   deployment-controller  Scaled down replica <span class="built_in">set</span> nginx-deployment-67594d6bf6 to 0</span><br></pre></td></tr></table></figure>
+<p>以上狀況是在原本的 deployment 已經完成佈署的狀態下，變更 template 後會發生的行為，那如下發生以下狀況：</p>
+<blockquote>
+<p>佈署 5 個副本 + nginx:1.7.9 的 deployment，但當只有 3 個 pod 佈署完成時，馬上將 template 中的 container image version 修改為 nginx:1.9.1</p>
+</blockquote>
+<p>以上面的例子來說，k8s 就不會遵守原本的更新規則，而是會直接砍掉原本的 3 個 pod，然後開始建立新版本的 5 個 pod。</p>
+<p>最後，有個需要注意的是 Label Selector 的部份，在 API version <strong>apps/v1</strong> 之後，<code>.spec.selector</code> 被設定之後就無法再修改了!</p>
+<h1 id="Deployment-版本回溯"><a href="#Deployment-版本回溯" class="headerlink" title="Deployment 版本回溯"></a>Deployment 版本回溯</h1><p>在預設情況下，系統中會包含 Deployment rollout 的歷史資訊(也就是 <code>.spec.template</code> 有變動時)，因此使用者可以在 在 revision history limit 的範圍內，回復到任何一個時間點的狀態。</p>
+<blockquote>
+<p>由於只有當 <code>.spec.template</code> 變更時才會有 revision 記錄，因此改變 replica 數量就不會產生新的 revision 記錄</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 將 container image 從 nginx:1.9.1 更新為 nginx:1.91</span></span><br><span class="line">$ kubectl <span class="built_in">set</span> image deployment/nginx-deployment nginx=nginx:1.91</span><br><span class="line">deployment.extensions/nginx-deployment image updated</span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視 rollout status</span></span><br><span class="line"><span class="comment"># 因為 container image version error，所以無法正確完成工作，因此更新會卡住，按下 Ctrl+C 跳離</span></span><br><span class="line">$ kubectl rollout status deployments nginx-deployment</span><br><span class="line">Waiting <span class="keyword">for</span> deployment <span class="string">"nginx-deployment"</span> rollout to finish: 1 out of 3 new replicas have been updated...</span><br><span class="line">^C</span><br><span class="line"></span><br><span class="line"><span class="comment"># 取得 replicaset 狀態</span></span><br><span class="line"><span class="comment"># 新建的 replicaset 一直在無法完成工作的狀態</span></span><br><span class="line">$ kubectl get rs</span><br><span class="line">NAME                          DESIRED   CURRENT   READY     AGE</span><br><span class="line">nginx-deployment-58c7645486   1         1         0         4m</span><br><span class="line">nginx-deployment-67594d6bf6   0         0         0         2d</span><br><span class="line">nginx-deployment-6fdbb596db   3         3         3         23h</span><br><span class="line"></span><br><span class="line"><span class="comment"># pod 則是明確的顯示遇到 image pull 的問題，時間一久就會開始進入 back off 的狀態</span></span><br><span class="line">$ kubectl get pod</span><br><span class="line">NAME                                READY     STATUS             RESTARTS   AGE</span><br><span class="line">nginx-deployment-58c7645486-xrgn8   0/1       ImagePullBackOff   0          4m</span><br><span class="line">nginx-deployment-6fdbb596db-27dmh   1/1       Running            0          23h</span><br><span class="line">nginx-deployment-6fdbb596db-67cwx   1/1       Running            0          23h</span><br><span class="line">nginx-deployment-6fdbb596db-r9qmv   1/1       Running            0          23h</span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視 deployment 的細節</span></span><br><span class="line">$ kubectl describe deployment/nginx-deployment</span><br><span class="line">Name:                   nginx-deployment</span><br><span class="line">Namespace:              default</span><br><span class="line">CreationTimestamp:      Mon, 10 Sep 2018 20:13:20 +0000</span><br><span class="line">Labels:                 app=nginx</span><br><span class="line"><span class="comment"># 從 annotation 可以看出目前 deployment status 是由什麼指令造成的</span></span><br><span class="line">Annotations:            deployment.kubernetes.io/revision=3</span><br><span class="line">                        kubectl.kubernetes.io/last-applied-configuration=&#123;<span class="string">"apiVersion"</span>:<span class="string">"apps/v1"</span>,<span class="string">"kind"</span>:<span class="string">"Deployment"</span>,<span class="string">"metadata"</span>:&#123;<span class="string">"annotations"</span>:&#123;<span class="string">"kubernetes.io/change-cause"</span>:<span class="string">"kubectl apply --filename=nginx-deployment.yaml --r...</span></span><br><span class="line"><span class="string">                        kubernetes.io/change-cause=kubectl set image deployment/nginx-deployment nginx=nginx:1.91 --record=true</span></span><br><span class="line"><span class="string">Selector:               app=nginx</span></span><br><span class="line"><span class="string">Replicas:               3 desired | 1 updated | 4 total | 3 available | 1 unavailable</span></span><br><span class="line"><span class="string">....(略)</span></span><br><span class="line"><span class="string">OldReplicaSets:  nginx-deployment-6fdbb596db (3/3 replicas created)</span></span><br><span class="line"><span class="string">NewReplicaSet:   nginx-deployment-58c7645486 (1/1 replicas created)</span></span><br><span class="line"><span class="string">Events:</span></span><br><span class="line"><span class="string">  Type    Reason             Age   From                   Message</span></span><br><span class="line"><span class="string">  ----    ------             ----  ----                   -------</span></span><br><span class="line"><span class="string">  Normal  ScalingReplicaSet  1m    deployment-controller  Scaled up replica set nginx-deployment-67594d6bf6 to 3</span></span><br><span class="line"><span class="string">  Normal  ScalingReplicaSet  1m    deployment-controller  Scaled up replica set nginx-deployment-6fdbb596db to 1</span></span><br><span class="line"><span class="string">  Normal  ScalingReplicaSet  1m    deployment-controller  Scaled down replica set nginx-deployment-67594d6bf6 to 2</span></span><br><span class="line"><span class="string">  Normal  ScalingReplicaSet  1m    deployment-controller  Scaled up replica set nginx-deployment-6fdbb596db to 2</span></span><br><span class="line"><span class="string">  Normal  ScalingReplicaSet  59s   deployment-controller  Scaled down replica set nginx-deployment-67594d6bf6 to 1</span></span><br><span class="line"><span class="string">  Normal  ScalingReplicaSet  59s   deployment-controller  Scaled up replica set nginx-deployment-6fdbb596db to 3</span></span><br><span class="line"><span class="string">  Normal  ScalingReplicaSet  48s   deployment-controller  Scaled down replica set nginx-deployment-67594d6bf6 to 0</span></span><br><span class="line"><span class="string">  Normal  ScalingReplicaSet  16s   deployment-controller  Scaled up replica set nginx-deployment-58c7645486 to 1</span></span><br></pre></td></tr></table></figure>
+<p>接著來看一下 rollout history：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 透過 rollout history 指令可以看出曾經下過什麼指令</span></span><br><span class="line">$ kubectl rollout <span class="built_in">history</span> deployment/nginx-deployment</span><br><span class="line">deployments <span class="string">"nginx-deployment"</span></span><br><span class="line">REVISION  CHANGE-CAUSE</span><br><span class="line">1         kubectl apply --filename=nginx-deployment.yaml --record=<span class="literal">true</span></span><br><span class="line">2         kubectl <span class="built_in">set</span> image deployment/nginx-deployment nginx=nginx:1.9.1 --record=<span class="literal">true</span></span><br><span class="line">3         kubectl <span class="built_in">set</span> image deployment/nginx-deployment nginx=nginx:1.91 --record=<span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視 rollout hsitory 的細節</span></span><br><span class="line">$ kubectl rollout <span class="built_in">history</span> deployment/nginx-deployment --revision=2</span><br><span class="line">deployments <span class="string">"nginx-deployment"</span> with revision <span class="comment">#2</span></span><br><span class="line">Pod Template:</span><br><span class="line">  Labels:	app=nginx</span><br><span class="line">	pod-template-hash=2986615286</span><br><span class="line">  Annotations:	kubernetes.io/change-cause=kubectl <span class="built_in">set</span> image deployment/nginx-deployment nginx=nginx:1.9.1 --record=<span class="literal">true</span></span><br><span class="line">  Containers:</span><br><span class="line">   nginx:</span><br><span class="line">    Image:	nginx:1.9.1</span><br><span class="line">....(略)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>請注意! 在目前的版本 1.11.2 中，如果指令沒有加上 <code>--record</code> 參數，就不會在這邊看到指令的細節(其實這些指令是存放在 deployment 的 annotation 中)</p>
+</blockquote>
+<p>這時候我們知道 revision 2 這個版本是正常的，因此我們可以透過以下指令將 deployment 進行 rollback：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 指令效果相同於 "kubectl rollout undo deployment/nginx-deployment --to-revision=2"</span></span><br><span class="line">$ kubectl rollout undo deployment/nginx-deployment</span><br><span class="line">deployment.extensions/nginx-deployment</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重新檢視 deployment status =&gt; 正常</span></span><br><span class="line">$ kubectl get deployment</span><br><span class="line">NAME               DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE</span><br><span class="line">nginx-deployment   3         3         3            3           19m</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重新檢視 replicaset status =&gt; 正常</span></span><br><span class="line">$ kubectl get rs</span><br><span class="line">NAME                          DESIRED   CURRENT   READY     AGE</span><br><span class="line">nginx-deployment-58c7645486   0         0         0         17m</span><br><span class="line">nginx-deployment-67594d6bf6   0         0         0         19m</span><br><span class="line">nginx-deployment-6fdbb596db   3         3         3         18m</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重新檢視 pod status =&gt; 正常</span></span><br><span class="line">$ kubectl get pod</span><br><span class="line">NAME                                READY     STATUS    RESTARTS   AGE</span><br><span class="line">nginx-deployment-6fdbb596db-7zqm6   1/1       Running   0          18m</span><br><span class="line">nginx-deployment-6fdbb596db-kcl8k   1/1       Running   0          18m</span><br><span class="line">nginx-deployment-6fdbb596db-rljdk   1/1       Running   0          18m</span><br></pre></td></tr></table></figure>
+<h1 id="Scale-out-in-Deployment"><a href="#Scale-out-in-Deployment" class="headerlink" title="Scale out/in Deployment"></a>Scale out/in Deployment</h1><h2 id="Scale-out"><a href="#Scale-out" class="headerlink" title="Scale out"></a>Scale out</h2><p>在 k8s 中設定 scale out 相當簡單，以下語法就可以完成：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 設定目前的 pod repplica 為 10</span></span><br><span class="line">$ kubectl scale deployment/nginx-deployment --replicas=10</span><br><span class="line">deployment.extensions/nginx-deployment scaled</span><br><span class="line"></span><br><span class="line"><span class="comment"># 10 個 pod 順利產生</span></span><br><span class="line">$ kubectl get deployment</span><br><span class="line">NAME               DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE</span><br><span class="line">nginx-deployment   10        10        10           10          23h</span><br></pre></td></tr></table></figure>
+<h2 id="設定-Horizontal-Pod-Autoscaling"><a href="#設定-Horizontal-Pod-Autoscaling" class="headerlink" title="設定 Horizontal Pod Autoscaling"></a>設定 Horizontal Pod Autoscaling</h2><p>如果希望 pod replica 可以根據某個 resource 指標進行自動伸縮，則可以使用 <a href="https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/" target="_blank" rel="noopener">Horizontal Pod Autoscaling</a> 的功能：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl autoscale deployment nginx-deployment --min=10 --max=20 --cpu-percent=80</span><br><span class="line">horizontalpodautoscaler.autoscaling/nginx-deployment autoscaled</span><br><span class="line"></span><br><span class="line">$ kubectl get hpa</span><br><span class="line">NAME               REFERENCE                     TARGETS         MINPODS   MAXPODS   REPLICAS   AGE</span><br><span class="line">nginx-deployment   Deployment/nginx-deployment   &lt;unknown&gt;/80%   10        20        0          5s</span><br></pre></td></tr></table></figure>
+<h2 id="Proportional-Scaling"><a href="#Proportional-Scaling" class="headerlink" title="Proportional Scaling"></a>Proportional Scaling</h2><p>當變更 deployment template 時，其實 k8s 是允許多個版本同時存在的(會嚴格遵守 <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#max-surge" target="_blank" rel="noopener">maxSurge</a> &amp; [maxUnavailable] 的設定(<a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#max-unavailable)" target="_blank" rel="noopener">https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#max-unavailable)</a>)</p>
+<p>開始測試之前，先來檢視一下 deployment 的細節：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl describe deployment/nginx-deployment</span><br><span class="line">Name:                   nginx-deployment</span><br><span class="line">.... (略)</span><br><span class="line">RollingUpdateStrategy:  25% max unavailable, 25% max surge</span><br></pre></td></tr></table></figure>
+<p>可以看到關於 Proportional Scaling 的兩個重要設定，分別是：</p>
+<ul>
+<li><p><strong>25% max unavailable</strong></p>
+</li>
+<li><p><strong>25% max surge</strong></p>
+</li>
+</ul>
+<p>接著以上面 rollback 的例子來說，如果當 replica 的數量比較大時，就比較容易看的出來，以下用個範例來說明：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl get deployment</span><br><span class="line">NAME               DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE</span><br><span class="line">nginx-deployment   10        10        10           10          23h</span><br><span class="line"></span><br><span class="line"><span class="comment"># 將 container image version 指定到一個不存在的版本</span></span><br><span class="line">$ kubectl <span class="built_in">set</span> image deployment/nginx-deployment nginx=nginx:1.91</span><br><span class="line"></span><br><span class="line"><span class="comment"># k8s 調整後 (目前因為 image version 問題，所以已經卡住)</span></span><br><span class="line">$ kubectl get deployment</span><br><span class="line">NAME               DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE</span><br><span class="line">nginx-deployment   10        13        5            8           23h</span><br><span class="line"></span><br><span class="line"><span class="comment"># 兩個不同的 version 同時存在(template hash code 為 "67594d6bf6" &amp; "58c7645486")</span></span><br><span class="line"><span class="comment"># 原本的 replicaset 中有 2(10-8) 個 pod 已經暫時被移除 (maxUnavailable &lt; 25%)</span></span><br><span class="line"><span class="comment"># 所有的 replicaset 的 pod 數量為 13(8+5)，沒有超過 max surge 定義的 25% =&gt; (13 - 10) / 13 約莫 24%</span></span><br><span class="line">$ kubectl get rs</span><br><span class="line">NAME                          DESIRED   CURRENT   READY     AGE</span><br><span class="line">nginx-deployment-58c7645486   5         5         0         23h</span><br><span class="line">nginx-deployment-67594d6bf6   8         8         8         23h</span><br><span class="line">nginx-deployment-6fdbb596db   0         0         0         23h</span><br><span class="line"></span><br><span class="line"><span class="comment"># 可以再度看一下 deployment 細節</span></span><br><span class="line"><span class="comment"># 可以發現無論何時，所有 pod 的總和都沒超過 13</span></span><br><span class="line"><span class="comment"># 也就是表示 max surge 低於 25%</span></span><br><span class="line">$ kubectl describe deployment/nginx-deployment</span><br><span class="line">Name:                   nginx-deployment</span><br><span class="line">....(略)</span><br><span class="line">Events:</span><br><span class="line">  Type    Reason             Age   From                   Message</span><br><span class="line">  ----    ------             ----  ----                   -------</span><br><span class="line">  Normal  ScalingReplicaSet  9m    deployment-controller  Scaled up replica <span class="built_in">set</span> nginx-deployment-67594d6bf6 to 10</span><br><span class="line">  Normal  ScalingReplicaSet  2m    deployment-controller  Scaled up replica <span class="built_in">set</span> nginx-deployment-58c7645486 to 3</span><br><span class="line">  Normal  ScalingReplicaSet  2m    deployment-controller  Scaled down replica <span class="built_in">set</span> nginx-deployment-67594d6bf6 to 8</span><br><span class="line">  Normal  ScalingReplicaSet  2m    deployment-controller  Scaled up replica <span class="built_in">set</span> nginx-deployment-58c7645486 to 5</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>這邊比較需要注意的是，<code>max surge</code> 的計算中，是以 <strong>新舊 replica 中所有的 pod 數量為分母</strong> 去計算出來的，而不是以原有設定的 10 replica。</p>
+</blockquote>
+<h1 id="暫停-amp-恢復-Deployment"><a href="#暫停-amp-恢復-Deployment" class="headerlink" title="暫停 &amp; 恢復 Deployment"></a>暫停 &amp; 恢復 Deployment</h1><p>k8s 允許使用者暫停某個 deployment 後續的任何變更，然後再恢復。這種功能有利於當有多個調整要套用到 deployment 上時，而不需要不斷的觸發 rollout。</p>
+<p>首先來看看目前 k8s cluster 內部 deployment &amp; replicaset 的狀況：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl get deployment</span><br><span class="line">NAME               DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE</span><br><span class="line">nginx-deployment   3         3         3            3           12s</span><br><span class="line"></span><br><span class="line">$ kubectl get rs</span><br><span class="line">NAME                          DESIRED   CURRENT   READY     AGE</span><br><span class="line">nginx-deployment-67594d6bf6   3         3         3         15s</span><br></pre></td></tr></table></figure>
+<p>確認了目前　deployment　的狀況後，接著透過 <code>rollout pause</code> 來將 deployment 的變更暫停：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 暫停 deployment/nginx-deployment 的 rollout (template 變更暫時不會觸發 rollout)</span></span><br><span class="line">$ kubectl rollout pause deployment/nginx-deployment</span><br><span class="line">deployment.extensions/nginx-deployment paused</span><br><span class="line"></span><br><span class="line"><span class="comment"># 變更 deployment/nginx-deployment 中的 container image 設定</span></span><br><span class="line"><span class="comment"># 並將指令紀錄到 rollout history =&gt; --record</span></span><br><span class="line">$ kubectl <span class="built_in">set</span> image deployment/nginx-deployment nginx=nginx:1.9.1 --record</span><br><span class="line">deployment.extensions/nginx-deployment image updated</span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視 deployment/nginx-deployment 的 rollout history</span></span><br><span class="line">$ kubectl rollout <span class="built_in">history</span> deployment/nginx-deployment</span><br><span class="line">deployments <span class="string">"nginx-deployment"</span></span><br><span class="line">REVISION  CHANGE-CAUSE</span><br><span class="line">1         &lt;none&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 變更 deployment/nginx-deployment 中的 resource quita 設定</span></span><br><span class="line"><span class="comment"># 這個變更不會馬上觸發 rollout，因為已經被暫停</span></span><br><span class="line">$ kubectl <span class="built_in">set</span> resources deployment/nginx-deployment -c=nginx --limits=cpu=200m,memory=512Mi</span><br><span class="line">deployment.extensions/nginx-deployment resource requirements updated</span><br></pre></td></tr></table></figure>
+<p>從暫停到目前為止，已經完成了上面的兩個變更，分別是：</p>
+<ol>
+<li><p>修改 container image version</p>
+</li>
+<li><p>設定 resource quota</p>
+</li>
+</ol>
+<p>接著把 rollout 功能恢復：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 恢復 deployment/nginx-deployment 的 rollout</span></span><br><span class="line">$ kubectl rollout resume deployment/nginx-deployment</span><br><span class="line">deployment.extensions/nginx-deployment resumed</span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視目前 replicaset rollout 的即時狀態</span></span><br><span class="line"><span class="comment"># 仔細看下方的輸出，就可以發現 rollout 的過程都是會遵守 maxUnavailable &amp; maxSurge 的設定</span></span><br><span class="line">$ kubectl get rs -w</span><br><span class="line">NAME                          DESIRED   CURRENT   READY     AGE</span><br><span class="line">nginx-deployment-67594d6bf6   3         3         3         2m</span><br><span class="line">nginx-deployment-84bc848fd6   1         1         0         8s</span><br><span class="line">nginx-deployment-84bc848fd6   1         1         1         11s</span><br><span class="line">nginx-deployment-67594d6bf6   2         3         3         3m</span><br><span class="line">nginx-deployment-84bc848fd6   2         1         1         11s</span><br><span class="line">nginx-deployment-67594d6bf6   2         3         3         3m</span><br><span class="line">nginx-deployment-84bc848fd6   2         1         1         11s</span><br><span class="line">nginx-deployment-84bc848fd6   2         2         1         11s</span><br><span class="line">nginx-deployment-67594d6bf6   2         2         2         3m</span><br><span class="line">nginx-deployment-84bc848fd6   2         2         2         22s</span><br><span class="line">nginx-deployment-67594d6bf6   1         2         2         3m</span><br><span class="line">nginx-deployment-84bc848fd6   3         2         2         22s</span><br><span class="line">nginx-deployment-67594d6bf6   1         2         2         3m</span><br><span class="line">nginx-deployment-84bc848fd6   3         2         2         22s</span><br><span class="line">nginx-deployment-84bc848fd6   3         3         2         22s</span><br><span class="line">nginx-deployment-67594d6bf6   1         1         1         3m</span><br><span class="line">nginx-deployment-84bc848fd6   3         3         3         33s</span><br><span class="line">nginx-deployment-67594d6bf6   0         1         1         3m</span><br><span class="line">nginx-deployment-67594d6bf6   0         1         1         3m</span><br><span class="line">nginx-deployment-67594d6bf6   0         0         0         3m</span><br><span class="line">^C</span><br><span class="line"></span><br><span class="line"><span class="comment"># 最後檢視一下完成狀態</span></span><br><span class="line">$ kubectl get rs</span><br><span class="line">NAME                          DESIRED   CURRENT   READY     AGE</span><br><span class="line">nginx-deployment-67594d6bf6   0         0         0         3m</span><br><span class="line">nginx-deployment-84bc848fd6   3         3         3         52s</span><br></pre></td></tr></table></figure>
+<p>最後記得一件事情，若是 rollout 目前已經暫停，那就連 rollback 也無法做了，因為 rollback 也會觸發 rollout 的發生。</p>
+<h1 id="佈署狀態"><a href="#佈署狀態" class="headerlink" title="佈署狀態"></a>佈署狀態</h1><p>一個 deployment 整體生命周期中會有好幾個狀態，例如：</p>
+<ul>
+<li><p><strong>Progressing</strong></p>
+</li>
+<li><p><strong>Complete</strong></p>
+</li>
+<li><p><strong>Fail to progress</strong></p>
+</li>
+</ul>
+<p>以下就針對上面3個狀態進行額外說明。</p>
+<h2 id="Progressing"><a href="#Progressing" class="headerlink" title="Progressing"></a>Progressing</h2><p>當 deployment 在進行以下工作時，狀態會變更為 <strong>Progressing</strong>：</p>
+<ul>
+<li><p>建立一個 replicaset</p>
+</li>
+<li><p>scale up 新的 replicaset</p>
+</li>
+<li><p>scale down 舊的 replicaset</p>
+</li>
+<li><p>新的 pod 狀態變成 <strong>ready</strong> or <strong>available</strong></p>
+</li>
+</ul>
+<h2 id="Complete"><a href="#Complete" class="headerlink" title="Complete"></a>Complete</h2><p>當以下的條件 or 狀態有達成時，k8s 會將 deployment 狀態變更為 <strong>Complete</strong>：</p>
+<ul>
+<li><p>所有與 deployment 相關的 replicaset 都已經更新到最新的 template 版本(表示已經達到 desired status)</p>
+</li>
+<li><p>所有相關的 pod 的狀態都是 available</p>
+</li>
+<li><p>沒有舊版本的 pod 還在執行中</p>
+</li>
+</ul>
+<p>透過以下指令可以簡單的檢視目前 deployment 是否已經進入 complete 的狀態：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 檢視 deployment rollout status</span></span><br><span class="line">$ kubectl rollout status deployment/nginx-deployment</span><br><span class="line">deployment <span class="string">"nginx-deployment"</span> successfully rolled out</span><br><span class="line"></span><br><span class="line"><span class="comment"># 若上一個指令的 exit code 為 0 表示 deployment 目前為 complete 狀態</span></span><br><span class="line">root@leon-k8s-node01:~<span class="comment"># echo $?</span></span><br><span class="line">0</span><br></pre></td></tr></table></figure>
+<h2 id="Fail-to-progress"><a href="#Fail-to-progress" class="headerlink" title="Fail to progress"></a>Fail to progress</h2><p>有時會遇到 deployment 執行到一半發生問題 or 卡住而無法完成工作，而這些問題通常是以下情況引起的：</p>
+<ul>
+<li><p>Readiness probe 診斷失敗</p>
+</li>
+<li><p>container image pull 發生錯誤</p>
+</li>
+<li><p>權限不足</p>
+</li>
+<li><p>resource quota 不足 (namespace level)</p>
+</li>
+<li><p>超過 limit range 設定範圍 (pod level)</p>
+</li>
+<li><p>application 本身造成的錯誤</p>
+</li>
+</ul>
+<p>其實 k8s 判定 deployment 為 fail to progress 的預設時間為 600 秒，如果想要提早確認 deployment 無法正常運作，可以透過設定 <strong><a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#progress-deadline-seconds" target="_blank" rel="noopener">.spec.progressDeadlineSeconds</a></strong> 來縮短 or 延長判定為 fail 的時間，可以直接定義在 deployment spec 中，也可以透過以下指令修改：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># progressDeadlineSeconds 預設為 600 秒，因此不會變更</span></span><br><span class="line">$ kubectl patch deployments/nginx-deployment -p <span class="string">'&#123; "spec": &#123; "progressDeadlineSeconds": 600 &#125;&#125;'</span></span><br><span class="line">deployment.extensions/nginx-deployment not patched</span><br><span class="line"></span><br><span class="line"><span class="comment">#　將 progressDeadlineSeconds 從 600 秒改為 300 秒</span></span><br><span class="line">$ kubectl patch deployments/nginx-deployment -p <span class="string">'&#123; "spec": &#123; "progressDeadlineSeconds": 300 &#125;&#125;'</span></span><br><span class="line">deployment.extensions/nginx-deployment patched</span><br></pre></td></tr></table></figure>
+<p>當超過　progressDeadlineSeconds 設定值，就會有一筆新的 <strong>DeploymentCondition</strong> 資訊被加入到 deployment 的 <code>.status.conditions</code> 中，內容如下：</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Status</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Progressing</td>
+<td>False</td>
+<td>ProgressDeadlineExceeded</td>
+</tr>
+</tbody>
+</table>
+<p>當 deployment 已經被判定為 fail to prgress 後，除了回報 deployment 狀態外，k8s 就不會再額外多做什麼了。但若是有更上層的工具，依然還是可以利用這樣的狀態完成一些管理操作，例如：rollback 到前一個版本。</p>
+<p>最後，即使是一個 failed deployment，當它的 template 變更時，依然還是會觸發 roll out 的進行，就跟一般正常的 deployment 是完全相同的。</p>
+<h2 id="當-Deployment-發生-Failure-時怎辦？"><a href="#當-Deployment-發生-Failure-時怎辦？" class="headerlink" title="當 Deployment 發生 Failure 時怎辦？"></a>當 Deployment 發生 Failure 時怎辦？</h2><p>從上面可以看出，可能發生 fail to progress 的原因其實也不少，當遇到 deployment 無法正常佈署時，可以透過以下幾種方式來查 root cause：</p>
+<h3 id="檢查-rollout-status"><a href="#檢查-rollout-status" class="headerlink" title="檢查 rollout status"></a>檢查 rollout status</h3><p>以上面 <strong>deployment/nginx-deployment</strong> 為例，利用以下語法可以檢查 rollout status：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 檢視 deploy/nginx-deployment 的 rollout status</span></span><br><span class="line">$ kubectl rollout status deploy/nginx-deployment</span><br><span class="line">Waiting <span class="keyword">for</span> rollout to finish: 2 out of 3 new replicas have been updated...</span><br><span class="line">error: deployment <span class="string">"nginx"</span> exceeded its progress deadline</span><br><span class="line"></span><br><span class="line"><span class="comment"># 上一個指令回傳的 exit code 不等於 0</span></span><br><span class="line">$ <span class="built_in">echo</span> $?</span><br><span class="line">1</span><br></pre></td></tr></table></figure>
+<h3 id="輸出完整的-YAML-資訊"><a href="#輸出完整的-YAML-資訊" class="headerlink" title="輸出完整的 YAML 資訊"></a>輸出完整的 YAML 資訊</h3><p>透過 <code>kubectl describe</code> 檢視 deployment 狀況時，可能會出現以下資訊：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl describe deployment nginx-deployment</span><br><span class="line">.....(略)</span><br><span class="line">Conditions:</span><br><span class="line">  Type            Status  Reason</span><br><span class="line">  ----            ------  ------</span><br><span class="line">  Available       True    MinimumReplicasAvailable</span><br><span class="line">  Progressing     True    ReplicaSetUpdated</span><br><span class="line">  ReplicaFailure  True    FailedCreate</span><br><span class="line">.....(略)</span><br></pre></td></tr></table></figure>
+<p>只看到 <strong>FailedCreate</strong> 實在很難判定實際的問題到底是什麼，因此可以透過以下指令找出導致問題的詳細原因：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 可看出每一個階段產生出的詳細 log 資訊</span></span><br><span class="line">$ kubectl get deployment nginx-deployment -o yaml</span><br><span class="line">.....(略)</span><br><span class="line">status:</span><br><span class="line">  availableReplicas: 2</span><br><span class="line">  conditions:</span><br><span class="line">  - lastTransitionTime: 2016-10-04T12:25:39Z</span><br><span class="line">    lastUpdateTime: 2016-10-04T12:25:39Z</span><br><span class="line">    message: Replica <span class="built_in">set</span> <span class="string">"nginx-deployment-4262182780"</span> is progressing.</span><br><span class="line">    reason: ReplicaSetUpdated</span><br><span class="line">    status: <span class="string">"True"</span></span><br><span class="line">    <span class="built_in">type</span>: Progressing</span><br><span class="line">  - lastTransitionTime: 2016-10-04T12:25:42Z</span><br><span class="line">    lastUpdateTime: 2016-10-04T12:25:42Z</span><br><span class="line">    message: Deployment has minimum availability.</span><br><span class="line">    reason: MinimumReplicasAvailable</span><br><span class="line">    status: <span class="string">"True"</span></span><br><span class="line">    <span class="built_in">type</span>: Available</span><br><span class="line">  - lastTransitionTime: 2016-10-04T12:25:39Z</span><br><span class="line">    lastUpdateTime: 2016-10-04T12:25:39Z</span><br><span class="line">    message: <span class="string">'Error creating: pods "nginx-deployment-4262182780-" is forbidden: exceeded quota:</span></span><br><span class="line"><span class="string">      object-counts, requested: pods=1, used: pods=3, limited: pods=2'</span></span><br><span class="line">    reason: FailedCreate</span><br><span class="line">    status: <span class="string">"True"</span></span><br><span class="line">    <span class="built_in">type</span>: ReplicaFailure</span><br><span class="line">  observedGeneration: 3</span><br><span class="line">  replicas: 2</span><br><span class="line">  unavailableReplicas: 2</span><br><span class="line">.....(略)</span><br></pre></td></tr></table></figure>
+<h1 id="Clean-up-Policy"><a href="#Clean-up-Policy" class="headerlink" title="Clean up Policy"></a>Clean up Policy</h1><p>這個部份主要設定的是 revision history 保留的數量，這個設定可以針對單一的 Deployment 進行設定，透過設定 <code>.spec.revisionHistoryLimit</code> 就可以指定 k8s 要保留幾份 Deployment 的 revision history，預設值為 <strong>10</strong>。</p>
+<blockquote>
+<p>若是設定為 0，將會喪失 rollback 的能力</p>
+</blockquote>
+<h1 id="如何撰寫正確的-Deployment"><a href="#如何撰寫正確的-Deployment" class="headerlink" title="如何撰寫正確的 Deployment"></a>如何撰寫正確的 Deployment</h1><p>以上介紹了很多 Deployment 的特性 &amp; 功能，但如果希望某些屬性在定義時就宣告完成，就必須要知道 deployment spec 要如何撰寫，以下是一個比較詳細的範例：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># apiVersion, kind, metadata 3個欄位是必備的</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="comment"># deployment name</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">nginx-deployment-spec</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">nginx</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  strategy:</span></span><br><span class="line">    <span class="comment"># 用來指定當 new pod 要取代 old pod 時要如何進行</span></span><br><span class="line">    <span class="comment"># RollingUpdate: 會根據 maxUnavailable &amp; maxSurge 的設定，確保有足夠的 pod 可以提供服務</span></span><br><span class="line">    <span class="comment"># 才會慢慢的將 old pod 換成 new pod (default)</span></span><br><span class="line">    <span class="comment"># Recreate: 會先移除所有的 old pod 後，才會開始產生 new pod</span></span><br><span class="line"><span class="attr">    type:</span> <span class="string">RollingUpdate</span></span><br><span class="line"><span class="attr">    rollingUpdate:</span></span><br><span class="line">      <span class="comment"># 指定當 update 進行中時，可以失效(無法提供服務)的 pod 佔整體 pod 數量的比例(也可以是整數值)為多少</span></span><br><span class="line">      <span class="comment"># (default = 25%)</span></span><br><span class="line"><span class="attr">      maxUnavailable:</span> <span class="number">25</span><span class="string">%</span></span><br><span class="line">      <span class="comment"># 指定當 update 進行中時，pod 可以超過 desired status 定義數量的比例(也可以是整數值)</span></span><br><span class="line">      <span class="comment"># (default = 25%)</span></span><br><span class="line"><span class="attr">      maxSurge:</span> <span class="number">25</span><span class="string">%</span></span><br><span class="line">  <span class="comment"># 指定要建立多少 pod 副本(default = 1)</span></span><br><span class="line">  <span class="comment"># 實際情況少於此數字，則會增加 pod，反之則會殺掉 pod</span></span><br><span class="line"><span class="attr">  replicas:</span> <span class="number">3</span></span><br><span class="line">  <span class="comment"># 指定最長等待多少時間後，佈署依舊無法順利完成時，回報 "failed progressing" 的時間(秒)</span></span><br><span class="line">  <span class="comment"># (default = 600)</span></span><br><span class="line"><span class="attr">  progressDeadlineSeconds:</span> <span class="number">600</span></span><br><span class="line">  <span class="comment"># 設定若是沒有任何 pod crashing 的情況發生，被認為是可用狀態的最小秒數 (default = 0)</span></span><br><span class="line"><span class="attr">  minReadySeconds:</span> <span class="number">0</span></span><br><span class="line">  <span class="comment"># 設定 revision history 保留的數量</span></span><br><span class="line">  <span class="comment"># 建議可以根據 Deployment 更新的頻率來決定這個值要設定多少</span></span><br><span class="line">  <span class="comment"># 設定 0 將會無法進行 rollback</span></span><br><span class="line">  <span class="comment"># (default = 10)</span></span><br><span class="line"><span class="attr">  revisionHistoryLimit:</span> <span class="number">10</span></span><br><span class="line">  <span class="comment"># 用來指定要用來監控並進行管理的 pod label 設定</span></span><br><span class="line">  <span class="comment"># 必須要與下面的 pod label(.spec.template.metadata.labels) 相符合</span></span><br><span class="line">  <span class="comment"># 在 apps/v1 版本中，".spec.selector" 一旦設定後就無法變更了</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    matchLabels:</span></span><br><span class="line"><span class="attr">      app:</span> <span class="string">nginx</span></span><br><span class="line">  <span class="comment"># .spec.template 其實就是 pod 的定義</span></span><br><span class="line">  <span class="comment"># 也是 .spec 中唯一必須要設定的欄位</span></span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line">    <span class="comment"># pod metadata</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line">      <span class="comment"># 設定給 pod 的 label 資訊</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        app:</span> <span class="string">nginx</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line">      <span class="comment"># restart policy  在 Delpoyment 中只能設定為 Always</span></span><br><span class="line"><span class="attr">      restartPolicy:</span> <span class="string">Always</span></span><br><span class="line">      <span class="comment"># 可看出這個 pod 只運行了一個 nginx container</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">nginx</span></span><br><span class="line"><span class="attr">        image:</span> <span class="attr">nginx:1.7.9</span></span><br><span class="line"><span class="attr">        ports:</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">80</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>設定 deployment 時，必須注意<strong>不可以</strong>佈署帶有相同 label selector 的 Deployment, ReplicaSet 或是 ReplicationController</p>
+</blockquote>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/" target="_blank" rel="noopener">Deployments - Kubernetes</a></p>
+</li>
+<li><p><a href="https://jimmysong.io/kubernetes-handbook/concepts/deployment.html" target="_blank" rel="noopener">Deployment · Kubernetes Handbook - Kubernetes中文指南/云原生应用架构实践手册 by Jimmy Song(宋净超)</a></p>
+</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog/tags/Kubernetes/" rel="tag"># Kubernetes</a>
+          
+            <a href="/blog/tags/CKA/" rel="tag"># CKA</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/2018/09/07/Kubernetes/k8s-ReplicaSet-Overview/" rel="next" title="[Kubernetes] ReplicaSet 介紹">
+                <i class="fa fa-chevron-left"></i> [Kubernetes] ReplicaSet 介紹
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            本站概覽
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">godleon</p>
+              <p class="site-description motion-element" itemprop="description">把時間花在哪裡，成就就在哪裡</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/blog/archives/">
+              
+                  <span class="site-state-item-count">69</span>
+                  <span class="site-state-item-name">文章</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/blog/categories/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">分類</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/blog/tags/index.html">
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">標籤</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/godleon" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:godleon@gmail.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-globe"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://plus.google.com/godleon" target="_blank" title="Google">
+                    
+                      <i class="fa fa-fw fa-google"></i>Google</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#What-is-Deployment"><span class="nav-number">1.</span> <span class="nav-text">What is Deployment ?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用案例"><span class="nav-number">2.</span> <span class="nav-text">使用案例</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#建立-Deployment"><span class="nav-number">3.</span> <span class="nav-text">建立 Deployment</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Pod-Template-Hash-Label"><span class="nav-number">3.1.</span> <span class="nav-text">Pod-Template-Hash Label</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如果在另外一個-namespace-中建立相同的-Deployment"><span class="nav-number">3.2.</span> <span class="nav-text">如果在另外一個 namespace 中建立相同的 Deployment ?</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#更新-Deployment"><span class="nav-number">4.</span> <span class="nav-text">更新 Deployment</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Deployment-版本回溯"><span class="nav-number">5.</span> <span class="nav-text">Deployment 版本回溯</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Scale-out-in-Deployment"><span class="nav-number">6.</span> <span class="nav-text">Scale out/in Deployment</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Scale-out"><span class="nav-number">6.1.</span> <span class="nav-text">Scale out</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#設定-Horizontal-Pod-Autoscaling"><span class="nav-number">6.2.</span> <span class="nav-text">設定 Horizontal Pod Autoscaling</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Proportional-Scaling"><span class="nav-number">6.3.</span> <span class="nav-text">Proportional Scaling</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#暫停-amp-恢復-Deployment"><span class="nav-number">7.</span> <span class="nav-text">暫停 &amp; 恢復 Deployment</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#佈署狀態"><span class="nav-number">8.</span> <span class="nav-text">佈署狀態</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Progressing"><span class="nav-number">8.1.</span> <span class="nav-text">Progressing</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Complete"><span class="nav-number">8.2.</span> <span class="nav-text">Complete</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Fail-to-progress"><span class="nav-number">8.3.</span> <span class="nav-text">Fail to progress</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#當-Deployment-發生-Failure-時怎辦？"><span class="nav-number">8.4.</span> <span class="nav-text">當 Deployment 發生 Failure 時怎辦？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#檢查-rollout-status"><span class="nav-number">8.4.1.</span> <span class="nav-text">檢查 rollout status</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#輸出完整的-YAML-資訊"><span class="nav-number">8.4.2.</span> <span class="nav-text">輸出完整的 YAML 資訊</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Clean-up-Policy"><span class="nav-number">9.</span> <span class="nav-text">Clean up Policy</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#如何撰寫正確的-Deployment"><span class="nav-number">10.</span> <span class="nav-text">如何撰寫正確的 Deployment</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">11.</span> <span class="nav-text">References</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 強力驅動</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主題 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/blog/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://godleon-blog-hexo.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'https://godleon.github.io/blog/2018/09/16/Kubernetes/k8s-Deployment-Overview/';
+          this.page.identifier = '2018/09/16/Kubernetes/k8s-Deployment-Overview/';
+          this.page.title = '[Kubernetes] Deployment Overview';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/blog/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
