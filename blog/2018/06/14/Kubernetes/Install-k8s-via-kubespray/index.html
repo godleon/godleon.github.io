@@ -79,18 +79,18 @@
 
 
 
-<meta name="description" content="此篇文章介紹如何使用 Kubespray 安裝 Kubernetes 1.10.4">
+<meta name="description" content="此篇文章介紹如何使用 Kubespray 安裝 Kubernetes v1.10 以上版本">
 <meta name="keywords" content="Kubernetes,Kubespray">
 <meta property="og:type" content="article">
-<meta property="og:title" content="使用 Kubespray 安裝 Kubernetes 1.10.4">
+<meta property="og:title" content="使用 Kubespray 安裝 Kubernetes v1.10 以上版本">
 <meta property="og:url" content="https://godleon.github.io/blog/2018/06/14/Kubernetes/Install-k8s-via-kubespray/index.html">
 <meta property="og:site_name" content="小信豬的原始部落">
-<meta property="og:description" content="此篇文章介紹如何使用 Kubespray 安裝 Kubernetes 1.10.4">
+<meta property="og:description" content="此篇文章介紹如何使用 Kubespray 安裝 Kubernetes v1.10 以上版本">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2018-09-16T19:54:26.446Z">
+<meta property="og:updated_time" content="2018-09-18T20:12:10.194Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="使用 Kubespray 安裝 Kubernetes 1.10.4">
-<meta name="twitter:description" content="此篇文章介紹如何使用 Kubespray 安裝 Kubernetes 1.10.4">
+<meta name="twitter:title" content="使用 Kubespray 安裝 Kubernetes v1.10 以上版本">
+<meta name="twitter:description" content="此篇文章介紹如何使用 Kubespray 安裝 Kubernetes v1.10 以上版本">
 
 
 
@@ -126,7 +126,7 @@
 
 
 
-  <title>使用 Kubespray 安裝 Kubernetes 1.10.4 | 小信豬的原始部落</title>
+  <title>使用 Kubespray 安裝 Kubernetes v1.10 以上版本 | 小信豬的原始部落</title>
   
 
 
@@ -313,7 +313,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">使用 Kubespray 安裝 Kubernetes 1.10.4</h1>
+          <h1 class="post-title" itemprop="name headline">使用 Kubespray 安裝 Kubernetes v1.10 以上版本</h1>
         
 
         <div class="post-meta">
@@ -383,7 +383,7 @@
 
           
               <div class="post-description">
-                  此篇文章介紹如何使用 Kubespray 安裝 Kubernetes 1.10.4
+                  此篇文章介紹如何使用 Kubespray 安裝 Kubernetes v1.10 以上版本
               </div>
           
 
@@ -401,37 +401,79 @@
 
       
         <p>此篇文章介紹如何使用 <a href="https://github.com/kubernetes-incubator/kubespray" target="_blank" rel="noopener">Kubespray</a> 安裝 Kubernetes</p>
-<h1 id="環境介紹"><a href="#環境介紹" class="headerlink" title="環境介紹"></a>環境介紹</h1><p>在這個安裝過程中，共有 8 個 VM，皆為透過 Ubuntu 16.04 cloud image 所產生，分別有以下幾個 node：</p>
+<h1 id="Current-Status"><a href="#Current-Status" class="headerlink" title="Current Status"></a>Current Status</h1><p>目前支援到 <code>v1.11.3</code>，如果有需要調整，可以按照下面的說明進行修改。</p>
+<h1 id="準備安裝環境"><a href="#準備安裝環境" class="headerlink" title="準備安裝環境"></a>準備安裝環境</h1><h2 id="安裝-k8s-cluster-用機器"><a href="#安裝-k8s-cluster-用機器" class="headerlink" title="安裝 k8s cluster 用機器"></a>安裝 k8s cluster 用機器</h2><p>在這個安裝過程中，共有 6 個 VM，皆為透過 <code>Ubuntu 16.04 cloud image</code> 所產生，分別有以下幾個 node：</p>
 <ul>
 <li><p>Master Node x 3 (<strong>同時兼任 etcd node</strong>)</p>
 </li>
 <li><p>Worker Node x 3</p>
 </li>
-<li><p>Ingress Node x 2 (<strong>同時兼任 worker node</strong>)</p>
+</ul>
+<blockquote>
+<p>需要確保以上的 VM 可以透過 ssh key 或是帳號密碼登入</p>
+</blockquote>
+<h2 id="準備用來執行安裝指令的機器-bootstrapper"><a href="#準備用來執行安裝指令的機器-bootstrapper" class="headerlink" title="準備用來執行安裝指令的機器 (bootstrapper)"></a>準備用來執行安裝指令的機器 (bootstrapper)</h2><p>這台機器是用來作為執行安裝程序之用，需求如下：</p>
+<ul>
+<li>OS: <strong>Ubuntu 16.04(Trusty)</strong> or <strong>Ubuntu 18.04(Bionic)</strong></li>
+</ul>
+<h1 id="取得安裝程式碼"><a href="#取得安裝程式碼" class="headerlink" title="取得安裝程式碼"></a>取得安裝程式碼</h1><p>首先登入到 bootstrapper，輸入以下指令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ sudo apt-get update &amp;&amp; sudo apt-get -y install git</span><br><span class="line">$ <span class="built_in">cd</span> /tmp</span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/godleon/kubernetes-installation-template.git</span><br></pre></td></tr></table></figure>
+<p>上面的程式其實只是個 wrapper，目的是協助使用者快速產生安裝 Kubespray 用的環境。</p>
+<h1 id="修改安裝環境設定"><a href="#修改安裝環境設定" class="headerlink" title="修改安裝環境設定"></a>修改安裝環境設定</h1><p>接著進入 <strong>/tmp/kubernetes-installation-template</strong> 目錄中</p>
+<blockquote>
+<p>cd /tmp/kubernetes-installation-template</p>
+</blockquote>
+<p>接著根據自己環境的情況，進行後續的修改 &amp; 調整。</p>
+<h2 id="準備存取機器的-SSH-Key"><a href="#準備存取機器的-SSH-Key" class="headerlink" title="準備存取機器的 SSH Key"></a>準備存取機器的 SSH Key</h2><p>將存取機器的 SSH Key(檔名為 <strong>id_rsa</strong>) 放到 <strong>$(pwd)/ssh-privkey</strong> 目錄中</p>
+<blockquote>
+<p>若用帳號 + 密碼存取可忽略此步驟</p>
+</blockquote>
+<h2 id="pwd-kubespray-hosts-ini"><a href="#pwd-kubespray-hosts-ini" class="headerlink" title="$(pwd)/kubespray/hosts.ini"></a>$(pwd)/kubespray/hosts.ini</h2><p>這個檔案定義了要用來安裝 k8s cluster 的機器有哪些，修改時有以下幾點需要注意：</p>
+<ul>
+<li><p>務必輸入機器正確的 hostname</p>
+</li>
+<li><p>下方每個機器的 role(<code>kube-master</code>/<code>etcd</code>/<code>kube-node</code>) 要定義清楚</p>
+</li>
+<li><p>一般來說，master 跟 etcd 會安裝在一起 (大規模佈署才需要分開)</p>
+</li>
+<li><p>Ingress 可以暫時先忽略</p>
 </li>
 </ul>
-<h1 id="準備安裝環境"><a href="#準備安裝環境" class="headerlink" title="準備安裝環境"></a>準備安裝環境</h1><h2 id="準備安裝環境-1"><a href="#準備安裝環境-1" class="headerlink" title="準備安裝環境"></a>準備安裝環境</h2><p>確認了環境之後，另外還要準備一台用來執行 Ansible 程式的機器(or VM)，以下以 docker container 的方式來執行：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ docker run --name kubespray -td ubuntu:xenial /bin/bash</span><br><span class="line"></span><br><span class="line">$ docker <span class="built_in">exec</span> -it kubespray bash</span><br></pre></td></tr></table></figure>
-<p>接著在 ubuntu container 中執行以下 script：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bib/bash</span></span><br><span class="line"></span><br><span class="line">apt-get update</span><br><span class="line">apt-get -y install git python3-pip python</span><br><span class="line">pip3 install --upgrade pip</span><br><span class="line"></span><br><span class="line"><span class="built_in">cd</span> /tmp</span><br><span class="line">git <span class="built_in">clone</span> https://github.com/kubernetes-incubator/kubespray.git</span><br><span class="line"><span class="built_in">cd</span> -</span><br><span class="line">pip install -r /tmp/kubespray/requirements.txt</span><br></pre></td></tr></table></figure>
-<p>如此一來 Kubespray 的安裝環境就準備好了</p>
-<h2 id="準備環境設定檔"><a href="#準備環境設定檔" class="headerlink" title="準備環境設定檔"></a>準備環境設定檔</h2><p>接著要針對我們自己的環境來進行 Ansible inventory &amp; variables 的相關設定：(以下內容皆在 container 中)</p>
-<h3 id="tmp-kubespray-inventory-mycluster-hosts-ini"><a href="#tmp-kubespray-inventory-mycluster-hosts-ini" class="headerlink" title="/tmp/kubespray/inventory/mycluster/hosts.ini"></a>/tmp/kubespray/inventory/mycluster/hosts.ini</h3><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">kube-ingress0   ansible_host=[YOUR_SERVER_IP]   ip=[YOUR_SERVER_IP]</span><br><span class="line">kube-ingress1   ansible_host=[YOUR_SERVER_IP]   ip=[YOUR_SERVER_IP]</span><br><span class="line"></span><br><span class="line">kube-master0    ansible_host=[YOUR_SERVER_IP]   ip=[YOUR_SERVER_IP]</span><br><span class="line">kube-master1    ansible_host=[YOUR_SERVER_IP]   ip=[YOUR_SERVER_IP]</span><br><span class="line">kube-master2    ansible_host=[YOUR_SERVER_IP]   ip=[YOUR_SERVER_IP]</span><br><span class="line"></span><br><span class="line">kube-worker0    ansible_host=[YOUR_SERVER_IP]   ip=[YOUR_SERVER_IP]</span><br><span class="line">kube-worker1    ansible_host=[YOUR_SERVER_IP]   ip=[YOUR_SERVER_IP]</span><br><span class="line">kube-worker2    ansible_host=[YOUR_SERVER_IP]   ip=[YOUR_SERVER_IP]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="section">[kube-master]</span></span><br><span class="line">kube-master[0:2]</span><br><span class="line"></span><br><span class="line"><span class="section">[etcd]</span></span><br><span class="line">kube-master[0:2]</span><br><span class="line"></span><br><span class="line"><span class="section">[kube-node]</span></span><br><span class="line">kube-worker[0:2]</span><br><span class="line">kube-ingress[0:1]</span><br><span class="line"></span><br><span class="line"><span class="section">[kube-ingress]</span></span><br><span class="line">kube-ingress[0:1]</span><br><span class="line"></span><br><span class="line"><span class="section">[k8s-cluster:children]</span></span><br><span class="line">kube-master</span><br><span class="line">kube-node</span><br><span class="line">kube-ingress</span><br></pre></td></tr></table></figure>
-<h3 id="tmp-kubespray-inventory-mycluster-group-vars-all-yml"><a href="#tmp-kubespray-inventory-mycluster-group-vars-all-yml" class="headerlink" title="/tmp/kubespray/inventory/mycluster/group_vars/all.yml"></a>/tmp/kubespray/inventory/mycluster/group_vars/all.yml</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#### ....預設值忽略.... ####</span></span><br><span class="line"></span><br><span class="line"><span class="attr">bootstrap_os:</span> <span class="string">ubuntu</span></span><br><span class="line"><span class="attr">ansible_user:</span> <span class="string">ubuntu</span></span><br><span class="line"><span class="attr">ansible_become_user:</span> <span class="string">root</span></span><br><span class="line"><span class="attr">ansible_ssh_private_key_file:</span> <span class="string">/ansible/ssh-privkey/id_rsa</span></span><br></pre></td></tr></table></figure>
-<h3 id="tmp-kubespray-inventory-mycluster-group-vars-k8s-cluster-yml"><a href="#tmp-kubespray-inventory-mycluster-group-vars-k8s-cluster-yml" class="headerlink" title="/tmp/kubespray/inventory/mycluster/group_vars/k8s-cluster.yml"></a>/tmp/kubespray/inventory/mycluster/group_vars/k8s-cluster.yml</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#### ....預設值忽略.... ####</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 在 ansible host 上存放 kubeconfig</span></span><br><span class="line"><span class="attr">kubeconfig_localhost:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
-<h1 id="安裝-Kubernetes"><a href="#安裝-Kubernetes" class="headerlink" title="安裝 Kubernetes"></a>安裝 Kubernetes</h1><p>最後執行以下指令即可安裝：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> /tmp/kubespray</span><br><span class="line">$ ansible-playbook -b -i inventory/mycluster/hosts.ini cluster.yml</span><br></pre></td></tr></table></figure>
-<p>安裝完之後可以在執行 ansible 指令的機器上找到 kubeconfig，位置在 <code>/tmp/kubespray/inventory/mycluster/artifacts/admin.conf</code></p>
+<p>以下是根據上面的安裝環境所撰寫的設定範例：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">kube-master0    ansible_ssh_host=[YOUR_SERVER_IP]</span><br><span class="line">kube-master1    ansible_ssh_host=[YOUR_SERVER_IP]</span><br><span class="line">kube-master2    ansible_ssh_host=[YOUR_SERVER_IP]</span><br><span class="line"></span><br><span class="line">kube-worker0    ansible_ssh_host=[YOUR_SERVER_IP]</span><br><span class="line">kube-worker1    ansible_ssh_host=[YOUR_SERVER_IP]</span><br><span class="line">kube-worker2    ansible_ssh_host=[YOUR_SERVER_IP]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="section">[kube-master]</span></span><br><span class="line">kube-master[0:2]</span><br><span class="line"></span><br><span class="line"><span class="section">[etcd]</span></span><br><span class="line">kube-master[0:2]</span><br><span class="line"></span><br><span class="line"><span class="section">[kube-node]</span></span><br><span class="line">kube-worker[0:2]</span><br><span class="line"></span><br><span class="line"><span class="section">[kube-ingress]</span></span><br><span class="line"></span><br><span class="line"><span class="section">[k8s-cluster:children]</span></span><br><span class="line">kube-master</span><br><span class="line">kube-node</span><br><span class="line">kube-ingress</span><br></pre></td></tr></table></figure>
+<h2 id="pwd-kubespray-group-vars-all-yml"><a href="#pwd-kubespray-group-vars-all-yml" class="headerlink" title="$(pwd)/kubespray/group_vars/all.yml"></a>$(pwd)/kubespray/group_vars/all.yml</h2><ul>
+<li><p>確認遠端安裝機器的 python 路徑，並修改 <strong>ansible_python_interpreter</strong> 參數(預設是 <code>/usr/bin/python3.5</code>)</p>
+</li>
+<li><p>確認遠端機器的 OS，並修改 <strong>bootstrap_os</strong> 參數(預設是 <code>ubuntu</code>)</p>
+</li>
+</ul>
+<p>最後要設定安裝用 VM 的存取方式，分為以下兩種狀況：</p>
+<h3 id="使用-SSH-Key-存取"><a href="#使用-SSH-Key-存取" class="headerlink" title="使用 SSH Key 存取"></a>使用 SSH Key 存取</h3><ul>
+<li>確認 SSH Key 為 <strong>$(pwd)/ssh-privkey/id_rsa</strong></li>
+</ul>
+<h2 id="使用帳號-密碼存取"><a href="#使用帳號-密碼存取" class="headerlink" title="使用帳號 + 密碼存取"></a>使用帳號 + 密碼存取</h2><ul>
+<li><p>將 <strong>ansible_ssh_pass</strong> 參數的註解取消，並輸入存取密碼</p>
+</li>
+<li><p><strong>ansible_user</strong> 參數請設定為登入帳號</p>
+</li>
+<li><p>移除(or 註解) <strong>ansible_ssh_private_key_file</strong> 參數</p>
+</li>
+</ul>
+<h2 id="pwd-kubespray-group-vars-k8s-cluster-yml"><a href="#pwd-kubespray-group-vars-k8s-cluster-yml" class="headerlink" title="$(pwd)/kubespray/group_vars/k8s-cluster.yml"></a>$(pwd)/kubespray/group_vars/k8s-cluster.yml</h2><p>若有需要調整安裝的版本，目前預設是 <code>v1.11.3</code>，可以調整 <strong>kube_version</strong> 來變更。</p>
+<h1 id="執行安裝程式"><a href="#執行安裝程式" class="headerlink" title="執行安裝程式"></a>執行安裝程式</h1><p>當以上設定都完成後，就可以開始執行安裝程式：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 若按照上面的操作，沒有離開原本的目錄的話，應該就是位於下面的目錄中</span></span><br><span class="line">$ <span class="built_in">cd</span> /tmp/kubernetes-installation-template</span><br><span class="line"></span><br><span class="line"><span class="comment"># 開始安裝</span></span><br><span class="line">$ bash start.sh</span><br></pre></td></tr></table></figure>
+<p>整個安裝過程大約需要耗費十來分鐘(端看網路 &amp; VM 運行速度)。</p>
+<p>安裝完之後可以在執行安裝指令的機器(<strong>bootstrapper</strong>)上找到 kubeconfig，位置在 <code>/tmp/kubernetes-installation-template/kubeconfig/admin.conf</code>。</p>
 <h1 id="操作-Kubernetes"><a href="#操作-Kubernetes" class="headerlink" title="操作 Kubernetes"></a>操作 Kubernetes</h1><p>要操作 k8s 可以直接連到 master node 上直接使用 kubectl 進行操作，也可以使用其他機器進行操作。</p>
 <p>但若要使用非 master node 的機器對 k8s 進行操作，必須先準備好以下環境：</p>
 <ol>
 <li><p>安裝 <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/" target="_blank" rel="noopener">kubectl</a></p>
 </li>
-<li><p>準備好 kubeconfig (以上例來說，位於 <code>/tmp/kubespray/inventory/mycluster/artifacts/admin.conf</code>)，檔案路徑為 <code>~/.kube/config</code></p>
+<li><p>準備好 kubeconfig (以上例來說，位於 <code>/tmp/kubernetes-installation-template/kubeconfig/admin.conf</code>)，檔案路徑為 <code>~/.kube/config</code></p>
 </li>
 </ol>
 <p>完成後執行簡單的指令：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl get nodes</span><br><span class="line">NAME            STATUS    ROLES          AGE       VERSION</span><br><span class="line">kube-ingress0   Ready     ingress,node   1h        v1.10.4</span><br><span class="line">kube-ingress1   Ready     ingress,node   1h        v1.10.4</span><br><span class="line">kube-master0    Ready     master         1h        v1.10.4</span><br><span class="line">kube-master1    Ready     master         1h        v1.10.4</span><br><span class="line">kube-master2    Ready     master         1h        v1.10.4</span><br><span class="line">kube-worker0    Ready     node           1h        v1.10.4</span><br><span class="line">kube-worker1    Ready     node           1h        v1.10.4</span><br><span class="line">kube-worker2    Ready     node           1h        v1.10.4</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl get nodes</span><br><span class="line">NAME            STATUS    ROLES          AGE       VERSION</span><br><span class="line">kube-master0    Ready     master         1h        v1.11.2</span><br><span class="line">kube-master1    Ready     master         1h        v1.11.2</span><br><span class="line">kube-master2    Ready     master         1h        v1.11.2</span><br><span class="line">kube-worker0    Ready     node           1h        v1.11.2</span><br><span class="line">kube-worker1    Ready     node           1h        v1.11.2</span><br><span class="line">kube-worker2    Ready     node           1h        v1.11.2</span><br></pre></td></tr></table></figure>
 <p>這樣大致上基本的 Kubernetes 就安裝完成了!</p>
 <blockquote>
 <p>若是要取得安裝時所產生的相關憑證檔案，可以到 master node 上的 <code>/etc/kubernetes/ssl</code> 目錄中尋找</p>
@@ -647,7 +689,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#環境介紹"><span class="nav-number">1.</span> <span class="nav-text">環境介紹</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#準備安裝環境"><span class="nav-number">2.</span> <span class="nav-text">準備安裝環境</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#準備安裝環境-1"><span class="nav-number">2.1.</span> <span class="nav-text">準備安裝環境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#準備環境設定檔"><span class="nav-number">2.2.</span> <span class="nav-text">準備環境設定檔</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#tmp-kubespray-inventory-mycluster-hosts-ini"><span class="nav-number">2.2.1.</span> <span class="nav-text">/tmp/kubespray/inventory/mycluster/hosts.ini</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#tmp-kubespray-inventory-mycluster-group-vars-all-yml"><span class="nav-number">2.2.2.</span> <span class="nav-text">/tmp/kubespray/inventory/mycluster/group_vars/all.yml</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#tmp-kubespray-inventory-mycluster-group-vars-k8s-cluster-yml"><span class="nav-number">2.2.3.</span> <span class="nav-text">/tmp/kubespray/inventory/mycluster/group_vars/k8s-cluster.yml</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#安裝-Kubernetes"><span class="nav-number">3.</span> <span class="nav-text">安裝 Kubernetes</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#操作-Kubernetes"><span class="nav-number">4.</span> <span class="nav-text">操作 Kubernetes</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Current-Status"><span class="nav-number">1.</span> <span class="nav-text">Current Status</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#準備安裝環境"><span class="nav-number">2.</span> <span class="nav-text">準備安裝環境</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#安裝-k8s-cluster-用機器"><span class="nav-number">2.1.</span> <span class="nav-text">安裝 k8s cluster 用機器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#準備用來執行安裝指令的機器-bootstrapper"><span class="nav-number">2.2.</span> <span class="nav-text">準備用來執行安裝指令的機器 (bootstrapper)</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#取得安裝程式碼"><span class="nav-number">3.</span> <span class="nav-text">取得安裝程式碼</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#修改安裝環境設定"><span class="nav-number">4.</span> <span class="nav-text">修改安裝環境設定</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#準備存取機器的-SSH-Key"><span class="nav-number">4.1.</span> <span class="nav-text">準備存取機器的 SSH Key</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#pwd-kubespray-hosts-ini"><span class="nav-number">4.2.</span> <span class="nav-text">$(pwd)/kubespray/hosts.ini</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#pwd-kubespray-group-vars-all-yml"><span class="nav-number">4.3.</span> <span class="nav-text">$(pwd)/kubespray/group_vars/all.yml</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#使用-SSH-Key-存取"><span class="nav-number">4.3.1.</span> <span class="nav-text">使用 SSH Key 存取</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用帳號-密碼存取"><span class="nav-number">4.4.</span> <span class="nav-text">使用帳號 + 密碼存取</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#pwd-kubespray-group-vars-k8s-cluster-yml"><span class="nav-number">4.5.</span> <span class="nav-text">$(pwd)/kubespray/group_vars/k8s-cluster.yml</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#執行安裝程式"><span class="nav-number">5.</span> <span class="nav-text">執行安裝程式</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#操作-Kubernetes"><span class="nav-number">6.</span> <span class="nav-text">操作 Kubernetes</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">7.</span> <span class="nav-text">References</span></a></li></ol></div>
             
 
           </div>
@@ -812,7 +854,7 @@
         var disqus_config = function () {
           this.page.url = 'https://godleon.github.io/blog/2018/06/14/Kubernetes/Install-k8s-via-kubespray/';
           this.page.identifier = '2018/06/14/Kubernetes/Install-k8s-via-kubespray/';
-          this.page.title = '使用 Kubespray 安裝 Kubernetes 1.10.4';
+          this.page.title = '使用 Kubespray 安裝 Kubernetes v1.10 以上版本';
         };
         var d = document, s = d.createElement('script');
         s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
