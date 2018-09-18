@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-tw">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/blog/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/blog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/blog/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/blog/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Linux,RHCE,RH134," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="此文章記錄學習 RHCE7 RH134 Chapter 07. Managing SELinux Security 留下的內容">
+<meta name="keywords" content="Linux,RHCE,RH134">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[RHCE7] RH134 Chapter 7. Managing SELinux Security 學習筆記">
+<meta property="og:url" content="https://godleon.github.io/blog/RHCE/RHCE7-RH134-LearningNotes-CH07_ManagingSELinuxSecurity/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此文章記錄學習 RHCE7 RH134 Chapter 07. Managing SELinux Security 留下的內容">
+<meta property="og:locale" content="zh-tw">
+<meta property="og:image" content="https://lh3.googleusercontent.com/bR6HlmRdHb9TosMXahqB3BxjdVdlFnfgpHh3bYbHeOmr2xGY_tvnAd7YBE4S4UWVzO_DX56XWwh6ytRqH1V27HhfcgRVlSHI5il3oCrJDaq0CRj_SBKElh8LLtCi4oDh3X1YXTK0gRX3p39i0soYp_ILkDBUku85ao5bYgFwmADGGN7S4Hd2FCQaREgbk9SFKgXQRJgMsvpfwmCg3KBKR6yEhG9T9iiQZg2cxZdXxELuzOFLx0jjrbgn84jxtXNnkNJJlWaOKQKtq8qGReElZkvZy2F1ZaJTcJtO208xPgEtoHHbI4N9GJyGUIcQzDhQ3rlXBuPbcuo0TT_W1yULLmLxA-uGR_JnA4cm9wv16tJZs3zMdeUKsFNxALBFZptxtOkOcpi1jopCJUEvCw4NAHhExPVHVHkVdFS2a-KUjRMBRyrFX-sa-xC5Ey3l7dbgKgjHjYta11VozADz7WIUV1FUVkR2tUmdXv6_XJVwVpclaD2PXnd7tHbOmM8Mnf4mwMP4E6yjjWiuTk9YVpoGx_2_8Nyw3xzzJ9CHYJy-WVPgSI1Q-m0Co6ZcR2bK_6p02bE8h9nft0354PiugpLIqV6dKQ0SW6g=w888-h225-no">
+<meta property="og:updated_time" content="2018-09-18T20:29:07.282Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[RHCE7] RH134 Chapter 7. Managing SELinux Security 學習筆記">
+<meta name="twitter:description" content="此文章記錄學習 RHCE7 RH134 Chapter 07. Managing SELinux Security 留下的內容">
+<meta name="twitter:image" content="https://lh3.googleusercontent.com/bR6HlmRdHb9TosMXahqB3BxjdVdlFnfgpHh3bYbHeOmr2xGY_tvnAd7YBE4S4UWVzO_DX56XWwh6ytRqH1V27HhfcgRVlSHI5il3oCrJDaq0CRj_SBKElh8LLtCi4oDh3X1YXTK0gRX3p39i0soYp_ILkDBUku85ao5bYgFwmADGGN7S4Hd2FCQaREgbk9SFKgXQRJgMsvpfwmCg3KBKR6yEhG9T9iiQZg2cxZdXxELuzOFLx0jjrbgn84jxtXNnkNJJlWaOKQKtq8qGReElZkvZy2F1ZaJTcJtO208xPgEtoHHbI4N9GJyGUIcQzDhQ3rlXBuPbcuo0TT_W1yULLmLxA-uGR_JnA4cm9wv16tJZs3zMdeUKsFNxALBFZptxtOkOcpi1jopCJUEvCw4NAHhExPVHVHkVdFS2a-KUjRMBRyrFX-sa-xC5Ey3l7dbgKgjHjYta11VozADz7WIUV1FUVkR2tUmdXv6_XJVwVpclaD2PXnd7tHbOmM8Mnf4mwMP4E6yjjWiuTk9YVpoGx_2_8Nyw3xzzJ9CHYJy-WVPgSI1Q-m0Co6ZcR2bK_6p02bE8h9nft0354PiugpLIqV6dKQ0SW6g=w888-h225-no">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://godleon.github.io/blog/RHCE/RHCE7-RH134-LearningNotes-CH07_ManagingSELinuxSecurity/"/>
+
+
+
+
+
+  <title>[RHCE7] RH134 Chapter 7. Managing SELinux Security 學習筆記 | 小信豬的原始部落</title>
+  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-703592-7', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-tw">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">小信豬的原始部落</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/blog/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首頁
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/blog/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            標籤
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/blog/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分類
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/blog/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            歸檔
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            檢索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/blog/RHCE/RHCE7-RH134-LearningNotes-CH07_ManagingSELinuxSecurity/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">[RHCE7] RH134 Chapter 7. Managing SELinux Security 學習筆記</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">發表於</span>
+              
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2016-05-08T21:10:00+00:00">
+                2016-05-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分類於</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/RHCE/" itemprop="url" rel="index">
+                    <span itemprop="name">RHCE</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/RHCE/RHCE7-RH134-LearningNotes-CH07_ManagingSELinuxSecurity/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="RHCE/RHCE7-RH134-LearningNotes-CH07_ManagingSELinuxSecurity/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  此文章記錄學習 RHCE7 RH134 Chapter 07. Managing SELinux Security 留下的內容
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><a name="ch7.1"></a></p>
+<h1 id="7-1-Enabling-and-Monitoring-Security-Enhanced-Linux-SELinux"><a href="#7-1-Enabling-and-Monitoring-Security-Enhanced-Linux-SELinux" class="headerlink" title="7.1 Enabling and Monitoring Security Enhanced Linux (SELinux)"></a>7.1 Enabling and Monitoring Security Enhanced Linux (SELinux)</h1><h2 id="7-1-1-Basic-SELinux-security-concepts"><a href="#7-1-1-Basic-SELinux-security-concepts" class="headerlink" title="7.1.1 Basic SELinux security concepts"></a>7.1.1 Basic SELinux security concepts</h2><p>SELinux 為系統安全提供了多一層的保護，目的在於當系統服務被攻陷後，還有另外一層機制(object-based)可以保護使用者的資料。</p>
+<p><img src="https://lh3.googleusercontent.com/bR6HlmRdHb9TosMXahqB3BxjdVdlFnfgpHh3bYbHeOmr2xGY_tvnAd7YBE4S4UWVzO_DX56XWwh6ytRqH1V27HhfcgRVlSHI5il3oCrJDaq0CRj_SBKElh8LLtCi4oDh3X1YXTK0gRX3p39i0soYp_ILkDBUku85ao5bYgFwmADGGN7S4Hd2FCQaREgbk9SFKgXQRJgMsvpfwmCg3KBKR6yEhG9T9iiQZg2cxZdXxELuzOFLx0jjrbgn84jxtXNnkNJJlWaOKQKtq8qGReElZkvZy2F1ZaJTcJtO208xPgEtoHHbI4N9GJyGUIcQzDhQ3rlXBuPbcuo0TT_W1yULLmLxA-uGR_JnA4cm9wv16tJZs3zMdeUKsFNxALBFZptxtOkOcpi1jopCJUEvCw4NAHhExPVHVHkVdFS2a-KUjRMBRyrFX-sa-xC5Ey3l7dbgKgjHjYta11VozADz7WIUV1FUVkR2tUmdXv6_XJVwVpclaD2PXnd7tHbOmM8Mnf4mwMP4E6yjjWiuTk9YVpoGx_2_8Nyw3xzzJ9CHYJy-WVPgSI1Q-m0Co6ZcR2bK_6p02bE8h9nft0354PiugpLIqV6dKQ0SW6g=w888-h225-no" alt="SELinux"></p>
+<p>在傳統架構下，當 web server 被攻陷後，駭客取得 <strong>apache</strong> 使用者的權限，就可以自由地存取 <strong>/var/www/html</strong>, <strong>/tmp</strong>, <strong>/var/tmp</strong> 等目錄；但若是在 SELinux 的限制下，就僅有 <strong>/var/www/html</strong> 可以存取。</p>
+<p>從上面就不難看出，SELinux 定義了特定服務可以存取的特定 file、directory、port …. 等資訊，用以限縮 service owner 可以存取檔案的範圍；而方法就在於每一個 file, directory, process, port 都有所謂的 <code>SELinux context</code>。</p>
+<p>而 context 大概長這樣 =&gt; <code>system_u:object_r:httpd_sys_content_t:s0</code></p>
+<p>以 <strong>:</strong> 作為分隔，分別是 user(system_u), role(object_r), type(httpd_sys_content_t), sensitvity(s0)；而 SELinux rule 的制定則是以 type 為主來設計的。</p>
+<p>舉例來說，與 Apache 相關的檔案位於 <strong>/var/www/html</strong> 中，而這裡檔案的 context type 則為 <code>httpd_sys_content_t</code> or <code>httpd_t</code>，與 Apache 服務運行相關的檔案則為 <code>http_port_t</code>，這些 context type　的檔案都可以讓 Apache service 存取；但若是 <strong>/tmp</strong> 與 <strong>/var/tmp</strong> 中的檔案，其 context type 則為 <code>tmp_t</code>，而 Apache service 要嘗試存取時就會被拒絕。</p>
+<p>許多指令都可以透過 <code>-Z</code> 參數取得 SELinux context 資訊，例如：<code>ps axZ</code>, <code>ps -ZC httpd</code>, <code>ls -Z /var/www</code> … 等等。</p>
+<h2 id="7-1-2-SELinux-modes"><a href="#7-1-2-SELinux-modes" class="headerlink" title="7.1.2 SELinux modes"></a>7.1.2 SELinux modes</h2><p>預設為 <strong>enforcing</strong> mode，但若是基於臨時性的需求而需要關掉 SELinux，可轉換成 <strong>permissive</strong> mode，此時只會有警告 &amp; Log，但不會被安全機制阻擋，且可以 online 切換，不須 reboot；但如果要完全 disable SELinux ，就需要重開機。</p>
+<blockquote>
+<p>使用 <code>getenforce</code> 指令就可以知道目前的 SELinux mode</p>
+</blockquote>
+<h2 id="7-1-3-SELinux-Booleans"><a href="#7-1-3-SELinux-Booleans" class="headerlink" title="7.1.3 SELinux Booleans"></a>7.1.3 SELinux Booleans</h2><p><strong>SELinux Booleans</strong> 是用來設定 SELinux Rules 是否啟用，可以用來調整 SELinux 的原始設定；若要檢視 SELinux Booleans 目前的設定值，可使用 <code>getsebool -a</code> 取得。</p>
+<hr>
+<p><a name="ch7.2"></a></p>
+<h1 id="7-2-Changing-SELinux-Modes"><a href="#7-2-Changing-SELinux-Modes" class="headerlink" title="7.2 Changing SELinux Modes"></a>7.2 Changing SELinux Modes</h1><h2 id="7-2-1-Changing-the-current-SELinux-mode"><a href="#7-2-1-Changing-the-current-SELinux-mode" class="headerlink" title="7.2.1 Changing the current SELinux mode"></a>7.2.1 Changing the current SELinux mode</h2><p>檢視目前 SELinux 狀態：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[vagrant@server tmp]$ getenforce</span><br><span class="line">Permissive</span><br><span class="line"></span><br><span class="line"><span class="comment"># 1(enforcing), 0(permissive)</span></span><br><span class="line">[vagrant@server tmp]$ sudo setenforce 1</span><br><span class="line">[vagrant@server tmp]$ getenforce</span><br><span class="line">Enforcing</span><br></pre></td></tr></table></figure>
+<h2 id="7-2-2-Setting-the-default-SELinux-mode"><a href="#7-2-2-Setting-the-default-SELinux-mode" class="headerlink" title="7.2.2 Setting the default SELinux mode"></a>7.2.2 Setting the default SELinux mode</h2><p>SELinux 的設定檔位於 <code>/etc/selinux/config</code></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[vagrant@server tmp]$ cat /etc/selinux/config</span><br><span class="line"></span><br><span class="line"><span class="comment"># This file controls the state of SELinux on the system.</span></span><br><span class="line"><span class="comment"># SELINUX= can take one of these three values:</span></span><br><span class="line"><span class="comment">#     enforcing - SELinux security policy is enforced.</span></span><br><span class="line"><span class="comment">#     permissive - SELinux prints warnings instead of enforcing.</span></span><br><span class="line"><span class="comment">#     disabled - No SELinux policy is loaded.</span></span><br><span class="line">SELINUX=permissive</span><br><span class="line"><span class="comment"># SELINUXTYPE= can take one of three two values:</span></span><br><span class="line"><span class="comment">#     targeted - Targeted processes are protected,</span></span><br><span class="line"><span class="comment">#     minimum - Modification of targeted policy. Only selected processes are protected.</span></span><br><span class="line"><span class="comment">#     mls - Multi Level Security protection.</span></span><br><span class="line">SELINUXTYPE=targeted</span><br></pre></td></tr></table></figure>
+<p><code>permissive</code>：僅會 log 不會限制存取</p>
+<p><code>enforcing</code>：會 log &amp; 限制存取</p>
+<blockquote>
+<p>SELINUXTYPE 預設為 targeted, 也許在少數狀況下會使用另外兩個</p>
+</blockquote>
+<blockquote>
+<p>變更完設定後必須重新啟動，設定才會生效</p>
+</blockquote>
+<hr>
+<p><a name="ch7.3"></a></p>
+<h2 id="7-3-Chaging-SELinux-Contexts"><a href="#7-3-Chaging-SELinux-Contexts" class="headerlink" title="7.3 Chaging SELinux Contexts"></a>7.3 Chaging SELinux Contexts</h2><p>在開始這個部分之前，需要先安裝兩個必要套件，分別是 <code>policycoreutils</code> &amp; <code>policycoreutils-python</code>(semanage)</p>
+<h3 id="7-3-1-Initial-SELinux-context"><a href="#7-3-1-Initial-SELinux-context" class="headerlink" title="7.3.1 Initial SELinux context"></a>7.3.1 Initial SELinux context</h3><p>在 RHEL7 中，檔案預設的 SELinux context 會由其所在的目錄所決定，新產生的檔案都會繼承目錄的 context(<code>vim</code>, <code>cp</code>, <code>touch</code> 適用)，但若是非新建的或是特別情況則不會(<code>mv</code>, <code>cp -a</code>)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># context =&gt; httpd_sys_content_t</span></span><br><span class="line">[student@server0 ~]$ ls -Zd /var/www/html</span><br><span class="line">drwxr-xr-x. root root system_u:object_r:httpd_sys_content_t:s0 /var/www/html</span><br><span class="line"></span><br><span class="line"><span class="comment"># 產生兩個檔案</span></span><br><span class="line">[student@server0 ~]$ sudo touch /var/www/html/index.html</span><br><span class="line">[student@server0 ~]$ sudo cp -a /tmp/rht /var/www/html/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 新建的繼承目錄的 context，透過 cp -a 的則保留原有的 context</span></span><br><span class="line">[student@server0 ~]$ ls -laZ /var/www/html/</span><br><span class="line">drwxr-xr-x. root root system_u:object_r:httpd_sys_content_t:s0 .</span><br><span class="line">drwxr-xr-x. root root system_u:object_r:httpd_sys_content_t:s0 ..</span><br><span class="line">-rw-r--r--. root root unconfined_u:object_r:httpd_sys_content_t:s0 index.html</span><br><span class="line">-rw-r--r--. root root system_u:object_r:init_tmp_t:s0  rht</span><br></pre></td></tr></table></figure>
+<h3 id="7-3-2-Changing-the-SELinux-context-of-a-file"><a href="#7-3-2-Changing-the-SELinux-context-of-a-file" class="headerlink" title="7.3.2 Changing the SELinux context of a file"></a>7.3.2 Changing the SELinux context of a file</h3><p>有兩種方式可以改變 SELinux context：</p>
+<ol>
+<li><p><code>chcon</code>：搭配 <code>-t</code> 參數指定所要變更的 context</p>
+</li>
+<li><p><code>restorecon</code>：直接將 context 改為預設 context (根據檔案 or 目錄所在的位置而定)</p>
+</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 顯示目錄(/var/www/html)的預設 SELinux context</span></span><br><span class="line">[student@server0 ~]$ ls -laZ /var/www/html/</span><br><span class="line">drwxr-xr-x. root root system_u:object_r:httpd_sys_content_t:s0 .</span><br><span class="line">drwxr-xr-x. root root system_u:object_r:httpd_sys_content_t:s0 ..</span><br><span class="line">-rw-r--r--. root root unconfined_u:object_r:httpd_sys_content_t:s0 index.html</span><br><span class="line">-rw-r--r--. root root system_u:object_r:init_tmp_t:s0  rht</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 chcon 變更檔案的 context</span></span><br><span class="line">[student@server0 ~]$ sudo chcon -t tmp_t /var/www/html/index.html</span><br><span class="line">[student@server0 ~]$ ls -laZ /var/www/html/</span><br><span class="line">drwxr-xr-x. root root system_u:object_r:httpd_sys_content_t:s0 .</span><br><span class="line">drwxr-xr-x. root root system_u:object_r:httpd_sys_content_t:s0 ..</span><br><span class="line">-rw-r--r--. root root unconfined_u:object_r:tmp_t:s0   index.html</span><br><span class="line">-rw-r--r--. root root system_u:object_r:init_tmp_t:s0  rht</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 restorecon 直接將檔案變成為預設值</span></span><br><span class="line">[student@server0 ~]$ sudo restorecon -vR /var/www/html</span><br><span class="line">restorecon reset /var/www/html/index.html context unconfined_u:object_r:tmp_t:s0-&gt;unconfined_u:object_r:httpd_sys_content_t:s0</span><br><span class="line">restorecon reset /var/www/html/rht context system_u:object_r:init_tmp_t:s0-&gt;system_u:object_r:httpd_sys_content_t:s0</span><br><span class="line">[student@server0 ~]$ ls -laZ /var/www/html/</span><br><span class="line">drwxr-xr-x. root root system_u:object_r:httpd_sys_content_t:s0 .</span><br><span class="line">drwxr-xr-x. root root system_u:object_r:httpd_sys_content_t:s0 ..</span><br><span class="line">-rw-r--r--. root root unconfined_u:object_r:httpd_sys_content_t:s0 index.html</span><br><span class="line">-rw-r--r--. root root system_u:object_r:httpd_sys_content_t:s0 rht</span><br></pre></td></tr></table></figure>
+<h3 id="7-3-3-Defining-SELinux-default-file-context-rules"><a href="#7-3-3-Defining-SELinux-default-file-context-rules" class="headerlink" title="7.3.3 Defining SELinux default file context rules"></a>7.3.3 Defining SELinux default file context rules</h3><p>使用 <code>semanage fcontext</code> 可以顯示(<code>-l</code>) or 修改(<code>-a</code>) 目錄的預設 SELinux context：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在 / 建立新的目錄，其預設 SELinux context 為 default_t</span></span><br><span class="line">[student@server0 ~]$ sudo mkdir /virtual</span><br><span class="line"><span class="comment"># 在此目錄建立的檔案，context 也會變成 default_t</span></span><br><span class="line">[student@server0 ~]$ sudo touch /virtual/index.html</span><br><span class="line">[student@server0 ~]$ ls -alZ /virtual</span><br><span class="line">drwxr-xr-x. root root unconfined_u:object_r:default_t:s0 .</span><br><span class="line">drwxr-xr-x. root root system_u:object_r:root_t:s0      ..</span><br><span class="line">-rw-r--r--. root root unconfined_u:object_r:default_t:s0 index.html</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 semanage fcontext 修改 /virtual 目錄的預設 SELinux context</span></span><br><span class="line">[student@server0 ~]$ sudo semanage fcontext -a -t httpd_sys_content_t <span class="string">'/virtual(/.*)?'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 透過 restorecon 將 /virtual 目錄下的檔案還原為預設值</span></span><br><span class="line">[student@server0 ~]$ sudo restorecon -Rv /virtual</span><br><span class="line">restorecon reset /virtual context unconfined_u:object_r:default_t:s0-&gt;unconfined_u:object_r:httpd_sys_content_t:s0</span><br><span class="line">restorecon reset /virtual/index.html context unconfined_u:object_r:default_t:s0-&gt;unconfined_u:object_r:httpd_sys_content_t:s0</span><br><span class="line">[student@server0 ~]$ ls -alZ /virtual</span><br><span class="line">drwxr-xr-x. root root unconfined_u:object_r:httpd_sys_content_t:s0 .</span><br><span class="line">drwxr-xr-x. root root system_u:object_r:root_t:s0      ..</span><br><span class="line">-rw-r--r--. root root unconfined_u:object_r:httpd_sys_content_t:s0 index.html</span><br></pre></td></tr></table></figure>
+<hr>
+<p><a name="ch7.3"></a></p>
+<h1 id="7-4-Chaging-SELinux-Booleans"><a href="#7-4-Chaging-SELinux-Booleans" class="headerlink" title="7.4 Chaging SELinux Booleans"></a>7.4 Chaging SELinux Booleans</h1><p>安裝 <code>selinux-policy-devel</code> 套件可取得與 SELinux Booleans 相關的說明資訊，位於 <strong>selinux(8)</strong>，可使用 <code>man -k _selinux</code> 來查詢目前系統中存在的文件。</p>
+<p>SELinux Booleans 是用來決定 rule 是否啟用的設定值，可透過 <code>getsebool</code> &amp; <code>setsebool</code> 兩個指令來設定：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 取得 SELinux Booleans 資訊('-a' 參數表示顯示全木)</span></span><br><span class="line">[student@server0 ~]$ getsebool -a | grep httpd_enable_homedir</span><br><span class="line">httpd_enable_homedirs --&gt; off</span><br><span class="line">[student@server0 ~]$ getsebool httpd_enable_homedirs</span><br><span class="line">httpd_enable_homedirs --&gt; off</span><br><span class="line"></span><br><span class="line"><span class="comment"># 修改 SELinux Boolean</span></span><br><span class="line">[student@server0 ~]$ sudo setsebool httpd_enable_homedirs on</span><br><span class="line"></span><br><span class="line"><span class="comment"># 透過 'semanage boolean -l' 可以查詢 SELinux Boolean 是否永久被更改(第二個結果)</span></span><br><span class="line">[student@server0 ~]$ sudo semanage boolean -l | grep httpd_enable_homedirs</span><br><span class="line">httpd_enable_homedirs          (on   ,  off)  Allow httpd to <span class="built_in">read</span> home directories</span><br><span class="line">[student@server0 ~]$ getsebool -a | grep httpd_enable_homedir</span><br><span class="line">httpd_enable_homedirs --&gt; on</span><br><span class="line"></span><br><span class="line"><span class="comment"># 透過 '-P' 參數永久變更 SELinux Boolean 的設定</span></span><br><span class="line">[student@server0 ~]$ sudo setsebool -P httpd_enable_homedirs on</span><br><span class="line">[student@server0 ~]$ getsebool -a | grep httpd_enable_homedir</span><br><span class="line">httpd_enable_homedirs --&gt; on</span><br><span class="line">[student@server0 ~]$ sudo semanage boolean -l | grep httpd_enable_homedirs</span><br><span class="line">httpd_enable_homedirs          (on   ,   on)  Allow httpd to <span class="built_in">read</span> home directories</span><br></pre></td></tr></table></figure>
+<hr>
+<p><a name="ch7.3"></a></p>
+<h1 id="7-5-Troublshooting-SELinux"><a href="#7-5-Troublshooting-SELinux" class="headerlink" title="7.5 Troublshooting SELinux"></a>7.5 Troublshooting SELinux</h1><h2 id="7-5-1-Troubleshooting-SELinux-issues"><a href="#7-5-1-Troubleshooting-SELinux-issues" class="headerlink" title="7.5.1 Troubleshooting SELinux issues"></a>7.5.1 Troubleshooting SELinux issues</h2><p>關於 SELinux 會造成的 issue，大概會有幾個原因 &amp; 方向可以思考：</p>
+<ol>
+<li><p>服務是否有特定目錄 or 檔案的存取權限</p>
+</li>
+<li><p>可能是錯誤的 file context 造成的，此時可用 <code>restorecon</code> 解決</p>
+</li>
+<li><p>可能是太嚴格的 SELinux Boolean 設定所造成(例如 <code>ftpd_anon_write</code> 限制了匿名使用者對 FTP 服務的存取)</p>
+</li>
+<li><p>可能是 SELinux policy 的 bug 所造成</p>
+</li>
+</ol>
+<h2 id="7-5-2-Monitoring-SELinux-violations"><a href="#7-5-2-Monitoring-SELinux-violations" class="headerlink" title="7.5.2 Monitoring SELinux violations"></a>7.5.2 Monitoring SELinux violations</h2><p>套件 <code>setroubleshoot-server</code> 必須安裝，才有辦法紀錄 SELinux 所產生的相關 log 資訊(存在於 <strong>/var/log/audit/audit.log</strong>)。</p>
+<ul>
+<li><p><code>sealert -l UUID</code>：檢視指定 UUID 的報告</p>
+</li>
+<li><p><code>sealert -a /var/log/audit/audit.log</code>：檢視 log 中所有的稽核報告</p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br></pre></td><td class="code"><pre><span class="line">[student@server0 ~]$ sudo systemctl start httpd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在 /root 下新增檔案，並移到 /var/www/html 目錄</span></span><br><span class="line">[student@server0 ~]$ sudo touch /root/file3</span><br><span class="line">[student@server0 ~]$ sudo mv /root/file3 /var/www/html/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 嘗試透過瀏覽器存取 file3</span></span><br><span class="line">[student@server0 ~]$ curl http://localhost/file3</span><br><span class="line">&lt;!DOCTYPE HTML PUBLIC <span class="string">"-//IETF//DTD HTML 2.0//EN"</span>&gt;</span><br><span class="line">&lt;html&gt;&lt;head&gt;</span><br><span class="line">&lt;title&gt;403 Forbidden&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;&lt;body&gt;</span><br><span class="line">&lt;h1&gt;Forbidden&lt;/h1&gt;</span><br><span class="line">&lt;p&gt;You don\<span class="string">'t have permission to access /file3</span></span><br><span class="line"><span class="string">on this server.&lt;/p&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;&lt;/html&gt;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"># 從 /var/log/audit/audit.log 中尋找相關的錯誤資訊</span></span><br><span class="line"><span class="string">[student@server0 ~]$ sudo tail /var/log/audit/audit.log</span></span><br><span class="line"><span class="string">......</span></span><br><span class="line"><span class="string">type=AVC msg=audit(1462720907.786:517): avc:  denied  &#123; getattr &#125; for  pid=1754 comm="httpd" path="/var/www/html/file3" dev="vda1" ino=8846767 scontext=system_u:system_r:httpd_t:s0 tcontext=unconfined_u:object_r:admin_home_t:s0 tclass=file</span></span><br><span class="line"><span class="string">type=SYSCALL msg=audit(1462720907.786:517): arch=c000003e syscall=4 success=no exit=-13 a0=7fd102869b48 a1=7fff0049e4f0 a2=7fff0049e4f0 a3=7fd0f7202752 items=0 ppid=1751 pid=1754 auid=4294967295 uid=48 gid=48 euid=48 suid=48 fsuid=48 egid=48 sgid=48 fsgid=48 tty=(none) ses=4294967295 comm="httpd" exe="/usr/sbin/httpd" subj=system_u:system_r:httpd_t:s0 key=(null)</span></span><br><span class="line"><span class="string">type=AVC msg=audit(1462720907.786:518): avc:  denied  &#123; getattr &#125; for  pid=1754 comm="httpd" path="/var/www/html/file3" dev="vda1" ino=8846767 scontext=system_u:system_r:httpd_t:s0 tcontext=unconfined_u:object_r:admin_home_t:s0 tclass=file</span></span><br><span class="line"><span class="string">type=SYSCALL msg=audit(1462720907.786:518): arch=c000003e syscall=6 success=no exit=-13 a0=7fd102869c18 a1=7fff0049e4f0 a2=7fff0049e4f0 a3=0 items=0 ppid=1751 pid=1754 auid=4294967295 uid=48 gid=48 euid=48 suid=48 fsuid=48 egid=48 sgid=48 fsgid=48 tty=(none) ses=4294967295 comm="httpd" exe="/usr/sbin/httpd" subj=system_u:system_r:httpd_t:s0 key=(null)</span></span><br><span class="line"><span class="string">.......</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"># 找到 SELinux 相關的 UUID</span></span><br><span class="line"><span class="string">[student@server0 ~]$ sudo tail -50 /var/log/messages</span></span><br><span class="line"><span class="string">.....</span></span><br><span class="line"><span class="string">May  8 11:21:48 localhost setroubleshoot: Plugin Exception restorecon_source</span></span><br><span class="line"><span class="string">May  8 11:21:48 localhost setroubleshoot: SELinux is preventing /usr/sbin/httpd from getattr access on the file . For complete SELinux messages. run sealert -l 26a423d9-3dbd-413b-8048-3e7abec01df1</span></span><br><span class="line"><span class="string">May  8 11:21:48 localhost python: SELinux is preventing /usr/sbin/httpd from getattr access on the file .</span></span><br><span class="line"><span class="string">.....</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"># 透過 sealert -l 檢視詳細的報告內容</span></span><br><span class="line"><span class="string">[student@server0 ~]$ sudo sealert -l 26a423d9-3dbd-413b-8048-3e7abec01df1</span></span><br><span class="line"><span class="string">SELinux is preventing /usr/sbin/httpd from getattr access on the file .</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">*****  Plugin catchall (100. confidence) suggests   **************************</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">If you believe that httpd should be allowed getattr access on the  file by default.</span></span><br><span class="line"><span class="string">Then you should report this as a bug.</span></span><br><span class="line"><span class="string">You can generate a local policy module to allow this access.</span></span><br><span class="line"><span class="string">Do</span></span><br><span class="line"><span class="string">allow this access for now by executing:</span></span><br><span class="line"><span class="string"># grep httpd /var/log/audit/audit.log | audit2allow -M mypol</span></span><br><span class="line"><span class="string"># semodule -i mypol.pp</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">Additional Information:</span></span><br><span class="line"><span class="string">Source Context                system_u:system_r:httpd_t:s0</span></span><br><span class="line"><span class="string">Target Context                unconfined_u:object_r:admin_home_t:s0</span></span><br><span class="line"><span class="string">Target Objects                 [ file ]</span></span><br><span class="line"><span class="string">Source                        httpd</span></span><br><span class="line"><span class="string">Source Path                   /usr/sbin/httpd</span></span><br><span class="line"><span class="string">Port                          &lt;Unknown&gt;</span></span><br><span class="line"><span class="string">Host                          localhost</span></span><br><span class="line"><span class="string">Source RPM Packages           httpd-2.4.6-17.el7.x86_64</span></span><br><span class="line"><span class="string">Target RPM Packages</span></span><br><span class="line"><span class="string">Policy RPM                    selinux-policy-3.12.1-153.el7.noarch</span></span><br><span class="line"><span class="string">Selinux Enabled               True</span></span><br><span class="line"><span class="string">Policy Type                   targeted</span></span><br><span class="line"><span class="string">Enforcing Mode                Enforcing</span></span><br><span class="line"><span class="string">Host Name                     server0.example.com</span></span><br><span class="line"><span class="string">Platform                      Linux server0.example.com 3.10.0-123.el7.x86_64 #1</span></span><br><span class="line"><span class="string">                              SMP Mon May 5 11:16:57 EDT 2014 x86_64 x86_64</span></span><br><span class="line"><span class="string">Alert Count                   1</span></span><br><span class="line"><span class="string">First Seen                    2016-05-09 00:21:47 JST</span></span><br><span class="line"><span class="string">Last Seen                     2016-05-09 00:21:47 JST</span></span><br><span class="line"><span class="string">Local ID                      26a423d9-3dbd-413b-8048-3e7abec01df1</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">Raw Audit Messages</span></span><br><span class="line"><span class="string">type=AVC msg=audit(1462720907.786:518): avc:  denied  &#123; getattr &#125; for  pid=1754 comm="httpd" path="/var/www/html/file3" dev="vda1" ino=8846767 scontext=system_u:system_r:httpd_t:s0 tcontext=unconfined_u:object_r:admin_home_t:s0 tclass=file</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">type=SYSCALL msg=audit(1462720907.786:518): arch=x86_64 syscall=lstat success=no exit=EACCES a0=7fd102869c18 a1=7fff0049e4f0 a2=7fff0049e4f0 a3=0 items=0 ppid=1751 pid=1754 auid=4294967295 uid=48 gid=48 euid=48 suid=48 fsuid=48 egid=48 sgid=48 fsgid=48 tty=(none) ses=4294967295 comm=httpd exe=/usr/sbin/httpd subj=system_u:system_r:httpd_t:s0 key=(null)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">Hash: httpd,httpd_t,admin_home_t,file,getattr</span></span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="補充教材"><a href="#補充教材" class="headerlink" title="補充教材"></a>補充教材</h1><h2 id="初階篇"><a href="#初階篇" class="headerlink" title="初階篇"></a>初階篇</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[vagrant@server tmp]$ id -Z</span><br><span class="line">unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023</span><br><span class="line"></span><br><span class="line">[vagrant@server tmp]$ ls</span><br><span class="line">ABC  hosts  passwd  vagrant-shell</span><br><span class="line"></span><br><span class="line">[vagrant@server tmp]$ ls -Z</span><br><span class="line">drwxrwxrwx+ vagrant vagrant unconfined_u:object_r:user_tmp_t:s0 ABC</span><br><span class="line">-rw-r--r--. vagrant vagrant unconfined_u:object_r:user_tmp_t:s0 hosts</span><br><span class="line">-rw-r-xr--+ vagrant vagrant unconfined_u:object_r:user_tmp_t:s0 passwd</span><br><span class="line">-rwx--x--x. vagrant vagrant unconfined_u:object_r:user_tmp_t:s0 vagrant-shell</span><br></pre></td></tr></table></figure>
+<p>以上權限對應 =&gt; system_r:object_r:var_t:s0</p>
+<ol>
+<li>User</li>
+<li>Role</li>
+<li>Type<br>若 SELinux 設定為 enforcing，只要看 type 即可</li>
+</ol>
+<p>SELinux 的 check policy 存放於 <code>/etc/selinux/targeted/policy/policy.29</code></p>
+<p>安裝 <code>setools-console</code> 後就可以查詢 SELinux policy</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">[vagrant@server tmp]$ ps auxZ | grep httpd</span><br><span class="line">system_u:system_r:httpd_t:s0    root     14773  0.0  0.2 221904  4968 ?        Ss   05:44   0:00 /usr/sbin/httpd -DFOREGROUND</span><br><span class="line">system_u:system_r:httpd_t:s0    apache   14774  0.0  0.1 221904  2972 ?        S    05:44   0:00 /usr/sbin/httpd -DFOREGROUND</span><br><span class="line">system_u:system_r:httpd_t:s0    apache   14775  0.0  0.1 221904  2972 ?        S    05:44   0:00 /usr/sbin/httpd -DFOREGROUND</span><br><span class="line">system_u:system_r:httpd_t:s0    apache   14776  0.0  0.1 221904  2972 ?        S    05:44   0:00 /usr/sbin/httpd -DFOREGROUND</span><br><span class="line">system_u:system_r:httpd_t:s0    apache   14777  0.0  0.1 221904  2972 ?        S    05:44   0:00 /usr/sbin/httpd -DFOREGROUND</span><br><span class="line">system_u:system_r:httpd_t:s0    apache   14778  0.0  0.1 221904  2972 ?        S    05:44   0:00 /usr/sbin/httpd -DFOREGROUND</span><br><span class="line"></span><br><span class="line"><span class="comment"># 可查詢來源端為 httpd_t 相關的權限設定</span></span><br><span class="line">[vagrant@server tmp]$ sesearch -A -s httpd_t</span><br><span class="line">....more</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查詢來源端為 httpd_t，目的端為 lib_t 的權限設定</span></span><br><span class="line">[vagrant@server tmp]$ sesearch -A -s httpd_t -t lib_t</span><br><span class="line">Found 13 semantic av rules:</span><br><span class="line">   allow domain base_ro_file_type : file \&#123; ioctl <span class="built_in">read</span> getattr lock open \&#125; ;</span><br><span class="line">   allow domain base_ro_file_type : dir \&#123; ioctl <span class="built_in">read</span> getattr lock search open \&#125; ;</span><br><span class="line">   allow domain base_ro_file_type : lnk_file \&#123; <span class="built_in">read</span> getattr \&#125; ;</span><br><span class="line">.... more</span><br></pre></td></tr></table></figure>
+<h2 id="進階篇"><a href="#進階篇" class="headerlink" title="進階篇"></a>進階篇</h2><h3 id="限制-Process-對檔案目錄的存取"><a href="#限制-Process-對檔案目錄的存取" class="headerlink" title="限制 Process 對檔案目錄的存取"></a>限制 Process 對檔案目錄的存取</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[vagrant@server tmp]$ ls -ldZ /var/www/html</span><br><span class="line">drwxr-xr-x. root root system_u:object_r:httpd_sys_content_t:s0 /var/www/html</span><br><span class="line"></span><br><span class="line">[vagrant@server tmp]$ ls -lZ passwd</span><br><span class="line">-rw-r--r--. vagrant vagrant unconfined_u:object_r:user_tmp_t:s0 passwd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 變更 SELinux context user/role/type</span></span><br><span class="line">[vagrant@server tmp]$ chcon -u system_u passwd</span><br><span class="line">[vagrant@server tmp]$ chcon -r object_r passwd</span><br><span class="line">[vagrant@server tmp]$ chcon -t httpd_sys_content_t passwd</span><br><span class="line">[vagrant@server tmp]$ ls -lZ passwd</span><br><span class="line">-rw-r--r--. vagrant vagrant system_u:object_r:httpd_sys_content_t:s0 passwd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 同時變更 SELinux context user/role/type</span></span><br><span class="line">[vagrant@server tmp]$ chcon system_u:object_r:httpd_sys_content_t:s0 passwd</span><br></pre></td></tr></table></figure>
+<p><code>policycoreutils-python</code> 套件是用來尋找正確的 SELinux Context type 之用</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 尋找系統中已經存在的檔案 or 目錄的 context type</span></span><br><span class="line">[vagrant@server tmp]$ sudo semanage fcontext -l | grep /var/www</span><br><span class="line">/var/www(/.*)?                                     all files          system_u:object_r:httpd_sys_content_t:s0</span><br><span class="line">/var/www(/.*)?/logs(/.*)?                          all files          system_u:object_r:httpd_log_t:s0</span><br><span class="line">/var/www/[^/]*/cgi-bin(/.*)?                       all files          system_u:object_r:httpd_sys_script_exec_t:s0</span><br><span class="line">/var/www/svn(/.*)?                                 all files          system_u:object_r:httpd_sys_rw_content_t:s0</span><br><span class="line">/var/www/git(/.*)?                                 all files          system_u:object_r:git_content_t:s0</span><br><span class="line">/var/www/perl(/.*)?                                all files          system_u:object_r:httpd_sys_script_exec_t:s0</span><br><span class="line">.... more</span><br><span class="line"></span><br><span class="line"><span class="comment"># 參考同性質檔案 or 目錄的 context type</span></span><br><span class="line">[vagrant@server tmp]$ ls -ldZ /var/www</span><br><span class="line">drwxr-xr-x. root root system_u:object_r:httpd_sys_content_t:s0 /var/www</span><br></pre></td></tr></table></figure>
+<p><code>policycoreutils</code> 中的 <code>restorecon</code> 工具可幫助恢復成原有的標籤：例如：<code>restorecon -Rv /var/www/html/</code></p>
+<blockquote>
+<p>前提是資料庫必須要有相關資料</p>
+</blockquote>
+<h3 id="修改資料庫"><a href="#修改資料庫" class="headerlink" title="修改資料庫"></a>修改資料庫</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[vagrant@server tmp]$ sudo mkdir /WWW</span><br><span class="line">[vagrant@server tmp]$ ls -ldZ /WWW</span><br><span class="line">drwxr-xr-x. root root unconfined_u:object_r:default_t:s0 /WWW</span><br><span class="line"></span><br><span class="line"><span class="comment"># 透過 semanage fcontext 修改目錄預設的 SELinux context</span></span><br><span class="line">[vagrant@server tmp]$ sudo semanage fcontext -a -f a -t httpd_sys_content_t <span class="string">'/WWW(/.*)?'</span></span><br><span class="line">[vagrant@server tmp]$ sudo semanage fcontext -l | grep WWW</span><br><span class="line">/WWW(/.*)?                                         all files          system_u:object_r:httpd_sys_content_t:s0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 恢復原有設定</span></span><br><span class="line">[vagrant@server tmp]$ sudo restorecon -Rv /WWW</span><br><span class="line">restorecon reset /WWW context unconfined_u:object_r:default_t:s0-&gt;unconfined_u:object_r:httpd_sys_content_t:s0</span><br><span class="line">restorecon reset /WWW/aaa context unconfined_u:object_r:default_t:s0-&gt;unconfined_u:object_r:httpd_sys_content_t:s0</span><br><span class="line">[vagrant@server tmp]$ ls -ldZ /WWW</span><br><span class="line">drwxr-xr-x. root root unconfined_u:object_r:httpd_sys_content_t:s0 /WWW</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[vagrant@server tmp]$ sudo cp /etc/shadow /WWW/</span><br><span class="line">[vagrant@server tmp]$ ls -ldZ /WWW/</span><br><span class="line">drwxr-xr-x. root root unconfined_u:object_r:httpd_sys_content_t:s0 /WWW/</span><br><span class="line"></span><br><span class="line">[vagrant@server tmp]$ ls -ldZ /WWW/*</span><br><span class="line">----------. root root unconfined_u:object_r:httpd_sys_content_t:s0 /WWW/shadow</span><br><span class="line"></span><br><span class="line"><span class="comment"># -a 會保留原檔案的相關 metadata，因此不會被 dest dir 的 SELinux context 複寫</span></span><br><span class="line">[vagrant@server tmp]$ sudo cp -a /etc/shadow /WWW/shadow_a</span><br><span class="line">[vagrant@server tmp]$ ls -ldZ /WWW/*</span><br><span class="line">----------. root root unconfined_u:object_r:httpd_sys_content_t:s0 /WWW/shadow</span><br><span class="line">----------. root root system_u:object_r:shadow_t:s0    /WWW/shadow_a</span><br></pre></td></tr></table></figure>
+<p>查詢 SELinux 相關的 log 可到 /var/log/audit/audit.log 查詢</p>
+<h3 id="限制應用程式的特定功能是否能夠啟用"><a href="#限制應用程式的特定功能是否能夠啟用" class="headerlink" title="限制應用程式的特定功能是否能夠啟用"></a>限制應用程式的特定功能是否能夠啟用</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[vagrant@server tmp]$ sudo semanage boolean -l | grep ftp</span><br><span class="line">ftp_home_dir                   (off  ,  off)  Allow ftp to home dir</span><br><span class="line">ftpd_use_cifs                  (off  ,  off)  Allow ftpd to use cifs</span><br><span class="line">sftpd_write_ssh_home           (off  ,  off)  Allow sftpd to write ssh home</span><br><span class="line">ftpd_use_fusefs                (off  ,  off)  Allow ftpd to use fusefs</span><br><span class="line">..... more</span><br><span class="line"></span><br><span class="line"><span class="comment"># 加了 -P 會永久儲存，沒加就只會存到記憶體中</span></span><br><span class="line">[vagrant@server tmp]$ sudo setsebool -P ftp_home_dir 1</span><br><span class="line">[vagrant@server tmp]$ sudo semanage boolean -l | grep ftp</span><br><span class="line">ftp_home_dir                   (on   ,   on)  Allow ftp to home dir</span><br></pre></td></tr></table></figure>
+<h3 id="限制應用程式所能夠存取的-port"><a href="#限制應用程式所能夠存取的-port" class="headerlink" title="限制應用程式所能夠存取的 port"></a>限制應用程式所能夠存取的 port</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[vagrant@server tmp]$ sudo semanage port -l | grep http</span><br><span class="line">http_cache_port_t              tcp      8080, 8118, 8123, 10001-10010</span><br><span class="line">http_cache_port_t              udp      3130</span><br><span class="line">http_port_t                    tcp      80, 81, 443, 488, 8008, 8009, 8443, 9000</span><br><span class="line">pegasus_http_port_t            tcp      5988</span><br><span class="line">pegasus_https_port_t           tcp      5989</span><br><span class="line"></span><br><span class="line"><span class="comment"># -a 增加 port, -d 刪除 port</span></span><br><span class="line">[vagrant@server tmp]$ sudo semanage port -a -t http_port_t -p tcp 5678</span><br><span class="line">[vagrant@server tmp] manage port -l | grep http_port_t</span><br><span class="line">http_port_t                    tcp      5678, 80, 81, 443, 488, 8008, 8009, 8443, 9000</span><br><span class="line">pegasus_http_port_t            tcp      5988</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="Practice-Changing-SELinux-Booleans"><a href="#Practice-Changing-SELinux-Booleans" class="headerlink" title="Practice: Changing SELinux Booleans"></a>Practice: Changing SELinux Booleans</h1><p>啟用 web server 的使用者家目錄 web 功能</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安裝 apache</span></span><br><span class="line">$ sudo yum -y install httpd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 啟動 apache server</span></span><br><span class="line">$ sudo systemctl <span class="built_in">enable</span> httpd.service</span><br><span class="line">ln -s <span class="string">'/usr/lib/systemd/system/httpd.service'</span> <span class="string">'/etc/systemd/system/multi-user.target.wants/httpd.service'</span></span><br><span class="line">$ sudo systemctl start httpd.service</span><br><span class="line">$ sudo systemctl status httpd.service</span><br><span class="line">httpd.service - The Apache HTTP Server</span><br><span class="line">   Loaded: loaded (/usr/lib/systemd/system/httpd.service; enabled)</span><br><span class="line">   Active: active (running) since Mon 2016-05-16 17:55:59 JST; 5s ago</span><br><span class="line">.......</span><br><span class="line"></span><br><span class="line"><span class="comment"># 開啟使用者 web 目錄為 ~/public_html</span></span><br><span class="line">$ sudo sed -i <span class="string">'s/^\s*#\(UserDir public_html\)/    \1/g'</span> /etc/httpd/conf.d/userdir.conf</span><br><span class="line">$ sudo sed -i <span class="string">'s/^\s*\(UserDir\sdisabled\)/    # \1/g'</span> /etc/httpd/conf.d/userdir.conf</span><br><span class="line">$ sudo systemctl restart httpd.service</span><br><span class="line"></span><br><span class="line"><span class="comment"># 建立 index.html，但還是沒有權限可以存取</span></span><br><span class="line">$ mkdir ~/public_html</span><br><span class="line">$ <span class="built_in">echo</span> <span class="string">"Hello Internet"</span> | sudo tee /home/student/public_html/index.html</span><br><span class="line">Hello Internet</span><br><span class="line">$ chmod 711 /home/student</span><br><span class="line">$ curl http://localhost/~student/index.html</span><br><span class="line">&lt;!DOCTYPE HTML PUBLIC <span class="string">"-//IETF//DTD HTML 2.0//EN"</span>&gt;</span><br><span class="line">&lt;html&gt;&lt;head&gt;</span><br><span class="line">&lt;title&gt;403 Forbidden&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;&lt;body&gt;</span><br><span class="line">&lt;h1&gt;Forbidden&lt;/h1&gt;</span><br><span class="line">&lt;p&gt;You don\<span class="string">'t have permission to access /~student/index.html</span></span><br><span class="line"><span class="string">on this server.&lt;/p&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;&lt;/html&gt;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"># 檢視 SELinux Boolean 設定</span></span><br><span class="line"><span class="string">$ getsebool -a | grep httpd | grep home</span></span><br><span class="line"><span class="string">httpd_enable_homedirs --&gt; off</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"># 開啟 httpd_enable_homedirs</span></span><br><span class="line"><span class="string">$ sudo setsebool -P httpd_enable_homedirs on</span></span><br><span class="line"><span class="string">$ getsebool -a | grep httpd | grep home</span></span><br><span class="line"><span class="string">httpd_enable_homedirs --&gt; on</span></span><br><span class="line"><span class="string">$ curl http://localhost/~student/index.html</span></span><br><span class="line"><span class="string">Hello Internet</span></span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog/tags/Linux/" rel="tag"># Linux</a>
+          
+            <a href="/blog/tags/RHCE/" rel="tag"># RHCE</a>
+          
+            <a href="/blog/tags/RH134/" rel="tag"># RH134</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/RHCE/RHCE7-RH134-LearningNotes-CH06_ControllingAccessToFilesWithAccessControlLists/" rel="next" title="[RHCE7] RH134 Chapter 6. Controlling Access to Files with Access Control Lists(ACLs) 學習筆記">
+                <i class="fa fa-chevron-left"></i> [RHCE7] RH134 Chapter 6. Controlling Access to Files with Access Control Lists(ACLs) 學習筆記
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/KVM/Linux-KVM-GettingStart/" rel="prev" title="[KVM] Linux KVM 基本觀念">
+                [KVM] Linux KVM 基本觀念 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            本站概覽
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">godleon</p>
+              <p class="site-description motion-element" itemprop="description">把時間花在哪裡，成就就在哪裡</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/blog/archives/">
+              
+                  <span class="site-state-item-count">69</span>
+                  <span class="site-state-item-name">文章</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/blog/categories/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">分類</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/blog/tags/index.html">
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">標籤</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/godleon" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:godleon@gmail.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-globe"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://plus.google.com/godleon" target="_blank" title="Google">
+                    
+                      <i class="fa fa-fw fa-google"></i>Google</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#7-1-Enabling-and-Monitoring-Security-Enhanced-Linux-SELinux"><span class="nav-number">1.</span> <span class="nav-text">7.1 Enabling and Monitoring Security Enhanced Linux (SELinux)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#7-1-1-Basic-SELinux-security-concepts"><span class="nav-number">1.1.</span> <span class="nav-text">7.1.1 Basic SELinux security concepts</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-1-2-SELinux-modes"><span class="nav-number">1.2.</span> <span class="nav-text">7.1.2 SELinux modes</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-1-3-SELinux-Booleans"><span class="nav-number">1.3.</span> <span class="nav-text">7.1.3 SELinux Booleans</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#7-2-Changing-SELinux-Modes"><span class="nav-number">2.</span> <span class="nav-text">7.2 Changing SELinux Modes</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#7-2-1-Changing-the-current-SELinux-mode"><span class="nav-number">2.1.</span> <span class="nav-text">7.2.1 Changing the current SELinux mode</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-2-2-Setting-the-default-SELinux-mode"><span class="nav-number">2.2.</span> <span class="nav-text">7.2.2 Setting the default SELinux mode</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-3-Chaging-SELinux-Contexts"><span class="nav-number">2.3.</span> <span class="nav-text">7.3 Chaging SELinux Contexts</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#7-3-1-Initial-SELinux-context"><span class="nav-number">2.3.1.</span> <span class="nav-text">7.3.1 Initial SELinux context</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-3-2-Changing-the-SELinux-context-of-a-file"><span class="nav-number">2.3.2.</span> <span class="nav-text">7.3.2 Changing the SELinux context of a file</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-3-3-Defining-SELinux-default-file-context-rules"><span class="nav-number">2.3.3.</span> <span class="nav-text">7.3.3 Defining SELinux default file context rules</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#7-4-Chaging-SELinux-Booleans"><span class="nav-number">3.</span> <span class="nav-text">7.4 Chaging SELinux Booleans</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#7-5-Troublshooting-SELinux"><span class="nav-number">4.</span> <span class="nav-text">7.5 Troublshooting SELinux</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#7-5-1-Troubleshooting-SELinux-issues"><span class="nav-number">4.1.</span> <span class="nav-text">7.5.1 Troubleshooting SELinux issues</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-5-2-Monitoring-SELinux-violations"><span class="nav-number">4.2.</span> <span class="nav-text">7.5.2 Monitoring SELinux violations</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#補充教材"><span class="nav-number">5.</span> <span class="nav-text">補充教材</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#初階篇"><span class="nav-number">5.1.</span> <span class="nav-text">初階篇</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#進階篇"><span class="nav-number">5.2.</span> <span class="nav-text">進階篇</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#限制-Process-對檔案目錄的存取"><span class="nav-number">5.2.1.</span> <span class="nav-text">限制 Process 對檔案目錄的存取</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#修改資料庫"><span class="nav-number">5.2.2.</span> <span class="nav-text">修改資料庫</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#限制應用程式的特定功能是否能夠啟用"><span class="nav-number">5.2.3.</span> <span class="nav-text">限制應用程式的特定功能是否能夠啟用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#限制應用程式所能夠存取的-port"><span class="nav-number">5.2.4.</span> <span class="nav-text">限制應用程式所能夠存取的 port</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Practice-Changing-SELinux-Booleans"><span class="nav-number">6.</span> <span class="nav-text">Practice: Changing SELinux Booleans</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 強力驅動</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主題 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/blog/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://godleon-blog-hexo.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'https://godleon.github.io/blog/RHCE/RHCE7-RH134-LearningNotes-CH07_ManagingSELinuxSecurity/';
+          this.page.identifier = 'RHCE/RHCE7-RH134-LearningNotes-CH07_ManagingSELinuxSecurity/';
+          this.page.title = '[RHCE7] RH134 Chapter 7. Managing SELinux Security 學習筆記';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/blog/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

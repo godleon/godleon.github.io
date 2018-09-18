@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-tw">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/blog/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/blog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/blog/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/blog/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Linux,RHCE,RH124," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="此文章記錄學習 RHCE RH124 Chapter 11 Managing Red Hat Enterprise Linux Networking 留下的內容">
+<meta name="keywords" content="Linux,RHCE,RH124">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[RHCE] RH124 Chapter 11 Managing Red Hat Enterprise Linux Networking 學習筆記">
+<meta property="og:url" content="https://godleon.github.io/blog/RHCE/RHCE7-RH124-LearningNotes-CH11_ManagingRedHatEnterpriseLinuxNetworking/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此文章記錄學習 RHCE RH124 Chapter 11 Managing Red Hat Enterprise Linux Networking 留下的內容">
+<meta property="og:locale" content="zh-tw">
+<meta property="og:updated_time" content="2018-09-18T20:29:07.282Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[RHCE] RH124 Chapter 11 Managing Red Hat Enterprise Linux Networking 學習筆記">
+<meta name="twitter:description" content="此文章記錄學習 RHCE RH124 Chapter 11 Managing Red Hat Enterprise Linux Networking 留下的內容">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://godleon.github.io/blog/RHCE/RHCE7-RH124-LearningNotes-CH11_ManagingRedHatEnterpriseLinuxNetworking/"/>
+
+
+
+
+
+  <title>[RHCE] RH124 Chapter 11 Managing Red Hat Enterprise Linux Networking 學習筆記 | 小信豬的原始部落</title>
+  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-703592-7', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-tw">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">小信豬的原始部落</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/blog/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首頁
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/blog/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            標籤
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/blog/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分類
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/blog/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            歸檔
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            檢索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/blog/RHCE/RHCE7-RH124-LearningNotes-CH11_ManagingRedHatEnterpriseLinuxNetworking/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">[RHCE] RH124 Chapter 11 Managing Red Hat Enterprise Linux Networking 學習筆記</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">發表於</span>
+              
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2016-04-26T02:10:00+00:00">
+                2016-04-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分類於</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/RHCE/" itemprop="url" rel="index">
+                    <span itemprop="name">RHCE</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/RHCE/RHCE7-RH124-LearningNotes-CH11_ManagingRedHatEnterpriseLinuxNetworking/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="RHCE/RHCE7-RH124-LearningNotes-CH11_ManagingRedHatEnterpriseLinuxNetworking/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  此文章記錄學習 RHCE RH124 Chapter 11 Managing Red Hat Enterprise Linux Networking 留下的內容
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><a name="ch11.1"></a></p>
+<h1 id="11-1-Network-Concepts"><a href="#11-1-Network-Concepts" class="headerlink" title="11.1 Network Concepts"></a>11.1 Network Concepts</h1><h2 id="11-1-2-Network-interface-names"><a href="#11-1-2-Network-interface-names" class="headerlink" title="11.1.2 Network interface names"></a>11.1.2 Network interface names</h2><p>網卡命名原則：</p>
+<ul>
+<li><p>Ethernet 介面卡，開頭為 <code>en</code></p>
+<blockquote>
+<p>onboard 的網卡名稱為 eno1, eno2 … etc<br>可插拔(PCI 介面)的網卡名稱為 enp2s0</p>
+</blockquote>
+</li>
+<li><p>無線網路卡，開頭為 <code>wl</code></p>
+</li>
+<li><p>3G/4G 網路卡，開頭為 <code>ww</code></p>
+</li>
+</ul>
+<blockquote>
+<p>虛擬機則一律為 <code>eth0</code>, <code>eth1</code>, <code>eth2</code> … etc</p>
+</blockquote>
+<hr>
+<p><a name="ch11.2"></a></p>
+<h1 id="11-2-Validating-Network-Configuration"><a href="#11-2-Validating-Network-Configuration" class="headerlink" title="11.2 Validating Network Configuration"></a>11.2 Validating Network Configuration</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 顯示 enp0s8 資訊</span></span><br><span class="line">[student@server0 ~]$ ip addr show eth0</span><br><span class="line">2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast state UP qlen 1000</span><br><span class="line">    link/ether 52:54:00:00:00:0b brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 172.25.0.11/24 brd 172.25.0.255 scope global dynamic eth0</span><br><span class="line">       valid_lft 16494sec preferred_lft 16494sec</span><br><span class="line">    inet6 fe80::5054:ff:fe00:b/64 scope link</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line"></span><br><span class="line"><span class="comment"># 顯示網路介面的統計紀錄</span></span><br><span class="line">[student@server0 ~]$ ip -s link show eth0</span><br><span class="line">2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast state UP mode DEFAULT qlen 1000</span><br><span class="line">    link/ether 52:54:00:00:00:0b brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    RX: bytes  packets  errors  dropped overrun mcast   </span><br><span class="line">    5641965    4752     0       0       0       0      </span><br><span class="line">    TX: bytes  packets  errors  dropped carrier collsns</span><br><span class="line">    611742     3112     0       0       0       0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視路由</span></span><br><span class="line">[student@server0 ~]$ ip route</span><br><span class="line">default via 172.25.0.254 dev eth0  proto static  metric 1024</span><br><span class="line">172.25.0.0/24 dev eth0  proto kernel  scope link  src 172.25.0.11</span><br><span class="line">172.25.253.254 via 172.25.0.254 dev eth0  proto static  metric 1</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 列出所有資訊</span></span><br><span class="line">$ sudo ss</span><br><span class="line"></span><br><span class="line"><span class="comment"># 列出已經建立的 connection</span></span><br><span class="line">$ sudo ss -t</span><br><span class="line"></span><br><span class="line"><span class="comment"># 列出包含 listen 的 port &amp; connection</span></span><br><span class="line">$ sudo ss -ta</span><br><span class="line"></span><br><span class="line"><span class="comment"># 列出 listening 的 tcp socket</span></span><br><span class="line">$ sudo ss -lt</span><br></pre></td></tr></table></figure>
+<hr>
+<p><a name="ch11.3"></a></p>
+<h1 id="11-3-Configuring-Network-with-nmcli"><a href="#11-3-Configuring-Network-with-nmcli" class="headerlink" title="11.3 Configuring Network with nmcli"></a>11.3 Configuring Network with nmcli</h1><p>在 RHEL 7 中提供了 <strong><font color="red">nmcli</font></strong>(NetworkManager) 作為網路設定管理之用。</p>
+<h2 id="11-3-1-Network-Manager"><a href="#11-3-1-Network-Manager" class="headerlink" title="11.3.1 Network Manager"></a>11.3.1 Network Manager</h2><p><code>nmcli</code> 命令是修改 <code>/etc/sysconfig/network-scripts/ifcfg-*</code> 中的內容，有兩個觀念必須弄清楚，分別是 <strong><font color="red">device</font></strong> &amp; <strong><font color="red">connection</font></strong>：</p>
+<ul>
+<li><p><code>device</code>：每一個網路卡(介面)都屬於一個 device</p>
+</li>
+<li><p><code>connection</code>：每一個 device 可以同時有多個 connection 設定(每次只有一種可以生效)，可快速因應在不同場景所需要的網路設定變更</p>
+</li>
+</ul>
+<h2 id="11-3-2-Viewing-network-information-with-nmcli"><a href="#11-3-2-Viewing-network-information-with-nmcli" class="headerlink" title="11.3.2 Viewing network information with nmcli"></a>11.3.2 Viewing network information with nmcli</h2><ul>
+<li><p><code>sudo systemctl status NetworkManager.service</code>：檢查 Network Manager 目前服務狀態</p>
+</li>
+<li><p><code>nmcli connection show</code>：列出目前所有的 connection</p>
+</li>
+<li><p><code>nmcli connection show --active</code>：顯示出目前狀態為 active 的 connection</p>
+</li>
+<li><p><code>nmcli connection show &quot;System eth0&quot;</code>：顯示指定 connection 的詳細內容 (小寫的部分可以變更、大寫的部分無法變更)</p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[student@server0 ~]$ nmcli connection show --active</span><br><span class="line">NAME         UUID                                  TYPE            DEVICE</span><br><span class="line">System eth0  5fb06bd0-0bb0-7ffb-45f1-d6edd65f3e03  802-3-ethernet  eth0</span><br><span class="line">[student@server0 ~]$ nmcli connection show <span class="string">"System eth0"</span></span><br><span class="line">connection.id:                          System eth0</span><br><span class="line">connection.uuid:                        5fb06bd0-0bb0-7ffb-45f1-d6edd65f3e03</span><br><span class="line">connection.interface-name:              eth0</span><br><span class="line">connection.type:                        802-3-ethernet</span><br><span class="line">.....</span><br><span class="line">GENERAL.NAME:                           System eth0</span><br><span class="line">GENERAL.UUID:                           5fb06bd0-0bb0-7ffb-45f1-d6edd65f3e03</span><br><span class="line">GENERAL.DEVICES:                        eth0</span><br><span class="line">GENERAL.STATE:                          activated</span><br><span class="line">.....</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p><code>nmcli device status</code>：顯示目前 device 的狀態</p>
+</li>
+<li><p><code>nmcli device show eth0</code>：顯示指定 device 的詳細狀態</p>
+</li>
+</ul>
+<h2 id="11-3-3-Creating-network-connections-with-nmcli"><a href="#11-3-3-Creating-network-connections-with-nmcli" class="headerlink" title="11.3.3 Creating network connections with nmcli"></a>11.3.3 Creating network connections with nmcli</h2><ul>
+<li><p><code>sudo nmcli connection add con-name &quot;my-connect-name&quot; type ethernet ifname eth0</code></p>
+<blockquote>
+<p>device: eth0<br><br>connection: my-connect-name<br><br>設定內容：DHCP</p>
+</blockquote>
+</li>
+<li><p><code>sudo nmcli connection add con-name &quot;static&quot; ifname eth0 type ethernet autoconnect no ip4 172.25.40.11/24 gw4 172.25.40.254</code></p>
+<blockquote>
+<p>device: eth0 <br><br>connection: static <br><br>設定內容: 開機時不套用 | IPv4 | IP: 172.25.40.11/24 | Gateway: 172.25.40.254 <br><br><strong><font color="red">但 connection add 無法增加 DNS 設定</font></strong></p>
+</blockquote>
+</li>
+<li><p><code>sudo nmcli connection up static</code>：套用 “staic” connection 設定</p>
+</li>
+<li><p><code>sudo nmcli connection reload</code>：reload 所有的 connection(設定檔)，不會套用到網路介面上(設定完建議 reload 以確保設定有被 Network Manager 抓到)</p>
+</li>
+</ul>
+<h2 id="11-3-4-Modifying-network-interfaces-with-nmcli"><a href="#11-3-4-Modifying-network-interfaces-with-nmcli" class="headerlink" title="11.3.4 Modifying network interfaces with nmcli"></a>11.3.4 Modifying network interfaces with nmcli</h2><ul>
+<li><p><code>sudo nmcli connection modify &quot;static&quot; ipv4.dns 8.8.8.8</code>：在指定的 connection 中設定 DNS(作完要重新 up connection 才會生效)</p>
+</li>
+<li><p><code>sudo nmcli connection modify &quot;static&quot; +ipv4.dns 8.8.4.4</code>：在指定的 connection 中增加 DNS 設定</p>
+</li>
+<li><p><code>sudo nmcli connection modify &quot;static&quot; connection.autoconnect on</code>：設定開機自動套用指定 connection</p>
+</li>
+<li><p><code>sudo nmcli connection delete &quot;static&quot;</code>：刪除指定的 connection</p>
+</li>
+<li><p><code>sudo nmcli connection down</code>：網路斷掉後，Network Manager 會嘗試找到另外一個 autoconnect=on 的 connection 並套用其設定</p>
+</li>
+<li><p><code>sudo nmcli device disconnect eth0</code>：強制停用指定 device 的網路設定(不會自動套用設定)</p>
+</li>
+<li><p><code>sudo nmcli net off</code>：停止所有的網路介面</p>
+</li>
+</ul>
+<hr>
+<p><a name="ch11.4"></a></p>
+<h1 id="11-4-Editing-Network-Configuration-Files"><a href="#11-4-Editing-Network-Configuration-Files" class="headerlink" title="11.4 Editing Network Configuration Files"></a>11.4 Editing Network Configuration Files</h1><p>直接修改 <code>/etc/sysconfig/network-scripts/ifcfg-*</code> 檔案中的內容，再使用 <code>sudo nmcli connection reload</code>，就可以讓 Network Manager 取得新的設定。</p>
+<hr>
+<p><a name="ch11.5"></a></p>
+<h1 id="11-5-Configuring-Host-Names-and-Name-Resolution"><a href="#11-5-Configuring-Host-Names-and-Name-Resolution" class="headerlink" title="11.5 Configuring Host Names and Name Resolution"></a>11.5 Configuring Host Names and Name Resolution</h1><h2 id="11-5-1-Changing-the-System-host-name"><a href="#11-5-1-Changing-the-System-host-name" class="headerlink" title="11.5.1 Changing the System host name"></a>11.5.1 Changing the System host name</h2><p>若 <code>/etc/hostname</code> 不存在，則系統在網卡被分配到 ip 後，就會進行一個 DNS 的反向查詢</p>
+<p>hostname 可透過 <code>hostnamectl</code> 命令來設定</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">$ hostname</span><br><span class="line">server5.example.com</span><br><span class="line"></span><br><span class="line">$ sudo hostnamectl <span class="built_in">set</span>-hostname sercerX.example.com</span><br><span class="line"></span><br><span class="line">$ hostnamectl status</span><br><span class="line">   Static hostname: sercerx.example.com</span><br><span class="line">   Pretty hostname: sercerX.example.com</span><br><span class="line">         Icon name: computer-vm</span><br><span class="line">           Chassis: vm</span><br><span class="line">        Machine ID: adf65a29af58497b8bb516fc6d366b8d</span><br><span class="line">           Boot ID: 963e5bc0e26a42e8acf285616ed9c9b6</span><br><span class="line">    Virtualization: kvm</span><br><span class="line">  Operating System: CentOS Linux 7 (Core)</span><br><span class="line">       CPE OS Name: cpe:/o:centos:centos:7</span><br><span class="line">            Kernel: Linux 3.10.0-327.3.1.el7.x86_64</span><br><span class="line">      Architecture: x86-64</span><br></pre></td></tr></table></figure>
+<h2 id="11-5-2-Configuring-name-resolution"><a href="#11-5-2-Configuring-name-resolution" class="headerlink" title="11.5.2 Configuring name resolution"></a>11.5.2 Configuring name resolution</h2><blockquote>
+<p>若查詢簡短名稱，系統會自動戴上 <code>/etc/resolv.conf</code> 中的 <code>domain</code> or <code>search</code> 的值再查詢</p>
+</blockquote>
+<p>使用 <code>getent</code> &amp; <code>host</code> 測試 DNS 設定：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># getenv 主要以 IPv6 為主</span></span><br><span class="line">$ getent hosts tw.yahoo.com</span><br><span class="line">2406:2000:ec:601::1009 fd-fp3.wg1.b.yahoo.com tw.yahoo.com</span><br><span class="line"></span><br><span class="line"><span class="comment"># 沒有 IPv6 的設定，則回傳 IPv4</span></span><br><span class="line">$ getent hosts ptt.cc</span><br><span class="line">140.112.172.3   ptt.cc</span><br><span class="line">140.112.172.4   ptt.cc</span><br><span class="line">140.112.172.2   ptt.cc</span><br><span class="line">140.112.172.11  ptt.cc</span><br><span class="line">140.112.172.5   ptt.cc</span><br><span class="line">140.112.172.1   ptt.cc</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 host 查詢 google</span></span><br><span class="line">$ host www.google.com</span><br><span class="line">www.google.com has address 210.242.127.104</span><br><span class="line">www.google.com has address 210.242.127.88</span><br><span class="line">........</span><br><span class="line">www.google.com has address 210.242.127.109</span><br><span class="line">www.google.com has IPv6 address 2404:6800:4008:c01::6a</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 getent 查詢 google</span></span><br><span class="line">$ getent hosts www.google.com</span><br><span class="line">2404:6800:4008:c04::6a www.google.com</span><br></pre></td></tr></table></figure>
+<p>另外，一般網路設定若使用 DHCP，會把原有的 DNS 設定覆蓋，若要避免此情況，可用 <code>sudo nmcli connection &quot;System eth0&quot; ipv4.ignore-auto-dns yes</code> 來避免這樣的狀況發生。</p>
+<blockquote>
+<p>也可以用 nslookup 來測試 DNS，但需要額外加裝 <code>bind-utils</code> 套件</p>
+</blockquote>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog/tags/Linux/" rel="tag"># Linux</a>
+          
+            <a href="/blog/tags/RHCE/" rel="tag"># RHCE</a>
+          
+            <a href="/blog/tags/RH124/" rel="tag"># RH124</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/RHCE/RHCE7-RH124-LearningNotes-CH10_AnalyzingAndStoringLogs/" rel="next" title="[RHCE] RH124 Chapter 10 Analyzing and Storing Logs 學習筆記">
+                <i class="fa fa-chevron-left"></i> [RHCE] RH124 Chapter 10 Analyzing and Storing Logs 學習筆記
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/RHCE/RHCE7-RH124-LearningNotes-CH12-ArchvingAndCopyingFilesBetweenSystems/" rel="prev" title="[RHCE] RH124 Chapter 11 Managing Red Hat Enterprise Linux Networking 學習筆記">
+                [RHCE] RH124 Chapter 11 Managing Red Hat Enterprise Linux Networking 學習筆記 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            本站概覽
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">godleon</p>
+              <p class="site-description motion-element" itemprop="description">把時間花在哪裡，成就就在哪裡</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/blog/archives/">
+              
+                  <span class="site-state-item-count">69</span>
+                  <span class="site-state-item-name">文章</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/blog/categories/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">分類</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/blog/tags/index.html">
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">標籤</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/godleon" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:godleon@gmail.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-globe"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://plus.google.com/godleon" target="_blank" title="Google">
+                    
+                      <i class="fa fa-fw fa-google"></i>Google</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#11-1-Network-Concepts"><span class="nav-number">1.</span> <span class="nav-text">11.1 Network Concepts</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#11-1-2-Network-interface-names"><span class="nav-number">1.1.</span> <span class="nav-text">11.1.2 Network interface names</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#11-2-Validating-Network-Configuration"><span class="nav-number">2.</span> <span class="nav-text">11.2 Validating Network Configuration</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#11-3-Configuring-Network-with-nmcli"><span class="nav-number">3.</span> <span class="nav-text">11.3 Configuring Network with nmcli</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#11-3-1-Network-Manager"><span class="nav-number">3.1.</span> <span class="nav-text">11.3.1 Network Manager</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-3-2-Viewing-network-information-with-nmcli"><span class="nav-number">3.2.</span> <span class="nav-text">11.3.2 Viewing network information with nmcli</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-3-3-Creating-network-connections-with-nmcli"><span class="nav-number">3.3.</span> <span class="nav-text">11.3.3 Creating network connections with nmcli</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-3-4-Modifying-network-interfaces-with-nmcli"><span class="nav-number">3.4.</span> <span class="nav-text">11.3.4 Modifying network interfaces with nmcli</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#11-4-Editing-Network-Configuration-Files"><span class="nav-number">4.</span> <span class="nav-text">11.4 Editing Network Configuration Files</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#11-5-Configuring-Host-Names-and-Name-Resolution"><span class="nav-number">5.</span> <span class="nav-text">11.5 Configuring Host Names and Name Resolution</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#11-5-1-Changing-the-System-host-name"><span class="nav-number">5.1.</span> <span class="nav-text">11.5.1 Changing the System host name</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-5-2-Configuring-name-resolution"><span class="nav-number">5.2.</span> <span class="nav-text">11.5.2 Configuring name resolution</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 強力驅動</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主題 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/blog/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://godleon-blog-hexo.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'https://godleon.github.io/blog/RHCE/RHCE7-RH124-LearningNotes-CH11_ManagingRedHatEnterpriseLinuxNetworking/';
+          this.page.identifier = 'RHCE/RHCE7-RH124-LearningNotes-CH11_ManagingRedHatEnterpriseLinuxNetworking/';
+          this.page.title = '[RHCE] RH124 Chapter 11 Managing Red Hat Enterprise Linux Networking 學習筆記';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/blog/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

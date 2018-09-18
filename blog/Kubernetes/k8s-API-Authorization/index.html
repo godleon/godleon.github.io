@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-tw">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/blog/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/blog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/blog/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/blog/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Kubernetes,CKA," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="本篇文章介紹在 Kubernetes 中存取 API 時的授權機制">
+<meta name="keywords" content="Kubernetes,CKA">
+<meta property="og:type" content="article">
+<meta property="og:title" content="了解 Kubernetes 中的授權機制">
+<meta property="og:url" content="https://godleon.github.io/blog/Kubernetes/k8s-API-Authorization/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="本篇文章介紹在 Kubernetes 中存取 API 時的授權機制">
+<meta property="og:locale" content="zh-tw">
+<meta property="og:updated_time" content="2018-09-18T20:29:07.278Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="了解 Kubernetes 中的授權機制">
+<meta name="twitter:description" content="本篇文章介紹在 Kubernetes 中存取 API 時的授權機制">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://godleon.github.io/blog/Kubernetes/k8s-API-Authorization/"/>
+
+
+
+
+
+  <title>了解 Kubernetes 中的授權機制 | 小信豬的原始部落</title>
+  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-703592-7', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-tw">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">小信豬的原始部落</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/blog/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首頁
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/blog/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            標籤
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/blog/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分類
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/blog/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            歸檔
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            檢索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/blog/Kubernetes/k8s-API-Authorization/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">了解 Kubernetes 中的授權機制</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">發表於</span>
+              
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2018-06-19T08:30:00+00:00">
+                2018-06-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分類於</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Kubernetes/" itemprop="url" rel="index">
+                    <span itemprop="name">Kubernetes</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/Kubernetes/k8s-API-Authorization/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="Kubernetes/k8s-API-Authorization/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  本篇文章介紹在 Kubernetes 中存取 API 時的授權機制
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>在進行授權(Authorization) 之前，一定要先完成認證(Authentication) 的過程，而認證的說明可以參考<a href="https://godleon.github.io/blog/2018/06/19/Kubernetes/k8s-API-Authentication/">上一篇文章</a>。</p>
+<p>k8s 對於 REST API request 的屬性要求是通用的，因此可以與企業中 or 公有雲平台中現存的管理控制系統進行整合。</p>
+<p>而在 k8s 中，負責對 API request 進行授權的是 API server，藉由檢查所有的 <strong>request attribute</strong> 並查詢所有的 policy 來決定是否允許或拒絕 API request 的存取。</p>
+<blockquote>
+<p>預設情況下所有權限都是預設關閉的</p>
+</blockquote>
+<p>k8s 支援同時多個授權機制，並且為循序式的進行檢查，若有任何一個授權機制通過檢查，就會馬上允許存取，若是沒有通過任何的授權機制檢查，此 API request 就會被拒絕存取；而被拒絕存取的 API request 都會收到 HTTP 403 error。</p>
+<h1 id="名詞釋疑"><a href="#名詞釋疑" class="headerlink" title="名詞釋疑"></a>名詞釋疑</h1><h2 id="NameSpace"><a href="#NameSpace" class="headerlink" title="NameSpace"></a>NameSpace</h2><p>用來進行資源的虛擬隔離之用，在 k8s 剛建立好的初期會有預設的 <code>default</code> &amp; <code>kube-system</code> 兩個 namespace</p>
+<h2 id="User-Account-amp-Service-Account"><a href="#User-Account-amp-Service-Account" class="headerlink" title="User Account &amp; Service Account"></a>User Account &amp; Service Account</h2><p>User Account &amp; Service Account 是用來區別作用的範圍，但會有以下的差別：</p>
+<ol>
+<li><p>User Account 是用來辨識使用者，而 Service Account 則是用來辨識 k8s 中的各種服務</p>
+</li>
+<li><p>User Account 對應人的身份，因此是跨 namespace；而 Service Account 對應的是 service 的身份，因此是與 namespace 有相關</p>
+</li>
+</ol>
+<h1 id="Request-Attributes"><a href="#Request-Attributes" class="headerlink" title="Request Attributes"></a>Request Attributes</h1><p>上面有提到，API server 會檢查 <strong>API request attribute</strong> 來決定是否進行授權存取，在 k8s 有以下 API request attributes：</p>
+<ul>
+<li><p>user, group, extra(額外的 key/value 資訊)</p>
+</li>
+<li><p>API、Request Path(/api, /healthz), API request verb(get, list, create, update, patch, watch … etc)</p>
+</li>
+<li><p>HTTP request verb(get, post, put, delete)</p>
+</li>
+<li><p>Resource, Subresource (存取 resource 時需要的資訊)</p>
+</li>
+<li><p>Namespace</p>
+</li>
+<li><p><a href="https://kubernetes.io/docs/concepts/overview/kubernetes-api/#api-groups" target="_blank" rel="noopener">API group</a> (存取 resource 時需要的資訊)</p>
+</li>
+</ul>
+<h1 id="Authorization-Modules"><a href="#Authorization-Modules" class="headerlink" title="Authorization Modules"></a>Authorization Modules</h1><p>目前 k8s 支援以下幾種 Authorization Modules：</p>
+<h2 id="Node"><a href="#Node" class="headerlink" title="Node"></a><a href="https://kubernetes.io/docs/reference/access-authn-authz/node/" target="_blank" rel="noopener">Node</a></h2><p>此模組是為了授權在每一個 node 上的 kubelet 所發出的 API request 所設計出來的，讓 kubelet 的 API request 可進行特定的權限控制；例如對於以下的 resource 的讀取的權限：</p>
+<ul>
+<li><p>services</p>
+</li>
+<li><p>endpoints</p>
+</li>
+<li><p>nodes</p>
+</li>
+<li><p>pods</p>
+</li>
+<li><p>secrets / configmaps / presistent volume (claim)</p>
+</li>
+</ul>
+<p>另外透過 NodeRestriction 的 plugin，可以針對以下 resource 進行寫入：</p>
+<ul>
+<li><p>node (status)</p>
+</li>
+<li><p>pod (status)</p>
+</li>
+<li><p>event</p>
+</li>
+</ul>
+<blockquote>
+<p>未來可能還會繼續透過 Node Authorization 來對於 kubelet 進行更細膩的權限控管</p>
+</blockquote>
+<h2 id="ABAC-Attribute-based-access-control"><a href="#ABAC-Attribute-based-access-control" class="headerlink" title="ABAC (Attribute-based access control)"></a><a href="https://kubernetes.io/docs/reference/access-authn-authz/abac/" target="_blank" rel="noopener">ABAC (Attribute-based access control)</a></h2><p>此種方式就是在 master node 上保留一份 policy 文件，指定不同的使用者對於 resource 的存取權限，不彈性也不容易擴充，修改了 policy 文件之後還需要重新啟動 master node。</p>
+<h2 id="RBAC-Role-based-access-control"><a href="#RBAC-Role-based-access-control" class="headerlink" title="RBAC (Role-based access control)"></a><a href="https://kubernetes.io/docs/reference/access-authn-authz/rbac/" target="_blank" rel="noopener">RBAC (Role-based access control)</a></h2><p>RBAC 是目前 k8s 預設會啟動的 authorization module。</p>
+<p>在 RBAC API 中定義了 resource target，用來描述使用者以及 resource 之間的權限關係：</p>
+<ul>
+<li><p>Role：定義在特定 namespace 下的 resource 的存取權限</p>
+</li>
+<li><p>RoleBinding： 設定哪些使用者(or service account)與 role 綁定而擁有存取權限</p>
+</li>
+<li><p>ClusterRole：定義在整個 k8s cluster 下的 resource 的存取權限</p>
+</li>
+<li><p>ClusterRoleBinding：設定哪些使用者(or service account)與 role 綁定而擁有存取權限</p>
+</li>
+</ul>
+<p>接著以下以 role <strong>kubernetes-dashboard-minimal</strong> 做個簡單的示範：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">root@kube-master0:~<span class="comment"># kubectl get role --all-namespaces</span></span><br><span class="line">NAMESPACE     NAME                                             AGE</span><br><span class="line">default       pod-reader                                       4d</span><br><span class="line">kube-public   system:controller:bootstrap-signer               5d</span><br><span class="line">kube-system   extension-apiserver-authentication-reader        5d</span><br><span class="line">kube-system   kubernetes-dashboard-minimal                     5d</span><br><span class="line">..... (略)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl get rolebinding --all-namespaces</span></span><br><span class="line">NAMESPACE     NAME                                             AGE</span><br><span class="line">kube-public   system:controller:bootstrap-signer               5d</span><br><span class="line">kube-system   kubernetes-dashboard-minimal                     5d</span><br><span class="line">..... (略)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 檢視 role "kubernetes-dashboard-minimal" 中有那些 resource 的存取權限</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl describe role/kubernetes-dashboard-minimal -n kube-system</span></span><br><span class="line">Name:         kubernetes-dashboard-minimal</span><br><span class="line">Labels:       &lt;none&gt;</span><br><span class="line">Annotations:  kubectl.kubernetes.io/last-applied-configuration=&#123;<span class="string">"apiVersion"</span>:<span class="string">"rbac.authorization.k8s.io/v1"</span>,<span class="string">"kind"</span>:<span class="string">"Role"</span>,<span class="string">"metadata"</span>:&#123;<span class="string">"annotations"</span>:&#123;&#125;,<span class="string">"name"</span>:<span class="string">"kubernetes-dashboard-minimal"</span>,<span class="string">"namespace"</span>:<span class="string">"kube-system"</span>...</span><br><span class="line">PolicyRule:</span><br><span class="line">  Resources       Non-Resource URLs  Resource Names                     Verbs</span><br><span class="line">  ---------       -----------------  --------------                     -----</span><br><span class="line">  configmaps      []                 [kubernetes-dashboard-settings]    [get update]</span><br><span class="line">  configmaps      []                 []                                 [create]</span><br><span class="line">  secrets         []                 [kubernetes-dashboard-certs]       [get update delete]</span><br><span class="line">  secrets         []                 [kubernetes-dashboard-key-holder]  [get update delete]</span><br><span class="line">  secrets         []                 []                                 [create]</span><br><span class="line">  services        []                 [heapster]                         [proxy]</span><br><span class="line">  services/proxy  []                 [heapster]                         [get]</span><br><span class="line">  services/proxy  []                 [http:heapster:]                   [get]</span><br><span class="line">  services/proxy  []                 [https:heapster:]                  [get]</span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 檢視目前與 role "kubernetes-dashboard-minimal" 相關連的使用者(名稱為 "kubernetes-dashboard" 的 service account)</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl describe rolebinding/kubernetes-dashboard-minimal -n kube-system</span></span><br><span class="line">Name:         kubernetes-dashboard-minimal</span><br><span class="line">Labels:       &lt;none&gt;</span><br><span class="line">Annotations:  kubectl.kubernetes.io/last-applied-configuration=&#123;<span class="string">"apiVersion"</span>:<span class="string">"rbac.authorization.k8s.io/v1"</span>,<span class="string">"kind"</span>:<span class="string">"RoleBinding"</span>,<span class="string">"metadata"</span>:&#123;<span class="string">"annotations"</span>:&#123;&#125;,<span class="string">"name"</span>:<span class="string">"kubernetes-dashboard-minimal"</span>,<span class="string">"namespace"</span>:<span class="string">"kube-...</span></span><br><span class="line"><span class="string">Role:</span></span><br><span class="line"><span class="string">  Kind:  Role</span></span><br><span class="line"><span class="string">  Name:  kubernetes-dashboard-minimal</span></span><br><span class="line"><span class="string">Subjects:</span></span><br><span class="line"><span class="string">  Kind            Name                  Namespace</span></span><br><span class="line"><span class="string">  ----            ----                  ---------</span></span><br><span class="line"><span class="string">  ServiceAccount  kubernetes-dashboard  kube-system</span></span><br></pre></td></tr></table></figure>
+<p>接著以 clusterole <strong>system:controller:deployment-controller</strong> 做示範：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 檢視目前 k8s cluster 中的 ClusteRole 資訊</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl get clusterrole</span></span><br><span class="line">NAME                                                                   AGE</span><br><span class="line">admin                                                                  5d</span><br><span class="line">calico-node                                                            5d</span><br><span class="line">cluster-admin                                                          5d</span><br><span class="line">..... (略)</span><br><span class="line">system:controller:deployment-controller                                5d</span><br><span class="line">..... (略)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 檢視 "system:controller:deployment-controller" ClusteRole 的 resource 存取權限</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl describe clusterrole/system:controller:deployment-controller</span></span><br><span class="line">Name:         system:controller:deployment-controller</span><br><span class="line">Labels:       kubernetes.io/bootstrapping=rbac-defaults</span><br><span class="line">Annotations:  rbac.authorization.kubernetes.io/autoupdate=<span class="literal">true</span></span><br><span class="line">PolicyRule:</span><br><span class="line">  Resources                          Non-Resource URLs  Resource Names  Verbs</span><br><span class="line">  ---------                          -----------------  --------------  -----</span><br><span class="line">  events                             []                 []              [create patch update]</span><br><span class="line">  pods                               []                 []              [get list update watch]</span><br><span class="line">  deployments.apps                   []                 []              [get list update watch]</span><br><span class="line">  deployments.apps/finalizers        []                 []              [update]</span><br><span class="line">  deployments.apps/status            []                 []              [update]</span><br><span class="line">  replicasets.apps                   []                 []              [create delete get list patch update watch]</span><br><span class="line">  deployments.extensions             []                 []              [get list update watch]</span><br><span class="line">  deployments.extensions/finalizers  []                 []              [update]</span><br><span class="line">  deployments.extensions/status      []                 []              [update]</span><br><span class="line">  replicasets.extensions             []                 []              [create delete get list patch update watch]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 檢視目前 k8s cluster 中的 ClusteRoleBinding 資訊</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl get clusterrolebinding</span></span><br><span class="line">NAME                                                   AGE</span><br><span class="line">..... (略)</span><br><span class="line">system:controller:deployment-controller                5d</span><br><span class="line">..... (略)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 檢視目前 k8s cluster 中與 "system:controller:deployment-controller" ClusteRoleBinding 連結的使用者(or service account)</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl describe clusterrolebinding/system:controller:deployment-controller</span></span><br><span class="line">Name:         system:controller:deployment-controller</span><br><span class="line">Labels:       kubernetes.io/bootstrapping=rbac-defaults</span><br><span class="line">Annotations:  rbac.authorization.kubernetes.io/autoupdate=<span class="literal">true</span></span><br><span class="line">Role:</span><br><span class="line">  Kind:  ClusterRole</span><br><span class="line">  Name:  system:controller:deployment-controller</span><br><span class="line">Subjects:</span><br><span class="line">  Kind            Name                   Namespace</span><br><span class="line">  ----            ----                   ---------</span><br><span class="line">  ServiceAccount  deployment-controller  kube-system</span><br></pre></td></tr></table></figure>
+<p>API server 已經預先建立了一系列的 ClusterRole &amp; ClusteRoleBinding，名稱都以 <strong>system</strong> 開頭，並涵蓋了維持系統正常服務所需要的所有權限，因此整個 k8s cluster 都可以在 RBAC 的基礎下進行權限的管理與授權。</p>
+<blockquote>
+<p>這也代表著隨意對 system 開頭的 ClusteRole 修改，可能會造成系統無法正常運作。</p>
+</blockquote>
+<h2 id="Webhook"><a href="#Webhook" class="headerlink" title="Webhook"></a><a href="https://kubernetes.io/docs/reference/access-authn-authz/webhook/" target="_blank" rel="noopener">Webhook</a></h2><p>此模式是管理者在外部提供 HTTPS 授權服務，並設定 API server 透過與外部服務互動的方式進行授權。</p>
+<h1 id="檢查-API-存取權限"><a href="#檢查-API-存取權限" class="headerlink" title="檢查 API 存取權限"></a>檢查 API 存取權限</h1><p>kubectl 提供了 <code>auth can-i</code> 命令，可用來查詢當前的使用者有沒有特定 resource 的存取權限：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 檢查有無在 "dev" namespace 中建立 deployment 的權限</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl auth can-i create deployments --namespace dev</span></span><br><span class="line">yes</span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 檢查有無在 "prod" namespace 中建立 deployment 的權限</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl auth can-i create deployments --namespace prod</span></span><br><span class="line">yes</span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 檢查有無在 "dev" namespace 中以 dave 的身份來列出 secret 的權限</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl auth can-i list secrets --namespace dev --as dave</span></span><br><span class="line">yes</span><br></pre></td></tr></table></figure>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a href="https://kubernetes.io/docs/reference/access-authn-authz/authorization/" target="_blank" rel="noopener">Authorization Overview - Kubernetes</a></p>
+</li>
+<li><p><a href="https://zhangchenchen.github.io/2017/08/17/kubernetes-authentication-authorization-admission-control/" target="_blank" rel="noopener">Kubernetes– 漫谈kubernetes 中的认证 &amp; 授权 &amp; 准入机制 | Solar</a></p>
+</li>
+<li><p><a href="http://cizixs.com/2017/06/16/kubernetes-authentication-and-authorization" target="_blank" rel="noopener">kubernetes 權限管理 – Cizixs Writes Here</a></p>
+</li>
+<li><p><a href="https://k8smeetup.github.io/docs/admin/authorization/rbac/" target="_blank" rel="noopener">https://k8smeetup.github.io/docs/admin/authorization/rbac/</a></p>
+</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog/tags/Kubernetes/" rel="tag"># Kubernetes</a>
+          
+            <a href="/blog/tags/CKA/" rel="tag"># CKA</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/Kubernetes/k8s-API-Authentication/" rel="next" title="了解 Kubernetes 中的認證機制">
+                <i class="fa fa-chevron-left"></i> 了解 Kubernetes 中的認證機制
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/Kubernetes/k8s-Deploy-and-Access-Dashboard/" rel="prev" title="佈署 & 存取 Kubernetes Dashboard">
+                佈署 & 存取 Kubernetes Dashboard <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            本站概覽
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">godleon</p>
+              <p class="site-description motion-element" itemprop="description">把時間花在哪裡，成就就在哪裡</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/blog/archives/">
+              
+                  <span class="site-state-item-count">69</span>
+                  <span class="site-state-item-name">文章</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/blog/categories/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">分類</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/blog/tags/index.html">
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">標籤</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/godleon" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:godleon@gmail.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-globe"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://plus.google.com/godleon" target="_blank" title="Google">
+                    
+                      <i class="fa fa-fw fa-google"></i>Google</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#名詞釋疑"><span class="nav-number">2.</span> <span class="nav-text">名詞釋疑</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#NameSpace"><span class="nav-number">2.1.</span> <span class="nav-text">NameSpace</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#User-Account-amp-Service-Account"><span class="nav-number">2.2.</span> <span class="nav-text">User Account &amp; Service Account</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Request-Attributes"><span class="nav-number">3.</span> <span class="nav-text">Request Attributes</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Authorization-Modules"><span class="nav-number">4.</span> <span class="nav-text">Authorization Modules</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Node"><span class="nav-number">4.1.</span> <span class="nav-text">Node</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ABAC-Attribute-based-access-control"><span class="nav-number">4.2.</span> <span class="nav-text">ABAC (Attribute-based access control)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RBAC-Role-based-access-control"><span class="nav-number">4.3.</span> <span class="nav-text">RBAC (Role-based access control)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Webhook"><span class="nav-number">4.4.</span> <span class="nav-text">Webhook</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#檢查-API-存取權限"><span class="nav-number">5.</span> <span class="nav-text">檢查 API 存取權限</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text">References</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 強力驅動</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主題 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/blog/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://godleon-blog-hexo.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'https://godleon.github.io/blog/Kubernetes/k8s-API-Authorization/';
+          this.page.identifier = 'Kubernetes/k8s-API-Authorization/';
+          this.page.title = '了解 Kubernetes 中的授權機制';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/blog/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

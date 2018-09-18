@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-tw">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/blog/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/blog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/blog/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/blog/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Kubernetes,CKA," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="此篇文章介紹在 Kubernetes 中，提供了那些機制來管理各式各樣的 Resource Object">
+<meta name="keywords" content="Kubernetes,CKA">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[Kubernetes] 如何管理 Resource Object">
+<meta property="og:url" content="https://godleon.github.io/blog/Kubernetes/k8s-CoreConcept-Wokring-with-Objects/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章介紹在 Kubernetes 中，提供了那些機制來管理各式各樣的 Resource Object">
+<meta property="og:locale" content="zh-tw">
+<meta property="og:updated_time" content="2018-09-18T20:29:07.278Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[Kubernetes] 如何管理 Resource Object">
+<meta name="twitter:description" content="此篇文章介紹在 Kubernetes 中，提供了那些機制來管理各式各樣的 Resource Object">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://godleon.github.io/blog/Kubernetes/k8s-CoreConcept-Wokring-with-Objects/"/>
+
+
+
+
+
+  <title>[Kubernetes] 如何管理 Resource Object | 小信豬的原始部落</title>
+  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-703592-7', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-tw">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">小信豬的原始部落</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/blog/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首頁
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/blog/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            標籤
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/blog/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分類
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/blog/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            歸檔
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            檢索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/blog/Kubernetes/k8s-CoreConcept-Wokring-with-Objects/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">[Kubernetes] 如何管理 Resource Object</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">發表於</span>
+              
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2018-08-29T01:45:00+00:00">
+                2018-08-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分類於</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Kubernetes/" itemprop="url" rel="index">
+                    <span itemprop="name">Kubernetes</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/Kubernetes/k8s-CoreConcept-Wokring-with-Objects/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="Kubernetes/k8s-CoreConcept-Wokring-with-Objects/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  此篇文章介紹在 Kubernetes 中，提供了那些機制來管理各式各樣的 Resource Object
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>此篇文章介紹在 Kubernetes 中，提供了那些機制來管理各式各樣的 Resource Object</p>
+<h1 id="What-is-Kubernetes-Resource-Object"><a href="#What-is-Kubernetes-Resource-Object" class="headerlink" title="What is Kubernetes Resource Object?"></a>What is Kubernetes Resource Object?</h1><p>k8s object 是存在於 k8s 系統中的 persisten entity，用來描述 k8s cluster 中的狀態，例如：</p>
+<ul>
+<li><p>那一個 containerized application 正在運作?</p>
+</li>
+<li><p>承上，在哪些 worker nodes 上運行?</p>
+</li>
+<li><p>那些資源是可提供給 application 使用</p>
+</li>
+<li><p>套用在這些 application 上的規則，例如：restart policy, upgrade, fault-tolerance</p>
+</li>
+</ul>
+<p>每個 Object 都包含了 <strong>spec</strong> &amp; <strong>status</strong> 兩個部份，其中 spec 是用來描述 object 要以什麼樣的形式(規格 or 內容)呈現，而 status 則是用來描述這個 object 希望由 K8s 所維持的狀態(<strong>desired state</strong>)。</p>
+<p>以下舉個 deployment 的例子來說明：(可透過 YAML or JSON 呈現)</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 指定使用那個版本的 API 來建立此 object</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1beta1</span></span><br><span class="line"><span class="comment"># 建立什麼樣的 resource object</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="comment"># 用來辨識此物件的資訊，可能包含"name", "UID", "namespace" .... 等資訊</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">nginx-deployment</span></span><br><span class="line"><span class="comment"># spec 則是用來描述物件被生成的細節</span></span><br><span class="line"><span class="comment"># 每個不同的 resource object 都有不同的 spec 定義</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  replicas:</span> <span class="number">3</span></span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        app:</span> <span class="string">nginx</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">nginx</span></span><br><span class="line"><span class="attr">        image:</span> <span class="attr">nginx:1.7.9</span></span><br><span class="line"><span class="attr">        ports:</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">80</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>若是透過 <a href="https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#create" target="_blank" rel="noopener">kubectl create -f FILENAME</a> 建立物件，檔案的資料格式可以是 JSON or YAML 格式；但若是呼叫 API 直接建立物件，就只能使用 JSON 格式資料</p>
+</blockquote>
+<p>上面是一個 deployment object 的定義，其中的 spec 部份則清楚的定義這個 deployment 的規格(使用 nginx:1.7.9 作為 image 來運行 container)；而 status 則是希望有 3 份 replica，因此 K8s 會協助維持 3 份 replica 的狀態。</p>
+<p>在前一篇文章提到，在 K8s 上各式各樣(<strong>kind</strong>)的 resource，其實就是以一個一個 object 存在於 K8s ecosystem 中，而每個 object 都各自擁有自己的 spec &amp; status。</p>
+<p>以下提供兩種 resource object 的 spec 定義文件提供參考：</p>
+<ul>
+<li><p><a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#deploymentspec-v1-apps" target="_blank" rel="noopener">Deployment</a></p>
+</li>
+<li><p><a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#podspec-v1-core" target="_blank" rel="noopener">Pod</a></p>
+</li>
+</ul>
+<h1 id="Node"><a href="#Node" class="headerlink" title="Node"></a>Node</h1><h2 id="What-is-Node"><a href="#What-is-Node" class="headerlink" title="What is Node?"></a>What is Node?</h2><p>Node 在 k8s cluster 中的一個 worker node，以前稱為 <code>minion</code>，可以是實體機 or VM。在每個 node 中都包含數個服務元件，用來管理 pod 在上面運作的行為 &amp; 狀態，這些管理用的 service 包含以下幾個：</p>
+<ul>
+<li><p>container time: 可以是 <a href="https://www.docker.com/" target="_blank" rel="noopener">Docker</a>, <a href="https://coreos.com/rkt/" target="_blank" rel="noopener">rkt</a>, <a href="https://github.com/opencontainers/runc" target="_blank" rel="noopener">runc</a> 或是其他任何符合 <a href="https://github.com/opencontainers/runtime-spec" target="_blank" rel="noopener">OCI 規範</a>的 container runtime</p>
+</li>
+<li><p>kubelet: 負責接收來自 API server 的命令、維護 container 的生命周期，並負責 CSI(Container Storage Interface) &amp; CNI(Container Network Interface) 的管理</p>
+</li>
+<li><p>kube-proxy: 負責為 service 提供 cluster 內部的 service discovery &amp; load balance</p>
+</li>
+</ul>
+<h2 id="Node-Status"><a href="#Node-Status" class="headerlink" title="Node Status"></a>Node Status</h2><p>為了可以讓 master 確保每個 node 是否正常運作，Node 本身就要自己回報狀態資訊，包含以下內容：</p>
+<h3 id="Address"><a href="#Address" class="headerlink" title="Address"></a>Address</h3><ul>
+<li><p>HostName: 由系統的 kernel 主動回報的 資訊，可以被 kubelet 中的 <code>--hostname-override</code> 參數取代</p>
+</li>
+<li><p>ExternalIP：可被 cluster 外部存取的 IP</p>
+</li>
+<li><p>InternalIP: cluster 內部的 IP，無法從外部存取</p>
+</li>
+</ul>
+<h3 id="Condition"><a href="#Condition" class="headerlink" title="Condition"></a>Condition</h3><p>以下的狀態包含了所有用來描述運行中的 node 的狀態：</p>
+<ul>
+<li><p>OutOfDisk: <code>True</code> 表示沒有足夠的磁碟空間可以正常運作</p>
+</li>
+<li><p>Ready: <code>True</code> 表示可正常運作並接受 pod scheduling，<code>False</code> 則表示不健康，<code>Unknown</code> 表示 node 沒有在 <strong>node-monitor-grace-period</strong>(預設 40 秒) 限制時間內主動回報訊息給 node controller</p>
+</li>
+<li><p>MemoryPressure: <code>True</code> 表示剩餘記憶體很低</p>
+</li>
+<li><p>PIDPressure: <code>True</code> 表示存在太多 process</p>
+</li>
+<li><p>DiskPressure: <code>True</code> 表示磁碟空間所剩無幾</p>
+</li>
+<li><p>NetworkUnavailable: <code>True</code> 表示 node 網路沒有正確設定</p>
+</li>
+<li><p>ConfigOK: <code>True</code> 表示 kubelet 有被正確的設定好</p>
+</li>
+</ul>
+<h3 id="Capacity"><a href="#Capacity" class="headerlink" title="Capacity"></a>Capacity</h3><p>用來描述 node 上資源的可用程度，包含：</p>
+<ul>
+<li><p>CPU</p>
+</li>
+<li><p>Memory</p>
+</li>
+<li><p>可同時運行的 Pod 數量上限</p>
+</li>
+</ul>
+<h3 id="Info"><a href="#Info" class="headerlink" title="Info"></a>Info</h3><p>關於 Node 的一般資訊，由 kubelet 蒐集，例如：</p>
+<ul>
+<li><p>OS name</p>
+</li>
+<li><p>kernel version</p>
+</li>
+<li><p>Kubernetes version (包含 kubelet &amp; kube-proxy)</p>
+</li>
+<li><p>Docker version (如果安裝的 container runtime 是 Docker)</p>
+</li>
+</ul>
+<h1 id="Name"><a href="#Name" class="headerlink" title="Name"></a>Name</h1><p>每個在 K8s cluster 上的 object 都可以用 Name or UID 來識別，而在同一時間，每一種 <strong>kind(resource type)</strong> 的 object name 不能重複，例如：不能有兩個 name 同為 nginx 的 pod。</p>
+<p>而每個 resource 都可以透過 API 進行存取，以 pod 為例，resource url 可能像是 <code>/api/v1/pods/some-name</code>。當然，為 object 取名也是有學問的，若是要研究此部份可參考<a href="https://github.com/kubernetes/community/blob/master/contributors/design-proposals/architecture/identifiers.md" target="_blank" rel="noopener">官方文件</a>。</p>
+<h1 id="Namespace"><a href="#Namespace" class="headerlink" title="Namespace"></a>Namespace</h1><h2 id="What-is-namespace"><a href="#What-is-namespace" class="headerlink" title="What is namespace ?"></a>What is namespace ?</h2><p>假設有很多不同的使用者同時使用相同的 K8s cluster，K8s 提供了 <code>namespace</code> 讓一個 K8s cluster 上可區分出多個不同的 virtual cluster。</p>
+<blockquote>
+<p>通常用來區分不同 team 的 user 或是不同的專案</p>
+</blockquote>
+<p>大部分的 resource 都會隸屬於某個 namespace，不同 namespace 的 resource name 可以相同，每個使用者可以自訂一個自己的 namespace，並在此 namespace 中自訂自己的 resource。</p>
+<blockquote>
+<p>有些特殊的 resource(e.g., node, persistent volume) 不屬於任何 namespace</p>
+</blockquote>
+<p>而管理者也可以透過 <a href="https://kubernetes.io/docs/concepts/policy/resource-quotas/" target="_blank" rel="noopener">resource quota</a> 來定義每個 namespace 可使用的實體資源總量，亦可以 namespace 為單位設定 ccontrol policy。</p>
+<p>而若是要在同一個 namespace 為不同的 resource 進行分門別類，則可搭配 <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/" target="_blank" rel="noopener">Label</a> 來完成。</p>
+<h2 id="檢視-cluster-中的-namespace"><a href="#檢視-cluster-中的-namespace" class="headerlink" title="檢視 cluster 中的 namespace"></a>檢視 cluster 中的 namespace</h2><p>此外，namespace 其實也是 K8s resource 的一種，只是透過不同 resource 的搭配，可以達成資源隔離的效果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl get ns</span><br><span class="line">NAME          STATUS    AGE</span><br><span class="line">default       Active    1d</span><br><span class="line">kube-system   Active    1d</span><br><span class="line">kube-public   Active    1d</span><br></pre></td></tr></table></figure>
+<p>當 K8s 安裝完成後，預設就會有以下 3 個 namespace：</p>
+<ul>
+<li><p><strong>default</strong>：若沒有指定 namespace 的 resource object 則會被歸類在 default</p>
+</li>
+<li><p><strong>kube-system</strong>：這個 namespace 內的 resource object 則都是屬於 K8s 系統本身所擁有的</p>
+</li>
+<li><p><strong>kube-public</strong>：在這個 namespace 中的 resource object 是可以被所有使用者所存取(visible &amp; readable)的(也包含未認証的使用者)，通常是在 cluster level 被使用</p>
+</li>
+</ul>
+<h2 id="使用-namespace"><a href="#使用-namespace" class="headerlink" title="使用 namespace"></a>使用 namespace</h2><p>使用 namespace 的方式也很簡單，以下是幾個範例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 取得指定 namespace 的 pod 清單</span></span><br><span class="line">$ kubectl --namespace=&lt;insert-namespace-name-here&gt; get pods</span><br><span class="line"></span><br><span class="line"><span class="comment"># 修改使用 kubectl 時預設的 namespace (若不修改，預設為 default)</span></span><br><span class="line">$ kubectl config <span class="built_in">set</span>-context $(kubectl config current-context) --namespace=&lt;insert-namespace-name-here&gt;</span><br></pre></td></tr></table></figure>
+<h2 id="namespace-amp-DNS-的關係"><a href="#namespace-amp-DNS-的關係" class="headerlink" title="namespace &amp; DNS 的關係"></a>namespace &amp; DNS 的關係</h2><p>當 <a href="https://kubernetes.io/docs/concepts/services-networking/service/" target="_blank" rel="noopener">service</a> 被建立後，為了讓 cluster 內部可以透過 domain name 存取 service，相對應的 <a href="https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/" target="_blank" rel="noopener">DNS entry</a> 也同時會被建立，而這個 DNS entry 的格式如下：</p>
+<blockquote>
+<p>&lt;service-name>.&lt;namespace-name>.svc.cluster.local</p>
+</blockquote>
+<p>其中 <code>cluster.local</code> 是當初建立 cluster 的時候給入的設定，可以修改</p>
+<blockquote>
+<p>若是在同一個 namespace 中的 pod，可直接透過 <strong><service-name></service-name></strong> 就存取到 service，不需指定完整的 FQDN</p>
+</blockquote>
+<h2 id="不屬於任何-namespace-的-resource"><a href="#不屬於任何-namespace-的-resource" class="headerlink" title="不屬於任何 namespace 的 resource"></a>不屬於任何 namespace 的 resource</h2><p>雖然大部分的 resource 都有所屬的 namespace，但也有一些 resource 是例外，通常這些都是 cluster level 的 resource，例如：<strong>namespace</strong>、<strong>ClusterRole</strong>、<strong>ClusterRoleBinding</strong> …. 等等。</p>
+<p>詳細的清單可以透過以下指令查詢：</p>
+<blockquote>
+<p>kubectl api-resources –namespaced=false</p>
+</blockquote>
+<h1 id="Labels-and-Selectors"><a href="#Labels-and-Selectors" class="headerlink" title="Labels and Selectors"></a>Labels and Selectors</h1><h2 id="Label"><a href="#Label" class="headerlink" title="Label"></a>Label</h2><p>Label 是個 key/value 的組合，使用者可以隨意為 object 賦予附加上自訂的 label(一個 or 多個)，作為每個 object 的屬性，來達成類似群組 or 分類的效果；此外，還可以透過 selector 進行 object 的選取。</p>
+<blockquote>
+<p>在 k8s 中有個 <strong>annotation</strong> 的機制，同樣也是 key/value 的型式 &amp; 為 object 增加不同的屬性資料，但 annotation 可乘載的資料較為大量，甚至可以是結構性的資料或是一段 script，但也就無法透過 select 來進行屬性的過濾</p>
+</blockquote>
+<p>以下是幾個 Label 設定的範例：</p>
+<ul>
+<li><p>“<strong>release</strong>“ : “stable”, “<strong>release</strong>“ : “canary”</p>
+</li>
+<li><p>“<strong>environment</strong>“ : “dev”, “<strong>environment</strong>“ : “qa”, “<strong>environment</strong>“ : “production”</p>
+</li>
+<li><p>“<strong>tier</strong>“ : “frontend”, “<strong>tier</strong>“ : “backend”, “<strong>tier</strong>“ : “cache”</p>
+</li>
+<li><p>“<strong>partition</strong>“ : “customerA”, “<strong>partition</strong>“ : “customerB”</p>
+</li>
+<li><p>“<strong>track</strong>“ : “daily”, “<strong>track</strong>“ : “weekly”</p>
+</li>
+</ul>
+<blockquote>
+<p>一個 object 可以有多個 label，而同樣的 label 設定可以套在不同的 object 上面，因此 label &amp; resource object 之間其實是多對多的關係，然後仰賴後續介紹的 selector 來進行 resource 的過濾</p>
+</blockquote>
+<h2 id="Selector"><a href="#Selector" class="headerlink" title="Selector"></a>Selector</h2><p>select 顧名思義，就是用來過濾 label 之用的，那要如何使用呢? 以下也有幾個 cli 範例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl get pods -l environment=production,tier=frontend</span><br><span class="line"></span><br><span class="line">$ kubectl get pods -l <span class="string">'environment in (production),tier in (frontend)'</span></span><br><span class="line"></span><br><span class="line">$ kubectl get pods -l <span class="string">'environment in (production, qa)'</span></span><br><span class="line"></span><br><span class="line">$ kubectl get pods -l <span class="string">'environment,environment notin (frontend)'</span></span><br></pre></td></tr></table></figure>
+<p>若是透過 YAML 宣告：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">selector:</span></span><br><span class="line"><span class="attr">  matchLabels:</span></span><br><span class="line"><span class="attr">    component:</span> <span class="string">redis</span></span><br><span class="line"><span class="attr">  matchExpressions:</span></span><br><span class="line"><span class="bullet">    -</span> <span class="string">&#123;key:</span> <span class="string">tier,</span> <span class="attr">operator:</span> <span class="string">In,</span> <span class="attr">values:</span> <span class="string">[cache]&#125;</span></span><br><span class="line"><span class="bullet">    -</span> <span class="string">&#123;key:</span> <span class="string">environment,</span> <span class="attr">operator:</span> <span class="string">NotIn,</span> <span class="attr">values:</span> <span class="string">[dev]&#125;</span></span><br></pre></td></tr></table></figure>
+<p>最後，也可以指定 schedule pod 到特定的 node。(使用 <a href="https://kubernetes.io/docs/concepts/configuration/assign-pod-node/" target="_blank" rel="noopener">nodeSelector</a>)</p>
+<p>以下有個簡單範例，將 workload 丟到有強力顯示卡的機器上執行：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 將這個 pod schedule 到帶有 "accelerator=nvidia-tesla-p100" 上的 node 上執行</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">cuda-test</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  containers:</span></span><br><span class="line"><span class="attr">    - name:</span> <span class="string">cuda-test</span></span><br><span class="line"><span class="attr">      image:</span> <span class="string">"k8s.gcr.io/cuda-vector-add:v0.1"</span></span><br><span class="line"><span class="attr">      resources:</span></span><br><span class="line"><span class="attr">        limits:</span></span><br><span class="line">          <span class="string">nvidia.com/gpu:</span> <span class="number">1</span></span><br><span class="line"><span class="attr">  nodeSelector:</span></span><br><span class="line"><span class="attr">    accelerator:</span> <span class="string">nvidia-tesla-p100</span></span><br></pre></td></tr></table></figure>
+<h1 id="進階的-Label-用法"><a href="#進階的-Label-用法" class="headerlink" title="進階的 Label 用法"></a>進階的 Label 用法</h1><h2 id="針對-Application-管理的-Label-使用方式"><a href="#針對-Application-管理的-Label-使用方式" class="headerlink" title="針對 Application 管理的 Label 使用方式"></a>針對 Application 管理的 Label 使用方式</h2><p>除了 kubectl &amp; dashboard 之外，若想要視覺化的管理 k8s object，透過套用 common set label 來為不同的 object 增加更多的 metadata &amp; 管理資訊是相當有用的，特別是對那些想自己開發管理工具的人來說。</p>
+<p>k8s 原生就不是一個 PaaS，因此在設計上就不是以 <strong>Application</strong> 的角度為主來進行架構設計 &amp; 開發，因此若是要針對 Application 進行深入的管理，透過使用 <strong>app.kubernetes.io</strong> 作為 prefix 的 label or annotation 就是一種作法。</p>
+<blockquote>
+<p>一般來說 label 是 private to user，使用 <code>app.kubernetes.io</code> 的原因就是確保這樣子的 label 不會影響到 custom user label</p>
+</blockquote>
+<h2 id="相關的-Label-列表"><a href="#相關的-Label-列表" class="headerlink" title="相關的 Label 列表"></a>相關的 Label 列表</h2><p>透過 <code>app.kubernetes.io</code> prefix，有以下的 label 組合可以使用：</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+<th>Example</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>app.kubernetes.io/name</td>
+<td>Application 名稱</td>
+<td>mysql</td>
+<td>string</td>
+</tr>
+<tr>
+<td>app.kubernetes.io/instance</td>
+<td>Application Instance 的識別用名稱</td>
+<td>wordpress-abcxzy</td>
+<td>string</td>
+</tr>
+<tr>
+<td>app.kubernetes.io/version</td>
+<td>Application目前的版本號</td>
+<td>5.7.21</td>
+<td>string</td>
+</tr>
+<tr>
+<td>app.kubernetes.io/component</td>
+<td>在 Application 架構中的元件</td>
+<td>database</td>
+<td>string</td>
+</tr>
+<tr>
+<td>app.kubernetes.io/part-of</td>
+<td>更上層的 Application 名稱</td>
+<td>wordpress</td>
+<td>string</td>
+</tr>
+<tr>
+<td>app.kubernetes.io/managed-by</td>
+<td>用來管理 Application 佈署 &amp; 操作的工具</td>
+<td>helm</td>
+<td>string</td>
+</tr>
+</tbody>
+</table>
+<p>使用上面表格中的資訊，轉換成可設定在 k8s resource object 中的 YAML 格式，就會變成如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">StatefulSet</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line">    <span class="string">app.kubernetes.io/name:</span> <span class="string">"mysql"</span></span><br><span class="line">    <span class="string">app.kubernetes.io/instance:</span> <span class="string">"wordpress-abcxzy"</span></span><br><span class="line">    <span class="string">app.kubernetes.io/version:</span> <span class="string">"5.7.21"</span></span><br><span class="line">    <span class="string">app.kubernetes.io/component:</span> <span class="string">"database"</span></span><br><span class="line">    <span class="string">app.kubernetes.io/part-of:</span> <span class="string">"wordpress"</span></span><br><span class="line">    <span class="string">app.kubernetes.io/managed-by:</span> <span class="string">"helm"</span></span><br></pre></td></tr></table></figure>
+<h2 id="當-Application-被多次佈署到-Kubernetes-Cluster-時"><a href="#當-Application-被多次佈署到-Kubernetes-Cluster-時" class="headerlink" title="當 Application 被多次佈署到 Kubernetes Cluster 時"></a>當 Application 被多次佈署到 Kubernetes Cluster 時</h2><p>以上述的例子來說，一個 wordpress application 可以被佈署多次到 k8s cluster 中，每一次的佈署都稱為 <strong>Application Instance</strong>，雖然每個 application name 都是 <strong>wordpress</strong>，但每個 application instance 都會有各自不同的 instance ID，例如：</p>
+<ul>
+<li><p>app.kubernetes.io/instance: “wordpress-abcxzy”</p>
+</li>
+<li><p>app.kubernetes.io/instance: “wordpress-defstu”</p>
+</li>
+</ul>
+<p>透過不同的 instance 名稱，就可以知道同一個 application，可能被不同的使用者佈署，或是在不同的專案同時被使用</p>
+<h2 id="範例"><a href="#範例" class="headerlink" title="範例"></a>範例</h2><p>以下是使用 Helm 安裝 wordpress(Web + DB) 時，label 設定的範例：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Web 以 Deployment 的形式佈署</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line">    <span class="string">app.kubernetes.io/name:</span> <span class="string">wordpress</span></span><br><span class="line">    <span class="string">app.kubernetes.io/instance:</span> <span class="string">wordpress-abcxzy</span></span><br><span class="line">    <span class="string">app.kubernetes.io/version:</span> <span class="string">"4.9.4"</span></span><br><span class="line">    <span class="string">app.kubernetes.io/managed-by:</span> <span class="string">helm</span></span><br><span class="line">    <span class="string">app.kubernetes.io/component:</span> <span class="string">server</span></span><br><span class="line">    <span class="string">app.kubernetes.io/part-of:</span> <span class="string">wordpress</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 用來提供外部連線處理的 Service，串到後面的 Web 服務</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line">    <span class="string">app.kubernetes.io/name:</span> <span class="string">wordpress</span></span><br><span class="line">    <span class="string">app.kubernetes.io/instance:</span> <span class="string">wordpress-abcxzy</span></span><br><span class="line">    <span class="string">app.kubernetes.io/version:</span> <span class="string">"4.9.4"</span></span><br><span class="line">    <span class="string">app.kubernetes.io/managed-by:</span> <span class="string">helm</span></span><br><span class="line">    <span class="string">app.kubernetes.io/component:</span> <span class="string">server</span></span><br><span class="line">    <span class="string">app.kubernetes.io/part-of:</span> <span class="string">wordpress</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># DB(MySQL) 則是以 StatefulSet 的形式佈署</span></span><br><span class="line"><span class="comment"># 並可看出與那個 application instance 相關</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">StatefulSet</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line">    <span class="string">app.kubernetes.io/name:</span> <span class="string">mysql</span></span><br><span class="line">    <span class="string">app.kubernetes.io/instance:</span> <span class="string">wordpress-abcxzy</span></span><br><span class="line">    <span class="string">app.kubernetes.io/managed-by:</span> <span class="string">helm</span></span><br><span class="line">    <span class="string">app.kubernetes.io/component:</span> <span class="string">database</span></span><br><span class="line">    <span class="string">app.kubernetes.io/part-of:</span> <span class="string">wordpress</span></span><br><span class="line">    <span class="string">app.kubernetes.io/version:</span> <span class="string">"5.7.21"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 用來提供 DB 連線介面給 Web(wordpress) 的 service</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line">    <span class="string">app.kubernetes.io/name:</span> <span class="string">mysql</span></span><br><span class="line">    <span class="string">app.kubernetes.io/instance:</span> <span class="string">wordpress-abcxzy</span></span><br><span class="line">    <span class="string">app.kubernetes.io/managed-by:</span> <span class="string">helm</span></span><br><span class="line">    <span class="string">app.kubernetes.io/component:</span> <span class="string">database</span></span><br><span class="line">    <span class="string">app.kubernetes.io/part-of:</span> <span class="string">wordpress</span></span><br><span class="line">    <span class="string">app.kubernetes.io/version:</span> <span class="string">"5.7.21"</span></span><br></pre></td></tr></table></figure>
+<p>從上面 Label <strong>app.kubernetes.io/instance</strong> 設定的都是相同的 value 來看，就可以很明確的看出，這幾個 resource object 構成了一個完成的 Wordpress 服務。</p>
+<h1 id="Annotations"><a href="#Annotations" class="headerlink" title="Annotations"></a>Annotations</h1><h2 id="What-is-Annotations"><a href="#What-is-Annotations" class="headerlink" title="What is Annotations ?"></a>What is Annotations ?</h2><p>Annotations 跟 上面提到的 label 相同，是以 key/value 的型式儲存資料，但不同的是，Annotations 並不是儲存用來辨識 resource object 用的，主要就是作為 metadata 來當類似”<strong>註解</strong>“的方式使用，大概有幾個特點：</p>
+<ul>
+<li><p>並非用來辨識 resource object 之用</p>
+</li>
+<li><p>註解的資料量通常是較大的</p>
+</li>
+<li><p>資料可以是較為複雜的結構化資料(structured data)，當然也可以是非結構化的資料</p>
+</li>
+<li><p>tool or library 等 client 都可以存取此 metadata</p>
+</li>
+</ul>
+<h2 id="如何設定-Annotations"><a href="#如何設定-Annotations" class="headerlink" title="如何設定 Annotations"></a>如何設定 Annotations</h2><p>以下是簡單一點的 JSON 格式範例：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">"metadata": &#123;</span><br><span class="line">  "annotations": &#123;</span><br><span class="line">    "key1" : "value1",</span><br><span class="line">    "key2" : "value2"</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>也可以是複雜的資料格式：(以 YAML 格式示範)</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">extensions/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Ingress</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">cafe-ingress-with-annotations</span></span><br><span class="line"><span class="attr">  annotations:</span></span><br><span class="line">    <span class="string">nginx.org/proxy-connect-timeout:</span> <span class="string">"30s"</span></span><br><span class="line">    <span class="string">nginx.org/proxy-read-timeout:</span> <span class="string">"20s"</span></span><br><span class="line">    <span class="string">nginx.org/client-max-body-size:</span> <span class="string">"4m"</span></span><br><span class="line">    <span class="string">nginx.org/location-snippets:</span> <span class="string">|</span></span><br><span class="line"><span class="string">        if ($ssl_client_verify = SUCCESS) &#123;</span></span><br><span class="line"><span class="string">            set $auth_basic off;</span></span><br><span class="line"><span class="string">        &#125;</span></span><br><span class="line"><span class="string">        if ($ssl_client_verify != SUCCESS) &#123;</span></span><br><span class="line"><span class="string">            set $auth_basic "Restricted";</span></span><br><span class="line"><span class="string">        &#125;</span></span><br><span class="line"><span class="string">        auth_basic $auth_basic;</span></span><br><span class="line"><span class="string">        auth_basic_user_file "/var/run/secrets/nginx.org/auth-basic-file";</span></span><br><span class="line"><span class="string">    nginx.org/server-snippets: |</span></span><br><span class="line"><span class="string">        ssl_verify_client optional;</span></span><br><span class="line"><span class="string"></span><span class="attr">spec:</span></span><br><span class="line"><span class="string">.......</span> <span class="string">(以下略)</span></span><br></pre></td></tr></table></figure>
+<p>然而，Annotations 的設定不一定是由使用者套用到 resource object 上的，也可以是透過 auto-sizing or auto-scaling system 來自動生成相關 metadata 並套用到 object 上，讓 control manager 透過監控這一類的資訊來調整 object 狀態的變更。</p>
+<h2 id="那些資訊適合用-Annotation-呈現"><a href="#那些資訊適合用-Annotation-呈現" class="headerlink" title="那些資訊適合用 Annotation 呈現?"></a>那些資訊適合用 Annotation 呈現?</h2><p>以下幾個例子說明：</p>
+<ul>
+<li><p>auto-sizing or auto-scaling system 自動生成的資訊</p>
+</li>
+<li><p>build, release 或是與 image 相關的資訊，例如：timestamp, release ID, Git branch, PR numbers, image hash, registry address … 等等</p>
+</li>
+<li><p>與 client library/tool 相關且用來 debug 用的資訊，例如：name, version, build information</p>
+</li>
+<li><p>tool/system 的來源資訊，例如：URL</p>
+</li>
+<li><p>負責人聯絡資訊，例如：電話, E-Mail ….等等</p>
+</li>
+</ul>
+<h1 id="Field-Selectors"><a href="#Field-Selectors" class="headerlink" title="Field Selectors"></a>Field Selectors</h1><h2 id="What-is-Field-Selectors"><a href="#What-is-Field-Selectors" class="headerlink" title="What is Field Selectors?"></a>What is Field Selectors?</h2><p>k8s 除了提供了上面使用 label 的方式搜尋對應的 resource object 之外，還另外支援了另外一種稱為 “<strong>Field Selectors</strong>“ 的搜尋方式。</p>
+<p>透過 Field Selectors，使用者可以根據 object 中的 <code>Field</code> 作為搜尋的依據，以下是幾個範例：</p>
+<ul>
+<li><p>metadata.name=my-service</p>
+</li>
+<li><p>metadata.namespace!=default</p>
+</li>
+<li><p>status.phase=Pending</p>
+</li>
+</ul>
+<p>實際操作的範例如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 搜尋目前 status 為 running 的 pod</span></span><br><span class="line">$ kubectl get pods --field-selector status.phase=Running</span><br></pre></td></tr></table></figure>
+<h2 id="那些-Field-支援搜尋功能"><a href="#那些-Field-支援搜尋功能" class="headerlink" title="那些 Field 支援搜尋功能"></a>那些 Field 支援搜尋功能</h2><p>每種不同的 resource type 支援不同的 Field，但所有的 resource type 都支援以下兩種：</p>
+<ol>
+<li><p>metadata.name</p>
+</li>
+<li><p>metadata.namespace</p>
+</li>
+</ol>
+<p>若是使用者操作時針對不支援的 Field 做搜尋，就會出現類似下面的錯誤訊息：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl get pod -n kube-system --field-selector foo.bar=baz</span><br><span class="line">No resources found.</span><br><span class="line">Error from server (BadRequest): Unable to find &#123;<span class="string">""</span> <span class="string">"v1"</span> <span class="string">"pods"</span>&#125; that match label selector <span class="string">""</span>, field selector <span class="string">"foo.bar=baz"</span>: field label not supported: foo.bar</span><br></pre></td></tr></table></figure>
+<h2 id="進階搜尋"><a href="#進階搜尋" class="headerlink" title="進階搜尋"></a>進階搜尋</h2><h3 id="Supported-operators"><a href="#Supported-operators" class="headerlink" title="Supported operators"></a>Supported operators</h3><p>除了上面示範的 <strong>=</strong>(or <strong>==</strong>) 之外，同時也支援了 <strong>!=</strong>，但也僅此兩種而已，不像 label 支援 subset 的搜尋</p>
+<h3 id="Chained-selectors"><a href="#Chained-selectors" class="headerlink" title="Chained selectors"></a>Chained selectors</h3><p>還可以將多個搜尋條件作結合，就是類似 <strong>AND</strong> 的效果，例如：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 搜尋 kube-system namespace 中，狀態為 running &amp; restartPolicy 為 Always 的 pod</span></span><br><span class="line">$ kubectl get pods -n kube-system --field-selector=status.phase==Running,spec.restartPolicy=Always</span><br></pre></td></tr></table></figure>
+<h3 id="Multiple-resource-types"><a href="#Multiple-resource-types" class="headerlink" title="Multiple resource types"></a>Multiple resource types</h3><p>也可以一次針對多個 resource type 進行搜尋，例如：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 同時搜尋名稱為 myweb 的 pod &amp; service</span></span><br><span class="line">$ kubectl get pod,service --field-selector metadata.name=myweb</span><br></pre></td></tr></table></figure>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/" target="_blank" rel="noopener">Understanding Kubernetes Objects - Kubernetes</a></p>
+</li>
+<li><p><a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/names/" target="_blank" rel="noopener">Names - Kubernetes</a></p>
+</li>
+<li><p><a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/" target="_blank" rel="noopener">Namespaces - Kubernetes</a></p>
+</li>
+<li><p><a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/" target="_blank" rel="noopener">Labels and Selectors - Kubernetes</a></p>
+</li>
+<li><p><a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/" target="_blank" rel="noopener">Annotations - Kubernetes</a></p>
+</li>
+<li><p><a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/" target="_blank" rel="noopener">Field Selectors - Kubernetes</a></p>
+</li>
+<li><p><a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/" target="_blank" rel="noopener">Recommended Labels - Kubernetes</a></p>
+</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog/tags/Kubernetes/" rel="tag"># Kubernetes</a>
+          
+            <a href="/blog/tags/CKA/" rel="tag"># CKA</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/Kubernetes/k8s-CKA-resources/" rel="next" title="CKA(Certified Kubernetes Administrator) 學習資源整理">
+                <i class="fa fa-chevron-left"></i> CKA(Certified Kubernetes Administrator) 學習資源整理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/Kubernetes/k8s-CoreConcept-ResourceObject-Overview/" rel="prev" title="[Kubernetes] Resource Object 概觀">
+                [Kubernetes] Resource Object 概觀 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            本站概覽
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">godleon</p>
+              <p class="site-description motion-element" itemprop="description">把時間花在哪裡，成就就在哪裡</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/blog/archives/">
+              
+                  <span class="site-state-item-count">69</span>
+                  <span class="site-state-item-name">文章</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/blog/categories/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">分類</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/blog/tags/index.html">
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">標籤</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/godleon" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:godleon@gmail.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-globe"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://plus.google.com/godleon" target="_blank" title="Google">
+                    
+                      <i class="fa fa-fw fa-google"></i>Google</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#What-is-Kubernetes-Resource-Object"><span class="nav-number">1.</span> <span class="nav-text">What is Kubernetes Resource Object?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Node"><span class="nav-number">2.</span> <span class="nav-text">Node</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#What-is-Node"><span class="nav-number">2.1.</span> <span class="nav-text">What is Node?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Node-Status"><span class="nav-number">2.2.</span> <span class="nav-text">Node Status</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Address"><span class="nav-number">2.2.1.</span> <span class="nav-text">Address</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Condition"><span class="nav-number">2.2.2.</span> <span class="nav-text">Condition</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Capacity"><span class="nav-number">2.2.3.</span> <span class="nav-text">Capacity</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Info"><span class="nav-number">2.2.4.</span> <span class="nav-text">Info</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Name"><span class="nav-number">3.</span> <span class="nav-text">Name</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Namespace"><span class="nav-number">4.</span> <span class="nav-text">Namespace</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#What-is-namespace"><span class="nav-number">4.1.</span> <span class="nav-text">What is namespace ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#檢視-cluster-中的-namespace"><span class="nav-number">4.2.</span> <span class="nav-text">檢視 cluster 中的 namespace</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-namespace"><span class="nav-number">4.3.</span> <span class="nav-text">使用 namespace</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#namespace-amp-DNS-的關係"><span class="nav-number">4.4.</span> <span class="nav-text">namespace &amp; DNS 的關係</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#不屬於任何-namespace-的-resource"><span class="nav-number">4.5.</span> <span class="nav-text">不屬於任何 namespace 的 resource</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Labels-and-Selectors"><span class="nav-number">5.</span> <span class="nav-text">Labels and Selectors</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Label"><span class="nav-number">5.1.</span> <span class="nav-text">Label</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Selector"><span class="nav-number">5.2.</span> <span class="nav-text">Selector</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#進階的-Label-用法"><span class="nav-number">6.</span> <span class="nav-text">進階的 Label 用法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#針對-Application-管理的-Label-使用方式"><span class="nav-number">6.1.</span> <span class="nav-text">針對 Application 管理的 Label 使用方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#相關的-Label-列表"><span class="nav-number">6.2.</span> <span class="nav-text">相關的 Label 列表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#當-Application-被多次佈署到-Kubernetes-Cluster-時"><span class="nav-number">6.3.</span> <span class="nav-text">當 Application 被多次佈署到 Kubernetes Cluster 時</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#範例"><span class="nav-number">6.4.</span> <span class="nav-text">範例</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Annotations"><span class="nav-number">7.</span> <span class="nav-text">Annotations</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#What-is-Annotations"><span class="nav-number">7.1.</span> <span class="nav-text">What is Annotations ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何設定-Annotations"><span class="nav-number">7.2.</span> <span class="nav-text">如何設定 Annotations</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#那些資訊適合用-Annotation-呈現"><span class="nav-number">7.3.</span> <span class="nav-text">那些資訊適合用 Annotation 呈現?</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Field-Selectors"><span class="nav-number">8.</span> <span class="nav-text">Field Selectors</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#What-is-Field-Selectors"><span class="nav-number">8.1.</span> <span class="nav-text">What is Field Selectors?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#那些-Field-支援搜尋功能"><span class="nav-number">8.2.</span> <span class="nav-text">那些 Field 支援搜尋功能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#進階搜尋"><span class="nav-number">8.3.</span> <span class="nav-text">進階搜尋</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Supported-operators"><span class="nav-number">8.3.1.</span> <span class="nav-text">Supported operators</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Chained-selectors"><span class="nav-number">8.3.2.</span> <span class="nav-text">Chained selectors</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Multiple-resource-types"><span class="nav-number">8.3.3.</span> <span class="nav-text">Multiple resource types</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">9.</span> <span class="nav-text">References</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 強力驅動</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主題 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/blog/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://godleon-blog-hexo.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'https://godleon.github.io/blog/Kubernetes/k8s-CoreConcept-Wokring-with-Objects/';
+          this.page.identifier = 'Kubernetes/k8s-CoreConcept-Wokring-with-Objects/';
+          this.page.title = '[Kubernetes] 如何管理 Resource Object';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/blog/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

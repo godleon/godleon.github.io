@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-tw">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/blog/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/blog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/blog/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/blog/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Linux,KVM," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="This article introduces paravirtualization drivers(virtio) in QEMU/KVM">
+<meta name="keywords" content="Linux,KVM">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[Linux KVM] 半虛擬化驅動(Paravirtualization Driver)">
+<meta property="og:url" content="https://godleon.github.io/blog/KVM/KVM-Paravirtualization-Drivers/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="This article introduces paravirtualization drivers(virtio) in QEMU/KVM">
+<meta property="og:locale" content="zh-tw">
+<meta property="og:image" content="http://smilejay.b0.upaiyun.com/wp-content/uploads/2012/11/qemu-emulated-io.jpg">
+<meta property="og:image" content="http://images0.cnblogs.com/blog2015/697113/201506/011807259737673.jpg">
+<meta property="og:image" content="http://smilejay.b0.upaiyun.com/wp-content/uploads/2012/11/qemu-kvm-virtio.jpg">
+<meta property="og:image" content="http://smilejay.com/wp-content/uploads/2012/11/linux-ballooning-demo.jpg">
+<meta property="og:image" content="https://github.com/godleon/godleon.github.io/blob/master/_posts/images/2016/KVM-Paravirtualization-Drivers/kvm_virtio_balloon.PNG?raw=true">
+<meta property="og:updated_time" content="2018-09-18T20:29:07.278Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[Linux KVM] 半虛擬化驅動(Paravirtualization Driver)">
+<meta name="twitter:description" content="This article introduces paravirtualization drivers(virtio) in QEMU/KVM">
+<meta name="twitter:image" content="http://smilejay.b0.upaiyun.com/wp-content/uploads/2012/11/qemu-emulated-io.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://godleon.github.io/blog/KVM/KVM-Paravirtualization-Drivers/"/>
+
+
+
+
+
+  <title>[Linux KVM] 半虛擬化驅動(Paravirtualization Driver) | 小信豬的原始部落</title>
+  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-703592-7', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-tw">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">小信豬的原始部落</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/blog/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首頁
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/blog/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            標籤
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/blog/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分類
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/blog/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            歸檔
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            檢索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/blog/KVM/KVM-Paravirtualization-Drivers/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">[Linux KVM] 半虛擬化驅動(Paravirtualization Driver)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">發表於</span>
+              
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2016-08-20T07:30:00+00:00">
+                2016-08-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分類於</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/KVM/" itemprop="url" rel="index">
+                    <span itemprop="name">KVM</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/KVM/KVM-Paravirtualization-Drivers/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="KVM/KVM-Paravirtualization-Drivers/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  This article introduces paravirtualization drivers(virtio) in QEMU/KVM
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>介紹如何使用 QEMU/KVM 中的半虛擬化，並了解此技術如何帶來效能上的提升</p>
+<h1 id="QEMU-I-O-Overview"><a href="#QEMU-I-O-Overview" class="headerlink" title="QEMU I/O Overview"></a>QEMU I/O Overview</h1><p>QEMU/KVM 是屬於全虛擬化的解決方案，若沒有硬體加速輔助的情況下，所有的工作都必須透過軟體模擬，其實效率是很不好的，特別是 device I/O 的部分。</p>
+<p>以下的圖可以說明純 QEMU 模擬下的 device I/O 狀況：</p>
+<p><img src="http://smilejay.b0.upaiyun.com/wp-content/uploads/2012/11/qemu-emulated-io.jpg" alt="KVM virtio"></p>
+<p>一個 virtual machine 的 I/O request 會透過以下流程完成：</p>
+<ol>
+<li><p>被 KVM module 中的 I/O trap 捕捉到 &amp; 處理</p>
+</li>
+<li><p>將處理結果放到 I/O sharing page 中</p>
+</li>
+<li><p>通知 QEMU process 來取得 I/O 資訊，並交由 QEMU I/O Emulation Code 來模擬 I/O request</p>
+</li>
+<li><p>完成後將結果放回 I/O sharing page</p>
+</li>
+<li><p>通知 KVM module 中的 I/O trap 將處理結果取回並回傳給 virtual machine</p>
+</li>
+</ol>
+<p>透過 QEMU 可以模擬出各式各樣的 I/O device，甚至很老舊的設備都沒有問題；但從上面複雜的步驟不難看出為何使用 QEMU 模擬 device I/O 會效率不彰，除了每次 I/O request 處理的流程繁複之外，過多的 VMEntry, VMExit, context switch，也都是拖垮 QEMU 效能的原因。</p>
+<hr>
+<h1 id="virtio-Overview"><a href="#virtio-Overview" class="headerlink" title="virtio Overview"></a>virtio Overview</h1><p>有鑑於此，<a href="http://www.linux-kvm.org/page/Virtio" target="_blank" rel="noopener">virtio</a> 被提出來，作為運行在 Hypervisor 上的一組 API interface，讓 virtual machine 知道自己運行在虛擬環境中，並根據 virtio 標準與 hypervisor 互動，藉此達到更好的運作效能(I/O 效能提升最為明顯)。</p>
+<p>以下是純 QEMU 模擬 &amp; virtio 的架構比較，可以看出 virtio 省略了 I/O trap，讓 virtual machine 可以直接與 QEMU 的 I/O 模組通訊：</p>
+<p><img src="http://images0.cnblogs.com/blog2015/697113/201506/011807259737673.jpg" alt="QEMU v.s. virtio"></p>
+<p>更細部一點檢視 virtio 的架構：</p>
+<p><img src="http://smilejay.b0.upaiyun.com/wp-content/uploads/2012/11/qemu-kvm-virtio.jpg" alt="virtio architecture"></p>
+<ol>
+<li><p>第一層 <strong>virtio_blk</strong>、<strong>virtio_net</strong>、<strong>virtio_scsi</strong> …. 等等屬於 <strong><font color="red">virtio Frontend，存在於</font></strong> virtual machine OS kernel module 中</p>
+</li>
+<li><p>最下面一層稱為 <strong><font color="red">virtio Backend</font></strong>，是在 QEMU 中實作，讓 I/O request 可以透過 QEMU 直接送給 host machine 中的 device driver，減少整體 I/O 的 overhead</p>
+</li>
+<li><p><strong><font color="red">virtio</font></strong> 屬於虛擬佇列，目的是將 Frontend 的驅動程序附加到 Backend 的處理程序 (一個 Frontend 的驅動程序可以根據需求使用 0 個或多個佇列，例如 virtio_net 同時需要傳送 &amp; 接收用的兩個虛擬佇列，virtio_blk 則僅需要一個)</p>
+</li>
+<li><p><strong><font color="red">virtio-ring</font></strong> 透過實作 ring buffer 的機制，讓 I/O request 得以批次處理，藉以提升 virtual machine 與 hypervisor 之間訊息交換的效率</p>
+</li>
+</ol>
+<p>雖然 virtio 可以大幅的提升 I/O 性能，但不僅需要 host machine 的 OS kernel 有支援，連 virtual machine 也要同時有安裝 virtio driver，不過目前較新的 Linux 都已經支援 virtio 了! 所以若使用的是最近幾年的 Linux 版本，在 I/O 裝置的部分應該都可以選擇以 virtio 的方式運行。</p>
+<blockquote>
+<p>Windows 也都有對應的 virtio driver 可對應下載</p>
+</blockquote>
+<hr>
+<h1 id="檢查-virtio-環境"><a href="#檢查-virtio-環境" class="headerlink" title="檢查 virtio 環境"></a>檢查 virtio 環境</h1><h2 id="1-1-virtio-Backend"><a href="#1-1-virtio-Backend" class="headerlink" title="1.1 virtio Backend"></a>1.1 virtio Backend</h2><p>由於 host machine 安裝的是 CentOS 7，因此都已經預設安裝 virtio driver 了! 可以用以下指令查詢：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$ find / -name <span class="string">'virtio*.ko'</span> | grep $(uname -r)</span><br><span class="line">/usr/lib/modules/3.10.0-327.28.2.el7.x86_64/kernel/drivers/virtio/virtio_pci.ko</span><br><span class="line">/usr/lib/modules/3.10.0-327.28.2.el7.x86_64/kernel/drivers/virtio/virtio.ko</span><br><span class="line">/usr/lib/modules/3.10.0-327.28.2.el7.x86_64/kernel/drivers/virtio/virtio_ring.ko</span><br><span class="line">/usr/lib/modules/3.10.0-327.28.2.el7.x86_64/kernel/drivers/virtio/virtio_input.ko</span><br><span class="line">/usr/lib/modules/3.10.0-327.28.2.el7.x86_64/kernel/drivers/virtio/virtio_balloon.ko</span><br><span class="line">/usr/lib/modules/3.10.0-327.28.2.el7.x86_64/kernel/drivers/char/virtio_console.ko</span><br><span class="line">/usr/lib/modules/3.10.0-327.28.2.el7.x86_64/kernel/drivers/char/hw_random/virtio-rng.ko</span><br><span class="line">/usr/lib/modules/3.10.0-327.28.2.el7.x86_64/kernel/drivers/scsi/virtio_scsi.ko</span><br><span class="line">/usr/lib/modules/3.10.0-327.28.2.el7.x86_64/kernel/drivers/block/virtio_blk.ko</span><br><span class="line">/usr/lib/modules/3.10.0-327.28.2.el7.x86_64/kernel/drivers/net/virtio_net.ko</span><br></pre></td></tr></table></figure>
+<h2 id="1-2-virtio-Frontend"><a href="#1-2-virtio-Frontend" class="headerlink" title="1.2 virtio Frontend"></a>1.2 virtio Frontend</h2><h3 id="1-2-1-Linux"><a href="#1-2-1-Linux" class="headerlink" title="1.2.1 Linux"></a>1.2.1 Linux</h3><p>目前新版本的 Linux(Ubuntu / CentOS / …. 等等)都已經內建 virtio driver 了，不需要再額外安裝囉!</p>
+<h3 id="1-2-2-Windows"><a href="#1-2-2-Windows" class="headerlink" title="1.2.2 Windows"></a>1.2.2 Windows</h3><p>若是要安裝 Windows 的 virtio driver，可以使用以下指令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">$ wget https://fedorapeople.org/groups/virt/virtio-win/virtio-win.repo -O /etc/yum.repos.d/virtio-win.repo</span><br><span class="line"></span><br><span class="line">$ yum info virtio-win</span><br><span class="line">Loaded plugins: fastestmirror</span><br><span class="line">Loading mirror speeds from cached hostfile</span><br><span class="line"> * base: ftp.yzu.edu.tw</span><br><span class="line"> * epel: mirror01.idc.hinet.net</span><br><span class="line"> * extras: ftp.yzu.edu.tw</span><br><span class="line"> * updates: ftp.yzu.edu.tw</span><br><span class="line">Available Packages</span><br><span class="line">Name        : virtio-win</span><br><span class="line">Arch        : noarch</span><br><span class="line">Version     : 0.1.102</span><br><span class="line">Release     : 1</span><br><span class="line">Size        : 75 M</span><br><span class="line">Repo        : virtio-win-stable</span><br><span class="line">Summary     : VirtIO para-virtualized drivers <span class="keyword">for</span> Windows(R)</span><br><span class="line">URL         : http://www.redhat.com/</span><br><span class="line">License     : GPLv2</span><br><span class="line">Description : VirtIO para-virtualized Windows(R) drivers <span class="keyword">for</span> 32-bit and 64-bit</span><br><span class="line">            : Windows(R) guests.</span><br><span class="line"></span><br><span class="line">$ yum -y install virtio-win</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查詢目前 virtio-win 的支援程度</span></span><br><span class="line">$ ls -R /usr/share/virtio-win</span><br><span class="line">/usr/share/virtio-win:</span><br><span class="line">drivers  guest-agent  virtio-win-0.1.102_amd64.vfd  virtio-win-0.1.102.iso  virtio-win-0.1.102_x86.vfd  virtio-win_amd64.vfd  virtio-win.iso  virtio-win_x86.vfd</span><br><span class="line"></span><br><span class="line">/usr/share/virtio-win/drivers:</span><br><span class="line">amd64  i386</span><br><span class="line"></span><br><span class="line">/usr/share/virtio-win/drivers/amd64:</span><br><span class="line">Win2003  Win2008  Win2008R2  Win2012  Win2012R2  Win7  Win8  Win8.1</span><br><span class="line">.......</span><br><span class="line">/usr/share/virtio-win/drivers/amd64/Win2012R2:</span><br><span class="line">netkvm.cat  netkvm.inf  netkvm.sys  vioscsi.cat  vioscsi.inf  vioscsi.sys  viostor.cat  viostor.inf  viostor.sys</span><br><span class="line">.......</span><br><span class="line">/usr/share/virtio-win/drivers/amd64/Win7:</span><br><span class="line">netkvm.cat  netkvm.inf  netkvm.sys  qxl.cat  qxldd.dll  qxl.inf  qxl.sys  vioscsi.cat  vioscsi.inf  vioscsi.sys  viostor.cat  viostor.inf  viostor.sys</span><br><span class="line">.......</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>從上面的檔案列表得知，目前 stable 的 virtio-win 支援到 Windows 2012R2 &amp; Windows 8.1，若要更新的 Windows OS 需求，可能要使用 latest 版本</p>
+</blockquote>
+<p>若希望可以在最新版的 Windows 上安裝 virtio driver，那就要升級到最新版的 virtio-win，可以透過以下的指令來啟用最新的 repository &amp; 升級：(目前最新版已經支援 Windows 10)</p>
+<blockquote>
+<p>yum –enablerepo=virtio-win-latest update virtio-win</p>
+</blockquote>
+<p>使用方式很容易，只要在啟動 windows virtual machine 時，指定 CDRom 裝置掛載 <font color="red"><strong>/usr/share/virtio-win/virtio-win-0.1.102.iso</strong></font> 後，進入 Windows 把相關的 virtio 裝置驅動即可，詳細的使用方式可以參考 =&gt; <a href="http://www.lijyyh.com/2015/12/linux-kvm-set-up-linux-kvm.html" target="_blank" rel="noopener">傲笑紅塵路: 架設 Linux KVM 虛擬化主機 (Set up Linux KVM virtualization host)</a></p>
+<hr>
+<h1 id="使用-virtio-balloon"><a href="#使用-virtio-balloon" class="headerlink" title="使用 virtio_balloon"></a>使用 virtio_balloon</h1><h2 id="balloonning-Overview"><a href="#balloonning-Overview" class="headerlink" title="balloonning Overview"></a>balloonning Overview</h2><p><img src="http://smilejay.com/wp-content/uploads/2012/11/linux-ballooning-demo.jpg" alt="KVM ballooning"></p>
+<p>透過 balloon 的技術，可以如上圖所示，在 virtual machine 運行時動態調整記憶體的配置，而不需要 virtual machine 關機。</p>
+<p>情境如下：</p>
+<ol>
+<li><p>當 host machine 記憶體空間不足時，在 virtual machine 中的記憶體 balloon 會膨脹(inflate)，讓 virtual machine 實際上無法使用到太多的記憶體，進而讓記憶體空間可以讓 host machine 暫時利用</p>
+</li>
+<li><p>當 virtual machine 記憶體空間不足時，在 virtual machine 中的記憶體 balloon 則會壓縮(deflate)，讓 host machine 可以分配閒置的記憶體給 virtual machine</p>
+</li>
+</ol>
+<blockquote>
+<p>以上功能必須透過 <code>virtio-balloon driver</code> 來達成</p>
+</blockquote>
+<h2 id="使用-balloonning-技術的優缺點"><a href="#使用-balloonning-技術的優缺點" class="headerlink" title="使用 balloonning 技術的優缺點"></a>使用 balloonning 技術的優缺點</h2><p>使用 balloon 的技術肯定也是有優缺點的，管理者可以根據實際需求評估使用：</p>
+<p>優點如下：</p>
+<ul>
+<li><p>由於 balloonning 是能夠被監控 &amp; 控制的(不同於不可控制的 KSM 技術)，因此能夠有效率的節省記憶體的實際耗用</p>
+</li>
+<li><p>balloonning 對於記憶體的調度是很靈活的</p>
+</li>
+<li><p>hypervisor 透過 balloonning 從 virtual machine 中取得歸還的部分記憶體空間，不一定一定要用在其他地方，可自己保留住，端看管理者想要如何管理記憶體空間</p>
+</li>
+</ul>
+<p>但 balloonning 同樣也是有些缺點存在的的：</p>
+<ul>
+<li><p>virtual machine 必須安裝 virtio_balloon driver 才可使用此功能(新版的 Linux 有內建，但 Windows 就必須要另外安裝了)</p>
+</li>
+<li><p>若透過 balloonning 從 virtual machine 中取回大量的記憶體空間，可能會提升 virtual machine 對於 swap 的 I/O 存取而導致效能降低；也有可能會造成 virtual machine 中的某些 process 運作時發生記憶體不足的況狀而失敗</p>
+</li>
+<li><p>雖然 balloonning 可被監控 &amp; 控制，但目前尚缺乏有效的自動化機制，對於大規模佈署使用上是不方便的</p>
+</li>
+<li><p>記憶體動態調整的過於頻繁，可能會使記憶體空間配置上過於零散而不連續，如此一來記憶體的使用效率就會降低</p>
+</li>
+</ul>
+<h2 id="在-QEMU-KVM-中使用-balloonning"><a href="#在-QEMU-KVM-中使用-balloonning" class="headerlink" title="在 QEMU/KVM 中使用 balloonning"></a>在 QEMU/KVM 中使用 balloonning</h2><p>首先要先檢查 host machine 是否支援 balloonning：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">cat /boot/config-`uname -r` | grep VIRTIO</span><br><span class="line">CONFIG_VIRTIO_BLK=m</span><br><span class="line">CONFIG_SCSI_VIRTIO=m</span><br><span class="line">CONFIG_VIRTIO_NET=m</span><br><span class="line">CONFIG_VIRTIO_CONSOLE=m</span><br><span class="line">CONFIG_HW_RANDOM_VIRTIO=m</span><br><span class="line">CONFIG_VIRTIO=m</span><br><span class="line">CONFIG_VIRTIO_PCI=m</span><br><span class="line">CONFIG_VIRTIO_PCI_LEGACY=y</span><br><span class="line">CONFIG_VIRTIO_BALLOON=m</span><br><span class="line">CONFIG_VIRTIO_INPUT=m</span><br><span class="line"><span class="comment"># CONFIG_VIRTIO_MMIO is not set</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>CONFIG_VIRTIO_BALLOON=m 表示已經支援(以 module 方式載入)</p>
+</blockquote>
+<p>接著要在 virtual machine 中啟用 balloonning，則必須在啟動 virtual machine 的指令中加上以下參數：(預設為 <code>-balloon none</code>)</p>
+<blockquote>
+<p>-balloon virtio[,addr=addr]</p>
+</blockquote>
+<p>參數中的 addr 是可用來指定 virtual machine 中 balloon device 的 PCI address</p>
+<p>也可以使用 <font color="red"><strong>-device</strong></font> 參數來統一設定不同的 device，使用方法如下：</p>
+<blockquote>
+<p>-device driver[,prop[=value][,…]]</p>
+</blockquote>
+<p>了解啟用 balloon 的參數後，可以用以下指令啟動搭載 balloonning 功能的 virtual machine：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ kvm -vnc 0.0.0.0:1 -m 2048 /kvm/storage/vm_disks/ubnutu1604.img \</span><br><span class="line">  -net nic -net tap,script=/etc/qemu-ifup \</span><br><span class="line">  -device virtio-balloon-pci --daemonize</span><br></pre></td></tr></table></figure>
+<p>接著連線到 virtual machine 中，查詢 balloonning device 的狀態：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># balloon 功能已開啟</span></span><br><span class="line">ubuntu@vm-ubuntu1604:~$ cat /boot/config-`uname -r` | grep VIRTIO</span><br><span class="line">.....</span><br><span class="line">CONFIG_VIRTIO_BALLOON=y</span><br><span class="line">.....</span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視目前 pci device 狀態</span></span><br><span class="line">ubuntu@vm-ubuntu1604:~$ lspci</span><br><span class="line">00:00.0 Host bridge: Intel Corporation 440FX - 82441FX PMC [Natoma] (rev 02)</span><br><span class="line">00:01.0 ISA bridge: Intel Corporation 82371SB PIIX3 ISA [Natoma/Triton II]</span><br><span class="line">00:01.1 IDE interface: Intel Corporation 82371SB PIIX3 IDE [Natoma/Triton II]</span><br><span class="line">00:01.3 Bridge: Intel Corporation 82371AB/EB/MB PIIX4 ACPI (rev 03)</span><br><span class="line">00:02.0 VGA compatible controller: Cirrus Logic GD 5446</span><br><span class="line">00:03.0 Ethernet controller: Intel Corporation 82540EM Gigabit Ethernet Controller (rev 03)</span><br><span class="line">00:04.0 Unclassified device [00ff]: Red Hat, Inc Virtio memory balloon</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查詢 balloonning device 的詳細資訊</span></span><br><span class="line">ubuntu@vm-ubuntu1604:~$ lspci -s 00:04.0 -v</span><br><span class="line">00:04.0 Unclassified device [00ff]: Red Hat, Inc Virtio memory balloon</span><br><span class="line">        Subsystem: Red Hat, Inc Virtio memory balloon</span><br><span class="line">        Physical Slot: 4</span><br><span class="line">        Flags: bus master, fast devsel, latency 0, IRQ 11</span><br><span class="line">        I/O ports at c040 [size=32]</span><br><span class="line">        Kernel driver <span class="keyword">in</span> use: virtio-pci</span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視 virtual machine 記憶體狀態</span></span><br><span class="line">ubuntu@vm-ubuntu1604:~$ free -m</span><br><span class="line">              total        used        free      shared  buff/cache   available</span><br><span class="line">Mem:           2000          40        1851           3         108        1823</span><br><span class="line">Swap:          2045           0        2045</span><br></pre></td></tr></table></figure>
+<p>接著在 QEMU monitor 中透過 <code>balloon 512</code> 把 virtual machine 的記憶體限縮到僅能使用 512 MB：</p>
+<p><img src="https://github.com/godleon/godleon.github.io/blob/master/_posts/images/2016/KVM-Paravirtualization-Drivers/kvm_virtio_balloon.PNG?raw=true" alt="balloon"></p>
+<p>以下是 virtual machine 中目前的記憶體狀況：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 經過 balloon 縮小可用記憶體空間後，檢視記憶體狀態</span></span><br><span class="line">ubuntu@vm-ubuntu1604:~$ free -m</span><br><span class="line">              total        used        free      shared  buff/cache   available</span><br><span class="line">Mem:            464          39         316           3         108         288</span><br><span class="line">Swap:          2045           0        2045</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>可以看出 total memory 已經變少，可見 balloon 的確是起了作用</p>
+</blockquote>
+<p>另外一個比較需要注意的是，balloon 沒辦法用於增加 virtual machine 的記憶體配置；例如，啟用 virtual machine 時配置了 2048 MB 的記憶體，即使在 QEMU monitor 中使用 <code>ballon 4096</code>，也無法讓 virtual machine 的記憶體變成 4096 MB。</p>
+<hr>
+<h1 id="使用-virtio-net"><a href="#使用-virtio-net" class="headerlink" title="使用 virtio_net"></a>使用 virtio_net</h1><p>使用 virtio network device，有提高 throughput &amp; 降低 latency 的兩項優點，可以達到接近原生網卡的效能，因此通常是配置網路時的優先選擇。</p>
+<p>以下指令可以查詢是否支援 virtio_net：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 有出現 virtio 表示支援 virtio network device</span></span><br><span class="line">$ kvm -net nic,model=?</span><br><span class="line">qemu: Supported NIC models: ne2k_pci,i82551,i82557b,i82559er,rtl8139,e1000,pcnet,virtio</span><br></pre></td></tr></table></figure>
+<h2 id="1、啟用支援-virtio-net-的-vitual-machine"><a href="#1、啟用支援-virtio-net-的-vitual-machine" class="headerlink" title="1、啟用支援 virtio_net 的 vitual machine"></a>1、啟用支援 virtio_net 的 vitual machine</h2><p>接著可以用以下指令啟動一個使用 virtio_net 的 virtual machine：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ kvm -vnc 0.0.0.0:1 -m 2048 --daemonize \</span><br><span class="line">  -drive format=raw,file=/kvm/storage/vm_disks/ubnutu1604.img \</span><br><span class="line">  -device virtio-balloon-pci \</span><br><span class="line">  -net nic,model=virtio -net tap</span><br></pre></td></tr></table></figure>
+<p>當 virtual machine 啟動後，登入檢查 virtio_net 的狀態：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ubuntu 16.04 原生已經搭載 virtio driver</span></span><br><span class="line">ubuntu@vm-ubuntu1604:~$ cat /boot/config-`uname -r` | grep VIRTIO</span><br><span class="line">.....</span><br><span class="line">CONFIG_VIRTIO_NET=y</span><br><span class="line">.....</span><br><span class="line"></span><br><span class="line"><span class="comment"># 可看出目前 virtual machine 的網卡已經以 virtio 模式運作</span></span><br><span class="line">ubuntu@vm-ubuntu1604:~$ lspci</span><br><span class="line">....</span><br><span class="line">00:03.0 Ethernet controller: Red Hat, Inc Virtio network device</span><br><span class="line">00:04.0 Unclassified device [00ff]: Red Hat, Inc Virtio memory balloon</span><br><span class="line"></span><br><span class="line"><span class="comment"># virtio_net 詳細資訊</span></span><br><span class="line">ubuntu@vm-ubuntu1604:~$ lspci -vv -s 00:03.0</span><br><span class="line">00:03.0 Ethernet controller: Red Hat, Inc Virtio network device</span><br><span class="line">        Subsystem: Red Hat, Inc Virtio network device</span><br><span class="line">        Physical Slot: 3</span><br><span class="line">        Control: I/O+ Mem+ BusMaster+ SpecCycle- MemWINV- VGASnoop- ParErr- Stepping- SERR+ FastB2B- DisINTx+</span><br><span class="line">        Status: Cap+ 66MHz- UDF- FastB2B- ParErr- DEVSEL=fast &gt;TAbort- &lt;TAbort- &lt;MAbort- &gt;SERR- &lt;PERR- INTx-</span><br><span class="line">        Latency: 0</span><br><span class="line">        Interrupt: pin A routed to IRQ 11</span><br><span class="line">        Region 0: I/O ports at c000 [size=32]</span><br><span class="line">        Region 1: Memory at febd1000 (32-bit, non-prefetchable) [size=4K]</span><br><span class="line">        Expansion ROM at feb80000 [disabled] [size=256K]</span><br><span class="line">        Capabilities: &lt;access denied&gt;</span><br><span class="line">        Kernel driver <span class="keyword">in</span> use: virtio-pci</span><br></pre></td></tr></table></figure>
+<h2 id="2、進一步提升半虛擬化網卡效能"><a href="#2、進一步提升半虛擬化網卡效能" class="headerlink" title="2、進一步提升半虛擬化網卡效能"></a>2、進一步提升半虛擬化網卡效能</h2><h3 id="1-關閉-TSO-amp-GSO-以提升-virtio-net-的效能"><a href="#1-關閉-TSO-amp-GSO-以提升-virtio-net-的效能" class="headerlink" title="(1) 關閉 TSO &amp; GSO 以提升 virtio_net 的效能"></a>(1) 關閉 TSO &amp; GSO 以提升 virtio_net 的效能</h3><p>為了提升 virtual machine 網卡的效能，除了使用 virtio 半虛擬化的技術外，還可以透過關閉 host machine 的 TSO &amp; GSO 功能來更進一步提升</p>
+<p>以下可以檢查 host machine 的網卡是否支援 TSO &amp; GSO：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">$ ethtool -k ens1f1</span><br><span class="line">Features <span class="keyword">for</span> ens1f1:</span><br><span class="line">.....</span><br><span class="line">tcp-segmentation-offload: on</span><br><span class="line">        tx-tcp-segmentation: on</span><br><span class="line">        tx-tcp-ecn-segmentation: off [fixed]</span><br><span class="line">        tx-tcp6-segmentation: on</span><br><span class="line">.....</span><br><span class="line">generic-segmentation-offload: on</span><br><span class="line">.....</span><br></pre></td></tr></table></figure>
+<p>從上面可以看出目前 TSO &amp; GSO 的功能都是開啟的，可以透過以下方式關閉：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ ethtool -K ens1f1 tso off</span><br><span class="line">$ ethtool -K ens1f1 gso off</span><br></pre></td></tr></table></figure>
+<p>如此一來 virtio_net 的效能就可以進一步的提升。</p>
+<h3 id="2-使用-vhost-net-後端驅動"><a href="#2-使用-vhost-net-後端驅動" class="headerlink" title="(2) 使用 vhost-net 後端驅動"></a>(2) 使用 vhost-net 後端驅動</h3><p>一般來說，virtio 在 host machine 是由每個 user space 中的 QEMU 來進行後端處理的，但若是可以將 network I/O 的部分移到 kernel space 來處理，不僅可以提高 network throughput，還可以降低 latency，進而提升網路的效率。</p>
+<p>目前比較新的 Linux kernel 中都有搭載稱為 <strong><font color="red">vhost-net</font></strong> 的 module，可用來將 virtio_net 的後端處理移到 Linux kernel 中進行來提升 network I/O 的效率。</p>
+<p>首先先來檢查 host machine 是否支援 <strong>vhost-net</strong> 的功能：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ cat /boot/config-`uname -r` | grep VHOST</span><br><span class="line">CONFIG_VHOST_NET=m</span><br><span class="line">.....</span><br><span class="line"></span><br><span class="line">$ lsmod | grep vhost</span><br><span class="line">vhost_net              18152  1</span><br><span class="line">....</span><br></pre></td></tr></table></figure>
+<p>從上面可以看出 host machine 有支援 vhost-net，接著就可以使用以下指令啟動支援 vhost-net 的 virtual machine：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ kvm -vnc 0.0.0.0:1 -m 2048 --daemonize \</span><br><span class="line">  -drive format=raw,file=/kvm/storage/vm_disks/ubnutu1604.img,<span class="keyword">if</span>=virtio \</span><br><span class="line">  -device virtio-balloon-pci \</span><br><span class="line">  -netdev tap,id=net0,vhost=on -device virtio-net-pci,netdev=net0</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="使用-virtio-blk"><a href="#使用-virtio-blk" class="headerlink" title="使用 virtio_blk"></a>使用 virtio_blk</h1><p>virtio_blk 提供了 virtual machine 可以透過 virtio API 進行 block device I/O 的相關驅動程式，藉以提升存取 block device 的效能。</p>
+<p>同樣的，要使用 virtio_blk，host machine &amp; virtual machine 都必須要同時支援才行，目前新版的 Linux 都已經預設搭載 virtio driver 了，我們用以下的指令啟動支援 virtio_blk 的 virtual machine：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ kvm -vnc 0.0.0.0:1 -m 2048 --daemonize \</span><br><span class="line">  -drive format=raw,file=/kvm/storage/vm_disks/ubnutu1604.img \</span><br><span class="line">  -device virtio-balloon-pci \</span><br><span class="line">  -netdev tap,id=net0,vhost=on -device virtio-net-pci,netdev=net0</span><br></pre></td></tr></table></figure>
+<p>進入到 virtual machine 之後，可以透過以下指令確認 block device 的確是以 virtio driver 所驅動：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">ubuntu@vm-ubuntu1604:~$ cat /boot/config-`uname -r` | grep VIRTIO_BLK</span><br><span class="line">CONFIG_VIRTIO_BLK=y</span><br><span class="line"></span><br><span class="line">ubuntu@vm-ubuntu1604:~$ lspci | grep -i virtio</span><br><span class="line">00:03.0 Unclassified device [00ff]: Red Hat, Inc Virtio memory balloon</span><br><span class="line">00:04.0 Ethernet controller: Red Hat, Inc Virtio network device</span><br><span class="line">00:05.0 SCSI storage controller: Red Hat, Inc Virtio block devicei</span><br><span class="line"></span><br><span class="line">ubuntu@vm-ubuntu1604:~$ lspci -vv -s 00:05.0</span><br><span class="line">00:05.0 SCSI storage controller: Red Hat, Inc Virtio block device</span><br><span class="line">        Subsystem: Red Hat, Inc Virtio block device</span><br><span class="line">        Physical Slot: 5</span><br><span class="line">        Control: I/O+ Mem+ BusMaster+ SpecCycle- MemWINV- VGASnoop- ParErr- Stepping- SERR+ FastB2B- DisINTx+</span><br><span class="line">        Status: Cap+ 66MHz- UDF- FastB2B- ParErr- DEVSEL=fast &gt;TAbort- &lt;TAbort- &lt;MAbort- &gt;SERR- &lt;PERR- INTx-</span><br><span class="line">        Latency: 0</span><br><span class="line">        Interrupt: pin A routed to IRQ 10</span><br><span class="line">        Region 0: I/O ports at c000 [size=64]</span><br><span class="line">        Region 1: Memory at febd2000 (32-bit, non-prefetchable) [size=4K]</span><br><span class="line">        Capabilities: &lt;access denied&gt;</span><br><span class="line">        Kernel driver <span class="keyword">in</span> use: virtio-pci</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a href="https://read01.com/4aJdOL.html" target="_blank" rel="noopener">Virtio 基本概念和設備操作 - 壹讀</a></p>
+</li>
+<li><p><a href="http://www.cnblogs.com/sammyliu/p/4543657.html" target="_blank" rel="noopener">KVM 介绍（3）：I/O 全虚拟化和准虚拟化 [KVM I/O QEMU Full-Virtualizaiton Para-virtualization] - SammyLiu - 博客园</a></p>
+</li>
+<li><p><a href="http://www.lijyyh.com/2015/12/linux-kvm-set-up-linux-kvm.html" target="_blank" rel="noopener">傲笑紅塵路: 架設 Linux KVM 虛擬化主機 (Set up Linux KVM virtualization host)</a></p>
+</li>
+<li><p><a href="https://fedoraproject.org/wiki/Windows_Virtio_Drivers" target="_blank" rel="noopener">Windows Virtio Drivers - FedoraProject</a></p>
+</li>
+<li><p><a href="http://www.linux-kvm.org/page/Virtio" target="_blank" rel="noopener">Virtio - KVM</a></p>
+</li>
+<li><p><a href="http://seitran.com/2015/04/13/01-gso-gro-lro/" target="_blank" rel="noopener">网卡TSO/GSO/LRO/GRO简要介绍 | Chenny的部落格</a></p>
+</li>
+<li><p><a href="http://lirobo.blogspot.tw/2014/12/tso-gso-lro-gro.html" target="_blank" rel="noopener">小蘿蔔工作室 Little Robot Studio: TSO, GSO, LRO, GRO</a></p>
+</li>
+<li><p><a href="https://kris.io/2015/10/01/kvm-network-performance-tso-and-gso-turn-it-off/" target="_blank" rel="noopener">KVM Network Performance : TSO and GSO - Turn it off - kris.io : virtualization &amp; cloud</a></p>
+</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog/tags/Linux/" rel="tag"># Linux</a>
+          
+            <a href="/blog/tags/KVM/" rel="tag"># KVM</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/KVM/KVM-Basic-Concept-Networking/" rel="next" title="[Linux KVM] Linux KVM concept - Networking">
+                <i class="fa fa-chevron-left"></i> [Linux KVM] Linux KVM concept - Networking
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/KVM/KVM-libvirt-network/" rel="prev" title="[Linux KVM] libvirt & network">
+                [Linux KVM] libvirt & network <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            本站概覽
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">godleon</p>
+              <p class="site-description motion-element" itemprop="description">把時間花在哪裡，成就就在哪裡</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/blog/archives/">
+              
+                  <span class="site-state-item-count">69</span>
+                  <span class="site-state-item-name">文章</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/blog/categories/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">分類</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/blog/tags/index.html">
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">標籤</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/godleon" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:godleon@gmail.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-globe"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://plus.google.com/godleon" target="_blank" title="Google">
+                    
+                      <i class="fa fa-fw fa-google"></i>Google</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#QEMU-I-O-Overview"><span class="nav-number">1.</span> <span class="nav-text">QEMU I/O Overview</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#virtio-Overview"><span class="nav-number">2.</span> <span class="nav-text">virtio Overview</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#檢查-virtio-環境"><span class="nav-number">3.</span> <span class="nav-text">檢查 virtio 環境</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-virtio-Backend"><span class="nav-number">3.1.</span> <span class="nav-text">1.1 virtio Backend</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-virtio-Frontend"><span class="nav-number">3.2.</span> <span class="nav-text">1.2 virtio Frontend</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-1-Linux"><span class="nav-number">3.2.1.</span> <span class="nav-text">1.2.1 Linux</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-2-Windows"><span class="nav-number">3.2.2.</span> <span class="nav-text">1.2.2 Windows</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用-virtio-balloon"><span class="nav-number">4.</span> <span class="nav-text">使用 virtio_balloon</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#balloonning-Overview"><span class="nav-number">4.1.</span> <span class="nav-text">balloonning Overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-balloonning-技術的優缺點"><span class="nav-number">4.2.</span> <span class="nav-text">使用 balloonning 技術的優缺點</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#在-QEMU-KVM-中使用-balloonning"><span class="nav-number">4.3.</span> <span class="nav-text">在 QEMU/KVM 中使用 balloonning</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用-virtio-net"><span class="nav-number">5.</span> <span class="nav-text">使用 virtio_net</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1、啟用支援-virtio-net-的-vitual-machine"><span class="nav-number">5.1.</span> <span class="nav-text">1、啟用支援 virtio_net 的 vitual machine</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2、進一步提升半虛擬化網卡效能"><span class="nav-number">5.2.</span> <span class="nav-text">2、進一步提升半虛擬化網卡效能</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-關閉-TSO-amp-GSO-以提升-virtio-net-的效能"><span class="nav-number">5.2.1.</span> <span class="nav-text">(1) 關閉 TSO &amp; GSO 以提升 virtio_net 的效能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-使用-vhost-net-後端驅動"><span class="nav-number">5.2.2.</span> <span class="nav-text">(2) 使用 vhost-net 後端驅動</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用-virtio-blk"><span class="nav-number">6.</span> <span class="nav-text">使用 virtio_blk</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">7.</span> <span class="nav-text">References</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 強力驅動</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主題 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/blog/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://godleon-blog-hexo.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'https://godleon.github.io/blog/KVM/KVM-Paravirtualization-Drivers/';
+          this.page.identifier = 'KVM/KVM-Paravirtualization-Drivers/';
+          this.page.title = '[Linux KVM] 半虛擬化驅動(Paravirtualization Driver)';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/blog/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
