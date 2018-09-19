@@ -34,7 +34,7 @@ BorgMaster 是整個系統的大腦，用來負責與系統中的不同元件進
 這是在每個 host 中負責管理 container 生命周期的元件，接收來自 BorgMaster 的命令並進行相對應的操作。
 
 
-## Scheduer
+## Scheduler
 
 負責進行任務的調度，根據不同應用的需求，將 workload 調度到不同的機器去執行。
 
@@ -45,7 +45,7 @@ BorgMaster 是整個系統的大腦，用來負責與系統中的不同元件進
 
 ## borgcfg
 
-用來操作 Borg 系統的 command line tool
+用來操作 Borg 系統的 CLI 所使用的設定檔
 
 
 
@@ -68,7 +68,9 @@ Kubernetes 的架構設計上也極為類似 Borg，如下圖所示：
 
 3. worker node 到 master node 的溝通，僅能透過 API server 作為窗口，kubelet 是無法存取到 master node 上的其他元件
 
-4. 外部的到 worker node 的 traffic 則是由 kube-proxy 來負責處理，將流量導到正確的 pod 上
+4. 唯一可以存取 etcd 的只有 REST service(kube-apiserver)
+
+5. 外部的到 worker node 的 traffic 則是由 kube-proxy 來負責處理，將流量導到正確的 pod 上
 
 接著以下用不同 node type 的角度來切入進行細部檢視：
 
@@ -141,17 +143,17 @@ Kubernetes 的架構設計上也極為類似 Borg，如下圖所示：
 
 - 管理者從外面僅能透過 API server 進行對 Kubernetes cluster 的管理 (傳送 JSON 格式的資料)
 
-## Innter Master
+## Inside Master
 
-- 不論是負責管理 cluster 狀態的 controller manager，或是負責任務調度的 scheduler，要調整 worker 的工作狀態，都必須透過送 request 給 API server，再由 API server 統一對 host 上的 kubelet 進行操作 (這幾個元件之間傳送的資料格式為 [protobuf](https://developers.google.com/protocol-buffers/))
+- 不論是負責管理 cluster 狀態的 controller manager，或是負責任務調度的 scheduler，要調整 worker 的工作狀態，都必須透過送 request 給 API server，再由 API server 統一對 host 上的 kubelet 進行操作 (這幾個元件之間傳送的資料格式為 [protobuf][protobuf])
 
 - 在 master node 中的元件，唯一會對 etcd 服務進行 cluster 狀態存取的僅有 API server，雙方使用 gRPC 進行通訊
 
 ## Master <--> Worker
 
-- 所有對 worker node 上的狀態變更，都是由 master node 上的 API server 所發過來，並由 kubelet 接收後進行處理 (透過 [protobuf](https://developers.google.com/protocol-buffers/) 資料格式傳送資料)
+- 所有對 worker node 上的狀態變更，都是由 master node 上的 API server 所發過來，並由 kubelet 接收後進行處理 (透過 [protobuf][protobuf]) 資料格式傳送資料)
 
-## Worker 
+## Inside Worker 
 
 - kubelet 透過 CRI(Container Runtime Interface)，控制 container runtime 進行 pod 的管理
 
@@ -190,3 +192,7 @@ References
 - [架构原理 · Kubernetes Handbook](https://kubernetes.feisky.xyz/zh/architecture/architecture.html)
 
 - [Kubernetes指南 - 架构原理 · Kubernetes Handbook](https://kubernetes.feisky.xyz/zh/architecture/architecture.html)
+
+
+
+[protobuf]: https://developers.google.com/protocol-buffers/ "protobuf"
