@@ -274,6 +274,9 @@ apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: "my-gfs-storageclass"
+  annotations:
+    # 設定為預設的 storage class
+    storageclass.kubernetes.io/is-default-class: "true"
 provisioner: kubernetes.io/glusterfs
 parameters:
   resturl: "http://10.107.13.101:8080"
