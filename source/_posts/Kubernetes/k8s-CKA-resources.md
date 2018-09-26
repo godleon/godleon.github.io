@@ -136,6 +136,24 @@ tags:
 
 ## 其他參考資料
 
+- [深度解析Kubernetes Local Persistent Volume - WaltonWang's Blog - 开源中国](https://my.oschina.net/jxcdwangtao/blog/1934004)
+
+- [kubernetes-incubator/external-storage: External storage plugins, provisioners, and helper libraries](https://github.com/kubernetes-incubator/external-storage)
+
+### GlusterFS
+
+- [Gluster Storage System](http://www.l-penguin.idv.tw/book/Gluster-Storage_GitBook/)
+
+- [heketi/heketi: RESTful based volume management framework for GlusterFS](https://github.com/heketi/heketi)
+
+- [Heketi Documentation - Administration](https://github.com/heketi/heketi/blob/master/docs/admin/readme.md)
+
+- [Prepare Heketi Topology](https://github.com/heketi/heketi/blob/master/docs/admin/topology.md)
+
+- [独立部署GlusterFS+Heketi实现Kubernetes共享存储 - breezey - 博客园](https://www.cnblogs.com/breezey/p/8849466.html)
+
+- [GlusterFS 操作備忘 « Jamyy's Weblog](http://jamyy.us.to/blog/2014/03/6220.html
+
 
 ---
 
