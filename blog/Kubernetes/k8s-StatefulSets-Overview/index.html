@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-tw">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/blog/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/blog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/blog/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/blog/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Kubernetes,CKA," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="本篇文章的主題在介紹 Kubernetes 中的 StatefulSet resource object 是如何運作 &amp; 相關細節">
+<meta name="keywords" content="Kubernetes,CKA">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[Kubernetes] StatefulSet Overview">
+<meta property="og:url" content="https://godleon.github.io/blog/Kubernetes/k8s-StatefulSets-Overview/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="本篇文章的主題在介紹 Kubernetes 中的 StatefulSet resource object 是如何運作 &amp; 相關細節">
+<meta property="og:locale" content="zh-tw">
+<meta property="og:updated_time" content="2018-09-27T03:32:23.269Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[Kubernetes] StatefulSet Overview">
+<meta name="twitter:description" content="本篇文章的主題在介紹 Kubernetes 中的 StatefulSet resource object 是如何運作 &amp; 相關細節">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://godleon.github.io/blog/Kubernetes/k8s-StatefulSets-Overview/"/>
+
+
+
+
+
+  <title>[Kubernetes] StatefulSet Overview | 小信豬的原始部落</title>
+  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-703592-7', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-tw">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">小信豬的原始部落</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/blog/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首頁
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/blog/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            標籤
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/blog/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分類
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/blog/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            歸檔
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            檢索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/blog/Kubernetes/k8s-StatefulSets-Overview/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">[Kubernetes] StatefulSet Overview</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">發表於</span>
+              
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2018-09-27T03:30:00+00:00">
+                2018-09-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分類於</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Kubernetes/" itemprop="url" rel="index">
+                    <span itemprop="name">Kubernetes</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/Kubernetes/k8s-StatefulSets-Overview/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="Kubernetes/k8s-StatefulSets-Overview/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  本篇文章的主題在介紹 Kubernetes 中的 StatefulSet resource object 是如何運作 & 相關細節
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本篇文章的主題在介紹 Kubernetes 中的 StatefulSet resource object 是如何運作 &amp; 相關細節</p>
+<h1 id="What-is-StatefulSet"><a href="#What-is-StatefulSet" class="headerlink" title="What is StatefulSet?"></a>What is StatefulSet?</h1><p>StatefulSet 在 v1.9 版後正式支援，是在 Kubernetes 中用來建構 stateful application 的 resource(API) object。</p>
+<p>在一般的觀念裡，container 相當合適作為 stateless application 之用(例如：api service)，但由於 stateful application 的需求眾多(例如：<a href="https://github.com/kubernetes/contrib/tree/master/statefulsets" target="_blank" rel="noopener">官網範例中的 ZooKeeper &amp; Kafka 應用</a>)，因此 Kubernetes 就額外增加了一些管理維運的機制，讓 pod 也開始適合承載 stateful application。</p>
+<p>基本上 StatefulSet 中在 pod 的管理上都是與 Deployment 相同，基於相同的 container spec 來進行；而其中的差別在於 <strong>StatefulSet controller 會為每一個 pod 產生一個固定的識別資訊，不會因為 pod reschedule 後有變動</strong>。 </p>
+<h2 id="什麼時候需要使用-StatefulSet"><a href="#什麼時候需要使用-StatefulSet" class="headerlink" title="什麼時候需要使用 StatefulSet?"></a>什麼時候需要使用 StatefulSet?</h2><p>而到底如何研判某某 application 是否需要使用 StatefulSet 來佈署呢? 如果有符合以下條件，就需要使用 StatefulSet 來進行佈署：</p>
+<ul>
+<li><p>需要穩定 &amp; 唯一的網路識別 (pod reschedule 後的 pod name &amp; hostname 都不會變動)</p>
+</li>
+<li><p>需要穩定的 persistent storage (pod reschedule 後還是能存取到相同的資料，基本上用 PVC 就可以解決)</p>
+</li>
+<li><p>佈署 &amp; scale out 的時後，每個 pod 的產生都是有其順序且逐一慢慢完成的</p>
+</li>
+<li><p>進行更新操作時，也是與上面的需求相同</p>
+</li>
+</ul>
+<h2 id="有什麼限制"><a href="#有什麼限制" class="headerlink" title="有什麼限制?"></a>有什麼限制?</h2><ul>
+<li><p>v1.5 之前的版本不支援 StatefulSet，v1.5 ~ v1.9 之間是 beta(需額外開啟此功能)，v1.9 之後才有正式支援</p>
+</li>
+<li><p>storage 的部份一定要綁定 PVC，並綁定到特定的 StorageClass or 預先配置好的 PersistentVolume，確保 pod 被刪除後資料依然存在</p>
+</li>
+<li><p>需要額外定義一個 <a href="https://kubernetes.io/docs/concepts/services-networking/service/#headless-services" title="Headless Service" target="_blank" rel="noopener">Headless Service</a> 與 StatefulSet 搭配，確保 pod 有固定的 network identity</p>
+</li>
+</ul>
+<blockquote>
+<p>所謂的 network identity，即是可以透過 domain name 直接可以取得 pod IP；實現的方法則是佈署一個 ClusterIP=None 的 Service，讓 cluster 內部存取 service 時，可以直接連到 pod 而不是 service VIP。</p>
+</blockquote>
+<blockquote>
+<p>Headless Service 詳細的設定方式可以參考<a href="https://www.do1618.com/archives/1055/k8s%E4%B9%8Bheadless-service/" target="_blank" rel="noopener">此文章</a>。</p>
+</blockquote>
+<h1 id="如何撰寫一個-StatefulSet"><a href="#如何撰寫一個-StatefulSet" class="headerlink" title="如何撰寫一個 StatefulSet?"></a>如何撰寫一個 StatefulSet?</h1><p>要撰寫一個 StatefulSet，有幾個重要的部份必須涵蓋：</p>
+<ol>
+<li><p>Application &amp; Persistent Volume Claim</p>
+</li>
+<li><p><a href="https://kubernetes.io/docs/concepts/services-networking/service/#headless-services" title="Headless Service" target="_blank" rel="noopener">Headless Service</a></p>
+</li>
+<li><p><code>.spec.selector</code> 所定義的內容(<strong>matchLabels</strong>)必須與 <code>.spec.template.metadata.labels</code> 相同</p>
+</li>
+</ol>
+<p>其他的部份則是跟 Deployment 幾乎是相同的。</p>
+<h2 id="Application-amp-Persistent-Volume-Claim"><a href="#Application-amp-Persistent-Volume-Claim" class="headerlink" title="Application &amp; Persistent Volume Claim"></a>Application &amp; Persistent Volume Claim</h2><p>首先是關於 Application &amp; Persistent Volume Claim 的定義：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="comment"># v1.9 版本之前必須使用 "apps/v1beta2"</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">StatefulSet</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">web</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line">    <span class="comment"># 必須與 ".spec.template.metadata.labels" 相同</span></span><br><span class="line"><span class="attr">    matchLabels:</span></span><br><span class="line"><span class="attr">      app:</span> <span class="string">nginx</span></span><br><span class="line"><span class="attr">  serviceName:</span> <span class="string">"nginx"</span></span><br><span class="line"><span class="attr">  replicas:</span> <span class="number">3</span></span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line">      <span class="comment"># 必須與 ".spec.selector.matchLabels" 相同</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        app:</span> <span class="string">nginx</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      terminationGracePeriodSeconds:</span> <span class="number">10</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">nginx</span></span><br><span class="line"><span class="attr">        image:</span> <span class="string">k8s.gcr.io/nginx-slim:0.8</span></span><br><span class="line"><span class="attr">        ports:</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">80</span></span><br><span class="line"><span class="attr">          name:</span> <span class="string">web</span></span><br><span class="line">        <span class="comment"># 指定將 pvc 掛載到特定的目錄上</span></span><br><span class="line"><span class="attr">        volumeMounts:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">www</span></span><br><span class="line"><span class="attr">          mountPath:</span> <span class="string">/usr/share/nginx/html</span></span><br><span class="line">  <span class="comment"># 使用 persistent volume 來確保資料不會因為 pod reschedule 而消失</span></span><br><span class="line">  <span class="comment"># 以下是使用 volumeClaimTemplates + StorageClass 來完成</span></span><br><span class="line"><span class="attr">  volumeClaimTemplates:</span></span><br><span class="line"><span class="attr">  - metadata:</span></span><br><span class="line"><span class="attr">      name:</span> <span class="string">www</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      accessModes:</span> <span class="string">[</span> <span class="string">"ReadWriteOnce"</span> <span class="string">]</span></span><br><span class="line">      <span class="comment"># 在本實驗環境中已經架設好一個 GlusterFS cluster + Heketi，並設定好 StorageClass</span></span><br><span class="line"><span class="attr">      storageClassName:</span> <span class="string">"my-gfs-storageclass"</span></span><br><span class="line"><span class="attr">      resources:</span></span><br><span class="line"><span class="attr">        requests:</span></span><br><span class="line"><span class="attr">          storage:</span> <span class="number">1</span><span class="string">Gi</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>關於 GlusterFS 的設定，可參考文章 <a href="https://godleon.github.io/blog/Kubernetes/k8s-use-GlusterFS-with-standalone-Heketi/">[Kubernetes] 快速安裝 GlusterFS + Heketi 並與 StorageClass 搭配使用</a> 進行安裝設定</p>
+</blockquote>
+<p>套用上面的設定後，接著檢視一下在 k8s 中到底生成了哪些 resource object：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 取得在目前 namespace 中所有的 resource object</span></span><br><span class="line">$ kubectl get all -o wide</span><br><span class="line">NAME        READY     STATUS    RESTARTS   AGE       IP              NODE              NOMINATED NODE</span><br><span class="line">pod/web-0   1/1       Running   0          13h       10.233.64.159   leon-k8s-node03   &lt;none&gt;</span><br><span class="line">pod/web-1   1/1       Running   0          13h       10.233.65.148   leon-k8s-node04   &lt;none&gt;</span><br><span class="line">pod/web-2   1/1       Running   0          13h       10.233.66.155   leon-k8s-node05   &lt;none&gt;</span><br><span class="line"></span><br><span class="line">NAME                                  TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)   AGE       SELECTOR</span><br><span class="line">service/glusterfs-dynamic-www-web-0   ClusterIP   10.233.60.3   &lt;none&gt;        1/TCP     13h       &lt;none&gt;</span><br><span class="line">service/glusterfs-dynamic-www-web-1   ClusterIP   10.233.17.8   &lt;none&gt;        1/TCP     13h       &lt;none&gt;</span><br><span class="line">service/glusterfs-dynamic-www-web-2   ClusterIP   10.233.16.6   &lt;none&gt;        1/TCP     13h       &lt;none&gt;</span><br><span class="line">service/kubernetes                    ClusterIP   10.233.0.1    &lt;none&gt;        443/TCP   22d       &lt;none&gt;</span><br><span class="line"></span><br><span class="line">NAME                   DESIRED   CURRENT   AGE       CONTAINERS   IMAGES</span><br><span class="line">statefulset.apps/web   3         3         13h       nginx        k8s.gcr.io/nginx-slim:0.8</span><br><span class="line"></span><br><span class="line"><span class="comment"># 取得自動生成的 persistent volume claim 資訊</span></span><br><span class="line">$ kubectl get pvc</span><br><span class="line">NAME        STATUS    VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS          AGE</span><br><span class="line">www-web-0   Bound     pvc-fdda23de-c155-11e8-885a-627e9087949f   1Gi        RWO            my-gfs-storageclass   13h</span><br><span class="line">www-web-1   Bound     pvc-0b8f49d6-c156-11e8-885a-627e9087949f   1Gi        RWO            my-gfs-storageclass   13h</span><br><span class="line">www-web-2   Bound     pvc-1d15ce12-c156-11e8-885a-627e9087949f   1Gi        RWO            my-gfs-storageclass   13h</span><br><span class="line"></span><br><span class="line"><span class="comment"># 取得自動生成的 persistent volume 資訊(透過 StorageClass 產生)</span></span><br><span class="line">$ kubectl get pv</span><br><span class="line">NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS    CLAIM               STORAGECLASS          REASON    AGE</span><br><span class="line">pvc-0b8f49d6-c156-11e8-885a-627e9087949f   1Gi        RWO            Delete           Bound     default/www-web-1   my-gfs-storageclass             13h</span><br><span class="line">pvc-1d15ce12-c156-11e8-885a-627e9087949f   1Gi        RWO            Delete           Bound     default/www-web-2   my-gfs-storageclass             13h</span><br><span class="line">pvc-fdda23de-c155-11e8-885a-627e9087949f   1Gi        RWO            Delete           Bound     default/www-web-0   my-gfs-storageclass             13h</span><br></pre></td></tr></table></figure>
+<p>從上面可看出，Pod &amp; Service 這兩個部份的 resource object name，都會帶有一個有順序性的 index，而這個 index 不會因為 pod reschedule 而改變，而且還會將原本的 PVC 掛載回來。(<strong>透過 Service -&gt; PVC 的路徑</strong>)</p>
+<h2 id="Headless-Service"><a href="#Headless-Service" class="headerlink" title="Headless Service"></a>Headless Service</h2><p>[Headless Service][<a href="https://kubernetes.io/docs/concepts/services-networking/service/#headless-services" title="Headless Service" target="_blank" rel="noopener">headless_service</a>] 則是要定義一個 <code>ClusterIP: None</code> 的 service，目的就是讓 cluster 內部的 pod 可以 <strong>透過 DNS 找到 StatefulSet pod IP</strong>：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">nginx</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">nginx</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  ports:</span></span><br><span class="line"><span class="attr">  - port:</span> <span class="number">80</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">web</span></span><br><span class="line"><span class="attr">  clusterIP:</span> <span class="string">None</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">nginx</span></span><br></pre></td></tr></table></figure>
+<p>將以上設定套用到 </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 取得 StatefulSet 的 pod &amp; service 資訊</span></span><br><span class="line">$ kubectl get all -o wide</span><br><span class="line">NAME        READY     STATUS    RESTARTS   AGE       IP              NODE              NOMINATED NODE</span><br><span class="line">pod/web-0   1/1       Running   0          13h       10.233.64.159   leon-k8s-node03   &lt;none&gt;</span><br><span class="line">pod/web-1   1/1       Running   0          13h       10.233.65.148   leon-k8s-node04   &lt;none&gt;</span><br><span class="line">pod/web-2   1/1       Running   0          13h       10.233.66.155   leon-k8s-node05   &lt;none&gt;</span><br><span class="line"></span><br><span class="line">NAME                                  TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)   AGE       SELECTOR</span><br><span class="line">...(略)</span><br><span class="line">service/nginx                         ClusterIP   None          &lt;none&gt;        80/TCP    20m       app=nginx</span><br><span class="line">...(略)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 取得 k8s DNS 的 ip address</span></span><br><span class="line">$ kubectl get svc -n kube-system | grep dns</span><br><span class="line">coredns                ClusterIP   10.233.0.3      &lt;none&gt;        53/UDP,53/TCP   22d</span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視 k8s DNS server 對於 headless service 回應的 dns 資訊</span></span><br><span class="line"><span class="comment"># 從外面檢視需要輸入完整的 domain name(目前在 default)，若是在 pod 中就不需要</span></span><br><span class="line">$ nslookup</span><br><span class="line">&gt; server 10.233.0.3</span><br><span class="line">Default server: 10.233.0.3</span><br><span class="line">Address: 10.233.0.3<span class="comment">#53</span></span><br><span class="line">&gt; nginx.default.svc.cluster.local</span><br><span class="line">Server:		10.233.0.3</span><br><span class="line">Address:	10.233.0.3<span class="comment">#53</span></span><br><span class="line"></span><br><span class="line">Name:	nginx.default.svc.cluster.local</span><br><span class="line">Address: 10.233.64.159</span><br><span class="line">Name:	nginx.default.svc.cluster.local</span><br><span class="line">Address: 10.233.65.148</span><br><span class="line">Name:	nginx.default.svc.cluster.local</span><br><span class="line">Address: 10.233.66.155</span><br></pre></td></tr></table></figure>
+<p>從上面的訊息可以看出上面所定義 nginx service(<strong>nginx.default.svc.cluster.local</strong>) 所對應到的 IP 都是 pod 本身的 IP。</p>
+<h1 id="如何識別-StatefulSet-產生的-Pod"><a href="#如何識別-StatefulSet-產生的-Pod" class="headerlink" title="如何識別 StatefulSet 產生的 Pod?"></a>如何識別 StatefulSet 產生的 Pod?</h1><p>完成了上面的操作測試後，接著回頭來了解到底在 k8s 中是如何識別 StatefulSet 中的 pod &amp; service。</p>
+<p>每一個 StatefulSet Pod 都有一個獨一無二的識別資訊，但這件事情在 k8s 中是如何被達成的? 其實是分別由以下三種資訊所組成：</p>
+<ul>
+<li><p>表示順序的索引值 (Ordinal Index)</p>
+</li>
+<li><p>穩定的網路識別資訊 (Stable Network ID)</p>
+</li>
+<li><p>穩定的儲存空間 (Stable Storage)</p>
+</li>
+</ul>
+<h2 id="Ordinal-Index"><a href="#Ordinal-Index" class="headerlink" title="Ordinal Index"></a>Ordinal Index</h2><p>若一個 statefulset 包含了 N 個 replica，那每一個 pod 都會被分配到一個獨一無二的索引，從 <code>0</code> ~ <code>N-1</code>，即使 pod reschedule 也不會改變。</p>
+<h2 id="Stable-Network-ID"><a href="#Stable-Network-ID" class="headerlink" title="Stable Network ID"></a>Stable Network ID</h2><p>每個在 statefulset 中的 pod 都會有自己獨一無二的 hostname，命名的規則為 <code>$(statefulset name)-$(ordinal index)</code>，因此在上面的例子中，3 個 pod 的 hostname 就會分別為 <strong>web-0</strong>、<strong>web-1</strong>、<strong>web-2</strong>。</p>
+<p>此外，statefulset 還會透過 <a href="https://kubernetes.io/docs/concepts/services-networking/service/#headless-services" title="Headless Service" target="_blank" rel="noopener">Headless Service</a> 來維持 pod domain name 是固定指到 pod IP，並使用以下的標準格式存取 domain name：(以下稱為 <strong>governing service domain</strong>)</p>
+<blockquote>
+<p><strong>$(service name).$(namespace).svc.cluster.local</strong></p>
+</blockquote>
+<p>其中 <code>cluster.local</code> 是當初安裝 k8s 所設定的 cluster domain，若安裝時有修改的話，上面的 domain name 也必須跟著調整。</p>
+<p>因此存取每一個 pod 的完整 domain name 如下：</p>
+<blockquote>
+<p><strong>$(podname).$(governing service domain)</strong></p>
+</blockquote>
+<p>以下是一些範例說明：(假設 cluster domain 為 <code>cluster.local</code>)</p>
+<table>
+<thead>
+<tr>
+<th>Service (ns/name)</th>
+<th>StatefulSet (ns/name)</th>
+<th>StatefulSet Domain</th>
+<th>Pod Hostname</th>
+<th>Pod DNS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>default/nginx</td>
+<td>default/web</td>
+<td>nginx.default.svc.cluster.local</td>
+<td>web-{0..N-1}</td>
+<td>web-{0..N-1}.nginx.default.svc.cluster.local</td>
+</tr>
+<tr>
+<td>foo/nginx</td>
+<td>foo/web</td>
+<td>nginx.foo.svc.cluster.local</td>
+<td>web-{0..N-1}</td>
+<td>web-{0..N-1}.nginx.foo.svc.cluster.local</td>
+</tr>
+</tbody>
+</table>
+<p>以下透過範例來證實：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 取得 k8s DNS 的 ip address</span></span><br><span class="line">$ kubectl get svc -n kube-system | grep dns</span><br><span class="line">coredns                ClusterIP   10.233.0.3      &lt;none&gt;        53/UDP,53/TCP   22d</span><br><span class="line"></span><br><span class="line"><span class="comment"># 測試上述的 dns entry 可否回應正確的 ip address</span></span><br><span class="line">$ nslookup</span><br><span class="line">&gt; server 10.233.0.3</span><br><span class="line">Default server: 10.233.0.3</span><br><span class="line">Address: 10.233.0.3<span class="comment">#53</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># $(service name).$(namespace).svc.cluster.local</span></span><br><span class="line">&gt; nginx.default.svc.cluster.local</span><br><span class="line">Server:		10.233.0.3</span><br><span class="line">Address:	10.233.0.3<span class="comment">#53</span></span><br><span class="line"></span><br><span class="line">Name:	nginx.default.svc.cluster.local</span><br><span class="line">Address: 10.233.64.159</span><br><span class="line">Name:	nginx.default.svc.cluster.local</span><br><span class="line">Address: 10.233.65.148</span><br><span class="line">Name:	nginx.default.svc.cluster.local</span><br><span class="line">Address: 10.233.66.155</span><br><span class="line"></span><br><span class="line"><span class="comment"># $(podname).$(governing service domain)</span></span><br><span class="line"><span class="comment"># $(podname).$(service name).$(namespace).svc.cluster.local</span></span><br><span class="line">&gt; www-0.nginx.default.svc.cluster.local</span><br><span class="line">Server:		10.233.0.3</span><br><span class="line">Address:	10.233.0.3<span class="comment">#53</span></span><br><span class="line"></span><br><span class="line">Name:	web-0.nginx.default.svc.cluster.local</span><br><span class="line">Address: 10.233.64.159</span><br><span class="line"></span><br><span class="line"><span class="comment"># $(podname).$(governing service domain)</span></span><br><span class="line"><span class="comment"># $(podname).$(service name).$(namespace).svc.cluster.local</span></span><br><span class="line">&gt; web-1.nginx.default.svc.cluster.local</span><br><span class="line">Server:		10.233.0.3</span><br><span class="line">Address:	10.233.0.3<span class="comment">#53</span></span><br><span class="line"></span><br><span class="line">Name:	web-1.nginx.default.svc.cluster.local</span><br><span class="line">Address: 10.233.65.148</span><br><span class="line"></span><br><span class="line"><span class="comment"># $(podname).$(governing service domain)</span></span><br><span class="line"><span class="comment"># $(podname).$(service name).$(namespace).svc.cluster.local</span></span><br><span class="line">&gt; web-2.nginx.default.svc.cluster.local</span><br><span class="line">Server:		10.233.0.3</span><br><span class="line">Address:	10.233.0.3<span class="comment">#53</span></span><br><span class="line"></span><br><span class="line">Name:	web-2.nginx.default.svc.cluster.local</span><br><span class="line">Address: 10.233.66.155</span><br></pre></td></tr></table></figure>
+<h2 id="Stable-Storage"><a href="#Stable-Storage" class="headerlink" title="Stable Storage"></a>Stable Storage</h2><p>若是 statefulset 中的 replicas 設定為大於 1，為了確保每個 pod 在產生時都會有各自對應的 persistent storage 可用，在 Storage 的部份就要以 <code>volumeClaimTemplates</code> + <code>StorageClass</code> 來設定，使用以下範例說明：(來自於上方完整範例)</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 宣告 volumeClaimTemplates</span></span><br><span class="line"><span class="attr">volumeClaimTemplates:</span></span><br><span class="line"><span class="attr">- metadata:</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">www</span></span><br><span class="line"><span class="attr">  spec:</span></span><br><span class="line"><span class="attr">    accessModes:</span> <span class="string">[</span> <span class="string">"ReadWriteOnce"</span> <span class="string">]</span></span><br><span class="line">    <span class="comment"># 指定搭配的 StorageClass</span></span><br><span class="line"><span class="attr">    storageClassName:</span> <span class="string">"my-gfs-storageclass"</span></span><br><span class="line"><span class="attr">    resources:</span></span><br><span class="line"><span class="attr">      requests:</span></span><br><span class="line">        <span class="comment"># 容量需求為 1GB</span></span><br><span class="line"><span class="attr">        storage:</span> <span class="number">1</span><span class="string">Gi</span></span><br></pre></td></tr></table></figure>
+<p>透過以上的設定，statefulset 中<strong>每個 pod</strong> 副本產生時，k8s 會自動執行以下工作：</p>
+<ol>
+<li><p>StorageClass “<strong>my-gfs-storageclass</strong>“ 會負責對特定的 storage 要求 1GB 的空間</p>
+</li>
+<li><p>StorageClass “<strong>my-gfs-storageclass</strong>“ 動態產生 persistent volume(PV)，並與上面的空間綁定</p>
+</li>
+<li><p>透過 volumeClaimTemplates 為每個 pod 產生一個 persistent volume claim(PVC)，並與步驟 2 的 PV 綁定</p>
+</li>
+<li><p>pod 使用 PVC 並掛載到指定的目錄上</p>
+</li>
+</ol>
+<blockquote>
+<p>透過 StorageClass，可以根據 resource 的需求，產生 persistent volume 並與特定的 storage 綁定 </p>
+</blockquote>
+<p>PV 不會因為 pod 被刪除 or reschedule 而消失(只能手動刪除)，如此才能達成 statefulset 對 storage 的要求。</p>
+<p>接著來檢視一下實際的例子：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 檢視 PVC</span></span><br><span class="line">$ kubectl get pvc</span><br><span class="line">NAME        STATUS    VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS          AGE</span><br><span class="line">www-web-0   Bound     pvc-fdda23de-c155-11e8-885a-627e9087949f   1Gi        RWO            my-gfs-storageclass   13h</span><br><span class="line">www-web-1   Bound     pvc-0b8f49d6-c156-11e8-885a-627e9087949f   1Gi        RWO            my-gfs-storageclass   13h</span><br><span class="line">www-web-2   Bound     pvc-1d15ce12-c156-11e8-885a-627e9087949f   1Gi        RWO            my-gfs-storageclass   13h</span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視 PV</span></span><br><span class="line">$ kubectl get pv</span><br><span class="line">NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS    CLAIM               STORAGECLASS          REASON    AGE</span><br><span class="line">pvc-0b8f49d6-c156-11e8-885a-627e9087949f   1Gi        RWO            Delete           Bound     default/www-web-1   my-gfs-storageclass             13h</span><br><span class="line">pvc-1d15ce12-c156-11e8-885a-627e9087949f   1Gi        RWO            Delete           Bound     default/www-web-2   my-gfs-storageclass             13h</span><br><span class="line">pvc-fdda23de-c155-11e8-885a-627e9087949f   1Gi        RWO            Delete           Bound     default/www-web-0   my-gfs-storageclass             13h</span><br></pre></td></tr></table></figure>
+<h2 id="Pod-Name-Label"><a href="#Pod-Name-Label" class="headerlink" title="Pod Name Label"></a>Pod Name Label</h2><p>statefulset 產生每個 pod 時，都會自動幫 pod 加上名稱為 <code>statefulset.kubernetes.io/pod-name</code> 的 label，而 label value 就是上面提到的 pod name。</p>
+<p>看看實際操作產生出來的結果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl describe pod/web-0</span><br><span class="line">Name:               web-0</span><br><span class="line">Namespace:          default</span><br><span class="line">...(略)</span><br><span class="line">Labels:             app=nginx</span><br><span class="line">                    controller-revision-hash=web-6596ffb49b</span><br><span class="line">                    statefulset.kubernetes.io/pod-name=web-0</span><br><span class="line">...(略)</span><br></pre></td></tr></table></figure>
+<p>透過這個特別的 label，就可以讓使用者根據需求，額外定義 service 並附加到指定的 pod 上(透過 label selector)。</p>
+<h1 id="Deployment-amp-Scaling-流程說明"><a href="#Deployment-amp-Scaling-流程說明" class="headerlink" title="Deployment &amp; Scaling 流程說明"></a>Deployment &amp; Scaling 流程說明</h1><h2 id="佈署-amp-Scale-out"><a href="#佈署-amp-Scale-out" class="headerlink" title="佈署 &amp; Scale out"></a>佈署 &amp; Scale out</h2><p>當佈署一個 replica 數量為 N(大於 1) 的 StatefulSet 時，不會像 Deployment 一樣，pod 會同步的產生，而是會有順序的逐一產生，整個流程發生的過程如下：</p>
+<ul>
+<li><p>佈署的順序會是 <strong>{0 –&gt; N-1}</strong>，以上面的例子來說則是 web-0 &gt;&gt; web-1 &gt;&gt; web-2 (可想而知，web-2 不會在 web-0 &amp; web-1 都 Ready 之前就開始產生)</p>
+</li>
+<li><p>當要對 pod 進行 scale 時，predecessor 的狀態必須是 Running &amp; Ready</p>
+<blockquote>
+<p>例如當一個 pod(web-0) 要 scale out 成 2 個 pod(web-0 + web-1) 時，web-0 的狀態一定要是 Running &amp; Ready 才會開始</p>
+</blockquote>
+</li>
+</ul>
+<p>當 StatefulSet 進行 scale out 時，整個過程也會遵守上面的規則。</p>
+<h2 id="刪除-amp-Scale-in"><a href="#刪除-amp-Scale-in" class="headerlink" title="刪除 &amp; Scale in"></a>刪除 &amp; Scale in</h2><p>但若是要刪除 pod，或是進行 scale in 的時候，整個流程發生的過程如下：</p>
+<ul>
+<li><p>以反向 <strong>{N-1 –&gt; 0}</strong> 的順序逐一刪除，以上面的例子來說則是 web-2 &gt;&gt; web-1 &gt;&gt; web-0 (可想而知，web-1 不會在 web-2 完成刪除之前就被刪除)</p>
+</li>
+<li><p>當要終止一個 pod 時，所有的 successor 都必須完成 shutdown 才行</p>
+<blockquote>
+<p>例如要終止三份 replica(web-0 + web-1 + web-2) 中的 web-1 時，web-2 必須要完全終止才行</p>
+</blockquote>
+</li>
+</ul>
+<p>此外，若是把 <code>pod.Spec.TerminationGracePeriodSeconds</code> 設定為 <strong>0</strong>，pod 的刪除就會強制進行，而不會一個一個慢慢來。(不建議這麼做)</p>
+<h2 id="Pod-Management-Policy"><a href="#Pod-Management-Policy" class="headerlink" title="Pod Management Policy"></a>Pod Management Policy</h2><p>上述所說的是 StatefulSet 的預設行為，但在 v1.7 版之後，就可以透過修改 <code>.spec.podManagementPolicy</code> 欄位來改變佈署 &amp; scale 的行為：</p>
+<ul>
+<li><p><strong>OrderedReady</strong>：此為預設值</p>
+</li>
+<li><p><strong>Parallel</strong>：整體的行為會跟 Deployment 相同，同時產生(or 刪除) pod，不考慮順序問題</p>
+</li>
+</ul>
+<h1 id="更新-update-要如何進行"><a href="#更新-update-要如何進行" class="headerlink" title="更新(update)要如何進行?"></a>更新(update)要如何進行?</h1><p>預設情況下，k8s 自有一套進行 update 的準則(預設為 rolling update)，而 update 的過程會把 pod 中的 container, label, resource request/limit, annotation … 等資訊進行變更；而在 v1.7 版之後，就可以透過 <code>.spec.updateStrategy</code> 的設定，停止上面那些自動化的行為。</p>
+<p>目前 <code>.spec.updateStrategy</code> 支援兩種設定：</p>
+<h2 id="On-Delete"><a href="#On-Delete" class="headerlink" title="On Delete"></a>On Delete</h2><p>這其實是 v1.6 版之前的預設行為，只是在 v1.7 版後實作成 OnDelete；當設定 <code>.spec.updateStrategy.type: &quot;OnDelete&quot;</code> 時，對於 sprc template 的變更不會有任何反應，除非使用者手動刪除 pod，讓 replication controller 重新產生 pod，才會套用新的 spec template 設定。</p>
+<h2 id="Rolling-Update"><a href="#Rolling-Update" class="headerlink" title="Rolling Update"></a>Rolling Update</h2><p>這就屬於預設行為(<code>.spec.updateStrategy.type: &quot;RollingUpdate&quot;</code>)，當 spec template 發生變更時，舊的 pod 會逐一的刪除並逐一產生新的 pod。(依然是會有順序性的)</p>
+<h3 id="Partition"><a href="#Partition" class="headerlink" title="Partition"></a>Partition</h3><p>若是在 StatefulSet 中有 5 個 replica，但只想要更新其中兩個怎麼辦? 在 k8s 中就提供了 <strong>partition</strong> 的機制來完成這件事情，透過設定 <code>.spec.updateStrategy.rollingUpdate.partition</code> 為一個特定的整數(int)值，當 spec template 變更時，index 大於(or 等於)此整數值的 pod 就會被更新，而小於此整數值的 pod 就不會被更新。</p>
+<p>以上面的例子為例，假設有 5 個 replica，分別為：</p>
+<ul>
+<li>web-0</li>
+<li>web-1</li>
+<li>web-2</li>
+<li>web-3</li>
+<li>web-4</li>
+</ul>
+<p>而 <code>.spec.updateStrategy.rollingUpdate.partition</code> 設定為 <strong>3</strong>，當 spec template 變更時，就只會有以下的 pod 會變更新：</p>
+<ul>
+<li>web-3</li>
+<li>web-4</li>
+</ul>
+<p>因此，若是有<strong>分階段更新/發佈</strong> or <strong>canary deployment</strong> 的需求時，就可以透過 partition 的功能來完成。</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a href="https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/" target="_blank" rel="noopener">StatefulSets - Kubernetes</a></p>
+</li>
+<li><p><a href="https://kubernetes.io/cn/docs/tutorials/stateful-application/basic-stateful-set/" target="_blank" rel="noopener">StatefulSet基本使用 - Kubernetes</a></p>
+</li>
+<li><p><a href="https://jimmysong.io/kubernetes-handbook/concepts/statefulset.html" target="_blank" rel="noopener">StatefulSet · Kubernetes Handbook - Kubernetes中文指南/云原生应用架构实践手册 by Jimmy Song(宋净超)</a></p>
+</li>
+<li><p><a href="http://docs.kubernetes.org.cn/443.html" target="_blank" rel="noopener">Kubernetes StatefulSets _ Kubernetes(K8S)中文文档_Kubernetes中文社区</a></p>
+</li>
+<li><p><a href="https://www.do1618.com/archives/1055/k8s%E4%B9%8Bheadless-service/" target="_blank" rel="noopener">k8s之Headless Service - 程序印象</a></p>
+</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog/tags/Kubernetes/" rel="tag"># Kubernetes</a>
+          
+            <a href="/blog/tags/CKA/" rel="tag"># CKA</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/Kubernetes/k8s-use-GlusterFS-with-standalone-Heketi/" rel="next" title="[Kubernetes] 快速安裝 GlusterFS + Heketi 並與 StorageClass 搭配使用">
+                <i class="fa fa-chevron-left"></i> [Kubernetes] 快速安裝 GlusterFS + Heketi 並與 StorageClass 搭配使用
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            本站概覽
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">godleon</p>
+              <p class="site-description motion-element" itemprop="description">把時間花在哪裡，成就就在哪裡</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/blog/archives/">
+              
+                  <span class="site-state-item-count">71</span>
+                  <span class="site-state-item-name">文章</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/blog/categories/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">分類</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/blog/tags/index.html">
+                  <span class="site-state-item-count">29</span>
+                  <span class="site-state-item-name">標籤</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/godleon" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:godleon@gmail.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-globe"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://plus.google.com/godleon" target="_blank" title="Google">
+                    
+                      <i class="fa fa-fw fa-google"></i>Google</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#What-is-StatefulSet"><span class="nav-number">1.</span> <span class="nav-text">What is StatefulSet?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#什麼時候需要使用-StatefulSet"><span class="nav-number">1.1.</span> <span class="nav-text">什麼時候需要使用 StatefulSet?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#有什麼限制"><span class="nav-number">1.2.</span> <span class="nav-text">有什麼限制?</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#如何撰寫一個-StatefulSet"><span class="nav-number">2.</span> <span class="nav-text">如何撰寫一個 StatefulSet?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Application-amp-Persistent-Volume-Claim"><span class="nav-number">2.1.</span> <span class="nav-text">Application &amp; Persistent Volume Claim</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Headless-Service"><span class="nav-number">2.2.</span> <span class="nav-text">Headless Service</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#如何識別-StatefulSet-產生的-Pod"><span class="nav-number">3.</span> <span class="nav-text">如何識別 StatefulSet 產生的 Pod?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Ordinal-Index"><span class="nav-number">3.1.</span> <span class="nav-text">Ordinal Index</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Stable-Network-ID"><span class="nav-number">3.2.</span> <span class="nav-text">Stable Network ID</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Stable-Storage"><span class="nav-number">3.3.</span> <span class="nav-text">Stable Storage</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pod-Name-Label"><span class="nav-number">3.4.</span> <span class="nav-text">Pod Name Label</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Deployment-amp-Scaling-流程說明"><span class="nav-number">4.</span> <span class="nav-text">Deployment &amp; Scaling 流程說明</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#佈署-amp-Scale-out"><span class="nav-number">4.1.</span> <span class="nav-text">佈署 &amp; Scale out</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#刪除-amp-Scale-in"><span class="nav-number">4.2.</span> <span class="nav-text">刪除 &amp; Scale in</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pod-Management-Policy"><span class="nav-number">4.3.</span> <span class="nav-text">Pod Management Policy</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#更新-update-要如何進行"><span class="nav-number">5.</span> <span class="nav-text">更新(update)要如何進行?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#On-Delete"><span class="nav-number">5.1.</span> <span class="nav-text">On Delete</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Rolling-Update"><span class="nav-number">5.2.</span> <span class="nav-text">Rolling Update</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Partition"><span class="nav-number">5.2.1.</span> <span class="nav-text">Partition</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text">References</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 強力驅動</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主題 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/blog/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://godleon-blog-hexo.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'https://godleon.github.io/blog/Kubernetes/k8s-StatefulSets-Overview/';
+          this.page.identifier = 'Kubernetes/k8s-StatefulSets-Overview/';
+          this.page.title = '[Kubernetes] StatefulSet Overview';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/blog/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
