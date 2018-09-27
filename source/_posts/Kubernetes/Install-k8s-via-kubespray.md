@@ -128,6 +128,8 @@ kube-ingress
 
 - 確認 SSH Key 為 **$(pwd)/ssh-privkey/id_rsa**
 
+> 這裡需要把存取每個 node 的 SSH private key 放到 `$(pwd)/ssh-privkey` 目錄中，並命名為 `id_rsa`
+
 ## 使用帳號 + 密碼存取
 
 - 將 **ansible_ssh_pass** 參數的註解取消，並輸入存取密碼
@@ -153,12 +155,14 @@ kube-ingress
 $ cd /tmp/kubernetes-installation-template
 
 # 開始安裝
-$ bash start.sh
+$ ./start.sh
 ```
 
 整個安裝過程大約需要耗費十來分鐘(端看網路 & VM 運行速度)。
 
 安裝完之後可以在執行安裝指令的機器(**bootstrapper**)上找到 kubeconfig，位置在 `/tmp/kubernetes-installation-template/kubeconfig/admin.conf`。
+
+> 若安裝過程失敗，可嘗試再執行一次 `./start.sh`，應該就會安裝成功了!
 
 
 操作 Kubernetes
