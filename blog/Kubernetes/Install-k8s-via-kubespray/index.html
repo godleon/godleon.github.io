@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="小信豬的原始部落">
 <meta property="og:description" content="此篇文章介紹如何使用 Kubespray 安裝 Kubernetes v1.10 以上版本">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2018-09-27T03:32:23.269Z">
+<meta property="og:updated_time" content="2018-09-27T08:25:07.827Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="使用 Kubespray 安裝 Kubernetes v1.10 以上版本">
 <meta name="twitter:description" content="此篇文章介紹如何使用 Kubespray 安裝 Kubernetes v1.10 以上版本">
@@ -451,6 +451,9 @@
 <h3 id="使用-SSH-Key-存取"><a href="#使用-SSH-Key-存取" class="headerlink" title="使用 SSH Key 存取"></a>使用 SSH Key 存取</h3><ul>
 <li>確認 SSH Key 為 <strong>$(pwd)/ssh-privkey/id_rsa</strong></li>
 </ul>
+<blockquote>
+<p>這裡需要把存取每個 node 的 SSH private key 放到 <code>$(pwd)/ssh-privkey</code> 目錄中，並命名為 <code>id_rsa</code></p>
+</blockquote>
 <h2 id="使用帳號-密碼存取"><a href="#使用帳號-密碼存取" class="headerlink" title="使用帳號 + 密碼存取"></a>使用帳號 + 密碼存取</h2><ul>
 <li><p>將 <strong>ansible_ssh_pass</strong> 參數的註解取消，並輸入存取密碼</p>
 </li>
@@ -461,9 +464,12 @@
 </ul>
 <h2 id="pwd-kubespray-group-vars-k8s-cluster-yml"><a href="#pwd-kubespray-group-vars-k8s-cluster-yml" class="headerlink" title="$(pwd)/kubespray/group_vars/k8s-cluster.yml"></a>$(pwd)/kubespray/group_vars/k8s-cluster.yml</h2><p>若有需要調整安裝的版本，目前預設是 <code>v1.11.3</code>，可以調整 <strong>kube_version</strong> 來變更。</p>
 <h1 id="執行安裝程式"><a href="#執行安裝程式" class="headerlink" title="執行安裝程式"></a>執行安裝程式</h1><p>當以上設定都完成後，就可以開始執行安裝程式：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 若按照上面的操作，沒有離開原本的目錄的話，應該就是位於下面的目錄中</span></span><br><span class="line">$ <span class="built_in">cd</span> /tmp/kubernetes-installation-template</span><br><span class="line"></span><br><span class="line"><span class="comment"># 開始安裝</span></span><br><span class="line">$ bash start.sh</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 若按照上面的操作，沒有離開原本的目錄的話，應該就是位於下面的目錄中</span></span><br><span class="line">$ <span class="built_in">cd</span> /tmp/kubernetes-installation-template</span><br><span class="line"></span><br><span class="line"><span class="comment"># 開始安裝</span></span><br><span class="line">$ ./start.sh</span><br></pre></td></tr></table></figure>
 <p>整個安裝過程大約需要耗費十來分鐘(端看網路 &amp; VM 運行速度)。</p>
 <p>安裝完之後可以在執行安裝指令的機器(<strong>bootstrapper</strong>)上找到 kubeconfig，位置在 <code>/tmp/kubernetes-installation-template/kubeconfig/admin.conf</code>。</p>
+<blockquote>
+<p>若安裝過程失敗，可嘗試再執行一次 <code>./start.sh</code>，應該就會安裝成功了!</p>
+</blockquote>
 <h1 id="操作-Kubernetes"><a href="#操作-Kubernetes" class="headerlink" title="操作 Kubernetes"></a>操作 Kubernetes</h1><p>要操作 k8s 可以直接連到 master node 上直接使用 kubectl 進行操作，也可以使用其他機器進行操作。</p>
 <p>但若要使用非 master node 的機器對 k8s 進行操作，必須先準備好以下環境：</p>
 <ol>
