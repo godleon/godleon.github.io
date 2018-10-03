@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Linux,KVM," />
+  <meta name="keywords" content="Kubernetes,CKA," />
 
 
 
@@ -79,18 +79,18 @@
 
 
 
-<meta name="description" content="This article introduces what should to learn about storage when learning Linux KVM virtualization">
-<meta name="keywords" content="Linux,KVM">
+<meta name="description" content="本篇文章的主題在介紹 Kubernetes 中的 DaemonSet resource object 是如何運作 &amp; 相關細節">
+<meta name="keywords" content="Kubernetes,CKA">
 <meta property="og:type" content="article">
-<meta property="og:title" content="[Linux KVM] Linux KVM concept - Storage">
-<meta property="og:url" content="https://godleon.github.io/blog/KVM/KVM-Basic-Concept-Storage/index.html">
+<meta property="og:title" content="[Kubernetes] DaemonSet Overview">
+<meta property="og:url" content="https://godleon.github.io/blog/Kubernetes/k8s-DaemonSet-Overview/index.html">
 <meta property="og:site_name" content="小信豬的原始部落">
-<meta property="og:description" content="This article introduces what should to learn about storage when learning Linux KVM virtualization">
+<meta property="og:description" content="本篇文章的主題在介紹 Kubernetes 中的 DaemonSet resource object 是如何運作 &amp; 相關細節">
 <meta property="og:locale" content="zh-tw">
 <meta property="og:updated_time" content="2018-10-03T20:59:56.297Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="[Linux KVM] Linux KVM concept - Storage">
-<meta name="twitter:description" content="This article introduces what should to learn about storage when learning Linux KVM virtualization">
+<meta name="twitter:title" content="[Kubernetes] DaemonSet Overview">
+<meta name="twitter:description" content="本篇文章的主題在介紹 Kubernetes 中的 DaemonSet resource object 是如何運作 &amp; 相關細節">
 
 
 
@@ -120,13 +120,13 @@
 
 
 
-  <link rel="canonical" href="https://godleon.github.io/blog/KVM/KVM-Basic-Concept-Storage/"/>
+  <link rel="canonical" href="https://godleon.github.io/blog/Kubernetes/k8s-DaemonSet-Overview/"/>
 
 
 
 
 
-  <title>[Linux KVM] Linux KVM concept - Storage | 小信豬的原始部落</title>
+  <title>[Kubernetes] DaemonSet Overview | 小信豬的原始部落</title>
   
 
 
@@ -296,7 +296,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/blog/KVM/KVM-Basic-Concept-Storage/">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/blog/Kubernetes/k8s-DaemonSet-Overview/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="godleon">
@@ -313,7 +313,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">[Linux KVM] Linux KVM concept - Storage</h1>
+          <h1 class="post-title" itemprop="name headline">[Kubernetes] DaemonSet Overview</h1>
         
 
         <div class="post-meta">
@@ -325,8 +325,8 @@
               
                 <span class="post-meta-item-text">發表於</span>
               
-              <time title="創建於" itemprop="dateCreated datePublished" datetime="2016-08-03T00:00:00+00:00">
-                2016-08-03
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2018-10-03T21:00:00+00:00">
+                2018-10-04
               </time>
             
 
@@ -348,8 +348,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/blog/categories/KVM/" itemprop="url" rel="index">
-                    <span itemprop="name">KVM</span>
+                  <a href="/blog/categories/Kubernetes/" itemprop="url" rel="index">
+                    <span itemprop="name">Kubernetes</span>
                   </a>
                 </span>
 
@@ -366,9 +366,9 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/blog/KVM/KVM-Basic-Concept-Storage/#comments" itemprop="discussionUrl">
+                <a href="/blog/Kubernetes/k8s-DaemonSet-Overview/#comments" itemprop="discussionUrl">
                   <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="KVM/KVM-Basic-Concept-Storage/" itemprop="commentCount"></span>
+                        data-disqus-identifier="Kubernetes/k8s-DaemonSet-Overview/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -383,7 +383,7 @@
 
           
               <div class="post-description">
-                  This article introduces what should to learn about storage when learning Linux KVM virtualization
+                  本篇文章的主題在介紹 Kubernetes 中的 DaemonSet resource object 是如何運作 & 相關細節
               </div>
           
 
@@ -400,172 +400,148 @@
       
 
       
-        <p>此篇文章介紹學習 Linux KVM 時所需要了解的 Storage 相關知識</p>
-<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>在 Linux KVM 中，是由 QEMU 來提供 storage device 的模擬，可以模擬的 storage 類型很多，包含 IDE device / SCSI device / Floopy disk / USB disk / virtio disk …. 等等，可根據使用者需求的不同來提供不同組合以及不同的開機順序。</p>
-<hr>
-<h1 id="Host-Machine-Swap-空間應該要設定多大"><a href="#Host-Machine-Swap-空間應該要設定多大" class="headerlink" title="Host Machine Swap 空間應該要設定多大?"></a>Host Machine Swap 空間應該要設定多大?</h1><p>以前學 Linux 時知道，swap 是用來作為當記憶體不足時的 buffer 用，而現在虛擬化環境中，每台 host machine 的記憶體容量都很大，那 swap 應該如何規劃配置呢? 以下有幾個原則：</p>
-<h3 id="不使用-memory-overcommit"><a href="#不使用-memory-overcommit" class="headerlink" title="不使用 memory overcommit"></a>不使用 memory overcommit</h3><ol>
-<li><p>若實體記憶體 &lt;= 4GB，則 swap space 設定為 2GB</p>
-</li>
-<li><p>若 4GB &lt; 實體記憶體 &lt;= 16GB，則 swap space 設定為 4GB</p>
-</li>
-<li><p>若 16GB &lt; 實體記憶體 &lt;= 64GB，則 swap space 設定為 8GB</p>
-</li>
-<li><p>若 64GB &lt; 實體記憶體 &lt;= 526GB，則 swap space 設定為 16GB</p>
-</li>
-</ol>
-<h3 id="使用-memory-overcommit"><a href="#使用-memory-overcommit" class="headerlink" title="使用 memory overcommit"></a>使用 memory overcommit</h3><p>假設配置 memory overcommit rate 為 0.5 (例如：128 GB 的記憶體卻配置 <code>128 * (1 + 0.5) = 192 GB</code>)，那 swap space 除了上面的大小外，還要額外在加上記憶體容量 x 0.5 的空間。</p>
-<p>亦即設定 memory overcommit，還要多增加 <strong><font color="red">physical memory x memory overcommit rate</font></strong> 的容量大小給 swap space。</p>
-<p>舉個實際例子，假設 host machine 有 32GB 記憶體，memory overcommit ratio 設定為 0.5，則 swap space 的容量計算如下：</p>
+        <p>本篇文章的主題在介紹 Kubernetes 中的 DaemonSet resource object 是如何運作 &amp; 相關細節</p>
+<h1 id="What-is-DaemonSet"><a href="#What-is-DaemonSet" class="headerlink" title="What is DaemonSet ?"></a>What is DaemonSet ?</h1><p>DaemonSet 是確保在 Kubernetes 中的每一個 node 上都會有一個指定的 pod 來運行特定的工作，當有新的 node 加入到 Kubernetes cluster 後，系統會自動在那個 node 上長出相同的 DaemonSet pod，當有 node 從 Kubernetes cluster 移除後，該 node 上的 DaemonSet pod 就會自動被清除掉。</p>
 <blockquote>
-<p>(32 * 0.5) + 8 = 24 GB</p>
+<p>也可以讓 DaemonSet 佈署在特定幾個 node 上，透過 scheduling 的機制</p>
 </blockquote>
-<hr>
-<h1 id="Storage-Device-amp-開機順序的配置"><a href="#Storage-Device-amp-開機順序的配置" class="headerlink" title="Storage Device &amp; 開機順序的配置"></a>Storage Device &amp; 開機順序的配置</h1><p>在 <strong>qemu-kvm</strong> 可以直接在命令行中進行 storage device &amp; 開機順序的配置，以下是常用的參數：</p>
-<h2 id="Storage-Devices"><a href="#Storage-Devices" class="headerlink" title="Storage Devices"></a>Storage Devices</h2><ul>
-<li><code>-hd[a:d] file_path</code>：以 file_path 指定的 image 檔案作為系統的 IDE HDD，在 virtual machine 中會以 <strong>/dev/hd[a:d]</strong> or <strong>/dev/sd[a:d]</strong> 呈現</li>
+<p>了解以上 DaemonSet 的特色後，則會有一些比較標常見的應用例如：</p>
+<ul>
+<li><p>在每個 node 上運行 storage daemon，例如：ceph, glusterd</p>
+</li>
+<li><p>在每個 node 上運行收集 log 用的 daemon，例如：fluentd, logstash</p>
+</li>
+<li><p>在每個 ndoe 上運行監控用的 daemon，例如：<a href="https://github.com/prometheus/node_exporter" target="_blank" rel="noopener">Prometheus Node Exporter</a>, <a href="https://collectd.org/" target="_blank" rel="noopener">collectd</a>, <a href="https://www.datadoghq.com/" target="_blank" rel="noopener">Datadog</a> …. 等等</p>
+</li>
 </ul>
+<p>以上是一個 DaemonSet 作為單一用途的 daemon 時的範例，當然也有可能會有需要同時多個 DaemonSet 來達成某種複雜用途時的場景，這時候就可以還會包含到使用不同的 flag，或是針對不同的硬體型態有不同的 cpu &amp; memory 的資源需求。</p>
+<h1 id="撰寫第一個-DaemonSet"><a href="#撰寫第一個-DaemonSet" class="headerlink" title="撰寫第一個 DaemonSet"></a>撰寫第一個 DaemonSet</h1><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">DaemonSet</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">fluentd-elasticsearch</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    k8s-app:</span> <span class="string">fluentd-logging</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="comment"># .spec.selector 一旦定義後就無法再變更了</span></span><br><span class="line">  <span class="comment"># 必須與 .spec.template.metadata.labels 的定義相同</span></span><br><span class="line">  <span class="comment"># 這裡可以使用 matchLabels 或是 matchExpressions(用來處理較為複雜的 label 組合)</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    matchLabels:</span></span><br><span class="line"><span class="attr">      name:</span> <span class="string">fluentd-elasticsearch</span></span><br><span class="line">  <span class="comment"># 此為必要欄位，與 pod template 相同</span></span><br><span class="line">  <span class="comment"># 用來定義 DaemonSet 的內容應該要長什麼樣子</span></span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        name:</span> <span class="string">fluentd-elasticsearch</span></span><br><span class="line">    <span class="comment"># 由於是 DaemonSet 的關係，因此 .spec.template.spec.restartPolicy 永遠是 "Always"</span></span><br><span class="line">    <span class="comment"># 預設值為 "Always"</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      tolerations:</span></span><br><span class="line"><span class="attr">      - key:</span> <span class="string">node-role.kubernetes.io/master</span></span><br><span class="line"><span class="attr">        effect:</span> <span class="string">NoSchedule</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">fluentd-elasticsearch</span></span><br><span class="line"><span class="attr">        image:</span> <span class="string">k8s.gcr.io/fluentd-elasticsearch:1.20</span></span><br><span class="line"><span class="attr">        resources:</span></span><br><span class="line"><span class="attr">          limits:</span></span><br><span class="line"><span class="attr">            memory:</span> <span class="number">200</span><span class="string">Mi</span></span><br><span class="line"><span class="attr">          requests:</span></span><br><span class="line"><span class="attr">            cpu:</span> <span class="number">100</span><span class="string">m</span></span><br><span class="line"><span class="attr">            memory:</span> <span class="number">200</span><span class="string">Mi</span></span><br><span class="line"><span class="attr">        volumeMounts:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">varlog</span></span><br><span class="line"><span class="attr">          mountPath:</span> <span class="string">/var/log</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">varlibdockercontainers</span></span><br><span class="line"><span class="attr">          mountPath:</span> <span class="string">/var/lib/docker/containers</span></span><br><span class="line"><span class="attr">          readOnly:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">      terminationGracePeriodSeconds:</span> <span class="number">30</span></span><br><span class="line"><span class="attr">      volumes:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">varlog</span></span><br><span class="line"><span class="attr">        hostPath:</span></span><br><span class="line"><span class="attr">          path:</span> <span class="string">/var/log</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">varlibdockercontainers</span></span><br><span class="line"><span class="attr">        hostPath:</span></span><br><span class="line"><span class="attr">          path:</span> <span class="string">/var/lib/docker/containers</span></span><br></pre></td></tr></table></figure>
+<p>有幾個地方在定義 DaemonSet 的時候需要比較注意的：</p>
+<ul>
+<li><p><code>.spec.selector</code> 一旦定義後就不建議再修改，若是修改可能會造成某些 pod 變成孤兒(因為 DaemonSet controller 無法管理到正確的 pod)</p>
+</li>
+<li><p><code>.spec.selector</code> 的定義必須與 <code>.spec.template.metadata.labels</code> 相同，否則會被 API server 拒絕套用</p>
+</li>
+<li><p>不可以再建立(或是透過其他 controller 建立，例如：<strong>Deployment</strong>)帶有與 DaemonSet 相同 label 組合的 pod，否則會被 DaemonSet 認為是自己所產生的 </p>
+</li>
+</ul>
+<h1 id="誰負責-DaemonSet-中的-Pod-Scheduling"><a href="#誰負責-DaemonSet-中的-Pod-Scheduling" class="headerlink" title="誰負責 DaemonSet 中的 Pod Scheduling?"></a>誰負責 DaemonSet 中的 Pod Scheduling?</h1><p>這個部份在 v1.12 之後已經有所改變。</p>
+<h2 id="DaemonSet-controller-v1-12-之前"><a href="#DaemonSet-controller-v1-12-之前" class="headerlink" title="DaemonSet controller (v1.12 之前)"></a>DaemonSet controller (v1.12 之前)</h2><p>一般來說決定 pod 要在哪個 node 上運行是 k8s scheduler 的工作，但其實 DaemonSet controller 跟 k8s schedule 之間的運作有時就是會有矛盾之處，因為：</p>
+<ul>
+<li><p>若是使用者為特定的 node 設定 <a href="https://kubernetes.io/docs/concepts/architecture/nodes/#manual-node-administration" target="_blank" rel="noopener">unschedulable</a>，這通常就會跟 DaemonSet controller 的規則衝突</p>
+</li>
+<li><p>DaemonSet controller 可以在 k8s scheduler 還沒啟動前就佈署 pod，有時對於 k8s cluster bootstrap 是很有用途的</p>
+</li>
+</ul>
+<h2 id="default-scheduler-v1-12-之後"><a href="#default-scheduler-v1-12-之後" class="headerlink" title="default scheduler (v1.12 之後)"></a>default scheduler (v1.12 之後)</h2><p>而為了解決上述的矛盾，在 v1.12 之後，DaemonSet pod 預設是回到由 k8s scheduler 統一來處理分派的工作，藉此避免以下狀況的發生：</p>
+<ul>
+<li><p>不一致的 Pod 生成行為：一般的 pod 在等待被分派前，被建立後會先進入 <code>Pending</code> 狀態，但 DaemonSet Pod 不會先進入 Pending 狀態，這樣的過程可能會讓使用者混淆</p>
+</li>
+<li><p>即使 <a href="https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/" target="_blank" rel="noopener">Pod preemption</a> 被啟用(這是由 k8s scheduler 所負責處理的一個功能)，也不會被 DaemonSet controller 考慮進來</p>
+</li>
+</ul>
+<p>而讓 k8s scheduler 取代 DaemonSet controller 的方法很簡單，只要移除在 DaemonSet 中的 <code>spec.nodeName</code> 的部份，並加入類似以下的 <a href="https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity" target="_blank" rel="noopener">Node Affinity</a> 設定即可：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">nodeAffinity:</span></span><br><span class="line"><span class="attr">  requiredDuringSchedulingIgnoredDuringExecution:</span></span><br><span class="line"><span class="attr">    nodeSelectorTerms:</span></span><br><span class="line"><span class="attr">    - matchFields:</span></span><br><span class="line"><span class="attr">      - key:</span> <span class="string">metadata.name</span></span><br><span class="line"><span class="attr">        operator:</span> <span class="string">In</span></span><br><span class="line"><span class="attr">        values:</span></span><br><span class="line"><span class="bullet">        -</span> <span class="string">target-host-name</span></span><br></pre></td></tr></table></figure>
+<p>若是原有的 DaemonSet pod 已經有 node affinity 的設定，上面新增的設定則會會覆蓋掉原本舊有的部份。</p>
+<p>此外，針對 DaemonSet 設定的變更的部份，若是變動的部份是 <code>spec.template</code>，DaemonSet controller 並不會理會，因此變更就會無效；但 k8s scheduler 則還是會協助此變更的進行。</p>
+<h2 id="關於-Taints-amp-Tolerations"><a href="#關於-Taints-amp-Tolerations" class="headerlink" title="關於 Taints &amp; Tolerations"></a>關於 Taints &amp; Tolerations</h2><p>然而 scheduling 這件事情由 DaemonSet controller 回到了 k8s scheduler 身上，因此 <code>Taint</code> &amp; <code>Toleration</code> 這兩個機制就會對 DaemonSet 就顯得相對重要了，因為 <code>Noschedule</code> 的設定會影響 DaemonSet pod 的分派。</p>
 <blockquote>
-<p>若在 qemu-kvm 中直接指定檔案而沒有設定 -hd[a:d]，則預設為 <strong>-hda</strong></p>
+<p>關於 <code>Taint</code> &amp; <code>Toleration</code> 機制的說明，可以參考<a href="http://cloudnil.com/2017/06/08/Schedule-taints-tolerations/" target="_blank" rel="noopener">此文章(深入kubernetes調度之Taints和Tolerations — VF的部落格)</a></p>
 </blockquote>
+<p>而在原本由 DaemonSet controller 負責 scheduling 的情況下，若是 node 被設定為 <strong>unschedulable</strong>，也是同樣會被忽略的，但回到 k8s scheduler 之後，就必須額外增加 <code>Toleration</code> 的設定來達到相同的效果，以下是會被自動加入到 DaemonSet pod 中的 toleration 清單：</p>
+<table>
+<thead>
+<tr>
+<th>Toleration Key</th>
+<th style="text-align:center">Effect</th>
+<th style="text-align:center">Version</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>node.kubernetes.io/not-ready</code></td>
+<td style="text-align:center"><code>NoExecute</code></td>
+<td style="text-align:center"><code>1.8+</code></td>
+<td>若 <code>TaintBasedEvictions</code> 啟用時，pod 不會因為 node 發生問題而被驅離</td>
+</tr>
+<tr>
+<td><code>node.kubernetes.io/unreachable</code></td>
+<td style="text-align:center"><code>NoExecute</code></td>
+<td style="text-align:center"><code>1.8+</code></td>
+<td>若 <code>TaintBasedEvictions</code> 啟用時，pod 不會因為 node 發生問題而被驅離</td>
+</tr>
+<tr>
+<td><code>node.kubernetes.io/disk-pressure</code></td>
+<td style="text-align:center"><code>NoSchedule</code></td>
+<td style="text-align:center"><code>1.8+</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>node.kubernetes.io/memory-pressure</code></td>
+<td style="text-align:center"><code>NoSchedule</code></td>
+<td style="text-align:center"><code>1.8+</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>node.kubernetes.io/unschedulable</code></td>
+<td style="text-align:center"><code>NoSchedule</code></td>
+<td style="text-align:center"><code>1.12+</code></td>
+<td>node 上的 unschedulable 屬性對 DaemonSet pod 會失效</td>
+</tr>
+<tr>
+<td><code>node.kubernetes.io/network-unavailable</code></td>
+<td style="text-align:center"><code>NoSchedule</code></td>
+<td style="text-align:center"><code>1.12+</code></td>
+<td>node 上的 network-unavailable 屬性對 DaemonSet pod(使用 host network) 會失效</td>
+</tr>
+</tbody>
+</table>
+<h1 id="如何與-DaemonSet-Pod-溝通"><a href="#如何與-DaemonSet-Pod-溝通" class="headerlink" title="如何與 DaemonSet Pod 溝通?"></a>如何與 DaemonSet Pod 溝通?</h1><p>其實這跟一般的 pod 的運作方式沒什麼太大不同，不外乎就以下幾種：</p>
+<h2 id="Push"><a href="#Push" class="headerlink" title="Push"></a>Push</h2><p>在這種模式中，沒有 client 存在的必要性，因為是 pod 本身被設定為自動對外回報 or 更新資訊。</p>
+<h2 id="NodePort"><a href="#NodePort" class="headerlink" title="NodePort"></a>NodePort</h2><p>這就是一般的 host IP + port 的概念，外部的 client 可以透過 IP + port 的型式直接存取 pod</p>
+<h2 id="DNS"><a href="#DNS" class="headerlink" title="DNS"></a>DNS</h2><p>可以跟 StatefulSet 一樣，建立一個 <a href="https://kubernetes.io/docs/concepts/services-networking/service/#headless-services" target="_blank" rel="noopener">Headless Service</a> 搭配 pod selector，讓特定的 domain name 在 k8s cluster 內部可以直接被解析為 pod IP</p>
+<h2 id="Service"><a href="#Service" class="headerlink" title="Service"></a>Service</h2><p>這就是一般的 service，透過 service VIP 與後面的 pod 溝通，但缺點就是無法指定存取特定的 pod</p>
+<h1 id="更新-DaemonSet"><a href="#更新-DaemonSet" class="headerlink" title="更新 DaemonSet"></a>更新 DaemonSet</h1><p>關於更新</p>
 <ul>
-<li><p><code>-fd[a:b] file_path</code>：以 file_path 指定的 image 檔案作為系統的軟碟機，在 virtual machine 中會以 <strong>/dev/fd[a:b]</strong> 呈現</p>
+<li><p>若是 node label 變更了，DaemonSet 可能會在該 node 新增對應的 pod 或是移除不符合 label set 的 pod</p>
 </li>
-<li><p><code>-cdrom file_path</code>：用來指定 iso 檔案作為 virtual machine 的 <strong>/dev/cdrom</strong> 時使用：不可與 <strong>-hdc</strong> 參數同時使用，會衝突</p>
+<li><p>可以直接修改 DaemonSet pod，但並不是 pod 的每一個欄位都可以修改</p>
 </li>
-<li><p><code>-driver option[, option[, option[, option[,....]]]]</code>：透過 <strong>-driver</strong> 參數指定 storage device 的設定細節</p>
+<li><p>承上，即使 pod 被修改，下次有新的 node 加入的時候，DaemonSet 依然會用原本的 template 來產生 pod (因為 template 並沒有變動)</p>
+</li>
+<li><p>若是想刪除 DaemonSet 卻想保留 DaemonSet pod，可以使用 <code>kubectl</code> + <code>--cascade=false</code> 來完成</p>
+</li>
+<li><p>承上，若是接著有另一個帶有不同 template 卻相同 label selector 的 DaemonSet 被建立時，原有現存的 pod 不會被修改，但也不會產生新的 pod，此時就<strong>必須要手動將原有的 pod 刪除，讓新的 pod 可以自動被產生</strong></p>
+</li>
+<li><p>v1.6 之後對 DaemonSet 進行 <a href="https://kubernetes.io/docs/tasks/manage-daemon/update-daemon-set/" target="_blank" rel="noopener">rolling update</a></p>
 </li>
 </ul>
-<p>由於以上的設定參數太多，所以這邊直接貼 man page 的內容來看：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">-drive option[,option[,option[,...]]]</span><br><span class="line">    Define a new drive. Valid options are:</span><br><span class="line">    file=file</span><br><span class="line">      This option defines <span class="built_in">which</span> disk image to use with this drive. If the filename contains comma, you must double it (<span class="keyword">for</span> instance, <span class="string">"file=my,,file"</span> to use file <span class="string">"my,file"</span>).</span><br><span class="line">    <span class="keyword">if</span>=interface</span><br><span class="line">      This option defines on <span class="built_in">which</span> <span class="built_in">type</span> on interface the drive is connected. Available types are: ide, scsi, sd, mtd, floppy, pflash, virtio.</span><br><span class="line">    bus=bus,unit=unit</span><br><span class="line">      These options define <span class="built_in">where</span> is connected the drive by defining the bus number and the unit id.</span><br><span class="line">    index=index</span><br><span class="line">      This option defines <span class="built_in">where</span> is connected the drive by using an index <span class="keyword">in</span> the list of available connectors of a given interface <span class="built_in">type</span>.</span><br><span class="line">    media=media</span><br><span class="line">      This option defines the <span class="built_in">type</span> of the media: disk or cdrom.</span><br><span class="line">    cyls=c,heads=h,secs=s[,trans=t]</span><br><span class="line">      These options have the same definition as they have <span class="keyword">in</span> -hdachs.</span><br><span class="line">    snapshot=snapshot</span><br><span class="line">      snapshot is <span class="string">"on"</span> or <span class="string">"off"</span> and allows to <span class="built_in">enable</span> snapshot <span class="keyword">for</span> given drive (see -snapshot).</span><br><span class="line">    cache=cache</span><br><span class="line">      cache is <span class="string">"none"</span>, <span class="string">"writeback"</span>, <span class="string">"unsafe"</span>, or <span class="string">"writethrough"</span> and controls how the host cache is used to access block data.</span><br><span class="line">    aio=aio</span><br><span class="line">      aio is <span class="string">"threads"</span>, or <span class="string">"native"</span> and selects between pthread based disk I/O and native Linux AIO .</span><br><span class="line">    format=format</span><br><span class="line">      Specify <span class="built_in">which</span> disk format will be used rather than detecting the format. Can be used to specifiy format=raw to avoid interpreting an untrusted format header.</span><br><span class="line">    serial=serial</span><br><span class="line">      This option specifies the serial number to assign to the device.</span><br><span class="line">    addr=addr</span><br><span class="line">      Specify the controller\<span class="string">'s PCI address (if=virtio only).</span></span><br><span class="line"><span class="string">    copy-on-read=copy-on-read</span></span><br><span class="line"><span class="string">      copy-on-read is "on" or "off" and enables whether to copy read backing file sectors into the image file.</span></span><br></pre></td></tr></table></figure>
-<p>在預設情況下，QEMU 會為所有的 block device 自動帶上 writethrough caching 的功能，這功能是利用 host page cache 所達成的，效率較差，但安全性高。</p>
-<p>而另外一個 Writeback caching 可以提供更好的效率，但安全性較低，因為若是 host machine 突然掛點或發生電力中斷的情況，cache 中的資料很有可能會遺失；若是加上 <code>snapshot</code> 參數，則會預設使用 Writeback caching。</p>
-<p>若是要完全關閉 cache 功能，可以加上參數 <code>cache=none</code>。</p>
-<p>此外，其實每一個 storage device 都可以用 <code>-drive</code> 來設定，舉例來說：</p>
+<h1 id="DeamonSet-的替代方案"><a href="#DeamonSet-的替代方案" class="headerlink" title="DeamonSet 的替代方案?"></a>DeamonSet 的替代方案?</h1><p>由於 DeamonSet 的用途就是在每個(or 特定的) node 上運行一個 pod，確保每個 node 都可以執行特定的工作，例如：monitoring。但這樣子的工作只有 DeamonSet 可以完成嗎? 答案當然不是。</p>
+<p>但為什麼要使用 DeamonSet? 帶來的優點是什麼? 以下列出幾個替代方案來比較：</p>
+<h2 id="Init-Script"><a href="#Init-Script" class="headerlink" title="Init Script"></a>Init Script</h2><p>這是直接在 node 上啟動一個 daemon process(並非 pod)，例如：<code>init</code>, <code>upstartd</code>, <code>systemd</code> … 等等，但使用 DeamonSet 可以帶來其他好處：</p>
 <ul>
-<li><p><code>-cdrom file_path</code> = <code>-drive file=file,index=2,media=cdrom</code></p>
+<li><p>可以跟其他的 application 一樣，具備有監控 &amp; 管理 daemon log 的能力</p>
 </li>
-<li><p><code>-hda file_path</code> = <code>-drive file=file,index=0,media=disk</code></p>
+<li><p>像其他 application 一樣使用相同的配置方式 &amp; 語言 (例如: pod template, kubectl)</p>
 </li>
-<li><p><code>-fda file_path</code> = <code>-drive file=file,index=0,if=floppy</code></p>
+<li><p>透過在 DeamonSet pod 上設定 resource limit，將 DeamonSet pod 儘量不佔用到 application pod 的資源 </p>
 </li>
 </ul>
-<h2 id="開機順率"><a href="#開機順率" class="headerlink" title="開機順率"></a>開機順率</h2><p>開機順序的參數設定如下：</p>
+<h2 id="Bare-Pod"><a href="#Bare-Pod" class="headerlink" title="Bare Pod"></a>Bare Pod</h2><p>這是直接在 node 上建立一個 pod，跟 DaemonSet 是相同的。</p>
+<p>但 DeamonSet 是自動完成這件事情，而且在發生像是 node failure 或是進行維護狀態(例如: kernel update) 的事件時，DeamonSet 也會自動的刪除 &amp; 對應的 pod。</p>
+<h2 id="Static-Pod"><a href="#Static-Pod" class="headerlink" title="Static Pod"></a>Static Pod</h2><p>在 k8s 中提供了一個特殊的機制，稱為 <a href="https://kubernetes.io/docs/concepts/cluster-administration/static-pod/" target="_blank" rel="noopener">static pod</a>，可以透過在 node 中的某個目錄寫入一個檔案後，由 kubelet 來產生對應的 pod。</p>
+<p>但 static pod 的問題在於不受 API server 或是任何的 client 所管控，因此通常只適用在 cluster bootstrap 的時候用。</p>
 <blockquote>
-<p>-boot [order=drives][,once=drives][,menu=on|off][,splash=sp_name][,splash-time=sp_time][,reboot-timeout=rb_timeout][,strict=on|off]</p>
+<p>在更後面的版本中，static pod 這個機制可能會被移除</p>
 </blockquote>
-<p>QEMU 的開機順序，是以英文字母表示：</p>
-<ul>
-<li><p><code>a</code>：第一台軟碟機</p>
-</li>
-<li><p><code>b</code>：第二台軟碟機</p>
-</li>
-<li><p><code>c</code>：第一顆硬碟</p>
-</li>
-<li><p><code>d</code>：光碟機</p>
-</li>
-<li><p><code>n</code>：網路啟動</p>
-</li>
-</ul>
-<p>以下是幾個簡單的範例：</p>
-<ul>
-<li><p><code>-boot order=d</code>：光碟開機</p>
-</li>
-<li><p><code>-boot once=d</code>：第一次以光碟開機，系統重開後以第一顆硬碟開機</p>
-</li>
-</ul>
-<p>此外其他參數的說明：</p>
-<ul>
-<li><p><code>menu=on|off</code>：是否顯示開機選單</p>
-</li>
-<li><p><code>splash=sp_name</code> &amp; <code>splash-time=sp_time</code>：在 <code>menu=on</code> 時才有效，<code>splash</code> 設定開機 logo，<code>splash-time</code> 設定開機 logo 時間</p>
-</li>
-<li><p><code>-boot order=dc,menu=on</code>：開機順序為光碟機 &gt;&gt; 硬碟，顯示開機選單</p>
-</li>
-</ul>
-<hr>
-<h1 id="qemu-img"><a href="#qemu-img" class="headerlink" title="qemu-img"></a>qemu-img</h1><p><strong><a href="http://wiki.qemu.org/download/qemu-doc.html#qemu_005fimg_005finvocation" target="_blank" rel="noopener">qemu-img</a></strong> 是 QEMU 的磁碟管理工具，安裝好 QEMU 相關套件時就會存在於系統中，基本使用語法如下：</p>
-<blockquote>
-<p>qemu-img command [command options]</p>
-</blockquote>
-<p>以下就常用的相關命令 &amp; 參數進行介紹：</p>
-<ul>
-<li><code>create [-f fmt] [-o options] filename [size]</code>：建立 disk image；其中 <code>options</code> 的部分可以使用 <code>-o ?</code> 來查詢特定格式所支援的選項；<code>size</code> 則是支援 <code>k</code>(KB) / <code>M</code>(MB) / <code>G</code>(GB) / <code>T</code>(TB) 等大小。</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 顯示目前 qcow2 格式支援的 options</span></span><br><span class="line">$ qemu-img create -f qcow2 -o ?</span><br><span class="line">Supported options:</span><br><span class="line">size             Virtual disk size</span><br><span class="line">compat           Compatibility level (0.10 or 1.1)</span><br><span class="line">backing_file     File name of a base image</span><br><span class="line">backing_fmt      Image format of the base image</span><br><span class="line">encryption       Encrypt the image</span><br><span class="line">cluster_size     qcow2 cluster size</span><br><span class="line">preallocation    Preallocation mode (allowed values: off, metadata, falloc, full)</span><br><span class="line">lazy_refcounts   Postpone refcount updates</span><br><span class="line"></span><br><span class="line"><span class="comment"># 新增檔名為 ubuntu1604.qcow2，格式為 qcow2，大小為 10GB 的 disk image</span></span><br><span class="line">$ qemu-img create -f qcow2 ubuntu1604.qcow2 10G</span><br><span class="line">Formatting <span class="string">'ubuntu1604.qcow2'</span>, fmt=qcow2 size=10737418240 encryption=off cluster_size=65536 lazy_refcounts=off</span><br><span class="line"></span><br><span class="line"><span class="comment"># 新增有 backing file(centos7.img，原生大小為 10GB) 的 disk image</span></span><br><span class="line"><span class="comment"># disk image 檔名為 centos7.qcow2，格式為 qcow2，大小為 20GB</span></span><br><span class="line">$ qemu-img create -f qcow2 centos7.img 10G</span><br><span class="line">Formatting <span class="string">'centos7.img'</span>, fmt=qcow2 size=10737418240 encryption=off cluster_size=65536 lazy_refcounts=off</span><br><span class="line">$ qemu-img create -f qcow2 -o backing_file=centos7.img,size=20G centos7.qcow2</span><br><span class="line">Formatting <span class="string">'centos7.qcow2'</span>, fmt=qcow2 size=21474836480 backing_file=<span class="string">'centos7.img'</span> encryption=off cluster_size=65536 lazy_refcounts=off</span><br></pre></td></tr></table></figure>
-<ul>
-<li><code>check [-f fmt] filename</code>：對 disk image 進行一致性 &amp; 錯誤的檢查，但目前只有支援 qcow2 / qed / vdi 等格式；若不加上 <code>[-f fmt]</code> 參數則會自動偵測格式</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ qemu-img check centos7.qcow2</span><br><span class="line">No errors were found on the image.</span><br><span class="line">Image end offset: 262144</span><br></pre></td></tr></table></figure>
-<ul>
-<li><p><code>commit [-f fmt] filename</code>：將指定 disk image 的修改 commit 到 backing file 中(例如上面範例中，把 centos7.qcow2 的修改 commit 回 centos7.img 中)</p>
-</li>
-<li><p><code>convert [-c] [-f fmt] [-O output_fmt] [-o options] filename [filename2 [...]] output_filename</code>：轉換 disk image 的格式；input file 的格式可自動偵測，但 output file 則需要指定，不指定則預設為 <code>raw</code>；<code>-c</code> 則是指定對 output file 進行壓縮，但只支援 qcow &amp; qcow2 格式的檔案；<code>-o options</code> 用來指定各種選項，例如 backing file，檔案大小、是否加密…等，附帶一提，使用 backing file 可以使產生的檔案變成 copy-on-write 的增量檔案</p>
-</li>
-</ul>
-<blockquote>
-<p>若是由 raw 轉成 qcow2，一般來說檔案還會有瘦身的效果</p>
-</blockquote>
-<ul>
-<li><code>info [-f fmt] filename</code>：顯示 disk image 的詳細資訊</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">$ qemu-img info /kvm/storage/vm_disks/ubnutu1604.img</span><br><span class="line">image: /kvm/storage/vm_disks/ubnutu1604.img</span><br><span class="line">file format: raw</span><br><span class="line">virtual size: 8.0G (8589934592 bytes)</span><br><span class="line">disk size: 8.0G</span><br><span class="line"></span><br><span class="line">$  qemu-img info centos7.qcow2</span><br><span class="line">image: centos7.qcow2</span><br><span class="line">file format: qcow2</span><br><span class="line">virtual size: 20G (21474836480 bytes)</span><br><span class="line">disk size: 196K</span><br><span class="line">cluster_size: 65536</span><br><span class="line">backing file: centos7.img</span><br><span class="line">Format specific information:</span><br><span class="line">    compat: 1.1</span><br><span class="line">    lazy refcounts: <span class="literal">false</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li><p><code>snapshot [-l | -a snapshot | -c snapshot | -d snapshot] filename</code>：snapshot 的管理，包含查詢 snapshot 列表資訊(<code>-l</code>) / 使用快照作為 disk image(<code>-a snapshot</code>) / 建立 snapshot(<code>-c snapshot</code>) / 刪除 snapshot(<code>-d snapshot</code>)</p>
-</li>
-<li><p><code>resize filename [+ | -]size</code>：改變 disk image 的大小；縮小空間要確保 disk image 有足夠的空間，否則會有資料損毀的風險；qcow2 格式不支援縮小；增加空間後，在 virtual machine 中需要使用 fdisk or parted 才可以使用到增加的空間</p>
-</li>
-</ul>
-<blockquote>
-<p>強烈建議在 resize 之前要做好備份</p>
-</blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@ocp-kvm-host ~]<span class="comment"># qemu-img resize ubuntu1604.qcow2 +1G</span></span><br><span class="line">Image resized.</span><br><span class="line"></span><br><span class="line">[root@ocp-kvm-host ~]<span class="comment"># qemu-img info ubuntu1604.qcow2</span></span><br><span class="line">image: ubuntu1604.qcow2</span><br><span class="line">file format: qcow2</span><br><span class="line">virtual size: 11G (11811160064 bytes)</span><br><span class="line">disk size: 200K</span><br><span class="line">cluster_size: 65536</span><br><span class="line">Format specific information:</span><br><span class="line">    compat: 1.1</span><br><span class="line">    lazy refcounts: <span class="literal">false</span></span><br></pre></td></tr></table></figure>
-<hr>
-<h1 id="Storage-Types"><a href="#Storage-Types" class="headerlink" title="Storage Types"></a>Storage Types</h1><p>在 QEMU/KVM 中，virual machine 的 disk image 其實可以用很多種不同方式來儲存，例如：</p>
-<ol>
-<li><p>Local storage (最常用的方式)</p>
-</li>
-<li><p>physical disk/partition</p>
-</li>
-<li><p>LVM</p>
-</li>
-<li><p>NFS</p>
-</li>
-<li><p>iSCSI</p>
-</li>
-<li><p>在 Local 端 or 透過 Fiber 連接的 LUN</p>
-</li>
-<li><p>GFS2</p>
-</li>
-</ol>
-<blockquote>
-<p>上面的幾個選項中，phtsical partition &amp; LVM 由於無法存放 MBR，因此無法作為 virtual machine 的開機磁碟，只能用來存放資料用。</p>
-</blockquote>
-<p>基本上，以 file-based 的方式管理 disk images 是比較有彈性的，可放在 Local / NFS / iSCSI / LUN / GFS2 … 等，若是 virtual machine 對於 I/O 效能不是非常要求時，選擇 qcow2 則是較為建議的 disk image 格式，其優點如下：</p>
-<ul>
-<li><p>儲存方便 (file-baed)</p>
-</li>
-<li><p>比起其他方式相對容易使用</p>
-</li>
-<li><p>可移動性佳</p>
-</li>
-<li><p>容易複製</p>
-</li>
-<li><p>可透過 sparse 的機制節省硬碟空間(類似 thin provision)</p>
-</li>
-<li><p>可放在透過網路連結的檔案系統中(例如：NFS，可把 backing file 放在 NFS，差異部分放在 local)，因此可以輕鬆達到 live migration 的效果</p>
-</li>
-</ul>
-<p>最後，若需要高效能的 I/O，則可以使用半虛擬化的 <strong><font color="red">virtio</font></strong> 作為 disk image 的 driver。</p>
-<hr>
+<h2 id="Deployment"><a href="#Deployment" class="headerlink" title="Deployment"></a>Deployment</h2><p>Deployment 則是跟 DeamonSet 很相似，同樣都是建立 pod，並且持續的監控這個 pod 確保持續存在。</p>
+<p>但 Deployment 比較適合用在 Stateless 的服務(例如 web server)，而這一類的服務的重點在於確保 replica 的數量會一直維持在使用者所提供的 desired status，並非<strong>每一個 node 都要有一個特定的 pod</strong>上。</p>
+<p>因此若是目的是要達成在每個 node 上都運行特定的 pod，DeamonSet 會是比 Deployment 更好的選擇。</p>
 <h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
-<li><p><a href="http://linux.die.net/man/1/qemu-kvm" target="_blank" rel="noopener">qemu-kvm(1): QEMU Emulator User Documentation - Linux man page</a></p>
+<li><p><a href="https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/" target="_blank" rel="noopener">DaemonSet - Kubernetes</a></p>
 </li>
-<li><p><a href="http://wiki.qemu.org/download/qemu-doc.html" target="_blank" rel="noopener">QEMU Emulator User Documentation</a></p>
-</li>
-<li><p><a href="http://benjr.tw/20361" target="_blank" rel="noopener">Cache 的 write back 和 write through – Benjr.tw</a></p>
-</li>
-<li><p><a href="http://www.pcdvd.com.tw/showthread.php?t=285217" target="_blank" rel="noopener">請教Cache運作方式的Write Back與Write Through之分別 - PCDVD數位科技討論區</a></p>
+<li><p><a href="https://jimmysong.io/kubernetes-handbook/concepts/daemonset.html" target="_blank" rel="noopener">DaemonSet · Kubernetes Handbook - Kubernetes中文指南/云原生应用架构实践手册 by Jimmy Song(宋净超)</a></p>
 </li>
 </ul>
 
@@ -585,9 +561,9 @@
       
         <div class="post-tags">
           
-            <a href="/blog/tags/Linux/" rel="tag"># Linux</a>
+            <a href="/blog/tags/Kubernetes/" rel="tag"># Kubernetes</a>
           
-            <a href="/blog/tags/KVM/" rel="tag"># KVM</a>
+            <a href="/blog/tags/CKA/" rel="tag"># CKA</a>
           
         </div>
       
@@ -600,8 +576,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/blog/KVM/KVM-Basic-Concept-Memory/" rel="next" title="[Linux KVM] Linux KVM concept - Memory">
-                <i class="fa fa-chevron-left"></i> [Linux KVM] Linux KVM concept - Memory
+              <a href="/blog/Kubernetes/k8s-StatefulSets-Overview/" rel="next" title="[Kubernetes] StatefulSet Overview">
+                <i class="fa fa-chevron-left"></i> [Kubernetes] StatefulSet Overview
               </a>
             
           </div>
@@ -609,10 +585,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/blog/KVM/KVM-Basic-Concept-Networking/" rel="prev" title="[Linux KVM] Linux KVM concept - Networking">
-                [Linux KVM] Linux KVM concept - Networking <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -776,7 +748,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Host-Machine-Swap-空間應該要設定多大"><span class="nav-number">2.</span> <span class="nav-text">Host Machine Swap 空間應該要設定多大?</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#不使用-memory-overcommit"><span class="nav-number">2.0.1.</span> <span class="nav-text">不使用 memory overcommit</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用-memory-overcommit"><span class="nav-number">2.0.2.</span> <span class="nav-text">使用 memory overcommit</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Storage-Device-amp-開機順序的配置"><span class="nav-number">3.</span> <span class="nav-text">Storage Device &amp; 開機順序的配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Storage-Devices"><span class="nav-number">3.1.</span> <span class="nav-text">Storage Devices</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#開機順率"><span class="nav-number">3.2.</span> <span class="nav-text">開機順率</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#qemu-img"><span class="nav-number">4.</span> <span class="nav-text">qemu-img</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Storage-Types"><span class="nav-number">5.</span> <span class="nav-text">Storage Types</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text">References</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#What-is-DaemonSet"><span class="nav-number">1.</span> <span class="nav-text">What is DaemonSet ?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#撰寫第一個-DaemonSet"><span class="nav-number">2.</span> <span class="nav-text">撰寫第一個 DaemonSet</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#誰負責-DaemonSet-中的-Pod-Scheduling"><span class="nav-number">3.</span> <span class="nav-text">誰負責 DaemonSet 中的 Pod Scheduling?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#DaemonSet-controller-v1-12-之前"><span class="nav-number">3.1.</span> <span class="nav-text">DaemonSet controller (v1.12 之前)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#default-scheduler-v1-12-之後"><span class="nav-number">3.2.</span> <span class="nav-text">default scheduler (v1.12 之後)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#關於-Taints-amp-Tolerations"><span class="nav-number">3.3.</span> <span class="nav-text">關於 Taints &amp; Tolerations</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#如何與-DaemonSet-Pod-溝通"><span class="nav-number">4.</span> <span class="nav-text">如何與 DaemonSet Pod 溝通?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Push"><span class="nav-number">4.1.</span> <span class="nav-text">Push</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NodePort"><span class="nav-number">4.2.</span> <span class="nav-text">NodePort</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DNS"><span class="nav-number">4.3.</span> <span class="nav-text">DNS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Service"><span class="nav-number">4.4.</span> <span class="nav-text">Service</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#更新-DaemonSet"><span class="nav-number">5.</span> <span class="nav-text">更新 DaemonSet</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DeamonSet-的替代方案"><span class="nav-number">6.</span> <span class="nav-text">DeamonSet 的替代方案?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Init-Script"><span class="nav-number">6.1.</span> <span class="nav-text">Init Script</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Bare-Pod"><span class="nav-number">6.2.</span> <span class="nav-text">Bare Pod</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Static-Pod"><span class="nav-number">6.3.</span> <span class="nav-text">Static Pod</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Deployment"><span class="nav-number">6.4.</span> <span class="nav-text">Deployment</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">7.</span> <span class="nav-text">References</span></a></li></ol></div>
             
 
           </div>
@@ -939,9 +911,9 @@
     
       <script type="text/javascript">
         var disqus_config = function () {
-          this.page.url = 'https://godleon.github.io/blog/KVM/KVM-Basic-Concept-Storage/';
-          this.page.identifier = 'KVM/KVM-Basic-Concept-Storage/';
-          this.page.title = '[Linux KVM] Linux KVM concept - Storage';
+          this.page.url = 'https://godleon.github.io/blog/Kubernetes/k8s-DaemonSet-Overview/';
+          this.page.identifier = 'Kubernetes/k8s-DaemonSet-Overview/';
+          this.page.title = '[Kubernetes] DaemonSet Overview';
         };
         var d = document, s = d.createElement('script');
         s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
