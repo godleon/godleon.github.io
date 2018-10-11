@@ -150,7 +150,7 @@ Volume 跟 pod 有相同的生命週期(以 pod UID 為準)。當 Pod 因為某�
 | Failed | Pod 中的所有 container 都被終止，但至少有一個因為任務失敗而終止(表示退出時的狀態碼不為 0 or 被系統終止) |
 | Unknown | 因為某些原因無法取得 Pod 的狀態，通常是因為與 Pod 所在 node 通訊失敗 |
 
-![Pod status](/blog/images/kubernetes/kubernetes-pod-life-cycle-status.jpg)
+![Pod Life Cycle](/blog/images/kubernetes/kubernetes-pod-life-cycle-status.jpg)
 
 
 ## Pod Condition
