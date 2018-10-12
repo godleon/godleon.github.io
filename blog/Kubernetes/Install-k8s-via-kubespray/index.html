@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="小信豬的原始部落">
 <meta property="og:description" content="此篇文章介紹如何使用 Kubespray 安裝 Kubernetes v1.10 以上版本">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2018-10-11T09:18:37.864Z">
+<meta property="og:updated_time" content="2018-10-12T05:46:14.074Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="使用 Kubespray 安裝 Kubernetes v1.10 以上版本">
 <meta name="twitter:description" content="此篇文章介紹如何使用 Kubespray 安裝 Kubernetes v1.10 以上版本">
@@ -401,7 +401,7 @@
 
       
         <p>此篇文章介紹如何使用 <a href="https://github.com/kubernetes-incubator/kubespray" target="_blank" rel="noopener">Kubespray</a> 安裝 Kubernetes</p>
-<h1 id="Current-Status"><a href="#Current-Status" class="headerlink" title="Current Status"></a>Current Status</h1><p>目前支援到 <code>v1.11.3</code>，如果有需要調整，可以按照下面的說明進行修改。</p>
+<h1 id="Current-Status"><a href="#Current-Status" class="headerlink" title="Current Status"></a>Current Status</h1><p>目前支援到 <code>v1.12.1</code>，如果有需要調整，可以按照下面的說明進行修改。</p>
 <h1 id="準備安裝環境"><a href="#準備安裝環境" class="headerlink" title="準備安裝環境"></a>準備安裝環境</h1><h2 id="安裝-k8s-cluster-用機器"><a href="#安裝-k8s-cluster-用機器" class="headerlink" title="安裝 k8s cluster 用機器"></a>安裝 k8s cluster 用機器</h2><p>在這個安裝過程中，共有 6 個 VM，皆為透過 <code>Ubuntu 16.04 cloud image</code> 所產生，分別有以下幾個 node：</p>
 <ul>
 <li><p>Master Node x 3 (<strong>同時兼任 etcd node</strong>)</p>
@@ -440,7 +440,7 @@
 </li>
 </ul>
 <p>以下是根據上面的安裝環境所撰寫的設定範例：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">kube-master0    ansible_ssh_host=[YOUR_SERVER_IP]</span><br><span class="line">kube-master1    ansible_ssh_host=[YOUR_SERVER_IP]</span><br><span class="line">kube-master2    ansible_ssh_host=[YOUR_SERVER_IP]</span><br><span class="line"></span><br><span class="line">kube-worker0    ansible_ssh_host=[YOUR_SERVER_IP]</span><br><span class="line">kube-worker1    ansible_ssh_host=[YOUR_SERVER_IP]</span><br><span class="line">kube-worker2    ansible_ssh_host=[YOUR_SERVER_IP]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="section">[kube-master]</span></span><br><span class="line">kube-master[0:2]</span><br><span class="line"></span><br><span class="line"><span class="section">[etcd]</span></span><br><span class="line">kube-master[0:2]</span><br><span class="line"></span><br><span class="line"><span class="section">[kube-node]</span></span><br><span class="line">kube-worker[0:2]</span><br><span class="line"></span><br><span class="line"><span class="section">[kube-ingress]</span></span><br><span class="line"></span><br><span class="line"><span class="section">[k8s-cluster:children]</span></span><br><span class="line">kube-master</span><br><span class="line">kube-node</span><br><span class="line">kube-ingress</span><br></pre></td></tr></table></figure>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">kube-master0    ansible_ssh_host=[YOUR_SERVER_IP]</span><br><span class="line">kube-master1    ansible_ssh_host=[YOUR_SERVER_IP]</span><br><span class="line">kube-master2    ansible_ssh_host=[YOUR_SERVER_IP]</span><br><span class="line"></span><br><span class="line">kube-worker0    ansible_ssh_host=[YOUR_SERVER_IP]</span><br><span class="line">kube-worker1    ansible_ssh_host=[YOUR_SERVER_IP]</span><br><span class="line">kube-worker2    ansible_ssh_host=[YOUR_SERVER_IP]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="section">[kube-master]</span></span><br><span class="line">kube-master[0:2]</span><br><span class="line"></span><br><span class="line"><span class="section">[etcd]</span></span><br><span class="line">kube-master[0:2]</span><br><span class="line"></span><br><span class="line"><span class="section">[kube-node]</span></span><br><span class="line">kube-worker[0:2]</span><br><span class="line"></span><br><span class="line"><span class="section">[k8s-cluster:children]</span></span><br><span class="line">kube-master</span><br><span class="line">kube-node</span><br></pre></td></tr></table></figure>
 <h2 id="pwd-kubespray-group-vars-all-yml"><a href="#pwd-kubespray-group-vars-all-yml" class="headerlink" title="$(pwd)/kubespray/group_vars/all.yml"></a>$(pwd)/kubespray/group_vars/all.yml</h2><ul>
 <li><p>確認遠端安裝機器的 python 路徑，並修改 <strong>ansible_python_interpreter</strong> 參數(預設是 <code>/usr/bin/python3.5</code>)</p>
 </li>
@@ -462,7 +462,13 @@
 <li><p>移除(or 註解) <strong>ansible_ssh_private_key_file</strong> 參數</p>
 </li>
 </ul>
-<h2 id="pwd-kubespray-group-vars-k8s-cluster-yml"><a href="#pwd-kubespray-group-vars-k8s-cluster-yml" class="headerlink" title="$(pwd)/kubespray/group_vars/k8s-cluster.yml"></a>$(pwd)/kubespray/group_vars/k8s-cluster.yml</h2><p>若有需要調整安裝的版本，目前預設是 <code>v1.11.3</code>，可以調整 <strong>kube_version</strong> 來變更。</p>
+<h2 id="pwd-kubespray-group-vars-k8s-cluster-yml"><a href="#pwd-kubespray-group-vars-k8s-cluster-yml" class="headerlink" title="$(pwd)/kubespray/group_vars/k8s-cluster.yml"></a>$(pwd)/kubespray/group_vars/k8s-cluster.yml</h2><p>目前比較重要的安裝預設值如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 自訂設定</span></span><br><span class="line"><span class="attr">kubeconfig_localhost:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">kube_feature_gates:</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">"TTLAfterFinished=true"</span> </span><br><span class="line"></span><br><span class="line"><span class="comment"># k8s 版本</span></span><br><span class="line"><span class="attr">kube_version:</span> <span class="string">v1.12.1</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># CNI plugin</span></span><br><span class="line"><span class="attr">kube_network_plugin:</span> <span class="string">calico</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># k8s cluster 內部使用的 DNS server</span></span><br><span class="line"><span class="attr">dns_mode:</span> <span class="string">coredns</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Container runtime (也可以是 crio for cri-o)</span></span><br><span class="line"><span class="comment"># 但 cri-o 目前無法使用在 Ubuntu 上，只能用在 CentOS</span></span><br><span class="line"><span class="attr">container_manager:</span> <span class="string">docker</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#... (略)</span></span><br></pre></td></tr></table></figure>
+<p>Kubespray 預設會安裝最新版的 docker，但 k8s 官方建議的穩定版本是 17.03，因此若有調整的需求，可以增加以下設定：</p>
+<blockquote>
+<p>docker_version: “17.03”</p>
+</blockquote>
+<p>其他的部份，使用者可以根據自己佈署的需求調整所相關的參數。</p>
 <h1 id="執行安裝程式"><a href="#執行安裝程式" class="headerlink" title="執行安裝程式"></a>執行安裝程式</h1><p>當以上設定都完成後，就可以開始執行安裝程式：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 若按照上面的操作，沒有離開原本的目錄的話，應該就是位於下面的目錄中</span></span><br><span class="line">$ <span class="built_in">cd</span> /tmp/kubernetes-installation-template</span><br><span class="line"></span><br><span class="line"><span class="comment"># 開始安裝</span></span><br><span class="line">$ ./start.sh</span><br></pre></td></tr></table></figure>
 <p>整個安裝過程大約需要耗費十來分鐘(端看網路 &amp; VM 運行速度)。</p>
@@ -485,7 +491,10 @@
 <p>若是要取得安裝時所產生的相關憑證檔案，可以到 master node 上的 <code>/etc/kubernetes/ssl</code> 目錄中尋找</p>
 </blockquote>
 <h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
-<li><a href="https://github.com/kubernetes-incubator/kubespray" target="_blank" rel="noopener">kubernetes-incubator/kubespray: Setup a kubernetes cluster</a></li>
+<li><p><a href="https://github.com/kubernetes-incubator/kubespray" target="_blank" rel="noopener">kubernetes-incubator/kubespray: Setup a kubernetes cluster</a></p>
+</li>
+<li><p><a href="https://killmebaby.cc/posts/kubernetes-deployment-with-kubespray/" target="_blank" rel="noopener">How to deploy Kubernetes with Kubespray - KillMeBaby</a></p>
+</li>
 </ul>
 
       
@@ -618,7 +627,7 @@
               
                 <a href="/blog/archives/">
               
-                  <span class="site-state-item-count">73</span>
+                  <span class="site-state-item-count">74</span>
                   <span class="site-state-item-name">文章</span>
                 </a>
               </div>
