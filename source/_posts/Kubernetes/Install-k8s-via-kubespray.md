@@ -14,10 +14,12 @@ tags:
 
 此篇文章介紹如何使用 [Kubespray](https://github.com/kubernetes-incubator/kubespray) 安裝 Kubernetes
 
+
 Current Status
 ==============
 
-目前支援到 `v1.11.3`，如果有需要調整，可以按照下面的說明進行修改。
+目前支援到 `v1.12.1`，如果有需要調整，可以按照下面的說明進行修改。
+
 
 
 準備安裝環境
@@ -107,12 +109,9 @@ kube-master[0:2]
 [kube-node]
 kube-worker[0:2]
 
-[kube-ingress]
-
 [k8s-cluster:children]
 kube-master
 kube-node
-kube-ingress
 ```
 
 
@@ -141,7 +140,35 @@ kube-ingress
 
 ## $(pwd)/kubespray/group_vars/k8s-cluster.yml
 
-若有需要調整安裝的版本，目前預設是 `v1.11.3`，可以調整 **kube_version** 來變更。
+目前比較重要的安裝預設值如下：
+
+```yaml
+# 自訂設定
+kubeconfig_localhost: true
+kube_feature_gates:
+  - "TTLAfterFinished=true" 
+
+# k8s 版本
+kube_version: v1.12.1
+
+# CNI plugin
+kube_network_plugin: calico
+
+# k8s cluster 內部使用的 DNS server
+dns_mode: coredns
+
+# Container runtime (也可以是 crio for cri-o)
+# 但 cri-o 目前無法使用在 Ubuntu 上，只能用在 CentOS
+container_manager: docker
+
+#... (略)
+```
+
+Kubespray 預設會安裝最新版的 docker，但 k8s 官方建議的穩定版本是 17.03，因此若有調整的需求，可以增加以下設定：
+
+> docker_version: "17.03"
+
+其他的部份，使用者可以根據自己佈署的需求調整所相關的參數。
 
 
 
@@ -163,6 +190,7 @@ $ ./start.sh
 安裝完之後可以在執行安裝指令的機器(**bootstrapper**)上找到 kubeconfig，位置在 `/tmp/kubernetes-installation-template/kubeconfig/admin.conf`。
 
 > 若安裝過程失敗，可嘗試再執行一次 `./start.sh`，應該就會安裝成功了!
+
 
 
 操作 Kubernetes
@@ -194,7 +222,10 @@ kube-worker2    Ready     node           1h        v1.11.2
 > 若是要取得安裝時所產生的相關憑證檔案，可以到 master node 上的 `/etc/kubernetes/ssl` 目錄中尋找
 
 
+
 References
 ==========
 
 - [kubernetes-incubator/kubespray: Setup a kubernetes cluster](https://github.com/kubernetes-incubator/kubespray)
+
+- [How to deploy Kubernetes with Kubespray - KillMeBaby](https://killmebaby.cc/posts/kubernetes-deployment-with-kubespray/)
