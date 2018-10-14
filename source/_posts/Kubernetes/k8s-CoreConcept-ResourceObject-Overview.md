@@ -112,7 +112,7 @@ Deployment 其實就是 [Pod](https://kubernetes.io/docs/concepts/workloads/pods
 當然 Deployment 的功能不只上面這些，之後有機會會用獨立篇幅來介紹。
 
 
-## StatefulSets - Kubernetes
+## StatefulSets
 
 StatefulSets 是在 v1.9 後正式釋出的功能，顧名思義，主要功能就是作為 stateful application 的管理，例如：Database。
 
@@ -156,6 +156,15 @@ Job 很直覺，跟 Linux 中的 `at` 是類似的概念。
 跟 Linux 相同，CronJob 也是在特定的時間 or 週期性的特定時間運行 job；在使用上，時間格式的定義也是與 Linux 相同。
 
 典型的運用像是資料庫的備份、發送郵件 ... 等等
+
+
+## TTL Controller
+
+k8s 可以讓使用者執行很多一次性的工作，但執行完成後，即使過程中的 log 或是 resource object 本身都已經不再需要了，它們都還是會一直留在 k8s 上，於是就會看到很多狀態為 Complete(or Failed) 的 resource object，久而久之為了環境不要過度雜亂，可能一段時間就要清理一次，不論是手動 or 寫 script 完成，但其實這是一件挺麻煩的事情。
+
+而在 v1.12 之後，k8s 新增了 TTL controller 這個新功能，目的就是透過限制已經執行完成的 resource object 的生命周期，藉此來達成自動清理的目的；這個設計其實是針對多種不同的 resource object，但在 v1.12 中，僅支援 Job 而已，未來可能或擴充支援到 Pod or Custom Resource。
+
+> TTL 在 v1.12 版本中仍是 alpha 而已，且必須透過啟用 `TTLAfterFinished` feature gate 才可使用
 
 
 
