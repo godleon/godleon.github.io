@@ -87,10 +87,12 @@
 <meta property="og:site_name" content="小信豬的原始部落">
 <meta property="og:description" content="本篇文章的主題圍繞在 Kubernetes 中的 ReplicaSet resource object，並對其概念 &amp; 特性作概略的介紹">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2018-10-14T20:01:40.827Z">
+<meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/k8s-replicaset.png">
+<meta property="og:updated_time" content="2018-10-14T20:03:37.897Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[Kubernetes] ReplicaSet 介紹">
 <meta name="twitter:description" content="本篇文章的主題圍繞在 Kubernetes 中的 ReplicaSet resource object，並對其概念 &amp; 特性作概略的介紹">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/kubernetes/k8s-replicaset.png">
 
 
 
@@ -401,7 +403,8 @@
 
       
         <p>本篇文章的主題圍繞在 Kubernetes 中的 ReplicaSet resource object，並對其概念 &amp; 特性作概略的介紹</p>
-<h1 id="What-is-ReplicaSet"><a href="#What-is-ReplicaSet" class="headerlink" title="What is ReplicaSet ?"></a>What is ReplicaSet ?</h1><p>ReplicaSet 是用來確保在 k8s 中，在資源允許的前提下，指定的 pod 的數量會跟使用者所期望的一致，也就是所謂的 desired status。</p>
+<h1 id="What-is-ReplicaSet"><a href="#What-is-ReplicaSet" class="headerlink" title="What is ReplicaSet ?"></a>What is ReplicaSet ?</h1><p><img src="/blog/images/kubernetes/k8s-replicaset.png" alt="ReplicaSet"></p>
+<p>ReplicaSet 是用來確保在 k8s 中，在資源允許的前提下，指定的 pod 的數量會跟使用者所期望的一致，也就是所謂的 desired status。</p>
 <p>而 ReplicaSet 其實是 ReplicationController 的進化版，其中的差別僅在於 ReplicaSet 支援 set-based label selector，而 ReplicationController 僅支援 equality-based label selector。</p>
 <h1 id="如何使用-ReplicaSet"><a href="#如何使用-ReplicaSet" class="headerlink" title="如何使用 ReplicaSet?"></a>如何使用 ReplicaSet?</h1><p>官方建議 ReplicaSet 要搭配 Deployment 一起來使用，原因如下：</p>
 <ul>
