@@ -48,6 +48,13 @@ StatefulSet 在 v1.9 版後正式支援，是在 Kubernetes 中用來建構 stat
 
 > Headless Service 詳細的設定方式可以參考[此文章](https://www.do1618.com/archives/1055/k8s%E4%B9%8Bheadless-service/)。
 
+## 以 MongoDB 作為示範
+
+![ReplicaSet](/blog/images/kubernetes/k8s-statefulset-mongodb.png)
+
+
+
+
 
 如何撰寫一個 StatefulSet?
 =======================
@@ -465,7 +472,7 @@ References
 
 - [k8s之Headless Service - 程序印象](https://www.do1618.com/archives/1055/k8s%E4%B9%8Bheadless-service/)
 
-
+- [How to Deploy Containerized MongoDB on Kubernetes, with NetApp - thePub](https://netapp.io/2017/04/07/deploy-containerized-mongodb-kubernetes-netapp/)
 
 
 
