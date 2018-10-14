@@ -19,6 +19,8 @@ tags:
 What is ReplicaSet ?
 ====================
 
+![ReplicaSet](/blog/images/kubernetes/k8s-replicaset.png)
+
 ReplicaSet 是用來確保在 k8s 中，在資源允許的前提下，指定的 pod 的數量會跟使用者所期望的一致，也就是所謂的 desired status。
 
 而 ReplicaSet 其實是 ReplicationController 的進化版，其中的差別僅在於 ReplicaSet 支援 set-based label selector，而 ReplicationController 僅支援 equality-based label selector。
