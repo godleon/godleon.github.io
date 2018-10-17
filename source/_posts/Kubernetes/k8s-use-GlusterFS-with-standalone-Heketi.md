@@ -226,6 +226,13 @@ $ sudo add-apt-repository ppa:gluster/glusterfs-4.1 -y
 $ sudo apt-get -y install glusterfs-client
 ```
 
+若是 worker node 是 CentOS，可用下面指令安裝 GlusterFS client：
+
+```bash
+$ yum -y install centos-release-gluster41
+$ yum install -y glusterfs-fuse
+```
+
 這個部份若是漏掉了，會出現 **mount: unknown filesystem type 'glusterfs'** 錯誤，在 pod 生成的時候會出現類似下面的訊息：
 
 ```txt

@@ -54,8 +54,6 @@ StatefulSet 在 v1.9 版後正式支援，是在 Kubernetes 中用來建構 stat
 
 
 
-
-
 如何撰寫一個 StatefulSet?
 =======================
 
