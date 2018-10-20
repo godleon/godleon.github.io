@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "[Kubernetes] 分配 & 管理 container 所使用到的計算資源"
-description: "本篇文章介紹如何在 Kubernetes 中，對於 container 中所使用的 computing resource 進行分配 & 管理"
+description: "本篇文章介紹如何在 Kubernetes 中，分配 & 管理 container 所使用到的計算資源"
 date: 2018-10-21 05:00:00
 published: true
 comments: true
