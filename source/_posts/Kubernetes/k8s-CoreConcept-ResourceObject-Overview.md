@@ -185,7 +185,7 @@ DNS 服務 (沒人會想用 IP 存取服務)
 
 - 每個 service 會帶有一個 VIP
 
-- 在 cluster 內部可以透過 **\<service_name>.\<namespace>.cluster.local** 這個 domain name 存取到
+- 在 cluster 內部可以透過 **<service_name\>.<namespace\>.cluster.local** 這個 domain name 存取到
 
 - 若要在 cluster 外部存取 service，則必須將 service 的 type 設定為 **NodePort** or **LoadBalancer**(只有在公有雲有效)
 
