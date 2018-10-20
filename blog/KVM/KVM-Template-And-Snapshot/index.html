@@ -6,10 +6,10 @@
 
 
 <html class="theme-next muse use-motion" lang="zh-tw">
-<head>
-  <meta charset="UTF-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="theme-color" content="#222">
 
 
@@ -20,8 +20,8 @@
 
 
 
-<meta http-equiv="Cache-Control" content="no-transform" />
-<meta http-equiv="Cache-Control" content="no-siteapp" />
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
 
 
 
@@ -40,7 +40,7 @@
 
   
   
-  <link href="/blog/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+  <link href="/blog/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
 
 
 
@@ -48,9 +48,9 @@
 
 
 
-<link href="/blog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+<link href="/blog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
 
-<link href="/blog/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+<link href="/blog/css/main.css?v=5.1.3" rel="stylesheet" type="text/css">
 
 
   <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png?v=5.1.3">
@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Linux,KVM," />
+  <meta name="keywords" content="Linux,KVM,">
 
 
 
@@ -88,7 +88,7 @@
 <meta property="og:description" content="This article introduces how to use template and snapshot in KVM">
 <meta property="og:locale" content="zh-tw">
 <meta property="og:image" content="https://github.com/godleon/godleon.github.io/blob/master/_posts/images/2017/KVM-Template-And-Snapshot/copy-on-write_overlay-disk0-image.png?raw=true">
-<meta property="og:updated_time" content="2018-10-17T20:08:51.474Z">
+<meta property="og:updated_time" content="2018-10-20T12:14:03.235Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[Linux KVM] Template &amp; Snapshot 的運用">
 <meta name="twitter:description" content="This article introduces how to use template and snapshot in KVM">
@@ -122,7 +122,7 @@
 
 
 
-  <link rel="canonical" href="https://godleon.github.io/blog/KVM/KVM-Template-And-Snapshot/"/>
+  <link rel="canonical" href="https://godleon.github.io/blog/KVM/KVM-Template-And-Snapshot/">
 
 
 
@@ -149,7 +149,7 @@
 
 </head>
 
-<body itemscope itemtype="http://schema.org/WebPage" lang="zh-tw">
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-tw">
 
   
   
@@ -159,13 +159,13 @@
   <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
-    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
       <div class="header-inner"><div class="site-brand-wrapper">
   <div class="site-meta ">
     
 
     <div class="custom-logo-site-title">
-      <a href="/blog/"  class="brand" rel="start">
+      <a href="/blog/" class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
         <span class="site-title">小信豬的原始部落</span>
         <span class="logo-line-after"><i></i></span>
@@ -195,7 +195,7 @@
         <li class="menu-item menu-item-home">
           <a href="/blog/" rel="section">
             
-              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
             
             首頁
           </a>
@@ -205,7 +205,7 @@
         <li class="menu-item menu-item-tags">
           <a href="/blog/tags/" rel="section">
             
-              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
             
             標籤
           </a>
@@ -215,7 +215,7 @@
         <li class="menu-item menu-item-categories">
           <a href="/blog/categories/" rel="section">
             
-              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
             
             分類
           </a>
@@ -225,7 +225,7 @@
         <li class="menu-item menu-item-archives">
           <a href="/blog/archives/" rel="section">
             
-              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
             
             歸檔
           </a>
@@ -238,7 +238,7 @@
             <a href="javascript:;" class="popup-trigger">
           
             
-              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
             
             檢索
           </a>
@@ -259,9 +259,7 @@
       <i class="fa fa-times-circle"></i>
     </span>
     <div class="local-search-input-wrapper">
-      <input autocomplete="off"
-             placeholder="搜索..." spellcheck="false"
-             type="text" id="local-search-input">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
     </div>
   </div>
   <div id="local-search-result"></div>
@@ -293,20 +291,20 @@
   
   
 
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
   
   
   
   <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/blog/KVM/KVM-Template-And-Snapshot/">
 
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="godleon">
       <meta itemprop="description" content="">
       <meta itemprop="image" content="/blog/images/avatar.gif">
     </span>
 
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="小信豬的原始部落">
     </span>
 
@@ -338,7 +336,7 @@
           </span>
 
           
-            <span class="post-category" >
+            <span class="post-category">
             
               <span class="post-meta-divider">|</span>
             
@@ -349,7 +347,7 @@
                 <span class="post-meta-item-text">分類於</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
                   <a href="/blog/categories/KVM/" itemprop="url" rel="index">
                     <span itemprop="name">KVM</span>
                   </a>
@@ -369,8 +367,7 @@
                   <i class="fa fa-comment-o"></i>
                 </span>
                 <a href="/blog/KVM/KVM-Template-And-Snapshot/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="KVM/KVM-Template-And-Snapshot/" itemprop="commentCount"></span>
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="KVM/KVM-Template-And-Snapshot/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -678,7 +675,7 @@
 
       <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
-          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
             
               <p class="site-author-name" itemprop="name">godleon</p>
               <p class="site-description motion-element" itemprop="description">把時間花在哪裡，成就就在哪裡</p>
@@ -768,7 +765,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Overview"><span class="nav-number">1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#VM-Templates"><span class="nav-number">2.</span> <span class="nav-text">VM Templates</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#建立-template"><span class="nav-number">2.1.</span> <span class="nav-text">建立 template</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-建立-Centos-Template"><span class="nav-number">2.1.1.</span> <span class="nav-text">(1) 建立 Centos Template</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-建立-Windows-Template"><span class="nav-number">2.1.2.</span> <span class="nav-text">(2) 建立 Windows Template</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#透過-template-佈署-VM"><span class="nav-number">2.2.</span> <span class="nav-text">透過 template 佈署 VM</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Snapshots"><span class="nav-number">3.</span> <span class="nav-text">Snapshots</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#internal-snapshot"><span class="nav-number">3.0.1.</span> <span class="nav-text">internal snapshot</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#external-snapshot"><span class="nav-number">3.0.2.</span> <span class="nav-text">external snapshot</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VM-Disk-Image-Format"><span class="nav-number">3.1.</span> <span class="nav-text">VM Disk Image Format</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-raw"><span class="nav-number">3.1.1.</span> <span class="nav-text">(1) raw</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-qcow2"><span class="nav-number">3.1.2.</span> <span class="nav-text">(2) qcow2</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#轉換-Disk-Image-Format"><span class="nav-number">3.2.</span> <span class="nav-text">轉換 Disk Image Format</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#操作-Internal-Snapshot"><span class="nav-number">3.3.</span> <span class="nav-text">操作 Internal Snapshot</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-建立-amp-檢視-snapshot"><span class="nav-number">3.3.1.</span> <span class="nav-text">(1) 建立 &amp; 檢視 snapshot</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-透過-snapshot-還原-VM"><span class="nav-number">3.3.2.</span> <span class="nav-text">(2) 透過 snapshot 還原 VM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-刪除-snapshot"><span class="nav-number">3.3.3.</span> <span class="nav-text">(3) 刪除 snapshot</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#操作-External-Snapshot"><span class="nav-number">3.4.</span> <span class="nav-text">操作 External Snapshot</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-建立-external-snapshot"><span class="nav-number">3.4.1.</span> <span class="nav-text">(1) 建立 external snapshot</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-從-external-snapshot-還原"><span class="nav-number">3.4.2.</span> <span class="nav-text">(2) 從 external snapshot 還原</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-刪除-external-snapshot"><span class="nav-number">3.4.3.</span> <span class="nav-text">(3) 刪除 external snapshot</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-snapshot-時所需的正確觀念"><span class="nav-number">3.5.</span> <span class="nav-text">使用 snapshot 時所需的正確觀念</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Overview"><span class="nav-number">1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#VM-Templates"><span class="nav-number">2.</span> <span class="nav-text">VM Templates</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#建立-template"><span class="nav-number">2.1.</span> <span class="nav-text">建立 template</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-建立-Centos-Template"><span class="nav-number">2.1.1.</span> <span class="nav-text">(1) 建立 Centos Template</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-建立-Windows-Template"><span class="nav-number">2.1.2.</span> <span class="nav-text">(2) 建立 Windows Template</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#透過-template-佈署-VM"><span class="nav-number">2.2.</span> <span class="nav-text">透過 template 佈署 VM</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Snapshots"><span class="nav-number">3.</span> <span class="nav-text">Snapshots</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#internal-snapshot"><span class="nav-number">3.0.1.</span> <span class="nav-text">internal snapshot</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#external-snapshot"><span class="nav-number">3.0.2.</span> <span class="nav-text">external snapshot</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VM-Disk-Image-Format"><span class="nav-number">3.1.</span> <span class="nav-text">VM Disk Image Format</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-raw"><span class="nav-number">3.1.1.</span> <span class="nav-text">(1) raw</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-qcow2"><span class="nav-number">3.1.2.</span> <span class="nav-text">(2) qcow2</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#轉換-Disk-Image-Format"><span class="nav-number">3.2.</span> <span class="nav-text">轉換 Disk Image Format</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#操作-Internal-Snapshot"><span class="nav-number">3.3.</span> <span class="nav-text">操作 Internal Snapshot</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-建立-amp-檢視-snapshot"><span class="nav-number">3.3.1.</span> <span class="nav-text">(1) 建立 &amp; 檢視 snapshot</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-透過-snapshot-還原-VM"><span class="nav-number">3.3.2.</span> <span class="nav-text">(2) 透過 snapshot 還原 VM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-刪除-snapshot"><span class="nav-number">3.3.3.</span> <span class="nav-text">(3) 刪除 snapshot</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#操作-External-Snapshot"><span class="nav-number">3.4.</span> <span class="nav-text">操作 External Snapshot</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-建立-external-snapshot"><span class="nav-number">3.4.1.</span> <span class="nav-text">(1) 建立 external snapshot</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-從-external-snapshot-還原"><span class="nav-number">3.4.2.</span> <span class="nav-text">(2) 從 external snapshot 還原</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-刪除-external-snapshot"><span class="nav-number">3.4.3.</span> <span class="nav-text">(3) 刪除 external snapshot</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-snapshot-時所需的正確觀念"><span class="nav-number">3.5.</span> <span class="nav-text">使用 snapshot 時所需的正確觀念</span></a></li></ol></div>
             
 
           </div>
