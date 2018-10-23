@@ -330,6 +330,10 @@ Pod <---> PersistentVolumeClaim(PVC) <---> PersistentVolume(PV)
 
 2. PVC 在 k8s cluster 中尋找可用的 PV 並掛載
 
+透過以上的分工，讓 Administrator & Developer 的權責可以劃分的很清楚，而 Developer 也不需要了解底層 storage 設定的細節，就像以下這張圖：
+
+![Kubernetes - Pod, PVC, PV](/blog/images/kubernetes/k8s_pod-pvc-pv.png)
+
 
 ## StorageClass
 
@@ -343,13 +347,17 @@ PV + PVC 解決了永久性資料儲存的問題，但同時也帶來了以下�
 
 - 每次都要手動建立 RBD image 哪有 cloud native ?
 
-而 Storage Class 就是以上問題的解答，其流程如下圖：
+而 Storage Class 就是以上問題的解答，簡單的概念圖如下：
+
+![Kubernetes - StorageClass](/blog/images/kubernetes/k8s_storageclass.png)
+
+而 Storage Class 的功能就是要`動態` & `自動`的把上述的事情給自動化，其詳細的運作流程如下圖：
 
 ![Kubernetes Persistent Volume Provisioning](/blog/images/kubernetes/dynamic-volume-provision.jpg)
 
 1. 設定 persistent volume provisioner
 
-2. k8s ckuster 管理者建立 Storage Class，並指定要使用的 PV provisioner
+2. k8s cluster 管理者建立 Storage Class，並指定要使用的 PV provisioner
 
 3. 使用者建立 PVC，指定要使用的 Storage Class
 
