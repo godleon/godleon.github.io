@@ -88,8 +88,10 @@
 <meta property="og:description" content="此篇文章從比較 high level 的角度來了解什麼是 Kubernetes Resource Object，以及 Kubernetes 中到底包含了那些 Resource Object &amp; 其用途">
 <meta property="og:locale" content="zh-tw">
 <meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/k8s-service.svg">
+<meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/k8s_pod-pvc-pv.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/k8s_storageclass.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/dynamic-volume-provision.jpg">
-<meta property="og:updated_time" content="2018-10-20T21:05:49.098Z">
+<meta property="og:updated_time" content="2018-10-23T20:43:29.615Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[Kubernetes] Resource Object 概觀">
 <meta name="twitter:description" content="此篇文章從比較 high level 的角度來了解什麼是 Kubernetes Resource Object，以及 Kubernetes 中到底包含了那些 Resource Object &amp; 其用途">
@@ -604,6 +606,8 @@
 <li><p>PVC 在 k8s cluster 中尋找可用的 PV 並掛載</p>
 </li>
 </ol>
+<p>透過以上的分工，讓 Administrator &amp; Developer 的權責可以劃分的很清楚，而 Developer 也不需要了解底層 storage 設定的細節，就像以下這張圖：</p>
+<p><img src="/blog/images/kubernetes/k8s_pod-pvc-pv.png" alt="Kubernetes - Pod, PVC, PV"></p>
 <h2 id="StorageClass"><a href="#StorageClass" class="headerlink" title="StorageClass"></a>StorageClass</h2><p>PV + PVC 解決了永久性資料儲存的問題，但同時也帶來了以下問題：</p>
 <ul>
 <li><p>如果我常常需要產生 PV，又要刪除它呢 ?</p>
@@ -615,12 +619,14 @@
 <li><p>每次都要手動建立 RBD image 哪有 cloud native ?</p>
 </li>
 </ul>
-<p>而 Storage Class 就是以上問題的解答，其流程如下圖：</p>
+<p>而 Storage Class 就是以上問題的解答，簡單的概念圖如下：</p>
+<p><img src="/blog/images/kubernetes/k8s_storageclass.png" alt="Kubernetes - StorageClass"></p>
+<p>而 Storage Class 的功能就是要<code>動態</code> &amp; <code>自動</code>的把上述的事情給自動化，其詳細的運作流程如下圖：</p>
 <p><img src="/blog/images/kubernetes/dynamic-volume-provision.jpg" alt="Kubernetes Persistent Volume Provisioning"></p>
 <ol>
 <li><p>設定 persistent volume provisioner</p>
 </li>
-<li><p>k8s ckuster 管理者建立 Storage Class，並指定要使用的 PV provisioner</p>
+<li><p>k8s cluster 管理者建立 Storage Class，並指定要使用的 PV provisioner</p>
 </li>
 <li><p>使用者建立 PVC，指定要使用的 Storage Class</p>
 </li>
