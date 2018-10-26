@@ -9,11 +9,8 @@ categories:
   - Kubernetes
 tags:
   - Kubernetes
-  - CKA
+  - CKA Core Concept
 ---
-
-本篇文章的主題在介紹 Kubernetes 中的 Deployment resource object 是如何運作 & 相關細節
-
 
 
 What is Deployment ?
