@@ -12,8 +12,6 @@ tags:
   - CKA
 ---
 
-此篇文章從比較 high level 的角度來了解什麼是 Kubernetes Resource Object，以及 Kubernetes 中到底包含了那些 Resource Object & 其用途
-
 
 What is Resource Object?
 ========================
