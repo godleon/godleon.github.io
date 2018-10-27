@@ -11,6 +11,7 @@ tags:
   - Kubernetes
   - GlusterFS
   - CKA
+  - CKA Storage
 ---
 
 

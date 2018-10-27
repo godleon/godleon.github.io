@@ -9,7 +9,7 @@ categories:
   - Kubernetes
 tags:
   - Kubernetes
-  - CKA
+  - CKA Security
 ---
 
 

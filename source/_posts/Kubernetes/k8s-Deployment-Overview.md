@@ -9,6 +9,7 @@ categories:
   - Kubernetes
 tags:
   - Kubernetes
+  - CKA
   - CKA Core Concept
 ---
 

@@ -9,6 +9,8 @@ categories:
   - Kubernetes
 tags:
   - Kubernetes
+  - CKA
+  - CKA Storage
   - Ceph
 ---
 

@@ -10,6 +10,7 @@ categories:
 tags:
   - Kubernetes
   - CKA
+  - CKA Core Concept
 ---
 
 本篇文章從 high level 的角度介紹 Kubernetes Cluster Architecture 以及內部元件功能的大略說明。
