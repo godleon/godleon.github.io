@@ -48,6 +48,10 @@
             
             <tag> Kubernetes </tag>
             
+            <tag> CKA </tag>
+            
+            <tag> CKA Storage </tag>
+            
             <tag> NFS </tag>
             
         </tags>
@@ -75,6 +79,8 @@
             
             <tag> CKA </tag>
             
+            <tag> CKA Scheduling </tag>
+            
         </tags>
       
     </entry>
@@ -99,6 +105,8 @@
             <tag> Kubernetes </tag>
             
             <tag> CKA </tag>
+            
+            <tag> CKA Core Concept </tag>
             
         </tags>
       
@@ -150,6 +158,8 @@
             
             <tag> CKA </tag>
             
+            <tag> CKA Core Concept </tag>
+            
         </tags>
       
     </entry>
@@ -174,6 +184,8 @@
             <tag> Kubernetes </tag>
             
             <tag> CKA </tag>
+            
+            <tag> CKA Core Concept </tag>
             
         </tags>
       
@@ -200,6 +212,8 @@
             
             <tag> CKA </tag>
             
+            <tag> CKA Storage </tag>
+            
             <tag> GlusterFS </tag>
             
         </tags>
@@ -224,6 +238,8 @@
         <tags>
             
             <tag> Kubernetes </tag>
+            
+            <tag> CKA </tag>
             
             <tag> CKA Core Concept </tag>
             
@@ -252,6 +268,8 @@
             
             <tag> CKA </tag>
             
+            <tag> CKA Core Concept </tag>
+            
         </tags>
       
     </entry>
@@ -276,6 +294,8 @@
             <tag> Kubernetes </tag>
             
             <tag> CKA </tag>
+            
+            <tag> CKA Core Concept </tag>
             
         </tags>
       
@@ -302,6 +322,8 @@
             
             <tag> CKA </tag>
             
+            <tag> CKA Core Concept </tag>
+            
         </tags>
       
     </entry>
@@ -326,6 +348,8 @@
             <tag> Kubernetes </tag>
             
             <tag> CKA </tag>
+            
+            <tag> CKA Core Concept </tag>
             
         </tags>
       
@@ -376,6 +400,8 @@
             <tag> Kubernetes </tag>
             
             <tag> CKA </tag>
+            
+            <tag> CKA Core Concept </tag>
             
         </tags>
       
@@ -471,6 +497,8 @@
             
             <tag> CKA </tag>
             
+            <tag> CKA Networking </tag>
+            
         </tags>
       
     </entry>
@@ -493,6 +521,10 @@
         <tags>
             
             <tag> Kubernetes </tag>
+            
+            <tag> CKA </tag>
+            
+            <tag> CKA Storage </tag>
             
             <tag> Ceph </tag>
             
@@ -542,7 +574,7 @@
             
             <tag> Kubernetes </tag>
             
-            <tag> CKA </tag>
+            <tag> CKA Security </tag>
             
         </tags>
       
@@ -568,6 +600,8 @@
             <tag> Kubernetes </tag>
             
             <tag> CKA </tag>
+            
+            <tag> CKA Security </tag>
             
         </tags>
       
