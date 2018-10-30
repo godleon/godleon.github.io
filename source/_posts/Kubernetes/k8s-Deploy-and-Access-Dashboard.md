@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "佈署 & 存取 Kubernetes Dashboard"
-description: "本篇文章介紹在 Kubernetes 中佈署 & 存取 Dashboard"
+description: "本篇文章介紹在 Kubernetes 中如何佈署 & 存取 Dashboard"
 date: 2018-06-20 14:50:00
 published: true
 comments: true
@@ -12,11 +12,14 @@ tags:
 ---
 
 
+前言
+===
+
 剛安裝完 Kubernetes，第一個會想到的大概就是 "**入口網站在哪裡**"?
 
 k8s 無疑是個非常強大的 container orchestration platform，但它預設並沒有附上一個精美的 UI(因為不是每個人都需要 UI，畢竟多少還是會消耗掉一些資源)，設計者提供給使用者 & 開發者完全自由的使用方式。
 
-**有需要就自己設計 & 安裝吧!**
+**因此! 有需要就自己設計 & 安裝吧!**
 
 
 

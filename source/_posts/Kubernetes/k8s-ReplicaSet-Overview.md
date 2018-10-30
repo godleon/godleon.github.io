@@ -14,9 +14,6 @@ tags:
 ---
 
 
-本篇文章的主題圍繞在 Kubernetes 中的 ReplicaSet resource object，並對其概念 & 特性作概略的介紹
-
-
 What is ReplicaSet ?
 ====================
 

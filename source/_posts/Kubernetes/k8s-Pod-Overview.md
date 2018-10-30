@@ -14,8 +14,6 @@ tags:
 ---
 
 
-本篇文章的主題圍繞在 Kubernetes 中的 Pod resource object，其中包含 Pod 的設計 & 相關運作機制，並對這些概念做一些概略的介紹
-
 Overview
 ========
 

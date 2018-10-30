@@ -13,8 +13,6 @@ tags:
   - CKA Core Concept
 ---
 
-此篇文章介紹在 Kubernetes 中，提供了那些機制來管理各式各樣的 Resource Object
-
 
 What is Kubernetes Resource Object?
 ===================================

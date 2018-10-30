@@ -12,10 +12,7 @@ tags:
   - GlusterFS
   - CKA
   - CKA Storage
----
-
-
-此篇文章介紹如何快速的安裝 GlusterFS + Heketi 並與 Kubernetes 中的 StorageClass 搭配使用 
+--- 
 
 
 緣由

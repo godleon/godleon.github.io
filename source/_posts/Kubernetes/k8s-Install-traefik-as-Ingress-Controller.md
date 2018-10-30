@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "[Kubernetes] 設定 Ingress Controller (以 Traefik 為例)"
-description: "本篇文章介紹在 Kubernetes 中設定 Ingress Controller (以 Traefik 為例)"
+description: "此篇文章介紹 Kubernetes Ingress 的基本概念 & 使用方式 (以 Traefik 為例)"
 date: 2018-07-04 17:50:00
 published: true
 comments: true
@@ -13,8 +13,6 @@ tags:
   - CKA Networking
 ---
 
-
-此篇文章介紹 Kubernetes Ingress 的基本概念 & 使用方式 (以 Traefik 為例)
 
 前言
 ===

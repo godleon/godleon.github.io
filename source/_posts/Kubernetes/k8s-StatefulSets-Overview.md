@@ -13,8 +13,6 @@ tags:
   - CKA Core Concept
 ---
 
-本篇文章的主題在介紹 Kubernetes 中的 StatefulSet resource object 是如何運作 & 相關細節
-
 
 What is StatefulSet?
 ====================

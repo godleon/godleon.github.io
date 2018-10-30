@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "[Kubernetes] Cluster Architecture"
-description: "本篇文章介紹 Kubernetes Cluster Architecture 以及內部元件的功能"
+description: "本篇文章從 high level 的角度介紹 Kubernetes Cluster Architecture 以及內部元件功能的功能"
 date: 2018-08-26 17:35:00
 published: true
 comments: true
@@ -12,8 +12,6 @@ tags:
   - CKA
   - CKA Core Concept
 ---
-
-本篇文章從 high level 的角度介紹 Kubernetes Cluster Architecture 以及內部元件功能的大略說明。
 
 
 Kubernetes 的前身 - Google Borg
