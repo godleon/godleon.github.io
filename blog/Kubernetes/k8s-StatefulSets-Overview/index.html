@@ -88,7 +88,7 @@
 <meta property="og:description" content="本篇文章的主題在介紹 Kubernetes 中的 StatefulSet resource object 是如何運作 &amp; 相關細節">
 <meta property="og:locale" content="zh-tw">
 <meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/k8s-statefulset-mongodb.png">
-<meta property="og:updated_time" content="2018-10-27T10:22:28.956Z">
+<meta property="og:updated_time" content="2018-10-30T20:32:51.048Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[Kubernetes] StatefulSet Overview">
 <meta name="twitter:description" content="本篇文章的主題在介紹 Kubernetes 中的 StatefulSet resource object 是如何運作 &amp; 相關細節">
@@ -399,8 +399,7 @@
       
 
       
-        <p>本篇文章的主題在介紹 Kubernetes 中的 StatefulSet resource object 是如何運作 &amp; 相關細節</p>
-<h1 id="What-is-StatefulSet"><a href="#What-is-StatefulSet" class="headerlink" title="What is StatefulSet?"></a>What is StatefulSet?</h1><p>StatefulSet 在 v1.9 版後正式支援，是在 Kubernetes 中用來建構 stateful application 的 resource(API) object。</p>
+        <h1 id="What-is-StatefulSet"><a href="#What-is-StatefulSet" class="headerlink" title="What is StatefulSet?"></a>What is StatefulSet?</h1><p>StatefulSet 在 v1.9 版後正式支援，是在 Kubernetes 中用來建構 stateful application 的 resource(API) object。</p>
 <p>在一般的觀念裡，container 相當合適作為 stateless application 之用(例如：api service)，但由於 stateful application 的需求眾多(例如：<a href="https://github.com/kubernetes/contrib/tree/master/statefulsets" target="_blank" rel="noopener">官網範例中的 ZooKeeper &amp; Kafka 應用</a>)，因此 Kubernetes 就額外增加了一些管理維運的機制，讓 pod 也開始適合承載 stateful application。</p>
 <p>基本上 StatefulSet 中在 pod 的管理上都是與 Deployment 相同，基於相同的 container spec 來進行；而其中的差別在於 <strong>StatefulSet controller 會為每一個 pod 產生一個固定的識別資訊，不會因為 pod reschedule 後有變動</strong>。 </p>
 <h2 id="什麼時候需要使用-StatefulSet"><a href="#什麼時候需要使用-StatefulSet" class="headerlink" title="什麼時候需要使用 StatefulSet?"></a>什麼時候需要使用 StatefulSet?</h2><p>而到底如何研判某某 application 是否需要使用 StatefulSet 來佈署呢? 如果有符合以下條件，就需要使用 StatefulSet 來進行佈署：</p>
@@ -622,8 +621,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/blog/Kubernetes/k8s-use-GlusterFS-with-standalone-Heketi/" rel="next" title="[Kubernetes] 快速安裝 GlusterFS + Heketi 並與 StorageClass 搭配使用">
-                <i class="fa fa-chevron-left"></i> [Kubernetes] 快速安裝 GlusterFS + Heketi 並與 StorageClass 搭配使用
+              <a href="/blog/Kubernetes/k8s-Deployment-Overview/" rel="next" title="[Kubernetes] Deployment Overview">
+                <i class="fa fa-chevron-left"></i> [Kubernetes] Deployment Overview
               </a>
             
           </div>
@@ -743,7 +742,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/blog/tags/index.html">
-                  <span class="site-state-item-count">35</span>
+                  <span class="site-state-item-count">34</span>
                   <span class="site-state-item-name">標籤</span>
                 </a>
               </div>

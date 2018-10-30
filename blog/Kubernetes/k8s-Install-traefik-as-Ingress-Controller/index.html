@@ -79,18 +79,18 @@
 
 
 
-<meta name="description" content="本篇文章介紹在 Kubernetes 中設定 Ingress Controller (以 Traefik 為例)">
+<meta name="description" content="此篇文章介紹 Kubernetes Ingress 的基本概念 &amp; 使用方式 (以 Traefik 為例)">
 <meta name="keywords" content="Kubernetes,CKA,CKA Networking">
 <meta property="og:type" content="article">
 <meta property="og:title" content="[Kubernetes] 設定 Ingress Controller (以 Traefik 為例)">
 <meta property="og:url" content="https://godleon.github.io/blog/Kubernetes/k8s-Install-traefik-as-Ingress-Controller/index.html">
 <meta property="og:site_name" content="小信豬的原始部落">
-<meta property="og:description" content="本篇文章介紹在 Kubernetes 中設定 Ingress Controller (以 Traefik 為例)">
+<meta property="og:description" content="此篇文章介紹 Kubernetes Ingress 的基本概念 &amp; 使用方式 (以 Traefik 為例)">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2018-10-27T10:22:28.952Z">
+<meta property="og:updated_time" content="2018-10-30T20:32:51.048Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[Kubernetes] 設定 Ingress Controller (以 Traefik 為例)">
-<meta name="twitter:description" content="本篇文章介紹在 Kubernetes 中設定 Ingress Controller (以 Traefik 為例)">
+<meta name="twitter:description" content="此篇文章介紹 Kubernetes Ingress 的基本概念 &amp; 使用方式 (以 Traefik 為例)">
 
 
 
@@ -380,7 +380,7 @@
 
           
               <div class="post-description">
-                  本篇文章介紹在 Kubernetes 中設定 Ingress Controller (以 Traefik 為例)
+                  此篇文章介紹 Kubernetes Ingress 的基本概念 & 使用方式 (以 Traefik 為例)
               </div>
           
 
@@ -397,8 +397,7 @@
       
 
       
-        <p>此篇文章介紹 Kubernetes Ingress 的基本概念 &amp; 使用方式 (以 Traefik 為例)</p>
-<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>之前提到的 <a href="https://kubernetes.io/docs/concepts/workloads/pods/pod-overview/" target="_blank" rel="noopener">Pod</a> &amp; <a href="https://kubernetes.io/docs/concepts/services-networking/service/" target="_blank" rel="noopener">Service</a> 都會各自擁有一個 IP address 供存取，但這些 IP 僅有在 K8s cluster 內部才有辦法存取的到，但若要在 K8s cluster 上提供對外服務呢?</p>
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>之前提到的 <a href="https://kubernetes.io/docs/concepts/workloads/pods/pod-overview/" target="_blank" rel="noopener">Pod</a> &amp; <a href="https://kubernetes.io/docs/concepts/services-networking/service/" target="_blank" rel="noopener">Service</a> 都會各自擁有一個 IP address 供存取，但這些 IP 僅有在 K8s cluster 內部才有辦法存取的到，但若要在 K8s cluster 上提供對外服務呢?</p>
 <p>而目前可讓外部存取 K8s 上服務的方式主要有三種：</p>
 <ol>
 <li><p><strong>Service NodePort</strong>: 這方法會在每個 master &amp; worker node 上都開啟指定的 port number (這樣其實造成不少資源浪費)</p>
@@ -734,7 +733,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/blog/tags/index.html">
-                  <span class="site-state-item-count">35</span>
+                  <span class="site-state-item-count">34</span>
                   <span class="site-state-item-name">標籤</span>
                 </a>
               </div>

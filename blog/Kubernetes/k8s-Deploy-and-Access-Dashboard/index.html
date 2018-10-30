@@ -79,20 +79,20 @@
 
 
 
-<meta name="description" content="本篇文章介紹在 Kubernetes 中佈署 &amp; 存取 Dashboard">
+<meta name="description" content="本篇文章介紹在 Kubernetes 中如何佈署 &amp; 存取 Dashboard">
 <meta name="keywords" content="Kubernetes">
 <meta property="og:type" content="article">
 <meta property="og:title" content="佈署 &amp; 存取 Kubernetes Dashboard">
 <meta property="og:url" content="https://godleon.github.io/blog/Kubernetes/k8s-Deploy-and-Access-Dashboard/index.html">
 <meta property="og:site_name" content="小信豬的原始部落">
-<meta property="og:description" content="本篇文章介紹在 Kubernetes 中佈署 &amp; 存取 Dashboard">
+<meta property="og:description" content="本篇文章介紹在 Kubernetes 中如何佈署 &amp; 存取 Dashboard">
 <meta property="og:locale" content="zh-tw">
 <meta property="og:image" content="https://godleon.github.io/blog/images//kubernetes/dashboard-login-page.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/dashboard-overview-page.png">
-<meta property="og:updated_time" content="2018-10-27T10:22:28.952Z">
+<meta property="og:updated_time" content="2018-10-30T20:32:51.048Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="佈署 &amp; 存取 Kubernetes Dashboard">
-<meta name="twitter:description" content="本篇文章介紹在 Kubernetes 中佈署 &amp; 存取 Dashboard">
+<meta name="twitter:description" content="本篇文章介紹在 Kubernetes 中如何佈署 &amp; 存取 Dashboard">
 <meta name="twitter:image" content="https://godleon.github.io/blog/images//kubernetes/dashboard-login-page.png">
 
 
@@ -383,7 +383,7 @@
 
           
               <div class="post-description">
-                  本篇文章介紹在 Kubernetes 中佈署 & 存取 Dashboard
+                  本篇文章介紹在 Kubernetes 中如何佈署 & 存取 Dashboard
               </div>
           
 
@@ -400,9 +400,9 @@
       
 
       
-        <p>剛安裝完 Kubernetes，第一個會想到的大概就是 “<strong>入口網站在哪裡</strong>“?</p>
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>剛安裝完 Kubernetes，第一個會想到的大概就是 “<strong>入口網站在哪裡</strong>“?</p>
 <p>k8s 無疑是個非常強大的 container orchestration platform，但它預設並沒有附上一個精美的 UI(因為不是每個人都需要 UI，畢竟多少還是會消耗掉一些資源)，設計者提供給使用者 &amp; 開發者完全自由的使用方式。</p>
-<p><strong>有需要就自己設計 &amp; 安裝吧!</strong></p>
+<p><strong>因此! 有需要就自己設計 &amp; 安裝吧!</strong></p>
 <h1 id="安裝-Dashboard"><a href="#安裝-Dashboard" class="headerlink" title="安裝 Dashboard"></a>安裝 Dashboard</h1><p>自己設計 dashboard 當然是無法，但找個現成的就挺簡單了。</p>
 <p>若是使用 [Kubespray][Kubespray] 安裝的 k8s cluster，dashboard 是預設會安裝好的；若要確認 dashboard 是否會被安裝，可以在 <code>group_vars/k8s-cluster.yml</code> 這個檔案中，加入以下設定：</p>
 <blockquote>
@@ -593,7 +593,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/blog/tags/index.html">
-                  <span class="site-state-item-count">35</span>
+                  <span class="site-state-item-count">34</span>
                   <span class="site-state-item-name">標籤</span>
                 </a>
               </div>
@@ -648,7 +648,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#安裝-Dashboard"><span class="nav-number">1.</span> <span class="nav-text">安裝 Dashboard</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#存取-Dashboard"><span class="nav-number">2.</span> <span class="nav-text">存取 Dashboard</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#建立可登入-Dashboard-的使用者"><span class="nav-number">3.</span> <span class="nav-text">建立可登入 Dashboard 的使用者</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#登入-Dashboard"><span class="nav-number">4.</span> <span class="nav-text">登入 Dashboard</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#後記"><span class="nav-number">5.</span> <span class="nav-text">後記</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text">References</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#安裝-Dashboard"><span class="nav-number">2.</span> <span class="nav-text">安裝 Dashboard</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#存取-Dashboard"><span class="nav-number">3.</span> <span class="nav-text">存取 Dashboard</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#建立可登入-Dashboard-的使用者"><span class="nav-number">4.</span> <span class="nav-text">建立可登入 Dashboard 的使用者</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#登入-Dashboard"><span class="nav-number">5.</span> <span class="nav-text">登入 Dashboard</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#後記"><span class="nav-number">6.</span> <span class="nav-text">後記</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">7.</span> <span class="nav-text">References</span></a></li></ol></div>
             
 
           </div>
