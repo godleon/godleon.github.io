@@ -102,17 +102,41 @@ tags:
 
 ## 官網資料
 
+### Services
+
+- [Services - Kubernetes](https://kubernetes.io/docs/concepts/services-networking/service/)
+
+- [Service - Kubernetes (中文)](https://kubernetes.io/zh/docs/concepts/services-networking/service/)
+
+- [Stream Control Transmission Protocol - SCTP @ 網路黑貓 :: 隨意窩 Xuite日誌](https://blog.xuite.net/champyen/champ/5396649-Stream+Control+Transmission+Protocol+-+SCTP)
+
 ## 其他參考資料
+
+### Services
+
+- [谈谈kubernets的service组件的Virtual IP](https://ieevee.com/tech/2017/01/20/k8s-service.html)
+
+- [kube-proxy工作原理 - WaltonWang's Blog - 开源中国](https://my.oschina.net/jxcdwangtao/blog/839650)
+
+- [LVS原理介绍 - 简书](https://www.jianshu.com/p/8a61de3f8be9)
+
+- [kubernets: Headless Services](https://ieevee.com/tech/2017/03/22/k8s-headless-service.html)
+
+- [[Kubernetes] How to Implement Kubernetes Service - ClusterIP | Hwchiu Learning Note](https://www.hwchiu.com/kubernetes-service-ii.html)
+
+- [[Kubernetes] How to Implement Kubernetes Service - NodePort | Hwchiu Learning Note](https://www.hwchiu.com/kubernetes-service-iii.html)
+
+- [[Kubernetes] How Implemete Kubernetes Service - SessionAffinity | Hwchiu Learning Note](https://www.hwchiu.com/kubernetes-service-iiii.html)
+
+- [http://dockone.io/article/4884](http://dockone.io/article/4884)
+
+- [Kubernetes Tips - Part 1](https://akomljen.com/kubernetes-tips-part-1/)
+
+### Others
 
 - [[netfilter] Introduction to ebtables | Hwchiu Learning Note](https://www.hwchiu.com/netfilter-eiptables-i.html)
 
 - [[netfilter] Introduction to iptables | Hwchiu Learning Note](https://www.hwchiu.com/netfilter-eiptables-iai.html)
-
-- [[Kubernetes] How To Implemete Kubernetes Service - ClusterIP | Hwchiu Learning Note](https://www.hwchiu.com/kubernetes-service-ii.html)
-
-- [[Kubernetes] How To Implemete Kubernetes Service - NodePort | Hwchiu Learning Note](https://www.hwchiu.com/kubernetes-service-iii.html)
-
-- [[Kubernetes] How Implemete Kubernetes Service - SessionAffinity | Hwchiu Learning Note](https://www.hwchiu.com/kubernetes-service-iiii.html)
 
 
 ---

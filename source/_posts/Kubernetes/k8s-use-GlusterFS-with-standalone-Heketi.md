@@ -9,9 +9,10 @@ categories:
   - Kubernetes
 tags:
   - Kubernetes
-  - GlusterFS
+  - Kubernetes Storage
   - CKA
   - CKA Storage
+  - GlusterFS
 --- 
 
 

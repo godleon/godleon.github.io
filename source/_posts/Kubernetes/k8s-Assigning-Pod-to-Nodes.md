@@ -9,6 +9,7 @@ categories:
   - Kubernetes
 tags:
   - Kubernetes
+  - Kubernetes Scheduling
   - CKA
   - CKA Scheduling
 ---

@@ -9,6 +9,7 @@ categories:
   - Kubernetes
 tags:
   - Kubernetes
+  - Kubernetes Core Concept
   - CKA
   - CKA Core Concept
 ---
@@ -157,7 +158,7 @@ pvc-fdda23de-c155-11e8-885a-627e9087949f   1Gi        RWO            Delete     
 
 ## Headless Service
 
-[Headless Service][[headless_service]] 則是要定義一個 `ClusterIP: None` 的 service，目的就是讓 cluster 內部的 pod 可以 **透過 DNS 找到 StatefulSet pod IP**：
+[Headless Service][headless_service] 則是要定義一個 `ClusterIP: None` 的 service，目的就是讓 cluster 內部的 pod 可以 **透過 DNS 找到 StatefulSet pod IP**：
 
 ```yaml
 ---

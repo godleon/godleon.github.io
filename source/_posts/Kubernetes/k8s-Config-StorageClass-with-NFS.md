@@ -9,6 +9,7 @@ categories:
   - Kubernetes
 tags:
   - Kubernetes
+  - Kubernetes Storage
   - CKA
   - CKA Storage
   - NFS
