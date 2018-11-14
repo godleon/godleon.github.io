@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Kubernetes,CKA,Kubernetes Security,CKA Security,">
+  <meta name="keywords" content="Kubernetes,CKA,Kubernetes Networking,CKA Networking,">
 
 
 
@@ -79,18 +79,18 @@
 
 
 
-<meta name="description" content="本篇文章介紹在 Kubernetes 中存取 API 時的認證機制">
-<meta name="keywords" content="Kubernetes,CKA,Kubernetes Security,CKA Security">
+<meta name="description" content="本篇文章的主題在介紹在 Kubernetes cluster 內部的 Service &amp; Pod，其 DNS 解析功能是如何運作的 &amp; 相關規則">
+<meta name="keywords" content="Kubernetes,CKA,Kubernetes Networking,CKA Networking">
 <meta property="og:type" content="article">
-<meta property="og:title" content="了解 Kubernetes 中的認證機制">
-<meta property="og:url" content="https://godleon.github.io/blog/Kubernetes/k8s-API-Authentication/index.html">
+<meta property="og:title" content="[Kubernetes] DNS for Service &amp; Pod">
+<meta property="og:url" content="https://godleon.github.io/blog/Kubernetes/k8s-DNS-for-Service-and-Pod/index.html">
 <meta property="og:site_name" content="小信豬的原始部落">
-<meta property="og:description" content="本篇文章介紹在 Kubernetes 中存取 API 時的認證機制">
+<meta property="og:description" content="本篇文章的主題在介紹在 Kubernetes cluster 內部的 Service &amp; Pod，其 DNS 解析功能是如何運作的 &amp; 相關規則">
 <meta property="og:locale" content="zh-tw">
 <meta property="og:updated_time" content="2018-11-14T07:05:09.429Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="了解 Kubernetes 中的認證機制">
-<meta name="twitter:description" content="本篇文章介紹在 Kubernetes 中存取 API 時的認證機制">
+<meta name="twitter:title" content="[Kubernetes] DNS for Service &amp; Pod">
+<meta name="twitter:description" content="本篇文章的主題在介紹在 Kubernetes cluster 內部的 Service &amp; Pod，其 DNS 解析功能是如何運作的 &amp; 相關規則">
 
 
 
@@ -120,13 +120,13 @@
 
 
 
-  <link rel="canonical" href="https://godleon.github.io/blog/Kubernetes/k8s-API-Authentication/">
+  <link rel="canonical" href="https://godleon.github.io/blog/Kubernetes/k8s-DNS-for-Service-and-Pod/">
 
 
 
 
 
-  <title>了解 Kubernetes 中的認證機制 | 小信豬的原始部落</title>
+  <title>[Kubernetes] DNS for Service & Pod | 小信豬的原始部落</title>
   
 
 
@@ -294,7 +294,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/blog/Kubernetes/k8s-API-Authentication/">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/blog/Kubernetes/k8s-DNS-for-Service-and-Pod/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="godleon">
@@ -311,7 +311,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">了解 Kubernetes 中的認證機制</h1>
+          <h1 class="post-title" itemprop="name headline">[Kubernetes] DNS for Service & Pod</h1>
         
 
         <div class="post-meta">
@@ -323,8 +323,8 @@
               
                 <span class="post-meta-item-text">發表於</span>
               
-              <time title="創建於" itemprop="dateCreated datePublished" datetime="2018-06-19T02:00:00+00:00">
-                2018-06-19
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2018-11-14T07:05:00+00:00">
+                2018-11-14
               </time>
             
 
@@ -364,8 +364,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/blog/Kubernetes/k8s-API-Authentication/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="Kubernetes/k8s-API-Authentication/" itemprop="commentCount"></span>
+                <a href="/blog/Kubernetes/k8s-DNS-for-Service-and-Pod/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="Kubernetes/k8s-DNS-for-Service-and-Pod/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -380,7 +380,7 @@
 
           
               <div class="post-description">
-                  本篇文章介紹在 Kubernetes 中存取 API 時的認證機制
+                  本篇文章的主題在介紹在 Kubernetes cluster 內部的 Service & Pod，其 DNS 解析功能是如何運作的 & 相關規則
               </div>
           
 
@@ -397,66 +397,115 @@
       
 
       
-        <p>由於 Kubernetes 整體就是以 API 為基礎來設計的，因此要了解認證機制也就等同於要了解 k8s API server 的認證機制。</p>
-<h1 id="了解-Kubernetes-API-認證機制"><a href="#了解-Kubernetes-API-認證機制" class="headerlink" title="了解 Kubernetes API 認證機制"></a>了解 Kubernetes API 認證機制</h1><p>k8s 提供了多種的認證方式，管理者可以設定多種認證機制共存,只要任何一種通過就算通過。</p>
-<p>以 k8s 中各服務之間的認證為例，是以 x509 的認證，同時也是最嚴格的認證方式。透過 Kubespray 安裝好 k8s 後，我們可以在 master node 上檢視一下 api server 的啟動設定：(<code>/etc/kubernetes/manifests/kube-apiserver.manifest</code>)</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">kube-apiserver</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line">  <span class="string">........(略)</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  hostNetwork:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">  dnsPolicy:</span> <span class="string">ClusterFirst</span></span><br><span class="line"><span class="attr">  containers:</span></span><br><span class="line"><span class="attr">  - name:</span> <span class="string">kube-apiserver</span></span><br><span class="line"><span class="attr">    image:</span> <span class="string">gcr.io/google-containers/hyperkube:v1.10.4</span></span><br><span class="line"><span class="attr">    imagePullPolicy:</span> <span class="string">IfNotPresent</span></span><br><span class="line"><span class="attr">    resources:</span></span><br><span class="line"><span class="attr">      limits:</span></span><br><span class="line"><span class="attr">        cpu:</span> <span class="number">800</span><span class="string">m</span></span><br><span class="line"><span class="attr">        memory:</span> <span class="number">2000</span><span class="string">M</span></span><br><span class="line"><span class="attr">      requests:</span></span><br><span class="line"><span class="attr">        cpu:</span> <span class="number">100</span><span class="string">m</span></span><br><span class="line"><span class="attr">        memory:</span> <span class="number">256</span><span class="string">M</span></span><br><span class="line"><span class="attr">    command:</span></span><br><span class="line"><span class="bullet">    -</span> <span class="string">/hyperkube</span></span><br><span class="line"><span class="bullet">    -</span> <span class="string">apiserver</span></span><br><span class="line"><span class="bullet">    -</span> <span class="bullet">--advertise-address=10.103.10.51</span></span><br><span class="line"><span class="bullet">    -</span> <span class="bullet">--etcd-servers=https://10.103.10.51:2379,https://10.103.10.52:2379,https://10.103.10.53:2379</span></span><br><span class="line"><span class="bullet">    -</span> <span class="bullet">--etcd-cafile=/etc/ssl/etcd/ssl/ca.pem</span></span><br><span class="line"><span class="bullet">    -</span> <span class="bullet">--etcd-certfile=/etc/ssl/etcd/ssl/node-kube-master0.pem</span></span><br><span class="line"><span class="bullet">    -</span> <span class="bullet">--etcd-keyfile=/etc/ssl/etcd/ssl/node-kube-master0-key.pem</span></span><br><span class="line"><span class="bullet">    -</span> <span class="bullet">--insecure-bind-address=127.0.0.1</span></span><br><span class="line"><span class="bullet">    -</span> <span class="bullet">--bind-address=0.0.0.0</span></span><br><span class="line">    <span class="string">........(略)</span></span><br><span class="line"><span class="bullet">    -</span> <span class="bullet">--client-ca-file=/etc/kubernetes/ssl/ca.pem</span></span><br><span class="line"><span class="bullet">    -</span> <span class="bullet">--kubelet-client-certificate=/etc/kubernetes/ssl/node-kube-master0.pem</span></span><br><span class="line"><span class="bullet">    -</span> <span class="bullet">--kubelet-client-key=/etc/kubernetes/ssl/node-kube-master0-key.pem</span></span><br><span class="line"><span class="bullet">    -</span> <span class="bullet">--tls-cert-file=/etc/kubernetes/ssl/apiserver.pem</span></span><br><span class="line"><span class="bullet">    -</span> <span class="bullet">--tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem</span></span><br><span class="line"><span class="bullet">    -</span> <span class="bullet">--service-account-key-file=/etc/kubernetes/ssl/service-account-key.pem</span></span><br><span class="line"><span class="bullet">    -</span> <span class="bullet">--secure-port=6443</span></span><br><span class="line"><span class="bullet">    -</span> <span class="bullet">--insecure-port=8080</span></span><br><span class="line"><span class="bullet">    -</span> <span class="bullet">--storage-backend=etcd3</span></span><br><span class="line"><span class="bullet">    -</span> <span class="bullet">--authorization-mode=Node,RBAC</span></span><br><span class="line">    <span class="string">........(略)</span></span><br><span class="line"><span class="bullet">    -</span> <span class="bullet">--requestheader-client-ca-file=/etc/kubernetes/ssl/front-proxy-ca.pem</span></span><br><span class="line"><span class="bullet">    -</span> <span class="bullet">--proxy-client-cert-file=/etc/kubernetes/ssl/front-proxy-client.pem</span></span><br><span class="line"><span class="bullet">    -</span> <span class="bullet">--proxy-client-key-file=/etc/kubernetes/ssl/front-proxy-client-key.pem</span></span><br><span class="line"><span class="attr">    livenessProbe:</span></span><br><span class="line">    <span class="string">........(略)</span></span><br><span class="line"><span class="attr">    volumeMounts:</span></span><br><span class="line">    <span class="string">........(略)</span></span><br><span class="line"><span class="attr">  volumes:</span></span><br><span class="line"><span class="attr">  - hostPath:</span></span><br><span class="line"><span class="attr">      path:</span> <span class="string">/etc/kubernetes</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">kubernetes-config</span></span><br><span class="line"><span class="attr">  - name:</span> <span class="string">ssl-certs-host</span></span><br><span class="line"><span class="attr">    hostPath:</span></span><br><span class="line"><span class="attr">      path:</span> <span class="string">/etc/ssl</span></span><br><span class="line"><span class="attr">  - name:</span> <span class="string">usr-share-ca-certificates</span></span><br><span class="line"><span class="attr">    hostPath:</span></span><br><span class="line"><span class="attr">      path:</span> <span class="string">/usr/share/ca-certificates</span></span><br><span class="line"><span class="attr">  - hostPath:</span></span><br><span class="line"><span class="attr">      path:</span> <span class="string">/etc/ssl/etcd/ssl</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">etcd-certs</span></span><br></pre></td></tr></table></figure>
-<p>從上面可以看出：</p>
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>DNS service 在 k8s cluster 內部負責 service discovery 的重責大任←讓使用者可以跳脫 IP based 的思維，以 domain name 的方式來進行 application 的架構設計。</p>
+<p>而 k8s DNS service 其實也是由一個 DNS pod + service 所組成，並且告訴 kubelet 將每個 container 的 DNS resolution 都指向這個 DNS service，藉由此方式，每個 pod 在存取其他 service 時，都會向一開始就安裝好的 DNS pod 進行 domain name 的詢問。</p>
+<h1 id="Domain-Name-解析規則"><a href="#Domain-Name-解析規則" class="headerlink" title="Domain Name 解析規則"></a>Domain Name 解析規則</h1><p>要了解 k8s Domain Name 的解析規則，必須清楚知道以下兩件事情：</p>
 <ol>
-<li><p>與各個服務相互認證所使用的憑證 (<code>*.pem</code>)</p>
+<li><p>k8s 中有 namespace 的概念，由於不同的 namespace 中可以有同樣名稱的 service or pod，因此 DNS 解析的部份就需要考慮 namespace</p>
 </li>
-<li><p>與本地端的其他服務則是透過 <code>--insecure-bind-address=127.0.0.1</code> &amp; <code>--insecure-port=8080</code> 來溝通</p>
-</li>
-<li><p>憑證存放的位置其實就是在各個 node 的本機上 (<code>hostPath</code> 定義)</p>
-</li>
-<li><p>目前此 k8s cluster 支援的認證方式為 <strong><a href="https://kubernetes.io/docs/reference/access-authn-authz/node/" target="_blank" rel="noopener">Node</a></strong> &amp; <strong><a href="https://kubernetes.io/docs/reference/access-authn-authz/rbac/" target="_blank" rel="noopener">RBAC</a></strong></p>
-</li>
-<li><p>pod 內部服務需要與 api server 互動時的認證方式，使用 <strong><a href="https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/" target="_blank" rel="noopener">Service Account Token</a></strong> 的方式，此處對應的設定是 <code>--service-account-key-file=/etc/kubernetes/ssl/service-account-key.pem</code></p>
+<li><p>k8s cluster domain name，若是未設定，預設就會是 <code>cluster.local</code></p>
 </li>
 </ol>
-<p>Kubespray 預設設置了 <code>X509</code>, <code>Node</code> &amp; <code>RBAC</code> 三種認證方式，但 Kubernetes 還支援了相當多其他的認證方式，例如：</p>
+<p>有了以上兩個概念之後，接著可以繼續往下。</p>
+<p>假設目前 k8s 有以下幾個 resource object：</p>
 <ul>
-<li><p><code>Static Token File</code></p>
+<li><p>兩個 namespace，分別是 <code>ns1</code> &amp; <code>ns2</code></p>
 </li>
-<li><p><code>Bootstrap Tokens</code></p>
+<li><p>在 ns1 中，有個 service 名稱為 <code>svc1</code>，與其相關連的 pod 為 <code>pod1</code></p>
 </li>
-<li><p><code>Static Password File</code></p>
-</li>
-<li><p><code>OpenID Connect Tokens</code></p>
-</li>
-<li><p><code>Webhook Token Authentication</code></p>
-</li>
-<li><p><code>Keystone Password</code></p>
+<li><p>在 ns2 中，有個 service 名稱為 <code>svc2</code>，與其相關連的 pod 為 <code>pod2</code></p>
 </li>
 </ul>
-<p>以下會針對比較重要的認證機制詳細說明。 </p>
-<h1 id="X509-Client-Certs"><a href="#X509-Client-Certs" class="headerlink" title="X509 Client Certs"></a>X509 Client Certs</h1><p>從 Kubespray 預設的安裝設定中的 API server 啟動參數中，可以看到與 X509 相關設定參數有：</p>
+<p>假設目前有個 pod 位於 ns1 中：</p>
 <ul>
-<li><p><code>client-ca-file</code></p>
+<li><p>可透過 domain name <code>svc1</code> or <code>svc1.ns1</code> or <code>svc1.ns1.svc.cluster.local</code> 存取 svc1</p>
 </li>
-<li><p><code>tls-private-key-file</code></p>
-</li>
-<li><p><code>tls-cert-file</code></p>
+<li><p>可透過 domain name <code>svc2.ns2</code> or <code>svc2.ns2.svc.cluster.local</code> 存取 svc2 (但無法使用 <code>svc1</code>，因為在不同的 namespace 中)</p>
 </li>
 </ul>
-<p>由於只有在 k8s cluster 內的 node 才會有這些憑證檔案，因此這樣的認證方式是在 cluster 內部不同 node 之間的服務相互存取時使用。</p>
-<p>但若是與 API server 同在本地端(localhost)的服務要存取 API 呢? 就直接 pass 了…..(像是 <code>kube-scheduler</code> &amp; <code>kube-controller-manager</code> 都屬於這一類的服務)</p>
-<p>可看到 <code>--insecure-bind-address=127.0.0.1</code> &amp; <code>--insecure-port=8080</code> 兩個設定，就可以看出在本地端內部服務存取 API server 時，使用的是 <strong><a href="http://localhost:8080" target="_blank" rel="noopener">http://localhost:8080</a></strong></p>
-<h1 id="Service-Account"><a href="#Service-Account" class="headerlink" title="Service Account"></a>Service Account</h1><p>Service Account 本身在 k8s 中是屬於 resource 的一種。我們可以透過以下指令取得 Service Account 清單：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 每一個 namespace 都有一個名稱為 "default" 的 service account</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl get serviceaccount --all-namespaces</span></span><br><span class="line">NAMESPACE     NAME                                 SECRETS   AGE</span><br><span class="line">default       default                              1         4d</span><br><span class="line">kube-public   default                              1         4d</span><br><span class="line">kube-system   attachdetach-controller              1         4d</span><br><span class="line">kube-system   cronjob-controller                   1         4d</span><br><span class="line">kube-system   daemon-set-controller                1         4d</span><br><span class="line">kube-system   default                              1         4d</span><br><span class="line">kube-system   deployment-controller                1         4d</span><br><span class="line">.....(略)</span><br></pre></td></tr></table></figure>
-<p>從上面清單可看出，每個 namespace 中都會有一個名稱為 <code>default</code> 的 service account，接著可以來拆解這個 <code>default</code> service account 有什麼內容：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 名稱為 "default" 的 service account 其實就是帶著用來存取 API server 時認證用的 token</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl describe serviceaccount/default -n kube-system</span></span><br><span class="line">Name:                default</span><br><span class="line">Namespace:           kube-system</span><br><span class="line">Labels:              &lt;none&gt;</span><br><span class="line">Annotations:         &lt;none&gt;</span><br><span class="line">Image pull secrets:  &lt;none&gt;</span><br><span class="line">Mountable secrets:   default-token-nkl69</span><br><span class="line">Tokens:              default-token-nkl69</span><br><span class="line">Events:              &lt;none&gt;</span><br></pre></td></tr></table></figure>
-<p>最後來看看上面 service account token 所帶的內容：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 此 token 內容載明了 token 本身之外，還有 namespace, type ... 等資訊</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl describe secret/default-token-nkl69 -n kube-system</span></span><br><span class="line">Name:         default-token-nkl69</span><br><span class="line">Namespace:    kube-system</span><br><span class="line">Labels:       &lt;none&gt;</span><br><span class="line">Annotations:  kubernetes.io/service-account.name=default</span><br><span class="line">              kubernetes.io/service-account.uid=fd2e5d64-6f9c-11e8-b6b3-065296fdbf18</span><br><span class="line"></span><br><span class="line">Type:  kubernetes.io/service-account-token</span><br><span class="line"></span><br><span class="line">Data</span><br><span class="line">====</span><br><span class="line">namespace:  11 bytes</span><br><span class="line">token:      eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJkZWZhdWx0LXRva2VuLW5rbDY5Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6ImRlZmF1bHQiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiJmZDJlNWQ2NC02ZjljLTExZTgtYjZiMy0wNjUyOTZmZGJmMTgiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6a3ViZS1zeXN0ZW06ZGVmYXVsdCJ9.cMC6jKcj1vmDhQnxlsHzop1t6W3qeG-xhEAZyBuzagUgb-2f06ZxI0UvIQ-qb3mkXyjtCdhw-Hn4PpvJ56HtvCBMYwfaP-ii4ord0aZfhqIRynlFuj-cc2qvhewaGwC84Yj7awMj6rv9yQGMgFBEL0roaLgoVAyYqpbJ6B2ig4cBlQQnTbiewYXdGoWGzb3wtl2Ii6E9nZ6ANPxLI4dhwbAxVNVAR4tojRiukQldSnI0ItX-Iwx1Djd5FK3FCgxY1soo682sLE-_NJeF8KfVPAWtg1049dSXe1iNQ3k-AO3pfEGDBaAq4WACuYhMtfL2iYlZRxS5SEt8Mwz3aVW1ng</span><br><span class="line">ca.crt:     1090 bytes</span><br></pre></td></tr></table></figure>
+<p>反之亦然。</p>
+<h1 id="DNS-for-Service"><a href="#DNS-for-Service" class="headerlink" title="DNS for Service"></a>DNS for Service</h1><h2 id="準備環境"><a href="#準備環境" class="headerlink" title="準備環境"></a>準備環境</h2><p>為了進行後面關於 DNS 的實驗，我們透過以下的 YAML 建立 service：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">k8s-nginx</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    matchLabels:</span></span><br><span class="line"><span class="attr">      run:</span> <span class="string">k8s-nginx</span></span><br><span class="line"><span class="attr">  replicas:</span> <span class="number">3</span></span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        run:</span> <span class="string">k8s-nginx</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">k8s-nginx</span></span><br><span class="line"><span class="attr">        image:</span> <span class="string">nginx</span></span><br><span class="line"><span class="attr">        ports:</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">80</span></span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">svc-cluster</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    run:</span> <span class="string">k8s-nginx</span></span><br><span class="line"><span class="attr">  ports:</span></span><br><span class="line"><span class="attr">  - name:</span> <span class="string">http</span></span><br><span class="line"><span class="attr">    port:</span> <span class="number">80</span></span><br><span class="line"><span class="attr">    protocol:</span> <span class="string">TCP</span></span><br><span class="line">  </span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">svc-headless</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    run:</span> <span class="string">k8s-nginx</span></span><br><span class="line"><span class="attr">  ports:</span></span><br><span class="line"><span class="attr">    - name:</span> <span class="string">http</span></span><br><span class="line"><span class="attr">      protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">      port:</span> <span class="number">80</span></span><br><span class="line"><span class="attr">      targetPort:</span> <span class="number">80</span></span><br><span class="line"><span class="attr">  clusterIP:</span> <span class="string">None</span></span><br></pre></td></tr></table></figure>
+<p>套用以上設定後，可以看到類似以下資訊：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 檢視套用上面設定後的結果</span></span><br><span class="line">$ kubectl get all</span><br><span class="line">NAME                            READY   STATUS    RESTARTS   AGE</span><br><span class="line">pod/k8s-nginx-6fb585ddf-4kf46   1/1     Running   0          95s</span><br><span class="line">pod/k8s-nginx-6fb585ddf-6fbkq   1/1     Running   0          95s</span><br><span class="line">pod/k8s-nginx-6fb585ddf-lhdzp   1/1     Running   0          95s</span><br><span class="line"></span><br><span class="line">NAME                   TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE</span><br><span class="line">service/kubernetes     ClusterIP   10.233.0.1     &lt;none&gt;        443/TCP   32d</span><br><span class="line">service/svc-cluster    ClusterIP   10.233.49.77   &lt;none&gt;        80/TCP    95s</span><br><span class="line">service/svc-headless   ClusterIP   None           &lt;none&gt;        80/TCP    95s</span><br><span class="line"></span><br><span class="line">NAME                        DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE</span><br><span class="line">deployment.apps/k8s-nginx   3         3         3            3           95s</span><br><span class="line"></span><br><span class="line">NAME                                  DESIRED   CURRENT   READY   AGE</span><br><span class="line">replicaset.apps/k8s-nginx-6fb585ddf   3         3         3       95s</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 取得 endpoint 相關資訊</span></span><br><span class="line">$ kubectl get endpoints</span><br><span class="line">NAME           ENDPOINTS                                               AGE</span><br><span class="line">.... (略)</span><br><span class="line">svc-cluster    10.233.103.201:80,10.233.76.10:80,10.233.76.11:80       108s</span><br><span class="line">svc-headless   10.233.103.201:80,10.233.76.10:80,10.233.76.11:80       108s</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 取得 k8s DNS service IP</span></span><br><span class="line">$ kubectl -n kube-system get svc</span><br><span class="line">NAME                   TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)                  AGE</span><br><span class="line">coredns                ClusterIP   10.233.0.3     &lt;none&gt;        53/UDP,53/TCP,9153/TCP   32d</span><br></pre></td></tr></table></figure>
+<h2 id="A-records"><a href="#A-records" class="headerlink" title="A records"></a>A records</h2><p>在以上的範例中(namespace = <code>default</code>)，k8s 會為 service 自動建立 A record 如下：</p>
+<ul>
+<li>svc-cluster.default.svc.cluster.local</li>
+</ul>
 <blockquote>
-<p>Service Account 的認證方式主要是由 k8s 自行管理，當我們建立一個 namespace 時，就自動會產生一個名稱為 <code>default</code> 的 service account 並帶有新建立的 token；而未來在此 namespace 中所產生的 pod，都會自動使用此 token 與 API server 進行認證。</p>
+<p>一般的 type=ClusterIP 的 service，因此會有一個匹配的 cluster IP</p>
 </blockquote>
+<ul>
+<li>svc-headless.default.svc.cluster.local</li>
+</ul>
+<blockquote>
+<p><code>clusterIP: None</code>，屬於 headless service，因此不會有 cluster IP，解析出來的結果會是其 endpoints 資訊</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 從 host level 使用 nslookup</span></span><br><span class="line">$ nslookup</span><br><span class="line">&gt; server 10.233.0.3   <span class="comment"># 切換 DNS server 到 k8s DNS svc</span></span><br><span class="line">Default server: 10.233.0.3</span><br><span class="line">Address: 10.233.0.3<span class="comment">#53</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查詢 "default" namespace 中的 "svc-cluster" service domain name</span></span><br><span class="line"><span class="comment"># (type = ClusterIP)</span></span><br><span class="line">Name:	svc-cluster.default.svc.cluster.local</span><br><span class="line">Server:		10.233.0.3</span><br><span class="line">Address:	10.233.0.3<span class="comment">#53</span></span><br><span class="line"></span><br><span class="line">Name:	svc-cluster.default.svc.cluster.local</span><br><span class="line">Address: 10.233.49.77</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查詢 "default" namespace 中的 "svc-headless" service domain name</span></span><br><span class="line"><span class="comment"># (clusterIP: None)</span></span><br><span class="line">&gt; svc-headless.default.svc.cluster.local</span><br><span class="line">Server:		10.233.0.3</span><br><span class="line">Address:	10.233.0.3<span class="comment">#53</span></span><br><span class="line"></span><br><span class="line">Name:	svc-headless.default.svc.cluster.local</span><br><span class="line">Address: 10.233.103.201</span><br><span class="line">Name:	svc-headless.default.svc.cluster.local</span><br><span class="line">Address: 10.233.76.11</span><br><span class="line">Name:	svc-headless.default.svc.cluster.local</span><br><span class="line">Address: 10.233.76.10</span><br></pre></td></tr></table></figure>
+<h2 id="SRV-records"><a href="#SRV-records" class="headerlink" title="SRV records"></a>SRV records</h2><p>除了 A record 之外，k8s DNS 還會額外建立相對應的 SRV record，並且用以下的命名規則來產生：</p>
+<blockquote>
+<p>[_my-port-name].[_my-port-protocol].[svc_name].[namespace_name].svc.cluster.local</p>
+</blockquote>
+<p>以下進行實際的查詢來檢視一下 DNS SRV record 產生的結果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#### 繼續上面的 nslookup 測試 ###</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 修改查詢 type 為 SRV</span></span><br><span class="line">&gt; <span class="built_in">set</span> <span class="built_in">type</span>=srv</span><br><span class="line"></span><br><span class="line"><span class="comment"># 測試 [_my-port-name].[_my-port-protocol].[svc_name].[namespace_name].svc.cluster.local</span></span><br><span class="line">&gt; _http._tcp.svc-cluster.default.svc.cluster.local</span><br><span class="line">Server:		10.233.0.3</span><br><span class="line">Address:	10.233.0.3<span class="comment">#53</span></span><br><span class="line"></span><br><span class="line">_http._tcp.svc-cluster.default.svc.cluster.local	service = 0 100 80 svc-cluster.default.svc.cluster.local.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 測試 [_my-port-name].[_my-port-protocol].[headless_svc_name].[namespace_name].svc.cluster.local</span></span><br><span class="line">&gt; _http._tcp.svc-headless.default.svc.cluster.local                                           </span><br><span class="line">Server:		10.233.0.3</span><br><span class="line">Address:	10.233.0.3<span class="comment">#53</span></span><br><span class="line"></span><br><span class="line">_http._tcp.svc-headless.default.svc.cluster.local	service = 0 33 80 10-233-103-201.svc-headless.default.svc.cluster.local.</span><br><span class="line">_http._tcp.svc-headless.default.svc.cluster.local	service = 0 33 80 10-233-76-10.svc-headless.default.svc.cluster.local.</span><br><span class="line">_http._tcp.svc-headless.default.svc.cluster.local	service = 0 33 80 10-233-76-11.svc-headless.default.svc.cluster.local.</span><br></pre></td></tr></table></figure>
+<h1 id="DNS-for-Pod"><a href="#DNS-for-Pod" class="headerlink" title="DNS for Pod"></a>DNS for Pod</h1><h2 id="A-record"><a href="#A-record" class="headerlink" title="A record"></a>A record</h2><p>跟 service 相同，每個 pod 在產生的時候也會以下述的格式分配一個 DNS A record 在 k8s DNS service 中：</p>
+<blockquote>
+<p>[pod-ip-address].[namespace-name].pod.cluster.local</p>
+</blockquote>
+<p>因此假設 pod 的 ip 為 <code>1.2.3.4</code>，namespace 為 <code>default</code>，且 cluster domain 為 <code>cluster.local</code>，那就會有 <code>1-2-3-4.default.pod.cluster.local</code> 這筆 A record 產生。</p>
+<blockquote>
+<p>以上的部份是<a href="https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#a-records-1" target="_blank" rel="noopener">官方文件</a>上提到會有的設定，但實際上實驗結果(k8s version = <code>1.12.1</code>)並不是這樣! 並沒有在 k8s DNS service 中看到上述的 A record，因此這個部份還有帶後續釐清</p>
+</blockquote>
+<h2 id="Pod-的-hostname-amp-subdomain"><a href="#Pod-的-hostname-amp-subdomain" class="headerlink" title="Pod 的 hostname &amp; subdomain"></a>Pod 的 hostname &amp; subdomain</h2><p>這裡要分成兩個部份來說：</p>
+<ul>
+<li><p><code>hostname</code>: 在預設情況下，每個 pod 的 <strong>hostname</strong> 都會使用在 pod 定義中 <code>metadata.name</code> 的值</p>
+</li>
+<li><p><code>subdomain</code>：預設情況下不會有這個部份的設定出現</p>
+</li>
+</ul>
+<p>但以上兩個其實都是可以在 pod spec 中定義的，分別是 <code>.spec.hostname</code> &amp; <code>.spec.subdomain</code>。</p>
+<p>因此假設有個 pod spec 有以下設定：</p>
+<ul>
+<li><p><code>.spec.hostname</code>: <strong>foo</strong></p>
+</li>
+<li><p><code>.spec.subdomain</code>: <strong>bar</strong></p>
+</li>
+</ul>
+<p>並新增到 namespace <code>default</code> 中，就會在該 pod 中的 <strong>/etc/hosts</strong> 中多出 <code>foo.bar.default.svc.cluster.local</code> &amp; pod IP 的對應記錄，但是並不會出現在 k8s DNS service 中。</p>
+<blockquote>
+<p>不會出現在 k8s DNS service 中的部份，跟<a href="https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-hostname-and-subdomain-fields" target="_blank" rel="noopener">官網文件</a>說明有出入，同樣也是待後續釐清</p>
+</blockquote>
+<h2 id="DNS-Policy-amp-Config"><a href="#DNS-Policy-amp-Config" class="headerlink" title="DNS Policy &amp; Config"></a>DNS Policy &amp; Config</h2><p>此外 pod spec 中還可以根據自身的需求，額外設定 DNS policy &amp; config，但在進行這樣的設定之前，建議先把 Linux <code>/etc/resolv.conf</code> 中的相關設定搞清楚，會比較容易理解這一段。</p>
+<p>關於 Linux <code>/etc/resolv.conf</code> 的設定說明，可以參考下列文章：</p>
+<ul>
+<li><p><a href="http://www.tsnien.idv.tw/Internet_WebBook/chap13/13-8%20DNS%20%E5%AE%A2%E6%88%B6%E7%AB%AF%E8%A8%AD%E5%AE%9A.html" target="_blank" rel="noopener">DNS 客戶端設定</a></p>
+</li>
+<li><p><a href="https://www.jianshu.com/p/2c1c081cc521" target="_blank" rel="noopener">Linux下域名解析的优化 - 简书</a></p>
+</li>
+<li><p><a href="https://my.oschina.net/guol/blog/114297" target="_blank" rel="noopener">Linux 本地dns配置文件详解 - 好脑袋和烂笔头 - 开源中国</a></p>
+</li>
+<li><p><a href="http://blog.51cto.com/linuxtro/282776" target="_blank" rel="noopener">DNS域名解析时的顺序问题-linux on the way-51CTO博客</a></p>
+</li>
+</ul>
+<p>有了以上的 DNS 觀念後，進行 pod DNS policy &amp; config 設定時就會清楚每個設定所產生的效果會是如何了。</p>
+<p>而這個部份(pod DNS policy &amp; config)已經有網友有相當詳細的說明，可以參考下列文章：</p>
+<ul>
+<li><a href="https://www.hwchiu.com/kubernetes-dns.html" target="_blank" rel="noopener">[Kubernetes] DNS setting in your Pod | Hwchiu Learning Note</a></li>
+</ul>
 <h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
-<li><p><a href="https://kubernetes.io/docs/reference/access-authn-authz/authentication/" target="_blank" rel="noopener">Authenticating - Kubernetes</a></p>
+<li><p><a href="https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/" target="_blank" rel="noopener">DNS for Services and Pods - Kubernetes</a></p>
 </li>
-<li><p><a href="https://zhangchenchen.github.io/2017/08/17/kubernetes-authentication-authorization-admission-control/" target="_blank" rel="noopener">Kubernetes– 漫谈kubernetes 中的认证 &amp; 授权 &amp; 准入机制 | Solar</a></p>
+<li><p><a href="https://dotblogs.com.tw/jerrymow/2014/01/06/139132" target="_blank" rel="noopener">DNS (bind) 設定 - SRV 紀錄 - Office 365 - Lync Server | 黃昏的甘蔗 - 點部落</a></p>
 </li>
-<li><p><a href="整合 OpenLDAP 進行 Kubernetes 身份認證 | KaiRen&#39;s Blog">https://kairen.github.io/2018/04/15/kubernetes/k8s-integration-ldap/</a></p>
+<li><p><a href="https://www.hwchiu.com/kubernetes-dns.html" target="_blank" rel="noopener">[Kubernetes] DNS setting in your Pod | Hwchiu Learning Note</a></p>
+</li>
+<li><p><a href="http://www.tsnien.idv.tw/Internet_WebBook/chap13/13-8%20DNS%20%E5%AE%A2%E6%88%B6%E7%AB%AF%E8%A8%AD%E5%AE%9A.html" target="_blank" rel="noopener">DNS 客戶端設定</a></p>
+</li>
+<li><p><a href="https://www.jianshu.com/p/2c1c081cc521" target="_blank" rel="noopener">Linux下域名解析的优化 - 简书</a></p>
+</li>
+<li><p><a href="https://my.oschina.net/guol/blog/114297" target="_blank" rel="noopener">Linux 本地dns配置文件详解 - 好脑袋和烂笔头 - 开源中国</a></p>
+</li>
+<li><p><a href="http://blog.51cto.com/linuxtro/282776" target="_blank" rel="noopener">DNS域名解析时的顺序问题-linux on the way-51CTO博客</a></p>
 </li>
 </ul>
 
@@ -480,9 +529,9 @@
           
             <a href="/blog/tags/CKA/" rel="tag"># CKA</a>
           
-            <a href="/blog/tags/Kubernetes-Security/" rel="tag"># Kubernetes Security</a>
+            <a href="/blog/tags/Kubernetes-Networking/" rel="tag"># Kubernetes Networking</a>
           
-            <a href="/blog/tags/CKA-Security/" rel="tag"># CKA Security</a>
+            <a href="/blog/tags/CKA-Networking/" rel="tag"># CKA Networking</a>
           
         </div>
       
@@ -495,8 +544,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/blog/Kubernetes/Install-k8s-via-kubespray/" rel="next" title="使用 Kubespray 安裝 Kubernetes v1.10 以上版本">
-                <i class="fa fa-chevron-left"></i> 使用 Kubespray 安裝 Kubernetes v1.10 以上版本
+              <a href="/blog/Kubernetes/k8s-Service-Overview/" rel="next" title="[Kubernetes] Service Overview">
+                <i class="fa fa-chevron-left"></i> [Kubernetes] Service Overview
               </a>
             
           </div>
@@ -504,10 +553,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/blog/Kubernetes/k8s-API-Authorization/" rel="prev" title="了解 Kubernetes 中的授權機制">
-                了解 Kubernetes 中的授權機制 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -671,7 +716,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#了解-Kubernetes-API-認證機制"><span class="nav-number">1.</span> <span class="nav-text">了解 Kubernetes API 認證機制</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#X509-Client-Certs"><span class="nav-number">2.</span> <span class="nav-text">X509 Client Certs</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Service-Account"><span class="nav-number">3.</span> <span class="nav-text">Service Account</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">4.</span> <span class="nav-text">References</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Domain-Name-解析規則"><span class="nav-number">2.</span> <span class="nav-text">Domain Name 解析規則</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DNS-for-Service"><span class="nav-number">3.</span> <span class="nav-text">DNS for Service</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#準備環境"><span class="nav-number">3.1.</span> <span class="nav-text">準備環境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#A-records"><span class="nav-number">3.2.</span> <span class="nav-text">A records</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SRV-records"><span class="nav-number">3.3.</span> <span class="nav-text">SRV records</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DNS-for-Pod"><span class="nav-number">4.</span> <span class="nav-text">DNS for Pod</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-record"><span class="nav-number">4.1.</span> <span class="nav-text">A record</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pod-的-hostname-amp-subdomain"><span class="nav-number">4.2.</span> <span class="nav-text">Pod 的 hostname &amp; subdomain</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DNS-Policy-amp-Config"><span class="nav-number">4.3.</span> <span class="nav-text">DNS Policy &amp; Config</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a></li></ol></div>
             
 
           </div>
@@ -834,9 +879,9 @@
     
       <script type="text/javascript">
         var disqus_config = function () {
-          this.page.url = 'https://godleon.github.io/blog/Kubernetes/k8s-API-Authentication/';
-          this.page.identifier = 'Kubernetes/k8s-API-Authentication/';
-          this.page.title = '了解 Kubernetes 中的認證機制';
+          this.page.url = 'https://godleon.github.io/blog/Kubernetes/k8s-DNS-for-Service-and-Pod/';
+          this.page.identifier = 'Kubernetes/k8s-DNS-for-Service-and-Pod/';
+          this.page.title = '[Kubernetes] DNS for Service & Pod';
         };
         var d = document, s = d.createElement('script');
         s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
