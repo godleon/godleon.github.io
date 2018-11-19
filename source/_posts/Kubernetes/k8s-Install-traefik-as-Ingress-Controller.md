@@ -66,7 +66,7 @@ tags:
 在使用 Ingress 之前
 =================
 
-看起來 Ingress 就是處理 inbound traffic 的銀彈，但直接在 YAML 中宣告 Ingress resource 並建立並不會有任何效果，必須搭配 [Ingress controller][k8s Ingress Controller] 才有辦法讓設定真正的生效。
+看起來 Ingress 就是處理 inbound traffic 的銀彈，但直接在 YAML 中宣告 Ingress resource 並建立並不會有任何效果，必須搭配 [Ingress controller][k8s Ingress Controller] 才有辦法讓設定真正的生效，而不同於其他的 controller，Ingress controller 是屬於 `kube-controller-manager` 的一部份，而且會自動的跟著 cluster 一起啟動。
 
 > 目前 [K8s 官方 GitHub repository](https://git.k8s.io/ingress-nginx/README.md) 中提供的則是以 nginx 來作為 Ingress controller。
 
