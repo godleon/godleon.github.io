@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="小信豬的原始部落">
 <meta property="og:description" content="此篇文章介紹 Kubernetes Ingress 的基本概念 &amp; 使用方式 (以 Traefik 為例)">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2018-11-19T20:07:13.267Z">
+<meta property="og:updated_time" content="2018-11-19T20:42:11.036Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[Kubernetes] 設定 Ingress Controller (以 Traefik 為例)">
 <meta name="twitter:description" content="此篇文章介紹 Kubernetes Ingress 的基本概念 &amp; 使用方式 (以 Traefik 為例)">
@@ -426,7 +426,7 @@
 </li>
 </ul>
 <p>看的出來可以做到的功能實在很多，非常值得好好研究一下。</p>
-<h1 id="在使用-Ingress-之前"><a href="#在使用-Ingress-之前" class="headerlink" title="在使用 Ingress 之前"></a>在使用 Ingress 之前</h1><p>看起來 Ingress 就是處理 inbound traffic 的銀彈，但直接在 YAML 中宣告 Ingress resource 並建立並不會有任何效果，必須搭配 <a href="https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-controllers" title="Kubernetes Ingress Controller" target="_blank" rel="noopener">Ingress controller</a> 才有辦法讓設定真正的生效。</p>
+<h1 id="在使用-Ingress-之前"><a href="#在使用-Ingress-之前" class="headerlink" title="在使用 Ingress 之前"></a>在使用 Ingress 之前</h1><p>看起來 Ingress 就是處理 inbound traffic 的銀彈，但直接在 YAML 中宣告 Ingress resource 並建立並不會有任何效果，必須搭配 <a href="https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-controllers" title="Kubernetes Ingress Controller" target="_blank" rel="noopener">Ingress controller</a> 才有辦法讓設定真正的生效，而不同於其他的 controller，Ingress controller 是屬於 <code>kube-controller-manager</code> 的一部份，而且會自動的跟著 cluster 一起啟動。</p>
 <blockquote>
 <p>目前 <a href="https://git.k8s.io/ingress-nginx/README.md" target="_blank" rel="noopener">K8s 官方 GitHub repository</a> 中提供的則是以 nginx 來作為 Ingress controller。</p>
 </blockquote>
