@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="小信豬的原始部落">
 <meta property="og:description" content="此篇文章介紹如何使用 Kubespray 安裝 Kubernetes v1.10 以上版本">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2018-11-19T20:42:11.036Z">
+<meta property="og:updated_time" content="2018-11-30T05:27:46.201Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="使用 Kubespray 安裝 Kubernetes v1.10 以上版本">
 <meta name="twitter:description" content="此篇文章介紹如何使用 Kubespray 安裝 Kubernetes v1.10 以上版本">
@@ -398,7 +398,7 @@
 
       
         <p>此篇文章介紹如何使用 <a href="https://github.com/kubernetes-incubator/kubespray" target="_blank" rel="noopener">Kubespray</a> 安裝 Kubernetes</p>
-<h1 id="Current-Status"><a href="#Current-Status" class="headerlink" title="Current Status"></a>Current Status</h1><p>目前支援到 <code>v1.12.1</code>，如果有需要調整，可以按照下面的說明進行修改。</p>
+<h1 id="Current-Status"><a href="#Current-Status" class="headerlink" title="Current Status"></a>Current Status</h1><p>目前支援到 <code>v1.12.3</code>，如果有需要調整，可以按照下面的說明進行修改。</p>
 <h1 id="準備安裝環境"><a href="#準備安裝環境" class="headerlink" title="準備安裝環境"></a>準備安裝環境</h1><h2 id="安裝-k8s-cluster-用機器"><a href="#安裝-k8s-cluster-用機器" class="headerlink" title="安裝 k8s cluster 用機器"></a>安裝 k8s cluster 用機器</h2><p>在這個安裝過程中，共有 6 個 VM，皆為透過 <code>Ubuntu 16.04 cloud image</code> 所產生，分別有以下幾個 node：</p>
 <ul>
 <li><p>Master Node x 3 (<strong>同時兼任 etcd node</strong>)</p>
@@ -439,7 +439,7 @@
 <p>以下是根據上面的安裝環境所撰寫的設定範例：</p>
 <figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">kube-master0    ansible_ssh_host=[YOUR_SERVER_IP]</span><br><span class="line">kube-master1    ansible_ssh_host=[YOUR_SERVER_IP]</span><br><span class="line">kube-master2    ansible_ssh_host=[YOUR_SERVER_IP]</span><br><span class="line"></span><br><span class="line">kube-worker0    ansible_ssh_host=[YOUR_SERVER_IP]</span><br><span class="line">kube-worker1    ansible_ssh_host=[YOUR_SERVER_IP]</span><br><span class="line">kube-worker2    ansible_ssh_host=[YOUR_SERVER_IP]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="section">[kube-master]</span></span><br><span class="line">kube-master[0:2]</span><br><span class="line"></span><br><span class="line"><span class="section">[etcd]</span></span><br><span class="line">kube-master[0:2]</span><br><span class="line"></span><br><span class="line"><span class="section">[kube-node]</span></span><br><span class="line">kube-worker[0:2]</span><br><span class="line"></span><br><span class="line"><span class="section">[k8s-cluster:children]</span></span><br><span class="line">kube-master</span><br><span class="line">kube-node</span><br></pre></td></tr></table></figure>
 <h2 id="pwd-kubespray-group-vars-all-yml"><a href="#pwd-kubespray-group-vars-all-yml" class="headerlink" title="$(pwd)/kubespray/group_vars/all.yml"></a>$(pwd)/kubespray/group_vars/all.yml</h2><ul>
-<li><p>確認遠端安裝機器的 python 路徑，並修改 <strong>ansible_python_interpreter</strong> 參數(預設是 <code>/usr/bin/python3.5</code>)</p>
+<li><p>確認遠端安裝機器的 python 路徑，並修改 <strong>ansible_python_interpreter</strong> 參數(預設是 <code>/usr/bin/python3</code>)</p>
 </li>
 <li><p>確認遠端機器的 OS，並修改 <strong>bootstrap_os</strong> 參數(預設是 <code>ubuntu</code>)</p>
 </li>
