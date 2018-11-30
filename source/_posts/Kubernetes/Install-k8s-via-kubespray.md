@@ -18,7 +18,7 @@ tags:
 Current Status
 ==============
 
-目前支援到 `v1.12.1`，如果有需要調整，可以按照下面的說明進行修改。
+目前支援到 `v1.12.3`，如果有需要調整，可以按照下面的說明進行修改。
 
 
 
@@ -117,7 +117,7 @@ kube-node
 
 ## $(pwd)/kubespray/group_vars/all.yml
 
-- 確認遠端安裝機器的 python 路徑，並修改 **ansible_python_interpreter** 參數(預設是 `/usr/bin/python3.5`)
+- 確認遠端安裝機器的 python 路徑，並修改 **ansible_python_interpreter** 參數(預設是 `/usr/bin/python3`)
 
 - 確認遠端機器的 OS，並修改 **bootstrap_os** 參數(預設是 `ubuntu`)
 
