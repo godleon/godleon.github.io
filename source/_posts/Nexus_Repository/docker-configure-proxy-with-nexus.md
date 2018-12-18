@@ -69,7 +69,7 @@ $ openssl pkcs12 -export -name nexus.example.com -inkey path_to_private.key -in 
 
 # 將 PKCS12 憑證匯入新建的 JKS 憑證
 # 並設定 jks(Java keystore) 的密碼為 password
-$ keytool -importkeystore -deststorepass password -destkeypass password -destkeystore keystore.jks -srckeystore complete_key.p12 -srcstoretype PKCS12 -srcstorepass password -alias nexus3.rd2.qct.io
+$ keytool -importkeystore -deststorepass password -destkeypass password -destkeystore keystore.jks -srckeystore complete_key.p12 -srcstoretype PKCS12 -srcstorepass password -alias nexus.example.com
 ```
 
 ### 設定 HTTPS
