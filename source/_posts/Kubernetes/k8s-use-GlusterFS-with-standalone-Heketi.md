@@ -429,3 +429,4 @@ References
 - [独立部署GlusterFS+Heketi实现Kubernetes共享存储 - breezey - 博客园](https://www.cnblogs.com/breezey/p/8849466.html)
 
 - [GlusterFS 操作備忘 « Jamyy's Weblog](http://jamyy.us.to/blog/2014/03/6220.html)
+
