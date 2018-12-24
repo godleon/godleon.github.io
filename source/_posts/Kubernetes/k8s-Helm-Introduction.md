@@ -90,6 +90,34 @@ $ sudo mv linux-amd64/helm /usr/local/bin/helm
 ```
 
 
+
+Helm 三大重要概念
+===============
+
+學習 Helm 有 3 個重要概念必須先了解，分別是：
+
+1. Chart
+
+2. Repository
+
+3. Release
+
+## Chart
+
+Chart 其實就是一堆 k8s resource object definition 的集合，目的就是要在 k8s 上佈署多個不同的 resource object；而為了要重複利用，這些 resource object definition 必須要支援 template, parameter ... 等相關功能。
+
+這概念上就類似 APT dpkg, YUM rpm .... 等套件系統。
+
+## Repository
+
+Repository 就是存放 Chart 的地方，由 Helm client 管理。
+
+## Release
+
+Release 則是由 chart 產生的一個個 instance，一個 chart 可以被佈署多次，每一個佈署都是每個獨立的 instance，在 Helm 中則稱為 `Release`，每個 release name 都不同且獨立運作的。
+
+
+
 將 Helm 佈署至 Cluster Level
 ===========================
 
