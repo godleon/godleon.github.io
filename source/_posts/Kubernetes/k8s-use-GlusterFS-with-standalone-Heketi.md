@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "[Kubernetes] 快速安裝 GlusterFS & Heketi 並與 StorageClass 搭配使用"
+title:  "[Kubernetes] 快速安裝 GlusterFS + Heketi 並與 StorageClass 搭配使用"
 description: "此篇文章介紹如何快速的安裝 GlusterFS + Heketi 並與 Kubernetes 中的 StorageClass 搭配使用"
 date: 2018-09-26 14:50:00
 published: true

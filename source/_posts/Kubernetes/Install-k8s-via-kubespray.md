@@ -18,7 +18,7 @@ tags:
 Current Status
 ==============
 
-目前支援到 `v1.12.3`，如果有需要調整，可以按照下面的說明進行修改。
+目前支援到 `v1.13.1`，如果有需要調整，可以按照下面的說明進行修改。
 
 
 
@@ -145,11 +145,13 @@ kube-node
 ```yaml
 # 自訂設定
 kubeconfig_localhost: true
+
+# 若是要啟動特定的 feature gate 可以加入以下設定
 kube_feature_gates:
   - "TTLAfterFinished=true" 
 
 # k8s 版本
-kube_version: v1.12.1
+kube_version: v1.13.1
 
 # CNI plugin
 kube_network_plugin: calico
