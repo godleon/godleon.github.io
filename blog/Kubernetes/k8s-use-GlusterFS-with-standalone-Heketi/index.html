@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Kubernetes,CKA,CKA Storage,GlusterFS,">
+  <meta name="keywords" content="Hexo, NexT">
 
 
 
@@ -79,18 +79,17 @@
 
 
 
-<meta name="description" content="此篇文章介紹如何快速的安裝 GlusterFS + Heketi 並與 Kubernetes 中的 StorageClass 搭配使用">
-<meta name="keywords" content="Kubernetes,CKA,CKA Storage,GlusterFS">
+<meta name="description" content="layout: posttitle:  “[Kubernetes] 快速安裝 GlusterFS + Heketi 並與 StorageClass 搭配使用”description: “此篇文章介紹如何快速的安裝 GlusterFS + Heketi 並與 Kubernetes 中的 StorageClass 搭配使用”date: 2018-09-26 14:50:00published: tr">
 <meta property="og:type" content="article">
-<meta property="og:title" content="[Kubernetes] 快速安裝 GlusterFS + Heketi 並與 StorageClass 搭配使用">
+<meta property="og:title" content="小信豬的原始部落">
 <meta property="og:url" content="https://godleon.github.io/blog/Kubernetes/k8s-use-GlusterFS-with-standalone-Heketi/index.html">
 <meta property="og:site_name" content="小信豬的原始部落">
-<meta property="og:description" content="此篇文章介紹如何快速的安裝 GlusterFS + Heketi 並與 Kubernetes 中的 StorageClass 搭配使用">
+<meta property="og:description" content="layout: posttitle:  “[Kubernetes] 快速安裝 GlusterFS + Heketi 並與 StorageClass 搭配使用”description: “此篇文章介紹如何快速的安裝 GlusterFS + Heketi 並與 Kubernetes 中的 StorageClass 搭配使用”date: 2018-09-26 14:50:00published: tr">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2018-10-27T10:22:28.956Z">
+<meta property="og:updated_time" content="2018-12-26T21:31:39.148Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="[Kubernetes] 快速安裝 GlusterFS + Heketi 並與 StorageClass 搭配使用">
-<meta name="twitter:description" content="此篇文章介紹如何快速的安裝 GlusterFS + Heketi 並與 Kubernetes 中的 StorageClass 搭配使用">
+<meta name="twitter:title" content="小信豬的原始部落">
+<meta name="twitter:description" content="layout: posttitle:  “[Kubernetes] 快速安裝 GlusterFS + Heketi 並與 StorageClass 搭配使用”description: “此篇文章介紹如何快速的安裝 GlusterFS + Heketi 並與 Kubernetes 中的 StorageClass 搭配使用”date: 2018-09-26 14:50:00published: tr">
 
 
 
@@ -126,7 +125,7 @@
 
 
 
-  <title>[Kubernetes] 快速安裝 GlusterFS + Heketi 並與 StorageClass 搭配使用 | 小信豬的原始部落</title>
+  <title> | 小信豬的原始部落</title>
   
 
 
@@ -311,7 +310,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">[Kubernetes] 快速安裝 GlusterFS + Heketi 並與 StorageClass 搭配使用</h1>
+          <h1 class="post-title" itemprop="name headline"></h1>
         
 
         <div class="post-meta">
@@ -323,8 +322,8 @@
               
                 <span class="post-meta-item-text">發表於</span>
               
-              <time title="創建於" itemprop="dateCreated datePublished" datetime="2018-09-26T06:50:00+00:00">
-                2018-09-26
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2018-12-26T21:31:39+00:00">
+                2018-12-27
               </time>
             
 
@@ -333,28 +332,6 @@
             
           </span>
 
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分類於</span>
-              
-              
-                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
-                  <a href="/blog/categories/Kubernetes/" itemprop="url" rel="index">
-                    <span itemprop="name">Kubernetes</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
           
 
           
@@ -379,10 +356,6 @@
           
 
           
-              <div class="post-description">
-                  此篇文章介紹如何快速的安裝 GlusterFS + Heketi 並與 Kubernetes 中的 StorageClass 搭配使用
-              </div>
-          
 
         </div>
       </header>
@@ -397,7 +370,17 @@
       
 
       
-        <p>此篇文章介紹如何快速的安裝 GlusterFS + Heketi 並與 Kubernetes 中的 StorageClass 搭配使用 </p>
+        <hr>
+<p>layout: post<br>title:  “[Kubernetes] 快速安裝 GlusterFS + Heketi 並與 StorageClass 搭配使用”<br>description: “此篇文章介紹如何快速的安裝 GlusterFS + Heketi 並與 Kubernetes 中的 StorageClass 搭配使用”<br>date: 2018-09-26 14:50:00<br>published: true<br>comments: true<br>categories:</p>
+<ul>
+<li>Kubernetes<br>tags:</li>
+<li>Kubernetes</li>
+<li>Kubernetes Storage</li>
+<li>CKA</li>
+<li>CKA Storage</li>
+<li>GlusterFS</li>
+</ul>
+<hr>
 <h1 id="緣由"><a href="#緣由" class="headerlink" title="緣由"></a>緣由</h1><p>由於最近在花些時間研究 k8s，但一直研究到 <a href="https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/" target="_blank" rel="noopener">StatefulSet</a> 時，發現對於 StatefulSet 來說，<strong>persistet volume 是必備的</strong>，而且若是有設定 replica 的部份，就演變成 <strong>動態產生 persistent volume 是必備</strong> 的。</p>
 <p>動態產生 PV 這個需求的確是存在的，試想如果有很多不同的 workload or job 都在 k8s 上運行，但同時都需要保存資料時，每次都請 storage manager 開好 PV 是很麻煩的，因此把這個部份的自動化的需求就產生了；而動態產生 <strong>PV</strong>(persistent volume) 這件工作，在 k8s 是由 <a href="https://kubernetes.io/docs/concepts/storage/storage-classes/" target="_blank" rel="noopener">Storage Class</a> 這個機制來完成；於是仔細看了一下 provisioner list，決定使用 GlusterFS 來作為 persistent storage 的測試對象。</p>
 <blockquote>
@@ -431,115 +414,6 @@
 <li><p>可根據需求，自動化的在分配 brick 時，分散到不同的 failure domain，提供資料可用性</p>
 </li>
 </ul>
-<h1 id="環境需求"><a href="#環境需求" class="headerlink" title="環境需求"></a>環境需求</h1><h2 id="Kubernetes"><a href="#Kubernetes" class="headerlink" title="Kubernetes"></a>Kubernetes</h2><p>假設已經有一個正常運行的 Kubernetes</p>
-<h2 id="GlusterFS"><a href="#GlusterFS" class="headerlink" title="GlusterFS"></a>GlusterFS</h2><p>GlusterFS 的環境安裝過程中，需要 2 個 node 來進行安裝，規格如下：</p>
-<ul>
-<li><p>OS: <code>Ubuntu 18.04 (Bionic)</code></p>
-</li>
-<li><p>CPU &amp; RAM: 由於只是測試環境….因此這邊只給 4 vcore + 4GB RAM</p>
-</li>
-<li><p>Disk: <code>3 (1 for OS, 2 for Data)</code> (<strong>/dev/vda</strong>, <strong>/dev/vdb</strong>, <strong>/dev/vdc</strong>)</p>
-</li>
-</ul>
-<blockquote>
-<p>以上的 node 建議需要設定成搭配 SSH pribate key 進行 passwordless 登入</p>
-</blockquote>
-<h2 id="Heketi"><a href="#Heketi" class="headerlink" title="Heketi"></a>Heketi</h2><p>以下安裝過程中，會將 Heketi 安裝在 GlusterFS cluster 的第一個 node 上，單獨以 docker container 的方式運行</p>
-<h2 id="安裝用機器-Bootstrapper"><a href="#安裝用機器-Bootstrapper" class="headerlink" title="安裝用機器(Bootstrapper)"></a>安裝用機器(Bootstrapper)</h2><p>這台機器可以是實體機 or VM，使用的環境必須為 <code>Ubuntu 18.04</code> or <code>Ubuntu 16.04</code></p>
-<h1 id="安裝事前準備"><a href="#安裝事前準備" class="headerlink" title="安裝事前準備"></a>安裝事前準備</h1><h2 id="取得安裝程式"><a href="#取得安裝程式" class="headerlink" title="取得安裝程式"></a>取得安裝程式</h2><p>首先登入到 bootstrapper，輸入以下指令：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ sudo apt-get update &amp;&amp; sudo apt-get -y install git</span><br><span class="line">$ <span class="built_in">cd</span> /tmp</span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/godleon/k8s-lab.git</span><br><span class="line">$ <span class="built_in">cd</span> /tmp/k8s-lab/GlusterFS-with-standalone-Heketi/ansible</span><br></pre></td></tr></table></figure>
-<h2 id="修改安裝參數檔"><a href="#修改安裝參數檔" class="headerlink" title="修改安裝參數檔"></a>修改安裝參數檔</h2><p>以下的安裝參數檔請按照自己的環境進行修改：</p>
-<h3 id="pwd-inventory"><a href="#pwd-inventory" class="headerlink" title="$(pwd)/inventory"></a>$(pwd)/inventory</h3><p>此檔案包含了用來安裝 GlusterFS 的兩個 node 的名稱 &amp; IP 資訊</p>
-<h3 id="pwd-group-vars-all"><a href="#pwd-group-vars-all" class="headerlink" title="$(pwd)/group_vars/all"></a>$(pwd)/group_vars/all</h3><p>這裡包含三種資訊：</p>
-<ol>
-<li><p>每個 node 的 <strong>SSH 連線資訊</strong>(因為安裝程式是使用 Ansible 所開發，因此正確的 SSH 連線資訊是必備的)</p>
-</li>
-<li><p>GlusterFS 的<strong>版本</strong> (預設為 <code>4.1</code>)</p>
-</li>
-<li><p>每個 node 上用來儲存資料的 <strong>device name</strong> (也可以是 <strong>partition name</strong>)</p>
-</li>
-</ol>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Login information of GlusterFS nodes</span></span><br><span class="line"><span class="attr">ansible_python_interpreter:</span> <span class="string">/usr/bin/python3</span></span><br><span class="line"><span class="attr">ansible_user:</span> <span class="string">"ubuntu"</span></span><br><span class="line"><span class="attr">ansible_become_user:</span> <span class="string">root</span></span><br><span class="line"><span class="attr">ansible_ssh_private_key_file:</span> <span class="string">/ansible/ssh-privkey/id_rsa</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># GlusterFS version</span></span><br><span class="line"><span class="attr">glusterfs_version:</span> <span class="string">"4.1"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># disk list for storing data (not OS disk)</span></span><br><span class="line"><span class="attr">storage_devs:</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">"/dev/vdb"</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">"/dev/vdc"</span></span><br></pre></td></tr></table></figure>
-<h2 id="準備-SSH-Private-Key"><a href="#準備-SSH-Private-Key" class="headerlink" title="準備 SSH Private Key"></a>準備 SSH Private Key</h2><p>將用來登入 GlusterFS node 用的 ssh private key 放到 <code>$(pwd)/ssh-privkey</code> 目錄中，並命名為 <strong>id_rsa</strong>。</p>
-<h1 id="安裝程式做了那些事情"><a href="#安裝程式做了那些事情" class="headerlink" title="安裝程式做了那些事情?"></a>安裝程式做了那些事情?</h1><p>在開始安裝之前，先說明一下整個安裝程式到底完成了那些事情：</p>
-<ol>
-<li><p>在 2 個乾淨的 node 上安裝 GlusterFS，並設定 peer(這是一個 GlusterFS cluster node 之間相互認識的一個過程)</p>
-</li>
-<li><p>在第一個 node 上安裝 docker</p>
-</li>
-<li><p>透過 docker 啟動 Heketi service container</p>
-</li>
-<li><p>匯入 cluster topology 資訊到 Heketi service</p>
-<blockquote>
-<p>topology 資訊包含 hostname, IP, 用來儲存 data 的 device(or partition name), failure domain … 等資訊</p>
-</blockquote>
-</li>
-<li><p>取得新建立的 cluster ID 並顯示</p>
-</li>
-</ol>
-<p>有了最後一個步驟取得的 cluster ID 後，才可以用來設定 k8s StorageClass for GlusterFS。</p>
-<h1 id="開始安裝"><a href="#開始安裝" class="headerlink" title="開始安裝"></a>開始安裝</h1><p>執行以下命令開始安裝：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> /tmp/k8s-lab/GlusterFS-with-standalone-Heketi</span><br><span class="line">$ ./start.sh</span><br></pre></td></tr></table></figure>
-<p>接著安裝程式會開始執行，大概需要 3~5 分鐘完成所有的安裝流程，而安裝完成後會出現類似以下訊息：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">....(略)</span><br><span class="line">TASK [Display topology import result] ******************************************</span><br><span class="line">Wednesday 26 September 2018  05:49:15 +0000 (0:00:10.832)       0:02:01.148 *** </span><br><span class="line">skipping: [gfs02]</span><br><span class="line">ok: [gfs01] =&gt; &#123;</span><br><span class="line">    &quot;import_result.stdout_lines&quot;: [</span><br><span class="line">        &quot;Creating cluster ... ID: 6190e1bfdb33d611af35361d7f72625b&quot;, </span><br><span class="line">        &quot;\tAllowing file volumes on cluster.&quot;, </span><br><span class="line">        &quot;\tAllowing block volumes on cluster.&quot;, </span><br><span class="line">        &quot;\tCreating node 10.107.13.101 ... ID: 18db1bc118707ed70e26213b484068c2&quot;, </span><br><span class="line">        &quot;\t\tAdding device /dev/vdb ... OK&quot;, </span><br><span class="line">        &quot;\t\tAdding device /dev/vdc ... OK&quot;, </span><br><span class="line">        &quot;\tCreating node 10.107.13.102 ... ID: 900110afd1dff7c89c8fd7ef427f4337&quot;, </span><br><span class="line">        &quot;\t\tAdding device /dev/vdb ... OK&quot;, </span><br><span class="line">        &quot;\t\tAdding device /dev/vdc ... OK&quot;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br><span class="line">....(略)</span><br><span class="line">TASK [Display Cluster ID] ******************************************************</span><br><span class="line">Wednesday 26 September 2018  05:49:16 +0000 (0:00:00.116)       0:02:01.970 *** </span><br><span class="line">skipping: [gfs02]</span><br><span class="line">ok: [gfs01] =&gt; &#123;</span><br><span class="line">    &quot;msg&quot;: &quot;Cluster ID = 6190e1bfdb33d611af35361d7f72625b&quot;</span><br><span class="line">&#125;</span><br><span class="line">....(略)</span><br></pre></td></tr></table></figure>
-<p>從上面可以看到 topology 資訊匯入到 Heketi 所產生的回應訊息 &amp; Cluster ID，其中 <strong>Cluster ID</strong>(上面 Cluster ID = <code>6190e1bfdb33d611af35361d7f72625b</code>) 會在下一個步驟中使用到。</p>
-<h1 id="Kubernetes-Cluster-設定"><a href="#Kubernetes-Cluster-設定" class="headerlink" title="Kubernetes Cluster 設定"></a>Kubernetes Cluster 設定</h1><p>由於要掛載 GlusterFS volume，因此在<strong>每個 worker node</strong> 上都必須要準備好 GlusterFS client 才行，由於實驗的 k8s 環境是安裝在 Ubuntu 上，因此可以透過以下指令安裝 GlusterFS client：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ sudo add-apt-repository ppa:gluster/glusterfs-4.1 -y</span><br><span class="line">$ sudo apt-get -y install glusterfs-client</span><br></pre></td></tr></table></figure>
-<p>若是 worker node 是 CentOS，可用下面指令安裝 GlusterFS client：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ yum -y install centos-release-gluster41</span><br><span class="line">$ yum install -y glusterfs-fuse</span><br></pre></td></tr></table></figure>
-<p>這個部份若是漏掉了，會出現 <strong>mount: unknown filesystem type ‘glusterfs’</strong> 錯誤，在 pod 生成的時候會出現類似下面的訊息：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">the following error information was pulled from the glusterfs log to help diagnose this issue: could not open log file for pod web-0</span><br><span class="line">  Warning  FailedMount  1m  kubelet, leon-k8s-node03  MountVolume.SetUp failed for volume &quot;pvc-6f3abcc5-bfec-11e8-885a-627e9087949f&quot; : mount failed: mount failed: exit status 32</span><br><span class="line">Mounting command: systemd-run</span><br><span class="line">Mounting arguments: --description=Kubernetes transient mount for /var/lib/kubelet/pods/6f3b9642-bfec-11e8-885a-627e9087949f/volumes/kubernetes.io~glusterfs/pvc-6f3abcc5-bfec-11e8-885a-627e9087949f --scope -- mount -t glusterfs -o auto_unmount,log-level=ERROR,log-file=/var/lib/kubelet/plugins/kubernetes.io/glusterfs/pvc-6f3abcc5-bfec-11e8-885a-627e9087949f/web-0-glusterfs.log,backup-volfile-servers=10.107.13.101:10.107.13.102:10.107.13.103 10.107.13.101:vol_e3f5e3f4faf604ab10014c9d1a274624 /var/lib/kubelet/pods/6f3b9642-bfec-11e8-885a-627e9087949f/volumes/kubernetes.io~glusterfs/pvc-6f3abcc5-bfec-11e8-885a-627e9087949f</span><br><span class="line">Output: Running scope as unit run-ra3dac606d12c48fc9cdf4667bf5a9963.scope.</span><br><span class="line">mount: unknown filesystem type &apos;glusterfs&apos;</span><br></pre></td></tr></table></figure>
-<h1 id="測試-Kubernetes-與-Heketi-的連結"><a href="#測試-Kubernetes-與-Heketi-的連結" class="headerlink" title="測試 Kubernetes 與 Heketi 的連結"></a>測試 Kubernetes 與 Heketi 的連結</h1><p>在上面有提到 Heketi service 將會裝在第一個 node 上(<strong>gfs01</strong>, IP=<strong>10.107.13.101</strong>)，以 docker container 的方式提供服務；而且為了安裝方便，有些參數已經寫死在參數檔中(例如：admin password)，因此這邊可以彙整出以下資訊：</p>
-<ul>
-<li><p>GlusterFS cluster ID: <code>6190e1bfdb33d611af35361d7f72625b</code></p>
-</li>
-<li><p>Heketi service URL: <code>http://10.107.13.101:8080</code></p>
-</li>
-<li><p>admin password: <code>admin_key</code></p>
-</li>
-</ul>
-<p>有了以上的資訊後，就可以往下進行與 k8s 的整合測試。</p>
-<h2 id="建立-Storage-Class"><a href="#建立-Storage-Class" class="headerlink" title="建立 Storage Class"></a>建立 Storage Class</h2><p>在安裝程式中，預設 admin 的密碼為 <code>admin_key</code>，在 k8s 中可以透過 <a href="https://kubernetes.io/docs/concepts/configuration/secret/" target="_blank" rel="noopener">secret</a> 的方式帶入：</p>
-<ul>
-<li>檔名：<code>gfs-storageclass.yml</code></li>
-</ul>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Secret</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">heketi-secret</span></span><br><span class="line"><span class="attr">data:</span></span><br><span class="line">  <span class="comment"># echo -n "admin_key" | base64</span></span><br><span class="line"><span class="attr">  key:</span> <span class="string">YWRtaW5fa2V5</span></span><br><span class="line"><span class="attr">type:</span> <span class="string">kubernetes.io/glusterfs</span></span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">storage.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">StorageClass</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">"my-gfs-storageclass"</span></span><br><span class="line"><span class="attr">  annotations:</span></span><br><span class="line">    <span class="comment"># 設定為預設的 storage class</span></span><br><span class="line">    <span class="string">storageclass.kubernetes.io/is-default-class:</span> <span class="string">"true"</span></span><br><span class="line"><span class="attr">provisioner:</span> <span class="string">kubernetes.io/glusterfs</span></span><br><span class="line"><span class="attr">parameters:</span></span><br><span class="line"><span class="attr">  resturl:</span> <span class="string">"http://10.107.13.101:8080"</span></span><br><span class="line"><span class="attr">  clusterid:</span> <span class="string">"6190e1bfdb33d611af35361d7f72625b"</span></span><br><span class="line"><span class="attr">  restauthenabled:</span> <span class="string">"true"</span></span><br><span class="line"><span class="attr">  restuser:</span> <span class="string">"admin"</span></span><br><span class="line"><span class="attr">  secretNamespace:</span> <span class="string">"default"</span></span><br><span class="line"><span class="attr">  secretName:</span> <span class="string">"heketi-secret"</span></span><br><span class="line"><span class="attr">  gidMin:</span> <span class="string">"40000"</span></span><br><span class="line"><span class="attr">  gidMax:</span> <span class="string">"50000"</span></span><br><span class="line"><span class="attr">  volumetype:</span> <span class="string">"replicate:2"</span></span><br></pre></td></tr></table></figure>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl apply -f gfs-storageclass.yml</span><br><span class="line">secret/heketi-secret created</span><br><span class="line">storageclass.storage.k8s.io/my-gfs-storageclass created</span><br></pre></td></tr></table></figure>
-<h2 id="建立-StatefulSet"><a href="#建立-StatefulSet" class="headerlink" title="建立 StatefulSet"></a>建立 StatefulSet</h2><p>這邊使用 StatefulSet 搭配 VolumeClaimTemplate 對 <code>my-gfs-storageclass</code> 進行 dynamic volume provisioning：</p>
-<ul>
-<li>檔名: <code>statefulset.yml</code></li>
-</ul>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">StatefulSet</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">web</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    matchLabels:</span></span><br><span class="line"><span class="attr">      app:</span> <span class="string">nginx</span></span><br><span class="line"><span class="attr">  serviceName:</span> <span class="string">"nginx"</span></span><br><span class="line"><span class="attr">  replicas:</span> <span class="number">3</span></span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        app:</span> <span class="string">nginx</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      terminationGracePeriodSeconds:</span> <span class="number">10</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">nginx</span></span><br><span class="line"><span class="attr">        image:</span> <span class="string">k8s.gcr.io/nginx-slim:0.8</span></span><br><span class="line"><span class="attr">        ports:</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">80</span></span><br><span class="line"><span class="attr">          name:</span> <span class="string">web</span></span><br><span class="line"><span class="attr">        volumeMounts:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">www</span></span><br><span class="line"><span class="attr">          mountPath:</span> <span class="string">/usr/share/nginx/html</span></span><br><span class="line"><span class="attr">  volumeClaimTemplates:</span></span><br><span class="line"><span class="attr">  - metadata:</span></span><br><span class="line"><span class="attr">      name:</span> <span class="string">www</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      accessModes:</span> <span class="string">[</span> <span class="string">"ReadWriteOnce"</span> <span class="string">]</span></span><br><span class="line"><span class="attr">      storageClassName:</span> <span class="string">"my-gfs-storageclass"</span></span><br><span class="line"><span class="attr">      resources:</span></span><br><span class="line"><span class="attr">        requests:</span></span><br><span class="line"><span class="attr">          storage:</span> <span class="number">1</span><span class="string">Gi</span></span><br></pre></td></tr></table></figure>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl apply -f nginx.yml </span><br><span class="line">statefulset.apps/web created</span><br></pre></td></tr></table></figure>
-<p>完成之後，可以看到 PV &amp; PVC 自動被建立，並 bind 到每個 pod 中：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 取得 pv 資訊</span></span><br><span class="line">$ kubectl get pv</span><br><span class="line">NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS    CLAIM               STORAGECLASS          REASON    AGE</span><br><span class="line">pvc-0b8f49d6-c156-11e8-885a-627e9087949f   1Gi        RWO            Delete           Bound     default/www-web-1   my-gfs-storageclass             1m</span><br><span class="line">pvc-1d15ce12-c156-11e8-885a-627e9087949f   1Gi        RWO            Delete           Bound     default/www-web-2   my-gfs-storageclass             44s</span><br><span class="line">pvc-fdda23de-c155-11e8-885a-627e9087949f   1Gi        RWO            Delete           Bound     default/www-web-0   my-gfs-storageclass             1m</span><br><span class="line"></span><br><span class="line"><span class="comment"># 取得 pvc 資訊</span></span><br><span class="line">$ kubectl get pvc</span><br><span class="line">NAME        STATUS    VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS          AGE</span><br><span class="line">www-web-0   Bound     pvc-fdda23de-c155-11e8-885a-627e9087949f   1Gi        RWO            my-gfs-storageclass   2m</span><br><span class="line">www-web-1   Bound     pvc-0b8f49d6-c156-11e8-885a-627e9087949f   1Gi        RWO            my-gfs-storageclass   1m</span><br><span class="line">www-web-2   Bound     pvc-1d15ce12-c156-11e8-885a-627e9087949f   1Gi        RWO            my-gfs-storageclass   1m</span><br><span class="line"></span><br><span class="line"><span class="comment"># 剛剛佈署的 StatefulSet 也都完成佈署了</span></span><br><span class="line">$ kubectl get all</span><br><span class="line">NAME        READY     STATUS    RESTARTS   AGE</span><br><span class="line">pod/web-0   1/1       Running   0          2m</span><br><span class="line">pod/web-1   1/1       Running   0          2m</span><br><span class="line">pod/web-2   1/1       Running   0          1m</span><br><span class="line"></span><br><span class="line">NAME                                  TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)   AGE</span><br><span class="line">service/glusterfs-dynamic-www-web-0   ClusterIP   10.233.60.3   &lt;none&gt;        1/TCP     2m</span><br><span class="line">service/glusterfs-dynamic-www-web-1   ClusterIP   10.233.17.8   &lt;none&gt;        1/TCP     1m</span><br><span class="line">service/glusterfs-dynamic-www-web-2   ClusterIP   10.233.16.6   &lt;none&gt;        1/TCP     1m</span><br><span class="line">service/kubernetes                    ClusterIP   10.233.0.1    &lt;none&gt;        443/TCP   21d</span><br><span class="line"></span><br><span class="line">NAME                   DESIRED   CURRENT   AGE</span><br><span class="line">statefulset.apps/web   3         3         2m</span><br></pre></td></tr></table></figure>
-<p>看到以上訊息，就表示 <strong>Kubernetes <--> Heketi <--> GlusterFS</--></--></strong> 三個不同服務的串接已經正確的設定完成。</p>
-<h1 id="結論"><a href="#結論" class="headerlink" title="結論"></a>結論</h1><p>若是單獨使用 GlusterFS volume 的情況下，完整的流程應該分成兩大部份：</p>
-<ul>
-<li><p>安裝 GlusterFS</p>
-<ul>
-<li>建立 peer information</li>
-<li>check peer status &amp; pool list</li>
-</ul>
-</li>
-<li><p>設定 volume</p>
-<ul>
-<li>新增 volume (設定 replica &amp; 指定使用哪個 node 的 brick)</li>
-<li>掛載 volume 並使用</li>
-</ul>
-</li>
-</ul>
-<p>而 Heketi 把第二個部份的工作都自動化了，因此在設定 Heketi 時，只要匯入所謂的 topology 資訊(每一次匯入則是新增一個 cluster)，告訴 Heketi 以下資訊：</p>
-<ul>
-<li><p>這個 cluster 有哪些 node</p>
-</li>
-<li><p>每個 node 可用來儲存 data 的 device(or partition) name</p>
-</li>
-<li><p>failure domain (這個尚不清楚可以達成什麼效果，但應該跟 data redundacy policy 有關係)</p>
-</li>
-</ul>
-<p>接著，產生 brick &amp; volume 這種煩瑣的工作，就由 Heketi 來負責自動完成。</p>
-<p>然而 Heketi 除了以上功能外，還可以同時管理多個 GlusterFS cluster，因此可以讓使用者在資料配置上不受限於單一 cluster，在規劃 &amp; 運用上也更有彈性；不但可以減輕 storage manager 的負擔，同時也藉由與 Kubernetes 的搭配，讓實際應用程式的開發者可以更專注在應用上，而非複雜的 infra 設定上。</p>
 <h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
 <li><p><a href="http://www.l-penguin.idv.tw/book/Gluster-Storage_GitBook/" target="_blank" rel="noopener">Gluster Storage System</a></p>
 </li>
@@ -569,18 +443,6 @@
 
     <footer class="post-footer">
       
-        <div class="post-tags">
-          
-            <a href="/blog/tags/Kubernetes/" rel="tag"># Kubernetes</a>
-          
-            <a href="/blog/tags/CKA/" rel="tag"># CKA</a>
-          
-            <a href="/blog/tags/CKA-Storage/" rel="tag"># CKA Storage</a>
-          
-            <a href="/blog/tags/GlusterFS/" rel="tag"># GlusterFS</a>
-          
-        </div>
-      
 
       
       
@@ -590,8 +452,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/blog/Kubernetes/k8s-Deployment-Overview/" rel="next" title="[Kubernetes] Deployment Overview">
-                <i class="fa fa-chevron-left"></i> [Kubernetes] Deployment Overview
+              <a href="/blog/Kubernetes/k8s-Network-Policy-Overview/" rel="next" title="[Kubernetes] Network Policy Overview">
+                <i class="fa fa-chevron-left"></i> [Kubernetes] Network Policy Overview
               </a>
             
           </div>
@@ -599,10 +461,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/blog/Kubernetes/k8s-StatefulSets-Overview/" rel="prev" title="[Kubernetes] StatefulSet Overview">
-                [Kubernetes] StatefulSet Overview <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -689,7 +547,7 @@
               
                 <a href="/blog/archives/">
               
-                  <span class="site-state-item-count">77</span>
+                  <span class="site-state-item-count">84</span>
                   <span class="site-state-item-name">文章</span>
                 </a>
               </div>
@@ -700,7 +558,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/blog/categories/index.html">
-                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-count">13</span>
                   <span class="site-state-item-name">分類</span>
                 </a>
               </div>
@@ -711,7 +569,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/blog/tags/index.html">
-                  <span class="site-state-item-count">35</span>
+                  <span class="site-state-item-count">41</span>
                   <span class="site-state-item-name">標籤</span>
                 </a>
               </div>
@@ -766,7 +624,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#緣由"><span class="nav-number">1.</span> <span class="nav-text">緣由</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#What-is-GlusterFS"><span class="nav-number">2.</span> <span class="nav-text">What is GlusterFS?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#What-is-Heketi"><span class="nav-number">3.</span> <span class="nav-text">What is Heketi?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#環境需求"><span class="nav-number">4.</span> <span class="nav-text">環境需求</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Kubernetes"><span class="nav-number">4.1.</span> <span class="nav-text">Kubernetes</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GlusterFS"><span class="nav-number">4.2.</span> <span class="nav-text">GlusterFS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Heketi"><span class="nav-number">4.3.</span> <span class="nav-text">Heketi</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安裝用機器-Bootstrapper"><span class="nav-number">4.4.</span> <span class="nav-text">安裝用機器(Bootstrapper)</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#安裝事前準備"><span class="nav-number">5.</span> <span class="nav-text">安裝事前準備</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#取得安裝程式"><span class="nav-number">5.1.</span> <span class="nav-text">取得安裝程式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#修改安裝參數檔"><span class="nav-number">5.2.</span> <span class="nav-text">修改安裝參數檔</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#pwd-inventory"><span class="nav-number">5.2.1.</span> <span class="nav-text">$(pwd)/inventory</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pwd-group-vars-all"><span class="nav-number">5.2.2.</span> <span class="nav-text">$(pwd)/group_vars/all</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#準備-SSH-Private-Key"><span class="nav-number">5.3.</span> <span class="nav-text">準備 SSH Private Key</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#安裝程式做了那些事情"><span class="nav-number">6.</span> <span class="nav-text">安裝程式做了那些事情?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#開始安裝"><span class="nav-number">7.</span> <span class="nav-text">開始安裝</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kubernetes-Cluster-設定"><span class="nav-number">8.</span> <span class="nav-text">Kubernetes Cluster 設定</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#測試-Kubernetes-與-Heketi-的連結"><span class="nav-number">9.</span> <span class="nav-text">測試 Kubernetes 與 Heketi 的連結</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#建立-Storage-Class"><span class="nav-number">9.1.</span> <span class="nav-text">建立 Storage Class</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#建立-StatefulSet"><span class="nav-number">9.2.</span> <span class="nav-text">建立 StatefulSet</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#結論"><span class="nav-number">10.</span> <span class="nav-text">結論</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">11.</span> <span class="nav-text">References</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#緣由"><span class="nav-number">1.</span> <span class="nav-text">緣由</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#What-is-GlusterFS"><span class="nav-number">2.</span> <span class="nav-text">What is GlusterFS?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#What-is-Heketi"><span class="nav-number">3.</span> <span class="nav-text">What is Heketi?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">4.</span> <span class="nav-text">References</span></a></li></ol></div>
             
 
           </div>
@@ -931,7 +789,7 @@
         var disqus_config = function () {
           this.page.url = 'https://godleon.github.io/blog/Kubernetes/k8s-use-GlusterFS-with-standalone-Heketi/';
           this.page.identifier = 'Kubernetes/k8s-use-GlusterFS-with-standalone-Heketi/';
-          this.page.title = '[Kubernetes] 快速安裝 GlusterFS + Heketi 並與 StorageClass 搭配使用';
+          this.page.title = '';
         };
         var d = document, s = d.createElement('script');
         s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
