@@ -3,17 +3,6 @@
   
     
     <entry>
-      <title></title>
-      <link href="/blog/Kubernetes/k8s-use-GlusterFS-with-standalone-Heketi/"/>
-      <url>/blog/Kubernetes/k8s-use-GlusterFS-with-standalone-Heketi/</url>
-      
-        <content type="html"><![CDATA[<hr><p>layout: post<br>title:  “[Kubernetes] 快速安裝 GlusterFS + Heketi 並與 StorageClass 搭配使用”<br>description: “此篇文章介紹如何快速的安裝 GlusterFS + Heketi 並與 Kubernetes 中的 StorageClass 搭配使用”<br>date: 2018-09-26 14:50:00<br>published: true<br>comments: true<br>categories:</p><ul><li>Kubernetes<br>tags:</li><li>Kubernetes</li><li>Kubernetes Storage</li><li>CKA</li><li>CKA Storage</li><li>GlusterFS</li></ul><hr><h1 id="緣由"><a href="#緣由" class="headerlink" title="緣由"></a>緣由</h1><p>由於最近在花些時間研究 k8s，但一直研究到 <a href="https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/" target="_blank" rel="noopener">StatefulSet</a> 時，發現對於 StatefulSet 來說，<strong>persistet volume 是必備的</strong>，而且若是有設定 replica 的部份，就演變成 <strong>動態產生 persistent volume 是必備</strong> 的。</p><p>動態產生 PV 這個需求的確是存在的，試想如果有很多不同的 workload or job 都在 k8s 上運行，但同時都需要保存資料時，每次都請 storage manager 開好 PV 是很麻煩的，因此把這個部份的自動化的需求就產生了；而動態產生 <strong>PV</strong>(persistent volume) 這件工作，在 k8s 是由 <a href="https://kubernetes.io/docs/concepts/storage/storage-classes/" target="_blank" rel="noopener">Storage Class</a> 這個機制來完成；於是仔細看了一下 provisioner list，決定使用 GlusterFS 來作為 persistent storage 的測試對象。</p><blockquote><p>選擇 GlusterFS 的原因是因為同時支援 ReadWriteOnce/ReadOnlyMany/ReadWriteMany 三種 <a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes" target="_blank" rel="noopener">Access Mode</a>，同時也支援 Quota &amp; Snapshot 等功能</p></blockquote><h1 id="What-is-GlusterFS"><a href="#What-is-GlusterFS" class="headerlink" title="What is GlusterFS?"></a>What is GlusterFS?</h1><p>這個部份就不多著墨，詳細的內容可以參考以下網站：</p><ul><li><a href="http://www.l-penguin.idv.tw/book/Gluster-Storage_GitBook/gluster_intra/gluster_arch.html" target="_blank" rel="noopener">Gluster 架構 | Gluster Storage System</a></li></ul><p>上面有提到關於一些 GlsuterFS 重要的概念，例如：<strong>Peer</strong>, <strong>Brick</strong>, <strong>Volume</strong> …. 等等。</p><p>若對 GlusterFS 的運作細節跟優化很有興趣，可以參考<a href="https://docs.gluster.org/en/latest/" target="_blank" rel="noopener">官方的文件說明</a>。</p><h1 id="What-is-Heketi"><a href="#What-is-Heketi" class="headerlink" title="What is Heketi?"></a>What is Heketi?</h1><p>首先看看以下官網的說明：</p><blockquote><p>Heketi provides a RESTful management interface which can be used to manage the life cycle of GlusterFS volumes. With Heketi, cloud services like OpenStack Manila, Kubernetes, and OpenShift can dynamically provision GlusterFS volumes with any of the supported durability types. Heketi will automatically determine the location for bricks across the cluster, making sure to place bricks and its replicas across different failure domains. Heketi also supports any number of GlusterFS clusters, allowing cloud services to provide network file storage without being limited to a single GlusterFS cluster.</p></blockquote><p>首先關於 GlusterFS，必須知道以下幾件事情：</p><ul><li><p>GlusterFS 並沒有提供管理用的 REST API service</p></li><li><p>GlusterFS 並沒有提供 Failure Domain 的設計</p></li></ul><p>而以上兩個在 GlusterFS 中沒有的設計，Heketi 則是在更上層的抽象設計中，把這兩個功能補足了! 因此細部檢視 Heketi 的功能，就包含了：</p><ul><li><p>提供 REST API service 作為管理 GlusterFS 之用</p></li><li><p>可以讓 OpenStack Manila, Kubernetes, OpenShift 等平台動態產生 volume 並掛載使用</p></li><li><p>可同時管理多個 GlusterFS cluster，可讓使用者把資料放到不同的 GlusterFS cluster 中</p></li><li><p>可根據需求，自動化的在分配 brick 時，分散到不同的 failure domain，提供資料可用性</p></li></ul><h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul><li><p><a href="http://www.l-penguin.idv.tw/book/Gluster-Storage_GitBook/" target="_blank" rel="noopener">Gluster Storage System</a></p></li><li><p><a href="https://github.com/heketi/heketi" target="_blank" rel="noopener">heketi/heketi: RESTful based volume management framework for GlusterFS</a></p></li><li><p><a href="https://github.com/heketi/heketi/blob/master/docs/admin/readme.md" target="_blank" rel="noopener">Heketi Documentation - Administration</a></p></li><li><p><a href="https://github.com/heketi/heketi/blob/master/docs/admin/topology.md" target="_blank" rel="noopener">Prepare Heketi Topology</a></p></li><li><p><a href="https://www.cnblogs.com/breezey/p/8849466.html" target="_blank" rel="noopener">独立部署GlusterFS+Heketi实现Kubernetes共享存储 - breezey - 博客园</a></p></li><li><p><a href="http://jamyy.us.to/blog/2014/03/6220.html" target="_blank" rel="noopener">GlusterFS 操作備忘 « Jamyy’s Weblog</a></p></li></ul>]]></content>
-      
-      
-      
-    </entry>
-    
-    <entry>
       <title>[Kubernetes] Network Policy Overview</title>
       <link href="/blog/Kubernetes/k8s-Network-Policy-Overview/"/>
       <url>/blog/Kubernetes/k8s-Network-Policy-Overview/</url>
@@ -408,6 +397,37 @@
             <tag> Kubernetes Core Concept </tag>
             
             <tag> CKA Core Concept </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>[Kubernetes] 快速安裝 GlusterFS + Heketi 並與 StorageClass 搭配使用</title>
+      <link href="/blog/Kubernetes/k8s-use-GlusterFS-with-standalone-Heketi/"/>
+      <url>/blog/Kubernetes/k8s-use-GlusterFS-with-standalone-Heketi/</url>
+      
+        <content type="html"><![CDATA[<h1 id="緣由"><a href="#緣由" class="headerlink" title="緣由"></a>緣由</h1><p>由於最近在花些時間研究 k8s，但一直研究到 <a href="https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/" target="_blank" rel="noopener">StatefulSet</a> 時，發現對於 StatefulSet 來說，<strong>persistet volume 是必備的</strong>，而且若是有設定 replica 的部份，就演變成 <strong>動態產生 persistent volume 是必備</strong> 的。</p><p>動態產生 PV 這個需求的確是存在的，試想如果有很多不同的 workload or job 都在 k8s 上運行，但同時都需要保存資料時，每次都請 storage manager 開好 PV 是很麻煩的，因此把這個部份的自動化的需求就產生了；而動態產生 <strong>PV</strong>(persistent volume) 這件工作，在 k8s 是由 <a href="https://kubernetes.io/docs/concepts/storage/storage-classes/" target="_blank" rel="noopener">Storage Class</a> 這個機制來完成；於是仔細看了一下 provisioner list，決定使用 GlusterFS 來作為 persistent storage 的測試對象。</p><blockquote><p>選擇 GlusterFS 的原因是因為同時支援 ReadWriteOnce/ReadOnlyMany/ReadWriteMany 三種 <a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes" target="_blank" rel="noopener">Access Mode</a>，同時也支援 Quota &amp; Snapshot 等功能</p></blockquote><h1 id="What-is-GlusterFS"><a href="#What-is-GlusterFS" class="headerlink" title="What is GlusterFS?"></a>What is GlusterFS?</h1><p>這個部份就不多著墨，詳細的內容可以參考以下網站：</p><ul><li><a href="http://www.l-penguin.idv.tw/book/Gluster-Storage_GitBook/gluster_intra/gluster_arch.html" target="_blank" rel="noopener">Gluster 架構 | Gluster Storage System</a></li></ul><p>上面有提到關於一些 GlsuterFS 重要的概念，例如：<strong>Peer</strong>, <strong>Brick</strong>, <strong>Volume</strong> …. 等等。</p><p>若對 GlusterFS 的運作細節跟優化很有興趣，可以參考<a href="https://docs.gluster.org/en/latest/" target="_blank" rel="noopener">官方的文件說明</a>。</p><h1 id="What-is-Heketi"><a href="#What-is-Heketi" class="headerlink" title="What is Heketi?"></a>What is Heketi?</h1><p>首先看看以下官網的說明：</p><blockquote><p>Heketi provides a RESTful management interface which can be used to manage the life cycle of GlusterFS volumes. With Heketi, cloud services like OpenStack Manila, Kubernetes, and OpenShift can dynamically provision GlusterFS volumes with any of the supported durability types. Heketi will automatically determine the location for bricks across the cluster, making sure to place bricks and its replicas across different failure domains. Heketi also supports any number of GlusterFS clusters, allowing cloud services to provide network file storage without being limited to a single GlusterFS cluster.</p></blockquote><p>首先關於 GlusterFS，必須知道以下幾件事情：</p><ul><li><p>GlusterFS 並沒有提供管理用的 REST API service</p></li><li><p>GlusterFS 並沒有提供 Failure Domain 的設計</p></li></ul><p>而以上兩個在 GlusterFS 中沒有的設計，Heketi 則是在更上層的抽象設計中，把這兩個功能補足了! 因此細部檢視 Heketi 的功能，就包含了：</p><ul><li><p>提供 REST API service 作為管理 GlusterFS 之用</p></li><li><p>可以讓 OpenStack Manila, Kubernetes, OpenShift 等平台動態產生 volume 並掛載使用</p></li><li><p>可同時管理多個 GlusterFS cluster，可讓使用者把資料放到不同的 GlusterFS cluster 中</p></li><li><p>可根據需求，自動化的在分配 brick 時，分散到不同的 failure domain，提供資料可用性</p></li></ul><h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul><li><p><a href="http://www.l-penguin.idv.tw/book/Gluster-Storage_GitBook/" target="_blank" rel="noopener">Gluster Storage System</a></p></li><li><p><a href="https://github.com/heketi/heketi" target="_blank" rel="noopener">heketi/heketi: RESTful based volume management framework for GlusterFS</a></p></li><li><p><a href="https://github.com/heketi/heketi/blob/master/docs/admin/readme.md" target="_blank" rel="noopener">Heketi Documentation - Administration</a></p></li><li><p><a href="https://github.com/heketi/heketi/blob/master/docs/admin/topology.md" target="_blank" rel="noopener">Prepare Heketi Topology</a></p></li><li><p><a href="https://www.cnblogs.com/breezey/p/8849466.html" target="_blank" rel="noopener">独立部署GlusterFS+Heketi实现Kubernetes共享存储 - breezey - 博客园</a></p></li><li><p><a href="http://jamyy.us.to/blog/2014/03/6220.html" target="_blank" rel="noopener">GlusterFS 操作備忘 « Jamyy’s Weblog</a></p></li></ul>]]></content>
+      
+      
+      <categories>
+          
+          <category> Kubernetes </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Kubernetes </tag>
+            
+            <tag> Kubernetes Storage </tag>
+            
+            <tag> CKA </tag>
+            
+            <tag> CKA Storage </tag>
+            
+            <tag> GlusterFS </tag>
             
         </tags>
       
