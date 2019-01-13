@@ -52,6 +52,8 @@ What is Heketi?
 
 - GlusterFS 並沒有提供 Failure Domain 的設計
 
+> 所謂一個 failure domain，就是指一群接上同樣的 switch & power suppoly 的 node
+
 而以上兩個在 GlusterFS 中沒有的設計，Heketi 則是在更上層的抽象設計中，把這兩個功能補足了! 因此細部檢視 Heketi 的功能，就包含了：
 
 - 提供 REST API service 作為管理 GlusterFS 之用
@@ -61,6 +63,8 @@ What is Heketi?
 - 可同時管理多個 GlusterFS cluster，可讓使用者把資料放到不同的 GlusterFS cluster 中
 
 - 可根據需求，自動化的在分配 brick 時，分散到不同的 failure domain，提供資料可用性
+
+> brick 分散到不同的 failure domain = 將資料分散在接上不同 switch & power supply 的 node 上
 
 
 

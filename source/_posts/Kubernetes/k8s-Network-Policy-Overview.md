@@ -565,6 +565,16 @@ spec:
   - Ingress
 ```
 
+此外若想要了解更多 network policy + Calico 的示範，可以參考 Calico 官網的資訊：
+
+- [Calico Tutorial - Simple Policy Demo](https://docs.projectcalico.org/v3.4/getting-started/kubernetes/tutorials/simple-policy)
+
+- [Calico Tutorial - Stars Policy Demo](https://docs.projectcalico.org/v3.4/getting-started/kubernetes/tutorials/stars-policy/)
+
+- [Calico Tutorial - Controlling ingress and egress traffic with network policy](https://docs.projectcalico.org/v3.4/getting-started/kubernetes/tutorials/advanced-policy)
+
+- [Calico Tutorial - Application layer policy tutorial](https://docs.projectcalico.org/v3.4/getting-started/kubernetes/tutorials/app-layer-policy/)
+
 
 
 SCTP 的支援
@@ -584,6 +594,8 @@ References
 - [Network Policies - Kubernetes](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
 
 - [Declare Network Policy - Kubernetes](https://kubernetes.io/docs/tasks/administer-cluster/declare-network-policy/)
+
+- [Calico Tutorial - Simple Policy Demo](https://docs.projectcalico.org/v3.4/getting-started/kubernetes/tutorials/simple-policy)
 
 - [Kumu's Blog - Calico 笔记备忘](https://blog.opskumu.com/calico.html)
 
