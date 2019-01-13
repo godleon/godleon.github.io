@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="小信豬的原始部落">
 <meta property="og:description" content="本篇文章的主題在介紹如何利用 Kubernetes 中的 Network Policy 機制，來管理 pod 之間的流量，藉此提高安全性">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2018-12-26T21:52:04.673Z">
+<meta property="og:updated_time" content="2019-01-13T21:06:33.883Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[Kubernetes] Network Policy Overview">
 <meta name="twitter:description" content="本篇文章的主題在介紹如何利用 Kubernetes 中的 Network Policy 機制，來管理 pod 之間的流量，藉此提高安全性">
@@ -540,6 +540,17 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 白名單中的 nginx-can-access 依然可以存取</span></span><br><span class="line">$ kubectl -n new-ns <span class="built_in">exec</span> nginx-can-access -- /bin/sh -c <span class="string">"ping -c 2 10.233.103.218"</span></span><br><span class="line">PING 10.233.103.218 (10.233.103.218) 56(84) bytes of data.</span><br><span class="line">64 bytes from 10.233.103.218: icmp_seq=1 ttl=63 time=0.139 ms</span><br><span class="line">64 bytes from 10.233.103.218: icmp_seq=2 ttl=63 time=0.099 ms</span><br><span class="line"></span><br><span class="line">--- 10.233.103.218 ping statistics ---</span><br><span class="line">2 packets transmitted, 2 received, 0% packet loss, time 1001ms</span><br><span class="line">rtt min/avg/max/mdev = 0.099/0.119/0.139/0.020 ms</span><br><span class="line"></span><br><span class="line"><span class="comment"># 但不在白名單中的 nginx-cannot-access 已經無法存取</span></span><br><span class="line">$ kubectl -n new-ns <span class="built_in">exec</span> nginx-cannot-access -- /bin/sh -c <span class="string">"ping -c 2 10.233.103.218"</span></span><br><span class="line">PING 10.233.103.218 (10.233.103.218) 56(84) bytes of data.</span><br><span class="line"></span><br><span class="line">--- 10.233.103.218 ping statistics ---</span><br><span class="line">2 packets transmitted, 0 received, 100% packet loss, time 999ms</span><br><span class="line"></span><br><span class="line"><span class="built_in">command</span> terminated with <span class="built_in">exit</span> code 1</span><br></pre></td></tr></table></figure>
 <p>最後檢視 calico policy：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">$ calicoctl get policy -o wide --namespace=new-ns</span><br><span class="line">WARNING: Your kernel does not support swap <span class="built_in">limit</span> capabilities or the cgroup is not mounted. Memory limited without swap.</span><br><span class="line">NAMESPACE   NAME                            ORDER   SELECTOR                                                                        </span><br><span class="line">new-ns      knp.default.deny-egress-test    1000    projectcalico.org/orchestrator == <span class="string">'k8s'</span> &amp;&amp; app == <span class="string">'deny-egress-test'</span>            </span><br><span class="line">new-ns      knp.default.deny-nginx-access   1000    projectcalico.org/orchestrator == <span class="string">'k8s'</span> &amp;&amp; app == <span class="string">'nginx-network-policy-test'</span>   </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">$ calicoctl get policy knp.default.deny-nginx-access -o yaml --namespace=new-ns</span><br><span class="line">WARNING: Your kernel does not support swap <span class="built_in">limit</span> capabilities or the cgroup is not mounted. Memory limited without swap.</span><br><span class="line">apiVersion: projectcalico.org/v3</span><br><span class="line">kind: NetworkPolicy</span><br><span class="line">metadata:</span><br><span class="line">  creationTimestamp: 2018-12-26T21:11:59Z</span><br><span class="line">  name: knp.default.deny-nginx-access</span><br><span class="line">  namespace: new-ns</span><br><span class="line">  resourceVersion: <span class="string">"12203982"</span></span><br><span class="line">  uid: e1ffb3df-0952-11e9-a683-52fddc671d88</span><br><span class="line">spec:</span><br><span class="line">  ingress:</span><br><span class="line">  - action: Allow</span><br><span class="line">    destination: &#123;&#125;</span><br><span class="line">    <span class="built_in">source</span>:</span><br><span class="line">      selector: projectcalico.org/orchestrator == <span class="string">'k8s'</span> &amp;&amp; priv == <span class="string">'can-access'</span></span><br><span class="line">  order: 1000</span><br><span class="line">  selector: projectcalico.org/orchestrator == <span class="string">'k8s'</span> &amp;&amp; app == <span class="string">'nginx-network-policy-test'</span></span><br><span class="line">  types:</span><br><span class="line">  - Ingress</span><br></pre></td></tr></table></figure>
+<p>此外若想要了解更多 network policy + Calico 的示範，可以參考 Calico 官網的資訊：</p>
+<ul>
+<li><p><a href="https://docs.projectcalico.org/v3.4/getting-started/kubernetes/tutorials/simple-policy" target="_blank" rel="noopener">Calico Tutorial - Simple Policy Demo</a></p>
+</li>
+<li><p><a href="https://docs.projectcalico.org/v3.4/getting-started/kubernetes/tutorials/stars-policy/" target="_blank" rel="noopener">Calico Tutorial - Stars Policy Demo</a></p>
+</li>
+<li><p><a href="https://docs.projectcalico.org/v3.4/getting-started/kubernetes/tutorials/advanced-policy" target="_blank" rel="noopener">Calico Tutorial - Controlling ingress and egress traffic with network policy</a></p>
+</li>
+<li><p><a href="https://docs.projectcalico.org/v3.4/getting-started/kubernetes/tutorials/app-layer-policy/" target="_blank" rel="noopener">Calico Tutorial - Application layer policy tutorial</a></p>
+</li>
+</ul>
 <h1 id="SCTP-的支援"><a href="#SCTP-的支援" class="headerlink" title="SCTP 的支援"></a>SCTP 的支援</h1><p>在 v1.12 開始，network policy 已經以 beta 的型式開始支援 SCTP，因此若希望可以在 network policy 中來管理 SCTP 的流量，只要完成以下的設定即可：</p>
 <ol>
 <li><p>開啟 <code>SCTPSupport</code> feature gate</p>
@@ -551,6 +562,8 @@
 <li><p><a href="https://kubernetes.io/docs/concepts/services-networking/network-policies/" target="_blank" rel="noopener">Network Policies - Kubernetes</a></p>
 </li>
 <li><p><a href="https://kubernetes.io/docs/tasks/administer-cluster/declare-network-policy/" target="_blank" rel="noopener">Declare Network Policy - Kubernetes</a></p>
+</li>
+<li><p><a href="https://docs.projectcalico.org/v3.4/getting-started/kubernetes/tutorials/simple-policy" target="_blank" rel="noopener">Calico Tutorial - Simple Policy Demo</a></p>
 </li>
 <li><p><a href="https://blog.opskumu.com/calico.html" target="_blank" rel="noopener">Kumu’s Blog - Calico 笔记备忘</a></p>
 </li>
@@ -787,7 +800,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

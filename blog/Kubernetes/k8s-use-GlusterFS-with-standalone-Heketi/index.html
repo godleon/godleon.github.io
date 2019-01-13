@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="小信豬的原始部落">
 <meta property="og:description" content="此篇文章介紹如何快速的安裝 GlusterFS + Heketi 並與 Kubernetes 中的 StorageClass 搭配使用">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2018-12-26T21:52:04.673Z">
+<meta property="og:updated_time" content="2019-01-13T21:06:33.883Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[Kubernetes] 快速安裝 GlusterFS + Heketi 並與 StorageClass 搭配使用">
 <meta name="twitter:description" content="此篇文章介紹如何快速的安裝 GlusterFS + Heketi 並與 Kubernetes 中的 StorageClass 搭配使用">
@@ -419,6 +419,9 @@
 <li><p>GlusterFS 並沒有提供 Failure Domain 的設計</p>
 </li>
 </ul>
+<blockquote>
+<p>所謂一個 failure domain，就是指一群接上同樣的 switch &amp; power suppoly 的 node</p>
+</blockquote>
 <p>而以上兩個在 GlusterFS 中沒有的設計，Heketi 則是在更上層的抽象設計中，把這兩個功能補足了! 因此細部檢視 Heketi 的功能，就包含了：</p>
 <ul>
 <li><p>提供 REST API service 作為管理 GlusterFS 之用</p>
@@ -430,6 +433,9 @@
 <li><p>可根據需求，自動化的在分配 brick 時，分散到不同的 failure domain，提供資料可用性</p>
 </li>
 </ul>
+<blockquote>
+<p>brick 分散到不同的 failure domain = 將資料分散在接上不同 switch &amp; power supply 的 node 上</p>
+</blockquote>
 <h1 id="環境需求"><a href="#環境需求" class="headerlink" title="環境需求"></a>環境需求</h1><h2 id="Kubernetes"><a href="#Kubernetes" class="headerlink" title="Kubernetes"></a>Kubernetes</h2><p>假設已經有一個正常運行的 Kubernetes</p>
 <h2 id="GlusterFS"><a href="#GlusterFS" class="headerlink" title="GlusterFS"></a>GlusterFS</h2><p>GlusterFS 的環境安裝過程中，需要 2 個 node 來進行安裝，規格如下：</p>
 <ul>
@@ -787,7 +793,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
