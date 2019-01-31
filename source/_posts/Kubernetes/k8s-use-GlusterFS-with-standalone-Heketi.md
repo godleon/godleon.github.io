@@ -298,6 +298,7 @@ parameters:
   gidMin: "40000"
   gidMax: "50000"
   volumetype: "replicate:2"
+allowVolumeExpansion: true
 ```
 
 ```bash
