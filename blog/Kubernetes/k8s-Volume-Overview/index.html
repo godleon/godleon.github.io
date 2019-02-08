@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="小信豬的原始部落">
 <meta property="og:description" content="本篇文章的主題在介紹 Kubernetes 中的 Volume 的設計概念 &amp; 使用方式">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2019-01-31T06:01:44.999Z">
+<meta property="og:updated_time" content="2019-02-08T04:53:23.317Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[Kubernetes] Volume Overview">
 <meta name="twitter:description" content="本篇文章的主題在介紹 Kubernetes 中的 Volume 的設計概念 &amp; 使用方式">
@@ -597,6 +597,8 @@
 </ul>
 <p><code>Bidirectional</code> 模式在使用上其實蠻危險的，因此僅限於 Priviledged Container 中使用，此外在 container 中建立的任何 volume 都必須在 container 結束時一併移除。</p>
 <p>最後，若真的要使用到 Mount Propagation 的功能，必須在 Docker 中加上 <code>MountFlags=shared</code> 設定，並重新啟動 Docker service。</p>
+<h1 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h1><p>在 k8s 中，透過將 volume 抽離出 container 成為一個獨立的 resource object，透過此方式 <strong>volume state</strong> 可以被保存，即使分別由不同的 container 存取，而存在 volume 裡面的資料也就跟著 volume 本身的 life cycle 一起走。</p>
+<p>藉由以上方式，讓開發者與 storage 管理者可以分開管理各自負責的領域，最終的目的就是要讓開發者可以專注在開發上，而非 infrastucture 本身。</p>
 <h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
 <li><p><a href="https://kubernetes.io/docs/concepts/storage/volumes/" target="_blank" rel="noopener">Volumes - Kubernetes</a></p>
 </li>
@@ -660,6 +662,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/Kubernetes/k8s-PersistentVolume-Overview/" rel="prev" title="[Kubernetes] Persistent Volume (Claim) Overview">
+                [Kubernetes] Persistent Volume (Claim) Overview <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -746,7 +752,7 @@
               
                 <a href="/blog/archives/">
               
-                  <span class="site-state-item-count">85</span>
+                  <span class="site-state-item-count">86</span>
                   <span class="site-state-item-name">文章</span>
                 </a>
               </div>
@@ -823,7 +829,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Preface"><span class="nav-number">1.</span> <span class="nav-text">Preface</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kubernetes-支援那些-Volume-Type"><span class="nav-number">2.</span> <span class="nav-text">Kubernetes 支援那些 Volume Type ?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#emptyDir"><span class="nav-number">2.1.</span> <span class="nav-text">emptyDir</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#hostPath"><span class="nav-number">2.2.</span> <span class="nav-text">hostPath</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#local"><span class="nav-number">2.3.</span> <span class="nav-text">local</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nfs"><span class="nav-number">2.4.</span> <span class="nav-text">nfs</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#secret"><span class="nav-number">2.5.</span> <span class="nav-text">secret</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#configMap"><span class="nav-number">2.6.</span> <span class="nav-text">configMap</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用-subPath"><span class="nav-number">3.</span> <span class="nav-text">使用 subPath</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#搭配-Expanded-Environment-Variables"><span class="nav-number">3.1.</span> <span class="nav-text">搭配 Expanded Environment Variables</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Out-of-Tree-Volume-Plugins"><span class="nav-number">4.</span> <span class="nav-text">Out-of-Tree Volume Plugins</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#FlexVolume"><span class="nav-number">4.1.</span> <span class="nav-text">FlexVolume</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Container-Storage-Interface-CSI"><span class="nav-number">4.2.</span> <span class="nav-text">Container Storage Interface (CSI)</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Mount-Propagation"><span class="nav-number">5.</span> <span class="nav-text">Mount Propagation</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text">References</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Preface"><span class="nav-number">1.</span> <span class="nav-text">Preface</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kubernetes-支援那些-Volume-Type"><span class="nav-number">2.</span> <span class="nav-text">Kubernetes 支援那些 Volume Type ?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#emptyDir"><span class="nav-number">2.1.</span> <span class="nav-text">emptyDir</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#hostPath"><span class="nav-number">2.2.</span> <span class="nav-text">hostPath</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#local"><span class="nav-number">2.3.</span> <span class="nav-text">local</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nfs"><span class="nav-number">2.4.</span> <span class="nav-text">nfs</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#secret"><span class="nav-number">2.5.</span> <span class="nav-text">secret</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#configMap"><span class="nav-number">2.6.</span> <span class="nav-text">configMap</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用-subPath"><span class="nav-number">3.</span> <span class="nav-text">使用 subPath</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#搭配-Expanded-Environment-Variables"><span class="nav-number">3.1.</span> <span class="nav-text">搭配 Expanded Environment Variables</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Out-of-Tree-Volume-Plugins"><span class="nav-number">4.</span> <span class="nav-text">Out-of-Tree Volume Plugins</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#FlexVolume"><span class="nav-number">4.1.</span> <span class="nav-text">FlexVolume</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Container-Storage-Interface-CSI"><span class="nav-number">4.2.</span> <span class="nav-text">Container Storage Interface (CSI)</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Mount-Propagation"><span class="nav-number">5.</span> <span class="nav-text">Mount Propagation</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Summary"><span class="nav-number">6.</span> <span class="nav-text">Summary</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">7.</span> <span class="nav-text">References</span></a></li></ol></div>
             
 
           </div>
