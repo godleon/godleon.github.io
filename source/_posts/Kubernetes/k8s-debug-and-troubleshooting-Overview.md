@@ -341,3 +341,9 @@ References
 - [Debug Pods and ReplicationControllers - Kubernetes](https://kubernetes.io/docs/tasks/debug-application-cluster/debug-pod-replication-controller/)
 
 - [Logging Architecture - Kubernetes](https://kubernetes.io/docs/concepts/cluster-administration/logging/)
+
+- [Troubleshoot Applications - Kubernetes](https://kubernetes.io/docs/tasks/debug-application-cluster/debug-application/)
+
+- [Troubleshoot Clusters - Kubernetes](https://kubernetes.io/docs/tasks/debug-application-cluster/debug-cluster/)
+
+- [Troubleshooting - Kubernetes](https://kubernetes.io/docs/tasks/debug-application-cluster/troubleshooting/)
