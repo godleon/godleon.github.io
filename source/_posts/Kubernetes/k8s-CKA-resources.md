@@ -315,6 +315,16 @@ tags:
 
 - [nikovirtala/Certified-Kubernetes-Administrator-CKA](https://github.com/nikovirtala/Certified-Kubernetes-Administrator-CKA)
 
+---
+
+# 線上課程
+
+- [Overview of Kubernetes Online Training - Kubernetes](https://kubernetes.io/docs/tutorials/online-training/overview/)
+
+- [LiNUX Courses - Certified Kubernetes Administrator (CKA)](https://linuxacademy.com/linux/training/course/name/certified-kubernetes-administrator-preparation-course)
+
+- [Kubernetes On The Cloud & The CNCF CKA Certification | Udemy](https://www.udemy.com/kubernetes-cka-on-cloud/)
+
 
 
 References
