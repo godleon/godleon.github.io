@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="小信豬的原始部落">
 <meta property="og:description" content="此文章記錄學習 RHCE7 RH254 Chapter 4 Network Port Security 留下的內容">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2019-02-08T04:53:23.317Z">
+<meta property="og:updated_time" content="2019-02-21T21:36:59.340Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[RHCE7] RH254 Chapter 4 Network Port Security Learning Notes">
 <meta name="twitter:description" content="此文章記錄學習 RHCE7 RH254 Chapter 4 Network Port Security 留下的內容">
@@ -147,7 +147,7 @@
 
 </head>
 
-<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-tw">
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-tw">
 
   
   
@@ -157,7 +157,7 @@
   <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
-    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
       <div class="header-inner"><div class="site-brand-wrapper">
   <div class="site-meta ">
     
@@ -289,20 +289,20 @@
   
   
 
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
   
   
   
   <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/blog/RHCE/RHCE7-RH254-LearningNotes-CH04_NetworkPortSecurity/">
 
-    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="godleon">
-      <meta itemprop="description" content="">
+      <meta itemprop="description" content>
       <meta itemprop="image" content="/blog/images/avatar.gif">
     </span>
 
-    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="小信豬的原始部落">
     </span>
 
@@ -345,7 +345,7 @@
                 <span class="post-meta-item-text">分類於</span>
               
               
-                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/blog/categories/RHCE/" itemprop="url" rel="index">
                     <span itemprop="name">RHCE</span>
                   </a>
@@ -608,7 +608,7 @@
 <h2 id="4-2-3-Loggind-with-rich-rules"><a href="#4-2-3-Loggind-with-rich-rules" class="headerlink" title="4.2.3 Loggind with rich rules"></a>4.2.3 Loggind with rich rules</h2><p>logging 的功能很適合用在 debug or monitor 的需求上，firewalld 可以使用 <code>syslog</code>，也可以將訊息送給 <code>auditd</code>；此外，還可以設定 rate limit，避免 log 爆量產生塞滿硬碟</p>
 <p>若要搭配 <code>syslog</code>，使用下面語法：(其中 Log Level 有 <code>emerg</code>, <code>alert</code>, <code>crit</code>, <code>error</code>, <code>warning</code>, <code>notice</code>, <code>info</code>, <code>debug</code> 幾種可用)</p>
 <blockquote>
-<p>log [prefix=”<prefix text="">“] [level=<log level="">] [limit value=”&lt;RATE/DURATION&gt;”]</log></prefix></p>
+<p>log [prefix=”<prefix text>“] [level=<log level>] [limit value=”&lt;RATE/DURATION&gt;”]</log></prefix></p>
 </blockquote>
 <p>若搭配 <code>auditd</code>，則使用下列語法：</p>
 <blockquote>
@@ -632,7 +632,7 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在 zone "work" 中，將此機器設定為來源為 192.168.0.0/24 的 NAT</span></span><br><span class="line">[root@server ~]<span class="comment"># firewall-cmd --permanent --zone=work --add-rich-rule 'rule family=ipv4 source address=192.168.0.0/24 masquerade'</span></span><br></pre></td></tr></table></figure>
 <h2 id="4-3-2-Port-forwarding"><a href="#4-3-2-Port-forwarding" class="headerlink" title="4.3.2 Port forwarding"></a>4.3.2 Port forwarding</h2><p>設定 port forwarding 的語法如下：</p>
 <blockquote>
-<p>firewall-cmd –permanent –zone=\&lt;ZONE> –add-forward-port=port=\<port number\="">:proto=\&lt;PROTOCOL>[:toport=\&lt;PORTNUMBER>] [:toaddr=\&lt;IPADDR>]</port></p>
+<p>firewall-cmd –permanent –zone=\&lt;ZONE> –add-forward-port=port=\<port number\>:proto=\&lt;PROTOCOL>[:toport=\&lt;PORTNUMBER>] [:toaddr=\&lt;IPADDR>]</port></p>
 </blockquote>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在 zone "public" 中，將到達 tcp:513 的流量導向 192.168.0.254:132</span></span><br><span class="line">[root@server ~]<span class="comment"># firewall-cmd --permanent --zone=public --add-forward-port=port=513:proto=tcp:toport=132:toaddr=192.168.0.254</span></span><br></pre></td></tr></table></figure>
 <p>也可以使用 rich rule 設定較為複雜的規則：</p>
@@ -680,7 +680,7 @@
 <h1 id="老師補充-iptables"><a href="#老師補充-iptables" class="headerlink" title="老師補充(iptables)"></a>老師補充(iptables)</h1><ul>
 <li><p>Linux 防火牆叫做 <strong>netfilter</strong></p>
 </li>
-<li><p>Linux 把很多功能獨立出來成一個一個小檔案，可以到 <strong>/lib/modules/<kernel version="">/kernel/</kernel></strong> 目錄下找 <code>*.ko</code> 的檔案</p>
+<li><p>Linux 把很多功能獨立出來成一個一個小檔案，可以到 <strong>/lib/modules/<kernel version>/kernel/</kernel></strong> 目錄下找 <code>*.ko</code> 的檔案</p>
 </li>
 </ul>
 <blockquote>
@@ -873,7 +873,7 @@
 
       <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
-          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
               <p class="site-author-name" itemprop="name">godleon</p>
               <p class="site-description motion-element" itemprop="description">把時間花在哪裡，成就就在哪裡</p>
@@ -886,7 +886,7 @@
               
                 <a href="/blog/archives/">
               
-                  <span class="site-state-item-count">86</span>
+                  <span class="site-state-item-count">87</span>
                   <span class="site-state-item-name">文章</span>
                 </a>
               </div>
@@ -908,7 +908,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/blog/tags/index.html">
-                  <span class="site-state-item-count">42</span>
+                  <span class="site-state-item-count">44</span>
                   <span class="site-state-item-name">標籤</span>
                 </a>
               </div>
