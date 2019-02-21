@@ -187,7 +187,7 @@ u@nettools_pod$ nslookup hostnames
 Server:		10.233.0.3
 Address:	10.233.0.3#53
 
-** server can't find hostnames: NXDOMAIN
+** server can\'t find hostnames: NXDOMAIN
 
 # 若是有對應的 service 就會出現以下訊息
 # 然後一般也都會可以 ping 的通
@@ -209,7 +209,7 @@ u@nettools_pod$ nslookup coredns
 Server:		10.233.0.3
 Address:	10.233.0.3#53
 
-** server can't find coredns: NXDOMAIN
+** server can\'t find coredns: NXDOMAIN
 
 u@nettools_pod$ nslookup coredns.kube-system
 Server:		10.233.0.3
