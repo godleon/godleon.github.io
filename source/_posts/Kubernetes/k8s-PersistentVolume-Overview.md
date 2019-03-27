@@ -30,7 +30,7 @@ Preface
 
 
 
-PC & PVC Interaction Lifecycle
+PV & PVC Interaction Lifecycle
 ==============================
 
 有了上面對 PV & PVC 的基礎了解後，這個部份要說明從 PV 的產生到 PV & PVC 相互連結，一直到最後結束的這一段 lifecycle，會有以下的事件發生：
