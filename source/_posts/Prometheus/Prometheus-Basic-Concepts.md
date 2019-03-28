@@ -45,7 +45,9 @@ Prometheus 中的 multiple dimension 是透過 `metric` + `label` 所呈現出�
 
 資料的表示需要 `metric` & `label` 兩種資訊，範例如下：
 
-> <metric name>{<label name>=<label value>, ...}
+```txt
+<metric name>{<label name>=<label value>, ...}
+```
 
 以下是個實際範例：
 
