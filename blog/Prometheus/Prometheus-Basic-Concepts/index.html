@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="小信豬的原始部落">
 <meta property="og:description" content="這篇文章單純是研究 Prometheus 時隨手記下的筆記....">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2019-03-27T08:59:22.009Z">
+<meta property="og:updated_time" content="2019-03-28T05:33:23.237Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[Prometheus] Basic Concept memo">
 <meta name="twitter:description" content="這篇文章單純是研究 Prometheus 時隨手記下的筆記....">
@@ -409,9 +409,7 @@
 <h2 id="Job"><a href="#Job" class="headerlink" title="Job"></a>Job</h2><p>一群 instance 的集合，稱為一個 Job，一般會是用來收集相同目的的資料，例如：因為 scalability &amp; reliability 而讓同一個 process 跑在多台機器上，然後同時監控多台機器中的該 process。</p>
 <h1 id="Data-Model"><a href="#Data-Model" class="headerlink" title="Data Model"></a>Data Model</h1><p>Prometheus 中的 multiple dimension 是透過 <code>metric</code> + <code>label</code> 所呈現出來的，同樣的 metric 資料，但透過不同的 label 搭配可以呈現出不同的維度的資料。</p>
 <h2 id="如何表示資料"><a href="#如何表示資料" class="headerlink" title="如何表示資料"></a>如何表示資料</h2><p>資料的表示需要 <code>metric</code> &amp; <code>label</code> 兩種資訊，範例如下：</p>
-<blockquote>
-<p><metric name>{<label name>=<label value>, …}</label></label></metric></p>
-</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;metric name&gt;&#123;&lt;label name&gt;=&lt;label value&gt;, ...&#125;</span><br></pre></td></tr></table></figure>
 <p>以下是個實際範例：</p>
 <blockquote>
 <p>api_http_requests_total{method=”POST”, handler=”/messages”}</p>
