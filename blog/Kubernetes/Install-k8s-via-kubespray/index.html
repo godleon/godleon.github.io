@@ -79,18 +79,18 @@
 
 
 
-<meta name="description" content="此篇文章介紹如何使用 Kubespray 安裝 Kubernetes v1.10 以上版本(目前支援到 v1.13.2)">
+<meta name="description" content="此篇文章介紹如何使用 Kubespray 安裝 Kubernetes v1.10 以上版本(目前支援到 v1.14.1)">
 <meta name="keywords" content="Kubernetes,Kubespray">
 <meta property="og:type" content="article">
 <meta property="og:title" content="使用 Kubespray 安裝 Kubernetes v1.10 以上版本">
 <meta property="og:url" content="https://godleon.github.io/blog/Kubernetes/Install-k8s-via-kubespray/index.html">
 <meta property="og:site_name" content="小信豬的原始部落">
-<meta property="og:description" content="此篇文章介紹如何使用 Kubespray 安裝 Kubernetes v1.10 以上版本(目前支援到 v1.13.2)">
+<meta property="og:description" content="此篇文章介紹如何使用 Kubespray 安裝 Kubernetes v1.10 以上版本(目前支援到 v1.14.1)">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2019-03-28T05:33:23.233Z">
+<meta property="og:updated_time" content="2019-04-29T05:45:11.927Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="使用 Kubespray 安裝 Kubernetes v1.10 以上版本">
-<meta name="twitter:description" content="此篇文章介紹如何使用 Kubespray 安裝 Kubernetes v1.10 以上版本(目前支援到 v1.13.2)">
+<meta name="twitter:description" content="此篇文章介紹如何使用 Kubespray 安裝 Kubernetes v1.10 以上版本(目前支援到 v1.14.1)">
 
 
 
@@ -380,7 +380,7 @@
 
           
               <div class="post-description">
-                  此篇文章介紹如何使用 Kubespray 安裝 Kubernetes v1.10 以上版本(目前支援到 v1.13.2)
+                  此篇文章介紹如何使用 Kubespray 安裝 Kubernetes v1.10 以上版本(目前支援到 v1.14.1)
               </div>
           
 
@@ -398,7 +398,7 @@
 
       
         <p>此篇文章介紹如何使用 <a href="https://github.com/kubernetes-incubator/kubespray" target="_blank" rel="noopener">Kubespray</a> 安裝 Kubernetes</p>
-<h1 id="Current-Status"><a href="#Current-Status" class="headerlink" title="Current Status"></a>Current Status</h1><p>目前支援到 <code>v1.13.2</code>，如果有需要調整，可以按照下面的說明進行修改。</p>
+<h1 id="Current-Status"><a href="#Current-Status" class="headerlink" title="Current Status"></a>Current Status</h1><p>目前支援到 <code>v1.14.1</code>，如果有需要調整，可以按照下面的說明進行修改。</p>
 <h1 id="準備安裝環境"><a href="#準備安裝環境" class="headerlink" title="準備安裝環境"></a>準備安裝環境</h1><h2 id="安裝-k8s-cluster-用機器"><a href="#安裝-k8s-cluster-用機器" class="headerlink" title="安裝 k8s cluster 用機器"></a>安裝 k8s cluster 用機器</h2><p>在這個安裝過程中，共有 6 個 VM，皆為透過 <code>Ubuntu 16.04 cloud image</code> 所產生，分別有以下幾個 node：</p>
 <ul>
 <li><p>Master Node x 3 (<strong>同時兼任 etcd node</strong>)</p>
@@ -460,7 +460,7 @@
 </li>
 </ul>
 <h2 id="pwd-kubespray-group-vars-k8s-cluster-yml"><a href="#pwd-kubespray-group-vars-k8s-cluster-yml" class="headerlink" title="$(pwd)/kubespray/group_vars/k8s-cluster.yml"></a>$(pwd)/kubespray/group_vars/k8s-cluster.yml</h2><p>目前比較重要的安裝預設值如下：</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 自訂設定</span></span><br><span class="line"><span class="attr">kubeconfig_localhost:</span> <span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 若是要啟動特定的 feature gate 可以加入以下設定</span></span><br><span class="line"><span class="attr">kube_feature_gates:</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">"TTLAfterFinished=true"</span> </span><br><span class="line"></span><br><span class="line"><span class="comment"># k8s 版本</span></span><br><span class="line"><span class="attr">kube_version:</span> <span class="string">v1.13.1</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># CNI plugin</span></span><br><span class="line"><span class="attr">kube_network_plugin:</span> <span class="string">calico</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># k8s cluster 內部使用的 DNS server</span></span><br><span class="line"><span class="attr">dns_mode:</span> <span class="string">coredns</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Container runtime (也可以是 crio for cri-o)</span></span><br><span class="line"><span class="comment"># 但 cri-o 目前無法使用在 Ubuntu 上，只能用在 CentOS</span></span><br><span class="line"><span class="attr">container_manager:</span> <span class="string">docker</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#... (略)</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 自訂設定</span></span><br><span class="line"><span class="attr">kubeconfig_localhost:</span> <span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 若是要啟動特定的 feature gate 可以加入以下設定</span></span><br><span class="line"><span class="attr">kube_feature_gates:</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">"TTLAfterFinished=true"</span> </span><br><span class="line"></span><br><span class="line"><span class="comment"># k8s 版本</span></span><br><span class="line"><span class="attr">kube_version:</span> <span class="string">v1.14.1</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># CNI plugin</span></span><br><span class="line"><span class="attr">kube_network_plugin:</span> <span class="string">calico</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># k8s cluster 內部使用的 DNS server</span></span><br><span class="line"><span class="attr">dns_mode:</span> <span class="string">coredns</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Container runtime (也可以是 crio for cri-o)</span></span><br><span class="line"><span class="comment"># 但 cri-o 目前無法使用在 Ubuntu 上，只能用在 CentOS</span></span><br><span class="line"><span class="attr">container_manager:</span> <span class="string">docker</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#... (略)</span></span><br></pre></td></tr></table></figure>
 <p>Kubespray 預設會安裝最新版的 docker，但 k8s 官方建議的穩定版本是 17.03，因此若有調整的需求，可以增加以下設定：</p>
 <blockquote>
 <p>docker_version: “17.03”</p>
