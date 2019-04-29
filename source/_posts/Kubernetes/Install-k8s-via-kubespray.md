@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "使用 Kubespray 安裝 Kubernetes v1.10 以上版本"
-description: "此篇文章介紹如何使用 Kubespray 安裝 Kubernetes v1.10 以上版本(目前支援到 v1.13.2)"
+description: "此篇文章介紹如何使用 Kubespray 安裝 Kubernetes v1.10 以上版本(目前支援到 v1.14.1)"
 date: 2018-06-14 15:50:00
 published: true
 comments: true
@@ -18,7 +18,7 @@ tags:
 Current Status
 ==============
 
-目前支援到 `v1.13.2`，如果有需要調整，可以按照下面的說明進行修改。
+目前支援到 `v1.14.1`，如果有需要調整，可以按照下面的說明進行修改。
 
 
 
@@ -151,7 +151,7 @@ kube_feature_gates:
   - "TTLAfterFinished=true" 
 
 # k8s 版本
-kube_version: v1.13.1
+kube_version: v1.14.1
 
 # CNI plugin
 kube_network_plugin: calico
