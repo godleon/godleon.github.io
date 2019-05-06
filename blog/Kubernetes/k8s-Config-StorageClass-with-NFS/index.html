@@ -88,7 +88,7 @@
 <meta property="og:description" content="本篇文章介紹如何在 Kubernetes 上設定 StorageClass，並以 NFS 作為後端的 storage">
 <meta property="og:locale" content="zh-tw">
 <meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/dynamic-volume-provision.jpg">
-<meta property="og:updated_time" content="2019-04-29T05:45:11.927Z">
+<meta property="og:updated_time" content="2019-05-06T02:38:54.732Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[Kubernetes] 設定 StorageClass (以 NFS 為例)">
 <meta name="twitter:description" content="本篇文章介紹如何在 Kubernetes 上設定 StorageClass，並以 NFS 作為後端的 storage">
@@ -399,7 +399,17 @@
       
 
       
-        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>之前有介紹過 StorageClass 搭配 GlusterFS + Heketi 作為後端的 storage，但 GlusterFS 可能對很多人來說還是有點複雜，因此想說介紹一個比較容易入門的 storage，學習 k8s 的過程才不會覺得很艱難。</p>
+        <h1 id="2019-05-06-更新"><a href="#2019-05-06-更新" class="headerlink" title="2019-05-06 更新"></a>2019-05-06 更新</h1><p>目前在 NFS storage 的部份，已經變成 <code>NFS Provisioner</code> &amp; <code>NFS-Client Provisioner</code> 兩種了：</p>
+<ul>
+<li><p><a href="https://github.com/kubernetes-incubator/external-storage/tree/master/nfs" target="_blank" rel="noopener">NFS Provisioner</a>：會在 k8s 中啟動一個 NFS server 來使用</p>
+</li>
+<li><p><a href="https://github.com/kubernetes-incubator/external-storage/tree/master/nfs-client" target="_blank" rel="noopener">NFS-Client Provisioner</a>：這部份跟下面原本介紹的相同，使用者必須先設定好一個外部的 NFS server，然後將這個 plugin 指定過去，它就會在需要時在上面建立目錄並存放資料。</p>
+</li>
+</ul>
+<blockquote>
+<p>若有 NFS external storage 的需求，可以參考上面新的連結來設定，新的方法已經改用 Helm 來管理，佈署安裝的流程變得相當簡單</p>
+</blockquote>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>之前有介紹過 StorageClass 搭配 GlusterFS + Heketi 作為後端的 storage，但 GlusterFS 可能對很多人來說還是有點複雜，因此想說介紹一個比較容易入門的 storage，學習 k8s 的過程才不會覺得很艱難。</p>
 <p>只要用過 Linux，大概 NFS 幾乎就會是個必學的服務，因此這邊要介紹以 NFS 作為 StorageClass 後端 storage 的設定方式，讓 k8s 可以動態的在 NFS share 上產生所需要 volume 來使用。</p>
 <h1 id="運作原理說明"><a href="#運作原理說明" class="headerlink" title="運作原理說明"></a>運作原理說明</h1><p>基本上要正確設定 StorageClass + NFS，大概要準備以下幾個東西：</p>
 <ol>
@@ -688,7 +698,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#運作原理說明"><span class="nav-number">2.</span> <span class="nav-text">運作原理說明</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#設定過程"><span class="nav-number">3.</span> <span class="nav-text">設定過程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#設定-NFS-share"><span class="nav-number">3.1.</span> <span class="nav-text">設定 NFS share</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#設定-Service-Account-amp-對應權限"><span class="nav-number">3.2.</span> <span class="nav-text">設定 Service Account &amp; 對應權限</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安裝-NFS-provisioner"><span class="nav-number">3.3.</span> <span class="nav-text">安裝 NFS provisioner</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#建立-StorageClass"><span class="nav-number">3.4.</span> <span class="nav-text">建立 StorageClass</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#驗證佈署是否成功"><span class="nav-number">4.</span> <span class="nav-text">驗證佈署是否成功</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#建立-PVC"><span class="nav-number">4.1.</span> <span class="nav-text">建立 PVC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#建立-Pod"><span class="nav-number">4.2.</span> <span class="nav-text">建立 Pod</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#2019-05-06-更新"><span class="nav-number">1.</span> <span class="nav-text">2019-05-06 更新</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">2.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#運作原理說明"><span class="nav-number">3.</span> <span class="nav-text">運作原理說明</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#設定過程"><span class="nav-number">4.</span> <span class="nav-text">設定過程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#設定-NFS-share"><span class="nav-number">4.1.</span> <span class="nav-text">設定 NFS share</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#設定-Service-Account-amp-對應權限"><span class="nav-number">4.2.</span> <span class="nav-text">設定 Service Account &amp; 對應權限</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安裝-NFS-provisioner"><span class="nav-number">4.3.</span> <span class="nav-text">安裝 NFS provisioner</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#建立-StorageClass"><span class="nav-number">4.4.</span> <span class="nav-text">建立 StorageClass</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#驗證佈署是否成功"><span class="nav-number">5.</span> <span class="nav-text">驗證佈署是否成功</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#建立-PVC"><span class="nav-number">5.1.</span> <span class="nav-text">建立 PVC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#建立-Pod"><span class="nav-number">5.2.</span> <span class="nav-text">建立 Pod</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text">References</span></a></li></ol></div>
             
 
           </div>
