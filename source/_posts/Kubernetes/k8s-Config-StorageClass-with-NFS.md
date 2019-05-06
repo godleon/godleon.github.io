@@ -15,6 +15,17 @@ tags:
   - NFS
 ---
 
+2019-05-06 更新
+==============
+
+目前在 NFS storage 的部份，已經變成 `NFS Provisioner` & `NFS-Client Provisioner` 兩種了：
+
+- [NFS Provisioner](https://github.com/kubernetes-incubator/external-storage/tree/master/nfs)：會在 k8s 中啟動一個 NFS server 來使用
+
+- [NFS-Client Provisioner](https://github.com/kubernetes-incubator/external-storage/tree/master/nfs-client)：這部份跟下面原本介紹的相同，使用者必須先設定好一個外部的 NFS server，然後將這個 plugin 指定過去，它就會在需要時在上面建立目錄並存放資料。
+
+> 若有 NFS external storage 的需求，可以參考上面新的連結來設定，新的方法已經改用 Helm 來管理，佈署安裝的流程變得相當簡單
+
 
 前言
 ===
