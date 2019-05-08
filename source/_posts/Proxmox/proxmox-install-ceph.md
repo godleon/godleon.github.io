@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Proxmox] 安裝 Ceph Luminous"
+title: "[Proxmox VE] 安裝 Ceph Luminous"
 description: "本篇文章介紹在 Proxmox 5.2.1 上安裝 Ceph Luminous 的正確流程"
 date: 2018-10-11 17:15:00
 comments: true

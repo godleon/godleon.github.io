@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Proxmox] 使用 cloud-init 快速產生 VM"
+title: "[Proxmox VE] 使用 cloud-init 快速產生 VM"
 description: "This article introduces how to use cloud-init to generate multiple VMs in a short time"
 date: 2018-06-07 09:50:00
 comments: true
