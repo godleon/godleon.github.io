@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>[Proxmox VE] 修復 cluster 發生的 no quorum 錯誤</title>
+      <link href="/blog/Proxmox/Proxmox-Fix-No-Quorum-issue/"/>
+      <url>/blog/Proxmox/Proxmox-Fix-No-Quorum-issue/</url>
+      
+        <content type="html"><![CDATA[<p>今天同事突然跟我說內部 Redmine 服務掛點了，想說它是執行在 OpenShift 上，且這個 OpenShift 是由散佈在 Proxmox cluster 中的多個 VM 所組成，要掛掉實在不容易，結果登入 Proxmox web console，發現整個 cluster 完全都異常，每個 node 都出現錯誤，且對 VM 的操作都會出現以下錯誤訊息：</p><blockquote><p>TASK ERROR: cluster not ready – no quorum?</p></blockquote><p>接著到每一台 node 上執行 <code>pvecm status</code>，會出現以下兩種情況：</p><ol><li><p><code>Cannot initialize CMAP service</code></p></li><li><p><code>Quorum: X Activity blocked</code> (其中 X 為某個數字)</p></li></ol><p>很明顯 cluster status 在同步上有問題，上網找了一下資料，找到了解決方式，出現第一種錯誤的 node，執行以下指令後可以修復：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ systemctl restart pve-cluster.service</span><br><span class="line"></span><br><span class="line">$ systemctl restart pvedaemon.service</span><br><span class="line"></span><br><span class="line">$ systemctl restart pveproxy.service</span><br><span class="line"></span><br><span class="line">$ systemctl restart corosync.service</span><br></pre></td></tr></table></figure><p>而第二種錯誤的 node，則需要執行以下指令來修復：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$ pvecm expected 1</span><br><span class="line"></span><br><span class="line">$ systemctl restart pve-cluster.service</span><br><span class="line"></span><br><span class="line">$ systemctl restart pvedaemon.service</span><br><span class="line"></span><br><span class="line">$ systemctl restart pveproxy.service</span><br><span class="line"></span><br><span class="line">$ systemctl restart corosync.service</span><br></pre></td></tr></table></figure><p>執行以上指令讓 corosync 服務重新啟動，並抓取原本的 cluster 設定，就會恢復正常了。</p><h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul><li><p><a href="http://blog.pulipuli.info/2014/08/proxmox-ve-fix-proxmox-ve-cluster-not.html" target="_blank" rel="noopener">修復Proxmox VE：集叢未啟動 / Fix Proxmox VE: Cluster Not Ready - 布丁布丁吃什麼？</a></p></li><li><p><a href="https://www.hostloc.com/thread-394364-1-1.html" target="_blank" rel="noopener">大佬们 问个proxmox集群的问题-美国VPS综合讨论-全球主机交流论坛 - Powered by Discuz!</a></p></li></ul>]]></content>
+      
+      
+      <categories>
+          
+          <category> Proxmox </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Proxmox </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>[Prometheus] Basic Concept memo</title>
       <link href="/blog/Prometheus/Prometheus-Basic-Concepts/"/>
       <url>/blog/Prometheus/Prometheus-Basic-Concepts/</url>
@@ -463,7 +488,7 @@
     
     
     <entry>
-      <title>[Proxmox] 安裝 Ceph Luminous</title>
+      <title>[Proxmox VE] 安裝 Ceph Luminous</title>
       <link href="/blog/Proxmox/proxmox-install-ceph/"/>
       <url>/blog/Proxmox/proxmox-install-ceph/</url>
       
@@ -1051,7 +1076,7 @@
     
     
     <entry>
-      <title>[Proxmox] 使用 cloud-init 快速產生 VM</title>
+      <title>[Proxmox VE] 使用 cloud-init 快速產生 VM</title>
       <link href="/blog/Proxmox/Proxmox-use-cloud-init-to-provision-vm/"/>
       <url>/blog/Proxmox/Proxmox-use-cloud-init-to-provision-vm/</url>
       
