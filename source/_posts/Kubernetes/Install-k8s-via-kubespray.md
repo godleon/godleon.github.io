@@ -12,6 +12,11 @@ tags:
   - Kubespray
 ---
 
+## 2019-05-21 Update
+
+目前已經支援到 `v1.14.1`，並預設安裝 multus CNI plugin，並以 calico 作為預設使用的 CNI plugin
+
+
 此篇文章介紹如何使用 [Kubespray](https://github.com/kubernetes-incubator/kubespray) 安裝 Kubernetes
 
 
@@ -150,11 +155,20 @@ kubeconfig_localhost: true
 kube_feature_gates:
   - "TTLAfterFinished=true" 
 
+#  啟用特定的 admission controller
+kube_apiserver_enable_admission_plugins:
+  - NodeRestriction
+  - AlwaysPullImages
+  - DefaultStorageClass
+
 # k8s 版本
 kube_version: v1.14.1
 
 # CNI plugin
 kube_network_plugin: calico
+
+# 預設安裝 multus CNI plugin，並使用上面定義的 calico 作為預設的 CNI
+kube_network_plugin_multus: true
 
 # k8s cluster 內部使用的 DNS server
 dns_mode: coredns
@@ -189,7 +203,7 @@ $ ./start.sh
 
 整個安裝過程大約需要耗費十來分鐘(端看網路 & VM 運行速度)。
 
-安裝完之後可以在執行安裝指令的機器(**bootstrapper**)上找到 kubeconfig，位置在 `/tmp/kubernetes-installation-template/kubeconfig/admin.conf`。
+安裝完之後會額外將 kuebconfig 放到 master node 的使用者家目錄中，因此在 master node 中就可以直接執行 kubectl 的指令對 Kubernetes 進行操作，
 
 > 若安裝過程失敗，可嘗試再執行一次 `./start.sh`，應該就會安裝成功了!
 
