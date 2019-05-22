@@ -154,4 +154,4 @@ Reference
 
 
 
-- [telegraf Kube Inventory Plugin]: https://github.com/influxdata/telegraf/blob/release-1.10/plugins/inputs/kube_inventory/README.md "telegraf Kube Inventory Plugin"
+[telegraf Kube Inventory Plugin]: https://github.com/influxdata/telegraf/blob/release-1.10/plugins/inputs/kube_inventory/README.md "telegraf Kube Inventory Plugin"
