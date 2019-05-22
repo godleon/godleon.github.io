@@ -360,7 +360,7 @@ Remote State Storage
 
 前面有提到使用 terraform 時很重要的一個課題就是如何管理 state，若是自己私下練習可以放在本機就好，但是當 infra 有很多人同時維護時，可以就需要放在遠端可透過 Internet 存取的地方；terraform 提供了很多 remote state storage babckend 的支援，像是：s3, consul, etcd, terraform cloud ... 等等。
 
-由於目前將 state 放到 terraform cloud 是免費的(此外在 user, workspace 都沒有使用數量的限制，加上官方宣稱使用 Valut 做加密)，因此這邊就使用 terraform cloud 來做測試。
+由於目前將 state 放到 terraform cloud 是免費的(此外在 user, workspace 都沒有使用數量的限制，加上官方宣稱使用 [Vault](https://www.vaultproject.io/) 作管理加密)，因此這邊就使用 terraform cloud 來做測試。
 
 首先要取得存取 terraform cloud 的 token，步驟如下：
 
