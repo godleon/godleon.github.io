@@ -17,8 +17,6 @@ tags:
 目前已經支援到 `v1.14.1`，並預設安裝 multus CNI plugin，並以 calico 作為預設使用的 CNI plugin
 
 
-此篇文章介紹如何使用 [Kubespray](https://github.com/kubernetes-incubator/kubespray) 安裝 Kubernetes
-
 
 Current Status
 ==============
