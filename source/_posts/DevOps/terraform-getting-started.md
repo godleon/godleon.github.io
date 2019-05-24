@@ -112,17 +112,17 @@ provider "aws" {
 # resource <resource_type> <resource_name>
 resource "aws_instance" "example" {
   ami             = "ami-0ccdbc8c1cb7957be"
-    instance_type   = "t2.micro"
+  instance_type   = "t2.micro"
 }
 
 resource "aws_eip" "ip" {
-  instance = "${aws_instance.example.id}"
+  instance = aws_instance.example.id
 }
 ```
 
 由於我們指定 EIP 要綁定 instance，因此 terraform 會自動先建立 instance，取得 instance id 後，再建立 EIP。
 
-透過 `${aws_instance.example.id}` 的設定，Terraform 可以自動判定 resource 之間的相依性，而使用者在撰寫 terraform configuration 時，則必須儘可能的將這一類的資訊給定清楚。
+透過 `aws_instance.example.id` 的設定，Terraform 可以自動判定 resource 之間的相依性，而使用者在撰寫 terraform configuration 時，則必須儘可能的將這一類的資訊給定清楚。
 
 除了上面的範例可以明確讓 terraform 知道 resource dependency 之外，也可以透過 `depends_on` 關鍵字來強制 resource 按照特定的順序來產生，以下是個範例：
 
@@ -143,11 +143,11 @@ resource "aws_instance" "example" {
     ami             = "ami-0ccdbc8c1cb7957be"
     instance_type   = "t2.micro"
 
-    depends_on      = ["aws_s3_bucket.example"]
+    depends_on      = [ aws_s3_bucket.example ]
 }
 
 resource "aws_eip" "ip" {
-  instance = "${aws_instance.example.id}"
+  instance = aws_instance.example.id
 }
 ```
 
@@ -176,7 +176,7 @@ resource "aws_instance" "example" {
     instance_type   = "t2.micro"
     key_name        = "godleon"
 
-    depends_on = ["aws_s3_bucket.example"]
+    depends_on = [ aws_s3_bucket.example ]
 
     provisioner "local-exec" {
         command = "echo ${aws_instance.example.public_ip} > /tmp/ip_address.txt"
@@ -210,9 +210,9 @@ variable "region" {
 
 ```bash
 provider "aws" {
-  access_key    = "${var.access_key}"
-  secret_key    = "${var.secret_key}"
-  region        = "${var.region}"
+  access_key    = var.access_key
+  secret_key    = var.secret_key
+  region        = var.region
 }
 ```
 
@@ -249,7 +249,7 @@ terraform 還支援了較為複雜的資料結構變數，分別是 **List** & *
 variable "cidrs" { default = [] }
 
 # 也可以明確的宣告其變數型態
-variable "cidrs" { type = "list" }
+variable "cidrs" { type = list }
 
 # 在 terraform.tfvars 中可用下面方式給入值
 cidrs = [ "10.0.0.0/16", "10.1.0.0/16" ]
@@ -291,7 +291,7 @@ Output Variables
 ```bash
 # https://www.terraform.io/docs/providers/aws/d/eip.html
 output "ip" {
-  value = "${aws_eip.ip.public_ip}"
+  value = aws_eip.ip.public_ip
 }
 ```
 
@@ -347,7 +347,7 @@ module "consul" {
 ```bash
 # 取得 auto-scaling group 的名稱
 output "consul_server_asg_name" {
-  value = "${module.consul.asg_name_servers}"
+  value = module.consul.asg_name_servers
 }
 ```
 
@@ -418,3 +418,5 @@ References
 - [Example Configurations - Terraform by HashiCorp](https://www.terraform.io/intro/examples/index.html)
 
 - [Import - Terraform by HashiCorp](https://www.terraform.io/docs/import/index.html)
+
+- [Configuration Language - Terraform by HashiCorp](https://www.terraform.io/docs/configuration/index.html)
