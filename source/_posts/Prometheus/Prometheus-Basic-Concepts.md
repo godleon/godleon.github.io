@@ -6,10 +6,10 @@ date: 2019-03-24 17:00:00
 published: true
 comments: true
 categories:
-  - Kubernetes
+  - Prometheus
 tags:
   - Prometheus
-  - Monitoring
+  - Telemetry
 ---
 
 
