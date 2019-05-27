@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-tw">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/blog/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/blog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/blog/css/main.css?v=5.1.3" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/blog/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Kubernetes,Prometheus,Telemetry,Service Discovery,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="本篇文章介紹如何使用 Prometheus 本身提供的 service discovery 機制(kubernetes_sd_configs) 搭配 relabel 的功能，對 Kubernetes resource 進行監控">
+<meta name="keywords" content="Kubernetes,Prometheus,Telemetry,Service Discovery">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[Prometheus] Service Discovery &amp; Relabel ">
+<meta property="og:url" content="https://godleon.github.io/blog/Prometheus/Prometheus-Relabel/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="本篇文章介紹如何使用 Prometheus 本身提供的 service discovery 機制(kubernetes_sd_configs) 搭配 relabel 的功能，對 Kubernetes resource 進行監控">
+<meta property="og:locale" content="zh-tw">
+<meta property="og:image" content="https://godleon.github.io/blog/images/prometheus/prometheus-k8s-nodes-before-relabel.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/prometheus/prometheus-k8s-nodes-after-relabel-1.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/prometheus/prometheus-k8s-nodes-after-relabel-2.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/prometheus/prometheus-k8s-nodes-after-relabel-3.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/prometheus/prometheus-k8s-pods-before-relabel.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/prometheus/prometheus-k8s-pods-before-relabel-2.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/prometheus/prometheus-k8s-pods-after-relabel-1.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/prometheus/prometheus-k8s-pods-after-relabel-2.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/prometheus/prometheus-k8s-pods-after-relabel-3.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/prometheus/prometheus-k8s-pods-after-relabel-4.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/prometheus/prometheus-k8s-pods-after-relabel-5.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/prometheus/prometheus-k8s-services-before-relabel.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/prometheus/prometheus-k8s-services-after-relabel-1.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/prometheus/prometheus-k8s-services-after-relabel-2.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/prometheus/prometheus-k8s-services-after-relabel-3.png">
+<meta property="og:updated_time" content="2019-05-27T08:52:33.830Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[Prometheus] Service Discovery &amp; Relabel ">
+<meta name="twitter:description" content="本篇文章介紹如何使用 Prometheus 本身提供的 service discovery 機制(kubernetes_sd_configs) 搭配 relabel 的功能，對 Kubernetes resource 進行監控">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/prometheus/prometheus-k8s-nodes-before-relabel.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://godleon.github.io/blog/Prometheus/Prometheus-Relabel/">
+
+
+
+
+
+  <title>[Prometheus] Service Discovery & Relabel  | 小信豬的原始部落</title>
+  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-703592-7', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-tw">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">小信豬的原始部落</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/blog/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首頁
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/blog/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            標籤
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/blog/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分類
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/blog/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            歸檔
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            檢索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/blog/Prometheus/Prometheus-Relabel/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">[Prometheus] Service Discovery & Relabel </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">發表於</span>
+              
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2019-05-27T08:50:00+00:00">
+                2019-05-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分類於</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Prometheus/" itemprop="url" rel="index">
+                    <span itemprop="name">Prometheus</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/Prometheus/Prometheus-Relabel/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="Prometheus/Prometheus-Relabel/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  本篇文章介紹如何使用 Prometheus 本身提供的 service discovery 機制(kubernetes_sd_configs) 搭配 relabel 的功能，對 Kubernetes resource 進行監控
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Preface"><a href="#Preface" class="headerlink" title="Preface"></a>Preface</h1><p>Relabel 是在 Prometheus 中一個強大的功能，善用 relabel 可以讓資料真正進入到資料庫之前，根據需求完成一些前置處理，了解 relabel 功能怎麼用，在使用 Prometheus 上就可以有許多變化。</p>
+<p>若是使用到 service discovery 的功能就會發現，動態的 instance 要用 static configuration 做到想要的設定是很困難的，而藉由 relabel 的功能就可以根據預先定義好的規則，將資料進行處理。</p>
+<p>以下以 Kubernetes 為例(使用 <code>kubernetes_sd_configs</code>)，做一些 relabel 的示範 &amp; 說明，而在 <strong>kubernetes_sd_configs</strong>，共有以下五種 role 的資料可以動態擷取，分別是：</p>
+<ul>
+<li><p>node</p>
+</li>
+<li><p>service</p>
+</li>
+<li><p>pod</p>
+</li>
+<li><p>endpoints</p>
+</li>
+<li><p>ingress</p>
+</li>
+</ul>
+<h1 id="Node"><a href="#Node" class="headerlink" title="Node"></a>Node</h1><p>一開始設定使用 <code>kubernetes_sd_configs</code> 取得 <code>node</code> 的資訊，設定如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">...</span> <span class="string">(略)</span></span><br><span class="line"><span class="attr">scrape_configs:</span></span><br><span class="line"><span class="attr">- job_name:</span> <span class="string">kubernetes-nodes-kubelet</span></span><br><span class="line"><span class="attr">  kubernetes_sd_configs:</span></span><br><span class="line"><span class="attr">  - role:</span> <span class="string">node</span></span><br><span class="line"><span class="attr">  scheme:</span> <span class="string">https</span></span><br><span class="line"><span class="attr">  tls_config:</span></span><br><span class="line"><span class="attr">    ca_file:</span> <span class="string">/var/run/secrets/kubernetes.io/serviceaccount/ca.crt</span></span><br><span class="line"><span class="attr">    insecure_skip_verify:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">  bearer_token_file:</span> <span class="string">/var/run/secrets/kubernetes.io/serviceaccount/token</span></span><br></pre></td></tr></table></figure>
+<p>套用到 Prometheus 之後，發現抓取到的資料似乎不太像是我們想要的，以下的圖是 relable 之前的樣子：</p>
+<p><img src="/blog/images/prometheus/prometheus-k8s-nodes-before-relabel.png" alt="Prometheus - k8s before relabel"></p>
+<p>接著我們要做的是，將原本以 external IP 擷取 node status 的方式，改成透過 internal k8s API server 來取得資訊，而從 k8s cluster 內部要取得 node metric 的方式，是透過以下的網址：</p>
+<blockquote>
+<p><a href="https://kubernetes.default.svc:443/api/v1/nodes/`[NODE_NAME]`/proxy/metrics/cadvisor" target="_blank" rel="noopener">https://kubernetes.default.svc:443/api/v1/nodes/`[NODE_NAME]`/proxy/metrics/cadvisor</a></p>
+</blockquote>
+<p>但目前的 endpoint 是 <code>https://10.103.9.x:10250/metrics</code>，因此以下要來進行一些 relabel 的動作：</p>
+<h2 id="修改-Endpoint-IP"><a href="#修改-Endpoint-IP" class="headerlink" title="修改 Endpoint IP"></a>修改 Endpoint IP</h2><p>首先要將 Endpoint 中的 IP 改成 <code>kubernetes.default.svc:443</code>，可以透過以下設定：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">relabel_configs:</span></span><br><span class="line">  <span class="comment"># 要修改 endpoint 中的 `__address__` value，並非修改 Label 本身</span></span><br><span class="line"><span class="attr">  - target_label:</span> <span class="string">__address__</span></span><br><span class="line"><span class="attr">    replacement:</span> <span class="string">kubernetes.default.svc:443</span></span><br></pre></td></tr></table></figure>
+<p>首先必須了解 Endpoint 的值是由 <code>__scheme__</code> + <code>__address__</code> + <code>__metrics_path__</code> 所組成，而上面的設定就是要將 <code>__address__</code> 的部份換成 <code>kubernetes.default.svc:443</code>，因此以上的 relabel 設定就會變成以下結果：</p>
+<p><img src="/blog/images/prometheus/prometheus-k8s-nodes-after-relabel-1.png" alt="Prometheus - k8s after relabel"></p>
+<p>但很明顯，這還沒到結束的程度，Endpoint 的部份還需要更多的加工。</p>
+<blockquote>
+<p><code>/metrics</code> 是預設抓取 metric 的路徑，可以透過 <code>scrape_configs[].metrics_path</code> 調整</p>
+</blockquote>
+<h2 id="修改-metric-path"><a href="#修改-metric-path" class="headerlink" title="修改 metric path"></a>修改 metric path</h2><p>接著要將 metric path 從 <code>/metrics</code> 變成 <code>/api/v1/nodes/[NODE_NAME]/proxy/metrics/cadvisor</code>，但麻煩的事情是，中間 <code>NODE_NAME</code> 的部份會隨著每個 node 而改變，因此這是動態的，那要怎麼解決?</p>
+<p>答案是從現有的 Label metata 中找尋是否有可用的資訊，透過第一張圖可以發現，我們可以用 <code>__meta_kubernetes_node_name</code> 這個 label 取得每個 node 所使用的 node name。</p>
+<p>有了以上的資訊後，可以使用以下設定來修改 metric path：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">relabel_configs:</span></span><br><span class="line">    <span class="comment"># 使用 Label "__meta_kubernetes_node_name" 的值</span></span><br><span class="line"><span class="attr">  - source_labels:</span> <span class="string">[__meta_kubernetes_node_name]</span></span><br><span class="line">    <span class="comment"># 使用所有的值，不經過額外處理</span></span><br><span class="line"><span class="attr">    regex:</span> <span class="string">(.+)</span></span><br><span class="line">    <span class="comment"># 取代 endpoint 中 "__metrics_path__" 的值</span></span><br><span class="line"><span class="attr">    target_label:</span> <span class="string">__metrics_path__</span></span><br><span class="line">    <span class="comment"># $&#123;1&#125; 的部份會由 "__meta_kubernetes_node_name" 的值取代</span></span><br><span class="line"><span class="attr">    replacement:</span> <span class="string">/api/v1/nodes/$&#123;1&#125;/proxy/metrics/cadvisor</span></span><br></pre></td></tr></table></figure>
+<p>透過以上的 relabel 設定後，結果會變成如下：</p>
+<p><img src="/blog/images/prometheus/prometheus-k8s-nodes-after-relabel-2.png" alt="Prometheus - k8s after relabel"></p>
+<h2 id="為資料標記更多-Label"><a href="#為資料標記更多-Label" class="headerlink" title="為資料標記更多 Label"></a>為資料標記更多 Label</h2><p>從上圖中可以看到，在 Label 的部份目前只有一個 instance，因此之後在做資料分析 or 處理時，僅有 instance 可以作為依據來處理，這樣看起來似乎不足；此外 <code>kubernetes_sd_configs</code> 提供了許多 metadata 資訊可供使用，而且很多是富有意義的，例如：</p>
+<ul>
+<li><p><code>__meta_kubernetes_node_label_beta_kubernetes_io_os</code></p>
+</li>
+<li><p><code>__meta_kubernetes_node_label_beta_kubernetes_io_arch</code></p>
+</li>
+<li><p><code>__meta_kubernetes_node_label_kubernetes_io_hostname</code></p>
+</li>
+</ul>
+<p>有了上面的 metadata 資訊，我們就可以額外對資料根據 OS, architecture, hostname 進行分類，為了達到此目的，我們可以透過 <code>labelmap</code> 的方式，為每一筆 time series data 加入新的 label 資訊：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">relabel_configs:</span></span><br><span class="line"><span class="attr">  - action:</span> <span class="string">labelmap</span></span><br><span class="line"><span class="attr">    regex:</span> <span class="string">__meta_kubernetes_node_label_(.+)</span></span><br></pre></td></tr></table></figure>
+<p>以上的設定會將 <code>__meta_kubernetes_node_label_</code> 開頭的 metadata，拆開後加入 Label 中，並會在之後的每一筆擷取到的資料中加上這些 label 的資訊，方便使用者進行分類查詢 or 使用。</p>
+<p>以下是設定 labelmap 後的結果：</p>
+<p><img src="/blog/images/prometheus/prometheus-k8s-nodes-after-relabel-3.png" alt="Prometheus - k8s after relabel"></p>
+<h2 id="結論"><a href="#結論" class="headerlink" title="結論"></a>結論</h2><p>經過上面 3 個 relabel 設定後，我們就可以在 k8s cluster 內部的 prometheus server，透過 k8s API server 來取得每個 node 的狀態，以下是完整 configmap 設定：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ConfigMap</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">"prometheus-config"</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="attr">data:</span></span><br><span class="line">  <span class="string">prometheus.yml:</span> <span class="string">|-</span></span><br><span class="line"><span class="attr">    global:</span></span><br><span class="line"><span class="attr">      scrape_interval:</span> <span class="number">15</span><span class="string">s</span></span><br><span class="line"><span class="attr">      external_labels:</span></span><br><span class="line"><span class="attr">        monitor:</span> <span class="string">'codelab-monitor'</span></span><br><span class="line"></span><br><span class="line"><span class="attr">    scrape_configs:</span></span><br><span class="line"><span class="attr">    - job_name:</span> <span class="string">kubernetes-nodes-kubelet</span></span><br><span class="line"><span class="attr">      kubernetes_sd_configs:</span></span><br><span class="line"><span class="attr">      - role:</span> <span class="string">node</span></span><br><span class="line"><span class="attr">      scheme:</span> <span class="string">https</span></span><br><span class="line"><span class="attr">      tls_config:</span></span><br><span class="line"><span class="attr">        ca_file:</span> <span class="string">/var/run/secrets/kubernetes.io/serviceaccount/ca.crt</span></span><br><span class="line"><span class="attr">        insecure_skip_verify:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">      bearer_token_file:</span> <span class="string">/var/run/secrets/kubernetes.io/serviceaccount/token</span></span><br><span class="line">      </span><br><span class="line"><span class="attr">      relabel_configs:</span></span><br><span class="line"><span class="attr">      - target_label:</span> <span class="string">__address__</span></span><br><span class="line"><span class="attr">        replacement:</span> <span class="string">kubernetes.default.svc:443</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__meta_kubernetes_node_name]</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="string">(.+)</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">__metrics_path__</span></span><br><span class="line"><span class="attr">        replacement:</span> <span class="string">/api/v1/nodes/$&#123;1&#125;/proxy/metrics/cadvisor</span></span><br><span class="line"><span class="attr">      - action:</span> <span class="string">labelmap</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="string">__meta_kubernetes_node_label_(.+)</span></span><br></pre></td></tr></table></figure>
+<h1 id="Pod"><a href="#Pod" class="headerlink" title="Pod"></a>Pod</h1><p>一開始先開啟 pod scrape 的功能：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">- job_name:</span> <span class="string">kubernetes-pods</span></span><br><span class="line"><span class="attr">  kubernetes_sd_configs:</span></span><br><span class="line"><span class="attr">  - role:</span> <span class="string">pod</span></span><br></pre></td></tr></table></figure>
+<p>以下的圖是尚未做任何 relabel 設定的結果：</p>
+<p><img src="/blog/images/prometheus/prometheus-k8s-pods-before-relabel.png" alt="Prometheus - k8s pod before relabel"></p>
+<p><img src="/blog/images/prometheus/prometheus-k8s-pods-before-relabel-2.png" alt="Prometheus - k8s pod before relabel"></p>
+<h2 id="只留下需要監控的-Pod"><a href="#只留下需要監控的-Pod" class="headerlink" title="只留下需要監控的 Pod"></a>只留下需要監控的 Pod</h2><p>在 k8s 中有一些 pod 其實不是我們想要關心的，真的想要關心的 pod 會在 YAML configuration 中設定 <code>metadata.annotations.prometheus.io/scrape</code> 設定為 <code>true</code>，prometheus 在擷取 pod 相關資訊時，就會取得 Label <code>__meta_kubernetes_pod_annotation_prometheus_io_scrape</code> 的值為 <strong>true</strong>，因此透過以下設定只取得我們想要留下的 pod 資訊：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">relabel_configs:</span></span><br><span class="line"><span class="attr">  - source_labels:</span> <span class="string">[__meta_kubernetes_pod_annotation_prometheus_io_scrape]</span></span><br><span class="line"><span class="attr">    action:</span> <span class="string">"keep"</span></span><br><span class="line"><span class="attr">    regex:</span> <span class="string">"true"</span></span><br></pre></td></tr></table></figure>
+<p>上面的設定會檢查 Label <code>__meta_kubernetes_pod_annotation_prometheus_io_scrape</code> 的值，只有是 <code>true</code> 的 target 才會被保留下來，結果很多 pod 就被過濾(drop)掉了：</p>
+<p><img src="/blog/images/prometheus/prometheus-k8s-pods-after-relabel-1.png" alt="Prometheus - k8s pods after relabel"></p>
+<p>接著還要再移除掉 <code>calico-node</code>，為什麼呢? 因為 calico 有專門口以用來監控的工具 <a href="https://docs.projectcalico.org/v3.5/reference/felix/prometheus" target="_blank" rel="noopener">felix</a>，所以這邊就先拿 calico 的部份：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">relabel_configs:</span></span><br><span class="line"><span class="attr">  - source_labels:</span> <span class="string">[__meta_kubernetes_pod_container_name]</span></span><br><span class="line"><span class="attr">    action:</span> <span class="string">"drop"</span></span><br><span class="line"><span class="attr">    regex:</span> <span class="string">"calico-node"</span></span><br></pre></td></tr></table></figure>
+<p>上面的設定會檢查 Label <code>__meta_kubernetes_pod_container_name</code> 的值，如果是 <code>calico-node</code>，就會被過濾掉：</p>
+<p><img src="/blog/images/prometheus/prometheus-k8s-pods-after-relabel-2.png" alt="Prometheus - k8s pods after relabel"></p>
+<h2 id="修改監控用的-port-amp-metrics-path"><a href="#修改監控用的-port-amp-metrics-path" class="headerlink" title="修改監控用的 port &amp; metrics path"></a>修改監控用的 port &amp; metrics path</h2><p>在預設的情況下，prometheus 擷取資料的 endpoint 為 <code>__scheme__</code> + <code>__address__</code> + <code>__metrics_path__</code>，但如果實際要擷取資料的位置不是這 3 個變數的組合呢? 就可以用 relabel 來調整。</p>
+<p>透過 YAML 佈署 k8s pod 時，可以額外加上以下兩種資訊：</p>
+<ul>
+<li><p><code>spec.template.metadata.annotations.prometheus.io/port</code></p>
+</li>
+<li><p><code>spec.template.metadata.annotations.prometheus.io/path</code></p>
+</li>
+</ul>
+<p>就會在 Target 中多出以下 Label 可以用：</p>
+<ul>
+<li><p><code>__meta_kubernetes_pod_annotation_prometheus_io_port</code></p>
+</li>
+<li><p><code>__meta_kubernetes_pod_annotation_prometheus_io_path</code></p>
+</li>
+</ul>
+<p>利用以上的 Label 就可以用來調整實際擷取 metrics 資訊的位置，以下是調整範例：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">relabel_configs:</span></span><br><span class="line"><span class="attr">  - source_labels:</span> <span class="string">[__address__,</span> <span class="string">__meta_kubernetes_pod_annotation_prometheus_io_port]</span></span><br><span class="line"><span class="attr">    action:</span> <span class="string">replace</span></span><br><span class="line"><span class="attr">    regex:</span> <span class="string">([^:]+)(?::\d+)?;(\d+)</span></span><br><span class="line"><span class="attr">    replacement:</span> <span class="string">$1:$2</span></span><br><span class="line"><span class="attr">    target_label:</span> <span class="string">__address__</span></span><br><span class="line"><span class="attr">  - source_labels:</span> <span class="string">[__meta_kubernetes_pod_annotation_prometheus_io_path]</span></span><br><span class="line"><span class="attr">    action:</span> <span class="string">replace</span></span><br><span class="line"><span class="attr">    target_label:</span> <span class="string">__metrics_path__</span></span><br><span class="line"><span class="attr">    regex:</span> <span class="string">"(.+)"</span></span><br></pre></td></tr></table></figure>
+<h2 id="為資料標記更多-Label-1"><a href="#為資料標記更多-Label-1" class="headerlink" title="為資料標記更多 Label"></a>為資料標記更多 Label</h2><h3 id="增加-pod-Label-資訊"><a href="#增加-pod-Label-資訊" class="headerlink" title="增加 pod Label 資訊"></a>增加 pod Label 資訊</h3><p>在佈署 pod 的過程中，我們通常會透過 Label(<code>spec.template.metadata.labels</code>) 的方式為 pod 加上一些 metadata，例如：<code>app: prometheus</code>, <code>app: node-exporter</code>，而這樣的資料，在 prometheus 中會自動生成相對應的 metadata Label 可用，以上面的例子來說：</p>
+<ul>
+<li><p><code>app: prometheus</code> -&gt; <code>__meta_kubernetes_pod_label_app=&quot;prometheus&quot;</code></p>
+</li>
+<li><p><code>app: node-exporter</code> -&gt; <code>__meta_kubernetes_pod_label_app=&quot;node-exporter&quot;</code></p>
+</li>
+</ul>
+<p>而我們希望可以在每一筆 time series data 中可以加上這樣的 metadata，因此就可以透過 relabel 的方式來處理：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">relabel_configs:</span></span><br><span class="line"><span class="attr">  - action:</span> <span class="string">labelmap</span></span><br><span class="line"><span class="attr">    regex:</span> <span class="string">__meta_kubernetes_pod_label_(.+)</span></span><br></pre></td></tr></table></figure>
+<p>結果變成如下：</p>
+<p><img src="/blog/images/prometheus/prometheus-k8s-pods-after-relabel-3.png" alt="Prometheus - k8s pods after relabel"></p>
+<h3 id="增加-namespace-資訊"><a href="#增加-namespace-資訊" class="headerlink" title="增加 namespace 資訊"></a>增加 namespace 資訊</h3><p>此外，由於 k8s cluster 中資源的 isolation 是用 namespace 實現的，因此我們希望每筆 time series data 可以同時帶著 namespace 的資訊，這時可以從 <code>__meta_kubernetes_namespace</code> 來著手，利用以下設定來完成：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">relabel_configs:</span></span><br><span class="line"><span class="attr">  - source_labels:</span> <span class="string">[__meta_kubernetes_namespace]</span></span><br><span class="line"><span class="attr">    action:</span> <span class="string">replace</span></span><br><span class="line"><span class="attr">    target_label:</span> <span class="string">kubernetes_namespace</span></span><br></pre></td></tr></table></figure>
+<p>結果就多了 <code>kubernetes_namespace</code> label：</p>
+<p><img src="/blog/images/prometheus/prometheus-k8s-pods-after-relabel-4.png" alt="Prometheus - k8s pods after relabel"></p>
+<h3 id="增加-pod-name-資訊"><a href="#增加-pod-name-資訊" class="headerlink" title="增加 pod name 資訊"></a>增加 pod name 資訊</h3><p>同上，我們希望可以增加 pod name 資訊(資料來源為 <code>__meta_kubernetes_pod_name</code>)，可用下面的設定：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">relabel_configs:</span></span><br><span class="line"><span class="attr">  - source_labels:</span> <span class="string">[__meta_kubernetes_pod_name]</span></span><br><span class="line"><span class="attr">    action:</span> <span class="string">replace</span></span><br><span class="line"><span class="attr">    target_label:</span> <span class="string">kubernetes_pod_name</span></span><br></pre></td></tr></table></figure>
+<p>結果就多了 <code>kubernetes_pod_name</code> label：</p>
+<p><img src="/blog/images/prometheus/prometheus-k8s-pods-after-relabel-5.png" alt="Prometheus - k8s pods after relabel"></p>
+<h2 id="結論-1"><a href="#結論-1" class="headerlink" title="結論"></a>結論</h2><p>經過上面的 relabel 設定後，我們就可以在 k8s cluster 內部的 prometheus server，取得我們所需要監控的 pod 資訊，以下是完整 configmap 設定：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ConfigMap</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">"prometheus-config"</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="attr">data:</span></span><br><span class="line">  <span class="string">prometheus.yml:</span> <span class="string">|-</span></span><br><span class="line"><span class="attr">    global:</span></span><br><span class="line"><span class="attr">      scrape_interval:</span> <span class="number">5</span><span class="string">s</span></span><br><span class="line"><span class="attr">      external_labels:</span></span><br><span class="line"><span class="attr">        monitor:</span> <span class="string">'codelab-monitor'</span></span><br><span class="line"></span><br><span class="line"><span class="attr">    scrape_configs:</span></span><br><span class="line"><span class="attr">    - job_name:</span> <span class="string">kubernetes-pods</span></span><br><span class="line"><span class="attr">      kubernetes_sd_configs:</span></span><br><span class="line"><span class="attr">      - role:</span> <span class="string">pod</span></span><br><span class="line"><span class="attr">      relabel_configs:</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__meta_kubernetes_pod_annotation_prometheus_io_scrape]</span></span><br><span class="line"><span class="attr">        action:</span> <span class="string">"keep"</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="string">"true"</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__meta_kubernetes_pod_container_name]</span></span><br><span class="line"><span class="attr">        action:</span> <span class="string">"drop"</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="string">"calico-node"</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__address__,</span> <span class="string">__meta_kubernetes_pod_annotation_prometheus_io_port]</span></span><br><span class="line"><span class="attr">        action:</span> <span class="string">replace</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="string">([^:]+)(?::\d+)?;(\d+)</span></span><br><span class="line"><span class="attr">        replacement:</span> <span class="string">$1:$2</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">__address__</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__meta_kubernetes_pod_annotation_prometheus_io_path]</span></span><br><span class="line"><span class="attr">        action:</span> <span class="string">replace</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">__metrics_path__</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="string">"(.+)"</span></span><br><span class="line"><span class="attr">      - action:</span> <span class="string">labelmap</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="string">__meta_kubernetes_pod_label_(.+)</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__meta_kubernetes_namespace]</span></span><br><span class="line"><span class="attr">        action:</span> <span class="string">replace</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">kubernetes_namespace</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__meta_kubernetes_pod_name]</span></span><br><span class="line"><span class="attr">        action:</span> <span class="string">replace</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">kubernetes_pod_name</span></span><br></pre></td></tr></table></figure>
+<h1 id="Service"><a href="#Service" class="headerlink" title="Service"></a>Service</h1><p>在 kubernetes service 的部份，我們希望可以透過 probe 的方式，檢查 service 是否會回應，首先先開啟 k8s 的 service scrape 的功能：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">scrape_configs:</span></span><br><span class="line"><span class="attr">  - job_name:</span> <span class="string">'kubernetes-services'</span></span><br><span class="line"><span class="attr">    kubernetes_sd_configs:</span></span><br><span class="line"><span class="attr">    - role:</span> <span class="string">service</span></span><br></pre></td></tr></table></figure>
+<p>以下是佈署後的結果結果：</p>
+<p><img src="/blog/images/prometheus/prometheus-k8s-services-before-relabel.png" alt="Prometheus - k8s service before relabel"></p>
+<h2 id="化繁為簡"><a href="#化繁為簡" class="headerlink" title="化繁為簡"></a>化繁為簡</h2><p>此時假如需要監控的 service 有上百個呢? 同時對上百個 service probe 對 prometheus 來說也是挺辛苦的事情，此時就可以在 prometheus 與眾多 service 之間放一個 aggregator 的角色，這裡我們選用的是 <a href="https://github.com/prometheus/blackbox_exporter" target="_blank" rel="noopener">Blackbox Prober Exporter</a>。</p>
+<blockquote>
+<p>Blackbox Exporter 允許使用者透過 HTTP、HTTPS、DNS、TCP &amp; ICMP …. 等協定來進行 probe</p>
+</blockquote>
+<p>在 k8s 中套用以下設定以安裝 blackbox exporter：(使用的 namespace 為 <code>kube-system</code>)</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">blackbox-exporter</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">blackbox-exporter</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  ports:</span></span><br><span class="line"><span class="attr">  - name:</span> <span class="string">blackbox</span></span><br><span class="line"><span class="attr">    port:</span> <span class="number">9115</span></span><br><span class="line"><span class="attr">    protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">blackbox-exporter</span></span><br><span class="line"><span class="attr">  type:</span> <span class="string">ClusterIP</span></span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">extensions/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">blackbox-exporter</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">blackbox-exporter</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  replicas:</span> <span class="number">1</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    matchLabels:</span></span><br><span class="line"><span class="attr">      app:</span> <span class="string">blackbox-exporter</span></span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        app:</span> <span class="string">blackbox-exporter</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">      - image:</span> <span class="string">prom/blackbox-exporter</span></span><br><span class="line"><span class="attr">        imagePullPolicy:</span> <span class="string">IfNotPresent</span></span><br><span class="line"><span class="attr">        name:</span> <span class="string">blackbox-exporter</span></span><br></pre></td></tr></table></figure>
+<p>在設定 blackbox exporter 之前，我們要了解一下 blackbox exporter 的使用方式，首先要先說明架構，原本的架構如下：</p>
+<blockquote>
+<p><code>Prometheus</code> –&gt; <code>Service</code></p>
+</blockquote>
+<p>若是加入了 blackbox exporter 之後，會變成如下：</p>
+<blockquote>
+<p><code>Prometheus</code> –&gt; <code>Blackbox Exporter</code> –&gt; <code>Service</code></p>
+</blockquote>
+<p>而正確的使用的方式呢? 要注意的地方有兩點：</p>
+<ol>
+<li><p>endpoint 要改成 <code>http://[Blackbox_URL]:9115/probe</code></p>
+</li>
+<li><p>要額外給入 target，告知 blackbox exporter 要探測的對象</p>
+</li>
+</ol>
+<p>所以此時 prometheus 的設定會變成如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">scrape_configs:</span></span><br><span class="line"><span class="attr">  - job_name:</span> <span class="string">'kubernetes-services'</span></span><br><span class="line"><span class="attr">    metrics_path:</span> <span class="string">/probe</span></span><br><span class="line"><span class="attr">    params:</span></span><br><span class="line">      <span class="comment"># 指定 blackbox exporter 使用 http_2xx module</span></span><br><span class="line">      <span class="comment"># 同時也有 http_post_2xx, tcp_connect, ping ... 等 module 可用</span></span><br><span class="line"><span class="attr">      module:</span> <span class="string">[http_2xx]</span></span><br><span class="line"><span class="attr">    kubernetes_sd_configs:</span></span><br><span class="line"><span class="attr">    - role:</span> <span class="string">service</span></span><br><span class="line"><span class="attr">    relabel_configs:</span></span><br><span class="line">    <span class="comment"># 將 service URL 的資訊新增到 target 中</span></span><br><span class="line"><span class="attr">    - source_labels:</span> <span class="string">[__address__]</span></span><br><span class="line"><span class="attr">      target_label:</span> <span class="string">__param_target</span></span><br><span class="line">    <span class="comment"># 將 endpoint 全部改成 blackbox exporter URL</span></span><br><span class="line"><span class="attr">    - target_label:</span> <span class="string">__address__</span></span><br><span class="line"><span class="attr">      replacement:</span> <span class="attr">blackbox-exporter:9115</span></span><br></pre></td></tr></table></figure>
+<p>以下是 relabel 後的結果：</p>
+<p><img src="/blog/images/prometheus/prometheus-k8s-services-after-relabel-1.png" alt="Prometheus - k8s services after relabel"></p>
+<h2 id="修正錯誤的-instance"><a href="#修正錯誤的-instance" class="headerlink" title="修正錯誤的 instance"></a>修正錯誤的 instance</h2><p>從上圖可以看出，雖然我們已經將擷取資料的對象從多個 service 改成單一的 blackbox exporter，但同時也把 <code>instance</code> 變成了 blackbox exporter，如此一來 time series data 中就無法判斷資料是來自於哪一個 service，因此可以透過以下設定來修正這個問題：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">relabel_configs:</span></span><br><span class="line"><span class="comment"># 將 instace 的值修改成 target 的值</span></span><br><span class="line"><span class="attr">- source_labels:</span> <span class="string">[__param_target]</span></span><br><span class="line"><span class="attr">  target_label:</span> <span class="string">instance</span></span><br></pre></td></tr></table></figure>
+<p>以下是 relabel 後的結果：</p>
+<p><img src="/blog/images/prometheus/prometheus-k8s-services-after-relabel-2.png" alt="Prometheus - k8s services after relabel"></p>
+<h2 id="為資料標記更多-Label-2"><a href="#為資料標記更多-Label-2" class="headerlink" title="為資料標記更多 Label"></a>為資料標記更多 Label</h2><p>但僅有 instance label 是不夠的，我們還可以用以下的設定加入更多的 label，以便於後續的資料處理：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">relabel_configs:</span></span><br><span class="line"><span class="attr">- action:</span> <span class="string">labelmap</span></span><br><span class="line"><span class="attr">  regex:</span> <span class="string">__meta_kubernetes_service_label_(.+)</span></span><br><span class="line"></span><br><span class="line"><span class="attr">- source_labels:</span> <span class="string">[__meta_kubernetes_namespace]</span></span><br><span class="line"><span class="attr">  target_label:</span> <span class="string">kubernetes_namespace</span></span><br><span class="line"></span><br><span class="line"><span class="attr">- source_labels:</span> <span class="string">[__meta_kubernetes_service_name]</span></span><br><span class="line"><span class="attr">  target_label:</span> <span class="string">kubernetes_service_name</span></span><br></pre></td></tr></table></figure>
+<p>以下是 relabel 後的結果：</p>
+<p><img src="/blog/images/prometheus/prometheus-k8s-services-after-relabel-3.png" alt="Prometheus - k8s services after relabel"></p>
+<h2 id="僅留下想要監控的-service"><a href="#僅留下想要監控的-service" class="headerlink" title="僅留下想要監控的 service"></a>僅留下想要監控的 service</h2><p>如果不是每個 service 都想要監控呢? 那可以在需要監控的 service YAML 定義加上 <code>metadata.annotations.prometheus.io/probe: &#39;true&#39;</code>，並將以下的 relabel 設定在第一條規則：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">relabel_configs:</span></span><br><span class="line"><span class="attr">- source_labels:</span> <span class="string">[__meta_kubernetes_service_annotation_prometheus_io_probe]</span></span><br><span class="line"><span class="attr">  action:</span> <span class="string">keep</span></span><br><span class="line"><span class="attr">  regex:</span> <span class="string">'true'</span></span><br></pre></td></tr></table></figure>
+<h2 id="結論-2"><a href="#結論-2" class="headerlink" title="結論"></a>結論</h2><p>經過上面的 relabel 設定後，我們就可以在 k8s cluster 內部的 prometheus server，取得我們所需要監控的 service 資訊，以下是完整 configmap 設定：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ConfigMap</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">"prometheus-config"</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="attr">data:</span></span><br><span class="line">  <span class="string">prometheus.yml:</span> <span class="string">|-</span></span><br><span class="line"><span class="attr">    global:</span></span><br><span class="line"><span class="attr">      scrape_interval:</span> <span class="number">5</span><span class="string">s</span></span><br><span class="line"><span class="attr">      external_labels:</span></span><br><span class="line"><span class="attr">        monitor:</span> <span class="string">'codelab-monitor'</span></span><br><span class="line"></span><br><span class="line"><span class="attr">    scrape_configs:</span></span><br><span class="line"><span class="attr">    - job_name:</span> <span class="string">'kubernetes-services'</span></span><br><span class="line"><span class="attr">      metrics_path:</span> <span class="string">/probe</span></span><br><span class="line"><span class="attr">      params:</span></span><br><span class="line"><span class="attr">        module:</span> <span class="string">[http_2xx]</span></span><br><span class="line"><span class="attr">      kubernetes_sd_configs:</span></span><br><span class="line"><span class="attr">      - role:</span> <span class="string">service</span></span><br><span class="line"><span class="attr">      relabel_configs:</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__meta_kubernetes_service_annotation_prometheus_io_probe]</span></span><br><span class="line"><span class="attr">        action:</span> <span class="string">keep</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="string">'true'</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__address__]</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">__param_target</span></span><br><span class="line"><span class="attr">      - target_label:</span> <span class="string">__address__</span></span><br><span class="line"><span class="attr">        replacement:</span> <span class="string">blackbox-exporter.monitoring.svc.cluster.local:9115</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__param_target]</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">instance</span></span><br><span class="line"><span class="attr">      - action:</span> <span class="string">labelmap</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="string">__meta_kubernetes_service_label_(.+)</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__meta_kubernetes_namespace]</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">kubernetes_namespace</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__meta_kubernetes_service_name]</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">kubernetes_service_name</span></span><br></pre></td></tr></table></figure>
+<h1 id="Endpoint-amp-Ingress"><a href="#Endpoint-amp-Ingress" class="headerlink" title="Endpoint &amp; Ingress"></a>Endpoint &amp; Ingress</h1><p>Endpoint &amp; Ingress 在 relabel 部份的作法其實跟上面大同小異，甚至有很多重複的部份，以下僅列出範例的設定方式，使用者可以根據自己的監控需求來進行增減：</p>
+<h2 id="Endpoint"><a href="#Endpoint" class="headerlink" title="Endpoint"></a>Endpoint</h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ConfigMap</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">"prometheus-config"</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="attr">data:</span></span><br><span class="line">  <span class="string">prometheus.yml:</span> <span class="string">|-</span></span><br><span class="line"><span class="attr">    global:</span></span><br><span class="line"><span class="attr">      scrape_interval:</span> <span class="number">5</span><span class="string">s</span></span><br><span class="line"><span class="attr">      external_labels:</span></span><br><span class="line"><span class="attr">        monitor:</span> <span class="string">'codelab-monitor'</span></span><br><span class="line"></span><br><span class="line"><span class="attr">    scrape_configs:</span>      </span><br><span class="line"><span class="attr">    - job_name:</span> <span class="string">'kubernetes-endpoints'</span></span><br><span class="line"><span class="attr">      kubernetes_sd_configs:</span></span><br><span class="line"><span class="attr">      - role:</span> <span class="string">endpoints</span></span><br><span class="line"><span class="attr">      relabel_configs:</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__meta_kubernetes_service_annotation_prometheus_io_scrape]</span></span><br><span class="line"><span class="attr">        action:</span> <span class="string">keep</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__meta_kubernetes_service_annotation_prometheus_io_scheme]</span></span><br><span class="line"><span class="attr">        action:</span> <span class="string">replace</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">__scheme__</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="string">(https?)</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__meta_kubernetes_service_annotation_prometheus_io_path]</span></span><br><span class="line"><span class="attr">        action:</span> <span class="string">replace</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">__metrics_path__</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="string">(.+)</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__address__,</span> <span class="string">__meta_kubernetes_service_annotation_prometheus_io_port]</span></span><br><span class="line"><span class="attr">        action:</span> <span class="string">replace</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">__address__</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="string">(.+)(?::\d+);(\d+)</span></span><br><span class="line"><span class="attr">        replacement:</span> <span class="string">$1:$2</span></span><br><span class="line"><span class="attr">      - action:</span> <span class="string">labelmap</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="string">__meta_kubernetes_service_label_(.+)</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__meta_kubernetes_service_namespace]</span></span><br><span class="line"><span class="attr">        action:</span> <span class="string">replace</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">kubernetes_namespace</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__meta_kubernetes_service_name]</span></span><br><span class="line"><span class="attr">        action:</span> <span class="string">replace</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">kubernetes_name</span></span><br></pre></td></tr></table></figure>
+<h2 id="Ingress"><a href="#Ingress" class="headerlink" title="Ingress"></a>Ingress</h2><p>Ingress 同樣建議搭配 <a href="https://github.com/prometheus/blackbox_exporter" target="_blank" rel="noopener">Blackbox Prober Exporter</a> 一起使用</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ConfigMap</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">"prometheus-config"</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="attr">data:</span></span><br><span class="line">  <span class="string">prometheus.yml:</span> <span class="string">|-</span></span><br><span class="line"><span class="attr">    global:</span></span><br><span class="line"><span class="attr">      scrape_interval:</span> <span class="number">5</span><span class="string">s</span></span><br><span class="line"><span class="attr">      external_labels:</span></span><br><span class="line"><span class="attr">        monitor:</span> <span class="string">'codelab-monitor'</span></span><br><span class="line"></span><br><span class="line"><span class="attr">    scrape_configs:</span></span><br><span class="line"><span class="attr">    - job_name:</span> <span class="string">'kubernetes-ingress'</span></span><br><span class="line"><span class="attr">      kubernetes_sd_configs:</span></span><br><span class="line"><span class="attr">      - role:</span> <span class="string">ingress</span></span><br><span class="line"><span class="attr">      relabel_configs:</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__meta_kubernetes_ingress_scheme,__address__,__meta_kubernetes_ingress_path]</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="string">(.+);(.+);(.+)</span></span><br><span class="line"><span class="attr">        replacement:</span> <span class="string">$&#123;1&#125;://$&#123;2&#125;$&#123;3&#125;</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">__param_target</span></span><br><span class="line"><span class="attr">      - target_label:</span> <span class="string">__address__</span></span><br><span class="line"><span class="attr">        replacement:</span> <span class="string">blackbox-exporter.example.com:9115</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__param_target]</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">instance</span></span><br><span class="line"><span class="attr">      - action:</span> <span class="string">labelmap</span></span><br><span class="line"><span class="attr">        regex:</span> <span class="string">__meta_kubernetes_ingress_label_(.+)</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__meta_kubernetes_namespace]</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">kubernetes_namespace</span></span><br><span class="line"><span class="attr">      - source_labels:</span> <span class="string">[__meta_kubernetes_ingress_name]</span></span><br><span class="line"><span class="attr">        target_label:</span> <span class="string">kubernetes_name</span></span><br></pre></td></tr></table></figure>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a href="https://github.com/prometheus/blackbox_exporter" target="_blank" rel="noopener">prometheus/blackbox_exporter: Blackbox prober exporter</a></p>
+</li>
+<li><p><a href="https://yunlzheng.gitbook.io/prometheus-book/part-ii-prometheus-jin-jie/exporter/commonly-eporter-usage/install_blackbox_exporter" target="_blank" rel="noopener">网络探测：Blackbox Exporter - prometheus-book</a></p>
+</li>
+<li><p><a href="https://blog.frognew.com/2018/02/prometheus-blackbox-exporter.html" target="_blank" rel="noopener">使用Prometheus的blackbox_exporter进行网络监控 — 青蛙小白</a></p>
+</li>
+<li><p><a href="https://www.puritys.me/docs-blog/article-30-Javascript-Regular-Expressions-,-%E8%A1%A8%E7%A4%BA%E6%B3%95.html" target="_blank" rel="noopener">Javascript Regular Expressions , 表示法</a></p>
+</li>
+<li><p><a href="https://regexr.com/" target="_blank" rel="noopener">RegExr: Learn, Build, &amp; Test RegEx</a></p>
+</li>
+<li><p><a href="https://jishu.io/kubernetes/kubernetes-monitoring-with-prometheus/" target="_blank" rel="noopener">使用Prometheus完成Kubernetes集群监控 · 极术</a></p>
+</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog/tags/Kubernetes/" rel="tag"># Kubernetes</a>
+          
+            <a href="/blog/tags/Prometheus/" rel="tag"># Prometheus</a>
+          
+            <a href="/blog/tags/Telemetry/" rel="tag"># Telemetry</a>
+          
+            <a href="/blog/tags/Service-Discovery/" rel="tag"># Service Discovery</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/DevOps/terraform-getting-started/" rel="next" title="[Terraform] 入門學習筆記">
+                <i class="fa fa-chevron-left"></i> [Terraform] 入門學習筆記
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            本站概覽
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">godleon</p>
+              <p class="site-description motion-element" itemprop="description">把時間花在哪裡，成就就在哪裡</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/blog/archives/">
+              
+                  <span class="site-state-item-count">92</span>
+                  <span class="site-state-item-name">文章</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/blog/categories/index.html">
+                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-name">分類</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/blog/tags/index.html">
+                  <span class="site-state-item-count">49</span>
+                  <span class="site-state-item-name">標籤</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/godleon" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:godleon@gmail.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-globe"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://plus.google.com/godleon" target="_blank" title="Google">
+                    
+                      <i class="fa fa-fw fa-google"></i>Google</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Preface"><span class="nav-number">1.</span> <span class="nav-text">Preface</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Node"><span class="nav-number">2.</span> <span class="nav-text">Node</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#修改-Endpoint-IP"><span class="nav-number">2.1.</span> <span class="nav-text">修改 Endpoint IP</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#修改-metric-path"><span class="nav-number">2.2.</span> <span class="nav-text">修改 metric path</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#為資料標記更多-Label"><span class="nav-number">2.3.</span> <span class="nav-text">為資料標記更多 Label</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#結論"><span class="nav-number">2.4.</span> <span class="nav-text">結論</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Pod"><span class="nav-number">3.</span> <span class="nav-text">Pod</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#只留下需要監控的-Pod"><span class="nav-number">3.1.</span> <span class="nav-text">只留下需要監控的 Pod</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#修改監控用的-port-amp-metrics-path"><span class="nav-number">3.2.</span> <span class="nav-text">修改監控用的 port &amp; metrics path</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#為資料標記更多-Label-1"><span class="nav-number">3.3.</span> <span class="nav-text">為資料標記更多 Label</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#增加-pod-Label-資訊"><span class="nav-number">3.3.1.</span> <span class="nav-text">增加 pod Label 資訊</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#增加-namespace-資訊"><span class="nav-number">3.3.2.</span> <span class="nav-text">增加 namespace 資訊</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#增加-pod-name-資訊"><span class="nav-number">3.3.3.</span> <span class="nav-text">增加 pod name 資訊</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#結論-1"><span class="nav-number">3.4.</span> <span class="nav-text">結論</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Service"><span class="nav-number">4.</span> <span class="nav-text">Service</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#化繁為簡"><span class="nav-number">4.1.</span> <span class="nav-text">化繁為簡</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#修正錯誤的-instance"><span class="nav-number">4.2.</span> <span class="nav-text">修正錯誤的 instance</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#為資料標記更多-Label-2"><span class="nav-number">4.3.</span> <span class="nav-text">為資料標記更多 Label</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#僅留下想要監控的-service"><span class="nav-number">4.4.</span> <span class="nav-text">僅留下想要監控的 service</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#結論-2"><span class="nav-number">4.5.</span> <span class="nav-text">結論</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Endpoint-amp-Ingress"><span class="nav-number">5.</span> <span class="nav-text">Endpoint &amp; Ingress</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Endpoint"><span class="nav-number">5.1.</span> <span class="nav-text">Endpoint</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Ingress"><span class="nav-number">5.2.</span> <span class="nav-text">Ingress</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text">References</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 強力驅動</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主題 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/blog/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://godleon-blog-hexo.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'https://godleon.github.io/blog/Prometheus/Prometheus-Relabel/';
+          this.page.identifier = 'Prometheus/Prometheus-Relabel/';
+          this.page.title = '[Prometheus] Service Discovery & Relabel ';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/blog/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
