@@ -7,19 +7,20 @@ cache:
     - node_modules
 
 before_script:
-  - git clone --branch master https://github.com/godleon/godleon.github.io.git dir_to_summit
+  - git clone --branch master https://github.com/godleon/godleon.github.io.git dir_to_commit
 
 script:
+  - rm -rf dir_to_commit/*
   - hexo clean
   - hexo generate
   - ls -al blog/
-  - cp blog/index.html dir_to_summit/
-  - cp -r blog dir_to_summit/
-  - ls -al dir_to_summit/
-  - ls -al dir_to_summit/blog
+  - cp blog/index.html dir_to_commit/
+  - cp -r blog dir_to_commit/
+  - ls -al dir_to_commit/
+  - ls -al dir_to_commit/blog
 
 after_success:
-  - cd dir_to_summit
+  - cd dir_to_commit
   - git config --global user.name "godleon" 
   - git config --global user.email "godleon@gmail.com"
   - git add --all .

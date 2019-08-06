@@ -1,8 +1,8 @@
 ---
 layout: post
 title:  "使用 Kubespray 安裝 Kubernetes v1.10 以上版本"
-description: "此篇文章介紹如何使用 Kubespray 安裝 Kubernetes v1.10 以上版本(目前支援到 v1.14.1)"
-date: 2018-06-14 15:50:00
+description: "此篇文章介紹如何使用 Kubespray 安裝 Kubernetes v1.10 以上版本(目前支援到 v1.15.1)"
+date: 2019-08-06 10:15:00
 published: true
 comments: true
 categories:
@@ -15,14 +15,14 @@ tags:
 2019-05-21 Update
 =================
 
-目前已經支援到 `v1.14.1`，並預設安裝 multus CNI plugin，並以 calico 作為預設使用的 CNI plugin
+目前已經支援到 `v1.15.1`，並預設安裝 multus CNI plugin，並以 calico 作為預設使用的 CNI plugin
 
 
 
 Current Status
 ==============
 
-目前支援到 `v1.14.1`，如果有需要調整，可以按照下面的說明進行修改。
+目前支援到 `v1.15.1`，如果有需要調整，可以按照下面的說明進行修改。
 
 
 
@@ -31,7 +31,7 @@ Current Status
 
 ## 安裝 k8s cluster 用機器
 
-在這個安裝過程中，共有 6 個 VM，皆為透過 `Ubuntu 16.04 cloud image` 所產生，分別有以下幾個 node：
+在這個安裝過程中，共有 6 個 VM，皆為透過 `Ubuntu 18.04 cloud image` 所產生，分別有以下幾個 node：
 
 - Master Node x 3 (**同時兼任 etcd node**)
 
