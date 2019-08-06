@@ -6,7 +6,7 @@
 
 
 <html class="theme-next muse use-motion" lang="zh-tw">
-<head><meta name="generator" content="Hexo 3.8.0">
+<head><meta name="generator" content="Hexo 3.9.0">
   <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -79,18 +79,18 @@
 
 
 
-<meta name="description" content="此篇文章介紹如何使用 Kubespray 安裝 Kubernetes v1.10 以上版本(目前支援到 v1.14.1)">
+<meta name="description" content="此篇文章介紹如何使用 Kubespray 安裝 Kubernetes v1.10 以上版本(目前支援到 v1.15.1)">
 <meta name="keywords" content="Kubernetes,Kubespray">
 <meta property="og:type" content="article">
 <meta property="og:title" content="使用 Kubespray 安裝 Kubernetes v1.10 以上版本">
 <meta property="og:url" content="https://godleon.github.io/blog/Kubernetes/Install-k8s-via-kubespray/index.html">
 <meta property="og:site_name" content="小信豬的原始部落">
-<meta property="og:description" content="此篇文章介紹如何使用 Kubespray 安裝 Kubernetes v1.10 以上版本(目前支援到 v1.14.1)">
+<meta property="og:description" content="此篇文章介紹如何使用 Kubespray 安裝 Kubernetes v1.10 以上版本(目前支援到 v1.15.1)">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2019-05-27T08:52:33.822Z">
+<meta property="og:updated_time" content="2019-08-06T02:21:35.667Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="使用 Kubespray 安裝 Kubernetes v1.10 以上版本">
-<meta name="twitter:description" content="此篇文章介紹如何使用 Kubespray 安裝 Kubernetes v1.10 以上版本(目前支援到 v1.14.1)">
+<meta name="twitter:description" content="此篇文章介紹如何使用 Kubespray 安裝 Kubernetes v1.10 以上版本(目前支援到 v1.15.1)">
 
 
 
@@ -323,8 +323,8 @@
               
                 <span class="post-meta-item-text">發表於</span>
               
-              <time title="創建於" itemprop="dateCreated datePublished" datetime="2018-06-14T07:50:00+00:00">
-                2018-06-14
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2019-08-06T02:15:00+00:00">
+                2019-08-06
               </time>
             
 
@@ -380,7 +380,7 @@
 
           
               <div class="post-description">
-                  此篇文章介紹如何使用 Kubespray 安裝 Kubernetes v1.10 以上版本(目前支援到 v1.14.1)
+                  此篇文章介紹如何使用 Kubespray 安裝 Kubernetes v1.10 以上版本(目前支援到 v1.15.1)
               </div>
           
 
@@ -397,9 +397,9 @@
       
 
       
-        <h1 id="2019-05-21-Update"><a href="#2019-05-21-Update" class="headerlink" title="2019-05-21 Update"></a>2019-05-21 Update</h1><p>目前已經支援到 <code>v1.14.1</code>，並預設安裝 multus CNI plugin，並以 calico 作為預設使用的 CNI plugin</p>
-<h1 id="Current-Status"><a href="#Current-Status" class="headerlink" title="Current Status"></a>Current Status</h1><p>目前支援到 <code>v1.14.1</code>，如果有需要調整，可以按照下面的說明進行修改。</p>
-<h1 id="準備安裝環境"><a href="#準備安裝環境" class="headerlink" title="準備安裝環境"></a>準備安裝環境</h1><h2 id="安裝-k8s-cluster-用機器"><a href="#安裝-k8s-cluster-用機器" class="headerlink" title="安裝 k8s cluster 用機器"></a>安裝 k8s cluster 用機器</h2><p>在這個安裝過程中，共有 6 個 VM，皆為透過 <code>Ubuntu 16.04 cloud image</code> 所產生，分別有以下幾個 node：</p>
+        <h1 id="2019-05-21-Update"><a href="#2019-05-21-Update" class="headerlink" title="2019-05-21 Update"></a>2019-05-21 Update</h1><p>目前已經支援到 <code>v1.15.1</code>，並預設安裝 multus CNI plugin，並以 calico 作為預設使用的 CNI plugin</p>
+<h1 id="Current-Status"><a href="#Current-Status" class="headerlink" title="Current Status"></a>Current Status</h1><p>目前支援到 <code>v1.15.1</code>，如果有需要調整，可以按照下面的說明進行修改。</p>
+<h1 id="準備安裝環境"><a href="#準備安裝環境" class="headerlink" title="準備安裝環境"></a>準備安裝環境</h1><h2 id="安裝-k8s-cluster-用機器"><a href="#安裝-k8s-cluster-用機器" class="headerlink" title="安裝 k8s cluster 用機器"></a>安裝 k8s cluster 用機器</h2><p>在這個安裝過程中，共有 6 個 VM，皆為透過 <code>Ubuntu 18.04 cloud image</code> 所產生，分別有以下幾個 node：</p>
 <ul>
 <li><p>Master Node x 3 (<strong>同時兼任 etcd node</strong>)</p>
 </li>
@@ -525,8 +525,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/blog/Proxmox/Proxmox-use-cloud-init-to-provision-vm/" rel="next" title="[Proxmox VE] 使用 cloud-init 快速產生 VM">
-                <i class="fa fa-chevron-left"></i> [Proxmox VE] 使用 cloud-init 快速產生 VM
+              <a href="/blog/Prometheus/Prometheus-Relabel/" rel="next" title="[Prometheus] Service Discovery & Relabel ">
+                <i class="fa fa-chevron-left"></i> [Prometheus] Service Discovery & Relabel 
               </a>
             
           </div>
@@ -534,10 +534,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/blog/Kubernetes/k8s-API-Authentication/" rel="prev" title="了解 Kubernetes 中的認證機制">
-                了解 Kubernetes 中的認證機制 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
