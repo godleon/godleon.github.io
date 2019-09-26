@@ -146,7 +146,7 @@ spec:
 Reference
 =========
 
-- [了解 Kubernetes 中的授權機制 | 小信豬的原始部落][https://godleon.github.io/blog/Kubernetes/k8s-API-Authorization/]
+- [了解 Kubernetes 中的授權機制 | 小信豬的原始部落](https://godleon.github.io/blog/Kubernetes/k8s-API-Authorization/)
 
 - [Kubernetes权限管理之RBAC - OrcHome](http://orchome.com/1308)
 
