@@ -88,7 +88,7 @@
 <meta property="og:description" content="本篇文章的主題在介紹在 Kubernetes 中，若要開發一支程式並與 API server 溝通，如何設定並取得合法可用的權限">
 <meta property="og:locale" content="zh-tw">
 <meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/k8s-serviceaccount-permission.png">
-<meta property="og:updated_time" content="2019-08-22T20:23:11.834Z">
+<meta property="og:updated_time" content="2019-09-26T02:03:49.518Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[Kubernetes] 如何取得合法可用的權限，讓 pod 與 API server 溝通">
 <meta name="twitter:description" content="本篇文章的主題在介紹在 Kubernetes 中，若要開發一支程式並與 API server 溝通，如何設定並取得合法可用的權限">
@@ -445,7 +445,7 @@
 <p>在 k8s 中，當使用者在 pod 中指定要使用特定的 service account，k8s 會自動將 service account 掛載到該 pod 中，而 service account 中的 token 就會存在於該 pod 的 <code>/var/run/secrets/kubernetes.io/serviceaccount/token</code> 這個位置，因此程式中只要指定使用上面這個位置的 token 內容，就可以跟 API server 溝通，並取得所需要的資料了!</p>
 <p>所以要開發運行在 k8s 的程式且有與 API server 溝通的需求，建議將 <code>/var/run/secrets/kubernetes.io/serviceaccount/token</code> 這個位置設定為 bearer token 的預設路徑，如此一來，使用者只要有設定好正確的 service account 並將其指定到 pod definition 中，程式理當來說就可以與 API server 溝通了!</p>
 <h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><ul>
-<li><p>[了解 Kubernetes 中的授權機制 | 小信豬的原始部落][<a href="https://godleon.github.io/blog/Kubernetes/k8s-API-Authorization/]">https://godleon.github.io/blog/Kubernetes/k8s-API-Authorization/]</a></p>
+<li><p><a href="https://godleon.github.io/blog/Kubernetes/k8s-API-Authorization/">了解 Kubernetes 中的授權機制 | 小信豬的原始部落</a></p>
 </li>
 <li><p><a href="http://orchome.com/1308" target="_blank" rel="noopener">Kubernetes权限管理之RBAC - OrcHome</a></p>
 </li>
