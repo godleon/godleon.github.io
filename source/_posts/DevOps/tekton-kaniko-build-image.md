@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  "[Tekton] 使用 Tekton + Kanibo 在 Kubernetes 上產生 containre image"
-description: "此篇文章介紹如何透過 Tekton + Kanibo 在 Kubernetes 上產生 containre image，並上傳到 Docker Hub 上"
+title:  "[Tekton] 使用 Tekton + Kanibo 在 Kubernetes 上產生 container image"
+description: "此篇文章介紹如何透過 Tekton + Kanibo 在 Kubernetes 上產生 container image，並上傳到 Docker Hub 上"
 date: 2019-09-26 15:50:00
 published: true
 comments: true
