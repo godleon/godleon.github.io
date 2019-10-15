@@ -342,7 +342,7 @@ module "consul" {
 
 ## Module Output
 
-在前面的範例中有指定 input `num_servers` 的值，而 output 也可以比照原本 terraform 的處理方式比照辦理，由於幾乎每個 module 都會有 output，因此[以上面的 consul module 為例]（https://registry.terraform.io/modules/hashicorp/consul/aws?tab=outputs），我們也可以使用 consul module output 來自訂我們想要的 output，範例如下：
+在前面的範例中有指定 input `num_servers` 的值，而 output 也可以比照原本 terraform 的處理方式比照辦理，由於幾乎每個 module 都會有 output，因此[以上面的 consul module 為例](https://registry.terraform.io/modules/hashicorp/consul/aws?tab=outputs)，我們也可以使用 consul module output 來自訂我們想要的 output，範例如下：
 
 ```bash
 # 取得 auto-scaling group 的名稱
