@@ -78,21 +78,21 @@ resource "aws_instance" "example" {
 
 input variable 可以有很多型態，以下是目前支援的型態：
 
-- string
+- `string`
 
-- number
+- `number`
 
-- bool
+- `bool`
 
-- list(<TYPE>)
+- `list(<TYPE>)`
 
-- set(<TYPE>)
+- `set(<TYPE>)`
 
-- map(<TYPE>)
+- `map(<TYPE>)`
 
-- object({<ATTR NAME> = <TYPE>, ... })
+- `object({<ATTR NAME> = <TYPE>, ... })`
 
-- tuple([<TYPE>, ...])
+- `tuple([<TYPE>, ...])`
 
 > tuple 中每個元素可以是不同的型態，例如 `["a", 15, true]`
 
