@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="小信豬的原始部落">
 <meta property="og:description" content="本篇文章介紹 Terraform Input Variables 如何使用 &amp; 使用時的注意事項">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2019-10-15T07:17:22.004Z">
+<meta property="og:updated_time" content="2019-10-15T07:39:50.531Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[Terraform] Input Variables ">
 <meta name="twitter:description" content="本篇文章介紹 Terraform Input Variables 如何使用 &amp; 使用時的注意事項">
@@ -405,21 +405,21 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ami 設定中使用變數 image_id</span></span><br><span class="line">resource <span class="string">"aws_instance"</span> <span class="string">"example"</span> &#123;</span><br><span class="line">  instance_type = <span class="string">"t2.micro"</span></span><br><span class="line">  ami           = var.image_id</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h1 id="變數型態"><a href="#變數型態" class="headerlink" title="變數型態"></a>變數型態</h1><p>input variable 可以有很多型態，以下是目前支援的型態：</p>
 <ul>
-<li><p>string</p>
+<li><p><code>string</code></p>
 </li>
-<li><p>number</p>
+<li><p><code>number</code></p>
 </li>
-<li><p>bool</p>
+<li><p><code>bool</code></p>
 </li>
-<li><p>list(<type>)</type></p>
+<li><p><code>list(&lt;TYPE&gt;)</code></p>
 </li>
-<li><p>set(<type>)</type></p>
+<li><p><code>set(&lt;TYPE&gt;)</code></p>
 </li>
-<li><p>map(<type>)</type></p>
+<li><p><code>map(&lt;TYPE&gt;)</code></p>
 </li>
-<li><p>object({<attr name> = <type>, … })</type></attr></p>
+<li><p><code>object({&lt;ATTR NAME&gt; = &lt;TYPE&gt;, ... })</code></p>
 </li>
-<li><p>tuple([<type>, …])</type></p>
+<li><p><code>tuple([&lt;TYPE&gt;, ...])</code></p>
 </li>
 </ul>
 <blockquote>
