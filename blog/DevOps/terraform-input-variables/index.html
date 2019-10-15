@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT">
+  <meta name="keywords" content="DevOps,Terraform,">
 
 
 
@@ -79,16 +79,18 @@
 
 
 
-<meta name="description" content="把時間花在哪裡，成就就在哪裡">
-<meta property="og:type" content="website">
-<meta property="og:title" content="小信豬的原始部落">
-<meta property="og:url" content="https://godleon.github.io/blog/tags/libvirt/index.html">
+<meta name="description" content="本篇文章介紹 Terraform Input Variables 如何使用 &amp; 使用時的注意事項">
+<meta name="keywords" content="DevOps,Terraform">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[Terraform] Input Variables ">
+<meta property="og:url" content="https://godleon.github.io/blog/DevOps/terraform-input-variables/index.html">
 <meta property="og:site_name" content="小信豬的原始部落">
-<meta property="og:description" content="把時間花在哪裡，成就就在哪裡">
+<meta property="og:description" content="本篇文章介紹 Terraform Input Variables 如何使用 &amp; 使用時的注意事項">
 <meta property="og:locale" content="zh-tw">
+<meta property="og:updated_time" content="2019-10-15T07:17:22.004Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="小信豬的原始部落">
-<meta name="twitter:description" content="把時間花在哪裡，成就就在哪裡">
+<meta name="twitter:title" content="[Terraform] Input Variables ">
+<meta name="twitter:description" content="本篇文章介紹 Terraform Input Variables 如何使用 &amp; 使用時的注意事項">
 
 
 
@@ -118,13 +120,13 @@
 
 
 
-  <link rel="canonical" href="https://godleon.github.io/blog/tags/libvirt/">
+  <link rel="canonical" href="https://godleon.github.io/blog/DevOps/terraform-input-variables/">
 
 
 
 
 
-  <title>標籤: libvirt | 小信豬的原始部落</title>
+  <title>[Terraform] Input Variables  | 小信豬的原始部落</title>
   
 
 
@@ -152,7 +154,7 @@
     
   
 
-  <div class="container sidebar-position-left ">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -278,78 +280,256 @@
           <div id="content" class="content">
             
 
-  
-  
-  
-  <div class="post-block tag">
+  <div id="posts" class="posts-expand">
+    
 
-    <div id="posts" class="posts-collapse">
-      <div class="collection-title">
-        <h1>libvirt<small>標籤</small>
-        </h1>
-      </div>
+  
 
-      
-        
+  
+  
+  
 
   <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/blog/DevOps/terraform-input-variables/">
 
-      <h2 class="post-title">
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+      <header class="post-header">
+
         
-            <a class="post-title-link" href="/blog/KVM/KVM-libvirt-storage/" itemprop="url">
-              
-                <span itemprop="name">[Linux KVM] libvirt & Storage</span>
-              
-            </a>
         
-      </h2>
+          <h1 class="post-title" itemprop="name headline">[Terraform] Input Variables </h1>
+        
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2016-10-27T09:50:00+08:00" content="2016-10-27">
-          10-27
-        </time>
-      </div>
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">發表於</span>
+              
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2019-10-15T07:15:00+00:00">
+                2019-10-15
+              </time>
+            
 
-    </header>
-  </article>
+            
 
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分類於</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Terraform/" itemprop="url" rel="index">
+                    <span itemprop="name">Terraform</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/DevOps/terraform-input-variables/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="DevOps/terraform-input-variables/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  本篇文章介紹 Terraform Input Variables 如何使用 & 使用時的注意事項
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-        
+      
 
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/blog/KVM/KVM-libvirt-network/" itemprop="url">
-              
-                <span itemprop="name">[Linux KVM] libvirt & network</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2016-10-22T06:00:00+08:00" content="2016-10-22">
-          10-22
-        </time>
-      </div>
-
-    </header>
-  </article>
-
+      
+        <h1 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h1><p>input variable 通常用來作為 module 的 parameter，而且在 root module 中定義好的 variable，可以根據需求透過 CLI or 環境變數來覆蓋。</p>
+<h1 id="變數宣告"><a href="#變數宣告" class="headerlink" title="變數宣告"></a>變數宣告</h1><p>要宣告一個變數檔，基本上就是新增一個副檔名為 <code>tf</code> 的文字檔，放入類似以下內容：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 變數名稱為 "image_id"，型態為 string</span></span><br><span class="line">variable <span class="string">"image_id"</span> &#123;</span><br><span class="line">  <span class="built_in">type</span> = string</span><br><span class="line">  <span class="comment"># 可透過 "description" 參數對變數加上額外說明</span></span><br><span class="line">  description = <span class="string">"The id of the machine image (AMI) to use for the server."</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 變數名稱為 "availability_zone_names"，型態為 list(string)</span></span><br><span class="line">variable <span class="string">"availability_zone_names"</span> &#123;</span><br><span class="line">  <span class="built_in">type</span>    = list(string)</span><br><span class="line">  <span class="comment"># 可指定預設值</span></span><br><span class="line">  default = [<span class="string">"us-west-1a"</span>]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 變數名稱為 "docker_ports"，型態為 list(object)</span></span><br><span class="line">variable <span class="string">"docker_ports"</span> &#123;</span><br><span class="line">  <span class="built_in">type</span> = list(object(&#123;</span><br><span class="line">    internal = number</span><br><span class="line">    external = number</span><br><span class="line">    protocol = string</span><br><span class="line">  &#125;))</span><br><span class="line">  default = [</span><br><span class="line">    &#123;</span><br><span class="line">      internal = 8300</span><br><span class="line">      external = 8300</span><br><span class="line">      protocol = <span class="string">"tcp"</span></span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>基本上變數的名稱可以隨意取(只要遵守<a href="https://www.terraform.io/docs/configuration/syntax.html#identifiers" target="_blank" rel="noopener">命名規則</a>即可)，但不可使用 <code>source</code>, <code>version</code>, <code>providers</code>, <code>count</code>, <code>for_each</code>, <code>lifecycle</code>, <code>depends_on</code>, <code>locals</code> … 等關鍵字。</p>
+<h1 id="如何使用-input-variable"><a href="#如何使用-input-variable" class="headerlink" title="如何使用 input variable?"></a>如何使用 input variable?</h1><p>使用方式很簡單，一個簡單的範例如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ami 設定中使用變數 image_id</span></span><br><span class="line">resource <span class="string">"aws_instance"</span> <span class="string">"example"</span> &#123;</span><br><span class="line">  instance_type = <span class="string">"t2.micro"</span></span><br><span class="line">  ami           = var.image_id</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="變數型態"><a href="#變數型態" class="headerlink" title="變數型態"></a>變數型態</h1><p>input variable 可以有很多型態，以下是目前支援的型態：</p>
+<ul>
+<li><p>string</p>
+</li>
+<li><p>number</p>
+</li>
+<li><p>bool</p>
+</li>
+<li><p>list(<type>)</type></p>
+</li>
+<li><p>set(<type>)</type></p>
+</li>
+<li><p>map(<type>)</type></p>
+</li>
+<li><p>object({<attr name> = <type>, … })</type></attr></p>
+</li>
+<li><p>tuple([<type>, …])</type></p>
+</li>
+</ul>
+<blockquote>
+<p>tuple 中每個元素可以是不同的型態，例如 <code>[&quot;a&quot;, 15, true]</code></p>
+</blockquote>
+<p>詳細的使用規範 &amp; 範例可以參考<a href="https://www.terraform.io/docs/configuration/types.html" target="_blank" rel="noopener">官網文件</a>。</p>
+<h1 id="如何傳入-variable-values"><a href="#如何傳入-variable-values" class="headerlink" title="如何傳入 variable values ?"></a>如何傳入 variable values ?</h1><p>定義了 variable 之後，就會面臨到如何傳入 value 的問題。</p>
+<p>以下的說明是將 value 傳入到 root module 中，若是要傳入到 child module 中，則是要在程式中自行處理。</p>
+<h2 id="透過-command-line"><a href="#透過-command-line" class="headerlink" title="透過 command line"></a>透過 command line</h2><p>透過 <code>-var</code> 關鍵字搭配 <code>terraform plan</code> or <code>terraform apply</code> 命令使用：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ terraform apply -var=<span class="string">"image_id=ami-abc123"</span></span><br><span class="line"></span><br><span class="line">$ terraform apply -var=<span class="string">'image_id_list=["ami-abc123","ami-def456"]'</span></span><br><span class="line"></span><br><span class="line">$ terraform apply -var=<span class="string">'image_id_map=&#123;"us-east-1":"ami-abc123","us-east-2":"ami-def456"&#125;'</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><code>-var</code> 可以在單一指令中使用多次，來傳入多個 variable value</p>
+</blockquote>
+<h2 id="使用變數定義檔-tfvars"><a href="#使用變數定義檔-tfvars" class="headerlink" title="使用變數定義檔(.tfvars)"></a>使用變數定義檔(<code>.tfvars</code>)</h2><p>可以撰寫以 <code>.tfvars</code> or <code>.tfvars.json</code> 為副檔名的變數定義檔，以下是一個簡單的範例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">image_id = <span class="string">"ami-abc123"</span></span><br><span class="line"></span><br><span class="line">availability_zone_names = [</span><br><span class="line">  <span class="string">"us-east-1a"</span>,</span><br><span class="line">  <span class="string">"us-west-1c"</span>,</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+<p>以下是 json 格式的範例：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"image_id"</span>: <span class="string">"ami-abc123"</span>,</span><br><span class="line"></span><br><span class="line">  <span class="attr">"availability_zone_names"</span>: [<span class="string">"us-west-1a"</span>, <span class="string">"us-west-1c"</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以透過類似以下的語法帶入變數定義檔：</p>
+<blockquote>
+<p>terraform apply -var-file=”testing.tfvars”</p>
+</blockquote>
+<p>而 Terraform 也可以自動將變數定義檔載入，只要符合以下任何一種命名規範即可：</p>
+<ul>
+<li><p>檔案名稱為 <code>terraform.tfvars</code> or <code>terraform.tfvars.json</code></p>
+</li>
+<li><p>任何檔名，副檔名為 <code>.auto.tfvars</code> or <code>.auto.tfvars</code></p>
+</li>
+</ul>
+<blockquote>
+<p>必須放在執行 <code>terraform apply</code> or <code>terraform plan</code> 時所在的目錄中</p>
+</blockquote>
+<h2 id="用-Environment-Variables-傳入"><a href="#用-Environment-Variables-傳入" class="headerlink" title="用 Environment Variables 傳入"></a>用 Environment Variables 傳入</h2><p>除了上面兩種外，Terraform 也會自動去使用環境變數開頭為 <code>TF_VAR_</code> 的環境變數來作為 variable value。</p>
+<p>假設變數名稱為 <code>image_id</code>，只要將變數值設定到 <code>TF_VAR_image_id</code> 環境變數中，terraform 就會自己載入了!</p>
+<h1 id="傳入變數值的優先權"><a href="#傳入變數值的優先權" class="headerlink" title="傳入變數值的優先權"></a>傳入變數值的優先權</h1><p>上面提到幾個方法可以傳入變數值，那如果同時有多個方法被使用，哪個會被優先採用呢?</p>
+<p>基本上順序是這樣的：</p>
+<ol>
+<li><p>首先會使用目錄中的 <code>terraform.tfvars</code> or <code>terraform.tfvars.json</code> 檔案</p>
+</li>
+<li><p>若目錄中有 <code>*.auto.tfvars</code> or <code>*.auto.tfvars.json</code> 檔案，則會覆蓋掉上一個檔案中的變數值</p>
+</li>
+<li><p>若在 command line 中透過 <code>-var</code> or <code>-var-file</code> 指定變數值或是檔案，則會覆蓋掉上面兩個檔案中提供的變數值</p>
+</li>
+</ol>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a href="https://www.terraform.io/docs/configuration/variables.html" target="_blank" rel="noopener">Input Variables - Configuration Language - Terraform by HashiCorp</a></p>
+</li>
+<li><p><a href="https://www.terraform.io/docs/configuration/types.html" target="_blank" rel="noopener">Type Constraints - Configuration Language - Terraform by HashiCorp</a></p>
+</li>
+</ul>
 
       
     </div>
+    
+    
+    
 
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog/tags/DevOps/" rel="tag"># DevOps</a>
+          
+            <a href="/blog/tags/Terraform/" rel="tag"># Terraform</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/DevOps/tekton-pipeline-building-blocks/" rel="next" title="[Tekton] Tekton Pipeline 的基本組成元件介紹">
+                <i class="fa fa-chevron-left"></i> [Tekton] Tekton Pipeline 的基本組成元件介紹
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
   </div>
   
   
   
+  </article>
 
-  
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -357,6 +537,20 @@
 
 
           
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
 
         </div>
         
@@ -377,8 +571,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            本站概覽
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -460,6 +663,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Overview"><span class="nav-number">1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#變數宣告"><span class="nav-number">2.</span> <span class="nav-text">變數宣告</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#如何使用-input-variable"><span class="nav-number">3.</span> <span class="nav-text">如何使用 input variable?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#變數型態"><span class="nav-number">4.</span> <span class="nav-text">變數型態</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#如何傳入-variable-values"><span class="nav-number">5.</span> <span class="nav-text">如何傳入 variable values ?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#透過-command-line"><span class="nav-number">5.1.</span> <span class="nav-text">透過 command line</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用變數定義檔-tfvars"><span class="nav-number">5.2.</span> <span class="nav-text">使用變數定義檔(.tfvars)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#用-Environment-Variables-傳入"><span class="nav-number">5.3.</span> <span class="nav-text">用 Environment Variables 傳入</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#傳入變數值的優先權"><span class="nav-number">6.</span> <span class="nav-text">傳入變數值的優先權</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">7.</span> <span class="nav-text">References</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -593,6 +812,10 @@
   
 
   
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=5.1.3"></script>
+
+
 
   
 
@@ -610,6 +833,18 @@
       <script id="dsq-count-scr" src="https://godleon-blog-hexo.disqus.com/count.js" async></script>
     
 
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'https://godleon.github.io/blog/DevOps/terraform-input-variables/';
+          this.page.identifier = 'DevOps/terraform-input-variables/';
+          this.page.title = '[Terraform] Input Variables ';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
     
 
   
