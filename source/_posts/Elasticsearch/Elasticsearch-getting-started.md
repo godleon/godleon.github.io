@@ -1066,7 +1066,7 @@ POST _analyze
         "type" : "mapping",
         "mappings" : [ "- => _"]
       }
-    ],
+  ],
 
   //標準分詞
   "tokenizer": "standard",
@@ -1438,15 +1438,15 @@ Elasticsearch 聚合分析簡介
 //根據目的地進行 bucketing 操作
 GET kibana_sample_data_flights/_search
 {
-	"size": 0,
-	"aggs":{
-		"flight_dest":{
+  "size": 0,
+  "aggs":{
+    "flight_dest":{
       //使用 terms 關鍵字，指定要進行 bucketing，使用的是 field DestCountry
-			"terms":{
-				"field":"DestCountry"
-			}
-		}
-	}
+      "terms":{
+        "field":"DestCountry"
+      }
+    }
+  }
 }
 ```
 
@@ -1456,33 +1456,33 @@ GET kibana_sample_data_flights/_search
 //查看航班目的地的統計資訊，並以目的地為單位，額外增加平均，最高最低價格
 GET kibana_sample_data_flights/_search
 {
-	"size": 0,
-	"aggs":{
+  "size": 0,
+  "aggs":{
     //先進行 bucket aggregation 操作
-		"flight_dest":{
-			"terms":{
-				"field":"DestCountry"
-			},
+    "flight_dest":{
+      "terms":{
+        "field":"DestCountry"
+      },
       //根據上面結果再進行 metric aggregation 操作
-			"aggs":{
-				"avg_price":{
-					"avg":{
-						"field":"AvgTicketPrice"
-					}
-				},
-				"max_price":{
-					"max":{
-						"field":"AvgTicketPrice"
-					}
-				},
-				"min_price":{
-					"min":{
-						"field":"AvgTicketPrice"
-					}
-				}
-			}
-		}
-	}
+      "aggs":{
+        "avg_price":{
+          "avg":{
+            "field":"AvgTicketPrice"
+          }
+        },
+        "max_price":{
+          "max":{
+            "field":"AvgTicketPrice"
+          }
+        },
+        "min_price":{
+          "min":{
+            "field":"AvgTicketPrice"
+          }
+        }
+      }
+    }
+  }
 }
 ```
 
@@ -1492,30 +1492,29 @@ GET kibana_sample_data_flights/_search
 //查看航班目的地的統計資訊，並以目的地為單位，額外增加平均票價 & 目的地天氣的統計資訊
 GET kibana_sample_data_flights/_search
 {
-	"size": 0,
-	"aggs":{
-		"flight_dest":{
-			"terms":{
-				"field":"DestCountry"
-			},
-			"aggs":{
-				"stats_price":{
+  "size": 0,
+  "aggs":{
+    "flight_dest":{
+      "terms":{
+        "field":"DestCountry"
+      },
+      "aggs":{
+        "stats_price":{
           //透過 stats 關鍵字可直接帶出 count/min/max/avg/sum ... 等資訊
-					"stats":{
-						"field":"AvgTicketPrice"
-					}
+          "stats":{
+            "field":"AvgTicketPrice"
+          }
 				},
-				"weather":{
-				  "terms": {
-				    "field": "DestWeather",
+        "weather":{
+          "terms": {
+            "field": "DestWeather",
             //可限定輸出的資料數量，預設為 10
-				    "size": 5
-				  }
-				}
-
-			}
-		}
-	}
+            "size": 5
+          }
+        }
+      }
+    }
+  }
 }
 ```
 
