@@ -256,7 +256,7 @@ $ lvdisplay
 References
 ==========
 
-- [[RHCE7] RH134 Chapter 10. Managing Logical Volume Management(LVM) Storage 學習筆記 - 小信豬的原始部落](https://godleon.github.io/blog/RHCE/RHCE7-RH134-LearningNotes-CH10_ManagingLogicalVolumeManagement\(LVM\)Storage)
+- [[RHCE7] RH134 Chapter 10. Managing Logical Volume Management(LVM) Storage 學習筆記 - 小信豬的原始部落](https://godleon.github.io/blog/RHCE/RHCE7-RH134-LearningNotes-CH10_ManagingLogicalVolumeManagement%28LVM%29Storage)
 
 - [Linux 的 Parted 指令教學：建立、變更與修復磁碟分割區 - 頁3，共3 - G. T. Wang](https://blog.gtwang.org/linux/parted-command-to-create-resize-rescue-linux-disk-partitions/3/)
 
