@@ -1,0 +1,1795 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-tw">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/blog/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/blog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/blog/css/main.css?v=5.1.3" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/blog/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Elasticsearch,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="此篇文章是在極客時間學習 Elasticsearch 課程時留下的一些學習筆記，主要內容包含 Elasticsearch 分散式特性 &amp; 分散式搜尋的機制">
+<meta name="keywords" content="Elasticsearch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[Elasticsearch] 分散式特性 &amp; 分散式搜尋的機制">
+<meta property="og:url" content="https://godleon.github.io/blog/Elasticsearch/Elasticsearch-distributed-mechanism/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章是在極客時間學習 Elasticsearch 課程時留下的一些學習筆記，主要內容包含 Elasticsearch 分散式特性 &amp; 分散式搜尋的機制">
+<meta property="og:locale" content="zh-tw">
+<meta property="og:image" content="https://godleon.github.io/blog/images/Elasticsearch/es_cluster-statue-1.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/Elasticsearch/es_cluster-statue-2.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/Elasticsearch/es_cluster-statue-3.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/Elasticsearch/es_cluster-failover-1.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/Elasticsearch/es_distribute-shard-update.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/Elasticsearch/es_distribute-shard-delete.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/Elasticsearch/es_index-refresh.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/Elasticsearch/es_transaction-log.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/Elasticsearch/es_flush.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/Elasticsearch/es_qa_chap40-1.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/Elasticsearch/es_qa_chap40-1.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/Elasticsearch/es_distrbuted-search.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/Elasticsearch/es_qa_chap40-1.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/Elasticsearch/es_deep-pagination-1.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/Elasticsearch/es_concurrent-1.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/Elasticsearch/es_optimistic-locking-1.png">
+<meta property="og:updated_time" content="2019-11-18T13:10:51.696Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[Elasticsearch] 分散式特性 &amp; 分散式搜尋的機制">
+<meta name="twitter:description" content="此篇文章是在極客時間學習 Elasticsearch 課程時留下的一些學習筆記，主要內容包含 Elasticsearch 分散式特性 &amp; 分散式搜尋的機制">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/Elasticsearch/es_cluster-statue-1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://godleon.github.io/blog/Elasticsearch/Elasticsearch-distributed-mechanism/">
+
+
+
+
+
+  <title>[Elasticsearch] 分散式特性 & 分散式搜尋的機制 | 小信豬的原始部落</title>
+  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-703592-7', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-tw">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">小信豬的原始部落</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/blog/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首頁
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/blog/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            標籤
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/blog/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分類
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/blog/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            歸檔
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            檢索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/blog/Elasticsearch/Elasticsearch-distributed-mechanism/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">[Elasticsearch] 分散式特性 & 分散式搜尋的機制</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">發表於</span>
+              
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2019-11-18T13:10:00+00:00">
+                2019-11-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分類於</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Elasticsearch/" itemprop="url" rel="index">
+                    <span itemprop="name">Elasticsearch</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/blog/Elasticsearch/Elasticsearch-distributed-mechanism/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="Elasticsearch/Elasticsearch-distributed-mechanism/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  此篇文章是在極客時間學習 Elasticsearch 課程時留下的一些學習筆記，主要內容包含 Elasticsearch 分散式特性 & 分散式搜尋的機制
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="集群分佈式模型及選主與腦裂問題"><a href="#集群分佈式模型及選主與腦裂問題" class="headerlink" title="集群分佈式模型及選主與腦裂問題"></a>集群分佈式模型及選主與腦裂問題</h1><h2 id="分散式特性"><a href="#分散式特性" class="headerlink" title="分散式特性"></a>分散式特性</h2><p>Elasticsearch 的分散式架構帶來以下優點：</p>
+<ul>
+<li><p>可以水平擴展儲存空間，支援 PB 等級的數據儲存</p>
+</li>
+<li><p>提高系統的可用性，當某些節點停止服務時，整個 cluster 的服務不會受影響</p>
+</li>
+</ul>
+<p>關於設定 Elasticsearch cluster：</p>
+<ul>
+<li><p>不同的 cluster 透過不同的名字區分，預設為 <code>elasticsearch</code></p>
+</li>
+<li><p>cluster name 可以透過設定檔修改，也可以在啟動指令中指定 <code>-E cluster.name=[CLUSTER_NAME]</code> 進行設定</p>
+</li>
+</ul>
+<h2 id="Node"><a href="#Node" class="headerlink" title="Node"></a>Node</h2><ul>
+<li><p>Node 就是一個 Elasticsearch 的 Java process；基本上一台機器上可以同時運行多個 Elasticsearch process，但 production 使用建議還是只要一個就好</p>
+</li>
+<li><p>每個 node 都有名稱，可透過設定檔配置，也可以在啟動時透過 <code>-E node.name=[NODE_NAME]</code> 進行設定</p>
+</li>
+<li><p>每個 node 啟動之後都會分配一個 UID，並儲存在 <code>/data</code> 目錄下</p>
+</li>
+</ul>
+<h2 id="Coordinating-Node"><a href="#Coordinating-Node" class="headerlink" title="Coordinating Node"></a>Coordinating Node</h2><ul>
+<li><p>處理 request 的 node 稱為 <strong>Coordinating Node</strong>，其功能是將 request 轉發到正確的 node 上(例如：建立 index 的 request 要轉發給 master node)</p>
+</li>
+<li><p>所有的 node 都預設是 Coordinating Node</p>
+</li>
+<li><p>可以透過將其他 node type 都設定為 <code>false</code>，這樣就可以讓特定的 node 變成 dedicated coordinating node</p>
+</li>
+</ul>
+<h2 id="Data-Node"><a href="#Data-Node" class="headerlink" title="Data Node"></a>Data Node</h2><ul>
+<li><p>可以保存數據資料的 node，每個 node 啟動後都會預設是 data node，可以透過設定 <code>node.data: false</code> 停用 data node 功能</p>
+</li>
+<li><p>用來保存分片數據資料，實現數據資料的 scalibility (由 master node 決定如何把分片分發到不同的 data node 上)</p>
+</li>
+<li><p>透過增加 data node 可以解決數據水平擴展 &amp; 解決單點故障導致數據資料遺失的問題</p>
+</li>
+</ul>
+<h2 id="Master-Node"><a href="#Master-Node" class="headerlink" title="Master Node"></a>Master Node</h2><ul>
+<li><p>master node 用來處理以下工作：</p>
+<ul>
+<li><p>處理建立/刪除 index 的 request，並實際執行</p>
+</li>
+<li><p>決定每個 shard 要被分配到哪個 data node 上</p>
+</li>
+<li><p>維護 &amp; 更新 cluster state</p>
+</li>
+</ul>
+</li>
+<li><p>master node 配置的 best practice：</p>
+<ul>
+<li><p>master node 很重要，佈署上要考慮避免單點故障的狀況發生</p>
+</li>
+<li><p>為 cluster 設置多個 master node，且必須是 dedicated master node</p>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><p>Master Eligible Node &amp; 選舉流程</p>
+<ul>
+<li><p>cluster 中可以設定多個 master eligible node，當 master node 發生問題時，這些 master eligible node 就會開始選舉流程，選出下一個 msater node</p>
+</li>
+<li><p>每個 node 啟動時就預設是一個 master eligible node，可以透過設定 <code>node.master: false</code> 取消此預設設定</p>
+</li>
+<li><p>當 cluster 中的第一個 master eligible node 啟動時，就會把自己選舉為 master node</p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="Cluster-State"><a href="#Cluster-State" class="headerlink" title="Cluster State"></a>Cluster State</h2><ul>
+<li><p>cluster state 維護了一個 cluster 中必要的訊息，包含以下內容：</p>
+<ul>
+<li><p>所有的 node 資訊</p>
+</li>
+<li><p>所有的 index &amp; 相對應的 mapping/setting 配置</p>
+</li>
+<li><p>shard 的路由資訊</p>
+</li>
+</ul>
+</li>
+<li><p>每個 node 上都保存了 cluster state</p>
+</li>
+<li><p>只有 master 才可以修改 cluster state 並負責同步給其他 node (若是每個 node 都可以修改 cluster state，很有可能會導致 cluster state 不一致的狀況發生)</p>
+</li>
+</ul>
+<h2 id="配置不同的-node-type"><a href="#配置不同的-node-type" class="headerlink" title="配置不同的 node type"></a>配置不同的 node type</h2><p>以下是要設定不同的 node type 時所會用到的設定參數：</p>
+<table>
+<thead>
+<tr>
+<th>Node Type</th>
+<th>配置參數</th>
+<th>預設值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Master Eligible</td>
+<td><code>node.master</code></td>
+<td>true</td>
+</tr>
+<tr>
+<td>Data</td>
+<td><code>node.data</code></td>
+<td>true</td>
+</tr>
+<tr>
+<td>Ingest</td>
+<td><code>node.ingest</code></td>
+<td>true</td>
+</tr>
+<tr>
+<td>Dedicated Coordinating</td>
+<td><code>無</code></td>
+<td>設置上面三個參數皆為 false</td>
+</tr>
+<tr>
+<td>Machine Learning</td>
+<td><code>node.ml</code></td>
+<td>true (需要 enable x-pack)</td>
+</tr>
+</tbody>
+</table>
+<h1 id="Shard-amp-Cluster-的故障轉移"><a href="#Shard-amp-Cluster-的故障轉移" class="headerlink" title="Shard &amp; Cluster 的故障轉移"></a>Shard &amp; Cluster 的故障轉移</h1><h2 id="Primary-Shard-提昇系統儲存容量"><a href="#Primary-Shard-提昇系統儲存容量" class="headerlink" title="Primary Shard (提昇系統儲存容量)"></a>Primary Shard (提昇系統儲存容量)</h2><ul>
+<li><p>shard 是 Elasticsearch 分散式儲存的基礎，包含 primary shard &amp; replica shard</p>
+</li>
+<li><p>primary shard 功能是將一份被索引的數據，分散到多個 data node 上存放，實現儲存方面的水平擴展</p>
+</li>
+<li><p>primary shard 在建立索引時就會指定，後續是無法修改的，若要修改就必須要進行 reindex</p>
+</li>
+</ul>
+<h2 id="Replica-Shard-提高數據資料可用性"><a href="#Replica-Shard-提高數據資料可用性" class="headerlink" title="Replica Shard (提高數據資料可用性)"></a>Replica Shard (提高數據資料可用性)</h2><ul>
+<li><p>replica shard 用來提供數據資料可用性，當 primary shard 遺失時，replica shard 就可以被 promote 成 primary shard 來保持資料完整性</p>
+</li>
+<li><p>replica shard 數量可以動態調整，讓每個 data node 上都有完整的數據資料</p>
+</li>
+<li><p>replica shard 可以一定程度的提高讀取的效能</p>
+</li>
+</ul>
+<blockquote>
+<p>若不設定 replica shard，一旦有 data node 故障導致 primary shard 遺失，數據資料可能就無法恢復了</p>
+</blockquote>
+<blockquote>
+<p>ES 7.0 開始，primary shard 預設為 <code>1</code>，replica shard 預設為 <code>0</code></p>
+</blockquote>
+<h2 id="Shard-的規劃-amp-設定"><a href="#Shard-的規劃-amp-設定" class="headerlink" title="Shard 的規劃 &amp; 設定"></a>Shard 的規劃 &amp; 設定</h2><ul>
+<li><p>若是 primary shard 數量設定太小，且遇到 index 資料增加很快時，cluster 無法通過增加 ndoe 數量對 index 進行數據擴展</p>
+</li>
+<li><p>若 primary shard 數量設定太大，可能導致每個 shard 容量很小，讓一個 data node 上有過多 shard 而影響效能</p>
+</li>
+<li><p>replica shard 若設定過多，會降低 cluster 整體的寫入效能</p>
+</li>
+</ul>
+<blockquote>
+<p>replica shard 必須和 primary shard 被分配在不同的 data node 上；但所有的 primary shard 可以在同一個 data node 上</p>
+</blockquote>
+<h2 id="cluster-amp-shard-設定情境-amp-範例"><a href="#cluster-amp-shard-設定情境-amp-範例" class="headerlink" title="cluster &amp; shard 設定情境 &amp; 範例"></a>cluster &amp; shard 設定情境 &amp; 範例</h2><h3 id="single-node-cluster"><a href="#single-node-cluster" class="headerlink" title="single node cluster"></a>single node cluster</h3><p><img src="/blog/images/Elasticsearch/es_cluster-statue-1.png" alt="Elasticsearch - single node cluster"></p>
+<ul>
+<li><p>由於 cluster 中只有單一個 node，因此全部都會被 primary shard 佔據</p>
+</li>
+<li><p>replica shard 無法被分配，因此 cluster 健康狀態為黃色</p>
+</li>
+</ul>
+<h3 id="增加第二個-node"><a href="#增加第二個-node" class="headerlink" title="增加第二個 node"></a>增加第二個 node</h3><p><img src="/blog/images/Elasticsearch/es_cluster-statue-2.png" alt="Elasticsearch - add second node to cluster"></p>
+<ul>
+<li><p>增加第二個 node，因此 replica shard 就可以被正常分配</p>
+</li>
+<li><p>cluster 健康狀態就會轉為綠色</p>
+</li>
+<li><p>目前 cluster 已經具備 failover 的能力了</p>
+</li>
+</ul>
+<h3 id="增加第三個-node"><a href="#增加第三個-node" class="headerlink" title="增加第三個 node"></a>增加第三個 node</h3><p><img src="/blog/images/Elasticsearch/es_cluster-statue-3.png" alt="Elasticsearch - add third node to cluster"></p>
+<ul>
+<li><p>此時 primary shard &amp; replica shard 都會再重新分配，力求資料可以平均分散</p>
+</li>
+<li><p>由 master node 決定每個 shard 會被分配到那一個 data node</p>
+</li>
+<li><p>透過持續增加 node，可以提高 cluster 的計算能力</p>
+</li>
+</ul>
+<h3 id="Failover"><a href="#Failover" class="headerlink" title="Failover"></a>Failover</h3><p><img src="/blog/images/Elasticsearch/es_cluster-failover-1.png" alt="Elasticsearch - cluster failover"></p>
+<blockquote>
+<p>1 index, 3 primary shard, 1 replica shard</p>
+</blockquote>
+<ul>
+<li><p>上面的部份是正常的時候，下面是表示 node 1(master node) 發生故障</p>
+</li>
+<li><p>node 2 透過選舉的過程變成了 master node</p>
+</li>
+<li><p>node 1 上的 P0 跟 R1 已經不可用</p>
+</li>
+<li><p>node 3 上的 R0 會提昇 P0 成用來取代 Node 1 上的 P0</p>
+</li>
+<li><p>為了要滿足 replica shard 的設定，node 2(目前的 master) 重新將 R0 &amp; R1 分配到剩餘的 data node 上</p>
+</li>
+<li><p>cluster 狀態重新變成綠色</p>
+</li>
+</ul>
+<blockquote>
+<p>若是擔心 reboot 機器造成 failover 動作開始執行，可以設定將 replication 延遲一段時間後再執行，避免無謂的 data copy 動作</p>
+</blockquote>
+<h2 id="值得一看的-Q-amp-A-資料"><a href="#值得一看的-Q-amp-A-資料" class="headerlink" title="值得一看的 Q&amp;A 資料"></a>值得一看的 Q&amp;A 資料</h2><p>1：選主的過程中可能存在問題的場景？</p>
+<blockquote>
+<p>選主的過程應該很短，這個期間，如果有創建index或者分片reallocation有可能會出錯。</p>
+</blockquote>
+<p>2：故障轉移期間可能會出現問題的場景？</p>
+<blockquote>
+<p>故障轉移期間，如果只是黃色變綠，應該不影響讀寫，因為副本會提升為主分片。集群變紅，代表有主分片丟失，這個時候會影響讀寫。</p>
+</blockquote>
+<p>3： 故障轉移，數據重新分配，消耗性能的避免方式？</p>
+<blockquote>
+<p>例如一個主分片不可用了。只要設置了副本分片，其中一個副本分片立即會將自己提升為主分片。同時會將自己的數據分配到一個新的replica上，有時候，我們只是重啟一台機器，可以讓這個reallocation的動作延遲一段時間再做，從而避免無謂的數據拷貝。</p>
+</blockquote>
+<p>4：故障轉移可能存在數據丟失的場景嘛？</p>
+<blockquote>
+<p>node如果丟失，如果沒有落盤。就有丟失的可能。如果節點重新回來，會從translog中恢覆沒有寫入的數據</p>
+</blockquote>
+<h1 id="Document-分散式儲存"><a href="#Document-分散式儲存" class="headerlink" title="Document 分散式儲存"></a>Document 分散式儲存</h1><h2 id="document-儲存在-shard-中"><a href="#document-儲存在-shard-中" class="headerlink" title="document 儲存在 shard 中"></a>document 儲存在 shard 中</h2><ul>
+<li><p>document 會儲存在特定的 primary shard &amp; replica shard 中，例如 document(id=1) 儲存在 P0 &amp; R0 shard 上</p>
+</li>
+<li><p>將 document 進行分散式儲存的可能解決方案：</p>
+<ul>
+<li><p>random / round robin 的方式，但此方法在 shard 數量大時，需要多次查詢才能找到 document</p>
+</li>
+<li><p>維護 document &amp; shard 之間的 mapping 關係，但當 document 數量大時，維護成本就會變得很高</p>
+</li>
+<li><p>透過即時運算，以 document id 為基礎，計算出要去那一個 shard 儲存 &amp; 取得 document</p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="document-到-shard-的路由計算方式"><a href="#document-到-shard-的路由計算方式" class="headerlink" title="document 到 shard 的路由計算方式"></a>document 到 shard 的路由計算方式</h2><blockquote>
+<p><code>shard = hash(_routing) % number_of_primary_shard</code></p>
+</blockquote>
+<ul>
+<li><p>hash algorithm 確保 document 均勻的分散到 primary shard 中</p>
+</li>
+<li><p>預設的 <code>_routing</code> value 是 document id</p>
+</li>
+<li><p>可以自行指定 routing value，藉此讓 document 都分配到特定的 shard 上</p>
+</li>
+<li><p>也是因為上述路由設計機制的原因，導致於設定 index settings 之後，primary shard 數量無法隨意變更</p>
+</li>
+</ul>
+<h2 id="更新-document-流程"><a href="#更新-document-流程" class="headerlink" title="更新 document 流程"></a>更新 document 流程</h2><p><img src="/blog/images/Elasticsearch/es_distribute-shard-update.png" alt="Elasticsearch - flow of updating a document"></p>
+<ol>
+<li><p>使用者送出一個 update document request 到 master node(同時也是 coordinating node)</p>
+</li>
+<li><p>coordinating node 透過 hash 計算出 document 存放的 shard 在哪裡</p>
+</li>
+<li><p>將 update request 轉發到正確的 data node 上</p>
+</li>
+<li><p>data node 取得 update request，會先將 document 刪除</p>
+</li>
+<li><p>再重新索引新的 document，完成標準的 update 操作</p>
+</li>
+<li><p>將更新成功訊息回傳給 coordinating node</p>
+</li>
+<li><p>coordinating node 回傳操作成功訊息給使用者</p>
+</li>
+</ol>
+<h2 id="刪除-document-流程"><a href="#刪除-document-流程" class="headerlink" title="刪除 document 流程"></a>刪除 document 流程</h2><p><img src="/blog/images/Elasticsearch/es_distribute-shard-delete.png" alt="Elasticsearch - flow of deleting a document"></p>
+<ol>
+<li><p>使用者送出一個 delete document request 到 master node(同時也是 coordinating node)</p>
+</li>
+<li><p>coordinating node 透過 hash 計算出 document 存放的 primary shard 在哪裡，並將 request 轉發到正確的 data node 上</p>
+</li>
+<li><p>data node 刪除 shard 中指定的 document</p>
+</li>
+<li><p>data node 送出 delete replica request 到儲存 replica shard 的 data node 上 (透過每個 node 上的 cluster state 才可以找到 routing 資訊)</p>
+</li>
+<li><p>replica shard 中的資料被刪除，data node 會回傳成功訊息</p>
+</li>
+<li><p>儲存 primary shard 的 data node 將刪除成功的訊息回傳給 coordinating node</p>
+</li>
+<li><p>coordinating node 回傳操作成功訊息給使用者</p>
+</li>
+</ol>
+<h2 id="值得一看的-Q-amp-A-資料-1"><a href="#值得一看的-Q-amp-A-資料-1" class="headerlink" title="值得一看的 Q&amp;A 資料"></a>值得一看的 Q&amp;A 資料</h2><ul>
+<li>請問，視頻中更新和刪除文檔的請求，首先會發送到master節點嗎，還是通過前置的負載均衡工具分發到某一個節點？</li>
+</ul>
+<blockquote>
+<p>視頻中發送到9200，我也沒在開發環境中指定dedicated的節點。所以這個節點既是master也是data，當然肯定也是coordinating節點。</p>
+</blockquote>
+<blockquote>
+<p>在生產環境，你可以設置dedicate的 coordinate節點，發查詢到這些節點。不建議直接發送請求到master節點，雖然也會工作，但是大量請求發送到master，會有潛在的性能問題</p>
+</blockquote>
+<h1 id="Shard-amp-Life-cycle"><a href="#Shard-amp-Life-cycle" class="headerlink" title="Shard &amp; Life cycle"></a>Shard &amp; Life cycle</h1><h2 id="shard-內部原理"><a href="#shard-內部原理" class="headerlink" title="shard 內部原理"></a>shard 內部原理</h2><ul>
+<li><p>shard 是 ES 中最小的工作單元</p>
+</li>
+<li><p>shard 是一個 Lucene 的 index</p>
+</li>
+</ul>
+<p>關於一些 Elasticsearch 的相關問題：</p>
+<ul>
+<li><p>Elasticsearch 的搜尋是如何作到接近即時的 ?</p>
+</li>
+<li><p>Elasticsearch 如何確保臨時的停電不會造成數據資料遺失 ?</p>
+</li>
+<li><p>為什麼刪除 document 後，不會馬上釋放空間 ?</p>
+</li>
+</ul>
+<h2 id="Inverted-Index-的不可變動性"><a href="#Inverted-Index-的不可變動性" class="headerlink" title="Inverted Index 的不可變動性"></a>Inverted Index 的不可變動性</h2><ul>
+<li><p>Inverted Index 使用 immutable design，一旦產生出來就無法變更</p>
+</li>
+<li><p>然而不可變動的特性會帶來以下好處：</p>
+<ul>
+<li><p>不需要考慮同時多個 document 寫入的問題，因此避免了 lock 機制所帶來的效能問題</p>
+</li>
+<li><p>一旦資料進入到 cache，就會留在裡面；只要 cache 夠大，大部分 request 就不會有 dick access，藉此大幅提昇讀取性能</p>
+</li>
+<li><p>cache 容易產生 &amp; 維護</p>
+</li>
+<li><p>數據資料可以被壓縮</p>
+</li>
+</ul>
+</li>
+<li><p>不可變動的特性帶來的缺點 =&gt; 若需要讓一個新的 document 可以被搜尋，需要重建 index</p>
+</li>
+</ul>
+<h2 id="Index-Refresh"><a href="#Index-Refresh" class="headerlink" title="Index Refresh"></a>Index Refresh</h2><p><img src="/blog/images/Elasticsearch/es_index-refresh.png" alt="Elasticsearch - Index Refresh"></p>
+<ul>
+<li><p>Elasticsearch 寫入 document 時，會先寫入稱為 <code>Index Buffer</code> 的儲存空間</p>
+</li>
+<li><p>到特定時間點(or 滿足特定條件)時，就會將 Index Buffer 中的內容寫入 <code>Segment</code>，而這寫入的動作就稱為 <code>Refresh</code>，但預設不會執行 <strong>fsync</strong> 操作</p>
+<blockquote>
+<p>預設一秒一次，可以透過設定 <code>index.refresh_interval</code> 進行調整</p>
+</blockquote>
+</li>
+<li><p>當 document 被 refresh 進入到 segment 之後，就可以被搜尋到了</p>
+</li>
+<li><p>若系統有大量的數據資料寫入，就會產生很多 segment</p>
+</li>
+<li><p>當 Index Buffer 被佔滿時，也會觸發 refresh 動作，預設值是 JVM 的 10%</p>
+</li>
+</ul>
+<h2 id="Transaction-Log"><a href="#Transaction-Log" class="headerlink" title="Transaction Log"></a>Transaction Log</h2><p><img src="/blog/images/Elasticsearch/es_transaction-log.png" alt="Elasticsearch - Transaction Log"></p>
+<ul>
+<li><p>segment 寫入磁碟的過程相對耗時，因此藉由 cache，在進行 refresh 時先將 segment 寫入 cache 以開放查詢</p>
+</li>
+<li><p>但使用 cache 可能就會有數據資料遺失的問題，因此為了保證資料不會遺失，就有了 transaction log 的設計</p>
+</li>
+<li><p>將 document 進行索引時，同時也會寫入 transaction log，且預設都會寫入磁碟中</p>
+<blockquote>
+<p>每個 shard 都會有對應的 transaction log</p>
+</blockquote>
+</li>
+<li><p>Elasticsearch 進行 refresh 時，index buffer 會被清空，但 transaction log 則不會</p>
+</li>
+</ul>
+<h2 id="Flush"><a href="#Flush" class="headerlink" title="Flush"></a>Flush</h2><p><img src="/blog/images/Elasticsearch/es_flush.png" alt="Elasticsearch - Flush"></p>
+<ul>
+<li><p>執行 refresh，將 index buffer 清空</p>
+</li>
+<li><p>執行 fsync，將在 cache 中的 segment 全部寫入磁碟中</p>
+</li>
+<li><p>清空 transaction log</p>
+</li>
+<li><p>由於操作對資源消耗相對大，因此預設 30 分鐘執行一次</p>
+</li>
+<li><p>當 transaction log 滿了(預設為 512 MB)，也會觸發 flush 的操作</p>
+</li>
+</ul>
+<h2 id="Merge"><a href="#Merge" class="headerlink" title="Merge"></a>Merge</h2><ul>
+<li><p>當 flush 工作陸陸續續完成後，segment 上的資料會寫入磁碟中，因此就會造成很多空的 segment，而 merge 就可以協助定期將 segment 合併</p>
+<blockquote>
+<p>可以減少 segment 數量 &amp; 將被刪除的 document 從磁碟中真正的移除掉</p>
+</blockquote>
+</li>
+<li><p>Elasticsearch 會定期自動執行 merge 工作，但若是要強制執行，可以呼叫 <code>POST [INDEX_NAME]/_forcemerge</code> 執行</p>
+</li>
+</ul>
+<h2 id="值得一看的-Q-amp-A-資料-2"><a href="#值得一看的-Q-amp-A-資料-2" class="headerlink" title="值得一看的 Q&amp;A 資料"></a>值得一看的 Q&amp;A 資料</h2><ol>
+<li><p>客戶端發起數據寫入請求，對你寫的這條數據根據_routing規則選擇發給哪個Shard。</p>
+<ul>
+<li>確認Index Request中是否設置了使用哪個Filed的值作為路由參數，</li>
+<li>如果沒有設置，則使用Mapping中的配置，</li>
+<li>如果mapping中也沒有配置，則使用_id作為路由參數，然後通過_routing的Hash值選擇出Shard，最後從集群的Meta中找出出該Shard的Primary節點。</li>
+</ul>
+</li>
+<li><p>寫入請求到達Shard後，先把數據寫入到內存（buffer）中，同時會寫入一條日誌到translog日誌文件中去。</p>
+<ul>
+<li>當寫入請求到shard後，首先是寫Lucene，其實就是創建索引。</li>
+<li>索引創建好後並不是馬上生成segment，這個時候索引數據還在緩存中，這裡的緩存是lucene的緩存，並非Elasticsearch緩存，lucene緩存中的數據是不可被查詢的。</li>
+</ul>
+</li>
+<li><p>執行refresh操作：從內存buffer中將數據寫入os cache(操作系統的內存)，產生一個segment file文件，buffer清空。</p>
+<ul>
+<li>寫入os cache的同時，建立倒排索引，這時數據就可以供客戶端進行訪問了。</li>
+<li>默認是每隔1秒refresh一次的，所以es是准實時的，因為寫入的數據1秒之後才能被看到。</li>
+<li>buffer內存佔滿的時候也會執行refresh操作，buffer默認值是JVM內存的10%。</li>
+<li>通過es的restful api或者java api，手動執行一次refresh操作，就是手動將buffer中的數據刷入os cache中，讓數據立馬就可以被搜索到。</li>
+<li>若要優化索引速度, 而不注重實時性, 可以降低刷新頻率。</li>
+</ul>
+</li>
+<li><p>translog會每隔5秒或者在一個變更請求完成之後，將translog從緩存刷入磁盤。</p>
+<ul>
+<li>translog是存儲在os cache中，每個分片有一個，如果節點宕機會有5秒數據丟失，但是性能比較好，最多丟5秒的數據。。</li>
+<li>可以將translog設置成每次寫操作必須是直接fsync到磁盤，但是性能會差很多。</li>
+<li>可以通過配置增加transLog刷磁盤的頻率來增加數據可靠性，最小可配置100ms，但不建議這麼做，因為這會對性能有非常大的影響。</li>
+</ul>
+</li>
+<li><p>每30分鐘或者當tanslog的大小達到512M時候，就會執行commit操作（flush操作），將os cache中所有的數據全以segment file的形式，持久到磁盤上去。</p>
+<ul>
+<li>第一步，就是將buffer中現有數據refresh到os cache中去。</li>
+<li>清空buffer 然後強行將os cache中所有的數據全都一個一個的通過segmentfile的形式，持久到磁盤上去。</li>
+<li>將commit point這個文件更新到磁盤中，每個Shard都有一個提交點(commit point), 其中保存了當前Shard成功寫入磁盤的所有segment。</li>
+<li>把translog文件刪掉清空，再開一個空的translog文件。</li>
+<li>flush參數設置：</li>
+<li>index.translog.flush_threshold_period:</li>
+<li>index.translog.flush_threshold_size:</li>
+<li>#控制每收到多少條數據後flush一次</li>
+<li>index.translog.flush_threshold_ops:</li>
+</ul>
+</li>
+<li><p>Segment的merge操作：</p>
+<ul>
+<li>隨著時間，磁盤上的segment越來越多，需要定期進行合併。</li>
+<li>Es和Lucene 會自動進行merge操作，合併segment和刪除已經刪除的文檔。</li>
+<li>我們可以手動進行merge：POST index/_forcemerge。一般不需要，這是一個比較消耗資源的操作</li>
+</ul>
+</li>
+</ol>
+<blockquote>
+<p>當數據從hot移動到warm，官方建議手工執行一下_forcemerge</p>
+</blockquote>
+<p><img src="/blog/images/Elasticsearch/es_qa_chap40-1.png" alt="Elasticsearch - Q&amp;A Chap40 - 1"></p>
+<p><img src="/blog/images/Elasticsearch/es_qa_chap40-1.png" alt="Elasticsearch - Q&amp;A Chap40 - 2"></p>
+<h1 id="剖析-Distributed-Search-分佈式查詢-及相關性算分"><a href="#剖析-Distributed-Search-分佈式查詢-及相關性算分" class="headerlink" title="剖析 Distributed Search(分佈式查詢)及相關性算分"></a>剖析 Distributed Search(分佈式查詢)及相關性算分</h1><h2 id="Distributed-Search-的運作機制"><a href="#Distributed-Search-的運作機制" class="headerlink" title="Distributed Search 的運作機制"></a>Distributed Search 的運作機制</h2><ul>
+<li>Elasticsearch 的搜尋會分為兩個階段，分別是 <code>Query</code> &amp; <code>Fetch</code>，也就是 <code>Query-then-Fetch</code></li>
+</ul>
+<h2 id="Query-then-Fetch-範例"><a href="#Query-then-Fetch-範例" class="headerlink" title="Query-then-Fetch 範例"></a>Query-then-Fetch 範例</h2><p>以下面的搜尋為例：</p>
+<p><img src="/blog/images/Elasticsearch/es_distrbuted-search.png" alt="Elasticsearch - Distributed Search"></p>
+<h3 id="Query-階段"><a href="#Query-階段" class="headerlink" title="Query 階段"></a>Query 階段</h3><ul>
+<li><p>使用者送出 search 到 Elasticsearch，Coordinating Node 會在六個 primary &amp; replica shard 中隨機挑選三個 shard 並送出 request 給 data node</p>
+</li>
+<li><p>被選中的 shard 執行查詢 &amp; 排序，返回 <code>From + Size</code> 個<strong>排序後</strong>的 document ID &amp; 排序值給 Coordinating Node</p>
+<blockquote>
+<p>上圖中是 P0, P1, P2 被選中 (<strong>目前只有取得 document ID，沒有內容</strong>)</p>
+</blockquote>
+</li>
+</ul>
+<h3 id="Fetch-階段"><a href="#Fetch-階段" class="headerlink" title="Fetch 階段"></a>Fetch 階段</h3><ul>
+<li><p>Coordinating Node 會將 Query 階段中從每個 shard 取得的 document ID 重新排序，並根據 <code>From</code> &amp; <code>Size</code> 重新選出 document ID list</p>
+</li>
+<li><p>以 multiple GET 的方式，從對應的 shard 取得詳細的 document 資訊</p>
+</li>
+</ul>
+<h2 id="Query-then-Fetch-的潛在問題"><a href="#Query-then-Fetch-的潛在問題" class="headerlink" title="Query-then-Fetch 的潛在問題"></a>Query-then-Fetch 的潛在問題</h2><p>效能問題：</p>
+<ul>
+<li><p>每個 shard 需要查詢的 document 數量 = <code>from</code> + <code>size</code></p>
+</li>
+<li><p>最後 Coordinating Node 需要處理 <code>number_of_shard * (from + size)</code> 數量的 document</p>
+</li>
+<li><p>若是遇到深度分頁的情況，效能會變很差</p>
+</li>
+</ul>
+<p>相關性算分：</p>
+<ul>
+<li>每個 shard 都基於自己 shard 上的數據進行相關度計算；若是在數據量少，shard 數量越大會導致算分越不準確</li>
+</ul>
+<h2 id="如何解決算分不準的問題"><a href="#如何解決算分不準的問題" class="headerlink" title="如何解決算分不準的問題 ?"></a>如何解決算分不準的問題 ?</h2><ul>
+<li><p>數據資料量不大時，可以將 primary shard 數量設定為 1</p>
+<blockquote>
+<p>但若資料足夠大時，只要 document 可以平均分散在多個 shard 上，結果就不會有太大偏差</p>
+</blockquote>
+</li>
+<li><p>使用 CFS Query Then Fetch</p>
+</li>
+<li><p>在搜尋的 URL 中指定參數 <code>_search?search_type=dfs_query_then_fetch</code></p>
+</li>
+<li><p>這會到各 shard 中蒐集完整的 TF &amp; IDF 的資料，再重新匯總並算分，但這會消耗太多 CPU &amp; memory，不建議使用</p>
+</li>
+</ul>
+<h2 id="值得一看的-Q-amp-A-資料-3"><a href="#值得一看的-Q-amp-A-資料-3" class="headerlink" title="值得一看的 Q&amp;A 資料"></a>值得一看的 Q&amp;A 資料</h2><p><img src="/blog/images/Elasticsearch/es_qa_chap40-1.png" alt="Elasticsearch - Q&amp;A Chap41 - 1"></p>
+<h1 id="排序及-Doc-Values-amp-Fielddata"><a href="#排序及-Doc-Values-amp-Fielddata" class="headerlink" title="排序及 Doc Values &amp; Fielddata"></a>排序及 Doc Values &amp; Fielddata</h1><h2 id="Sorting"><a href="#Sorting" class="headerlink" title="Sorting"></a>Sorting</h2><ul>
+<li><p>Elasticsearch 預設會使用相關性算分對結果進行排序</p>
+</li>
+<li><p>可以透過設定 <code>sorting</code> 參數決定排序的條件</p>
+</li>
+<li><p>若自己給入 sort 條件時但卻不是指定 <code>_score</code>，則算分為 NULL</p>
+</li>
+</ul>
+<p>以下是幾個範例：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">//single field 查詢，並指定 "sort"</span><br><span class="line">//回傳的資料在 _score 部份都會以 null 呈現</span><br><span class="line">POST /kibana_sample_data_ecommerce/_search</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"size"</span>: <span class="number">5</span>,</span><br><span class="line">  <span class="attr">"query"</span>: &#123;</span><br><span class="line">    <span class="attr">"match_all"</span>: &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">"sort"</span>: [</span><br><span class="line">    &#123;<span class="attr">"order_date"</span>: &#123;<span class="attr">"order"</span>: <span class="string">"desc"</span>&#125;&#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//multiple field 查詢的範例</span><br><span class="line">//因為有指定將 _score 拿來排序，因此 _score 就不會是 null</span><br><span class="line">//查詢中使用 "match_all"，因此所有的算分都會是 1</span><br><span class="line">POST /kibana_sample_data_ecommerce/_search</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"size"</span>: <span class="number">5</span>,</span><br><span class="line">  <span class="attr">"query"</span>: &#123;</span><br><span class="line">    <span class="attr">"match_all"</span>: &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">"sort"</span>: [</span><br><span class="line">    &#123;<span class="attr">"order_date"</span>: &#123;<span class="attr">"order"</span>: <span class="string">"desc"</span>&#125;&#125;,</span><br><span class="line">    &#123;<span class="attr">"_doc"</span>:&#123;<span class="attr">"order"</span>: <span class="string">"asc"</span>&#125;&#125;,</span><br><span class="line">    &#123;<span class="attr">"_score"</span>:&#123; <span class="attr">"order"</span>: <span class="string">"desc"</span>&#125;&#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>若想要對 text 類型的 field 做排序：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">//這樣的查詢會報錯，預設是無法針對 text 類型的 field 做排序</span><br><span class="line">POST /kibana_sample_data_ecommerce/_search</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"size"</span>: <span class="number">5</span>,</span><br><span class="line">  <span class="attr">"query"</span>: &#123;</span><br><span class="line">    <span class="attr">"match_all"</span>: &#123;</span><br><span class="line"></span><br><span class="line">    &#125;!</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">"sort"</span>: [</span><br><span class="line">    &#123;<span class="attr">"customer_full_name"</span>: &#123;<span class="attr">"order"</span>: <span class="string">"desc"</span>&#125;&#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//透過將 field 中的 "fielddata": true 設定打開</span><br><span class="line">//這樣就可以對 text 的 field 進行排序</span><br><span class="line">PUT kibana_sample_data_ecommerce/_mapping</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"properties"</span>: &#123;</span><br><span class="line">    <span class="attr">"customer_full_name"</span> : &#123;</span><br><span class="line">          <span class="attr">"type"</span> : <span class="string">"text"</span>,</span><br><span class="line">          <span class="attr">"fielddata"</span>: <span class="literal">true</span>,</span><br><span class="line">          <span class="attr">"fields"</span> : &#123;</span><br><span class="line">            <span class="attr">"keyword"</span> : &#123;</span><br><span class="line">              <span class="attr">"type"</span> : <span class="string">"keyword"</span>,</span><br><span class="line">              <span class="attr">"ignore_above"</span> : <span class="number">256</span></span><br><span class="line">            &#125;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="sorting-的過程"><a href="#sorting-的過程" class="headerlink" title="sorting 的過程"></a>sorting 的過程</h2><ul>
+<li><p>sorting 是針對原始的 field 內容進行，因此 inverted index 無法發揮作用</p>
+</li>
+<li><p>需要使用到 forward index(正排索引)，透過 document ID &amp; field 快速得到 field 原始內容</p>
+</li>
+<li><p>在 Elasticsearch 中有兩種實現 sorting 的方式：</p>
+<ul>
+<li><p>Fielddata</p>
+</li>
+<li><p>Doc Values (列式儲存，對 text 類型無效))</p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="Doc-Values-v-s-Field-data"><a href="#Doc-Values-v-s-Field-data" class="headerlink" title="Doc Values v.s. Field data"></a>Doc Values v.s. Field data</h2><table>
+<thead>
+<tr>
+<th></th>
+<th>Doc Values</th>
+<th>Field data</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>何時建立?</td>
+<td>資料進行索引時，和 inverted index 一起建立</td>
+<td>搜尋時動態建立</td>
+</tr>
+<tr>
+<td>建立位置</td>
+<td>磁碟檔案</td>
+<td>JVM Heap</td>
+</tr>
+<tr>
+<td>優點</td>
+<td>避免佔據大量記憶體</td>
+<td>索引速度快，不佔用額外的磁碟空間</td>
+</tr>
+<tr>
+<td>缺點</td>
+<td>降低索引速度，佔用額外的磁碟空間</td>
+<td>document 過多時，動態建立的消耗大，佔用過多的 JVM Heap</td>
+</tr>
+<tr>
+<td>預設?</td>
+<td>ES 2.x 之後</td>
+<td>ES 1.x 及之前</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>一般不會開啟 fielddata，因為對 text field 排序通常沒什麼意義，通常僅有在 aggregation 需求時才會開啟 fielddata 的設定</p>
+</blockquote>
+<h2 id="關閉-Doc-Values"><a href="#關閉-Doc-Values" class="headerlink" title="關閉 Doc Values"></a>關閉 Doc Values</h2><p>透過以下的語法，可以關閉 Doc Values：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">PUT test_keyword/_mapping</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"properties"</span>: &#123;</span><br><span class="line">    <span class="attr">"user_name"</span>:&#123;</span><br><span class="line">      <span class="attr">"type"</span>: <span class="string">"keyword"</span>,</span><br><span class="line">      <span class="attr">"doc_values"</span>:<span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>Doc Values 預設啟用，可以透過 mapping 設定關閉，優點可以增加索引速度 &amp; 減少硬碟空間的消耗</p>
+</li>
+<li><p>如果要重新打開，需要重建 index</p>
+</li>
+<li><p>若是對於不需要進行 sorting or aggregation 的欄位，可以關閉該欄位的 Doc Values</p>
+</li>
+</ul>
+<h1 id="分頁與遍歷：From-Size-Search-After-amp-Scroll-API"><a href="#分頁與遍歷：From-Size-Search-After-amp-Scroll-API" class="headerlink" title="分頁與遍歷：From, Size, Search After &amp; Scroll API"></a>分頁與遍歷：From, Size, Search After &amp; Scroll API</h1><h2 id="From-amp-Size"><a href="#From-amp-Size" class="headerlink" title="From &amp; Size"></a>From &amp; Size</h2><ul>
+<li>Elasticsearch 預設對搜尋回傳 10 筆紀錄，<code>From</code> 是 document 開始位置，<code>Size</code> 是期望取得 document 的總數</li>
+</ul>
+<h2 id="分散式系統中-Deep-Pagination-深度分頁-的問題"><a href="#分散式系統中-Deep-Pagination-深度分頁-的問題" class="headerlink" title="分散式系統中 Deep Pagination(深度分頁)的問題"></a>分散式系統中 Deep Pagination(深度分頁)的問題</h2><p><img src="/blog/images/Elasticsearch/es_deep-pagination-1.png" alt="Elasticsearch - Deep Pagination"></p>
+<ul>
+<li><p>Elasticsearch 是個分散式系統，資料會分佈在多個 shard 中</p>
+</li>
+<li><p>但假設查詢的 <code>From=990</code> &amp; <code>Size=10</code> 時，Elasticsearch 會進行以下操作：</p>
+<ul>
+<li><p>在每個 shard 中取得 1000 個 document，然後 coordinating node 會整合所有結果，最後透過排序選取前 1000 個 document</p>
+</li>
+<li><p>頁數越深，佔用的 memory 越多，而 Elasticsearch 預設限制到 10000 個 document(可透過修改 <code>index.max_result_window</code> 來調整)</p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="使用-search-after-避免-Deep-Pagination-深度分頁-問題"><a href="#使用-search-after-避免-Deep-Pagination-深度分頁-問題" class="headerlink" title="使用 search_after 避免 Deep Pagination(深度分頁)問題"></a>使用 search_after 避免 Deep Pagination(深度分頁)問題</h2><p>為了避免 deep pagination 的問題，Elasticsearch 提供了 <code>search_after</code> 的功能，以下是一個簡單範例：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">//透過 "search_after" 可以明確指定從哪裡開始取得資料</span><br><span class="line">//因此也就避免了 deep pagination 的問題</span><br><span class="line">POST users/_search</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"size"</span>: <span class="number">1</span>,</span><br><span class="line">    <span class="attr">"query"</span>: &#123;</span><br><span class="line">        <span class="attr">"match_all"</span>: &#123;&#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">"search_after"</span>: [<span class="number">10</span>, <span class="string">"ZQ0vYGsBrR8X3IP75QqX"</span>],</span><br><span class="line">    <span class="attr">"sort"</span>: [</span><br><span class="line">        &#123;<span class="attr">"age"</span>: <span class="string">"desc"</span>&#125; ,</span><br><span class="line">        &#123;<span class="attr">"_id"</span>: <span class="string">"asc"</span>&#125;    </span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>然而 search_after 會有以下兩項限制：</p>
+<ul>
+<li><p>不支援指定頁數 (也就是表示不能指定 <code>From</code>)</p>
+</li>
+<li><p>只能往下翻頁，無法往回</p>
+</li>
+</ul>
+</li>
+<li><p>搜尋時需要指定上一次的 <code>sort</code> value，如此一來就可以一次一次的搜尋結果進行翻頁</p>
+</li>
+<li><p><code>search_after</code> 是透過唯一排序值的定位方式，將每次要處理的 document 數量都控制在 10(可自訂 <code>size</code>)</p>
+</li>
+</ul>
+<h2 id="Scroll-API"><a href="#Scroll-API" class="headerlink" title="Scroll API"></a>Scroll API</h2><p>Scroll API 也是為了解決深度搜尋的另外一種方式，實踐的方法類似 <code>search_after</code>，作法如下：</p>
+<ul>
+<li><p>搜尋時建立一個快照，作為後續繼續快速搜尋之用，但如果有新的數據資料寫入後，就沒辦法被查詢到了</p>
+</li>
+<li><p>每次查詢時，要將上次查詢結果中的 scroll id 拿來使用，才可以正確的繼續往下搜尋</p>
+</li>
+</ul>
+<h2 id="不同的搜尋類型-amp-使用場景"><a href="#不同的搜尋類型-amp-使用場景" class="headerlink" title="不同的搜尋類型 &amp; 使用場景"></a>不同的搜尋類型 &amp; 使用場景</h2><ul>
+<li><p><strong>一般搜尋</strong>：需要接近即時的取得最新的部份資料，例如：查詢最新訂單</p>
+</li>
+<li><p><strong>Scroll</strong>：需要全部 document，但過程中的分頁速度要快，例如：導出全部數據資料</p>
+</li>
+<li><p><strong>Pagination</strong>：使用 <code>from</code> &amp; <code>size</code>，如果要處理 deep pagination 的問題，則使用 <code>search_after</code></p>
+</li>
+</ul>
+<h1 id="處理-Concurrent-讀寫操作"><a href="#處理-Concurrent-讀寫操作" class="headerlink" title="處理 Concurrent 讀寫操作"></a>處理 Concurrent 讀寫操作</h1><h2 id="Concurrent-control-的重要性"><a href="#Concurrent-control-的重要性" class="headerlink" title="Concurrent control 的重要性"></a>Concurrent control 的重要性</h2><p>以下是一個常見的範例，假設在沒有做 concurrent control 的狀況下，下圖的情況就有可能發生，導致實際庫存錯誤：</p>
+<p><img src="/blog/images/Elasticsearch/es_concurrent-1.png" alt="Elasticsearch - Concurrent Read &amp; Write operation"></p>
+<ul>
+<li><p>兩個 web process 同時更新某個 document，如果沒有對 concurrent control，可能會導致更新的資料遺失</p>
+</li>
+<li><p>悲觀鎖定(Pessimistic Locking)：假設有變更衝突的可能性，因此對資源更新的時候會進行 lock，防止衝突，例如：DB row lock</p>
+</li>
+<li><p>樂觀鎖定(Optimistic Locking)</p>
+<ul>
+<li><p>假設更新衝突不會發生，因此不會阻止正在嘗試更新的操作</p>
+</li>
+<li><p>但如果數據資料在讀寫中被修改，更新會失敗</p>
+</li>
+<li><p>通常由應用程式端來解決這樣的衝突，例如：重新嘗試更新、使用新資料、或是回應錯誤訊息給使用者</p>
+</li>
+<li><p>Elasticsearch 採用的即是 Optimistic Locking</p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="Elasticsearch-如何作到-Optimistic-Locking-下的-Concurrent-Control"><a href="#Elasticsearch-如何作到-Optimistic-Locking-下的-Concurrent-Control" class="headerlink" title="Elasticsearch 如何作到 Optimistic Locking 下的 Concurrent Control ?"></a>Elasticsearch 如何作到 Optimistic Locking 下的 Concurrent Control ?</h2><p><img src="/blog/images/Elasticsearch/es_optimistic-locking-1.png" alt="Elasticsearch - Optimistic Locking"></p>
+<ul>
+<li><p>Elasticsearch 中的 document 是不可變更的；更新 document 會將原本的 document 標記為刪除，並增加一個全新的 document，同時 document 的 <code>version</code> field 加 1</p>
+</li>
+<li><p>內部版本控制，可透過 <code>if_seq_no</code> + <code>if_primary_term</code> 來處理</p>
+</li>
+<li><p>外部版本(Elasticsearch 只是用來作為類似 DB backup)時，可使用 <code>version</code> + <code>version_type=external</code> 來處理</p>
+</li>
+</ul>
+<p>以下是個簡單範例：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">DELETE products</span><br><span class="line"></span><br><span class="line">//新增 document</span><br><span class="line">PUT products/_doc/1</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"title"</span>:<span class="string">"iphone"</span>,</span><br><span class="line">  <span class="attr">"count"</span>:<span class="number">100</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//取得新增的資料內容</span><br><span class="line">//可以看到 "_seq_no" : 0 &amp; "_primary_term" : 1</span><br><span class="line">GET products/_doc/1</span><br><span class="line"></span><br><span class="line">//進行更新操作，並指定 if_seq_no=0 &amp; if_primary_term=1</span><br><span class="line">//可以成功更新</span><br><span class="line">PUT products/_doc/1?if_seq_no=1&amp;if_primary_term=1</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"title"</span>:<span class="string">"iphone"</span>,</span><br><span class="line">  <span class="attr">"count"</span>:<span class="number">100</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//再一次進行更新操作，同樣指定 if_seq_no=0 &amp; if_primary_term=1</span><br><span class="line">//這次更新就會失敗了，會出現 'version_conflict_engine_exception'</span><br><span class="line">PUT products/_doc/1?if_seq_no=1&amp;if_primary_term=1</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"title"</span>:<span class="string">"iphone"</span>,</span><br><span class="line">  <span class="attr">"count"</span>:<span class="number">102</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//也可透過搭配 version &amp; version_type=external 的方式更新</span><br><span class="line">//這一次可以更新成功</span><br><span class="line">PUT products/_doc/1?version=30000&amp;version_type=external</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"title"</span>:<span class="string">"iphone"</span>,</span><br><span class="line">  <span class="attr">"count"</span>:<span class="number">100</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//同樣的 version 再進行更新，就會失敗了</span><br><span class="line">//出現 version_conflict_engine_exception</span><br><span class="line">PUT products/_doc/1?version=30000&amp;version_type=external</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"title"</span>:<span class="string">"iphone"</span>,</span><br><span class="line">  <span class="attr">"count"</span>:<span class="number">102</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a href="https://www.elastic.co/guide/cn/elasticsearch/guide/current/translog.html" target="_blank" rel="noopener">持久化变更 | Elasticsearch: 权威指南 | Elastic</a></p>
+</li>
+<li><p><a href="https://qbox.io/blog/refresh-flush-operations-elasticsearch-guide" target="_blank" rel="noopener">Guide to Refresh and Flush Operations in Elasticsearch</a></p>
+</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog/tags/Elasticsearch/" rel="tag"># Elasticsearch</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/Linux/Linux-extend-lvm-from-unused-space/" rel="next" title="[Linux] 利用未分割的硬碟空間，擴充 LVM 空間">
+                <i class="fa fa-chevron-left"></i> [Linux] 利用未分割的硬碟空間，擴充 LVM 空間
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            本站概覽
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">godleon</p>
+              <p class="site-description motion-element" itemprop="description">把時間花在哪裡，成就就在哪裡</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/blog/archives/">
+              
+                  <span class="site-state-item-count">100</span>
+                  <span class="site-state-item-name">文章</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/blog/categories/index.html">
+                  <span class="site-state-item-count">17</span>
+                  <span class="site-state-item-name">分類</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/blog/tags/index.html">
+                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-name">標籤</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/godleon" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:godleon@gmail.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-globe"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://plus.google.com/godleon" target="_blank" title="Google">
+                    
+                      <i class="fa fa-fw fa-google"></i>Google</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#集群分佈式模型及選主與腦裂問題"><span class="nav-number">1.</span> <span class="nav-text">集群分佈式模型及選主與腦裂問題</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#分散式特性"><span class="nav-number">1.1.</span> <span class="nav-text">分散式特性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Node"><span class="nav-number">1.2.</span> <span class="nav-text">Node</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Coordinating-Node"><span class="nav-number">1.3.</span> <span class="nav-text">Coordinating Node</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Data-Node"><span class="nav-number">1.4.</span> <span class="nav-text">Data Node</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Master-Node"><span class="nav-number">1.5.</span> <span class="nav-text">Master Node</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cluster-State"><span class="nav-number">1.6.</span> <span class="nav-text">Cluster State</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置不同的-node-type"><span class="nav-number">1.7.</span> <span class="nav-text">配置不同的 node type</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Shard-amp-Cluster-的故障轉移"><span class="nav-number">2.</span> <span class="nav-text">Shard &amp; Cluster 的故障轉移</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Primary-Shard-提昇系統儲存容量"><span class="nav-number">2.1.</span> <span class="nav-text">Primary Shard (提昇系統儲存容量)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Replica-Shard-提高數據資料可用性"><span class="nav-number">2.2.</span> <span class="nav-text">Replica Shard (提高數據資料可用性)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Shard-的規劃-amp-設定"><span class="nav-number">2.3.</span> <span class="nav-text">Shard 的規劃 &amp; 設定</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cluster-amp-shard-設定情境-amp-範例"><span class="nav-number">2.4.</span> <span class="nav-text">cluster &amp; shard 設定情境 &amp; 範例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#single-node-cluster"><span class="nav-number">2.4.1.</span> <span class="nav-text">single node cluster</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#增加第二個-node"><span class="nav-number">2.4.2.</span> <span class="nav-text">增加第二個 node</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#增加第三個-node"><span class="nav-number">2.4.3.</span> <span class="nav-text">增加第三個 node</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Failover"><span class="nav-number">2.4.4.</span> <span class="nav-text">Failover</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#值得一看的-Q-amp-A-資料"><span class="nav-number">2.5.</span> <span class="nav-text">值得一看的 Q&amp;A 資料</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Document-分散式儲存"><span class="nav-number">3.</span> <span class="nav-text">Document 分散式儲存</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#document-儲存在-shard-中"><span class="nav-number">3.1.</span> <span class="nav-text">document 儲存在 shard 中</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#document-到-shard-的路由計算方式"><span class="nav-number">3.2.</span> <span class="nav-text">document 到 shard 的路由計算方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#更新-document-流程"><span class="nav-number">3.3.</span> <span class="nav-text">更新 document 流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#刪除-document-流程"><span class="nav-number">3.4.</span> <span class="nav-text">刪除 document 流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#值得一看的-Q-amp-A-資料-1"><span class="nav-number">3.5.</span> <span class="nav-text">值得一看的 Q&amp;A 資料</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Shard-amp-Life-cycle"><span class="nav-number">4.</span> <span class="nav-text">Shard &amp; Life cycle</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#shard-內部原理"><span class="nav-number">4.1.</span> <span class="nav-text">shard 內部原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Inverted-Index-的不可變動性"><span class="nav-number">4.2.</span> <span class="nav-text">Inverted Index 的不可變動性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Index-Refresh"><span class="nav-number">4.3.</span> <span class="nav-text">Index Refresh</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Transaction-Log"><span class="nav-number">4.4.</span> <span class="nav-text">Transaction Log</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Flush"><span class="nav-number">4.5.</span> <span class="nav-text">Flush</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Merge"><span class="nav-number">4.6.</span> <span class="nav-text">Merge</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#值得一看的-Q-amp-A-資料-2"><span class="nav-number">4.7.</span> <span class="nav-text">值得一看的 Q&amp;A 資料</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#剖析-Distributed-Search-分佈式查詢-及相關性算分"><span class="nav-number">5.</span> <span class="nav-text">剖析 Distributed Search(分佈式查詢)及相關性算分</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Distributed-Search-的運作機制"><span class="nav-number">5.1.</span> <span class="nav-text">Distributed Search 的運作機制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Query-then-Fetch-範例"><span class="nav-number">5.2.</span> <span class="nav-text">Query-then-Fetch 範例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Query-階段"><span class="nav-number">5.2.1.</span> <span class="nav-text">Query 階段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Fetch-階段"><span class="nav-number">5.2.2.</span> <span class="nav-text">Fetch 階段</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Query-then-Fetch-的潛在問題"><span class="nav-number">5.3.</span> <span class="nav-text">Query-then-Fetch 的潛在問題</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何解決算分不準的問題"><span class="nav-number">5.4.</span> <span class="nav-text">如何解決算分不準的問題 ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#值得一看的-Q-amp-A-資料-3"><span class="nav-number">5.5.</span> <span class="nav-text">值得一看的 Q&amp;A 資料</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#排序及-Doc-Values-amp-Fielddata"><span class="nav-number">6.</span> <span class="nav-text">排序及 Doc Values &amp; Fielddata</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Sorting"><span class="nav-number">6.1.</span> <span class="nav-text">Sorting</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#sorting-的過程"><span class="nav-number">6.2.</span> <span class="nav-text">sorting 的過程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Doc-Values-v-s-Field-data"><span class="nav-number">6.3.</span> <span class="nav-text">Doc Values v.s. Field data</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#關閉-Doc-Values"><span class="nav-number">6.4.</span> <span class="nav-text">關閉 Doc Values</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#分頁與遍歷：From-Size-Search-After-amp-Scroll-API"><span class="nav-number">7.</span> <span class="nav-text">分頁與遍歷：From, Size, Search After &amp; Scroll API</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#From-amp-Size"><span class="nav-number">7.1.</span> <span class="nav-text">From &amp; Size</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分散式系統中-Deep-Pagination-深度分頁-的問題"><span class="nav-number">7.2.</span> <span class="nav-text">分散式系統中 Deep Pagination(深度分頁)的問題</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-search-after-避免-Deep-Pagination-深度分頁-問題"><span class="nav-number">7.3.</span> <span class="nav-text">使用 search_after 避免 Deep Pagination(深度分頁)問題</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Scroll-API"><span class="nav-number">7.4.</span> <span class="nav-text">Scroll API</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#不同的搜尋類型-amp-使用場景"><span class="nav-number">7.5.</span> <span class="nav-text">不同的搜尋類型 &amp; 使用場景</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#處理-Concurrent-讀寫操作"><span class="nav-number">8.</span> <span class="nav-text">處理 Concurrent 讀寫操作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Concurrent-control-的重要性"><span class="nav-number">8.1.</span> <span class="nav-text">Concurrent control 的重要性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Elasticsearch-如何作到-Optimistic-Locking-下的-Concurrent-Control"><span class="nav-number">8.2.</span> <span class="nav-text">Elasticsearch 如何作到 Optimistic Locking 下的 Concurrent Control ?</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">9.</span> <span class="nav-text">References</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 強力驅動</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主題 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/blog/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://godleon-blog-hexo.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'https://godleon.github.io/blog/Elasticsearch/Elasticsearch-distributed-mechanism/';
+          this.page.identifier = 'Elasticsearch/Elasticsearch-distributed-mechanism/';
+          this.page.title = '[Elasticsearch] 分散式特性 & 分散式搜尋的機制';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/blog/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
