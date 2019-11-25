@@ -250,6 +250,10 @@ $ lvdisplay
   Read ahead sectors     auto
   - currently set to     256
   Block device           253:0
+
+
+# 最後要使用 resize2fs 調整的空間才會真正生效
+$ resize2fs /dev/ubuntu-vg/ubuntu-lv
 ```
 
 
