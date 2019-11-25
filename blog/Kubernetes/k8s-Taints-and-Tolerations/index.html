@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="小信豬的原始部落">
 <meta property="og:description" content="本篇文章的主題在介紹在 Kubernetes 中，&apos;taint&apos; &amp; &apos;toleration&apos; 這兩種機制的設計會如何影響 scheduler &amp; k8s 相關自動化維運的行為">
 <meta property="og:locale" content="zh-tw">
-<meta property="og:updated_time" content="2019-11-18T13:10:51.700Z">
+<meta property="og:updated_time" content="2019-11-25T08:05:49.028Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[Kubernetes] Taints and Tolerations">
 <meta name="twitter:description" content="本篇文章的主題在介紹在 Kubernetes 中，&apos;taint&apos; &amp; &apos;toleration&apos; 這兩種機制的設計會如何影響 scheduler &amp; k8s 相關自動化維運的行為">
@@ -438,9 +438,9 @@
 <p>kubectl taint nodes node1 key:NoSchedule-</p>
 </blockquote>
 <h2 id="設定-pod-toleration"><a href="#設定-pod-toleration" class="headerlink" title="設定 pod toleration"></a>設定 pod toleration</h2><p>pod toleration 是設定在 pod spec 中，我們可以設定以下的 pod toleration 讓 pod 可以接受經過上面指令所產生的 node taint：</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 表示可以接受"帶有 key=value &amp; effect=NoSchedule" 的 taint</span></span><br><span class="line"><span class="attr">tolerations:</span></span><br><span class="line"><span class="attr">- key:</span> <span class="string">"key"</span></span><br><span class="line"><span class="attr">  operator:</span> <span class="string">"Equal"</span></span><br><span class="line"><span class="attr">  value:</span> <span class="string">"value"</span></span><br><span class="line"><span class="attr">  effect:</span> <span class="string">"NoSchedule"</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 表示可以接受"帶有 key=value &amp; effect=NoSchedule" 的 taint</span></span><br><span class="line"><span class="attr">tolerations:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">key:</span> <span class="string">"key"</span></span><br><span class="line">  <span class="attr">operator:</span> <span class="string">"Equal"</span></span><br><span class="line">  <span class="attr">value:</span> <span class="string">"value"</span></span><br><span class="line">  <span class="attr">effect:</span> <span class="string">"NoSchedule"</span></span><br></pre></td></tr></table></figure>
 <p>也可以是下面這樣設定：</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 表示可以接受"存在 key(不論 value 為何) &amp; effect=NoSchedule" 的 taint</span></span><br><span class="line"><span class="attr">tolerations:</span></span><br><span class="line"><span class="attr">- key:</span> <span class="string">"key"</span></span><br><span class="line"><span class="attr">  operator:</span> <span class="string">"Exists"</span></span><br><span class="line"><span class="attr">  effect:</span> <span class="string">"NoSchedule"</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 表示可以接受"存在 key(不論 value 為何) &amp; effect=NoSchedule" 的 taint</span></span><br><span class="line"><span class="attr">tolerations:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">key:</span> <span class="string">"key"</span></span><br><span class="line">  <span class="attr">operator:</span> <span class="string">"Exists"</span></span><br><span class="line">  <span class="attr">effect:</span> <span class="string">"NoSchedule"</span></span><br></pre></td></tr></table></figure>
 <p>在 toleration 的設定中，有一些比較特別的案例需要說明一下：</p>
 <ul>
 <li><p>operator 若是沒設定，預設值就是 <code>Equal</code></p>
@@ -448,11 +448,11 @@
 <li><p>若僅有設定 operator 為 Exists，卻沒有設定 key，那表示會 tolerate(容忍) 所有的 taint</p>
 </li>
 </ul>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">tolerations:</span></span><br><span class="line"><span class="attr">- operator:</span> <span class="string">"Exists"</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">tolerations:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">operator:</span> <span class="string">"Exists"</span></span><br></pre></td></tr></table></figure>
 <ul>
 <li>僅有設定 key，沒有設定 effect，表示只有帶有相同 key 的 taint 都會被容忍</li>
 </ul>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">tolerations:</span></span><br><span class="line"><span class="attr">- key:</span> <span class="string">"key"</span></span><br><span class="line"><span class="attr">  operator:</span> <span class="string">"Exists"</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">tolerations:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">key:</span> <span class="string">"key"</span></span><br><span class="line">  <span class="attr">operator:</span> <span class="string">"Exists"</span></span><br></pre></td></tr></table></figure>
 <h1 id="Effect-運作規則說明"><a href="#Effect-運作規則說明" class="headerlink" title="Effect 運作規則說明"></a>Effect 運作規則說明</h1><p>由於 key &amp; value 這兩個部份是比較容易理解的，而比較有差異的部份主要落在 <code>Effect</code> 的部份，因此以下就 Effect 進行比較詳細的說明。</p>
 <p>Taint Effect 共有分成三種，分別是：</p>
 <ul>
