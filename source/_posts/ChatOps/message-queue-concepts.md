@@ -28,7 +28,7 @@ Application 整合模式
 
 而一般常見的 application 整合方式大概可以分為以下幾種：
 
-### Filed Based Integration
+## Filed Based Integration
 
 ![File Based Integration](/blog/images/middleware/message-queue_file-based-integration.png)
 
@@ -36,7 +36,7 @@ Application 整合模式
 
 - 其他的 process application 則會是一直監控該路徑有沒有新檔案，有新的檔案則取出進行處理
 
-### Shared Database Integration
+## Shared Database Integration
 
 ![Shared Database Integration](/blog/images/middleware/message-queue_shared-db-integration.png)
 
@@ -46,7 +46,7 @@ Application 整合模式
 
 - processor application 處理完工作後可能會將狀態回寫到 DB 中
 
-### Direct Connection Integration
+## Direct Connection Integration
 
 ![Direct Connection Integration](/blog/images/middleware/message-queue_direct-connection-integration.png)
 
@@ -56,7 +56,7 @@ Application 整合模式
 
 - 不限傳遞的資料格式，連線兩端的 application 傳遞的資料格式可自訂，可能是純文字、XML or JSON
 
-### 透過 Message Broker 以非同步的方式傳遞訊息Asynchronous Messaging
+## 透過 Message Broker 以非同步的方式傳遞訊息Asynchronous Messaging
 
 ![Message Broker Based Integration](/blog/images/middleware/message-queue_message-broker-integration.png)
 
@@ -120,7 +120,7 @@ Application 整合模式
 
 
 Messaging System 中的標準組成元素
-============================
+==============================
 
 了解 Message Queue 的功能之後，接著說明在一個 Messaging System 會包含的標準元素：
 
@@ -141,7 +141,7 @@ Messaging System 中的標準組成元素
 
 - **Channel**：在真實的 TCP 連接中定義出來的 virtual connection，這才是實際上 producer/consumer 與 message broker 之間的連接改念
 
-- **Binding**：Binding 定義了 `Exchange` & `Queue` 之間的關係以及訊息 routing 的設定，可能還包含了一些 fitler 的設定
+- **Binding**：Binding 定義了 `Exchange` & `Queue` 之間的關係以及訊息 routing 的設定，可能還包含了一些 filter 的設定
 ![Message Queue Case 2](/blog/images/middleware/message-queue_concept-binding.png)
 
  
