@@ -2,7 +2,7 @@
 layout: post
 title:  "Message Queue 簡介(以 RabbitMQ 為例)"
 description: "此篇文章簡單介紹什麼是 Message Queue? 到底這類型的元件有什麼特性? 可以為系統帶來什麼優點? 以及其相關的特性 & 運作方式 (以 RabbitMQ 為例)"
-date: 2020-02-09 06:30:00
+date: 2020-02-12 17:20:00
 published: true
 comments: true
 categories:
