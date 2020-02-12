@@ -95,7 +95,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/middleware/message-queue_case-2.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/middleware/message-queue_concept-binding.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/middleware/message-queue_concept-binding.png">
-<meta property="og:updated_time" content="2020-02-12T09:21:32.116Z">
+<meta property="og:updated_time" content="2020-02-12T09:23:05.341Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Message Queue 簡介(以 RabbitMQ 為例)">
 <meta name="twitter:description" content="此篇文章簡單介紹什麼是 Message Queue? 到底這類型的元件有什麼特性? 可以為系統帶來什麼優點? 以及其相關的特性 &amp; 運作方式 (以 RabbitMQ 為例)">
@@ -410,14 +410,14 @@
 <p>由於目前 Message Queue 在系統架設設計時很常出現，到底這類型的元件有什麼特性? 可以為系統帶來什麼優點? 以及其相關的特性 &amp; 運作方式 (以 RabbitMQ 為例)。以下的部份會進行說明解釋。</p>
 <h1 id="Application-整合模式"><a href="#Application-整合模式" class="headerlink" title="Application 整合模式"></a>Application 整合模式</h1><p>在一個系統中，一般不會只有一隻程式在運作，而是會有多隻程式同時負責各種不同的任務，而程式之間難免會有互相傳遞資料進行處理的需求，而這類的需求，以下都統稱為 applcation 的整合。</p>
 <p>而一般常見的 application 整合方式大概可以分為以下幾種：</p>
-<h3 id="Filed-Based-Integration"><a href="#Filed-Based-Integration" class="headerlink" title="Filed Based Integration"></a>Filed Based Integration</h3><p><img src="/blog/images/middleware/message-queue_file-based-integration.png" alt="File Based Integration"></p>
+<h2 id="Filed-Based-Integration"><a href="#Filed-Based-Integration" class="headerlink" title="Filed Based Integration"></a>Filed Based Integration</h2><p><img src="/blog/images/middleware/message-queue_file-based-integration.png" alt="File Based Integration"></p>
 <ul>
 <li><p>source application 會根據需要處理的工作，產生新的檔案到特定的路徑</p>
 </li>
 <li><p>其他的 process application 則會是一直監控該路徑有沒有新檔案，有新的檔案則取出進行處理</p>
 </li>
 </ul>
-<h3 id="Shared-Database-Integration"><a href="#Shared-Database-Integration" class="headerlink" title="Shared Database Integration"></a>Shared Database Integration</h3><p><img src="/blog/images/middleware/message-queue_shared-db-integration.png" alt="Shared Database Integration"></p>
+<h2 id="Shared-Database-Integration"><a href="#Shared-Database-Integration" class="headerlink" title="Shared Database Integration"></a>Shared Database Integration</h2><p><img src="/blog/images/middleware/message-queue_shared-db-integration.png" alt="Shared Database Integration"></p>
 <ul>
 <li><p>source application 收到新任務時，或將資訊寫入 DB table 中</p>
 </li>
@@ -426,7 +426,7 @@
 <li><p>processor application 處理完工作後可能會將狀態回寫到 DB 中</p>
 </li>
 </ul>
-<h3 id="Direct-Connection-Integration"><a href="#Direct-Connection-Integration" class="headerlink" title="Direct Connection Integration"></a>Direct Connection Integration</h3><p><img src="/blog/images/middleware/message-queue_direct-connection-integration.png" alt="Direct Connection Integration"></p>
+<h2 id="Direct-Connection-Integration"><a href="#Direct-Connection-Integration" class="headerlink" title="Direct Connection Integration"></a>Direct Connection Integration</h2><p><img src="/blog/images/middleware/message-queue_direct-connection-integration.png" alt="Direct Connection Integration"></p>
 <ul>
 <li><p>source application 直接傳遞訊息給 processor application</p>
 </li>
@@ -435,7 +435,7 @@
 <li><p>不限傳遞的資料格式，連線兩端的 application 傳遞的資料格式可自訂，可能是純文字、XML or JSON</p>
 </li>
 </ul>
-<h3 id="透過-Message-Broker-以非同步的方式傳遞訊息Asynchronous-Messaging"><a href="#透過-Message-Broker-以非同步的方式傳遞訊息Asynchronous-Messaging" class="headerlink" title="透過 Message Broker 以非同步的方式傳遞訊息Asynchronous Messaging"></a>透過 Message Broker 以非同步的方式傳遞訊息Asynchronous Messaging</h3><p><img src="/blog/images/middleware/message-queue_message-broker-integration.png" alt="Message Broker Based Integration"></p>
+<h2 id="透過-Message-Broker-以非同步的方式傳遞訊息Asynchronous-Messaging"><a href="#透過-Message-Broker-以非同步的方式傳遞訊息Asynchronous-Messaging" class="headerlink" title="透過 Message Broker 以非同步的方式傳遞訊息Asynchronous Messaging"></a>透過 Message Broker 以非同步的方式傳遞訊息Asynchronous Messaging</h2><p><img src="/blog/images/middleware/message-queue_message-broker-integration.png" alt="Message Broker Based Integration"></p>
 <ul>
 <li><p>不限傳遞的資料格式</p>
 </li>
@@ -500,7 +500,7 @@
 </li>
 <li><p><strong>Channel</strong>：在真實的 TCP 連接中定義出來的 virtual connection，這才是實際上 producer/consumer 與 message broker 之間的連接改念</p>
 </li>
-<li><p><strong>Binding</strong>：Binding 定義了 <code>Exchange</code> &amp; <code>Queue</code> 之間的關係以及訊息 routing 的設定，可能還包含了一些 fitler 的設定<br><img src="/blog/images/middleware/message-queue_concept-binding.png" alt="Message Queue Case 2"></p>
+<li><p><strong>Binding</strong>：Binding 定義了 <code>Exchange</code> &amp; <code>Queue</code> 之間的關係以及訊息 routing 的設定，可能還包含了一些 filter 的設定<br><img src="/blog/images/middleware/message-queue_concept-binding.png" alt="Message Queue Case 2"></p>
 </li>
 </ul>
 <h1 id="細部探究-Message-Queue-amp-Exchange-的屬性資訊"><a href="#細部探究-Message-Queue-amp-Exchange-的屬性資訊" class="headerlink" title="細部探究 Message, Queue &amp; Exchange 的屬性資訊"></a>細部探究 Message, Queue &amp; Exchange 的屬性資訊</h1><p>了解了上面關於 Messaging System 的標準組成元素之後，可以大致了解一個 Message Queue 大概是如何與外部 application 進行溝通運作的；但如果要更探究 Message Queue 內部的運作細節，可以從標準組成元素中的屬性(attribute)來進行了解。</p>
@@ -795,7 +795,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Preface"><span class="nav-number">1.</span> <span class="nav-text">Preface</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Application-整合模式"><span class="nav-number">2.</span> <span class="nav-text">Application 整合模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Filed-Based-Integration"><span class="nav-number">2.0.1.</span> <span class="nav-text">Filed Based Integration</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Shared-Database-Integration"><span class="nav-number">2.0.2.</span> <span class="nav-text">Shared Database Integration</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Direct-Connection-Integration"><span class="nav-number">2.0.3.</span> <span class="nav-text">Direct Connection Integration</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#透過-Message-Broker-以非同步的方式傳遞訊息Asynchronous-Messaging"><span class="nav-number">2.0.4.</span> <span class="nav-text">透過 Message Broker 以非同步的方式傳遞訊息Asynchronous Messaging</span></a></li></ol></li></ol><li class="nav-item nav-level-1"><a class="nav-link" href="#使用-Message-Queue-有什麼優點"><span class="nav-number">3.</span> <span class="nav-text">使用 Message Queue 有什麼優點?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用場景範例"><span class="nav-number">4.</span> <span class="nav-text">使用場景範例</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Case-1"><span class="nav-number">4.1.</span> <span class="nav-text">Case 1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Case-2"><span class="nav-number">4.2.</span> <span class="nav-text">Case 2</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Messaging-System-中的標準組成元素"><span class="nav-number">5.</span> <span class="nav-text">Messaging System 中的標準組成元素</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#細部探究-Message-Queue-amp-Exchange-的屬性資訊"><span class="nav-number">6.</span> <span class="nav-text">細部探究 Message, Queue &amp; Exchange 的屬性資訊</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Message-的屬性"><span class="nav-number">6.1.</span> <span class="nav-text">Message 的屬性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Queue-的屬性"><span class="nav-number">6.2.</span> <span class="nav-text">Queue 的屬性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Exchange-的屬性"><span class="nav-number">6.3.</span> <span class="nav-text">Exchange 的屬性</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Exchange"><span class="nav-number">7.</span> <span class="nav-text">Exchange</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#總結"><span class="nav-number">8.</span> <span class="nav-text">總結</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">9.</span> <span class="nav-text">References</span></a></li></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Preface"><span class="nav-number">1.</span> <span class="nav-text">Preface</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Application-整合模式"><span class="nav-number">2.</span> <span class="nav-text">Application 整合模式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Filed-Based-Integration"><span class="nav-number">2.1.</span> <span class="nav-text">Filed Based Integration</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Shared-Database-Integration"><span class="nav-number">2.2.</span> <span class="nav-text">Shared Database Integration</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Direct-Connection-Integration"><span class="nav-number">2.3.</span> <span class="nav-text">Direct Connection Integration</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#透過-Message-Broker-以非同步的方式傳遞訊息Asynchronous-Messaging"><span class="nav-number">2.4.</span> <span class="nav-text">透過 Message Broker 以非同步的方式傳遞訊息Asynchronous Messaging</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用-Message-Queue-有什麼優點"><span class="nav-number">3.</span> <span class="nav-text">使用 Message Queue 有什麼優點?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用場景範例"><span class="nav-number">4.</span> <span class="nav-text">使用場景範例</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Case-1"><span class="nav-number">4.1.</span> <span class="nav-text">Case 1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Case-2"><span class="nav-number">4.2.</span> <span class="nav-text">Case 2</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Messaging-System-中的標準組成元素"><span class="nav-number">5.</span> <span class="nav-text">Messaging System 中的標準組成元素</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#細部探究-Message-Queue-amp-Exchange-的屬性資訊"><span class="nav-number">6.</span> <span class="nav-text">細部探究 Message, Queue &amp; Exchange 的屬性資訊</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Message-的屬性"><span class="nav-number">6.1.</span> <span class="nav-text">Message 的屬性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Queue-的屬性"><span class="nav-number">6.2.</span> <span class="nav-text">Queue 的屬性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Exchange-的屬性"><span class="nav-number">6.3.</span> <span class="nav-text">Exchange 的屬性</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Exchange"><span class="nav-number">7.</span> <span class="nav-text">Exchange</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#總結"><span class="nav-number">8.</span> <span class="nav-text">總結</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">9.</span> <span class="nav-text">References</span></a></li></ol></div>
             
 
           </div>
