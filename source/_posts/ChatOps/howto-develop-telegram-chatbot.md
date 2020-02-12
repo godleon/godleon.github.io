@@ -1,4 +1,3 @@
-
 ---
 layout: post
 title:  "[ChatOps] 簡單介紹如何開發一個 Telegram Bot"
