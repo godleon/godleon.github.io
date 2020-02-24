@@ -200,7 +200,7 @@ Messaging System 中的標準組成元素
 
 - **Name**：Exchange 的名稱(必須唯一)
 
-- **Type**：Exchange 的運作類型，會是 `Fanout`, `Firect`, `Topic`, `Headers` 四種之一 
+- **Type**：Exchange 的運作類型，會是 `Fanout`, `Direct`, `Topic`, `Headers` 四種之一 
 
 - **Durability**：與 Queue Durability 相同，用來決定在 RabbitMQ 服務重啟後會不會依然存在
 
@@ -230,7 +230,7 @@ Exchange
 
 - Exchange 僅能將訊息轉發到與其綁定的 Queue 上
 
-- Exchange 有四種轉發模式，分別是 `Fanout`, `Firect`, `Topic`, `Headers`
+- Exchange 有四種轉發模式，分別是 `Fanout`, `Direct`, `Topic`, `Headers`
 
 - 至少會有一個預設 Exchange 存在於 RabbitMQ 系統中，稱為 **default exchange**，轉發的模式為 `direct`；每個新建立的 Queue，若是沒指定 exchane 資訊，就會與預設的綁定
 
