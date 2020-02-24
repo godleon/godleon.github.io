@@ -95,7 +95,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/middleware/message-queue_case-2.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/middleware/message-queue_concept-binding.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/middleware/message-queue_concept-binding.png">
-<meta property="og:updated_time" content="2020-02-12T09:23:05.341Z">
+<meta property="og:updated_time" content="2020-02-24T09:54:43.885Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Message Queue 簡介(以 RabbitMQ 為例)">
 <meta name="twitter:description" content="此篇文章簡單介紹什麼是 Message Queue? 到底這類型的元件有什麼特性? 可以為系統帶來什麼優點? 以及其相關的特性 &amp; 運作方式 (以 RabbitMQ 為例)">
@@ -552,7 +552,7 @@
 <h2 id="Exchange-的屬性"><a href="#Exchange-的屬性" class="headerlink" title="Exchange 的屬性"></a>Exchange 的屬性</h2><ul>
 <li><p><strong>Name</strong>：Exchange 的名稱(必須唯一)</p>
 </li>
-<li><p><strong>Type</strong>：Exchange 的運作類型，會是 <code>Fanout</code>, <code>Firect</code>, <code>Topic</code>, <code>Headers</code> 四種之一 </p>
+<li><p><strong>Type</strong>：Exchange 的運作類型，會是 <code>Fanout</code>, <code>Direct</code>, <code>Topic</code>, <code>Headers</code> 四種之一 </p>
 </li>
 <li><p><strong>Durability</strong>：與 Queue Durability 相同，用來決定在 RabbitMQ 服務重啟後會不會依然存在</p>
 </li>
@@ -578,7 +578,7 @@
 </li>
 <li><p>Exchange 僅能將訊息轉發到與其綁定的 Queue 上</p>
 </li>
-<li><p>Exchange 有四種轉發模式，分別是 <code>Fanout</code>, <code>Firect</code>, <code>Topic</code>, <code>Headers</code></p>
+<li><p>Exchange 有四種轉發模式，分別是 <code>Fanout</code>, <code>Direct</code>, <code>Topic</code>, <code>Headers</code></p>
 </li>
 <li><p>至少會有一個預設 Exchange 存在於 RabbitMQ 系統中，稱為 <strong>default exchange</strong>，轉發的模式為 <code>direct</code>；每個新建立的 Queue，若是沒指定 exchane 資訊，就會與預設的綁定</p>
 </li>
