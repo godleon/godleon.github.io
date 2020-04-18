@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "[維運管理] Cloud Native 時代的維運實踐"
-description: "此篇文章是學習極客時間專欄(趙成的運維體系管理課)中的 \"Cloud Native 時代的維運實踐"\ 相關章節時，將文中的重要精華節錄下來的一篇筆記，對於維運觀念上的調整與改善，有很大的幫助"
+description: "此篇文章是學習極客時間專欄(趙成的運維體系管理課)中的\"Cloud Native 時代的維運實踐\"相關章節時，將文中的重要精華節錄下來的一篇筆記，對於維運觀念上的調整與改善，有很大的幫助"
 date: 2020-04-18 11:50:00
 published: true
 comments: true
