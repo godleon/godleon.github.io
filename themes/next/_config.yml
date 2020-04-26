@@ -582,8 +582,8 @@ comments:
 
 # Disqus
 disqus:
-  enable: false
-  shortname:
+  enable: true
+  shortname: godleon-blog-hexo
   count: true
   #post_meta_order: 0
 
