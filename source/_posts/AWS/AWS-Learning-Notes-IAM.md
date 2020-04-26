@@ -1,0 +1,161 @@
+---
+layout: post
+title:  "AWS 學習筆記 - IAM(Identity and Access Management)"
+description: "此篇文章是學習 AWS IAM(Identity and Access Management) 時所留下的學習筆記"
+date: 2020-04-24 05:35:00
+published: true
+comments: true
+categories:
+  - AWS
+tags:
+  - AWS
+  - IAM
+---
+
+
+What is IAM?
+============
+
+首先來看看 IAM(**AWS Identity and Access Management**) 在 AWS 原廠網站上的定義：
+
+> AWS Identity and Access Management (IAM) enables you to manage access to AWS services and resources securely. Using IAM, you can create and manage AWS users and groups, and use permissions to allow and deny their access to AWS resources.
+
+IAM 的主要目的如下：
+
+- 用來管理使用者的權限等級，限制使用者可以存取的 AWS 資源範圍
+
+- IAM 是以目前流行的 RBAC(Role-Based Access Control) 設計的，可以建立 User/Group，並將權限給予到 Group 等級
+
+- IAM 服務是免費的
+
+
+IAM 所提供的功能
+==============
+
+IAM 提供以下眾多的功能：
+
+- 統一管理 AWS 帳號
+
+- 可以將 AWS resource 使用權限分享給其他使用者
+
+- 可以針對每個帳號可存取的資源權限進行很細部的控制，例如**限制某人只能對 DynamoDB 進行唯讀的存取**
+
+- 提供 Identity Federation 功能，可與其他服務(例如：Active Directory, Facebook, Linkedin etc)整合，方便帳號管理
+
+- 多因素認證(Multifactor Authentication)，為帳號密碼之外，額外增加一個隨時變動的密碼
+> AWS 建議為每個帳號都設定 multifactor authentication
+
+- 可為 user/device/service(例如：手機裝置) ...等對象提供暫時的存取權限，一段時間後權限即關閉
+
+- 可自訂 password rotation policy，強制密碼一段時間後要變更
+
+- 為了確保使用者可以安全使用 AWS 服務，IAM 與 AWS 眾多服務都有良好的整合
+
+- 支援 PCI DSS(Payment Card Industry Data Security Standards) Compliance，方便整合外部支付的服務，提昇線上支付的安全性
+> PCI DSS(支付卡產業資料安全標準)是在整合外部付費服務之用，為了提升線上支付的安全性
+
+
+IAM 的核心概念 
+============
+
+IAM 的核心概念包含以下四項：
+
+- **Users**：指的就是使用者，也可以泛指使用資源的人 or 對象
+
+- **Group**：一群 `Users` 的集合，在 Group 中的 User 都會繼承 Group 所擁有的權限
+
+- **Roles**：這個概念就是用來與實際的權限綁定所設計出來的，例如：`UpdateApp`，並指定 RDS & S3 的讀寫權限
+
+- **Policies**：實際將權限綁定到 User/Group/Role 的關鍵就是 Policy 了，這是一個使用 JSON 格式所定義的文件，裡面會清楚描述可使用哪些 AWS resource & 可使用的權限，以下是一個例子：
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "s3:*",
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+
+實作筆記
+=======
+
+## IAM is global(universal)
+
+從 management console 進入 IAM 的功能頁面後，Region 的部份會變成 `global`，表示 IAM 只需要設定一次，這個設定就可以用來套用到使用者在全球所有 region 中的 resource
+
+
+## 啟動 MFA
+
+![IAM MFA options](/blog/images/aws/IAM_MFA-options.png)
+
+- 建議啟動 MFA(Multi-Factor Authentication)，用來增加 root account 的安全性
+> MFA 選項有三個，選擇 `Virtual MFA device`(Hardware 是要花錢買的) 可以與常見的 `Google Authenticator` or `Authy` app 搭配使用，透過掃描 barcode 的方式，手機上會一直出現 random 的啟用碼(要等一下)，輸入兩個就可以用來啟用 AWS IAM MFA 了
+
+- root account 是一開始建立 AWS 所使用的帳號，擁有存取所有 AWS resource 的權限
+
+- 使用 root account 建立其他擁有較小權限的帳號，並用其他帳號登入，會是相對較為安全的作法
+
+
+## IAM users sign-in link
+
+![IAM users sign-in link](http://etutorialsworld.com/wp-content/uploads/2016/05/72.22BAWS2BIAM2BDashboard-1.png)
+
+1. 這是用來提供給其他使用者存取 AWS resource 之用，並非 root account，需要注意一下!
+
+2. 網址是動態產生的，可以透過 **Customize** 的 link 設定別名以方便記憶
+
+
+## 新增 IAM Users
+
+- 所有帳號在 AWS 的有效範圍都是 Global 的，沒辦法為特定的 Region 開啟帳號
+
+- 建立 IAM user 時，可以根據需求建立；若是透過程式(API/SDK/CLI)存取 AWS，勾選 `Programmaric access`(需要 "**access key ID**" & "**secret access key**")；如果是要透過 AWS console 存取 AWS，勾選 `AWS Management Console access`(需要密碼)
+![IAM User access types](/blog/images/aws/IAM_User-access-types.png)
+
+- 在建立 Group 頁面中，指定權限的部份，若是看到有橘色方塊的項目，就表示此權限為 AWS 預先定義好的權限(AWS managed policy)；而 **Type** 為 `Job Function` 的部份，其實就是 AWS 預先為各種不同的管理職能，整理好的 AWS managed policy 的集合(減輕管理者設定全線上的負擔)，因此可將 Job Function 視為 AWS managed policy colleciton
+![IAM Create Group - AWS Managed policy](/blog/images/aws/IAM_CreateGroup_AWS-managed-policy.png)
+
+- policy 並非 group 專屬，也可以 attach 到單一 user
+
+- 每個權限有其對應的 JSON 格式設定，若是未來要使用程式化的方式定義 IAM role 的權限，可以透過此方式很方便的取得正確的定義
+![IAM Create Group - Permission JSON payload example](/blog/images/aws/IAM_CreateGroup_permission-json.png)
+
+
+## 新增 Role
+
+- 目前支援的 Role Type 有四種，分別是 `AWS services`, `Another AWS account`, `Web Identity`, `SAML 2.0 federation`，可能之後還會增加
+
+- 以 `AWS service` type 為例，可用來指定 AWS 上面的特定 service 為 trusted entity(也可以視為用來存取其他 AWS resource 的來源端，例如：EC2)，並指定 trusted entity 可以擁有其他特定資源的存取權限
+> 這可以設定的非常細，例如：只讓 EC2 對 S3 完全存取，無其他 service 的存取權限
+
+其他的部份可以參考[官網文件(IAM Roles - AWS Identity and Access Management)](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html)，有非常詳細的說明。
+
+
+Summary
+=======
+
+- IAM 有效範圍是 Global，目前還不支援 for 特定的 Region
+
+- `root account` 是建立 AWS 帳號時所用的帳號，擁有存取所有 AWS resource 的權限
+
+- 新建立的使用者預設是沒有任何權限的，都需要額外添加
+
+- 要透過程式 or CLI 存取 AWS 的使用者必須要有 `Access Key ID` & `Secret Access Key` (只能看一次，因此產生的當下要妥善保存)
+
+- root account 一定要啟用 MFA 以提高帳號安全性
+
+- 可建立客製化的 password rotation policy
+
+
+References
+==========
+
+- [AWS Identity and Access Management Documentation](https://docs.aws.amazon.com/iam/index.html)
+
+- [IAM Roles - AWS Identity and Access Management](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html)
