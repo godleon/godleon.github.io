@@ -107,6 +107,7 @@ S3 Storage Class
 ================
 
 S3 根據使用者存取的頻率與需求，提供不同的 storage class 供使用者選擇：
+> 調整單位可以細到 object level，而非 bucket level
 
 ## Standard
 
@@ -157,6 +158,8 @@ S3 根據使用者存取的頻率與需求，提供不同的 storage class 供�
 - AWS 會自動協助使用者進行優化，將不常存取的檔案移動到較為便宜的 access tier，常用的則會留在 standard tier
 
 - 透過人工智慧分析，自動將使用成本最佳化，且不會造成效能的影響，也可以減輕管理上的負擔
+
+> 但最多幫使用者將資料移動到 IA tier 的費率，無法更低了(例如：**One Zone-IA** or **Glacier**)
 
 ### 參考資料
 
@@ -241,6 +244,8 @@ S3 的收費標準
 - 若是更新 or 刪除檔案，則需要一段時間才會取得最新結果
 
 - S3 有眾多的 storage class 可以選用，使用者可以根據實際需求進行不同 storage class 的搭配以降低費用；若是懶的管理可以考慮選用 `Intelligent Tiering`，AWS 會根據實際使用狀況，最佳化使用成本 (但要長期備份的資料還是要自己移到 `Glacier` or `Glacier Deep Archive`)
+
+- 用來控制 Bucket 存取權限有兩個手段，分別是 `bucket ACL`(控制存取 bucket 本身的權限) & `bucket policies`(控制 bucket 與其他 AWS service 互相存取的權限)
 
 - S3 FAQ 很重要，考前必讀!
 
