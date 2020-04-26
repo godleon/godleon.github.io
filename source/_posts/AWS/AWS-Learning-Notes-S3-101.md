@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "AWS 學習筆記 - S3(Simple Storage Service)"
+title:  "AWS 學習筆記 - S3(Simple Storage Service) 101"
 description: "此篇文章是學習 AWS S3(Simple Storage Service) 時所留下的學習筆記"
 date: 2020-04-26 12:00:00
 published: true
