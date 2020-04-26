@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+<link rel="stylesheet" href="/blog/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="這篇文章是閱讀 &#39;深入淺出Prometheus(原理應用源碼與拓展詳解)&#39; 時的重點筆記">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[Prometheus] 學習筆記 - Monitoring Overview">
+<meta property="og:url" content="https://godleon.github.io/blog/Prometheus/Prometheus-LearningNotes-Monitoring/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="這篇文章是閱讀 &#39;深入淺出Prometheus(原理應用源碼與拓展詳解)&#39; 時的重點筆記">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="https://godleon.github.io/blog/images/prometheus-learning-notes/monitoring-overview-1.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/prometheus-learning-notes/pinpoint-example.png">
+<meta property="article:published_time" content="2019-08-22T20:20:00.000Z">
+<meta property="article:modified_time" content="2020-04-26T04:42:44.177Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="Prometheus">
+<meta property="article:tag" content="Telemetry">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/prometheus-learning-notes/monitoring-overview-1.png">
+
+<link rel="canonical" href="https://godleon.github.io/blog/Prometheus/Prometheus-LearningNotes-Monitoring/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-tw'
+  };
+</script>
+
+  <title>[Prometheus] 學習筆記 - Monitoring Overview | 小信豬的原始部落</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/blog/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/blog/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/Prometheus/Prometheus-LearningNotes-Monitoring/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [Prometheus] 學習筆記 - Monitoring Overview
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-08-23 04:20:00" itemprop="dateCreated datePublished" datetime="2019-08-23T04:20:00+08:00">2019-08-23</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-04-26 12:42:44" itemprop="dateModified" datetime="2020-04-26T12:42:44+08:00">2020-04-26</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Prometheus/" itemprop="url" rel="index"><span itemprop="name">Prometheus</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">這篇文章是閱讀 '深入淺出Prometheus(原理應用源碼與拓展詳解)' 時的重點筆記</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Monitoring-System-Overview"><a href="#Monitoring-System-Overview" class="headerlink" title="Monitoring System Overview"></a>Monitoring System Overview</h1><ul>
+<li><p>當企業 IT 從傳統的 bare metal(實體機)，轉移到 virtual machine(虛擬機) 甚至是 container(容器) 的過程中，對 monitoring 的需求只會越來越高</p>
+</li>
+<li><p>監控的對象也比起原本多很多，例如：container, distributed system/storage, SDN network, 各種 application，規劃時都需要考量進來</p>
+</li>
+<li><p>相對應 monitoring 所需要的儲存空間也相對龐大，同時也衍生了可以對這些龐大資料進行更進一步的分析、告警、預警…等工作</p>
+</li>
+<li><p>monitoring system 同時也可以作為輔助決策的重要角色，因為不僅可以提供 real-time 的狀態呈現，同時也可以顯示歷史資料，藉以協助進行故障回溯 &amp; 風險預測…等工作</p>
+</li>
+<li><p>從程式開發的角度，可以將監控分為 <code>基礎資源(Infrastructure)</code>、<code>中間層(Middleware)</code>、<code>應用程式監控(Applications)</code> 三層，每一層都有不同的監控指標</p>
+</li>
+</ul>
+<p><img src="/blog/images/prometheus-learning-notes/monitoring-overview-1.png" alt="Monitoring System Overview"></p>
+<ul>
+<li>針對需求決定要收集的監控目標，不需要全部都收</li>
+</ul>
+<h1 id="Infrastructure-Monitoring"><a href="#Infrastructure-Monitoring" class="headerlink" title="Infrastructure Monitoring"></a>Infrastructure Monitoring</h1><p>這部份包含了 <code>Networking</code>、<code>Storage</code>、<code>Computing</code> 三種主要資源的監控</p>
+<h2 id="Networking"><a href="#Networking" class="headerlink" title="Networking"></a>Networking</h2><p>這部份包含了以下的監控項目：</p>
+<ol>
+<li><p>Datacenter 內網路流量的監控</p>
+</li>
+<li><p>Networking Topology &amp; Devices 的監控</p>
+</li>
+<li><p>Network Performance 的監控</p>
+</li>
+<li><p>網路攻擊的探測</p>
+</li>
+</ol>
+<ul>
+<li><p>Datacenter 中的網路設備監控，一般都是透過 port mirror 的方式來達成；若是 virtual device 則是可以透過 tcpdump 或是其他工具來完成</p>
+</li>
+<li><p>透過匯總網路封包的 source IP &amp; destination IP 可以用來產生 networking topology</p>
+</li>
+<li><p>網路設備的監控通常會使用 SNMP v3 協定</p>
+</li>
+</ul>
+<h2 id="Storage"><a href="#Storage" class="headerlink" title="Storage"></a>Storage</h2><ul>
+<li><p>目前 storage 主要分為 cloud storage &amp; distributed storage 兩種</p>
+</li>
+<li><p>cloud storage 是透過儲存設備建立 storage pool，並提供其他的機器統一的 storage interface，例如：iSCSI, NFS</p>
+</li>
+<li><p>distributed storag 則是與機器上的 OS 共存，藉以提供分佈式集群的儲存服務，例如：HDFS</p>
+</li>
+</ul>
+<p>cloud storage 的監控可分為以下三種：</p>
+<ul>
+<li><p><strong>storage performance</strong>：block storage 會著重在 IOPS, Read/Write Latency, Disk Usage；object storage 則是著重在 Inode, Read/Write Speed, Folder permission … 等</p>
+</li>
+<li><p><strong>storage system</strong>：不同的系統有不同的指標，例如 Ceph 則需要監控 OSD, MON, PG … 等資訊</p>
+</li>
+<li><p><strong>storage device</strong>：這部份則是以監控 x86 server 上的儲存相關資源為主</p>
+</li>
+</ul>
+<h2 id="Computing"><a href="#Computing" class="headerlink" title="Computing"></a>Computing</h2><ul>
+<li><p>包含 bare metal, VM, container 的監控</p>
+</li>
+<li><p>可兼容來自於不同廠商的 server</p>
+</li>
+<li><p>可兼容不同的作業系統 (e.g., Windows, Linux … etc)</p>
+</li>
+<li><p>可兼容不同的虛擬化技術 (e.g., VMware, Xen, KVM … etc)</p>
+</li>
+<li><p>監控數據可透過在每個 client 上放 agent 或是從外部透過虛擬化環境的 API 來取得</p>
+</li>
+<li><p>OS 層級通常會監控 CPU、Memory、Network I/O、Disk I/O … 等資訊</p>
+</li>
+<li><p>bare metal server 的監控可以透過 IPMI</p>
+</li>
+</ul>
+<h1 id="Middleware-Monitoring"><a href="#Middleware-Monitoring" class="headerlink" title="Middleware Monitoring"></a>Middleware Monitoring</h1><ul>
+<li><p>常見的 middleware 可分成幾類：<strong>Message Queue</strong>(RabbitMQ, Kafka)，<strong>Web Service</strong>(Tomcat, Jetty), <strong>Buffer</strong>(Redis, Memcached), <strong>Database</strong>(MySQL, PostgreSQL)</p>
+</li>
+<li><p>很多 application 的性能都會直接與 middleware 有關係</p>
+</li>
+<li><p>middleware 的監控可用在 application 的優化，也可以用來在高並發 or 大流量環境時的提供正確的 feedback</p>
+</li>
+<li><p>middleware 的監控會根據不同的軟體有不同的特性資訊需要蒐集，因此沒有統一的標準；比較標準的作法就是分別針對不同的軟體開發不同的 agent，再統一收到監控中心(例如：Prometheus &amp; 眾多的 exporter)</p>
+</li>
+</ul>
+<h1 id="Application-Performance-Monitoring-APM"><a href="#Application-Performance-Monitoring-APM" class="headerlink" title="Application Performance Monitoring (APM)"></a>Application Performance Monitoring (APM)</h1><ul>
+<li><p>APM 主要是針對 application level 的監控</p>
+</li>
+<li><p>監控的項目包含了 application 運行狀態、效能、log、調用鏈(call-chain)跟蹤</p>
+</li>
+<li><p>透過 <code>調用鏈(call-chain)跟蹤</code> 可以建構出完整程式運行的 topology，還可以取得每個元件的執行時間，作為調整效能的重要依據</p>
+</li>
+</ul>
+<p><img src="/blog/images/prometheus-learning-notes/pinpoint-example.png" alt="pinpoint(APM) example"></p>
+<ul>
+<li><p>APM 除了可攔截 method call 的資訊外，還可以攔截 TCP &amp; HTTP request，進而取得花最多時間的 method &amp; SQL command，或是延遲最久的 API … 等訊息</p>
+</li>
+<li><p><strong>商業化的 SaaS APM 甚至可以提供從不同地點發出的模擬請求</strong></p>
+</li>
+<li><p>由於 application 的監控系統也需要關心 host 的狀態，因此會跟 host monitoring 會有重疊</p>
+</li>
+</ul>
+<h1 id="Log-Monitoring"><a href="#Log-Monitoring" class="headerlink" title="Log Monitoring"></a>Log Monitoring</h1><ul>
+<li><p>Log monitoring system 蒐集的主要是文字型的資訊，因此儲存的部份就需要具備全文檢索的能力</p>
+</li>
+<li><p>可用來定位出效能問題，也可以用來做數據統計 &amp; 故障告警等功能</p>
+</li>
+<li><p>目前比較流行的工具組合是：<a href="https://www.fluentd.org/" target="_blank" rel="noopener"><code>fluentd</code></a> -&gt; <a href="https://kafka.apache.org/" target="_blank" rel="noopener"><code>Kafka</code></a> -&gt; <a href="https://www.elastic.co/products/logstash" target="_blank" rel="noopener"><code>Logstash</code></a> -&gt; <a href="https://www.elastic.co/products/elasticsearch" target="_blank" rel="noopener"><code>Elasticsearch</code></a> -&gt; <a href="https://www.elastic.co/products/kibana" target="_blank" rel="noopener"><code>Kibana</code></a></p>
+</li>
+</ul>
+<h1 id="監控系統的實現"><a href="#監控系統的實現" class="headerlink" title="監控系統的實現"></a>監控系統的實現</h1><ul>
+<li>監控系統通常分為 <strong>數據蒐集</strong>(收集、過濾、匯總、儲存) &amp; <strong>數據處理</strong>(分析、顯示、預警、告警、告警動作觸發) 兩大部份</li>
+</ul>
+<h2 id="數據蒐集"><a href="#數據蒐集" class="headerlink" title="數據蒐集"></a>數據蒐集</h2><ul>
+<li><p>數據蒐集有兩種方式：透過 client 端程式 or 通過標準的 protocol(例如：SNMP、IPMI、JMX … 等等)</p>
+</li>
+<li><p>數據傳輸可以透過 HTTP/Socket 進行傳輸，也可以利用 RabbitMQ/Kafka 等工具作為 buffer 協助傳輸</p>
+</li>
+<li><p>利用 message queue 可以將整體架構進行 decouple，但系統就會與相關工具具有強大的依賴性，且會有單點故障的疑慮</p>
+</li>
+<li><p>儲存數據之前，還需要對資料進行<strong>去重複</strong>(重複上報數據) &amp; <strong>過濾</strong>(並非所有資料都需要)的步驟</p>
+</li>
+<li><p>監控數據的儲存通常使用 TSDB(Time-Series Database)</p>
+</li>
+<li><p>TSDB 具有以下特點：</p>
+<ul>
+<li>寫入一次，多次讀取，通常不會有修改 or 更新的動作</li>
+<li>數據流量相對穩定，不會有突然性爆炸流量的發生</li>
+<li>查詢方式通常是以最近的為主，很少需要查詢到太久之前的資訊(例如：一週以前)</li>
+<li>通常以 LSM tree 來設計(跟 DB 的 B+ tree 是完全不同的)，資料壓縮比高</li>
+<li>需要大容量的資料儲存能力</li>
+</ul>
+</li>
+</ul>
+<h2 id="數據處理"><a href="#數據處理" class="headerlink" title="數據處理"></a>數據處理</h2><ul>
+<li><p>為了提昇查詢歷史資料的速度，必須對資料進行彙整</p>
+</li>
+<li><p>目前比較常用的視覺化查詢工具為 Grafana &amp; Kibana</p>
+</li>
+<li><p>數據分析:指的是對監控數據進行 <code>效能分析</code>、<code>關聯分析</code>、<code>趨勢分析</code></p>
+</li>
+<li><p>效能分析:可按照資源的消耗類型來分類，可能是 high CPU usage 或是 high DISK I/O，不將消耗相同類型資源的 workload 放在一起</p>
+</li>
+<li><p>關聯分析：可透過 source/destination IP 繪製出 network topology；或是在 APM 監控中透過 TraceId 的關聯取得 call chain 的資訊，藉此分析出不同 component 的效能並優化系統</p>
+</li>
+<li><p>趨勢分析：將數據結合各種數學方法，分析數據的週期性，並預測出未來的變化趨勢，並用於資源調度 &amp; 預分配資源上</p>
+</li>
+<li><p>規則告警則是根據監控數據，定義多為度的告警規則</p>
+</li>
+<li><p>規則告警的例子像是：一段時間內觸發告警特定次數就停止、設計告警抑制，假設由 root issue 觸發很多 sub issue 的告警，只要針對 root issue 發告警即可</p>
+</li>
+<li><p>告警動作可以是送訊息 or EMail 通知，也可以是發送 webhook</p>
+</li>
+</ul>
+<h1 id="監控系統的發展趨勢"><a href="#監控系統的發展趨勢" class="headerlink" title="監控系統的發展趨勢"></a>監控系統的發展趨勢</h1><ul>
+<li><p>分散式系統越來越普及，單一指標無法很精確的反應實際系統運行 &amp; 程序當下的狀況</p>
+</li>
+<li><p>傳統監控提供效能、健康狀態、Application … 等監控能力</p>
+</li>
+<li><p>監控系統現在開始朝著自動化 &amp; 智慧化的方向發展，開始會具備機器學習 &amp; 自動化的維運能力</p>
+</li>
+<li><p>智慧監控需要有以下幾種能力：</p>
+<ul>
+<li>根據多種維度的指標分析定位實際問題</li>
+<li>故障 &amp; 風險預測</li>
+<li>智慧處理：告警發生後的問題處理，由智慧系統判斷後自行決定處理方法</li>
+</ul>
+</li>
+</ul>
+<h1 id="Prometheus"><a href="#Prometheus" class="headerlink" title="Prometheus"></a>Prometheus</h1><p>網路上有很多介紹了，簡單介紹可以參考以下文章：</p>
+<ul>
+<li><p><a href="https://www.inwinstack.com/2018/11/14/prometheus-introduction-1/" target="_blank" rel="noopener">Prometheus 介紹與基礎入門 (上)</a></p>
+</li>
+<li><p><a href="https://www.inwinstack.com/2018/11/14/prometheus-introduction-2/" target="_blank" rel="noopener">Prometheus 介紹與基礎入門 (下) - inwinSTACK</a></p>
+</li>
+</ul>
+<p>以下是其他重點資訊節錄：</p>
+<ul>
+<li><p>Prometheus 以 pull 的方式取得 metric，提供 metric 的 client 不需要知道 Prometheus 在那，因此可完全獨立於監控系統之外</p>
+</li>
+<li><p>一般監控系統以 push 的方式蒐集資料，相對不彈性，也可能因為 push 失敗導致監控系統癱瘓</p>
+</li>
+<li><p>支援靜態設定，也可搭配 ZooKeeper, Consul, Kubernetes … 等方式進行動態的 service discovery</p>
+</li>
+<li><p>本地儲存建議採用 SSD</p>
+</li>
+<li><p>若需要以 push 模式取得資料，可搭配 <a href="https://prometheus.io/docs/practices/pushing/" target="_blank" rel="noopener">Pushgateawy</a> 來處理</p>
+</li>
+<li><p>AlertManager 獨立於 Prometheus 之外，當 metric 有觸發了預設在 Prometheus 中的規則時，就會將訊息送到 AlertManager 做後續處理</p>
+</li>
+<li><p>AlertManager 支援多種通知方式，同時也支援 HA 並有 Gossip 的機制在(預防重送)</p>
+</li>
+</ul>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a href="https://github.com/naver/pinpoint" target="_blank" rel="noopener">naver/pinpoint: APM, (Application Performance Management) tool for large-scale distributed systems written in Java.</a></p>
+</li>
+<li><p><a href="https://github.com/apache/skywalking" target="_blank" rel="noopener">apache/skywalking: APM, Application Performance Monitoring System</a></p>
+</li>
+<li><p><a href="https://zipkin.io/" target="_blank" rel="noopener">OpenZipkin · A distributed tracing system</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/Prometheus/" rel="tag"># Prometheus</a>
+              <a href="/blog/tags/Telemetry/" rel="tag"># Telemetry</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/blog/Kubernetes/Install-k8s-via-kubespray/" rel="prev" title="使用 Kubespray 安裝 Kubernetes v1.10 以上版本">
+      <i class="fa fa-chevron-left"></i> 使用 Kubespray 安裝 Kubernetes v1.10 以上版本
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/blog/DevOps/tekton-kaniko-build-image/" rel="next" title="[Tekton] 使用 Tekton + Kanibo 在 Kubernetes 上產生 container image">
+      [Tekton] 使用 Tekton + Kanibo 在 Kubernetes 上產生 container image <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Monitoring-System-Overview"><span class="nav-number">1.</span> <span class="nav-text">Monitoring System Overview</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Infrastructure-Monitoring"><span class="nav-number">2.</span> <span class="nav-text">Infrastructure Monitoring</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Networking"><span class="nav-number">2.1.</span> <span class="nav-text">Networking</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Storage"><span class="nav-number">2.2.</span> <span class="nav-text">Storage</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Computing"><span class="nav-number">2.3.</span> <span class="nav-text">Computing</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Middleware-Monitoring"><span class="nav-number">3.</span> <span class="nav-text">Middleware Monitoring</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Application-Performance-Monitoring-APM"><span class="nav-number">4.</span> <span class="nav-text">Application Performance Monitoring (APM)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Log-Monitoring"><span class="nav-number">5.</span> <span class="nav-text">Log Monitoring</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#監控系統的實現"><span class="nav-number">6.</span> <span class="nav-text">監控系統的實現</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#數據蒐集"><span class="nav-number">6.1.</span> <span class="nav-text">數據蒐集</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#數據處理"><span class="nav-number">6.2.</span> <span class="nav-text">數據處理</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#監控系統的發展趨勢"><span class="nav-number">7.</span> <span class="nav-text">監控系統的發展趨勢</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Prometheus"><span class="nav-number">8.</span> <span class="nav-text">Prometheus</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">9.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives/">
+        
+          <span class="site-state-item-count">105</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">58</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/blog/lib/anime.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/blog/js/utils.js"></script>
+
+<script src="/blog/js/motion.js"></script>
+
+
+<script src="/blog/js/schemes/muse.js"></script>
+
+
+<script src="/blog/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

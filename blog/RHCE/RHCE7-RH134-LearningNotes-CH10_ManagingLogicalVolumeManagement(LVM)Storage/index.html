@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+<link rel="stylesheet" href="/blog/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="此文章記錄學習 RHCE7 RH134 Chapter 10. Managing Logical Volume Management(LVM) Storage 留下的內容">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[RHCE7] RH134 Chapter 10. Managing Logical Volume Management(LVM) Storage 學習筆記">
+<meta property="og:url" content="https://godleon.github.io/blog/RHCE/RHCE7-RH134-LearningNotes-CH10_ManagingLogicalVolumeManagement(LVM)Storage/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此文章記錄學習 RHCE7 RH134 Chapter 10. Managing Logical Volume Management(LVM) Storage 留下的內容">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="http://mo.morsi.org/blog/files/lvm1.png">
+<meta property="og:image" content="https://camo.githubusercontent.com/d8809c16fe3e3f5532e87165dfe4012346b3b13e/687474703a2f2f73332e353163746f2e636f6d2f7779667330322f4d30302f37322f33352f774b696f4c31586574513777746d7a6641414a364d4351464339303134332e6a7067">
+<meta property="og:image" content="http://www.linux-tips-and-tricks.de/images/stories/lvm.jpg">
+<meta property="article:published_time" content="2016-05-11T20:45:00.000Z">
+<meta property="article:modified_time" content="2020-04-26T04:42:44.177Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="RHCE">
+<meta property="article:tag" content="RH134">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://mo.morsi.org/blog/files/lvm1.png">
+
+<link rel="canonical" href="https://godleon.github.io/blog/RHCE/RHCE7-RH134-LearningNotes-CH10_ManagingLogicalVolumeManagement(LVM)Storage/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-tw'
+  };
+</script>
+
+  <title>[RHCE7] RH134 Chapter 10. Managing Logical Volume Management(LVM) Storage 學習筆記 | 小信豬的原始部落</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/blog/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/blog/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/RHCE/RHCE7-RH134-LearningNotes-CH10_ManagingLogicalVolumeManagement(LVM)Storage/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [RHCE7] RH134 Chapter 10. Managing Logical Volume Management(LVM) Storage 學習筆記
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2016-05-12 04:45:00" itemprop="dateCreated datePublished" datetime="2016-05-12T04:45:00+08:00">2016-05-12</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-04-26 12:42:44" itemprop="dateModified" datetime="2020-04-26T12:42:44+08:00">2020-04-26</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/RHCE/" itemprop="url" rel="index"><span itemprop="name">RHCE</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">此文章記錄學習 RHCE7 RH134 Chapter 10. Managing Logical Volume Management(LVM) Storage 留下的內容</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="10-1-Logical-Volume-Management-Concepts"><a href="#10-1-Logical-Volume-Management-Concepts" class="headerlink" title="10.1 Logical Volume Management Concepts"></a>10.1 Logical Volume Management Concepts</h1><p>可以從下圖很清楚看出 Physical Drivers / Partitions / PV(Physical Volume) / VG(Volume Group) / LV(Logical Volume) 的相互關係</p>
+<p><img src="http://mo.morsi.org/blog/files/lvm1.png" alt="LVM"></p>
+<p>此外，還有 PE(Physical Extent) &amp; LE(Logical Extent) 與上述其他概念的組成關係：</p>
+<p><img src="https://camo.githubusercontent.com/d8809c16fe3e3f5532e87165dfe4012346b3b13e/687474703a2f2f73332e353163746f2e636f6d2f7779667330322f4d30302f37322f33352f774b696f4c31586574513777746d7a6641414a364d4351464339303134332e6a7067" alt="PE_LE_1"></p>
+<p><img src="http://www.linux-tips-and-tricks.de/images/stories/lvm.jpg" alt="PE_LE_2"></p>
+<hr>
+<h1 id="10-2-Managing-Logical-Volumes"><a href="#10-2-Managing-Logical-Volumes" class="headerlink" title="10.2 Managing Logical Volumes"></a>10.2 Managing Logical Volumes</h1><h2 id="10-2-1-Create-PV"><a href="#10-2-1-Create-PV" class="headerlink" title="10.2.1 Create PV"></a>10.2.1 Create PV</h2><ol>
+<li><p>在 /dev/sda 中建立一個 partition，使用所有空間，partition type = 8e</p>
+</li>
+<li><p>第一個硬碟建立 PV：<code>sudo pvcreate /dev/sda1</code></p>
+</li>
+<li><p>第二個硬碟建立 PV：<code>sudo pvcreate /dev/sdb</code>(沒有 partition 的狀況下)</p>
+</li>
+</ol>
+<h3 id="其他相關指令"><a href="#其他相關指令" class="headerlink" title="其他相關指令"></a>其他相關指令</h3><ul>
+<li><p><code>pvscan</code>：目前有哪些 PV</p>
+</li>
+<li><p><code>pvdisplay [pv_name]</code>：顯示 PV 的詳細資訊</p>
+</li>
+</ul>
+<h2 id="10-2-2-Create-VG"><a href="#10-2-2-Create-VG" class="headerlink" title="10.2.2 Create VG"></a>10.2.2 Create VG</h2><ol>
+<li><p>建立 Volume Group：<code>sudo vgcreate -s 16M vg0 /dev/sda1 /dev/sdb</code> (<strong><font color='red'>設定 PE 大小為 16M</font></strong>)</p>
+<blockquote>
+<p>相同 VG 中的 PE 都一樣大</p>
+</blockquote>
+</li>
+<li><p>檢查 PV：<code>sudo pvscan</code> (顯示 PV 被使用中)</p>
+</li>
+<li><p>檢查 VG：<code>sudo vgscan</code></p>
+</li>
+<li><p>檢視 VG 詳細資料：<code>sudo vgdisplay [vg_name]</code></p>
+</li>
+</ol>
+<h2 id="10-2-3-Create-LV"><a href="#10-2-3-Create-LV" class="headerlink" title="10.2.3 Create LV"></a>10.2.3 Create LV</h2><ol>
+<li><p>建立 LV(從 vg0 切割 200M 空間，給 LV 使用，並命名為 lv-1)：<code>sudo lvcreate -L 200M -n lv-1 vg0</code></p>
+</li>
+<li><p>建立 LV(使用 PE 個數指定大小)：<code>sudo lvcreate -l 13 -n lv-2 vg0</code></p>
+</li>
+<li><p>檢查 LV：<code>sudo lvscan</code></p>
+</li>
+<li><p>檢視 LV 詳細資料：<code>sudo lvdisplay /dev/vg0/lv-1</code> &amp; <code>sudo lvdisplay /dev/vg0/lv-2</code></p>
+</li>
+</ol>
+<blockquote>
+<p>要使用 LV 前要記得進行 format 的動作</p>
+</blockquote>
+<hr>
+<h1 id="Practice-Adding-a-Logical-Volume"><a href="#Practice-Adding-a-Logical-Volume" class="headerlink" title="Practice: Adding a Logical Volume"></a>Practice: Adding a Logical Volume</h1><h2 id="目標"><a href="#目標" class="headerlink" title="目標"></a>目標</h2><ol>
+<li><p>建立一個 volume group，名稱為 <code>shazam</code>，由兩個大小為 <code>256 MB</code> 的 physical partition 組成(來源為 <code>/dev/vdb</code>)</p>
+</li>
+<li><p>從 volume group 中建立一個 <code>400 MB</code> 的 logical volume，名稱為 <code>storage</code></p>
+</li>
+<li><p>將 logical volume 掛載在 <code>/storage</code> 目錄</p>
+</li>
+</ol>
+<h2 id="實作"><a href="#實作" class="headerlink" title="實作"></a>實作</h2><h3 id="1、建立一個-volume-group，名稱為-shazam，由兩個大小為-256-MB-的-physical-partition-組成-來源為-dev-vdb"><a href="#1、建立一個-volume-group，名稱為-shazam，由兩個大小為-256-MB-的-physical-partition-組成-來源為-dev-vdb" class="headerlink" title="1、建立一個 volume group，名稱為 shazam，由兩個大小為 256 MB 的 physical partition 組成(來源為 /dev/vdb)"></a>1、建立一個 volume group，名稱為 <code>shazam</code>，由兩個大小為 <code>256 MB</code> 的 physical partition 組成(來源為 <code>/dev/vdb</code>)</h3><p>1.1 分割硬碟：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line">$ sudo fdisk /dev/vdb</span><br><span class="line">Welcome to fdisk (util-linux 2.23.2).</span><br><span class="line"></span><br><span class="line">Changes will remain <span class="keyword">in</span> memory only, until you decide to write them.</span><br><span class="line">Be careful before using the write <span class="built_in">command</span>.</span><br><span class="line"></span><br><span class="line">Device does not contain a recognized partition table</span><br><span class="line">Building a new DOS disklabel with disk identifier 0xa2e37afd.</span><br><span class="line"></span><br><span class="line">Command (m <span class="keyword">for</span> <span class="built_in">help</span>): n</span><br><span class="line">Partition <span class="built_in">type</span>:</span><br><span class="line">   p   primary (0 primary, 0 extended, 4 free)</span><br><span class="line">   e   extended</span><br><span class="line">Select (default p):</span><br><span class="line">Partition number (1-4, default 1):</span><br><span class="line">First sector (2048-20971519, default 2048):</span><br><span class="line">Using default value 2048</span><br><span class="line">Last sector, +sectors or +size&#123;K,M,G&#125; (2048-20971519, default 20971519): +256M</span><br><span class="line">Partition 1 of <span class="built_in">type</span> Linux and of size 256 MiB is <span class="built_in">set</span></span><br><span class="line"></span><br><span class="line">Command (m <span class="keyword">for</span> <span class="built_in">help</span>): n</span><br><span class="line">Partition <span class="built_in">type</span>:</span><br><span class="line">   p   primary (1 primary, 0 extended, 3 free)</span><br><span class="line">   e   extended</span><br><span class="line">Select (default p):</span><br><span class="line">Using default response p</span><br><span class="line">Partition number (2-4, default 2):</span><br><span class="line">First sector (526336-20971519, default 526336):</span><br><span class="line">Using default value 526336</span><br><span class="line">Last sector, +sectors or +size&#123;K,M,G&#125; (526336-20971519, default 20971519): +256M</span><br><span class="line">Partition 2 of <span class="built_in">type</span> Linux and of size 256 MiB is <span class="built_in">set</span></span><br><span class="line"></span><br><span class="line">Command (m <span class="keyword">for</span> <span class="built_in">help</span>): t</span><br><span class="line">Partition number (1,2, default 2): 1</span><br><span class="line">Hex code (<span class="built_in">type</span> L to list all codes): 8e</span><br><span class="line">Changed <span class="built_in">type</span> of partition <span class="string">'Linux'</span> to <span class="string">'Linux LVM'</span></span><br><span class="line"></span><br><span class="line">Command (m <span class="keyword">for</span> <span class="built_in">help</span>): t</span><br><span class="line">Partition number (1,2, default 2): 2</span><br><span class="line">Hex code (<span class="built_in">type</span> L to list all codes): 8e</span><br><span class="line">Changed <span class="built_in">type</span> of partition <span class="string">'Linux'</span> to <span class="string">'Linux LVM'</span></span><br><span class="line"></span><br><span class="line">Command (m <span class="keyword">for</span> <span class="built_in">help</span>): w</span><br><span class="line">The partition table has been altered!</span><br><span class="line"></span><br><span class="line">Calling ioctl() to re-read partition table.</span><br><span class="line">Syncing disks.</span><br><span class="line"></span><br><span class="line">$ sudo partprobe -s</span><br><span class="line">/dev/vda: msdos partitions 1</span><br><span class="line">/dev/vdb: msdos partitions 1 2</span><br></pre></td></tr></table></figure>
+
+<p>1.2 建立 physical volume</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ sudo pvcreate /dev/vdb1 /dev/vdb2</span><br><span class="line">  Physical volume <span class="string">"/dev/vdb1"</span> successfully created</span><br><span class="line">  Physical volume <span class="string">"/dev/vdb2"</span> successfully created</span><br></pre></td></tr></table></figure>
+
+<p>1.3 建立 volume group</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ sudo vgcreate shazam /dev/vdb1 /dev/vdb2</span><br><span class="line">  Volume group <span class="string">"shazam"</span> successfully created</span><br></pre></td></tr></table></figure>
+
+<h3 id="2、從-volume-group-中建立一個-400-MB-的-logical-volume，名稱為-storage"><a href="#2、從-volume-group-中建立一個-400-MB-的-logical-volume，名稱為-storage" class="headerlink" title="2、從 volume group 中建立一個 400 MB 的 logical volume，名稱為 storage"></a>2、從 volume group 中建立一個 <code>400 MB</code> 的 logical volume，名稱為 <code>storage</code></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">$ sudo lvcreate -n storage -L 400M shazam</span><br><span class="line">  Logical volume <span class="string">"storage"</span> created</span><br><span class="line"></span><br><span class="line"><span class="comment"># 格式化 LV</span></span><br><span class="line">$ sudo mkfs.ext4 /dev/shazam/storage</span><br><span class="line">  mke2fs 1.42.9 (28-Dec-2013)</span><br><span class="line">  Filesystem label=</span><br><span class="line">  OS <span class="built_in">type</span>: Linux</span><br><span class="line">  Block size=1024 (<span class="built_in">log</span>=0)</span><br><span class="line">  Fragment size=1024 (<span class="built_in">log</span>=0)</span><br><span class="line">  Stride=0 blocks, Stripe width=0 blocks</span><br><span class="line">  102400 inodes, 409600 blocks</span><br><span class="line">  20480 blocks (5.00%) reserved <span class="keyword">for</span> the super user</span><br><span class="line">  First data block=1</span><br><span class="line">  Maximum filesystem blocks=34078720</span><br><span class="line">  50 block groups</span><br><span class="line">  8192 blocks per group, 8192 fragments per group</span><br><span class="line">  2048 inodes per group</span><br><span class="line">  Superblock backups stored on blocks:</span><br><span class="line">          8193, 24577, 40961, 57345, 73729, 204801, 221185, 401409</span><br><span class="line"></span><br><span class="line">  Allocating group tables: <span class="keyword">done</span></span><br><span class="line">  Writing inode tables: <span class="keyword">done</span></span><br><span class="line">  Creating journal (8192 blocks): <span class="keyword">done</span></span><br><span class="line">  Writing superblocks and filesystem accounting information: <span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3、將-logical-volume-掛載在-storage-目錄"><a href="#3、將-logical-volume-掛載在-storage-目錄" class="headerlink" title="3、將 logical volume 掛載在 /storage 目錄"></a>3、將 logical volume 掛載在 <code>/storage</code> 目錄</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$ sudo blkid</span><br><span class="line">/dev/vda1: UUID=<span class="string">"9bf6b9f7-92ad-441b-848e-0257cbb883d1"</span> TYPE=<span class="string">"xfs"</span></span><br><span class="line">/dev/vdb1: UUID=<span class="string">"MxwktT-fxCb-KjzV-muCq-Dk7z-IHZU-WdclEG"</span> TYPE=<span class="string">"LVM2_member"</span></span><br><span class="line">/dev/vdb2: UUID=<span class="string">"mQaiiR-3LEA-XhT4-cd36-gT4T-7jjR-HrQreq"</span> TYPE=<span class="string">"LVM2_member"</span></span><br><span class="line">/dev/mapper/shazam-storage: UUID=<span class="string">"4b5e590a-10af-4e44-8619-aba91e436d17"</span> TYPE=<span class="string">"ext4"</span></span><br><span class="line"></span><br><span class="line">$ sudo mkdir /storage</span><br><span class="line">$ <span class="built_in">echo</span> <span class="string">"UUID=4b5e590a-10af-4e44-8619-aba91e436d17 /storage ext4 defaults 0 2"</span> | sudo tee --append /etc/fstab</span><br><span class="line">$ sudo mount -a</span><br><span class="line">$ sudo mount | grep storage</span><br><span class="line">/dev/mapper/shazam-storage on /storage <span class="built_in">type</span> ext4 (rw,relatime,seclabel,data=ordered)</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="10-3-Extending-Logical-Volumes"><a href="#10-3-Extending-Logical-Volumes" class="headerlink" title="10.3 Extending Logical Volumes"></a>10.3 Extending Logical Volumes</h1><h2 id="10-3-1-Extending-and-reducing-a-volume-group"><a href="#10-3-1-Extending-and-reducing-a-volume-group" class="headerlink" title="10.3.1 Extending and reducing a volume group"></a>10.3.1 Extending and reducing a volume group</h2><ol>
+<li><p>建立新的 PV：<code>sudo pvcreate /dev/sdc</code></p>
+</li>
+<li><p>將新的 PV(/dev/sdc) 加到 VG 中：<code>sudo vgextend vg0 /dev/sdc</code></p>
+</li>
+</ol>
+<blockquote>
+<p>若要把 PV 移出 VG 可以使用類似的指令：<code>sudo vgreduce vg0 /dev/sda1</code></p>
+</blockquote>
+<h2 id="10-3-2-Extend-a-logical-volume-and-XFS-file-system"><a href="#10-3-2-Extend-a-logical-volume-and-XFS-file-system" class="headerlink" title="10.3.2 Extend a logical volume and XFS file system"></a>10.3.2 Extend a logical volume and XFS file system</h2><p>目標：<strong>將 LV 容量加大到 300M</strong></p>
+<ol>
+<li><p>LV 放大可以 online，縮小需要 offline：<code>sudo lvextend -L +100M /dev/vg0/lv-1</code> or <code>sudo lvextend -L 300M /dev/vg0/lv-1</code></p>
+</li>
+<li><p>也可以用指定 PE 的個數來放大：<code>sudo lvextend -l +7 /dev/vg0/lv-2</code> or <code>sudo lvextend -l 19 /dev/vg0/lv-2</code></p>
+</li>
+<li><p>檢查 LV 狀態：<code>sudo lvscan</code></p>
+</li>
+<li><p>放大 XFS 檔案系統：<code>sudo xfs_growfs /dev/vg0/lv-1</code></p>
+</li>
+<li><p>放大 EXT4 檔案系統：<code>sudo resize2fs /dev/vg0/lv-2</code></p>
+</li>
+</ol>
+<h3 id="如何縮小-LV"><a href="#如何縮小-LV" class="headerlink" title="如何縮小 LV"></a>如何縮小 LV</h3><p><strong><font color='red'>【註】</font></strong> XFS 檔案系統僅能放大，不能縮小(上面的 lv-1 已經無法縮小)</p>
+<p>目標：縮小 EXT4 到 200M</p>
+<ol>
+<li><p>umount EXT4 partition：<code>sudo umount /lv-2</code></p>
+</li>
+<li><p>檢查 LV：<code>sudo fsck -f /dev/vg0/lv-2</code></p>
+</li>
+<li><p>縮小 EXT4 檔案系統：<code>sudo resize2fs /dev/vg0/lv-2 200M</code></p>
+</li>
+<li><p>縮小 LV：<code>sudo lvreduce -L 200M /dev/vg0/lv-2</code></p>
+</li>
+<li><p>重新掛載磁區：<code>sudo mount -a</code></p>
+</li>
+</ol>
+<h3 id="如何縮小-VG-amp-移除-PV-硬碟"><a href="#如何縮小-VG-amp-移除-PV-硬碟" class="headerlink" title="如何縮小 VG &amp; 移除 PV(硬碟)"></a>如何縮小 VG &amp; 移除 PV(硬碟)</h3><p>目標：移除第一個 PV(<code>/dev/sda1</code>)</p>
+<ol>
+<li><p>移動指定 PV 中的檔案到其他 PV 上：<code>pvscan</code> -&gt; <code>sudo pvmove /dev/sda1 /dev/sdc</code>(也可以不指定目的裝置)</p>
+</li>
+<li><p>移除 VG 中的 PV：<code>sudo vgreduce vg0 /dev/sda1</code> -&gt; <code>pvscan</code></p>
+</li>
+<li><p>徹底移除 PV：<code>sudo pvremove /dev/sda1</code></p>
+</li>
+</ol>
+<p>最後就可以把電腦關機並移除硬碟 /dev/sda 囉!</p>
+<h3 id="移除-LV"><a href="#移除-LV" class="headerlink" title="移除 LV"></a>移除 LV</h3><p>目標：<strong>移除 /dev/vg0/lv-1</strong></p>
+<ol>
+<li>卸載檔案系統：<code>sudo umount /lv-1</code></li>
+<li>移除 LV：<code>sudo lvremove /dev/vg0/lv-1</code> -&gt; <code>sudo lvscan</code></li>
+</ol>
+<hr>
+<h1 id="Practice-Extending-a-Logical-Volume"><a href="#Practice-Extending-a-Logical-Volume" class="headerlink" title="Practice: Extending a Logical Volume"></a>Practice: Extending a Logical Volume</h1><h2 id="目標-1"><a href="#目標-1" class="headerlink" title="目標"></a>目標</h2><ol>
+<li><p>以上一個練習為基礎，增加一個容量為 <code>800MB</code> 的 physical volume</p>
+</li>
+<li><p>把原有的 logical volume(<code>storage</code>)大小增加為 1GB</p>
+</li>
+</ol>
+<h3 id="1、以上一個練習為基礎，增加一個容量為-800MB-的-physical-volume"><a href="#1、以上一個練習為基礎，增加一個容量為-800MB-的-physical-volume" class="headerlink" title="1、以上一個練習為基礎，增加一個容量為 800MB 的 physical volume"></a>1、以上一個練習為基礎，增加一個容量為 <code>800MB</code> 的 physical volume</h3><p>1.1 分割硬碟</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">$ sudo fdisk /dev/vdb</span><br><span class="line">[sudo] password <span class="keyword">for</span> student:</span><br><span class="line">Welcome to fdisk (util-linux 2.23.2).</span><br><span class="line"></span><br><span class="line">Changes will remain <span class="keyword">in</span> memory only, until you decide to write them.</span><br><span class="line">Be careful before using the write <span class="built_in">command</span>.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Command (m <span class="keyword">for</span> <span class="built_in">help</span>): n</span><br><span class="line">Partition <span class="built_in">type</span>:</span><br><span class="line">   p   primary (2 primary, 0 extended, 2 free)</span><br><span class="line">   e   extended</span><br><span class="line">Select (default p):</span><br><span class="line">Using default response p</span><br><span class="line">Partition number (3,4, default 3):</span><br><span class="line">First sector (1050624-20971519, default 1050624):</span><br><span class="line">Using default value 1050624</span><br><span class="line">Last sector, +sectors or +size&#123;K,M,G&#125; (1050624-20971519, default 20971519): +800M</span><br><span class="line">Partition 3 of <span class="built_in">type</span> Linux and of size 800 MiB is <span class="built_in">set</span></span><br><span class="line"></span><br><span class="line">Command (m <span class="keyword">for</span> <span class="built_in">help</span>): t</span><br><span class="line">Partition number (1-3, default 3):</span><br><span class="line">Hex code (<span class="built_in">type</span> L to list all codes): 8e</span><br><span class="line">Changed <span class="built_in">type</span> of partition <span class="string">'Linux'</span> to <span class="string">'Linux LVM'</span></span><br><span class="line"></span><br><span class="line">Command (m <span class="keyword">for</span> <span class="built_in">help</span>): w</span><br><span class="line">The partition table has been altered!</span><br><span class="line"></span><br><span class="line">Calling ioctl() to re-read partition table.</span><br><span class="line"></span><br><span class="line">WARNING: Re-reading the partition table failed with error 16: Device or resource busy.</span><br><span class="line">The kernel still uses the old table. The new table will be used at</span><br><span class="line">the next reboot or after you run partprobe(8) or kpartx(8)</span><br><span class="line">Syncing disks.</span><br><span class="line"></span><br><span class="line">$ sudo partprobe -s</span><br><span class="line">/dev/vda: msdos partitions 1</span><br><span class="line">/dev/vdb: msdos partitions 1 2 3</span><br></pre></td></tr></table></figure>
+
+<p>1.2 加入 physical volume</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ sudo pvcreate /dev/vdb3</span><br><span class="line">  Physical volume <span class="string">"/dev/vdb3"</span> successfully created</span><br></pre></td></tr></table></figure>
+
+<p>1.3 擴充 volume group 空間</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">$ sudo vgextend shazam /dev/vdb3</span><br><span class="line">  Volume group <span class="string">"shazam"</span> successfully extended</span><br><span class="line">$ sudo vgdisplay shazam</span><br><span class="line">  --- Volume group ---</span><br><span class="line">  VG Name               shazam</span><br><span class="line">  System ID</span><br><span class="line">  Format                lvm2</span><br><span class="line">  Metadata Areas        3</span><br><span class="line">  Metadata Sequence No  3</span><br><span class="line">  VG Access             <span class="built_in">read</span>/write</span><br><span class="line">  VG Status             resizable</span><br><span class="line">  MAX LV                0</span><br><span class="line">  Cur LV                1</span><br><span class="line">  Open LV               1</span><br><span class="line">  Max PV                0</span><br><span class="line">  Cur PV                3</span><br><span class="line">  Act PV                3</span><br><span class="line">  VG Size               1.27 GiB</span><br><span class="line">  PE Size               4.00 MiB</span><br><span class="line">  Total PE              325</span><br><span class="line">  Alloc PE / Size       100 / 400.00 MiB</span><br><span class="line">  Free  PE / Size       225 / 900.00 MiB</span><br><span class="line">  VG UUID               s4g8vT-JCW9-p84f-wVU1-0dsn-xkrh-vytTVc</span><br></pre></td></tr></table></figure>
+
+<h3 id="2、把原有的-logical-volume-storage-大小增加為-1GB"><a href="#2、把原有的-logical-volume-storage-大小增加為-1GB" class="headerlink" title="2、把原有的 logical volume(storage)大小增加為 1GB"></a>2、把原有的 logical volume(<code>storage</code>)大小增加為 1GB</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ sudo lvextend -L 1G /dev/shazam/storage</span><br><span class="line">  Extending logical volume storage to 1.00 GiB</span><br><span class="line">  Logical volume storage successfully resized</span><br><span class="line"></span><br><span class="line">$ sudo resize2fs /dev/shazam/storage</span><br><span class="line">resize2fs 1.42.9 (28-Dec-2013)</span><br><span class="line">Filesystem at /dev/shazam/storage is mounted on /storage; on-line resizing required</span><br><span class="line">old_desc_blocks = 4, new_desc_blocks = 8</span><br><span class="line">The filesystem on /dev/shazam/storage is now 1048576 blocks long.</span><br><span class="line"></span><br><span class="line">$ df -hT | grep storage</span><br><span class="line">/dev/mapper/shazam-storage ext4      984M  2.8M  932M   1% /storage</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="10-4-Snapshot-補充"><a href="#10-4-Snapshot-補充" class="headerlink" title="10.4 Snapshot (補充)"></a>10.4 Snapshot (補充)</h1><p>假設：有個 20T 的 MySQL 資料庫，需要備份</p>
+<ol>
+<li><p>停掉 MySQL 服務</p>
+</li>
+<li><p>建立 Snapshop：<code>sudo lvcreate -L 100M -s -n backup /dev/vg0/lv-2</code> -&gt; ‘sudo lvscan’</p>
+</li>
+<li><p>啟動 MySQL 服務</p>
+</li>
+<li><p>檢查 LV 之間的關聯：<code>sudo lvs</code></p>
+</li>
+</ol>
+<blockquote>
+<p>只有在 PE 中的資料異動前，才會有資料複製的動作發生</p>
+</blockquote>
+<h2 id="老師設計的實驗"><a href="#老師設計的實驗" class="headerlink" title="老師設計的實驗"></a>老師設計的實驗</h2><ol>
+<li><p>reset server</p>
+</li>
+<li><p>幫 server 加上 200M/300M/500M IDE 硬碟共三顆</p>
+</li>
+<li><p>開機，按 F12 選擇 virtio(4) 開機</p>
+</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/Linux/" rel="tag"># Linux</a>
+              <a href="/blog/tags/RHCE/" rel="tag"># RHCE</a>
+              <a href="/blog/tags/RH134/" rel="tag"># RH134</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/blog/RHCE/RHCE7-RH134-LearningNotes-CH08_ConnectingToNetwork-DefinedUsersAndGroups/" rel="prev" title="[RHCE7] RH134 Chapter 08. Connecting to Network-defined Users and Groups 學習筆記">
+      <i class="fa fa-chevron-left"></i> [RHCE7] RH134 Chapter 08. Connecting to Network-defined Users and Groups 學習筆記
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/blog/RHCE/RHCE7-RH134-LearningNotes-CH12_AccessingNetworkStorageWithSMB/" rel="next" title="[RHCE7] RH134 Chapter 12. Accessing Network Storage with SMB 學習筆記">
+      [RHCE7] RH134 Chapter 12. Accessing Network Storage with SMB 學習筆記 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#10-1-Logical-Volume-Management-Concepts"><span class="nav-number">1.</span> <span class="nav-text">10.1 Logical Volume Management Concepts</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#10-2-Managing-Logical-Volumes"><span class="nav-number">2.</span> <span class="nav-text">10.2 Managing Logical Volumes</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#10-2-1-Create-PV"><span class="nav-number">2.1.</span> <span class="nav-text">10.2.1 Create PV</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#其他相關指令"><span class="nav-number">2.1.1.</span> <span class="nav-text">其他相關指令</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-2-2-Create-VG"><span class="nav-number">2.2.</span> <span class="nav-text">10.2.2 Create VG</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-2-3-Create-LV"><span class="nav-number">2.3.</span> <span class="nav-text">10.2.3 Create LV</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Practice-Adding-a-Logical-Volume"><span class="nav-number">3.</span> <span class="nav-text">Practice: Adding a Logical Volume</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#目標"><span class="nav-number">3.1.</span> <span class="nav-text">目標</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#實作"><span class="nav-number">3.2.</span> <span class="nav-text">實作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1、建立一個-volume-group，名稱為-shazam，由兩個大小為-256-MB-的-physical-partition-組成-來源為-dev-vdb"><span class="nav-number">3.2.1.</span> <span class="nav-text">1、建立一個 volume group，名稱為 shazam，由兩個大小為 256 MB 的 physical partition 組成(來源為 &#x2F;dev&#x2F;vdb)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2、從-volume-group-中建立一個-400-MB-的-logical-volume，名稱為-storage"><span class="nav-number">3.2.2.</span> <span class="nav-text">2、從 volume group 中建立一個 400 MB 的 logical volume，名稱為 storage</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3、將-logical-volume-掛載在-storage-目錄"><span class="nav-number">3.2.3.</span> <span class="nav-text">3、將 logical volume 掛載在 &#x2F;storage 目錄</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#10-3-Extending-Logical-Volumes"><span class="nav-number">4.</span> <span class="nav-text">10.3 Extending Logical Volumes</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#10-3-1-Extending-and-reducing-a-volume-group"><span class="nav-number">4.1.</span> <span class="nav-text">10.3.1 Extending and reducing a volume group</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-3-2-Extend-a-logical-volume-and-XFS-file-system"><span class="nav-number">4.2.</span> <span class="nav-text">10.3.2 Extend a logical volume and XFS file system</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#如何縮小-LV"><span class="nav-number">4.2.1.</span> <span class="nav-text">如何縮小 LV</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何縮小-VG-amp-移除-PV-硬碟"><span class="nav-number">4.2.2.</span> <span class="nav-text">如何縮小 VG &amp; 移除 PV(硬碟)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#移除-LV"><span class="nav-number">4.2.3.</span> <span class="nav-text">移除 LV</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Practice-Extending-a-Logical-Volume"><span class="nav-number">5.</span> <span class="nav-text">Practice: Extending a Logical Volume</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#目標-1"><span class="nav-number">5.1.</span> <span class="nav-text">目標</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1、以上一個練習為基礎，增加一個容量為-800MB-的-physical-volume"><span class="nav-number">5.1.1.</span> <span class="nav-text">1、以上一個練習為基礎，增加一個容量為 800MB 的 physical volume</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2、把原有的-logical-volume-storage-大小增加為-1GB"><span class="nav-number">5.1.2.</span> <span class="nav-text">2、把原有的 logical volume(storage)大小增加為 1GB</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#10-4-Snapshot-補充"><span class="nav-number">6.</span> <span class="nav-text">10.4 Snapshot (補充)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#老師設計的實驗"><span class="nav-number">6.1.</span> <span class="nav-text">老師設計的實驗</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives/">
+        
+          <span class="site-state-item-count">105</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">58</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/blog/lib/anime.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/blog/js/utils.js"></script>
+
+<script src="/blog/js/motion.js"></script>
+
+
+<script src="/blog/js/schemes/muse.js"></script>
+
+
+<script src="/blog/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+<link rel="stylesheet" href="/blog/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="本篇文章是在 Terraform 官網教學文件中學習時，把一些個人認為的重要觀念 &amp; 過程記錄起來，需要詳細的說明可以參考官網教學">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[Terraform] 入門學習筆記">
+<meta property="og:url" content="https://godleon.github.io/blog/DevOps/terraform-getting-started/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="本篇文章是在 Terraform 官網教學文件中學習時，把一些個人認為的重要觀念 &amp; 過程記錄起來，需要詳細的說明可以參考官網教學">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2019-05-22T07:15:00.000Z">
+<meta property="article:modified_time" content="2020-04-26T04:42:44.173Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="DevOps">
+<meta property="article:tag" content="Terraform">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://godleon.github.io/blog/DevOps/terraform-getting-started/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-tw'
+  };
+</script>
+
+  <title>[Terraform] 入門學習筆記 | 小信豬的原始部落</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/blog/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/blog/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/DevOps/terraform-getting-started/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [Terraform] 入門學習筆記
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-05-22 15:15:00" itemprop="dateCreated datePublished" datetime="2019-05-22T15:15:00+08:00">2019-05-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-04-26 12:42:44" itemprop="dateModified" datetime="2020-04-26T12:42:44+08:00">2020-04-26</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Terraform/" itemprop="url" rel="index"><span itemprop="name">Terraform</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">本篇文章是在 Terraform 官網教學文件中學習時，把一些個人認為的重要觀念 & 過程記錄起來，需要詳細的說明可以參考官網教學</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Installing-Terraform"><a href="#Installing-Terraform" class="headerlink" title="Installing Terraform"></a>Installing Terraform</h1><blockquote>
+<p><a href="https://learn.hashicorp.com/terraform/getting-started/install" target="_blank" rel="noopener">官網連結</a></p>
+</blockquote>
+<p>這邊沒什麼太特別，就下載 zip 檔之後，解壓縮到 <code>/usr/bin</code> 目錄中就可以用了。(我使用的是 Ubuntu 18.04 Desktop)</p>
+<p>而放到其他路徑，並修改 <code>$PATH</code> 也是可以的。</p>
+<h1 id="Build-Infrastructure"><a href="#Build-Infrastructure" class="headerlink" title="Build Infrastructure"></a>Build Infrastructure</h1><blockquote>
+<p><a href="https://learn.hashicorp.com/terraform/getting-started/build" target="_blank" rel="noopener">官網連結</a></p>
+</blockquote>
+<h2 id="Configuration"><a href="#Configuration" class="headerlink" title="Configuration"></a>Configuration</h2><p>以下給一個簡單範例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">provider <span class="string">"aws"</span> &#123;</span><br><span class="line">  access_key = <span class="string">"ACCESS_KEY_HERE"</span></span><br><span class="line">  secret_key = <span class="string">"SECRET_KEY_HERE"</span></span><br><span class="line">  region     = <span class="string">"ap-northeast-1"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># resource &lt;resource_type&gt; &lt;resource_name&gt;</span></span><br><span class="line">resource <span class="string">"aws_instance"</span> <span class="string">"example"</span> &#123;</span><br><span class="line">  ami             = <span class="string">"ami-0ccdbc8c1cb7957be"</span></span><br><span class="line">  instance_type   = <span class="string">"t2.micro"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p><code>provider</code>：此區塊用來指定所要使用的 provider，上述的例子是 <strong>aws</strong>，而 <a href="https://www.terraform.io/docs/providers/index.html" target="_blank" rel="noopener">terraform 支援的 provider 有相當多</a>，而 provider 琳琅滿目，不一定是 infra 類，也有很多是純軟體服務類</p>
+</li>
+<li><p><code>resource</code>：此區塊則是定義透過指定的 provider，所要建立的資源為何，而 resource 可以是一台 VM，也可以是個 app</p>
+</li>
+<li><p><code>&lt;resource_type&gt;</code>：每個 provider 底下有很多不同的 resource type 可以用，上面的範例是 aws_intance，而這個 resource type 也會主動告訴 terraform 所要使用的 provider 為 <strong>aws</strong></p>
+</li>
+<li><p><code>&lt;resource_name&gt;</code>：這就按照個人喜好 or 需求去定義</p>
+</li>
+</ul>
+<h2 id="Initialization"><a href="#Initialization" class="headerlink" title="Initialization"></a>Initialization</h2><p>這個步驟是執行 <code>terraform init</code> 指令，而 terraform 會根據在當前的目錄下產生一些本地端設定，並根據上面的 configuration 下載相對應的 provider binary，並放到 <code>.terraform</code> 目錄中</p>
+<h2 id="Apply-Changes"><a href="#Apply-Changes" class="headerlink" title="Apply Changes"></a>Apply Changes</h2><p>有了 provider binary 後，就可以執行 <code>terraform apply</code> 來實際產生相對應的資源了；而執行了 <code>terraform apply</code>，terraform 並不會馬上動作，而是會先列出一串執行列表，告訴使用者將會做哪些事情，並詳細列出建立該 resource 所會使用到的參數(資訊)；此外，若是看到 <code>+</code> 符號，表示此 resource 將會被建立。</p>
+<p>terraform 執行完後，會在當前目錄產生 <code>terraform.tfstate</code>，此檔案相當重要，包含了透過 terraform 產生出來的 resource 的詳細資訊，而 terraform 就是依靠此檔案來進行 resource 的追蹤 &amp; 維護。</p>
+<blockquote>
+<p>因為 <strong>terraform.tfstate</strong> 包含了所有 resource 的狀態，因此執行 terraform 指令時，都必須要有這個檔案在，確保 terraform 可以正確的掌握 resource 的狀況，而此需求可以考慮使用 <a href="https://www.terraform.io/docs/state/remote.html" target="_blank" rel="noopener">remote state</a> 來達成</p>
+</blockquote>
+<p>透過 <code>terraform show</code> 就可以檢視目前 resource 的詳細狀態</p>
+<h2 id="Provisioning"><a href="#Provisioning" class="headerlink" title="Provisioning"></a>Provisioning</h2><p>這部份則是當 instance 被建立之後，所接著要進行的初始化 or 額外安裝的工作。</p>
+<p>由於上面的範例是透過標準的 AMI 產生出來的 instance，因此還需要使用者額外安裝服務上去，若是透過自訂的 images 來產生的 instance，可以直接將 service 所需要的程式 &amp; library 通通包好，此時可以考慮搭配 <a href="https://www.packer.io/" target="_blank" rel="noopener">Packer</a> 來協助建立 image。</p>
+<h1 id="Change-Infrastructure"><a href="#Change-Infrastructure" class="headerlink" title="Change Infrastructure"></a>Change Infrastructure</h1><blockquote>
+<p><a href="https://learn.hashicorp.com/terraform/getting-started/change" target="_blank" rel="noopener">官網連結</a></p>
+</blockquote>
+<p>若有變更也相當容易，以上面的例子來說，假設換一個 AMI，就修改 AMI ID 之後，再執行一次 <code>terraform apply</code> 即可，而修改 AMI ID 的話，原本的 instance 會被移除，並使用新的 AMI 重新再建立一個新的 instance。</p>
+<blockquote>
+<p>同樣的，輸入 <code>terraform apply</code> 可以看到執行列表同時有 <code>+</code> &amp; <code>-</code>，表示原本的 instance 會被移除，並重新建立</p>
+</blockquote>
+<h1 id="Destroy-Infrastructure"><a href="#Destroy-Infrastructure" class="headerlink" title="Destroy Infrastructure"></a>Destroy Infrastructure</h1><blockquote>
+<p><a href="https://learn.hashicorp.com/terraform/getting-started/destroy" target="_blank" rel="noopener">官網連結</a></p>
+</blockquote>
+<p>這沒什麼訣竅…只要 configuration &amp; <code>terraform.tfstate</code> 資訊有正確，輸入 <code>terraform destroy</code> 即可</p>
+<h1 id="Resource-Dependencies"><a href="#Resource-Dependencies" class="headerlink" title="Resource Dependencies"></a>Resource Dependencies</h1><p>若是要同時建利多個 resource 時，以下面的 configuration 為例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">provider <span class="string">"aws"</span> &#123;</span><br><span class="line">  access_key = <span class="string">"ACCESS_KEY_HERE"</span></span><br><span class="line">  secret_key = <span class="string">"SECRET_KEY_HERE"</span></span><br><span class="line">  region     = <span class="string">"ap-northeast-1"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># resource &lt;resource_type&gt; &lt;resource_name&gt;</span></span><br><span class="line">resource <span class="string">"aws_instance"</span> <span class="string">"example"</span> &#123;</span><br><span class="line">  ami             = <span class="string">"ami-0ccdbc8c1cb7957be"</span></span><br><span class="line">  instance_type   = <span class="string">"t2.micro"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">resource <span class="string">"aws_eip"</span> <span class="string">"ip"</span> &#123;</span><br><span class="line">  instance = aws_instance.example.id</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>由於我們指定 EIP 要綁定 instance，因此 terraform 會自動先建立 instance，取得 instance id 後，再建立 EIP。</p>
+<p>透過 <code>aws_instance.example.id</code> 的設定，Terraform 可以自動判定 resource 之間的相依性，而使用者在撰寫 terraform configuration 時，則必須儘可能的將這一類的資訊給定清楚。</p>
+<p>除了上面的範例可以明確讓 terraform 知道 resource dependency 之外，也可以透過 <code>depends_on</code> 關鍵字來強制 resource 按照特定的順序來產生，以下是個範例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">provider <span class="string">"aws"</span> &#123;</span><br><span class="line">  access_key = <span class="string">"ACCESS_KEY_HERE"</span></span><br><span class="line">  secret_key = <span class="string">"SECRET_KEY_HERE"</span></span><br><span class="line">  region     = <span class="string">"ap-northeast-1"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">resource <span class="string">"aws_s3_bucket"</span> <span class="string">"example"</span> &#123;</span><br><span class="line">    bucket = <span class="string">"godleon-learn-terraform"</span></span><br><span class="line">    acl    = <span class="string">"private"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># resource &lt;resource_type&gt; &lt;resource_name&gt;</span></span><br><span class="line">resource <span class="string">"aws_instance"</span> <span class="string">"example"</span> &#123;</span><br><span class="line">    ami             = <span class="string">"ami-0ccdbc8c1cb7957be"</span></span><br><span class="line">    instance_type   = <span class="string">"t2.micro"</span></span><br><span class="line"></span><br><span class="line">    depends_on      = [ aws_s3_bucket.example ]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">resource <span class="string">"aws_eip"</span> <span class="string">"ip"</span> &#123;</span><br><span class="line">  instance = aws_instance.example.id</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>按照上面的 configuration，terraform 會按照以下順序建立 resource：</p>
+<ol>
+<li><p>aws_s3_bucket.example</p>
+</li>
+<li><p>aws_instance.example</p>
+</li>
+<li><p>aws_eip.ip</p>
+</li>
+</ol>
+<h1 id="Provision"><a href="#Provision" class="headerlink" title="Provision"></a>Provision</h1><p>若是使用 image-based infrastructure，那就可以忽略 provision 這一段，而轉去看看 <a href="https://www.packer.io/" target="_blank" rel="noopener">Packer</a> 是否可以提供更多的協助。</p>
+<p>但如果需要進行一些初始化工作的話，provisioner 可以讓使用者上傳檔案、執行 shell script，或是呼叫其他 configuration management tool 等等。</p>
+<p>以下是一個簡單的 local provisioner 範例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">resource <span class="string">"aws_instance"</span> <span class="string">"example"</span> &#123;</span><br><span class="line">    ami             = <span class="string">"ami-0eb48a19a8d81e20b"</span></span><br><span class="line">    instance_type   = <span class="string">"t2.micro"</span></span><br><span class="line">    key_name        = <span class="string">"godleon"</span></span><br><span class="line"></span><br><span class="line">    depends_on = [ aws_s3_bucket.example ]</span><br><span class="line"></span><br><span class="line">    provisioner <span class="string">"local-exec"</span> &#123;</span><br><span class="line">        <span class="built_in">command</span> = <span class="string">"echo <span class="variable">$&#123;aws_instance.example.public_ip&#125;</span> &gt; /tmp/ip_address.txt"</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="Input-Variables"><a href="#Input-Variables" class="headerlink" title="Input Variables"></a>Input Variables</h1><p>有些敏感 or 重要的資訊可能不適合放在 version control system 作管理，例如：密碼, access key … 等等，而 terraform 也提供了一些方法讓某些資訊可以透過 variable 的方式輸入。</p>
+<h2 id="定義-variables"><a href="#定義-variables" class="headerlink" title="定義 variables"></a>定義 variables</h2><p>我們可以建立一個 <code>variables.tf</code> 的檔案(檔名無所謂，只要副檔名為 tf 即可，terraform 會把當前目錄的 *.tf 全部拉進來用)，內容如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">variable <span class="string">"access_key"</span> &#123;&#125;</span><br><span class="line"></span><br><span class="line">variable <span class="string">"secret_key"</span> &#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 可以設定預設值</span></span><br><span class="line">variable <span class="string">"region"</span> &#123;</span><br><span class="line">  default = <span class="string">"ap-northeast-1"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>有了以上的設定後，在 resource configuration 可以改成如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">provider <span class="string">"aws"</span> &#123;</span><br><span class="line">  access_key    = var.access_key</span><br><span class="line">  secret_key    = var.secret_key</span><br><span class="line">  region        = var.region</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>完成以上設定後，在執行 <code>terraform apply</code> 時，會以互動式的方式詢問變數值，但如果不想用互動式的方式指定變數，可以透過以下的語法來指定變數：</p>
+<blockquote>
+<p>terraform apply -var ‘access_key=<YOUR_ACCESS_KEY>‘ -var ‘secret_key=<YOUR_SECRET_KEY>‘</p>
+</blockquote>
+<h2 id="其他傳入-input-variable-的方式"><a href="#其他傳入-input-variable-的方式" class="headerlink" title="其他傳入 input variable 的方式"></a>其他傳入 input variable 的方式</h2><h3 id="使用-variable-file"><a href="#使用-variable-file" class="headerlink" title="使用 variable file"></a>使用 variable file</h3><p>若想要更偷懶讓 terraform 自動載入 variable file，可以在當前目錄建立一個名稱為 <code>terraform.tfvars</code>(或是 <code>*.auto.tfvars</code>) 的檔案，並設定內容如下：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">access_key</span> = <span class="string">"&lt;YOUR_ACCESS_KEY&gt;"</span></span><br><span class="line"><span class="attr">secret_key</span> = <span class="string">"&lt;YOUR_SECRET_KEY&gt;"</span></span><br></pre></td></tr></table></figure>
+
+<p>若 variable file 想要用其他名稱，那就在執行 <code>terraform apply</code> 時使用 <code>-var-file</code> 參數指定 variable file</p>
+<h3 id="使用環境變數-Environment-Variable"><a href="#使用環境變數-Environment-Variable" class="headerlink" title="使用環境變數(Environment Variable)"></a>使用環境變數(Environment Variable)</h3><p>也可以透過環境變數的方式傳入 input value，terraform 會自動以 <code>TF_VAR_name</code> 的型式讀取目前的環境變數，因此若要傳入 <strong>key1=value1</strong>，只要設定好 <code>TF_VAR_key1 = value1</code> 即可。</p>
+<h2 id="複雜資料結構變數"><a href="#複雜資料結構變數" class="headerlink" title="複雜資料結構變數"></a>複雜資料結構變數</h2><p>terraform 還支援了較為複雜的資料結構變數，分別是 <strong>List</strong> &amp; <strong>Map</strong>，以下是使用範例：</p>
+<h3 id="List"><a href="#List" class="headerlink" title="List"></a>List</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 宣告 cidrs 變數為 list 格式</span></span><br><span class="line">variable <span class="string">"cidrs"</span> &#123; default = [] &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 也可以明確的宣告其變數型態</span></span><br><span class="line">variable <span class="string">"cidrs"</span> &#123; <span class="built_in">type</span> = list &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在 terraform.tfvars 中可用下面方式給入值</span></span><br><span class="line">cidrs = [ <span class="string">"10.0.0.0/16"</span>, <span class="string">"10.1.0.0/16"</span> ]</span><br></pre></td></tr></table></figure>
+
+<h3 id="Map"><a href="#Map" class="headerlink" title="Map"></a>Map</h3><p>由於在不同的 region，同樣的 AMI 會有不同的 ID，因此可以用 Map 來解決：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 宣告 Map 型態的變數</span></span><br><span class="line">variable <span class="string">"amis"</span> &#123;</span><br><span class="line">  <span class="built_in">type</span> = <span class="string">"map"</span></span><br><span class="line">  default = &#123;</span><br><span class="line">    <span class="string">"us-east-1"</span> = <span class="string">"ami-b374d5a5"</span></span><br><span class="line">    <span class="string">"us-west-2"</span> = <span class="string">"ami-4b32be2b"</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用方式</span></span><br><span class="line"><span class="comment"># 其中 var.amis 是 map 變數，var.region 則是 key</span></span><br><span class="line">resource <span class="string">"aws_instance"</span> <span class="string">"example"</span> &#123;</span><br><span class="line">  ami           = <span class="string">"<span class="variable">$&#123;lookup(var.amis, var.region)&#125;</span>"</span></span><br><span class="line">  instance_type = <span class="string">"t2.micro"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="Output-Variables"><a href="#Output-Variables" class="headerlink" title="Output Variables"></a>Output Variables</h1><p>執行 terraform 指令時，除了 input 重要外，output 也同樣重要，透過 output 可以讓使用者取得關於 resource 的真正重要資訊(例如：load balancer IP, VPN address … 等等)，特別是當環境很複雜時，設計良好的 output 肯定是必要的。</p>
+<p>而 output 除了會在 <code>terraform apply</code> 執行後顯示，以可以在後續透過 <code>terraform output</code> 來查詢。</p>
+<p>以下範例可以取得 <a href="https://www.terraform.io/docs/providers/aws/d/eip.html" target="_blank" rel="noopener">AWS Elastic IP</a> 的 public ip address：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># https://www.terraform.io/docs/providers/aws/d/eip.html</span></span><br><span class="line">output <span class="string">"ip"</span> &#123;</span><br><span class="line">  value = aws_eip.ip.public_ip</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的範例中，output 名稱為 <code>ip</code>(<strong>名稱必須唯一</strong>)，內容為 AWS Elastic IP 的 public IP address，當執行完 <code>terraform apply</code> 之後，就會自動出現 output，但之後也可以透過以下指令取得單純的內容輸出：</p>
+<blockquote>
+<p>terraform output ip</p>
+</blockquote>
+<h1 id="Modules"><a href="#Modules" class="headerlink" title="Modules"></a>Modules</h1><p>當 infra 越來越大時，原本將所有 resource, variable 等定義檔放在同一個目錄下的方式就顯的很不夠用，且無法重複利用，因此 terraform 就提供了一個稱為 <code>module</code> 的機制來管理這些 configuration，將複雜的 infra 設定拆開成一個個可以獨立管理的小模組。(類似 Ansible Role)</p>
+<h2 id="使用-module"><a href="#使用-module" class="headerlink" title="使用 module"></a>使用 module</h2><p>目前 <a href="https://registry.terraform.io/" target="_blank" rel="noopener">Terraform Registry</a> 已經有不少個已經開發完成可以直接使用的 module，若使用者要建立的 infra 中剛好有對應的 module 可以協助建立其中一部份，可以直接拉下來使用。</p>
+<p>以下是一個建立 AWS Consul cluster 的範例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">provider <span class="string">"aws"</span> &#123;</span><br><span class="line">  access_key = <span class="string">"AWS ACCESS KEY"</span></span><br><span class="line">  secret_key = <span class="string">"AWS SECRET KEY"</span></span><br><span class="line">  region     = <span class="string">"us-east-1"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">module <span class="string">"consul"</span> &#123;</span><br><span class="line">  <span class="built_in">source</span> = <span class="string">"hashicorp/consul/aws"</span></span><br><span class="line"></span><br><span class="line">  num_servers = <span class="string">"3"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>從以上的內容，加上目前已經學到的 terraform 相關知識，可以歸納出以下重點 &amp; 結論：</p>
+<ul>
+<li><p><code>source</code> 定義的是 module 所在的位置，這邊的定義方式是告訴 terraform 此 module 位於 terraform registry 中，因此必須透過 <code>terraform init</code> 來自動取得</p>
+</li>
+<li><p>由於是 public module，因此<a href="https://registry.terraform.io/modules/hashicorp/consul/aws/0.6.1?tab=inputs" target="_blank" rel="noopener">官網可以查詢到可用的 input 有哪些</a></p>
+</li>
+<li><p>每個 module 基本上也都會有一些 output 資訊可以取得(<a href="https://registry.terraform.io/modules/hashicorp/consul/aws/0.6.1?tab=outputs" target="_blank" rel="noopener">上面的範例</a>)</p>
+</li>
+<li><p>module 本身也可以來自於 Git repository, HTTP, 或是本地端檔案</p>
+</li>
+<li><p>透過 <code>terraform apply</code> + module 產生出來的 resource 的名稱，都會帶有 module 名稱作為 prefix</p>
+</li>
+<li><p>要將 resource 清除同樣也是可以使用 <code>terraform destroy</code></p>
+</li>
+</ul>
+<h2 id="Module-Output"><a href="#Module-Output" class="headerlink" title="Module Output"></a>Module Output</h2><p>在前面的範例中有指定 input <code>num_servers</code> 的值，而 output 也可以比照原本 terraform 的處理方式比照辦理，由於幾乎每個 module 都會有 output，因此<a href="https://registry.terraform.io/modules/hashicorp/consul/aws?tab=outputs" target="_blank" rel="noopener">以上面的 consul module 為例</a>，我們也可以使用 consul module output 來自訂我們想要的 output，範例如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 取得 auto-scaling group 的名稱</span></span><br><span class="line">output <span class="string">"consul_server_asg_name"</span> &#123;</span><br><span class="line">  value = module.consul.asg_name_servers</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>接著取得 output 的方式就跟上面相同囉!</p>
+<h1 id="Remote-State-Storage"><a href="#Remote-State-Storage" class="headerlink" title="Remote State Storage"></a>Remote State Storage</h1><p>前面有提到使用 terraform 時很重要的一個課題就是如何管理 state，若是自己私下練習可以放在本機就好，但是當 infra 有很多人同時維護時，可以就需要放在遠端可透過 Internet 存取的地方；terraform 提供了很多 remote state storage babckend 的支援，像是：s3, consul, etcd, terraform cloud … 等等。</p>
+<p>由於目前將 state 放到 terraform cloud 是免費的(此外在 user, workspace 都沒有使用數量的限制，加上官方宣稱使用 <a href="https://www.vaultproject.io/" target="_blank" rel="noopener">Vault</a> 作管理加密)，因此這邊就使用 terraform cloud 來做測試。</p>
+<p>首先要取得存取 terraform cloud 的 token，步驟如下：</p>
+<ol>
+<li><p>到 <a href="https://app.terraform.io/signup" target="_blank" rel="noopener">terraform cloud</a> 官網註冊新帳號</p>
+</li>
+<li><p>將 terraform 升級到 0.11.13 以上</p>
+</li>
+<li><p>在 <a href="https://app.terraform.io/app/organizations/new" target="_blank" rel="noopener">terraform cloud</a> 建立新的 organization</p>
+</li>
+<li><p>到 <a href="https://app.terraform.io/app/settings/tokens" target="_blank" rel="noopener">terraform cloud user settings</a> 中建立一個新的 token，並 copy token 內容</p>
+</li>
+<li><p>在本地端建立 <code>~/.terraformrc</code> 檔案，並填入以下內容：</p>
+</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 將上一個步驟的 token 內容取代下方的 REPLACE_ME</span></span><br><span class="line">credentials <span class="string">"app.terraform.io"</span> &#123;</span><br><span class="line">     token = <span class="string">"REPLACE_ME"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="6">
+<li>在當前目錄下建立一個名稱為 <code>remote-storage-state.tf</code> 的檔案(檔名可隨意，副檔名是 <code>tf</code> 即可)，內容如下：</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 將 organization 填入</span></span><br><span class="line"><span class="comment"># workspace name 可以隨意取，terraform 會自動在 terraform cloud 上建立下面指定的 workspace </span></span><br><span class="line">terraform &#123;</span><br><span class="line">  <span class="comment"># 其中 "remote" 的意思表示使用 terraform cloud</span></span><br><span class="line">  <span class="comment"># 若是 remote storage 使用 etcdv3，則會是 "etcv3"</span></span><br><span class="line">  backend <span class="string">"remote"</span> &#123;</span><br><span class="line">    organization = <span class="string">"&lt;ORGANIZATION NAME&gt;"</span></span><br><span class="line"></span><br><span class="line">    workspaces &#123;</span><br><span class="line">      name = <span class="string">"&lt;WORKSPACE NAME&gt;"</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="7">
+<li><p>執行 <code>terraform init</code>，取得存取 remote storage 所需要的檔案（若本地端有存在 state 檔案，terraform 會詢問要不要移到 remote storage）</p>
+</li>
+<li><p>接著後續的 <code>terraform apply</code> 就會自動將 state 存到 terraform cloud 了，還會有 version control 的功能喔!</p>
+</li>
+</ol>
+<p>另外一點比較重要的是，如果之後決定要將 state 從 remote 移回本地端，那就移除剛剛上面所新增的 <code>remote-storage-state.tf</code> 檔案，並再執行一次 <code>terraform init</code>，tetrraform 就會詢問要不要將 state 從 remote 移回本地端了!</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a href="https://learn.hashicorp.com/terraform/" target="_blank" rel="noopener">Terraform Curriculum - HashiCorp Learn</a></p>
+</li>
+<li><p><a href="https://www.terraform.io/docs/modules/index.html" target="_blank" rel="noopener">Creating Modules - Terraform by HashiCorp</a></p>
+</li>
+<li><p><a href="https://www.terraform.io/docs/index.html" target="_blank" rel="noopener">Documentation - Terraform by HashiCorp</a></p>
+</li>
+<li><p><a href="https://www.terraform.io/intro/examples/index.html" target="_blank" rel="noopener">Example Configurations - Terraform by HashiCorp</a></p>
+</li>
+<li><p><a href="https://www.terraform.io/docs/import/index.html" target="_blank" rel="noopener">Import - Terraform by HashiCorp</a></p>
+</li>
+<li><p><a href="https://www.terraform.io/docs/configuration/index.html" target="_blank" rel="noopener">Configuration Language - Terraform by HashiCorp</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/DevOps/" rel="tag"># DevOps</a>
+              <a href="/blog/tags/Terraform/" rel="tag"># Terraform</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/blog/Kubernetes/k8s-How-to-access-resource-legally/" rel="prev" title="[Kubernetes] 如何取得合法可用的權限，讓 pod 與 API server 溝通">
+      <i class="fa fa-chevron-left"></i> [Kubernetes] 如何取得合法可用的權限，讓 pod 與 API server 溝通
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/blog/Prometheus/Prometheus-Relabel/" rel="next" title="[Prometheus] Service Discovery & Relabel ">
+      [Prometheus] Service Discovery & Relabel  <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Installing-Terraform"><span class="nav-number">1.</span> <span class="nav-text">Installing Terraform</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Build-Infrastructure"><span class="nav-number">2.</span> <span class="nav-text">Build Infrastructure</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Configuration"><span class="nav-number">2.1.</span> <span class="nav-text">Configuration</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Initialization"><span class="nav-number">2.2.</span> <span class="nav-text">Initialization</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Apply-Changes"><span class="nav-number">2.3.</span> <span class="nav-text">Apply Changes</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Provisioning"><span class="nav-number">2.4.</span> <span class="nav-text">Provisioning</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Change-Infrastructure"><span class="nav-number">3.</span> <span class="nav-text">Change Infrastructure</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Destroy-Infrastructure"><span class="nav-number">4.</span> <span class="nav-text">Destroy Infrastructure</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Resource-Dependencies"><span class="nav-number">5.</span> <span class="nav-text">Resource Dependencies</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Provision"><span class="nav-number">6.</span> <span class="nav-text">Provision</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Input-Variables"><span class="nav-number">7.</span> <span class="nav-text">Input Variables</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#定義-variables"><span class="nav-number">7.1.</span> <span class="nav-text">定義 variables</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他傳入-input-variable-的方式"><span class="nav-number">7.2.</span> <span class="nav-text">其他傳入 input variable 的方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#使用-variable-file"><span class="nav-number">7.2.1.</span> <span class="nav-text">使用 variable file</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用環境變數-Environment-Variable"><span class="nav-number">7.2.2.</span> <span class="nav-text">使用環境變數(Environment Variable)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#複雜資料結構變數"><span class="nav-number">7.3.</span> <span class="nav-text">複雜資料結構變數</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#List"><span class="nav-number">7.3.1.</span> <span class="nav-text">List</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Map"><span class="nav-number">7.3.2.</span> <span class="nav-text">Map</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Output-Variables"><span class="nav-number">8.</span> <span class="nav-text">Output Variables</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Modules"><span class="nav-number">9.</span> <span class="nav-text">Modules</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-module"><span class="nav-number">9.1.</span> <span class="nav-text">使用 module</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Module-Output"><span class="nav-number">9.2.</span> <span class="nav-text">Module Output</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Remote-State-Storage"><span class="nav-number">10.</span> <span class="nav-text">Remote State Storage</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">11.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives/">
+        
+          <span class="site-state-item-count">105</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">58</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/blog/lib/anime.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/blog/js/utils.js"></script>
+
+<script src="/blog/js/motion.js"></script>
+
+
+<script src="/blog/js/schemes/muse.js"></script>
+
+
+<script src="/blog/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

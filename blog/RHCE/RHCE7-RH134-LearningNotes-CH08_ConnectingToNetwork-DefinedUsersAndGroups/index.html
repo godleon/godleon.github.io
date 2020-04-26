@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+<link rel="stylesheet" href="/blog/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="此文章記錄學習 RHCE7 RH134 Chapter 08. Connecting to Network-defined Users and Groups 留下的內容">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[RHCE7] RH134 Chapter 08. Connecting to Network-defined Users and Groups 學習筆記">
+<meta property="og:url" content="https://godleon.github.io/blog/RHCE/RHCE7-RH134-LearningNotes-CH08_ConnectingToNetwork-DefinedUsersAndGroups/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此文章記錄學習 RHCE7 RH134 Chapter 08. Connecting to Network-defined Users and Groups 留下的內容">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="https://lh3.googleusercontent.com/yrIOq6ZotETj8rEMxH3hnoBqJzUmaF4A_aYQQlvMTuqU6u2-xBCA7aUMIkVBUi_uwjiSOcEr5V_TXrlv0jYDX_ikqhPjZVWPiXo5XKIoWUovuYNtbyPu4nibuVU1sZ150Y43kME_1dExiLtYF3cowhoHA_ex4CbHBDGULMGkfPJQnJkoWM_PVlb-xk1ENpKjElCw0If4VUMnyk6QsSjWTeKrUt6gl8A9Szi-DEWgh2FuhnXFFfL2BOlUmcvLeUDDDu7cT1v09QRqQI1usK3bDKIjrmNUaSAYQ8hPoxDqZaT0-KMycPnDwc8SWJXmm4En8uQMHSGMqFKlx1LmJqufLKZMaFZgF3rM1BN8pCYFxkUkws2nNuG-tmzHi0yxVq7T0vYFerWX66XTvhrOHiReMjLKp3IEm7ue4-AUNY9bcwlPgyjoOBJXId1vT4AgyHeR7sivsMFvwfw2jTwZdEEp2723scmSxiYoO0baKp7rrSnls11b9SI_ZIPd7gAD_42AqnstDCEWWsKzXCpGLXuAXFFjk14lO5g0MHtCd73J2aJmsz8QN_rMZK_Hd9YW44VJ6AEQF3rB4Sxq09bT6q8HPF9ht-ak_qg=w474-h710-no">
+<meta property="article:published_time" content="2016-05-09T20:45:00.000Z">
+<meta property="article:modified_time" content="2020-04-26T04:42:44.177Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="RHCE">
+<meta property="article:tag" content="RH134">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://lh3.googleusercontent.com/yrIOq6ZotETj8rEMxH3hnoBqJzUmaF4A_aYQQlvMTuqU6u2-xBCA7aUMIkVBUi_uwjiSOcEr5V_TXrlv0jYDX_ikqhPjZVWPiXo5XKIoWUovuYNtbyPu4nibuVU1sZ150Y43kME_1dExiLtYF3cowhoHA_ex4CbHBDGULMGkfPJQnJkoWM_PVlb-xk1ENpKjElCw0If4VUMnyk6QsSjWTeKrUt6gl8A9Szi-DEWgh2FuhnXFFfL2BOlUmcvLeUDDDu7cT1v09QRqQI1usK3bDKIjrmNUaSAYQ8hPoxDqZaT0-KMycPnDwc8SWJXmm4En8uQMHSGMqFKlx1LmJqufLKZMaFZgF3rM1BN8pCYFxkUkws2nNuG-tmzHi0yxVq7T0vYFerWX66XTvhrOHiReMjLKp3IEm7ue4-AUNY9bcwlPgyjoOBJXId1vT4AgyHeR7sivsMFvwfw2jTwZdEEp2723scmSxiYoO0baKp7rrSnls11b9SI_ZIPd7gAD_42AqnstDCEWWsKzXCpGLXuAXFFjk14lO5g0MHtCd73J2aJmsz8QN_rMZK_Hd9YW44VJ6AEQF3rB4Sxq09bT6q8HPF9ht-ak_qg=w474-h710-no">
+
+<link rel="canonical" href="https://godleon.github.io/blog/RHCE/RHCE7-RH134-LearningNotes-CH08_ConnectingToNetwork-DefinedUsersAndGroups/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-tw'
+  };
+</script>
+
+  <title>[RHCE7] RH134 Chapter 08. Connecting to Network-defined Users and Groups 學習筆記 | 小信豬的原始部落</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/blog/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/blog/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/RHCE/RHCE7-RH134-LearningNotes-CH08_ConnectingToNetwork-DefinedUsersAndGroups/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [RHCE7] RH134 Chapter 08. Connecting to Network-defined Users and Groups 學習筆記
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2016-05-10 04:45:00" itemprop="dateCreated datePublished" datetime="2016-05-10T04:45:00+08:00">2016-05-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-04-26 12:42:44" itemprop="dateModified" datetime="2020-04-26T12:42:44+08:00">2020-04-26</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/RHCE/" itemprop="url" rel="index"><span itemprop="name">RHCE</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">此文章記錄學習 RHCE7 RH134 Chapter 08. Connecting to Network-defined Users and Groups 留下的內容</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="老師補充"><a href="#老師補充" class="headerlink" title="老師補充"></a>老師補充</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 取得使用者資訊(跟 /etc/passwd 沒有絕對關係)</span></span><br><span class="line">[vagrant@server tmp]$ getent passwd user1</span><br><span class="line">user1:x:1001:1001::/home/user1:/bin/bash</span><br><span class="line"></span><br><span class="line"><span class="comment"># 取得群組資訊</span></span><br><span class="line">[vagrant@server tmp]$ getent group user1</span><br><span class="line">user1:x:1001:</span><br></pre></td></tr></table></figure>
+
+<p>驗證是否通過：</p>
+<ol>
+<li><p>帳號 &amp; 密碼正確</p>
+</li>
+<li><p>可以正確取得使用者資訊</p>
+</li>
+</ol>
+<p>NIS &amp; LDAP 單獨可做到：</p>
+<ol>
+<li><p>可提供使用者資訊</p>
+</li>
+<li><p>可提供帳號密碼的驗證方法</p>
+</li>
+</ol>
+<blockquote>
+<p>但 Kerberos 僅能提供帳號密碼驗證，無法提供使用者資訊，因此一般會與 LDAP 搭配來解決提供使用者資訊的問題，Windows AD 目前就是依照這種方式達成，安全性提高，且提供了 SSO 的能力)</p>
+</blockquote>
+<blockquote>
+<p>目前使用 LDAP + Kerberos 架構的產品有 Windows AD, SAMBA 4.x, RedHat IDM(IPA)</p>
+</blockquote>
+<hr>
+<h1 id="8-1-Using-Identity-Management-Services"><a href="#8-1-Using-Identity-Management-Services" class="headerlink" title="8.1 Using Identity Management Services"></a>8.1 Using Identity Management Services</h1><h2 id="8-1-1-User-information-and-authentication-services"><a href="#8-1-1-User-information-and-authentication-services" class="headerlink" title="8.1.1 User information and authentication services"></a>8.1.1 User information and authentication services</h2><p>中央認證系統會包含兩個部分：</p>
+<h3 id="1-Account-information"><a href="#1-Account-information" class="headerlink" title="1. Account information"></a>1. Account information</h3><p>此部分用來存放使用者帳號的資訊，以及使用者權限等相關資訊。(例如：<strong>/etc/passwd</strong>)</p>
+<h3 id="2-Authentication-information"><a href="#2-Authentication-information" class="headerlink" title="2. Authentication information"></a>2. Authentication information</h3><p>此部分的目的則是驗證使用者是否為其所宣稱的使用者，因此會包含密碼資訊，但這些密碼資訊通常會透過密碼學的技術輔助來加密，避免以明碼的方式呈現。(例如：<strong>/etc/shadow</strong>)</p>
+<h3 id="其他補充"><a href="#其他補充" class="headerlink" title="其他補充"></a>其他補充</h3><p>Kerberos 僅能提供安全的驗證功能，無法提供使用者資訊；若需要使用者資訊，需要搭配 LDAP/NIS …. 等服務來提供。</p>
+<p>目前 LDAP + Kerberos 的選擇有 Windows AD / SAMBA 4.x / RedHat IDM … 等。</p>
+<p>透過調整 <code>/etc/nsswitch.conf</code>，可以調整驗證的順序</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[vagrant@localhost ~]$ cat /etc/nsswitch.conf | grep <span class="string">'^[^#]'</span></span><br><span class="line">passwd:     files sss</span><br><span class="line">shadow:     files sss</span><br><span class="line">group:      files sss</span><br><span class="line">hosts:      files dns</span><br><span class="line">bootparams: nisplus [NOTFOUND=<span class="built_in">return</span>] files</span><br><span class="line">ethers:     files</span><br><span class="line">netmasks:   files</span><br><span class="line">networks:   files</span><br><span class="line">protocols:  files</span><br><span class="line">rpc:        files</span><br><span class="line">services:   files sss</span><br><span class="line">netgroup:   files sss</span><br><span class="line">publickey:  nisplus</span><br><span class="line">automount:  files</span><br><span class="line">aliases:    files nisplus</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>NSS 設定中的 sss 表示指向系統中的 sssd(security system daemon, for cache)，即使在沒網路的狀態下也還是可以進行認証</p>
+</blockquote>
+<p>RedHat 設計的工具大多以 <code>system-config</code> 開頭：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[vagrant@localhost ~]$ system-config-</span><br><span class="line">system-config-authentication  system-config-firewall-tui    system-config-kickstart       system-config-printer-applet  </span><br><span class="line">system-config-date            system-config-kdump           system-config-language        system-config-users           </span><br><span class="line">system-config-firewall        system-config-keyboard        system-config-printer</span><br></pre></td></tr></table></figure>
+
+<p>安裝 <code>system-config-authentication</code> 相關的工具：<code>sudo yum -y install authconfig-gtk sssd krb5-workstation</code></p>
+<p>若 LDAP 過程中要加密，LDAP server 設定時就不能使用 IP，必須使用 domain name，否則 CA 憑證檢查不會過</p>
+<blockquote>
+<p>設定 Kerneros 要把 <code>Use DNS to resolve hosts to realm</code> &amp; <code>Use DNS to locate KDCs for realm</code> 兩個選項拿掉</p>
+</blockquote>
+<h2 id="8-1-2-Attaching-a-system-to-centralized-LDAP-and-Kerberos-servers"><a href="#8-1-2-Attaching-a-system-to-centralized-LDAP-and-Kerberos-servers" class="headerlink" title="8.1.2 Attaching a system to centralized LDAP and Kerberos servers"></a>8.1.2 Attaching a system to centralized LDAP and Kerberos servers</h2><p>設定時建議安裝套件：<code>authconfig-gtk</code>, <code>sssd</code>, <code>krb5-workstation</code></p>
+<h3 id="Authconfig"><a href="#Authconfig" class="headerlink" title="Authconfig"></a>Authconfig</h3><p>RHCE 中的示範以 LDAP + Kerberos 為組合，有一些設定資訊是必須了解的：</p>
+<ul>
+<li><p><strong>/etc/ldap.conf</strong>：提供 LDAP 服務的 server 的相關設定</p>
+</li>
+<li><p><strong>/etc/krb5.conf</strong>：Kerberos 的相關設定</p>
+</li>
+<li><p><strong>/etc/sssd/sssd.conf</strong>：system security services daemon(sssd) 的設定，負責用來取得 &amp; 快取使用者的認證資訊</p>
+</li>
+<li><p><strong>/etc/nsswitch.conf</strong>：用來設定認證使用者所要使用的服務 or 系統</p>
+</li>
+<li><p><strong>/etc/pam.d</strong>：此目錄包含了提供了不同驗證機制的模組</p>
+</li>
+<li><p>/etc/openldap/cacerts：儲存 certificate 用</p>
+</li>
+</ul>
+<blockquote>
+<p>認證設定的過程建議使用 <code>authconfig-gtk</code>(提供 <strong>system-config-authentication</strong> 指令) or <code>authconfig-tui</code> 套件來協助，有圖形介面較為容易設定；不建議使用 <code>authconfig</code> 套件</p>
+</blockquote>
+<h3 id="LDAP"><a href="#LDAP" class="headerlink" title="LDAP"></a>LDAP</h3><p>LDAP 帳號描述範例：<code>cn=kevin,ou=sales,ou=tp,ou=tw,dc=example,dc=com</code> (DN, Distinguish Name)</p>
+<p>LDAP 認証可用 SSL/TLS 加密</p>
+<p><strong>要使用 LDAP 服務，要提供以下必要資訊</strong>：</p>
+<ol>
+<li><p>LDAP server hostname</p>
+</li>
+<li><p>base DN(即是上面的 <code>ou=tp,ou=tw,dc=example,dc=com</code>，依據要認證到的層級而定)</p>
+</li>
+<li><p>若要加密則必須 CA</p>
+</li>
+</ol>
+<h3 id="Kerberos"><a href="#Kerberos" class="headerlink" title="Kerberos"></a>Kerberos</h3><p>兩大訴求：</p>
+<ol>
+<li><p>SSO (Single Sign On)</p>
+</li>
+<li><p>安全性高(驗證過程中，帳號密碼不會在網路上傳遞)</p>
+</li>
+</ol>
+<p>密碼儲存 &amp; 認証方式：</p>
+<ol>
+<li><p>Server 儲存 hash 過後的密碼</p>
+</li>
+<li><p>client 認証時，會將輸入的密碼 hash 後的結果作為加密帳號資訊的對稱式金鑰，將資訊(user_account,time,….)加密後傳到 server 驗證</p>
+</li>
+<li><p>server 收到加密結果後，會拿資料庫中的 hash value 並進行解密，若是有符合則通過</p>
+</li>
+<li><p>為防止重送攻擊，被加密的資料有包含時間資訊(因此系統時間很重要)</p>
+</li>
+<li><p>假設驗證通過，server 會發送一個 ticket 給 client，之後 client 要存取其他 resource 只要提供 account &amp; ticket 即可，resource owner 會自動去找 KDC(Kerberos Key Distribution Center) 驗證 ticket 是否有效</p>
+</li>
+</ol>
+<p><strong>要使用 Kerberos 服務，要提供以下必要資訊</strong>：</p>
+<ol>
+<li><p>Kerberos realm，類似 domain name 的概念</p>
+</li>
+<li><p>至少一個 key distribution center(KDC)，即為 Kerberos hostname</p>
+</li>
+<li><p>Admin server hostname(用來協助使用者密碼及其他資訊變更之用)，通常與 KDC 會是相同一台機器</p>
+</li>
+</ol>
+<h2 id="8-1-3-Attaching-a-System-to-an-IPA-Server"><a href="#8-1-3-Attaching-a-System-to-an-IPA-Server" class="headerlink" title="8.1.3 Attaching a System to an IPA Server"></a>8.1.3 Attaching a System to an IPA Server</h2><p>在 RHEL 7 中提供了方便工具設定，安裝 <code>ipa-client</code> 套件即可。</p>
+<p>以 non-interactive 的方式設定 IPA server 認証：<code>sudo ipa-client-install --domain=serverX.example.com --no-ntp --mkhomedir -p admin -w redhat123 -U</code></p>
+<hr>
+<h1 id="Practice-Connecting-to-a-Central-LDAP-and-Kerberos-Server"><a href="#Practice-Connecting-to-a-Central-LDAP-and-Kerberos-Server" class="headerlink" title="Practice: Connecting to a Central LDAP and Kerberos Server"></a>Practice: Connecting to a Central LDAP and Kerberos Server</h1><p>設定 LDAP + Kerberos 驗證的步驟：</p>
+<p>1、安裝相關套件：<code>sudo yum -y install sssd authconfig-gtk krb5-workstation</code></p>
+<p>2、使用圖形工具進行設定(設定如下)</p>
+<p><img src="https://lh3.googleusercontent.com/yrIOq6ZotETj8rEMxH3hnoBqJzUmaF4A_aYQQlvMTuqU6u2-xBCA7aUMIkVBUi_uwjiSOcEr5V_TXrlv0jYDX_ikqhPjZVWPiXo5XKIoWUovuYNtbyPu4nibuVU1sZ150Y43kME_1dExiLtYF3cowhoHA_ex4CbHBDGULMGkfPJQnJkoWM_PVlb-xk1ENpKjElCw0If4VUMnyk6QsSjWTeKrUt6gl8A9Szi-DEWgh2FuhnXFFfL2BOlUmcvLeUDDDu7cT1v09QRqQI1usK3bDKIjrmNUaSAYQ8hPoxDqZaT0-KMycPnDwc8SWJXmm4En8uQMHSGMqFKlx1LmJqufLKZMaFZgF3rM1BN8pCYFxkUkws2nNuG-tmzHi0yxVq7T0vYFerWX66XTvhrOHiReMjLKp3IEm7ue4-AUNY9bcwlPgyjoOBJXId1vT4AgyHeR7sivsMFvwfw2jTwZdEEp2723scmSxiYoO0baKp7rrSnls11b9SI_ZIPd7gAD_42AqnstDCEWWsKzXCpGLXuAXFFjk14lO5g0MHtCd73J2aJmsz8QN_rMZK_Hd9YW44VJ6AEQF3rB4Sxq09bT6q8HPF9ht-ak_qg=w474-h710-no" alt="system-config-authentication"></p>
+<p>3、驗證設定結果：<code>sudo getent passwd ldapuser1</code> or <code>ssh ldapuser1@server1</code>(密碼 <code>kerberos</code>)</p>
+<hr>
+<h1 id="Lab-Connecting-to-Network-defined-Users-and-Groups"><a href="#Lab-Connecting-to-Network-defined-Users-and-Groups" class="headerlink" title="Lab: Connecting to Network-defined Users and Groups"></a>Lab: Connecting to Network-defined Users and Groups</h1><p>Lab 設計為連線到 IPA server 進行驗證，步驟如下：</p>
+<p>1、安裝相關套件：<code>sudo yum -y install ipa-client</code></p>
+<p>2、設定連線：<code>sudo ipa-client-install --domain=server1.example.com --no-ntp --mkhomedir</code></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">$ sudo ipa-client-install --domain=server0.example.com --no-ntp --mkhomedir</span><br><span class="line"></span><br><span class="line">Discovery was successful!</span><br><span class="line">Hostname: desktop1.example.com</span><br><span class="line">Realm: SERVER0.EXAMPLE.COM</span><br><span class="line">DNS Domain: server1.example.com</span><br><span class="line">IPA Server: server1.example.com</span><br><span class="line">BaseDN: dc=server1,dc=example,dc=com</span><br><span class="line"></span><br><span class="line">Continue to configure the system with these values? [no]: yes</span><br><span class="line">User authorized to enroll computers: admin</span><br><span class="line">Synchronizing time with KDC...</span><br><span class="line">Unable to sync time with IPA NTP server, assuming the time is <span class="keyword">in</span> sync. Please check that 123 UDP port is opened.</span><br><span class="line">Password <span class="keyword">for</span> admin@SERVER1.EXAMPLE.COM:</span><br><span class="line">Successfully retrieved CA cert</span><br><span class="line">    Subject:     CN=Certificate Authority,O=SERVER1.EXAMPLE.COM</span><br><span class="line">    Issuer:      CN=Certificate Authority,O=SERVER1.EXAMPLE.COM</span><br><span class="line">    Valid From:  Tue May 17 20:31:07 2016 UTC</span><br><span class="line">    Valid Until: Sat May 17 20:31:07 2036 UTC</span><br><span class="line"></span><br><span class="line">Enrolled <span class="keyword">in</span> IPA realm SERVER1.EXAMPLE.COM</span><br><span class="line">Created /etc/ipa/default.conf</span><br><span class="line">New SSSD config will be created</span><br><span class="line">Configured /etc/sssd/sssd.conf</span><br><span class="line">Configured /etc/krb5.conf <span class="keyword">for</span> IPA realm SERVER1.EXAMPLE.COM</span><br><span class="line">trying https://server1.example.com/ipa/xml</span><br><span class="line">Forwarding <span class="string">'ping'</span> to server <span class="string">'https://server1.example.com/ipa/xml'</span></span><br><span class="line">Forwarding <span class="string">'env'</span> to server <span class="string">'https://server1.example.com/ipa/xml'</span></span><br><span class="line">Adding SSH public key from /etc/ssh/ssh_host_rsa_key.pub</span><br><span class="line">Adding SSH public key from /etc/ssh/ssh_host_ecdsa_key.pub</span><br><span class="line">Forwarding <span class="string">'host_mod'</span> to server <span class="string">'https://server1.example.com/ipa/xml'</span></span><br><span class="line">Could not update DNS SSHFP records.</span><br><span class="line">SSSD enabled</span><br><span class="line">Configured /etc/openldap/ldap.conf</span><br><span class="line">Configured /etc/ssh/ssh_config</span><br><span class="line">Configured /etc/ssh/sshd_config</span><br><span class="line">Client configuration complete.</span><br></pre></td></tr></table></figure>
+
+<p>3、驗證設定結果：<code>sudo getent passwd ipauser</code> &amp; <code>ssh ipauser@localhost</code>(原本密碼為 <code>password</code>，改為 <code>redhat123</code>)</p>
+<p>4、程式驗證：<code>lab ipaclient grade</code> (@desktop)</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/Linux/" rel="tag"># Linux</a>
+              <a href="/blog/tags/RHCE/" rel="tag"># RHCE</a>
+              <a href="/blog/tags/RH134/" rel="tag"># RH134</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/blog/RHCE/RHCE7-RH134-LearningNotes-CH09_AddingDisksPartitionAndFileSystemsToALinuxSystem/" rel="prev" title="[RHCE7] RH134 Chapter 09. Adding Disks, Partitions, and File Systems to a Linux System 學習筆記">
+      <i class="fa fa-chevron-left"></i> [RHCE7] RH134 Chapter 09. Adding Disks, Partitions, and File Systems to a Linux System 學習筆記
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/blog/RHCE/RHCE7-RH134-LearningNotes-CH10_ManagingLogicalVolumeManagement(LVM)Storage/" rel="next" title="[RHCE7] RH134 Chapter 10. Managing Logical Volume Management(LVM) Storage 學習筆記">
+      [RHCE7] RH134 Chapter 10. Managing Logical Volume Management(LVM) Storage 學習筆記 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#老師補充"><span class="nav-number">1.</span> <span class="nav-text">老師補充</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#8-1-Using-Identity-Management-Services"><span class="nav-number">2.</span> <span class="nav-text">8.1 Using Identity Management Services</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#8-1-1-User-information-and-authentication-services"><span class="nav-number">2.1.</span> <span class="nav-text">8.1.1 User information and authentication services</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Account-information"><span class="nav-number">2.1.1.</span> <span class="nav-text">1. Account information</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Authentication-information"><span class="nav-number">2.1.2.</span> <span class="nav-text">2. Authentication information</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#其他補充"><span class="nav-number">2.1.3.</span> <span class="nav-text">其他補充</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-1-2-Attaching-a-system-to-centralized-LDAP-and-Kerberos-servers"><span class="nav-number">2.2.</span> <span class="nav-text">8.1.2 Attaching a system to centralized LDAP and Kerberos servers</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Authconfig"><span class="nav-number">2.2.1.</span> <span class="nav-text">Authconfig</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LDAP"><span class="nav-number">2.2.2.</span> <span class="nav-text">LDAP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kerberos"><span class="nav-number">2.2.3.</span> <span class="nav-text">Kerberos</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-1-3-Attaching-a-System-to-an-IPA-Server"><span class="nav-number">2.3.</span> <span class="nav-text">8.1.3 Attaching a System to an IPA Server</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Practice-Connecting-to-a-Central-LDAP-and-Kerberos-Server"><span class="nav-number">3.</span> <span class="nav-text">Practice: Connecting to a Central LDAP and Kerberos Server</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Lab-Connecting-to-Network-defined-Users-and-Groups"><span class="nav-number">4.</span> <span class="nav-text">Lab: Connecting to Network-defined Users and Groups</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives/">
+        
+          <span class="site-state-item-count">105</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">58</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/blog/lib/anime.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/blog/js/utils.js"></script>
+
+<script src="/blog/js/motion.js"></script>
+
+
+<script src="/blog/js/schemes/muse.js"></script>
+
+
+<script src="/blog/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

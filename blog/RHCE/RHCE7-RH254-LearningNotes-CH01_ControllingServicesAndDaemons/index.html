@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+<link rel="stylesheet" href="/blog/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="此文章記錄學習 RHCE7 RH254 Chapter 1 Controlling Services and Daemons Learning Notes 留下的內容">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[RHCE7] RH254 Chapter 1 Controlling Services and Daemons Learning Notes">
+<meta property="og:url" content="https://godleon.github.io/blog/RHCE/RHCE7-RH254-LearningNotes-CH01_ControllingServicesAndDaemons/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此文章記錄學習 RHCE7 RH254 Chapter 1 Controlling Services and Daemons Learning Notes 留下的內容">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2016-05-21T08:25:00.000Z">
+<meta property="article:modified_time" content="2020-04-26T04:42:44.181Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="RHCE">
+<meta property="article:tag" content="RH254">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://godleon.github.io/blog/RHCE/RHCE7-RH254-LearningNotes-CH01_ControllingServicesAndDaemons/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-tw'
+  };
+</script>
+
+  <title>[RHCE7] RH254 Chapter 1 Controlling Services and Daemons Learning Notes | 小信豬的原始部落</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/blog/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/blog/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/RHCE/RHCE7-RH254-LearningNotes-CH01_ControllingServicesAndDaemons/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [RHCE7] RH254 Chapter 1 Controlling Services and Daemons Learning Notes
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2016-05-21 16:25:00" itemprop="dateCreated datePublished" datetime="2016-05-21T16:25:00+08:00">2016-05-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-04-26 12:42:44" itemprop="dateModified" datetime="2020-04-26T12:42:44+08:00">2020-04-26</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/RHCE/" itemprop="url" rel="index"><span itemprop="name">RHCE</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">此文章記錄學習 RHCE7 RH254 Chapter 1 Controlling Services and Daemons Learning Notes 留下的內容</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="1-1-Controlling-Services-with-systemctl"><a href="#1-1-Controlling-Services-with-systemctl" class="headerlink" title="1.1 Controlling Services with systemctl"></a>1.1 Controlling Services with systemctl</h1><h2 id="1-1-1-Introduction-to-systemd"><a href="#1-1-1-Introduction-to-systemd" class="headerlink" title="1.1.1 Introduction to systemd"></a>1.1.1 Introduction to systemd</h2><p>RHEL7 已經使用 <code>systemd</code> 取代原有的 <code>init</code> &amp; <code>xinetd</code>，因此目前 ID=1 的 process 為 systemd，主要加入了下列新的特性：</p>
+<ol>
+<li><p>平行處理，可加速系統開機</p>
+</li>
+<li><p>on-demand 啟動服務的能力</p>
+</li>
+<li><p>service 相依性的自動處理，避免造成系統長時間等待特定服務(例如：網路不通時不會把 network service 啟動)</p>
+</li>
+<li><p>可透過 Linux control group 追蹤相關的 process 的狀態</p>
+</li>
+</ol>
+<blockquote>
+<p>現在大多 service 的相關設定都被移到 <code>/etc/sysconfig</code> 目錄中了，只有某些 legacy services 才依然是以 shell-based 的形式存在</p>
+</blockquote>
+<p>現在 RHEL7 中使用 <code>systemctl</code> 管理各式各樣的 systemd 物件，這些物件統稱為 <code>units</code>，常看到的 units 會有：</p>
+<ol>
+<li><p><code>Service units</code>(<strong>.service</strong>)：這就是系統服務了，通常會以 daemon 的形式存在</p>
+</li>
+<li><p><code>Socket Units</code>(<strong>.socket</strong>)：指的是 IPC socket，通常在有新的連線與 service 產生時，socket unit 會被傳給 daemon 處理</p>
+</li>
+<li><p><code>Path units</code>(<strong>.path</strong>)：用來 delay 特定 service，直到特定的檔案有所變化，例如：列印服務</p>
+</li>
+</ol>
+<blockquote>
+<p>若 system unit 狀態為 <code>static</code>，表示無法被 enable，但可以被 <code>enabled unit</code> 自動啟用</p>
+</blockquote>
+<h2 id="1-1-2-Starting-and-stopping-daemons-on-a-running-system"><a href="#1-1-2-Starting-and-stopping-daemons-on-a-running-system" class="headerlink" title="1.1.2 Starting and stopping daemons on a running system"></a>1.1.2 Starting and stopping daemons on a running system</h2><p><code>restart</code> 會改變 service 的 process ID；但 <code>reload</code> 則會維持 service 原有的 process ID</p>
+<h2 id="其他：systemctl-特別的指令"><a href="#其他：systemctl-特別的指令" class="headerlink" title="其他：systemctl 特別的指令"></a>其他：systemctl 特別的指令</h2><ol>
+<li><p><code>sudo systemctl --failed --type=service</code>：列出狀態為 failed 的 service</p>
+</li>
+<li><p><code>sudo systemctl list-dependencies [UNIT]</code>：列出指定 system unit 的相依關係</p>
+</li>
+<li><p><code>sudo systemctl list-dependencies --reverse [UNIT]</code>：列出指定 system unit 啟動所需要預先啟動的其他 system unit</p>
+</li>
+</ol>
+<hr>
+<h1 id="1-2-Controlling-the-Boot-Process"><a href="#1-2-Controlling-the-Boot-Process" class="headerlink" title="1.2 Controlling the Boot Process"></a>1.2 Controlling the Boot Process</h1><h2 id="1-2-1-Selecting-a-systemd-target"><a href="#1-2-1-Selecting-a-systemd-target" class="headerlink" title="1.2.1 Selecting a systemd target"></a>1.2.1 Selecting a systemd target</h2><p>以下列出幾個重要的 systemd target：</p>
+<ul>
+<li><p><code>graphical.target</code>：就是一般的圖形模式，也包含了文字介面</p>
+</li>
+<li><p><code>multi-user.target</code>：純文字模式</p>
+</li>
+<li><p><code>rescue.target</code>：要求用 root 身分登入，基本系統服務已經初始化完成</p>
+</li>
+<li><p><code>emergency.target</code>：要求用 root 身分登入，initramfs 已經執行完畢，並把 system root 以 read-only 的方式掛載</p>
+</li>
+</ul>
+<p>每個 target 之間會有某種程度的相依關係，例如：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 可看出 graphical.target unit 與那些 target unit 有相依</span></span><br><span class="line">$ systemctl list-dependencies graphical.target | grep target</span><br><span class="line">graphical.target</span><br><span class="line">└─multi-user.target</span><br><span class="line">  ├─basic.target</span><br><span class="line">  │ ├─paths.target</span><br><span class="line">  │ ├─slices.target</span><br><span class="line">  │ ├─sockets.target</span><br><span class="line">  │ ├─sysinit.target</span><br><span class="line">  │ │ ├─cryptsetup.target</span><br><span class="line">  │ │ ├─<span class="built_in">local</span>-fs.target</span><br><span class="line">  │ │ └─swap.target</span><br><span class="line">  │ └─timers.target</span><br><span class="line">  ├─getty.target</span><br><span class="line">  ├─nfs.target</span><br><span class="line">  └─remote-fs.target</span><br><span class="line"></span><br><span class="line"><span class="comment"># 列出所有 target unit</span></span><br><span class="line">$ systemctl list-units --<span class="built_in">type</span>=target --all</span><br><span class="line">  UNIT                   LOAD   ACTIVE   SUB    DESCRIPTION</span><br><span class="line">  basic.target           loaded active   active Basic System</span><br><span class="line">  cryptsetup.target      loaded active   active Encrypted Volumes</span><br><span class="line">  emergency.target       loaded inactive dead   Emergency Mode</span><br><span class="line">  final.target           loaded inactive dead   Final Step</span><br><span class="line">  getty.target           loaded active   active Login Prompts</span><br><span class="line">  graphical.target       loaded active   active Graphical Interface</span><br><span class="line">  <span class="built_in">local</span>-fs-pre.target    loaded active   active Local File Systems (Pre)</span><br><span class="line">  <span class="built_in">local</span>-fs.target        loaded active   active Local File Systems</span><br><span class="line">  multi-user.target      loaded active   active Multi-User System</span><br><span class="line">  network-online.target  loaded inactive dead   Network is Online</span><br><span class="line">  ......</span><br></pre></td></tr></table></figure>
+
+<p>透過 <code>systemctl isolate [TARGET_UNIT]</code> 可以馬上變換不同的 target unit，假設目前在圖形模式下，執行指令 <code>sudo systemctl isolate multi-user.target</code> 可以切換到文字模式</p>
+<h3 id="Setting-a-default-target"><a href="#Setting-a-default-target" class="headerlink" title="Setting a default target"></a>Setting a default target</h3><p><code>default.target</code> 為開機時所啟動的 target unit，這是個 symbolic link，指向真正的 target unit</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 目前指向 graphical.target，因此開機會是圖形介面</span></span><br><span class="line">$ ls -al /etc/systemd/system/default.target</span><br><span class="line">lrwxrwxrwx. 1 root root 40 Jul 11  2014 /etc/systemd/system/default.target -&gt; /usr/lib/systemd/system/graphical.target</span><br><span class="line"></span><br><span class="line"><span class="comment"># 也可以用另外一個指令取得 default target unit</span></span><br><span class="line">$ systemctl get-default</span><br><span class="line">graphical.target</span><br></pre></td></tr></table></figure>
+
+<p>當然也有指令可以設定 default target unit：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">$ sudo systemctl <span class="built_in">set</span>-default multi-user.target</span><br><span class="line">rm <span class="string">'/etc/systemd/system/default.target'</span></span><br><span class="line">ln -s <span class="string">'/usr/lib/systemd/system/multi-user.target'</span> <span class="string">'/etc/systemd/system/default.target'</span></span><br><span class="line"></span><br><span class="line">$ systemctl get-default</span><br><span class="line">multi-user.target</span><br><span class="line">``</span><br><span class="line"></span><br><span class="line">&gt; 開機時編輯開機設定，在 `linux16` 那一行的最後面加上 `systemd.unit=[TARGET_UNIT]` 也可以直接進入所指定的 target unit</span><br><span class="line"></span><br><span class="line">----------------------------------------------------</span><br><span class="line"></span><br><span class="line">Lab: Controlling Services and Daemons</span><br><span class="line">=====================================</span><br><span class="line"></span><br><span class="line"><span class="comment">## 目標</span></span><br><span class="line"></span><br><span class="line">- 設定開機時同時支援文字介面登入 &amp; 圖形介面登入</span><br><span class="line"></span><br><span class="line">- 設定 `rsyslog` service 開機時啟動</span><br><span class="line"></span><br><span class="line"><span class="comment">## 實作步驟</span></span><br><span class="line"></span><br><span class="line">```bash</span><br><span class="line"><span class="comment"># 檢查目前的 target unit</span></span><br><span class="line">$ systemctl get-default</span><br><span class="line">multi-user.target</span><br><span class="line"></span><br><span class="line"><span class="comment"># 設定 target unit 為 graphical.target (同時支援文字介面登入 &amp; 圖形介面登入)</span></span><br><span class="line">[student@server0 ~]$ sudo systemctl <span class="built_in">set</span>-default graphical.target</span><br><span class="line">rm <span class="string">'/etc/systemd/system/default.target'</span></span><br><span class="line">ln -s <span class="string">'/usr/lib/systemd/system/graphical.target'</span> <span class="string">'/etc/systemd/system/default.target'</span></span><br><span class="line"></span><br><span class="line">[student@server0 ~]$ systemctl get-default</span><br><span class="line">graphical.target</span><br><span class="line"></span><br><span class="line">[student@server0 ~]$ systemctl status rsyslog</span><br><span class="line">rsyslog.service - System Logging Service</span><br><span class="line">   Loaded: loaded (/usr/lib/systemd/system/rsyslog.service; disabled)</span><br><span class="line">   Active: inactive (dead)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 設定 rsyslog.service 開機啟動</span></span><br><span class="line">[student@server0 ~]$ sudo systemctl <span class="built_in">enable</span> rsyslog.service</span><br><span class="line">ln -s <span class="string">'/usr/lib/systemd/system/rsyslog.service'</span> <span class="string">'/etc/systemd/system/multi-user.target.wants/rsyslog.service'</span></span><br><span class="line">[student@server0 ~]$ sudo systemctl restart rsyslog.service</span><br><span class="line">[student@server0 ~]$ systemctl status rsyslog</span><br><span class="line">rsyslog.service - System Logging Service</span><br><span class="line">   Loaded: loaded (/usr/lib/systemd/system/rsyslog.service; enabled)</span><br><span class="line">   Active: active (running) since Sat 2016-05-21 17:21:24 JST; 2s ago</span><br><span class="line"> Main PID: 31841 (rsyslogd)</span><br><span class="line">   CGroup: /system.slice/rsyslog.service</span><br><span class="line">           └─31841 /usr/sbin/rsyslogd -n</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/Linux/" rel="tag"># Linux</a>
+              <a href="/blog/tags/RHCE/" rel="tag"># RHCE</a>
+              <a href="/blog/tags/RH254/" rel="tag"># RH254</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/blog/RHCE/RHCE7-RH134-LearningNotes-CH13_ControllingAndTroubleshootingTheRHELBootProcess/" rel="prev" title="[RHCE7] RH134 Chapter 13. Controlling and Troubleshooting the RHEL Boot Process 學習筆記">
+      <i class="fa fa-chevron-left"></i> [RHCE7] RH134 Chapter 13. Controlling and Troubleshooting the RHEL Boot Process 學習筆記
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/blog/RHCE/RHCE7-RH254-LearningNotes-CH02_ManagingIPv6Networking/" rel="next" title="[RHCE7] RH254 Chapter 2 Managing IPv6 Networking Learning Notes">
+      [RHCE7] RH254 Chapter 2 Managing IPv6 Networking Learning Notes <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-1-Controlling-Services-with-systemctl"><span class="nav-number">1.</span> <span class="nav-text">1.1 Controlling Services with systemctl</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-1-Introduction-to-systemd"><span class="nav-number">1.1.</span> <span class="nav-text">1.1.1 Introduction to systemd</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-2-Starting-and-stopping-daemons-on-a-running-system"><span class="nav-number">1.2.</span> <span class="nav-text">1.1.2 Starting and stopping daemons on a running system</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他：systemctl-特別的指令"><span class="nav-number">1.3.</span> <span class="nav-text">其他：systemctl 特別的指令</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-2-Controlling-the-Boot-Process"><span class="nav-number">2.</span> <span class="nav-text">1.2 Controlling the Boot Process</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-1-Selecting-a-systemd-target"><span class="nav-number">2.1.</span> <span class="nav-text">1.2.1 Selecting a systemd target</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Setting-a-default-target"><span class="nav-number">2.1.1.</span> <span class="nav-text">Setting a default target</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives/">
+        
+          <span class="site-state-item-count">105</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">58</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/blog/lib/anime.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/blog/js/utils.js"></script>
+
+<script src="/blog/js/motion.js"></script>
+
+
+<script src="/blog/js/schemes/muse.js"></script>
+
+
+<script src="/blog/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

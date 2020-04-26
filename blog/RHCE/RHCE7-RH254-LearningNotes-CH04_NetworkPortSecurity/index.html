@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+<link rel="stylesheet" href="/blog/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="此文章記錄學習 RHCE7 RH254 Chapter 4 Network Port Security 留下的內容">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[RHCE7] RH254 Chapter 4 Network Port Security Learning Notes">
+<meta property="og:url" content="https://godleon.github.io/blog/RHCE/RHCE7-RH254-LearningNotes-CH04_NetworkPortSecurity/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此文章記錄學習 RHCE7 RH254 Chapter 4 Network Port Security 留下的內容">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2016-05-29T01:00:00.000Z">
+<meta property="article:modified_time" content="2020-04-26T04:42:44.181Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="RHCE">
+<meta property="article:tag" content="RH254">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://godleon.github.io/blog/RHCE/RHCE7-RH254-LearningNotes-CH04_NetworkPortSecurity/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-tw'
+  };
+</script>
+
+  <title>[RHCE7] RH254 Chapter 4 Network Port Security Learning Notes | 小信豬的原始部落</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/blog/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/blog/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/RHCE/RHCE7-RH254-LearningNotes-CH04_NetworkPortSecurity/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [RHCE7] RH254 Chapter 4 Network Port Security Learning Notes
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2016-05-29 09:00:00" itemprop="dateCreated datePublished" datetime="2016-05-29T09:00:00+08:00">2016-05-29</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-04-26 12:42:44" itemprop="dateModified" datetime="2020-04-26T12:42:44+08:00">2020-04-26</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/RHCE/" itemprop="url" rel="index"><span itemprop="name">RHCE</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">此文章記錄學習 RHCE7 RH254 Chapter 4 Network Port Security 留下的內容</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="4-1-Managing-Firewalld"><a href="#4-1-Managing-Firewalld" class="headerlink" title="4.1 Managing Firewalld"></a>4.1 Managing Firewalld</h1><h2 id="4-1-1-Firewalld-overview"><a href="#4-1-1-Firewalld-overview" class="headerlink" title="4.1.1 Firewalld overview"></a>4.1.1 Firewalld overview</h2><p><code>firewalld.service</code> 在 RHEL7 中目前是預設的防火牆管理用服務，因此也管理了 Linux kernel netfilter。</p>
+<p>但因為 <code>firewalld.service</code> 與舊有的 <code>iptables.service</code>/<code>ip6tables.service</code>/<code>ebtables.service</code> 會衝突，因此兩個陣營建議選一個使用就好，假設若要使用 firewalld，那就使用 <code>systemctl mask</code> 指令把其他的 system unit 停止掉：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ sudo systemctl mask iptables.service</span><br><span class="line">ln -s <span class="string">'/dev/null'</span> <span class="string">'/etc/systemd/system/iptables.service'</span></span><br><span class="line"></span><br><span class="line">$ sudo systemctl mask ip6tables.service</span><br><span class="line">ln -s <span class="string">'/dev/null'</span> <span class="string">'/etc/systemd/system/ip6tables.service'</span></span><br><span class="line"></span><br><span class="line">$ sudo systemctl mask ebtables.service</span><br><span class="line">ln -s <span class="string">'/dev/null'</span> <span class="string">'/etc/systemd/system/ebtables.service'</span></span><br></pre></td></tr></table></figure>
+
+<p>firewalld 將所有進入的流量分為不同的 <code>zone</code> 來看待，每個 zone 都會擁有相對應的一組規則，處理原則就是<strong>先比對到的規則就先處理</strong></p>
+<p>預設的 firewalld zone 如下：</p>
+<table>
+<thead>
+<tr>
+<th>Zone name</th>
+<th>Default configuration</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>trusted</code></td>
+<td>允許全部進入的流量</td>
+</tr>
+<tr>
+<td><code>home</code></td>
+<td>1. 允許 <code>ssh</code>, <code>mdns</code>, <code>ipp-client</code>, <code>samba-client</code>, <code>dhcpv6-client</code> 等服務的流量<br />2. 允許與連外相關的進入流量<br/>3. 其他所有進入的流量皆拒絕</td>
+</tr>
+<tr>
+<td><code>internal</code></td>
+<td>與 zone <code>home</code> 相同</td>
+</tr>
+<tr>
+<td><code>work</code></td>
+<td>1. 允許 <code>ssh</code>, <code>ipp-client</code>, <code>dhcpv6-client</code> 等服務的流量<br />2. 允許與連外相關的進入流量<br/>3. 其他所有進入的流量皆拒絕</td>
+</tr>
+<tr>
+<td><code>public</code></td>
+<td>1. 允許 <code>ssh</code>, <code>dhcpv6-client</code> 等服務的流量<br />2. 允許與連外相關的進入流量<br/>3. 其他所有進入的流量皆拒絕<br /><strong>4. 是新增 network interface 的 default zone</strong></td>
+</tr>
+<tr>
+<td><code>external</code></td>
+<td>1. 僅允許 <code>ssh</code> 服務的流量<br />2. 允許與連外相關的進入流量<br/>3. 其他所有進入的流量皆拒絕<br />4. 所有連外的流量都會偽裝來源(<strong>NAT</strong>)</td>
+</tr>
+<tr>
+<td><code>dmz</code></td>
+<td>1. 僅允許 <code>ssh</code> 服務的流量<br />2. 允許與連外相關的進入流量<br/>3. 其他所有進入的流量皆拒絕</td>
+</tr>
+<tr>
+<td><code>block</code></td>
+<td>僅允許與連外相關的進入流量</td>
+</tr>
+<tr>
+<td><code>drop</code></td>
+<td>允許與連外相關的進入流量(<strong>連 ICMP error 都不會回應</strong>)</td>
+</tr>
+</tbody></table>
+<h2 id="4-1-2-Managing-firewalld"><a href="#4-1-2-Managing-firewalld" class="headerlink" title="4.1.2 Managing firewalld"></a>4.1.2 Managing firewalld</h2><h3 id="Configure-firewall-settings-with-firewall-cmd"><a href="#Configure-firewall-settings-with-firewall-cmd" class="headerlink" title="Configure firewall settings with firewall-cmd"></a>Configure firewall settings with firewall-cmd</h3><p>RHEL7 提供 <code>firewall-cmd</code>(console) &amp; <code>firewall-config</code>(GUI) 作為管理防火牆之用。</p>
+<p>透過 firewall-cmd 設定規則，有幾個重點需要注意：</p>
+<ul>
+<li><p>若沒特別指定都只是會只有在 runtime 才有效，重開機就無效了，除非加上 <code>--permanent</code> 選項。</p>
+</li>
+<li><p>指令中都會加上 <code>--zone=&lt;ZONE&gt;</code>，若沒加就會預設為 default zone</p>
+</li>
+<li><p>設定規則一般都會加上 <code>--permanent</code> 選項，並使用 <code>firewall-cmd --reload</code> 來進行永久性的變更套用</p>
+</li>
+<li><p>若只是暫時的測試，可以使用 <code>timeout=&lt;TIMEINSECONDS&gt;</code> 來讓規則短暫在 runtime 時有效</p>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>firewall-cmd commands</th>
+<th>Explanation</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>--get-default-zone</code></td>
+<td>查詢 default zone</td>
+</tr>
+<tr>
+<td><code>--set-default-zone=&lt;ZONE&gt;</code></td>
+<td>設定 dfault zone</td>
+</tr>
+<tr>
+<td><code>--get-zones</code></td>
+<td>列出所有支援的 zone</td>
+</tr>
+<tr>
+<td><code>--get-services</code></td>
+<td>列出所有支援的 service</td>
+</tr>
+<tr>
+<td><code>--add-source=&lt;CIDR&gt;</code> [–zone=<ZONE>]</td>
+<td>允許來自指定 source 的進入流量</td>
+</tr>
+<tr>
+<td><code>--remove-source=&lt;CIDR&gt;</code> [–zone=<ZONE>]</td>
+<td>禁止來自特定 source 的進入流量</td>
+</tr>
+<tr>
+<td><code>--add-interface=&lt;INTERFACE&gt; [--zone=&lt;ZONE&gt;]</code></td>
+<td>允許從特定裝置進入的流量</td>
+</tr>
+<tr>
+<td><code>--change-interface=&lt;INTERFACE&gt; [--zone=&lt;ZONE&gt;]</code></td>
+<td>設定指定的 interface 與 zone 關聯</td>
+</tr>
+<tr>
+<td><code>--list-all [--zone=&lt;ZONE&gt;]</code></td>
+<td>列出指定 zone 的所有 interface, source, service, port 等規則</td>
+</tr>
+<tr>
+<td><code>--list-all-zones</code></td>
+<td>取得所有 zone 的設定規則資訊</td>
+</tr>
+<tr>
+<td><code>--add-service=&lt;SERVICE&gt; [--zone=&lt;ZONE&gt;]</code></td>
+<td>允許進入流量到指定的 service</td>
+</tr>
+<tr>
+<td><code>--add-port=&lt;PORT/PROTOCOL&gt; [--zone=&lt;ZONE&gt;]</code></td>
+<td>允許進入流量到指定的 port or protocol</td>
+</tr>
+<tr>
+<td><code>--remove-service=&lt;SERVICE&gt; [--zone=&lt;ZONE&gt;]</code></td>
+<td>禁止進入流量到指定的 service</td>
+</tr>
+<tr>
+<td><code>--remove-port=&lt;PORT/PROTOCOL&gt;</code> [–zone=<ZONE>]</td>
+<td>禁止進入流量到指定的 port or protocol</td>
+</tr>
+<tr>
+<td><code>--reload</code></td>
+<td>將 runtime 設定變成永久設定<br />(<strong>沒有加上 –permanent 選項的規則會失效</strong>)</td>
+</tr>
+</tbody></table>
+<h3 id="firewall-cmd-example"><a href="#firewall-cmd-example" class="headerlink" title="firewall-cmd example"></a>firewall-cmd example</h3><p>以下用幾個簡單範例，示範使用 firewall-cmd 達成以下設定：(使用 <code>dmz</code> zone)</p>
+<ol>
+<li><p>將 default zone 設定為 <code>dmz</code></p>
+</li>
+<li><p>zone <code>internal</code> 允許來自 192.168.0.0/24 的流量</p>
+</li>
+<li><p>zone <code>internal</code> 允許存取 mysql 服務</p>
+</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ sudo firewall-cmd --<span class="built_in">set</span>-default-zone=dmz</span><br><span class="line"></span><br><span class="line">$ sudo firewall-cmd --permanent --zone=internal --add-source=192.168.0.0/24</span><br><span class="line"></span><br><span class="line">$ sudo firewall-cmd --perminant --zone=internal --add-service=mysql</span><br><span class="line"></span><br><span class="line">$ sudo firewall-cmd --reload</span><br></pre></td></tr></table></figure>
+
+<h3 id="Firewall-configuration-files"><a href="#Firewall-configuration-files" class="headerlink" title="Firewall configuration files"></a>Firewall configuration files</h3><p>firewalld 的設定檔放在 <code>/etc/firewalld</code> &amp; <code>/usr/lib/firewalld</code> 目錄下，同樣的設定，放在 <strong>/etc/firewalld</strong> 目錄下的會優先被採用，這是讓管理者可以用來修改原有的預設值之用</p>
+<hr>
+<h1 id="Practice-Configuring-a-Firewall"><a href="#Practice-Configuring-a-Firewall" class="headerlink" title="Practice: Configuring a Firewall"></a>Practice: Configuring a Firewall</h1><h2 id="目標"><a href="#目標" class="headerlink" title="目標"></a>目標</h2><ol>
+<li><p>在 server 上安裝 <code>httpd</code> &amp; <code>mod_ssl</code> 套件，並確認 <code>httpd.service</code> 有啟用且運行中</p>
+</li>
+<li><p>web 首頁顯示 <code>COFFEE</code> 字眼</p>
+</li>
+<li><p>server 上必須啟動 <code>firewalld.service</code></p>
+</li>
+<li><p>在 server 上進行 firewalld 設定，使用 <code>dmz</code> zone 的設定處理未指定的連線</p>
+</li>
+<li><p>來自 <code>172.25.X.0/24</code> 的流量必須導引到 <code>work</code> zone 來處理</p>
+</li>
+<li><p><code>work</code> zone 必須開啟 <code>https</code> 服務所需要的所有 port，而 <code>http</code> 的流量則必須被過濾</p>
+</li>
+</ol>
+<h2 id="實作過程"><a href="#實作過程" class="headerlink" title="實作過程"></a>實作過程</h2><p>安裝 &amp; 設定 httpd.service，並修改首頁：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">$ sudo yum -y install httpd mod_ssl</span><br><span class="line"></span><br><span class="line"><span class="comment"># 啟動 httpd.service</span></span><br><span class="line">$ sudo systemctl <span class="built_in">enable</span> httpd.service</span><br><span class="line">ln -s <span class="string">'/usr/lib/systemd/system/httpd.service'</span> <span class="string">'/etc/systemd/system/multi-user.target.wants/httpd.service'</span></span><br><span class="line">$ sudo systemctl start httpd.service</span><br><span class="line"></span><br><span class="line">$ sudo systemctl status httpd.service</span><br><span class="line">httpd.service - The Apache HTTP Server</span><br><span class="line">   Loaded: loaded (/usr/lib/systemd/system/httpd.service; enabled)</span><br><span class="line">   Active: active (running) since Thu 2016-05-26 10:25:01 JST; 5s ago</span><br><span class="line"> Main PID: 29559 (httpd)</span><br><span class="line">   Status: <span class="string">"Processing requests..."</span></span><br><span class="line">   CGroup: /system.slice/httpd.service</span><br><span class="line">           ├─29559 /usr/sbin/httpd -DFOREGROUND</span><br><span class="line">           ├─29560 /usr/sbin/httpd -DFOREGROUND</span><br><span class="line">           ├─29561 /usr/sbin/httpd -DFOREGROUND</span><br><span class="line">           ├─29562 /usr/sbin/httpd -DFOREGROUND</span><br><span class="line">           ├─29563 /usr/sbin/httpd -DFOREGROUND</span><br><span class="line">           └─29564 /usr/sbin/httpd -DFOREGROUND</span><br><span class="line"></span><br><span class="line">May 26 10:25:01 server0.example.com systemd[1]: Started The Apache HTTP Server.</span><br><span class="line"></span><br><span class="line"><span class="comment"># 修改首頁</span></span><br><span class="line">$ <span class="built_in">echo</span> <span class="string">"COFFEE"</span> | sudo tee --append /var/www/html/index.html</span><br><span class="line"></span><br><span class="line"><span class="comment"># 確認網頁回傳的內容為 COFFEE</span></span><br><span class="line">$ curl http://localhost</span><br><span class="line">COFFEE</span><br></pre></td></tr></table></figure>
+
+<p>確認 firewalld.service 狀態為啟動中：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># firewalld.service 狀態</span></span><br><span class="line">$ sudo systemctl status firewalld.service</span><br><span class="line">firewalld.service - firewalld - dynamic firewall daemon</span><br><span class="line">   Loaded: loaded (/usr/lib/systemd/system/firewalld.service; enabled)</span><br><span class="line">   Active: active (running) since Thu 2016-05-26 09:59:39 JST; 28min ago</span><br><span class="line"> Main PID: 475 (firewalld)</span><br><span class="line">   CGroup: /system.slice/firewalld.service</span><br><span class="line">           └─475 /usr/bin/python -Es /usr/sbin/firewalld --nofork --nopid</span><br><span class="line"></span><br><span class="line">May 26 09:59:39 localhost systemd[1]: Started firewalld - dynamic firewall daemon.</span><br><span class="line"></span><br><span class="line"><span class="comment"># iptables.service 狀態</span></span><br><span class="line">$ sudo systemctl status iptables.service</span><br><span class="line">iptables.service - IPv4 firewall with iptables</span><br><span class="line">   Loaded: loaded (/usr/lib/systemd/system/iptables.service; disabled)</span><br><span class="line">   Active: inactive (dead)</span><br><span class="line"></span><br><span class="line"><span class="comment"># ip6tables.service 狀態</span></span><br><span class="line">$ sudo systemctl status ip6tables.service</span><br><span class="line">ip6tables.service - IPv6 firewall with ip6tables</span><br><span class="line">   Loaded: loaded (/usr/lib/systemd/system/ip6tables.service; disabled)</span><br><span class="line">   Active: inactive (dead)</span><br><span class="line"></span><br><span class="line"><span class="comment"># ebtables.service 狀態</span></span><br><span class="line">$ sudo systemctl status ebtables.service</span><br><span class="line">ebtables.service - Ethernet Bridge Filtering tables</span><br><span class="line">   Loaded: loaded (/usr/lib/systemd/system/ebtables.service; disabled)</span><br><span class="line">   Active: inactive (dead)</span><br></pre></td></tr></table></figure>
+
+<p>設定 <code>dmz</code> zone 處理為指定連線：(即是設定為預設的 zone)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ sudo firewall-cmd --<span class="built_in">set</span>-default-zone=dmz</span><br><span class="line">success</span><br></pre></td></tr></table></figure>
+
+<p>來自 <code>172.25.X.0/24</code> 的流量必須導引到 <code>work</code> zone 來處理</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo firewall-cmd --permanent --zone=work --add-source=172.25.X.0/24</span><br></pre></td></tr></table></figure>
+
+<p><code>work</code> zone 必須開啟 <code>https</code> 服務所需要的所有 port，而 <code>http</code> 的流量則必須被過濾：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo firewall-cmd --permanent --zone=work --add-service=https</span><br></pre></td></tr></table></figure>
+
+<p>套用 &amp; 檢查設定：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">$ sudo firewall-cmd --reload</span><br><span class="line">success</span><br><span class="line"></span><br><span class="line">$ sudo firewall-cmd --get-default-zone</span><br><span class="line">dmz</span><br><span class="line"></span><br><span class="line">$ sudo firewall-cmd --get-active-zones</span><br><span class="line">dmz</span><br><span class="line">  interfaces: eth0</span><br><span class="line">work</span><br><span class="line">  sources: 172.25.X.0/24</span><br><span class="line">ROL</span><br><span class="line">  sources: 172.25.0.252/32</span><br><span class="line"></span><br><span class="line">$ sudo firewall-cmd --zone=work --list-all</span><br><span class="line">work</span><br><span class="line">  interfaces:</span><br><span class="line">  sources: 172.25.X.0/24</span><br><span class="line">  services: dhcpv6-client https ipp-client ssh</span><br><span class="line">  ports:</span><br><span class="line">  masquerade: no</span><br><span class="line">  forward-ports:</span><br><span class="line">  icmp-blocks:</span><br><span class="line">  rich rules:</span><br></pre></td></tr></table></figure>
+
+<p>最後，從 desktop 查詢：<code>curl -k https://serverX</code></p>
+<hr>
+<h1 id="4-2-Managing-Rich-Rules"><a href="#4-2-Managing-Rich-Rules" class="headerlink" title="4.2 Managing Rich Rules"></a>4.2 Managing Rich Rules</h1><h2 id="4-2-1-Rich-rules-concepts"><a href="#4-2-1-Rich-rules-concepts" class="headerlink" title="4.2.1 Rich rules concepts"></a>4.2.1 Rich rules concepts</h2><p>除了 firewalld 原生支援的 zone &amp; service 之外，使用者還可以透過 <code>direct rules</code> &amp; <code>rich rules</code> 兩種機制來自訂規則</p>
+<h3 id="Direct-rules"><a href="#Direct-rules" class="headerlink" title="Direct rules"></a>Direct rules</h3><p>顧名思義，這種機制就是為了相容 {ip,ip6,eb}tables rule 所產生出來的，若已經有既有的 rules，可透過此機制加入到 firewalld 的管理下，詳細的設定可以參考 <code>firewall-cmd(1)</code> &amp; <code>firewalld.direct(5)</code></p>
+<h3 id="Rich-rules"><a href="#Rich-rules" class="headerlink" title="Rich rules"></a>Rich rules</h3><p>這就是全新給 firewalld 使用的客製化 rule 機制，除了規則之外，還可以設定 logging 的機制(使用 <code>syslog</code> &amp; <code>auditd</code>)，甚至連 port forwards, masquerading, rate limiting 等功能都可以設定。</p>
+<p>rich rule 的設定基本語法架構如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">rule</span><br><span class="line">    [<span class="built_in">source</span>]</span><br><span class="line">    [destination]</span><br><span class="line">    service|port|protocol|icmp-block|masquerade|forward-port</span><br><span class="line">    [<span class="built_in">log</span>]</span><br><span class="line">    [audit]</span><br><span class="line">    [accept|reject|drop]</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>完整的 rich rule 設定語法可以參考 <code>firewalld.richlanguage(5)</code></p>
+</blockquote>
+<h3 id="Rule-ordering"><a href="#Rule-ordering" class="headerlink" title="Rule ordering"></a>Rule ordering</h3><p>當規則多起來時，順序的問題就很重要了，順序如下：</p>
+<ol>
+<li><p>任何與 port forwarding &amp; masquerading 相關的規則</p>
+</li>
+<li><p>任何 logging 相關的規則</p>
+</li>
+<li><p>任何放行的規則</p>
+</li>
+<li><p>任何禁止的規則</p>
+</li>
+</ol>
+<p>基本上，先比對到的規則就會先使用，都沒相符的規則就使用預設的規則，而每個 zone 都會有不同的預設規則。</p>
+<p>不過 direct rule 會是例外，direct rule 會在 firewalld 開始過濾前就會先執行。</p>
+<h3 id="Test-and-debugging"><a href="#Test-and-debugging" class="headerlink" title="Test and debugging"></a>Test and debugging</h3><p>為了測試與 debug 的方便，幾乎所有加入到 runtime 設定的規則都可以額外加上 <code>timeout</code> 的設定，時間到就會自動移除，之後確認沒問題就可以改用 <code>--permanent</code> 讓設定永久生效</p>
+<h2 id="4-2-2-Working-with-rich-rules"><a href="#4-2-2-Working-with-rich-rules" class="headerlink" title="4.2.2 Working with rich rules"></a>4.2.2 Working with rich rules</h2><p>firewall-cmd 有 4 個選項用來處理 rich rule 之用，這些選項都可以搭配 <code>--permanent</code> &amp; <code>--zone</code> 使用：</p>
+<ul>
+<li><p><code>--add-rich-rule=&#39;&lt;RULE&gt;&#39;</code>新增規則</p>
+</li>
+<li><p><code>--remove-rich-rule=&#39;&lt;RULE&gt;&#39;</code>：移除規則</p>
+</li>
+<li><p><code>--query-rich-rule-&#39;&lt;RULE&gt;&#39;</code>：查詢規則是否有被加入到指定的 zone(or default zone)，回傳 0 表示有，1 則是沒有</p>
+</li>
+<li><p><code>--list-rich-rules</code>：顯示所有規則 (也可以用 <code>--list-all</code> or <code>--list-all-zones</code> 檢視所有規則)</p>
+</li>
+</ul>
+<p>以下為一些簡單範例：(以下權限以 root 身份執行)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># default zone = public</span></span><br><span class="line">[root@server ~]<span class="comment"># firewall-cmd --get-default-zone</span></span><br><span class="line">public</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在 zone "work" 中設定拒絕來自 192.168.0.11 的流量，永久生效</span></span><br><span class="line"><span class="comment"># family 可以省略</span></span><br><span class="line">[root@server ~]<span class="comment"># firewall-cmd --permanent --zone=work --add-rich-rule='rule family=ipv4 source address=192.168.0.11/32 reject'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 在 default zone 中，允許每分鐘能有兩個 ftp 連線產生</span></span><br><span class="line">[root@server ~]<span class="comment"># firewall-cmd --add-rich-rule='rule service name=ftp limit value=2/m accept'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 在 default zone 中，丟棄 IPSec esp 協定的所有封包</span></span><br><span class="line"><span class="comment"># reject 會送 ICMP 回 client，但 drop 則丟棄後完全不回應(因此 drop 會常用在已知的惡意網路段上)</span></span><br><span class="line">[root@server ~]<span class="comment"># firewall-cmd --permanent --add-rich-rule='rule protocol value=esp drop'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 在 zone "work" 中，設定允許來自 192.168.1.0/24 網段的流量，進入 tcp port 7900-7905</span></span><br><span class="line">[root@server ~]<span class="comment"># firewall-cmd --permanent --zone=work --add-rich-rule='rule family=ipv4 source address=192.168.1.0/24 port port=7900-7905 protocol=tcp accept'</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="4-2-3-Loggind-with-rich-rules"><a href="#4-2-3-Loggind-with-rich-rules" class="headerlink" title="4.2.3 Loggind with rich rules"></a>4.2.3 Loggind with rich rules</h2><p>logging 的功能很適合用在 debug or monitor 的需求上，firewalld 可以使用 <code>syslog</code>，也可以將訊息送給 <code>auditd</code>；此外，還可以設定 rate limit，避免 log 爆量產生塞滿硬碟</p>
+<p>若要搭配 <code>syslog</code>，使用下面語法：(其中 Log Level 有 <code>emerg</code>, <code>alert</code>, <code>crit</code>, <code>error</code>, <code>warning</code>, <code>notice</code>, <code>info</code>, <code>debug</code> 幾種可用)</p>
+<blockquote>
+<p>log [prefix=”<PREFIX TEXT>“] [level=<LOG LEVEL>] [limit value=”&lt;RATE/DURATION&gt;”]</p>
+</blockquote>
+<p>若搭配 <code>auditd</code>，則使用下列語法：</p>
+<blockquote>
+<p>audit [limit value=”&lt;RATE/DURATION&gt;”]</p>
+</blockquote>
+<p>以下是則是設定 logging 功能相關的範例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在 zone "work" 中，設定允許 ssh 的流量</span></span><br><span class="line"><span class="comment"># 搭配 syslog 記錄(prefix="ssh ", level="notice", 一分鐘最多三筆資料)</span></span><br><span class="line">[root@server ~]<span class="comment"># firewall-cmd --permanent --zone=work --add-rich-rule 'rule service name="ssh" log prefix="ssh " level="notice" limit value="3/m" accept'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 在 default zone 中，拒絕來自 ipv6 "2001:db8::/64" 網段到達 dns 服務的流量</span></span><br><span class="line"><span class="comment"># 搭配 auditd，每個小時最多一筆紀錄</span></span><br><span class="line"><span class="comment"># 此規則在 300 秒後會自動失效</span></span><br><span class="line">[root@server ~]<span class="comment"># firewall-cmd --add-rich-rule='rule family=ipv6 source address="2001:db8::/64" service name="dns" audit limit value="1/h" reject' --timeout=300</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="Practice-Writing-Custom-Rules"><a href="#Practice-Writing-Custom-Rules" class="headerlink" title="Practice: Writing Custom Rules"></a>Practice: Writing Custom Rules</h1><h2 id="目標-1"><a href="#目標-1" class="headerlink" title="目標"></a>目標</h2><ol>
+<li><p>server 安裝 <code>web server</code> 要讓 desktop 可以連</p>
+</li>
+<li><p>限定<code>最多每秒三筆 log 記錄</code>，且 log 記錄開頭必須為 <code>NEW HTTP</code></p>
+</li>
+</ol>
+<h2 id="實作過程-1"><a href="#實作過程-1" class="headerlink" title="實作過程"></a>實作過程</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">$ sudo yum -y install httpd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 設定首頁</span></span><br><span class="line">$ <span class="built_in">echo</span> <span class="string">"NEW HTTP"</span> | sudo tee /var/www/html/index.html</span><br><span class="line">NEW HTTP</span><br><span class="line"></span><br><span class="line"><span class="comment"># 啟動 web server</span></span><br><span class="line">$ sudo systemctl <span class="built_in">enable</span> httpd.service</span><br><span class="line">ln -s <span class="string">'/usr/lib/systemd/system/httpd.service'</span> <span class="string">'/etc/systemd/system/multi-user.target.wants/httpd.service'</span></span><br><span class="line">$ sudo systemctl start httpd.service</span><br><span class="line"></span><br><span class="line"><span class="comment"># 確認本機服務正常 (此時 desktop 無法連入)</span></span><br><span class="line">$ curl http://localhost</span><br><span class="line">NEW HTTP</span><br><span class="line"></span><br><span class="line">[root@server ~]<span class="comment"># firewall-cmd --permanent --add-rich-rule='rule family=ipv4 source address=172.25.0.10/32 service name="http" log level=notice prefix="NEW HTTP " limit value="3/s" accept'</span></span><br><span class="line">[root@server ~]<span class="comment"># firewall-cmd --reload</span></span><br><span class="line"></span><br><span class="line"><span class="comment">###### dekstop 連入一次 ######</span></span><br><span class="line">[root@server ~]<span class="comment"># tail /var/log/messages</span></span><br><span class="line">.......</span><br><span class="line">May 27 16:41:23 localhost kernel: NEW HTTP IN=eth0 OUT= MAC=52:54:00:00:00:0b:52:54:00:00:00:0a:08:00 SRC=172.25.0.10 DST=172.25.0.11 LEN=60 TOS=0x00 PREC=0x00 TTL=64 ID=55651 DF PROTO=TCP SPT=49712 DPT=80 WINDOW=14600 RES=0x00 SYN URGP=0</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="4-3-Masquerading-and-Port-Forwarding"><a href="#4-3-Masquerading-and-Port-Forwarding" class="headerlink" title="4.3 Masquerading and Port Forwarding"></a>4.3 Masquerading and Port Forwarding</h1><p>firewalld 也支援了 <code>masquerading</code>(<strong>SNAT</strong>, 稍有差異) &amp; <code>port forwarding</code>(<strong>DNAT</strong>) 兩種 NAT 模式</p>
+<h2 id="4-3-1-Masquerading"><a href="#4-3-1-Masquerading" class="headerlink" title="4.3.1 Masquerading"></a>4.3.1 Masquerading</h2><p>設定 masquerading 的方式如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 將此機器設定為 zone "work" 的 NAT</span></span><br><span class="line">[root@server ~]<span class="comment"># firewall-cmd --permanent --zone=work --add-masquerade</span></span><br></pre></td></tr></table></figure>
+
+<p>也可以使用 rich rule 設定較為複雜的規則：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在 zone "work" 中，將此機器設定為來源為 192.168.0.0/24 的 NAT</span></span><br><span class="line">[root@server ~]<span class="comment"># firewall-cmd --permanent --zone=work --add-rich-rule 'rule family=ipv4 source address=192.168.0.0/24 masquerade'</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="4-3-2-Port-forwarding"><a href="#4-3-2-Port-forwarding" class="headerlink" title="4.3.2 Port forwarding"></a>4.3.2 Port forwarding</h2><p>設定 port forwarding 的語法如下：</p>
+<blockquote>
+<p>firewall-cmd –permanent –zone=&lt;ZONE&gt; –add-forward-port=port=&lt;PORT NUMBER&gt;:proto=&lt;PROTOCOL&gt;[:toport=&lt;PORTNUMBER&gt;] [:toaddr=&lt;IPADDR&gt;]</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在 zone "public" 中，將到達 tcp:513 的流量導向 192.168.0.254:132</span></span><br><span class="line">[root@server ~]<span class="comment"># firewall-cmd --permanent --zone=public --add-forward-port=port=513:proto=tcp:toport=132:toaddr=192.168.0.254</span></span><br></pre></td></tr></table></figure>
+
+<p>也可以使用 rich rule 設定較為複雜的規則：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在 zone "work" 中，將來自 192.168.0.0/26，且到 tcp:80 的流量，導向 tcp:8080</span></span><br><span class="line">[root@server ~]<span class="comment">#  firewall-cmd --permanent --zone=work --add-rich-rule='rule family=ipv4 source address=192.168.0.0/26 forward-port port=80 protocol=tcp to-port=8080'</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="Practice-Forwarding-a-port"><a href="#Practice-Forwarding-a-port" class="headerlink" title="Practice: Forwarding a port"></a>Practice: Forwarding a port</h1><h2 id="目標-2"><a href="#目標-2" class="headerlink" title="目標"></a>目標</h2><p>將來自 172.25.0.10/32　的 <code>tcp port 443</code> <code>ssh</code> 連線流量轉到 <code>tcp port 22</code></p>
+<h2 id="實作過程-2"><a href="#實作過程-2" class="headerlink" title="實作過程"></a>實作過程</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@server ~]<span class="comment"># firewall-cmd --permanent --add-rich-rule='rule family=ipv4 source address=172.25.0.10/32 forward-port port=443 protocol=tcp to-port=22'</span></span><br><span class="line">[root@server ~]<span class="comment"># firewall-cmd --reload</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="4-4-Managing-SELinux-Port-Labeling"><a href="#4-4-Managing-SELinux-Port-Labeling" class="headerlink" title="4.4 Managing SELinux Port Labeling"></a>4.4 Managing SELinux Port Labeling</h1><p>要確保服務可以正常運行，就要確定 network port 擁有正確的 SELinux type　來與服務搭配才可以</p>
+<h2 id="4-4-1-SELinux-port-labeling"><a href="#4-4-1-SELinux-port-labeling" class="headerlink" title="4.4.1 SELinux port labeling"></a>4.4.1 SELinux port labeling</h2><p>不僅是 file &amp; process，連 network traffic 都屬於 SELinux 的管理範圍內，舉例來說：<code>22/tcp</code> 就有一個 <code>ssh_port_t</code> 的 label 與其相關</p>
+<p>因此當一個 process 要監聽某一個 port 時，SELinux 會去檢查 port 有沒有相對應的 label 可供 process 進行 binding，若沒有則 process 會無法正常監聽指定的 port；這功能可以防範不正常的 process 使用到一般服務的 port</p>
+<h2 id="4-4-2-Managing-SELinux-port-labeling"><a href="#4-4-2-Managing-SELinux-port-labeling" class="headerlink" title="4.4.2 Managing SELinux port labeling"></a>4.4.2 Managing SELinux port labeling</h2><h3 id="Listing-port-labels"><a href="#Listing-port-labels" class="headerlink" title="Listing port labels"></a>Listing port labels</h3><p>需要調整 label 通常是因為管理者要讓服務監聽一個非標準的 port 上，以下指令可以列出目前系統中已經存在的 SELinux port type：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$ sudo semanage port -l</span><br><span class="line"></span><br><span class="line">SELinux Port Type              Proto    Port Number</span><br><span class="line">.........</span><br><span class="line">amavisd_send_port_t            tcp      10025</span><br><span class="line">amqp_port_t                    tcp      5671-5672</span><br><span class="line">amqp_port_t                    udp      5671-5672</span><br><span class="line">aol_port_t                     tcp      5190-5193</span><br><span class="line">.........</span><br></pre></td></tr></table></figure>
+
+<h3 id="Managing-port-labels"><a href="#Managing-port-labels" class="headerlink" title="Managing port labels"></a>Managing port labels</h3><p>RHEL7 中提供 <code>semanage</code> 指令可用來修改 SELinux port type，指令類似如下：</p>
+<blockquote>
+<p>sudo semanage port -a -t PORT_LABEL -p tcp|udp PORT_NUMBER</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 允許 gopher service 監聽 tcp port 71</span></span><br><span class="line">$ sudo semanage port -a -t gopher_port_t -p tcp 71</span><br><span class="line"></span><br><span class="line"><span class="comment"># 修改 port lebel 為 http_port_t</span></span><br><span class="line">$ sudo semanage port -m -t http_port_t -p tcp 71</span><br><span class="line"></span><br><span class="line"><span class="comment"># 移除 port label</span></span><br><span class="line">$ sudo semanage port -d -t http_port_t -p tcp 71</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><p>詳細的 SELinux 參考文件可透過安裝 <code>selinux-policy-devel</code> 套件取得：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ sudo yum -y install selinux-policy-devel</span><br><span class="line">$ sudo mandb</span><br><span class="line">$ man -k _selinux</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="Practice-Managing-SELinux-Port-Labeling"><a href="#Practice-Managing-SELinux-Port-Labeling" class="headerlink" title="Practice: Managing SELinux Port Labeling"></a>Practice: Managing SELinux Port Labeling</h1><h2 id="目標-3"><a href="#目標-3" class="headerlink" title="目標"></a>目標</h2><ol>
+<li><p>確保 <code>httpd.service</code> 啟用且執行</p>
+</li>
+<li><p>web server 監聽 <code>82/tcp</code></p>
+</li>
+</ol>
+<h2 id="實作過程-3"><a href="#實作過程-3" class="headerlink" title="實作過程"></a>實作過程</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 新增 port type label</span></span><br><span class="line">$ sudo semanage port -a -t http_port_t -p tcp 82</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重新啟動 httpd.service</span></span><br><span class="line">[student@server0 ~]$ sudo systemctl <span class="built_in">enable</span> httpd.service</span><br><span class="line">[student@server0 ~]$ sudo systemctl restart httpd.service</span><br><span class="line">[student@server0 ~]$ sudo systemctl status httpd.service</span><br><span class="line">httpd.service - The Apache HTTP Server</span><br><span class="line">   Loaded: loaded (/usr/lib/systemd/system/httpd.service; enabled)</span><br><span class="line">   Active: active (running) since Sat 2016-05-28 10:43:14 JST; 2s ago</span><br><span class="line"> Main PID: 2080 (httpd)</span><br><span class="line">   Status: <span class="string">"Processing requests..."</span></span><br><span class="line">   CGroup: /system.slice/httpd.service</span><br><span class="line">           ├─2080 /usr/sbin/httpd -DFOREGROUND</span><br><span class="line">           ├─2081 /usr/sbin/httpd -DFOREGROUND</span><br><span class="line">           ├─2082 /usr/sbin/httpd -DFOREGROUND</span><br><span class="line">           ├─2083 /usr/sbin/httpd -DFOREGROUND</span><br><span class="line">           ├─2084 /usr/sbin/httpd -DFOREGROUND</span><br><span class="line">           └─2085 /usr/sbin/httpd -DFOREGROUND</span><br><span class="line"></span><br><span class="line">May 28 10:43:14 server0.example.com systemd[1]: Started The Apache HTTP Server.</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以 root 身分新增 firewall 設定</span></span><br><span class="line">[root@server ~]<span class="comment"># firewall-cmd --permanent --add-port=82/tcp</span></span><br><span class="line">[root@server ~]<span class="comment"># firewall-cmd --reload</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="Lab-Network-Port-Security"><a href="#Lab-Network-Port-Security" class="headerlink" title="Lab: Network Port Security"></a>Lab: Network Port Security</h1><h2 id="目標-4"><a href="#目標-4" class="headerlink" title="目標"></a>目標</h2><ol>
+<li><p>讓 <code>sshd.service</code> 同時監聽兩個 port(<code>22/tcp</code> &amp; <code>999/tcp</code>)</p>
+</li>
+<li><p>來自 <code>172.25.0.0/24</code> 的流量可以允許進入 zone <code>work</code></p>
+</li>
+<li><p><code>22/tcp</code> &amp; <code>999/tcp</code> 在 zone <code>work</code> 中必須都要能夠使用</p>
+</li>
+</ol>
+<h2 id="實作過程-4"><a href="#實作過程-4" class="headerlink" title="實作過程"></a>實作過程</h2><p>檢查 sshd.service 狀態：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">$ sudo systemctl status sshd.service</span><br><span class="line">sshd.service - OpenSSH server daemon</span><br><span class="line">   Loaded: loaded (/usr/lib/systemd/system/sshd.service; enabled)</span><br><span class="line">   Active: active (running) since Sat 2016-05-28 10:48:41 JST; 2min 6s ago</span><br><span class="line">  Process: 1742 ExecStartPre=/usr/sbin/sshd-keygen (code=exited, status=0/SUCCESS)</span><br><span class="line"> Main PID: 1743 (sshd)</span><br><span class="line">   CGroup: /system.slice/sshd.service</span><br><span class="line">           └─1743 /usr/sbin/sshd -D</span><br><span class="line"></span><br><span class="line">May 28 10:48:41 server0.example.com systemd[1]: Starting OpenSSH server daemon...</span><br><span class="line">May 28 10:48:41 server0.example.com systemd[1]: Started OpenSSH server daemon.</span><br><span class="line">May 28 10:48:41 server0.example.com sshd[1743]: error: Bind to port 999 on 0.0.0.0 failed: Permission denied.</span><br><span class="line">May 28 10:48:41 server0.example.com sshd[1743]: error: Bind to port 999 on :: failed: Permission denied.</span><br><span class="line">May 28 10:48:41 server0.example.com sshd[1743]: Server listening on 0.0.0.0 port 22.</span><br><span class="line">May 28 10:48:41 server0.example.com sshd[1743]: Server listening on :: port 22.</span><br><span class="line">May 28 10:48:42 server0.example.com python[1747]: SELinux is preventing /usr/sbin/sshd from name_bind access on the tcp_socket .</span><br><span class="line"></span><br><span class="line">                                                  *****  Plugin bind_ports (92.2 confidence) suggests   ************************...</span><br><span class="line">May 28 10:48:42 server0.example.com python[1747]: SELinux is preventing /usr/sbin/sshd from name_bind access on the tcp_socket .</span><br><span class="line"></span><br><span class="line">                                                  *****  Plugin bind_ports (92.2 confidence) suggests   ************************...</span><br><span class="line">Hint: Some lines were ellipsized, use -l to show <span class="keyword">in</span> full.</span><br></pre></td></tr></table></figure>
+
+<p>加入 port label for sshd.service：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">[root@server ~]<span class="comment"># semanage port -a -t ssh_port_t -p tcp 999</span></span><br><span class="line">[root@server ~]<span class="comment"># systemctl reload sshd.service</span></span><br><span class="line">[root@server ~]<span class="comment"># systemctl status sshd.service</span></span><br><span class="line">sshd.service - OpenSSH server daemon</span><br><span class="line">   Loaded: loaded (/usr/lib/systemd/system/sshd.service; enabled)</span><br><span class="line">   Active: active (running) since Sat 2016-05-28 11:10:17 JST; 2min 51s ago</span><br><span class="line">  Process: 2225 ExecReload=/bin/<span class="built_in">kill</span> -HUP <span class="variable">$MAINPID</span> (code=exited, status=0/SUCCESS)</span><br><span class="line">  Process: 1708 ExecStartPre=/usr/sbin/sshd-keygen (code=exited, status=0/SUCCESS)</span><br><span class="line"> Main PID: 1710 (sshd)</span><br><span class="line">   CGroup: /system.slice/sshd.service</span><br><span class="line">           └─1710 /usr/sbin/sshd -D</span><br><span class="line"></span><br><span class="line">May 28 11:10:17 server0.example.com sshd[1710]: Server listening on :: port 22.</span><br><span class="line">May 28 11:10:18 server0.example.com python[1713]: SELinux is preventing /usr/sbin/sshd from name_bind access on the tcp_socket .</span><br><span class="line"></span><br><span class="line">                                                  *****  Plugin bind_ports (92.2 confidence) suggests   ************************...</span><br><span class="line">May 28 11:10:18 server0.example.com python[1713]: SELinux is preventing /usr/sbin/sshd from name_bind access on the tcp_socket .</span><br><span class="line"></span><br><span class="line">                                                  *****  Plugin bind_ports (92.2 confidence) suggests   ************************...</span><br><span class="line">May 28 11:13:03 server0.example.com systemd[1]: Reloading OpenSSH server daemon.</span><br><span class="line">May 28 11:13:04 server0.example.com sshd[1710]: Received SIGHUP; restarting.</span><br><span class="line">May 28 11:13:04 server0.example.com systemd[1]: Reloaded OpenSSH server daemon.</span><br><span class="line">May 28 11:13:04 server0.example.com sshd[1710]: Server listening on 0.0.0.0 port 999.</span><br><span class="line">May 28 11:13:04 server0.example.com sshd[1710]: Server listening on :: port 999.</span><br><span class="line">May 28 11:13:04 server0.example.com sshd[1710]: Server listening on 0.0.0.0 port 22.</span><br><span class="line">May 28 11:13:04 server0.example.com sshd[1710]: Server listening on :: port 22.</span><br><span class="line">Hint: Some lines were ellipsized, use -l to show <span class="keyword">in</span> full.</span><br></pre></td></tr></table></figure>
+
+<p>放行相關的防火牆：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@server ~]<span class="comment"># firewall-cmd --permanent --zone=work --add-source=172.25.0.0/24</span></span><br><span class="line">[root@server ~]<span class="comment"># firewall-cmd --permanent --zone=work --add-port=999/tcp</span></span><br><span class="line">[root@server ~]<span class="comment"># firewall-cmd --reload</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="老師補充-iptables"><a href="#老師補充-iptables" class="headerlink" title="老師補充(iptables)"></a>老師補充(iptables)</h1><ul>
+<li><p>Linux 防火牆叫做 <strong>netfilter</strong></p>
+</li>
+<li><p>Linux 把很多功能獨立出來成一個一個小檔案，可以到 <strong>/lib/modules/<kernel version>/kernel/</strong> 目錄下找 <code>*.ko</code> 的檔案</p>
+</li>
+</ul>
+<blockquote>
+<p>在上面的目錄的 <code>netfilter</code> / <code>ipv4</code> / <code>ipv6</code> 等資料夾下，都是跟網路有關的模組，可參考 <a href="http://www.netfilter.org" target="_blank" rel="noopener">http://www.netfilter.org</a> 尋找 <code>extention howto</code> 文件，查詢 ko 的使用方式</p>
+</blockquote>
+<h2 id="1、netfilter-tables"><a href="#1、netfilter-tables" class="headerlink" title="1、netfilter tables"></a>1、netfilter tables</h2><p>主要有五個 table：</p>
+<ol>
+<li><p><strong>filter</strong>：主要防火牆的功能</p>
+</li>
+<li><p><strong>nat</strong>：IP 分享器的功能進到主機之後，就直接轉出去的封包，歸類為 FORWARD (例如：本機為 router)</p>
+</li>
+<li><p><strong>mangle</strong>：可對封包的內容小幅度的修改(例如：TTL，可偽裝成不同的作業系統)</p>
+</li>
+<li><p><strong>raw</strong>：調整連線追蹤的功能，可以指定某些電腦不做連線追蹤</p>
+</li>
+<li><p><strong>security</strong></p>
+</li>
+</ol>
+<h3 id="1-1-filter-chains"><a href="#1-1-filter-chains" class="headerlink" title="1.1 filter chains"></a>1.1 filter chains</h3><ul>
+<li><p><strong>INPUT</strong>：從外面進來，目的地為本機應用程式的封包，歸類為 INPUT</p>
+</li>
+<li><p><strong>FORWARD</strong>：進到主機之後，就直接轉出去的封包，歸類為 FORWARD (例如：本機為 router)</p>
+</li>
+<li><p><strong>OUTPUT</strong>：本機的應用程式，目的地是外面主機的封包，歸類為 OUTPUT</p>
+</li>
+</ul>
+<blockquote>
+<p>Linux netfilter 架構：<code>table</code> -&gt; <code>chain</code> -&gt; <code>rule</code></p>
+</blockquote>
+<blockquote>
+<p>chain default policy：只有 <code>ACCEPT</code> &amp; <code>DROP</code> 兩種，完全沒動過就會是 ACCEPT</p>
+</blockquote>
+<h3 id="1-2-連線追蹤-使用-state-模組"><a href="#1-2-連線追蹤-使用-state-模組" class="headerlink" title="1.2 連線追蹤(使用 state 模組)"></a>1.2 連線追蹤(使用 state 模組)</h3><p>狀態分為四種：</p>
+<ol>
+<li><p><strong>NEW</strong>：所有連線的第一個封包狀態，皆為 NEW</p>
+</li>
+<li><p><strong>ESTABLISHED</strong>：當封包穿越了 FW，這條連線的後續封包狀態都會變成 ESTABLISHED</p>
+</li>
+<li><p><strong>RELATED</strong>：因為主動產生的連線而發生的其他類型封包</p>
+</li>
+<li><p><strong>INVALID</strong>：狀態不明的封包，建議一律丟棄</p>
+</li>
+</ol>
+<h3 id="1-3-iptables-他使用上的注意事項"><a href="#1-3-iptables-他使用上的注意事項" class="headerlink" title="1.3 iptables 他使用上的注意事項"></a>1.3 iptables 他使用上的注意事項</h3><ul>
+<li><p>若要阻擋特定其他使用上的注意事項</p>
+</li>
+<li><p>若要阻擋特定網路流量，對內使用 <strong>REJECT</strong>、對外使用 <strong>DROP</strong></p>
+</li>
+<li><p><code>--dport 80</code>：destination port = 80</p>
+</li>
+<li><p><code>-i eth0</code>：incoming interface = eth0</p>
+</li>
+<li><p><code>-o eth1</code>：outgoing interface = eth1</p>
+</li>
+<li><p>為了避免影響 loopback interface，不建議設定 chain default policy，而是加上 <code>iptables -t filter -A INPUT -i eth0 -j DROP</code> 到最後一條規則</p>
+</li>
+<li><p><code>iptables -L -v -n</code>：可看出那一條規則比較熱門</p>
+</li>
+</ul>
+<h2 id="2、NAT-種類"><a href="#2、NAT-種類" class="headerlink" title="2、NAT 種類"></a>2、NAT 種類</h2><ul>
+<li><p>把來源端 ip 換掉的 NAT，稱為 <strong>SNAT</strong> (POSTROUTING chain 的任務)</p>
+</li>
+<li><p>把目的端 ip 換掉的 NAT，稱為 <strong>DNAT</strong> (PREROUTING chain 的任務)</p>
+</li>
+<li><p>本機產生的封包，原本僅能有 SNAT，而 nat OUTPUT chain 是要補足 DNAT 的功能</p>
+</li>
+<li><p>要作 NAT 必須開啟 port forward 功能：<code>echo 1 &gt; /proc/sys/net/ipv4/ip_forward</code></p>
+</li>
+</ul>
+<h2 id="3、iptables-使用方式"><a href="#3、iptables-使用方式" class="headerlink" title="3、iptables 使用方式"></a>3、iptables 使用方式</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">[root@server0 /]<span class="comment"># systemctl disable firewalld</span></span><br><span class="line">[root@server0 /]<span class="comment"># systemctl stop firewalld</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># List chains of filter table (可以看 chain default rule)</span></span><br><span class="line">[root@server0 /]<span class="comment"># iptables -t filter -L</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Append rule to chain FORWARD</span></span><br><span class="line"><span class="comment"># -p：指定 protocol，可參考 /etc/protocols</span></span><br><span class="line"><span class="comment"># -s：source</span></span><br><span class="line">[root@server0 /]<span class="comment"># iptables -t filter -A FORWARD -p tcp -s 172.25.254.250 -j ACCEPT</span></span><br><span class="line">[root@server0 /]<span class="comment"># iptables -t filter -A FORWARD -p udp -s 172.25.254.250 -j ACCEPT</span></span><br><span class="line">[root@server0 /]<span class="comment"># iptables -t filter -A FORWARD -p icmp -s 172.25.254.250 -j ACCEPT</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># -n：以數字方式表示</span></span><br><span class="line"><span class="comment"># --line-number：顯示第幾條規則</span></span><br><span class="line">[root@server0 /]<span class="comment"># iptables -t filter -L -n --line-number</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 設定 chain default rule</span></span><br><span class="line">[root@server0 /]<span class="comment"># iptables -t filter -P INPUT DROP</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 清除 chain rules</span></span><br><span class="line">[root@server0 /]<span class="comment"># iptables -t filter -F</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="4、基本操作練習"><a href="#4、基本操作練習" class="headerlink" title="4、基本操作練習"></a>4、基本操作練習</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">[root@server0 ~]<span class="comment"># iptables -t filter -L</span></span><br><span class="line">Chain INPUT (policy ACCEPT)</span><br><span class="line">target     prot opt <span class="built_in">source</span>               destination         </span><br><span class="line"></span><br><span class="line">Chain FORWARD (policy ACCEPT)</span><br><span class="line">target     prot opt <span class="built_in">source</span>               destination         </span><br><span class="line"></span><br><span class="line">Chain OUTPUT (policy ACCEPT)</span><br><span class="line">target     prot opt <span class="built_in">source</span>               destination         </span><br><span class="line"></span><br><span class="line">[root@server0 ~]<span class="comment"># iptables -t filter -A INPUT -p tcp -j ACCEPT</span></span><br><span class="line">[root@server0 ~]<span class="comment"># iptables -t filter -A INPUT -p udp -j ACCEPT</span></span><br><span class="line">[root@server0 ~]<span class="comment"># iptables -t filter -A INPUT -p icmp -j ACCEPT</span></span><br><span class="line">[root@server0 ~]<span class="comment"># iptables -t filter -L</span></span><br><span class="line">Chain INPUT (policy ACCEPT)</span><br><span class="line">target     prot opt <span class="built_in">source</span>               destination         </span><br><span class="line">ACCEPT     tcp  --  anywhere             anywhere            </span><br><span class="line">ACCEPT     udp  --  anywhere             anywhere            </span><br><span class="line">ACCEPT     icmp --  anywhere             anywhere            </span><br><span class="line"></span><br><span class="line">Chain FORWARD (policy ACCEPT)</span><br><span class="line">target     prot opt <span class="built_in">source</span>               destination         </span><br><span class="line"></span><br><span class="line">Chain OUTPUT (policy ACCEPT)</span><br><span class="line">target     prot opt <span class="built_in">source</span>               destination         </span><br><span class="line"></span><br><span class="line"><span class="comment"># 設定 chain default policy  </span></span><br><span class="line">[root@server0 ~]<span class="comment"># iptables -t filter -P INPUT DROP</span></span><br><span class="line">[root@server0 ~]<span class="comment"># iptables -t filter -L</span></span><br><span class="line">Chain INPUT (policy DROP)</span><br><span class="line">target     prot opt <span class="built_in">source</span>               destination         </span><br><span class="line">ACCEPT     tcp  --  anywhere             anywhere            </span><br><span class="line">ACCEPT     udp  --  anywhere             anywhere            </span><br><span class="line">ACCEPT     icmp --  anywhere             anywhere            </span><br><span class="line"></span><br><span class="line">Chain FORWARD (policy ACCEPT)</span><br><span class="line">target     prot opt <span class="built_in">source</span>               destination         </span><br><span class="line"></span><br><span class="line">Chain OUTPUT (policy ACCEPT)</span><br><span class="line">target     prot opt <span class="built_in">source</span>               destination         </span><br><span class="line">[root@server0 ~]<span class="comment"># iptables -t filter -F</span></span><br><span class="line">FORWARD  INPUT    OUTPUT   </span><br><span class="line"></span><br><span class="line"><span class="comment"># remove all chain rules</span></span><br><span class="line">[root@server0 ~]<span class="comment"># iptables -t filter -F INPUT</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="5、使用-shell-script-建立-FW"><a href="#5、使用-shell-script-建立-FW" class="headerlink" title="5、使用 shell script 建立 FW"></a>5、使用 shell script 建立 FW</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 防止 sync flooding 攻擊(開啟 tcp sync cookie)</span></span><br><span class="line"><span class="built_in">echo</span> 1 &gt; /proc/sys/net/ipv4/tcp_syncookies</span><br><span class="line"></span><br><span class="line">SRV=172.25.0.11</span><br><span class="line"></span><br><span class="line">iptables -t filter -F</span><br><span class="line"></span><br><span class="line"><span class="comment"># 設定 connection track</span></span><br><span class="line">iptables -t filter -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT</span><br><span class="line"><span class="comment"># 避免 INVALID 封包被其他服務所接收</span></span><br><span class="line">iptables -t filter -A INPUT -m state --state INVALID -j DROP</span><br><span class="line"></span><br><span class="line">iptables -t filter -A INPUT -d <span class="variable">$SRV</span> -p tcp --dport 22 -j ACCEPT</span><br><span class="line">iptables -t filter -A INPUT -d <span class="variable">$SRV</span> -p tcp --dport 25 -j ACCEPT</span><br><span class="line">iptables -t filter -A INPUT -d <span class="variable">$SRV</span> -p tcp --dport 110 -j ACCEPT</span><br><span class="line"></span><br><span class="line">iptables -t nat -A PREROUTING -i eth0 --dport 443 -j DNAT --to 127.0.0.1:22</span><br><span class="line"></span><br><span class="line"><span class="comment"># 用來取代 chain default policy</span></span><br><span class="line">iptables -t filter -A INPUT -i eth0 -j DROP</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/Linux/" rel="tag"># Linux</a>
+              <a href="/blog/tags/RHCE/" rel="tag"># RHCE</a>
+              <a href="/blog/tags/RH254/" rel="tag"># RH254</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/blog/RHCE/RHCE7-RH254-LearningNotes-CH03_ConfiguringLinkAggregationAndBridging/" rel="prev" title="[RHCE7] RH254 Chapter 3 Configuring Link Aggregation And Bridging Learning Notes">
+      <i class="fa fa-chevron-left"></i> [RHCE7] RH254 Chapter 3 Configuring Link Aggregation And Bridging Learning Notes
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/blog/RHCE/RHCE7-RH254-LearningNotes-CH06_ConfiguringEmailTransmission/" rel="next" title="[RHCE7] RH254 Chapter 6 Configuring Email Transmission Learning Notes">
+      [RHCE7] RH254 Chapter 6 Configuring Email Transmission Learning Notes <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#4-1-Managing-Firewalld"><span class="nav-number">1.</span> <span class="nav-text">4.1 Managing Firewalld</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-1-Firewalld-overview"><span class="nav-number">1.1.</span> <span class="nav-text">4.1.1 Firewalld overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-2-Managing-firewalld"><span class="nav-number">1.2.</span> <span class="nav-text">4.1.2 Managing firewalld</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Configure-firewall-settings-with-firewall-cmd"><span class="nav-number">1.2.1.</span> <span class="nav-text">Configure firewall settings with firewall-cmd</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#firewall-cmd-example"><span class="nav-number">1.2.2.</span> <span class="nav-text">firewall-cmd example</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Firewall-configuration-files"><span class="nav-number">1.2.3.</span> <span class="nav-text">Firewall configuration files</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Practice-Configuring-a-Firewall"><span class="nav-number">2.</span> <span class="nav-text">Practice: Configuring a Firewall</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#目標"><span class="nav-number">2.1.</span> <span class="nav-text">目標</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#實作過程"><span class="nav-number">2.2.</span> <span class="nav-text">實作過程</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-2-Managing-Rich-Rules"><span class="nav-number">3.</span> <span class="nav-text">4.2 Managing Rich Rules</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-1-Rich-rules-concepts"><span class="nav-number">3.1.</span> <span class="nav-text">4.2.1 Rich rules concepts</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Direct-rules"><span class="nav-number">3.1.1.</span> <span class="nav-text">Direct rules</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Rich-rules"><span class="nav-number">3.1.2.</span> <span class="nav-text">Rich rules</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Rule-ordering"><span class="nav-number">3.1.3.</span> <span class="nav-text">Rule ordering</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Test-and-debugging"><span class="nav-number">3.1.4.</span> <span class="nav-text">Test and debugging</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-2-Working-with-rich-rules"><span class="nav-number">3.2.</span> <span class="nav-text">4.2.2 Working with rich rules</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-3-Loggind-with-rich-rules"><span class="nav-number">3.3.</span> <span class="nav-text">4.2.3 Loggind with rich rules</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Practice-Writing-Custom-Rules"><span class="nav-number">4.</span> <span class="nav-text">Practice: Writing Custom Rules</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#目標-1"><span class="nav-number">4.1.</span> <span class="nav-text">目標</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#實作過程-1"><span class="nav-number">4.2.</span> <span class="nav-text">實作過程</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-3-Masquerading-and-Port-Forwarding"><span class="nav-number">5.</span> <span class="nav-text">4.3 Masquerading and Port Forwarding</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-3-1-Masquerading"><span class="nav-number">5.1.</span> <span class="nav-text">4.3.1 Masquerading</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-3-2-Port-forwarding"><span class="nav-number">5.2.</span> <span class="nav-text">4.3.2 Port forwarding</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Practice-Forwarding-a-port"><span class="nav-number">6.</span> <span class="nav-text">Practice: Forwarding a port</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#目標-2"><span class="nav-number">6.1.</span> <span class="nav-text">目標</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#實作過程-2"><span class="nav-number">6.2.</span> <span class="nav-text">實作過程</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-4-Managing-SELinux-Port-Labeling"><span class="nav-number">7.</span> <span class="nav-text">4.4 Managing SELinux Port Labeling</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-4-1-SELinux-port-labeling"><span class="nav-number">7.1.</span> <span class="nav-text">4.4.1 SELinux port labeling</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-4-2-Managing-SELinux-port-labeling"><span class="nav-number">7.2.</span> <span class="nav-text">4.4.2 Managing SELinux port labeling</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Listing-port-labels"><span class="nav-number">7.2.1.</span> <span class="nav-text">Listing port labels</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Managing-port-labels"><span class="nav-number">7.2.2.</span> <span class="nav-text">Managing port labels</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#其他"><span class="nav-number">7.2.3.</span> <span class="nav-text">其他</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Practice-Managing-SELinux-Port-Labeling"><span class="nav-number">8.</span> <span class="nav-text">Practice: Managing SELinux Port Labeling</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#目標-3"><span class="nav-number">8.1.</span> <span class="nav-text">目標</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#實作過程-3"><span class="nav-number">8.2.</span> <span class="nav-text">實作過程</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Lab-Network-Port-Security"><span class="nav-number">9.</span> <span class="nav-text">Lab: Network Port Security</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#目標-4"><span class="nav-number">9.1.</span> <span class="nav-text">目標</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#實作過程-4"><span class="nav-number">9.2.</span> <span class="nav-text">實作過程</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#老師補充-iptables"><span class="nav-number">10.</span> <span class="nav-text">老師補充(iptables)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1、netfilter-tables"><span class="nav-number">10.1.</span> <span class="nav-text">1、netfilter tables</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-filter-chains"><span class="nav-number">10.1.1.</span> <span class="nav-text">1.1 filter chains</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-連線追蹤-使用-state-模組"><span class="nav-number">10.1.2.</span> <span class="nav-text">1.2 連線追蹤(使用 state 模組)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-iptables-他使用上的注意事項"><span class="nav-number">10.1.3.</span> <span class="nav-text">1.3 iptables 他使用上的注意事項</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2、NAT-種類"><span class="nav-number">10.2.</span> <span class="nav-text">2、NAT 種類</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3、iptables-使用方式"><span class="nav-number">10.3.</span> <span class="nav-text">3、iptables 使用方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4、基本操作練習"><span class="nav-number">10.4.</span> <span class="nav-text">4、基本操作練習</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5、使用-shell-script-建立-FW"><span class="nav-number">10.5.</span> <span class="nav-text">5、使用 shell script 建立 FW</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives/">
+        
+          <span class="site-state-item-count">105</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">58</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/blog/lib/anime.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/blog/js/utils.js"></script>
+
+<script src="/blog/js/motion.js"></script>
+
+
+<script src="/blog/js/schemes/muse.js"></script>
+
+
+<script src="/blog/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

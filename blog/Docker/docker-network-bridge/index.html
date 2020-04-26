@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+<link rel="stylesheet" href="/blog/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="此篇文章介紹 Docker Bridge Network 及其運作方式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[Docker] Bridge Network 簡介">
+<meta property="og:url" content="https://godleon.github.io/blog/Docker/docker-network-bridge/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章介紹 Docker Bridge Network 及其運作方式">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="https://godleon.github.io/blog/images/docker/bridge_network.jpg">
+<meta property="og:image" content="https://godleon.github.io/blog/images/docker/docker-bridge-network-1.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/docker/docker-bridge-network-custom.png">
+<meta property="article:published_time" content="2018-07-09T08:40:00.000Z">
+<meta property="article:modified_time" content="2020-04-26T04:42:44.173Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="Docker">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/docker/bridge_network.jpg">
+
+<link rel="canonical" href="https://godleon.github.io/blog/Docker/docker-network-bridge/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-tw'
+  };
+</script>
+
+  <title>[Docker] Bridge Network 簡介 | 小信豬的原始部落</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/blog/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/blog/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/Docker/docker-network-bridge/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [Docker] Bridge Network 簡介
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-07-09 16:40:00" itemprop="dateCreated datePublished" datetime="2018-07-09T16:40:00+08:00">2018-07-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-04-26 12:42:44" itemprop="dateModified" datetime="2020-04-26T12:42:44+08:00">2020-04-26</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Docker/" itemprop="url" rel="index"><span itemprop="name">Docker</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">此篇文章介紹 Docker Bridge Network 及其運作方式</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>此篇文章介紹 Docker Bridge Network 及其運作方式</p>
+<h1 id="環境介紹"><a href="#環境介紹" class="headerlink" title="環境介紹"></a>環境介紹</h1><p>以下的測試將會在以下環境進行：</p>
+<ul>
+<li><p>OS：<code>Ubuntu 18.04</code></p>
+</li>
+<li><p>Docker: <code>18.03.1-ce</code></p>
+</li>
+</ul>
+<h1 id="檢視目前-Docker-Network-狀態"><a href="#檢視目前-Docker-Network-狀態" class="headerlink" title="檢視目前 Docker Network 狀態"></a>檢視目前 Docker Network 狀態</h1><p>以下是在 Ubuntu 18.04 上剛安裝好 docker 18.03.1 後的 docker network 狀態：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ docker network ls</span><br><span class="line">NETWORK ID          NAME                DRIVER              SCOPE</span><br><span class="line">a1c7b6f80389        bridge              bridge              <span class="built_in">local</span></span><br><span class="line">dc2f51e1056f        host                host                <span class="built_in">local</span></span><br><span class="line">f28460d3a620        none                null                <span class="built_in">local</span></span><br></pre></td></tr></table></figure>
+
+<p>從上面可以看出，剛安裝好 docker 的 Linux 主機，會預設帶有 3 個 driver，分別就是 <code>bridge</code>、<code>host</code> 以及 <code>null</code>。</p>
+<p>接著以下將會仔細的介紹一下 bridge network 的運作方式。</p>
+<h1 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h1><p>先來個 Docker Bridge Network 的觀念釋疑：</p>
+<ul>
+<li><p><a href="https://docs.docker.com/network/bridge/" target="_blank" rel="noopener" title="Docker Bridge Network">bridge network</a> 其實是利用的是 Docker Host 上的 software bridge 來達成讓 container 可以連外的目的，並透過此 bridge 可以讓同一個 bridge 的 container 之間相互進行通訊；而且 docker bridge driver 會自動在 Host 上設定相對應的 rule(iptables, network namespace)，讓 container 的網路可以正確的被使用。</p>
+</li>
+<li><p><a href="https://docs.docker.com/network/bridge/" target="_blank" rel="noopener" title="Docker Bridge Network">bridge network</a> 是處理在單一 docker daemon 上運行的 container 之間的相互通訊，若是要處理多個 docker daemon 上的 container 通訊，則必須要使用 <a href="https://docs.docker.com/network/overlay/" target="_blank" rel="noopener" title="Docker Overlay Network">overlay network</a></p>
+</li>
+</ul>
+<p>下圖是 bridge network 的架構</p>
+<p><img src="/blog/images/docker/bridge_network.jpg" alt="docker bridge network"></p>
+<h1 id="使用預設的-Bridge-Network-docker0"><a href="#使用預設的-Bridge-Network-docker0" class="headerlink" title="使用預設的 Bridge Network (docker0)"></a>使用預設的 Bridge Network (docker0)</h1><p>安裝好 docker 後，其實 docker 就為我們準備好了一個 bridge <code>docker0</code> 用來當作 container 的對外 software bridge，以下的範例會先使用 docker0 來做示範。</p>
+<h2 id="建立-container"><a href="#建立-container" class="headerlink" title="建立 container"></a>建立 container</h2><p>首先先建立所需要的 container 並檢視網路狀態：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 啟動 alpine linux container 1 (alpine1)</span></span><br><span class="line">$ docker run -dit --name alpine1 alpine ash</span><br><span class="line">b75464efd30bf09e118450de2abaeb35549e732bac5805671f1e6e97cd970897</span><br><span class="line"></span><br><span class="line"><span class="comment"># 啟動 alpine linux container 2 (alpine2)</span></span><br><span class="line">$ docker run -dit --name alpine2 alpine ash</span><br><span class="line">16aa4a102b14de3e151cb5e19522925bb4e143034d5b2aac4ce239c79716b703 </span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視目前 software bridge status (需安裝 bridge-utils 套件)</span></span><br><span class="line">$ brctl show</span><br><span class="line">bridge name	    bridge id		      STP enabled	    interfaces</span><br><span class="line">docker0		    8000.024284431eec	  no		        vethbddc381</span><br><span class="line">							                            vethee2a421</span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視 docker bridge network 狀態</span></span><br><span class="line">$ docker network inspect bridge</span><br><span class="line">[</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment"># 使用的 docker network 名稱為 "bridge"</span></span><br><span class="line">        <span class="string">"Name"</span>: <span class="string">"bridge"</span>,</span><br><span class="line">        <span class="string">"Id"</span>: <span class="string">"a1c7b6f8038999f034b8e64ae66885fa8094a020a306ce4f5b5692d7230890b0"</span>,</span><br><span class="line">        <span class="string">"Created"</span>: <span class="string">"2018-07-09T01:23:03.98371109Z"</span>,</span><br><span class="line">        <span class="string">"Scope"</span>: <span class="string">"local"</span>,</span><br><span class="line">        <span class="comment"># 使用的 driver 為 bridge</span></span><br><span class="line">        <span class="string">"Driver"</span>: <span class="string">"bridge"</span>,</span><br><span class="line">        <span class="string">"EnableIPv6"</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="string">"IPAM"</span>: &#123;</span><br><span class="line">            <span class="string">"Driver"</span>: <span class="string">"default"</span>,</span><br><span class="line">            <span class="string">"Options"</span>: null,</span><br><span class="line">            <span class="string">"Config"</span>: [</span><br><span class="line">                &#123;</span><br><span class="line">                    <span class="string">"Subnet"</span>: <span class="string">"172.17.0.0/16"</span>,</span><br><span class="line">                    <span class="string">"Gateway"</span>: <span class="string">"172.17.0.1"</span></span><br><span class="line">                &#125;</span><br><span class="line">            ]</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="string">"Internal"</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="string">"Attachable"</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="string">"Ingress"</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="string">"ConfigFrom"</span>: &#123;</span><br><span class="line">            <span class="string">"Network"</span>: <span class="string">""</span></span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="string">"ConfigOnly"</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="string">"Containers"</span>: &#123;</span><br><span class="line">            <span class="comment"># 此為 alpine2 所使用的網路 (對應到上面的 container ID)</span></span><br><span class="line">            <span class="string">"16aa4a102b14de3e151cb5e19522925bb4e143034d5b2aac4ce239c79716b703"</span>: &#123;</span><br><span class="line">                <span class="string">"Name"</span>: <span class="string">"alpine2"</span>,</span><br><span class="line">                <span class="string">"EndpointID"</span>: <span class="string">"4dc3947583ece828dd4371351501e7d0ba9fa149ac5373ea4ddb9466d333b85d"</span>,</span><br><span class="line">                <span class="string">"MacAddress"</span>: <span class="string">"02:42:ac:11:00:03"</span>,</span><br><span class="line">                <span class="string">"IPv4Address"</span>: <span class="string">"172.17.0.3/16"</span>,</span><br><span class="line">                <span class="string">"IPv6Address"</span>: <span class="string">""</span></span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="comment"># 此為 alpine1 所使用的網路 (對應到上面的 container ID)</span></span><br><span class="line">            <span class="string">"b75464efd30bf09e118450de2abaeb35549e732bac5805671f1e6e97cd970897"</span>: &#123;</span><br><span class="line">                <span class="string">"Name"</span>: <span class="string">"alpine1"</span>,</span><br><span class="line">                <span class="string">"EndpointID"</span>: <span class="string">"ea0138a2c51812f3f142db086e1690f6696e36ff972c826727be30e3c8b8cb41"</span>,</span><br><span class="line">                <span class="string">"MacAddress"</span>: <span class="string">"02:42:ac:11:00:02"</span>,</span><br><span class="line">                <span class="string">"IPv4Address"</span>: <span class="string">"172.17.0.2/16"</span>,</span><br><span class="line">                <span class="string">"IPv6Address"</span>: <span class="string">""</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="string">"Options"</span>: &#123;</span><br><span class="line">            <span class="string">"com.docker.network.bridge.default_bridge"</span>: <span class="string">"true"</span>,</span><br><span class="line">            <span class="string">"com.docker.network.bridge.enable_icc"</span>: <span class="string">"true"</span>,</span><br><span class="line">            <span class="string">"com.docker.network.bridge.enable_ip_masquerade"</span>: <span class="string">"true"</span>,</span><br><span class="line">            <span class="string">"com.docker.network.bridge.host_binding_ipv4"</span>: <span class="string">"0.0.0.0"</span>,</span><br><span class="line">            <span class="comment"># 使用的 bridge 名稱</span></span><br><span class="line">            <span class="string">"com.docker.network.bridge.name"</span>: <span class="string">"docker0"</span>,</span><br><span class="line">            <span class="string">"com.docker.network.driver.mtu"</span>: <span class="string">"1500"</span></span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="string">"Labels"</span>: &#123;&#125;</span><br><span class="line">    &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<p>而目前的網路架構變成如下：</p>
+<p><img src="/blog/images/docker/docker-bridge-network-1.png" alt="docker bridge network"></p>
+<h2 id="測試-container-網路"><a href="#測試-container-網路" class="headerlink" title="測試 container 網路"></a>測試 container 網路</h2><p>了解上面的網路架構之後，接著來測試 container 網路：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 檢視 container IP</span></span><br><span class="line">$ docker <span class="built_in">exec</span> -it alpine1 ip addr show</span><br><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN qlen 1000</span><br><span class="line">    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">    inet 127.0.0.1/8 scope host lo</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">6: eth0@if7: &lt;BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN&gt; mtu 1500 qdisc noqueue state UP </span><br><span class="line">    link/ether 02:42:ac:11:00:02 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 172.17.0.2/16 brd 172.17.255.255 scope global eth0</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line"></span><br><span class="line"><span class="comment"># 測試連外</span></span><br><span class="line">$ docker <span class="built_in">exec</span> -it alpine1 ping -c 3 www.google.com</span><br><span class="line">PING www.google.com (216.58.200.228): 56 data bytes</span><br><span class="line">64 bytes from 216.58.200.228: seq=0 ttl=54 time=2.112 ms</span><br><span class="line">64 bytes from 216.58.200.228: seq=1 ttl=54 time=2.166 ms</span><br><span class="line">64 bytes from 216.58.200.228: seq=2 ttl=54 time=2.417 ms</span><br><span class="line"></span><br><span class="line"><span class="comment"># 測試連線到另外一個 container (使用 IP)</span></span><br><span class="line">$ docker <span class="built_in">exec</span> -it alpine1 ping -c 3 172.17.0.3</span><br><span class="line">PING 172.17.0.3 (172.17.0.3): 56 data bytes</span><br><span class="line">64 bytes from 172.17.0.3: seq=0 ttl=64 time=0.121 ms</span><br><span class="line">64 bytes from 172.17.0.3: seq=1 ttl=64 time=0.071 ms</span><br><span class="line">64 bytes from 172.17.0.3: seq=2 ttl=64 time=0.068 ms</span><br><span class="line"></span><br><span class="line"><span class="comment"># 測試連線到另外一個 container (使用 domain name) =&gt; 不通</span></span><br><span class="line">$ docker <span class="built_in">exec</span> -it alpine1 ping -c 3 alpine2</span><br><span class="line">ping: bad address <span class="string">'alpine2'</span></span><br></pre></td></tr></table></figure>
+
+<p>從上面的測試可以看出，其實兩個 container 由於使用相同的 bridge(<code>docker0</code>) 因此 IP 可以互通，但使用 domain name 卻無法，表示互相不認識對方。</p>
+<h1 id="使用自訂的-Bridge-Network"><a href="#使用自訂的-Bridge-Network" class="headerlink" title="使用自訂的 Bridge Network"></a>使用自訂的 Bridge Network</h1><h2 id="自訂-docker-network"><a href="#自訂-docker-network" class="headerlink" title="自訂 docker network"></a>自訂 docker network</h2><p>這次同樣是使用 bridge driver，但透過 <code>docker network create</code> 指令建立一個自訂名稱的 docker network，這邊取名為 <code>alpine-net</code>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line">$ docker network create --driver bridge alpine-net</span><br><span class="line">2575acac8e781004cb0dc5c5b020c0252a4bc4cdf18dfc661fe3ffcde30fd0b2</span><br><span class="line"></span><br><span class="line">$ docker network ls</span><br><span class="line">NETWORK ID          NAME                DRIVER              SCOPE</span><br><span class="line">2575acac8e78        alpine-net          bridge              <span class="built_in">local</span></span><br><span class="line">a1c7b6f80389        bridge              bridge              <span class="built_in">local</span></span><br><span class="line">dc2f51e1056f        host                host                <span class="built_in">local</span></span><br><span class="line">f28460d3a620        none                null                <span class="built_in">local</span></span><br><span class="line"></span><br><span class="line">$ docker network inspect alpine-net</span><br><span class="line">[</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment"># docker bridge network 名稱改變了</span></span><br><span class="line">        <span class="string">"Name"</span>: <span class="string">"alpine-net"</span>,</span><br><span class="line">        <span class="comment"># 此 ID 會對應到新產生的 bridge</span></span><br><span class="line">        <span class="string">"Id"</span>: <span class="string">"2575acac8e781004cb0dc5c5b020c0252a4bc4cdf18dfc661fe3ffcde30fd0b2"</span>,</span><br><span class="line">        <span class="string">"Created"</span>: <span class="string">"2018-07-09T03:05:05.505539609Z"</span>,</span><br><span class="line">        <span class="string">"Scope"</span>: <span class="string">"local"</span>,</span><br><span class="line">        <span class="string">"Driver"</span>: <span class="string">"bridge"</span>,</span><br><span class="line">        <span class="string">"EnableIPv6"</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="string">"IPAM"</span>: &#123;</span><br><span class="line">            <span class="string">"Driver"</span>: <span class="string">"default"</span>,</span><br><span class="line">            <span class="string">"Options"</span>: &#123;&#125;,</span><br><span class="line">            <span class="string">"Config"</span>: [</span><br><span class="line">                &#123;</span><br><span class="line">                    <span class="string">"Subnet"</span>: <span class="string">"172.18.0.0/16"</span>,</span><br><span class="line">                    <span class="string">"Gateway"</span>: <span class="string">"172.18.0.1"</span></span><br><span class="line">                &#125;</span><br><span class="line">            ]</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="string">"Internal"</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="string">"Attachable"</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="string">"Ingress"</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="string">"ConfigFrom"</span>: &#123;</span><br><span class="line">            <span class="string">"Network"</span>: <span class="string">""</span></span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="string">"ConfigOnly"</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="string">"Containers"</span>: &#123;&#125;,</span><br><span class="line">        <span class="string">"Options"</span>: &#123;&#125;,</span><br><span class="line">        <span class="string">"Labels"</span>: &#123;&#125;</span><br><span class="line">    &#125;</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 新增了一個 software bridge</span></span><br><span class="line">$ brctl show</span><br><span class="line">bridge name	        bridge id		        STP enabled	  interfaces</span><br><span class="line">br-2575acac8e78		8000.0242a2569c8d	    no		</span><br><span class="line">docker0		        8000.024284431eec	    no</span><br><span class="line"></span><br><span class="line"><span class="comment"># 此 bridge 所使用的網段為 172.18.0.1/16，跟 docker0 的不同</span></span><br><span class="line">$ ip a</span><br><span class="line">.... (略)</span><br><span class="line">14: br-2575acac8e78: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu 1500 qdisc noqueue state DOWN group default </span><br><span class="line">    link/ether 02:42:a2:56:9c:8d brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 172.18.0.1/16 brd 172.18.255.255 scope global br-2575acac8e78</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure>
+
+<p>從上面的結果看的出來，新建立的 docker network(<code>alpine-net</code>) 會被分配使用另一個不同的網段，與原先的 docker0 使用的並不相同。</p>
+<h2 id="建立-container-1"><a href="#建立-container-1" class="headerlink" title="建立 container"></a>建立 container</h2><p>這裡一共要建立4個 container，分別是 <code>alpine1</code>、<code>alpine2</code>、<code>alpine3</code>、<code>alpine4</code>，並進行以下的網路設定：</p>
+<table>
+<thead>
+<tr>
+<th align="center">Container</th>
+<th align="left">Docker Network</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">alpine1</td>
+<td align="left">alpine-net</td>
+</tr>
+<tr>
+<td align="center">alpine2</td>
+<td align="left">alpine-net</td>
+</tr>
+<tr>
+<td align="center">alpine3</td>
+<td align="left">docker0</td>
+</tr>
+<tr>
+<td align="center">alpine4</td>
+<td align="left">alpine-net + docker0</td>
+</tr>
+</tbody></table>
+<p>並透過以下指令來完成：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 啟用 container，使用 alpine-net</span></span><br><span class="line">$ docker run -dit --name alpine1 --network alpine-net alpine ash</span><br><span class="line">010ba5c3e71a723f8c980bb00bb87c97bc41b073163415705006ce5d0071e97c</span><br><span class="line"></span><br><span class="line"><span class="comment"># 啟用 container，使用 alpine-net</span></span><br><span class="line">$ docker run -dit --name alpine2 --network alpine-net alpine ash</span><br><span class="line">aecb66274c3b3ec9109ff4eaa582ad4708ed871428d3b4894f9d04330aabcbc4</span><br><span class="line"></span><br><span class="line"><span class="comment"># 啟用 container，使用 default bridge docker0</span></span><br><span class="line">$ docker run -dit --name alpine3 alpine ash</span><br><span class="line">3c602d26fcdcc8c0145d4d2d159b20b5b760c1b74393c7b5f7be060f4f8822ac</span><br><span class="line"></span><br><span class="line"><span class="comment"># 啟用 container，使用 alpine-net</span></span><br><span class="line">$ docker run -dit --name alpine4 --network alpine-net alpine ash</span><br><span class="line">83133e6103d63513116e0fb791efea64b016424ca73357ba3fed41b7ea92df95</span><br><span class="line"></span><br><span class="line"><span class="comment"># 額外將 alpine4 網路在與 default bridge docker0 接上</span></span><br><span class="line">$ docker network connect bridge alpine4</span><br></pre></td></tr></table></figure>
+
+<p>接著確認一下相關的網路設定是不是都有被正確建立：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 檢視 veth device</span></span><br><span class="line">$ brctl show</span><br><span class="line">bridge name	        bridge id		        STP enabled     interfaces</span><br><span class="line">br-2575acac8e78		8000.0242a2569c8d	    no		        veth19aee42</span><br><span class="line">							                                veth403e609</span><br><span class="line">							                                veth439dc39</span><br><span class="line">docker0		        8000.024284431eec	    no		        veth1c78e99</span><br><span class="line">							                                veth9857cc8</span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視 docker bridge - bridge(docker0)</span></span><br><span class="line">$ docker network inspect bridge</span><br><span class="line">[</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment"># docker network 名稱</span></span><br><span class="line">        <span class="string">"Name"</span>: <span class="string">"bridge"</span>,</span><br><span class="line">        <span class="string">"Id"</span>: <span class="string">"a1c7b6f8038999f034b8e64ae66885fa8094a020a306ce4f5b5692d7230890b0"</span>,</span><br><span class="line">        <span class="string">"Created"</span>: <span class="string">"2018-07-09T01:23:03.98371109Z"</span>,</span><br><span class="line">        <span class="string">"Scope"</span>: <span class="string">"local"</span>,</span><br><span class="line">        <span class="comment"># 使用的 driver 為 bridge</span></span><br><span class="line">        <span class="string">"Driver"</span>: <span class="string">"bridge"</span>,</span><br><span class="line">        <span class="string">"EnableIPv6"</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="string">"IPAM"</span>: &#123;</span><br><span class="line">            <span class="string">"Driver"</span>: <span class="string">"default"</span>,</span><br><span class="line">            <span class="string">"Options"</span>: null,</span><br><span class="line">            <span class="string">"Config"</span>: [</span><br><span class="line">                &#123;</span><br><span class="line">                    <span class="string">"Subnet"</span>: <span class="string">"172.17.0.0/16"</span>,</span><br><span class="line">                    <span class="string">"Gateway"</span>: <span class="string">"172.17.0.1"</span></span><br><span class="line">                &#125;</span><br><span class="line">            ]</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="string">"Internal"</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="string">"Attachable"</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="string">"Ingress"</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="string">"ConfigFrom"</span>: &#123;</span><br><span class="line">            <span class="string">"Network"</span>: <span class="string">""</span></span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="string">"ConfigOnly"</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="string">"Containers"</span>: &#123;</span><br><span class="line">            <span class="comment"># 此為 alpine3 所使用的網路 (對應到上面的 container ID)</span></span><br><span class="line">            <span class="string">"3c602d26fcdcc8c0145d4d2d159b20b5b760c1b74393c7b5f7be060f4f8822ac"</span>: &#123;</span><br><span class="line">                <span class="string">"Name"</span>: <span class="string">"alpine3"</span>,</span><br><span class="line">                <span class="string">"EndpointID"</span>: <span class="string">"7bd6ae1d8a28a554f57f9937953716cc5f62ea8bd669fc744d3aeffacf05f3c1"</span>,</span><br><span class="line">                <span class="string">"MacAddress"</span>: <span class="string">"02:42:ac:11:00:02"</span>,</span><br><span class="line">                <span class="string">"IPv4Address"</span>: <span class="string">"172.17.0.2/16"</span>,</span><br><span class="line">                <span class="string">"IPv6Address"</span>: <span class="string">""</span></span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="comment"># 此為 alpine4 所使用的網路 (對應到上面的 container ID)</span></span><br><span class="line">            <span class="string">"83133e6103d63513116e0fb791efea64b016424ca73357ba3fed41b7ea92df95"</span>: &#123;</span><br><span class="line">                <span class="string">"Name"</span>: <span class="string">"alpine4"</span>,</span><br><span class="line">                <span class="string">"EndpointID"</span>: <span class="string">"2bb63005cf4bcb037d644ab230023e65e8ee9e00cf4d98b3fcf9526c14790492"</span>,</span><br><span class="line">                <span class="string">"MacAddress"</span>: <span class="string">"02:42:ac:11:00:03"</span>,</span><br><span class="line">                <span class="string">"IPv4Address"</span>: <span class="string">"172.17.0.3/16"</span>,</span><br><span class="line">                <span class="string">"IPv6Address"</span>: <span class="string">""</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="string">"Options"</span>: &#123;</span><br><span class="line">            <span class="string">"com.docker.network.bridge.default_bridge"</span>: <span class="string">"true"</span>,</span><br><span class="line">            <span class="string">"com.docker.network.bridge.enable_icc"</span>: <span class="string">"true"</span>,</span><br><span class="line">            <span class="string">"com.docker.network.bridge.enable_ip_masquerade"</span>: <span class="string">"true"</span>,</span><br><span class="line">            <span class="string">"com.docker.network.bridge.host_binding_ipv4"</span>: <span class="string">"0.0.0.0"</span>,</span><br><span class="line">            <span class="string">"com.docker.network.bridge.name"</span>: <span class="string">"docker0"</span>,</span><br><span class="line">            <span class="string">"com.docker.network.driver.mtu"</span>: <span class="string">"1500"</span></span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="string">"Labels"</span>: &#123;&#125;</span><br><span class="line">    &#125;</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視 docker bridge - alpine-net</span></span><br><span class="line">$ docker network inspect alpine-net</span><br><span class="line">[</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment"># docker network 名稱</span></span><br><span class="line">        <span class="string">"Name"</span>: <span class="string">"alpine-net"</span>,</span><br><span class="line">        <span class="string">"Id"</span>: <span class="string">"2575acac8e781004cb0dc5c5b020c0252a4bc4cdf18dfc661fe3ffcde30fd0b2"</span>,</span><br><span class="line">        <span class="string">"Created"</span>: <span class="string">"2018-07-09T03:05:05.505539609Z"</span>,</span><br><span class="line">        <span class="string">"Scope"</span>: <span class="string">"local"</span>,</span><br><span class="line">        <span class="comment"># 使用的 driver 為 bridge</span></span><br><span class="line">        <span class="string">"Driver"</span>: <span class="string">"bridge"</span>,</span><br><span class="line">        <span class="string">"EnableIPv6"</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="string">"IPAM"</span>: &#123;</span><br><span class="line">            <span class="string">"Driver"</span>: <span class="string">"default"</span>,</span><br><span class="line">            <span class="string">"Options"</span>: &#123;&#125;,</span><br><span class="line">            <span class="string">"Config"</span>: [</span><br><span class="line">                &#123;</span><br><span class="line">                    <span class="string">"Subnet"</span>: <span class="string">"172.18.0.0/16"</span>,</span><br><span class="line">                    <span class="string">"Gateway"</span>: <span class="string">"172.18.0.1"</span></span><br><span class="line">                &#125;</span><br><span class="line">            ]</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="string">"Internal"</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="string">"Attachable"</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="string">"Ingress"</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="string">"ConfigFrom"</span>: &#123;</span><br><span class="line">            <span class="string">"Network"</span>: <span class="string">""</span></span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="string">"ConfigOnly"</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="string">"Containers"</span>: &#123;</span><br><span class="line">            <span class="comment"># 此為 alpine1 所使用的網路 (對應到上面的 container ID)</span></span><br><span class="line">            <span class="string">"010ba5c3e71a723f8c980bb00bb87c97bc41b073163415705006ce5d0071e97c"</span>: &#123;</span><br><span class="line">                <span class="string">"Name"</span>: <span class="string">"alpine1"</span>,</span><br><span class="line">                <span class="string">"EndpointID"</span>: <span class="string">"f1357dd263dea947c4cd203fd8031be40fae4840f6994dd5e11d6790a038569c"</span>,</span><br><span class="line">                <span class="string">"MacAddress"</span>: <span class="string">"02:42:ac:12:00:02"</span>,</span><br><span class="line">                <span class="string">"IPv4Address"</span>: <span class="string">"172.18.0.2/16"</span>,</span><br><span class="line">                <span class="string">"IPv6Address"</span>: <span class="string">""</span></span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="comment"># 此為 alpine4 所使用的網路 (對應到上面的 container ID)</span></span><br><span class="line">            <span class="string">"83133e6103d63513116e0fb791efea64b016424ca73357ba3fed41b7ea92df95"</span>: &#123;</span><br><span class="line">                <span class="string">"Name"</span>: <span class="string">"alpine4"</span>,</span><br><span class="line">                <span class="string">"EndpointID"</span>: <span class="string">"cf6bb33270eca6d40d4d953cea49302d210bc8ba995f04cdcf138344d5378d2f"</span>,</span><br><span class="line">                <span class="string">"MacAddress"</span>: <span class="string">"02:42:ac:12:00:04"</span>,</span><br><span class="line">                <span class="string">"IPv4Address"</span>: <span class="string">"172.18.0.4/16"</span>,</span><br><span class="line">                <span class="string">"IPv6Address"</span>: <span class="string">""</span></span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="comment"># 此為 alpine2 所使用的網路 (對應到上面的 container ID)</span></span><br><span class="line">            <span class="string">"aecb66274c3b3ec9109ff4eaa582ad4708ed871428d3b4894f9d04330aabcbc4"</span>: &#123;</span><br><span class="line">                <span class="string">"Name"</span>: <span class="string">"alpine2"</span>,</span><br><span class="line">                <span class="string">"EndpointID"</span>: <span class="string">"28a237e9fe55f133459140c9e5265470e34baeec43c2c0f6c32d5d539b694403"</span>,</span><br><span class="line">                <span class="string">"MacAddress"</span>: <span class="string">"02:42:ac:12:00:03"</span>,</span><br><span class="line">                <span class="string">"IPv4Address"</span>: <span class="string">"172.18.0.3/16"</span>,</span><br><span class="line">                <span class="string">"IPv6Address"</span>: <span class="string">""</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="string">"Options"</span>: &#123;&#125;,</span><br><span class="line">        <span class="string">"Labels"</span>: &#123;&#125;</span><br><span class="line">    &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<p>由於 alpine4 特別與兩個 network 連接，因此來檢視一下 alpine4 的網路狀況：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 從下面的輸出可以看出，由於 alpine4 接到了兩個 software bridge，因此會有兩張網卡顯示出來</span></span><br><span class="line">$ docker <span class="built_in">exec</span> -it alpine4 ip a</span><br><span class="line">..... (略)</span><br><span class="line">21: eth0@if22: &lt;BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN&gt; mtu 1500 qdisc noqueue state UP </span><br><span class="line">    link/ether 02:42:ac:12:00:04 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 172.18.0.4/16 brd 172.18.255.255 scope global eth0</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">23: eth1@if24: &lt;BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN&gt; mtu 1500 qdisc noqueue state UP </span><br><span class="line">    link/ether 02:42:ac:11:00:03 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 172.17.0.3/16 brd 172.17.255.255 scope global eth1</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure>
+
+<p>而目前的網路架構變成如下圖：</p>
+<p><img src="/blog/images/docker/docker-bridge-network-custom.png" alt="customize docker bridge network"></p>
+<h2 id="測試-container-網路-1"><a href="#測試-container-網路-1" class="headerlink" title="測試 container 網路"></a>測試 container 網路</h2><p>最後要來測試一下 container 之間的連通性：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#　測試與 alpine2 通訊</span></span><br><span class="line">$ docker <span class="built_in">exec</span> -it alpine1 ping -c 2 alpine2</span><br><span class="line">PING alpine2 (172.18.0.3): 56 data bytes</span><br><span class="line">64 bytes from 172.18.0.3: seq=0 ttl=64 time=0.095 ms</span><br><span class="line">64 bytes from 172.18.0.3: seq=1 ttl=64 time=0.076 ms</span><br><span class="line"></span><br><span class="line">--- alpine2 ping statistics ---</span><br><span class="line">2 packets transmitted, 2 packets received, 0% packet loss</span><br><span class="line">round-trip min/avg/max = 0.076/0.085/0.095 ms</span><br><span class="line"></span><br><span class="line"><span class="comment">#　測試與 alpine4 通訊</span></span><br><span class="line">$ docker <span class="built_in">exec</span> -it alpine1 ping -c 2 alpine4</span><br><span class="line">PING alpine4 (172.18.0.4): 56 data bytes</span><br><span class="line">64 bytes from 172.18.0.4: seq=0 ttl=64 time=0.145 ms</span><br><span class="line">64 bytes from 172.18.0.4: seq=1 ttl=64 time=0.102 ms</span><br><span class="line"></span><br><span class="line">--- alpine4 ping statistics ---</span><br><span class="line">2 packets transmitted, 2 packets received, 0% packet loss</span><br><span class="line">round-trip min/avg/max = 0.102/0.123/0.145 ms</span><br><span class="line"></span><br><span class="line"><span class="comment">#　測試與 alpine3 通訊</span></span><br><span class="line">$ docker <span class="built_in">exec</span> -it alpine1 ping -c 2 alpine3</span><br><span class="line">ping: bad address <span class="string">'alpine3'</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#　以 IP 的方式測試與 alpine3 通訊</span></span><br><span class="line">$　docker <span class="built_in">exec</span> -it alpine1 ping -c 2 172.17.0.2</span><br><span class="line">PING 172.17.0.2 (172.17.0.2): 56 data bytes</span><br><span class="line"></span><br><span class="line">--- 172.17.0.2 ping statistics ---</span><br><span class="line">2 packets transmitted, 0 packets received, 100% packet loss</span><br><span class="line"></span><br><span class="line"><span class="comment">#　測試與 alpine1(自己) 通訊</span></span><br><span class="line">$ docker <span class="built_in">exec</span> -it alpine1 ping -c 2 alpine1</span><br><span class="line">PING alpine1 (172.18.0.2): 56 data bytes</span><br><span class="line">64 bytes from 172.18.0.2: seq=0 ttl=64 time=0.052 ms</span><br><span class="line">64 bytes from 172.18.0.2: seq=1 ttl=64 time=0.079 ms</span><br><span class="line"></span><br><span class="line">--- alpine1 ping statistics ---</span><br><span class="line">2 packets transmitted, 2 packets received, 0% packet loss</span><br><span class="line">round-trip min/avg/max = 0.052/0.065/0.079 ms</span><br><span class="line"></span><br><span class="line"><span class="comment"># 測試連外能力</span></span><br><span class="line">$ docker <span class="built_in">exec</span> -it alpine1 ping -c 2 www.google.com</span><br><span class="line">PING www.google.com (172.217.160.68): 56 data bytes</span><br><span class="line">64 bytes from 172.217.160.68: seq=0 ttl=53 time=7.252 ms</span><br><span class="line">64 bytes from 172.217.160.68: seq=1 ttl=53 time=7.329 ms</span><br><span class="line"></span><br><span class="line">--- www.google.com ping statistics ---</span><br><span class="line">2 packets transmitted, 2 packets received, 0% packet loss</span><br><span class="line">round-trip min/avg/max = 7.252/7.290/7.329 ms</span><br></pre></td></tr></table></figure>
+
+<p>從上面的測試可以得出以下結論：</p>
+<ol>
+<li><p><strong>在自訂的 docker network 中，container 可以透過 domain name 的方式與其他在同一個 docker network 下的 container 通訊</strong></p>
+</li>
+<li><p>不同 docker network 之間的 container 網路是隔離無法相互通訊的，不論是透過 domain name or IP</p>
+</li>
+</ol>
+<blockquote>
+<p>第一個結論是因為 docker 對於自訂的 docker network 會提供 <strong>automatic service discovery</strong> 的功能，讓 container 之間可以透過 name 來與對方通訊</p>
+</blockquote>
+<p>另外，若是在同時與 <code>docker0</code> 與 <code>alpine-net</code> 兩個 software bridge 相接的 <strong>alpine4</strong> container 上執行測試會是什麼結果呢?</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 可透過 name 與 alpine-net bridge 下的 container(alpine1) 通訊 </span></span><br><span class="line">$ docker <span class="built_in">exec</span> -it alpine4 ping -c 2 alpine1</span><br><span class="line">PING alpine1 (172.18.0.2): 56 data bytes</span><br><span class="line">64 bytes from 172.18.0.2: seq=0 ttl=64 time=0.093 ms</span><br><span class="line">64 bytes from 172.18.0.2: seq=1 ttl=64 time=0.077 ms</span><br><span class="line"></span><br><span class="line">--- alpine1 ping statistics ---</span><br><span class="line">2 packets transmitted, 2 packets received, 0% packet loss</span><br><span class="line">round-trip min/avg/max = 0.077/0.085/0.093 ms</span><br><span class="line"></span><br><span class="line"><span class="comment"># 無法透過 name 與 docker0 bridge 下的 container(alpine3) 通訊 </span></span><br><span class="line">$ docker <span class="built_in">exec</span> -it alpine4 ping -c 2 alpine3</span><br><span class="line">ping: bad address <span class="string">'alpine3'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 但還是可透過 IP 與 docker0 bridge 下的 container(alpine3) 通訊</span></span><br><span class="line">$ docker <span class="built_in">exec</span> -it alpine4 ping -c 2 172.17.0.2</span><br><span class="line">PING 172.17.0.2 (172.17.0.2): 56 data bytes</span><br><span class="line">64 bytes from 172.17.0.2: seq=0 ttl=64 time=0.140 ms</span><br><span class="line">64 bytes from 172.17.0.2: seq=1 ttl=64 time=0.092 ms</span><br><span class="line"></span><br><span class="line">--- 172.17.0.2 ping statistics ---</span><br><span class="line">2 packets transmitted, 2 packets received, 0% packet loss</span><br><span class="line">round-trip min/avg/max = 0.092/0.116/0.140 ms</span><br><span class="line"></span><br><span class="line"><span class="comment"># 測試連外能力</span></span><br><span class="line">$ docker <span class="built_in">exec</span> -it alpine4 ping -c 2 www.google.com</span><br><span class="line">PING www.google.com (172.217.160.68): 56 data bytes</span><br><span class="line">64 bytes from 172.217.160.68: seq=0 ttl=53 time=7.429 ms</span><br><span class="line">64 bytes from 172.217.160.68: seq=1 ttl=53 time=7.361 ms</span><br><span class="line"></span><br><span class="line">--- www.google.com ping statistics ---</span><br><span class="line">2 packets transmitted, 2 packets received, 0% packet loss</span><br><span class="line">round-trip min/avg/max = 7.361/7.395/7.429 ms</span><br></pre></td></tr></table></figure>
+
+<p>從 alpine4 上的測試可以發現以下結論：</p>
+<ol>
+<li><p>在 <code>docker0</code> bridge 下的 container，都無法透過 domain name 相互溝通</p>
+</li>
+<li><p>承上，使用 IP 通訊是沒問題的</p>
+</li>
+</ol>
+<p>有了以下測試結果，若要使用 domain name 處理 container 之間的通訊時，就記得必須建立一個新的 docker network 來處理才可以正常通訊。</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a href="https://docs.docker.com/network" target="_blank" rel="noopener">Configure Network | Docker Documentation</a></p>
+</li>
+<li><p><a href="https://docs.docker.com/engine/swarm/" target="_blank" rel="noopener">Swarm mode overview | Docker Documentation</a></p>
+</li>
+<li><p><a href="https://blog.docker.com/2016/12/understanding-docker-networking-drivers-use-cases/" target="_blank" rel="noopener">Understanding Docker Networking Drivers and their use cases - Docker Blog</a></p>
+</li>
+<li><p><a href="https://docs.docker.com/network/network-tutorial-standalone/" target="_blank" rel="noopener">Bridge Network Tutorial | Docker Documentation</a></p>
+</li>
+<li><p><a href="http://blog.daocloud.io/docker-source-code-analysis-part7-first/" target="_blank" rel="noopener">Docker源码分析（七）：Docker Container网络 （上） - DaoCloud</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/Docker/" rel="tag"># Docker</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/blog/Docker/docker-network-overview/" rel="prev" title="Docker 網路簡介">
+      <i class="fa fa-chevron-left"></i> Docker 網路簡介
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/blog/Docker/docker-network-macvlan/" rel="next" title="[Docker] MACVLAN Network 簡介">
+      [Docker] MACVLAN Network 簡介 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#環境介紹"><span class="nav-number">1.</span> <span class="nav-text">環境介紹</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#檢視目前-Docker-Network-狀態"><span class="nav-number">2.</span> <span class="nav-text">檢視目前 Docker Network 狀態</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Overview"><span class="nav-number">3.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用預設的-Bridge-Network-docker0"><span class="nav-number">4.</span> <span class="nav-text">使用預設的 Bridge Network (docker0)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#建立-container"><span class="nav-number">4.1.</span> <span class="nav-text">建立 container</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#測試-container-網路"><span class="nav-number">4.2.</span> <span class="nav-text">測試 container 網路</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用自訂的-Bridge-Network"><span class="nav-number">5.</span> <span class="nav-text">使用自訂的 Bridge Network</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#自訂-docker-network"><span class="nav-number">5.1.</span> <span class="nav-text">自訂 docker network</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#建立-container-1"><span class="nav-number">5.2.</span> <span class="nav-text">建立 container</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#測試-container-網路-1"><span class="nav-number">5.3.</span> <span class="nav-text">測試 container 網路</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives/">
+        
+          <span class="site-state-item-count">105</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">58</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/blog/lib/anime.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/blog/js/utils.js"></script>
+
+<script src="/blog/js/motion.js"></script>
+
+
+<script src="/blog/js/schemes/muse.js"></script>
+
+
+<script src="/blog/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

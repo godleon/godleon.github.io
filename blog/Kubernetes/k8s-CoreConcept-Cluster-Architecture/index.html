@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+<link rel="stylesheet" href="/blog/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="本篇文章從 high level 的角度介紹 Kubernetes Cluster Architecture 以及內部元件功能的功能">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[Kubernetes] Cluster Architecture">
+<meta property="og:url" content="https://godleon.github.io/blog/Kubernetes/k8s-CoreConcept-Cluster-Architecture/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="本篇文章從 high level 的角度介紹 Kubernetes Cluster Architecture 以及內部元件功能的功能">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/cka-k8s-borg-architecture.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/CKA-CoreConcept-k8s-cluster-architecture-high-level.jpg">
+<meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/k8s-architecture.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/kubernetes-master-arch.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/kubernetes-node-arch.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/CKA-CoreConcept-k8s-cluster-architecture-high-level.jpg">
+<meta property="article:published_time" content="2018-08-26T09:35:00.000Z">
+<meta property="article:modified_time" content="2020-04-26T04:42:44.173Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="Kubernetes">
+<meta property="article:tag" content="CKA">
+<meta property="article:tag" content="Kubernetes Core Concept">
+<meta property="article:tag" content="CKA Core Concept">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/kubernetes/cka-k8s-borg-architecture.png">
+
+<link rel="canonical" href="https://godleon.github.io/blog/Kubernetes/k8s-CoreConcept-Cluster-Architecture/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-tw'
+  };
+</script>
+
+  <title>[Kubernetes] Cluster Architecture | 小信豬的原始部落</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/blog/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/blog/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/Kubernetes/k8s-CoreConcept-Cluster-Architecture/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [Kubernetes] Cluster Architecture
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-08-26 17:35:00" itemprop="dateCreated datePublished" datetime="2018-08-26T17:35:00+08:00">2018-08-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-04-26 12:42:44" itemprop="dateModified" datetime="2020-04-26T12:42:44+08:00">2020-04-26</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Kubernetes/" itemprop="url" rel="index"><span itemprop="name">Kubernetes</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">本篇文章從 high level 的角度介紹 Kubernetes Cluster Architecture 以及內部元件功能的功能</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Kubernetes-的前身-Google-Borg"><a href="#Kubernetes-的前身-Google-Borg" class="headerlink" title="Kubernetes 的前身 - Google Borg"></a>Kubernetes 的前身 - Google Borg</h1><p>Kubernetes 源自於 Google 內部的 Borg，因此看看原生的 Borg 會有助於從大方向了解 Kubernets 架構中的各個 component 是如何協同運作的，以下是 Borg 的系統架構：</p>
+<p><img src="/blog/images/kubernetes/cka-k8s-borg-architecture.png" alt="Google Borg System Architecture"></p>
+<p>從上面的架構圖可以看出幾個重點：</p>
+<h2 id="BorgMaster"><a href="#BorgMaster" class="headerlink" title="BorgMaster"></a>BorgMaster</h2><p>BorgMaster 是整個系統的大腦，用來負責與系統中的不同元件進行溝通，確保系統可以正常運作。</p>
+<h2 id="Borglet"><a href="#Borglet" class="headerlink" title="Borglet"></a>Borglet</h2><p>這是在每個 host 中負責管理 container 生命周期的元件，接收來自 BorgMaster 的命令並進行相對應的操作。</p>
+<h2 id="Scheduler"><a href="#Scheduler" class="headerlink" title="Scheduler"></a>Scheduler</h2><p>負責進行任務的調度，根據不同應用的需求，將 workload 調度到不同的機器去執行。</p>
+<h2 id="Paxos-persistent-store"><a href="#Paxos-persistent-store" class="headerlink" title="Paxos (persistent store)"></a>Paxos (persistent store)</h2><p>由於整體系統在設計上就是預期會有某些 node 在某些時候會發生故障，因此當要儲存系統運作狀態時，就不會考慮儲存在自身的儲存空間上；因此 Paxos 就是在整個系統中負責儲存系統運作狀態的地方。</p>
+<h2 id="borgcfg"><a href="#borgcfg" class="headerlink" title="borgcfg"></a>borgcfg</h2><p>用來操作 Borg 系統的 CLI 所使用的設定檔</p>
+<h1 id="Kubernets-架構"><a href="#Kubernets-架構" class="headerlink" title="Kubernets 架構"></a>Kubernets 架構</h1><p>Kubernetes 的架構設計上也極為類似 Borg，如下圖所示：</p>
+<p><img src="/blog/images/kubernetes/CKA-CoreConcept-k8s-cluster-architecture-high-level.jpg" alt="Kubernetes Architecture"></p>
+<p>在把上面複雜的架構圖抽象化一點：</p>
+<p><img src="/blog/images/kubernetes/k8s-architecture.png" alt="Abstract Kubernetes Architecture"></p>
+<p>從上圖可以看出以下結論：</p>
+<ol>
+<li><p>不論是透過 CLI or UI，都只能透過呼叫 API 的方式與 Kubernetes 溝通</p>
+</li>
+<li><p>master node 收到 API request 後，針對使用者需求對後面的 worker node 進行指定的工作(透過 kubelet)</p>
+</li>
+<li><p>worker node 到 master node 的溝通，僅能透過 API server 作為窗口，kubelet 是無法存取到 master node 上的其他元件</p>
+</li>
+<li><p>唯一可以存取 etcd 的只有 REST service(kube-apiserver)</p>
+</li>
+<li><p>外部的到 worker node 的 traffic 則是由 kube-proxy 來負責處理，將流量導到正確的 pod 上</p>
+</li>
+</ol>
+<p>接著以下用不同 node type 的角度來切入進行細部檢視：</p>
+<h2 id="Master-Node"><a href="#Master-Node" class="headerlink" title="Master Node"></a>Master Node</h2><p><img src="/blog/images/kubernetes/kubernetes-master-arch.png" alt="Abstract Kubernetes Architecture"></p>
+<p>在 master node 上有幾個相當重要的 component 分別是：</p>
+<h3 id="API-server"><a href="#API-server" class="headerlink" title="API server"></a>API server</h3><p>此為所有資源操作的唯一入口，並負責 Authentication、Authorization、Access Control、API registration &amp; discovery。</p>
+<h3 id="Scheduler-1"><a href="#Scheduler-1" class="headerlink" title="Scheduler"></a>Scheduler</h3><p>負責進行任務的調度，根據不同應用的需求，將 workload 調度到不同的機器去執行。</p>
+<h3 id="Controller-Manager"><a href="#Controller-Manager" class="headerlink" title="Controller Manager"></a>Controller Manager</h3><p>負責維護 cluster 的狀態，包含 failure detection、auto scale in/out、rolling update …. 等等。</p>
+<h3 id="etcd"><a href="#etcd" class="headerlink" title="etcd"></a>etcd</h3><p>負責保存整個 cluster 的運行狀態</p>
+<blockquote>
+<p>若 cluster 的 node 數量龐大，etcd 也有可能會被獨立於 master 之外來單獨安裝。</p>
+</blockquote>
+<h2 id="Worker-Node"><a href="#Worker-Node" class="headerlink" title="Worker Node"></a><a href="https://github.com/kubernetes/community/blob/master/contributors/design-proposals/architecture/architecture.md#the-kubernetes-node" target="_blank" rel="noopener">Worker Node</a></h2><p>在 Kubernetes 中，worker node 也稱為 <strong>minion</strong>，可以是實體機或是 VM，以下是 worker node 的架構圖：</p>
+<p><img src="/blog/images/kubernetes/kubernetes-node-arch.png" alt="Abstract Kubernetes Architecture"></p>
+<h3 id="Container-Runtime"><a href="#Container-Runtime" class="headerlink" title="Container Runtime"></a>Container Runtime</h3><p>負責 container image 的管理並透過 <a href="https://github.com/kubernetes/community/blob/master/contributors/devel/container-runtime-interface.md" target="_blank" rel="noopener">CRI(Container Runtime Interface)</a> 來管理 pod 的運行。 </p>
+<p>大部份時候會以 Docker 作為 container runtime，但其實可以作為 container runtime 的除了 Docker 之外，還有以下幾個選項：</p>
+<ul>
+<li><p><a href="https://github.com/rkt/rkt" target="_blank" rel="noopener">rkt - the pod-native container engine</a></p>
+</li>
+<li><p><a href="https://github.com/kubernetes-incubator/cri-o" target="_blank" rel="noopener">CRI-O - OCI-based implementation of Kubernetes Container Runtime Interface</a></p>
+</li>
+<li><p><a href="https://github.com/kubernetes/frakti" target="_blank" rel="noopener">Frakti - The hypervisor-based container runtime for Kubernetes</a></p>
+</li>
+</ul>
+<h3 id="kubelet"><a href="#kubelet" class="headerlink" title="kubelet"></a>kubelet</h3><p>負責接收來自 API server 的命令、維護 container 的生命周期，並負責 CSI(Container Storage Interface) &amp; CNI(Container Network Interface) 的管理。</p>
+<h3 id="kube-proxy"><a href="#kube-proxy" class="headerlink" title="kube-proxy"></a>kube-proxy</h3><p>在 Kubernetes 中，<strong><a href="https://kubernetes.io/docs/concepts/services-networking/service/" target="_blank" rel="noopener">service</a></strong> 將多個 pod 抽象化成一個單一群組，並為此群組提供一個 virtual IP，並提供其他 pod or service 進行存取。</p>
+<p>而 kube-proxy 就是負責在 host 中針對 service 與 pod 的配置設定，產生相對應的 iptables rule，讓送到 service virtual IP 的流量可以正確的導向 service 後端的 pod 中。</p>
+<p>因此總結來說，kube-proxy 就是負責為 service 提供 cluster 內部的 service discovery &amp; load balance</p>
+<h1 id="核心元件之間的通訊"><a href="#核心元件之間的通訊" class="headerlink" title="核心元件之間的通訊"></a>核心元件之間的通訊</h1><p>接著來探討一下 Kubernetes 核心元件之間的通信細節，以下面的圖片進行說明：</p>
+<p><img src="/blog/images/kubernetes/CKA-CoreConcept-k8s-cluster-architecture-high-level.jpg" alt="Kubernetes Architecture"></p>
+<h2 id="External-lt-–-gt-Master"><a href="#External-lt-–-gt-Master" class="headerlink" title="External &lt;–&gt; Master"></a>External &lt;–&gt; Master</h2><ul>
+<li>管理者從外面僅能透過 API server 進行對 Kubernetes cluster 的管理 (傳送 JSON 格式的資料)</li>
+</ul>
+<h2 id="Inside-Master"><a href="#Inside-Master" class="headerlink" title="Inside Master"></a>Inside Master</h2><ul>
+<li><p>不論是負責管理 cluster 狀態的 controller manager，或是負責任務調度的 scheduler，要調整 worker 的工作狀態，都必須透過送 request 給 API server，再由 API server 統一對 host 上的 kubelet 進行操作 (這幾個元件之間傳送的資料格式為 <a href="https://developers.google.com/protocol-buffers/" target="_blank" rel="noopener" title="protobuf">protobuf</a>)</p>
+</li>
+<li><p>在 master node 中的元件，唯一會對 etcd 服務進行 cluster 狀態存取的僅有 API server，雙方使用 gRPC 進行通訊</p>
+</li>
+</ul>
+<h2 id="Master-lt-–-gt-Worker"><a href="#Master-lt-–-gt-Worker" class="headerlink" title="Master &lt;–&gt; Worker"></a>Master &lt;–&gt; Worker</h2><ul>
+<li>所有對 worker node 上的狀態變更，都是由 master node 上的 API server 所發過來，並由 kubelet 接收後進行處理 (透過 <a href="https://developers.google.com/protocol-buffers/" target="_blank" rel="noopener" title="protobuf">protobuf</a>) 資料格式傳送資料)</li>
+</ul>
+<h2 id="Inside-Worker"><a href="#Inside-Worker" class="headerlink" title="Inside Worker"></a>Inside Worker</h2><ul>
+<li><p>kubelet 透過 CRI(Container Runtime Interface)，控制 container runtime 進行 pod 的管理</p>
+</li>
+<li><p>contain runtime 則是透過符合 OCI(Open Container Initiative) 介面，在 OS 中實際的產生出相對應的 container</p>
+</li>
+<li><p>kubelet 透過 CNI(Container Network Interface)，呼叫 CNI plugin 來進行 pod network 的設定</p>
+</li>
+</ul>
+<h1 id="Add-Ons"><a href="#Add-Ons" class="headerlink" title="Add-Ons"></a>Add-Ons</h1><p>除了上面在 master &amp; worker node 上的核心元件外，還有一些 add-on 可以讓 Kubernetes 運作的更好，例如：</p>
+<ul>
+<li><p><strong>DNS</strong>：目前以 <a href="https://github.com/coredns/coredns" target="_blank" rel="noopener">CoreDNS</a> 為主，以前則是 <a href="https://github.com/kubernetes/kubernetes/tree/master/cluster/addons/dns/kube-dns" target="_blank" rel="noopener">kube-dns</a></p>
+</li>
+<li><p><strong>Ingress controller</strong>：負責讓外部的流量可以正確的導到 Kubernetes 內部的 service</p>
+</li>
+<li><p><strong>Resource Monitoring</strong>：原先是由 <a href="https://github.com/kubernetes/heapster" target="_blank" rel="noopener">Heapster</a> 來負責，但由於 <a href="https://prometheus.io/" target="_blank" rel="noopener">Prometheus</a> 從 CNCF 變成正式專案後，在 resource monitoring 這個部份開始推薦使用 Prometheus 來實現</p>
+</li>
+<li><p><strong>Dashboard</strong>：為了提供使用者更好的體驗，除了 <a href="https://github.com/kubernetes/dashboard/" target="_blank" rel="noopener">Kubernetes 官方正式維護的 Dashboard</a> 之外，也可以考慮其他的選項，例如：<a href="https://cockpit-project.org/guide/latest/feature-kubernetes.html" target="_blank" rel="noopener">Cockpit</a> or <a href="https://rancher.com/" target="_blank" rel="noopener">Rancher</a>(透過 import Kubernetes Clusters 的功能)</p>
+</li>
+</ul>
+<p>當然上面的 add-on 並不是全部，詳細的 add-on 清單可以到 <a href="https://github.com/kubernetes/kubernetes/tree/master/cluster/addons" target="_blank" rel="noopener">Kubernetes 的專案</a>中去查詢。</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a href="https://kubernetes.io/docs/concepts/architecture/" target="_blank" rel="noopener">Kubernetes Architecture - Kubernetes</a></p>
+</li>
+<li><p><a href="https://github.com/kubernetes/community/blob/master/contributors/design-proposals/architecture/architecture.md" target="_blank" rel="noopener">Kubernetes Design and Architecture</a></p>
+</li>
+<li><p><a href="https://jimmysong.io/kubernetes-handbook/concepts/" target="_blank" rel="noopener">Kubernetes架构 · Kubernetes Handbook - Kubernetes中文指南/云原生应用架构实践手册 by Jimmy Song(宋净超)</a></p>
+</li>
+<li><p><a href="https://kubernetes.feisky.xyz/zh/architecture/architecture.html" target="_blank" rel="noopener">架构原理 · Kubernetes Handbook</a></p>
+</li>
+<li><p><a href="https://kubernetes.feisky.xyz/zh/architecture/architecture.html" target="_blank" rel="noopener">Kubernetes指南 - 架构原理 · Kubernetes Handbook</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/Kubernetes/" rel="tag"># Kubernetes</a>
+              <a href="/blog/tags/CKA/" rel="tag"># CKA</a>
+              <a href="/blog/tags/Kubernetes-Core-Concept/" rel="tag"># Kubernetes Core Concept</a>
+              <a href="/blog/tags/CKA-Core-Concept/" rel="tag"># CKA Core Concept</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/blog/Docker/docker-network-macvlan/" rel="prev" title="[Docker] MACVLAN Network 簡介">
+      <i class="fa fa-chevron-left"></i> [Docker] MACVLAN Network 簡介
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/blog/Kubernetes/k8s-CKA-resources/" rel="next" title="CKA(Certified Kubernetes Administrator) 學習資源整理">
+      CKA(Certified Kubernetes Administrator) 學習資源整理 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Kubernetes-的前身-Google-Borg"><span class="nav-number">1.</span> <span class="nav-text">Kubernetes 的前身 - Google Borg</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#BorgMaster"><span class="nav-number">1.1.</span> <span class="nav-text">BorgMaster</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Borglet"><span class="nav-number">1.2.</span> <span class="nav-text">Borglet</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Scheduler"><span class="nav-number">1.3.</span> <span class="nav-text">Scheduler</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Paxos-persistent-store"><span class="nav-number">1.4.</span> <span class="nav-text">Paxos (persistent store)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#borgcfg"><span class="nav-number">1.5.</span> <span class="nav-text">borgcfg</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kubernets-架構"><span class="nav-number">2.</span> <span class="nav-text">Kubernets 架構</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Master-Node"><span class="nav-number">2.1.</span> <span class="nav-text">Master Node</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#API-server"><span class="nav-number">2.1.1.</span> <span class="nav-text">API server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Scheduler-1"><span class="nav-number">2.1.2.</span> <span class="nav-text">Scheduler</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Controller-Manager"><span class="nav-number">2.1.3.</span> <span class="nav-text">Controller Manager</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#etcd"><span class="nav-number">2.1.4.</span> <span class="nav-text">etcd</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Worker-Node"><span class="nav-number">2.2.</span> <span class="nav-text">Worker Node</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Container-Runtime"><span class="nav-number">2.2.1.</span> <span class="nav-text">Container Runtime</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kubelet"><span class="nav-number">2.2.2.</span> <span class="nav-text">kubelet</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kube-proxy"><span class="nav-number">2.2.3.</span> <span class="nav-text">kube-proxy</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#核心元件之間的通訊"><span class="nav-number">3.</span> <span class="nav-text">核心元件之間的通訊</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#External-lt-–-gt-Master"><span class="nav-number">3.1.</span> <span class="nav-text">External &lt;–&gt; Master</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Inside-Master"><span class="nav-number">3.2.</span> <span class="nav-text">Inside Master</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Master-lt-–-gt-Worker"><span class="nav-number">3.3.</span> <span class="nav-text">Master &lt;–&gt; Worker</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Inside-Worker"><span class="nav-number">3.4.</span> <span class="nav-text">Inside Worker</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Add-Ons"><span class="nav-number">4.</span> <span class="nav-text">Add-Ons</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives/">
+        
+          <span class="site-state-item-count">105</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">58</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/blog/lib/anime.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/blog/js/utils.js"></script>
+
+<script src="/blog/js/motion.js"></script>
+
+
+<script src="/blog/js/schemes/muse.js"></script>
+
+
+<script src="/blog/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

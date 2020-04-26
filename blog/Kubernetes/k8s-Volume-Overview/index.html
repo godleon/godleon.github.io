@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+<link rel="stylesheet" href="/blog/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="本篇文章的主題在介紹 Kubernetes 中的 Volume 的設計概念 &amp; 使用方式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[Kubernetes] Volume Overview">
+<meta property="og:url" content="https://godleon.github.io/blog/Kubernetes/k8s-Volume-Overview/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="本篇文章的主題在介紹 Kubernetes 中的 Volume 的設計概念 &amp; 使用方式">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2019-01-14T20:15:00.000Z">
+<meta property="article:modified_time" content="2020-04-26T04:42:44.177Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="Kubernetes">
+<meta property="article:tag" content="CKA">
+<meta property="article:tag" content="Kubernetes Storage">
+<meta property="article:tag" content="CKA Storage">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://godleon.github.io/blog/Kubernetes/k8s-Volume-Overview/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-tw'
+  };
+</script>
+
+  <title>[Kubernetes] Volume Overview | 小信豬的原始部落</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/blog/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/blog/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/Kubernetes/k8s-Volume-Overview/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [Kubernetes] Volume Overview
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-01-15 04:15:00" itemprop="dateCreated datePublished" datetime="2019-01-15T04:15:00+08:00">2019-01-15</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-04-26 12:42:44" itemprop="dateModified" datetime="2020-04-26T12:42:44+08:00">2020-04-26</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Kubernetes/" itemprop="url" rel="index"><span itemprop="name">Kubernetes</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">本篇文章的主題在介紹 Kubernetes 中的 Volume 的設計概念 & 使用方式</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Preface"><a href="#Preface" class="headerlink" title="Preface"></a>Preface</h1><p>使用 container 的開發者都知道，在 container 中的檔案不是永久存在的，隨著 container 的重啟，檔案就會隨之消失，當然這情況在 k8s pod 中也是相同；此外，在 k8s pod 中的多個 container 之間時常也會有檔案共享的需求，而為了解決這些問題，k8s 中提出了 <code>Volume</code> 這個抽象概念。</p>
+<p>因此回到系統本質來看，<code>Volume</code> 的出現就是為了解決以下的問題：</p>
+<ul>
+<li><p>檔案在 container 中無法永續存活</p>
+</li>
+<li><p>pod 內多個 container 之間有檔案共享的需求</p>
+</li>
+</ul>
+<p>回到 container 來看，其實 Docker 也有 <a href="https://docs.docker.com/storage/volumes/" target="_blank" rel="noopener">Volume</a> 的概念，相較於 k8s Volume 比較沒那麼著重在管理層面。在一開始 Docker Volume 僅支援 local directory，到最近才慢慢開始有 <a href="https://docs.docker.com/engine/extend/legacy_plugins/#types-of-plugins" target="_blank" rel="noopener">Volume plugin</a> 來支援多種不同的 storage。</p>
+<blockquote>
+<p>其實 volume plugin 的功能也不算是很完整 (例如：在 Docker v1.17 時，使用 volume plugin 時還無法傳入任何參數)</p>
+</blockquote>
+<p>反之 k8s 對於 volume 的管理就相對嚴謹：</p>
+<ul>
+<li><p>volume lifetime 與 pod lifetime 相同 (會一直存活到 pod 中的 container 全部消失為止)</p>
+</li>
+<li><p>只要 pod 存在，資料就不會因為 container restart 而消失</p>
+</li>
+<li><p>基本上 volume 會以 directory 的型式存在於 pod 中，pod 中的每一個 container 都可以存取 (至於 directory 如何產生、資料實際存在哪裡則是由 volume type 決定，k8s 不會負責管理這個)</p>
+</li>
+<li><p>在 pod 中要使用 volume 就必須使用 <code>.spec.volumes</code> &amp; <code>.spec.containers.volumeMounts</code> 兩個欄位進行設定</p>
+</li>
+<li><p>一個 volume 僅能給一個 pod 使用</p>
+</li>
+</ul>
+<h1 id="Kubernetes-支援那些-Volume-Type"><a href="#Kubernetes-支援那些-Volume-Type" class="headerlink" title="Kubernetes 支援那些 Volume Type ?"></a>Kubernetes 支援那些 Volume Type ?</h1><p>k8s 現有支援的 volume 相當的多，有些來自 public cloud(例如：awsElasticBlockStore, azureDisk, gcePersistentDisk … 等等)，也有些是屬於 on-premise 的(例如：glusterfs, nfs, iscsi … 等等)，詳細列表可以參考<a href="https://kubernetes.io/docs/concepts/storage/volumes/#types-of-volumes" target="_blank" rel="noopener">官網連結</a>。</p>
+<p>以下就比較常會在 on-premise 環境碰到的 volume type 作個簡單說明：</p>
+<h2 id="emptyDir"><a href="#emptyDir" class="headerlink" title="emptyDir"></a>emptyDir</h2><p>emptyDir 在使用上有以下幾點特性：</p>
+<ul>
+<li><p>emptyDir 會在 pod 被分配到特定的 node 後產生，一開始永遠是一個空的目錄</p>
+</li>
+<li><p>emptyDir 的 life cycle 是跟著 pod + node 一起走，只要該 pod 持續的在原本的 node 上運行，emptyDir 就會保留著；相反的，只要兩個條件有任一消失，emptyDir 的資料也會跟著消失</p>
+</li>
+<li><p>若是有資料存進去 emptyDir，node 會把資料放在 RAM(設定 <code>emptyDir.medium</code> 為 <code>Memory</code>，emptyDir 會以 tmpfs 的方式提供) or local SSD/HD 上</p>
+</li>
+<li><p>存放在 SSD or HD，取決於 <code>/var/lib/kubelet</code> 目錄位於哪種硬碟上 (也就是說 emptyDir 會存放在 <code>/var/lib/kubelet</code> 目錄中)</p>
+</li>
+<li><p>每個在 pod 中的 container，可以將 emptyDir 掛載在不同的路徑</p>
+</li>
+<li><p>目前無法限制使用量</p>
+</li>
+</ul>
+<p>在官網中有提到一些 emptyDir 的 use case：</p>
+<ul>
+<li><p>scratch space, such as for a disk-based merge sort</p>
+</li>
+<li><p>checkpointing a long computation for recovery from crashes</p>
+</li>
+<li><p>holding files that a content-manager Container fetches while a webserver Container serves the data</p>
+</li>
+</ul>
+<p>由於這幾項 use case 我並沒有接觸過，因此就不太多著墨了。</p>
+<h2 id="hostPath"><a href="#hostPath" class="headerlink" title="hostPath"></a>hostPath</h2><p>若是希望 volume 新增後裏面就存放一些 node 上已經存在的資料，可以使用 hostPath。</p>
+<p>通常這不是一般 pod 會用的 volume type，只有在一些情況下例外，例如：</p>
+<ul>
+<li><p>container 需要監控 host Docker 的內部運作細節，會需要掛載 host <code>/var/lib/docker</code> 資料夾</p>
+</li>
+<li><p>container 中執行 cAdvisor，需要掛在 host <code>/sys</code> 目錄</p>
+</li>
+<li><p>init container，用來產生另一個 container 需要的 host path</p>
+</li>
+</ul>
+<p>此外，hostPath 還細分成好幾種不同的類型。分別介紹如下：</p>
+<table>
+<thead>
+<tr>
+<th>類型</th>
+<th>運作行為</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>(空字串)</code></td>
+<td>掛載 host path 到 pod 之前，不會做任何檢查</td>
+</tr>
+<tr>
+<td><code>DirectoryOrCreate</code></td>
+<td>若 host path 指定的目錄不存在，則會新建一個目錄，並設定為權限 0755，目錄的 ownership &amp; group 則是 kubelet</td>
+</tr>
+<tr>
+<td><code>Directory</code></td>
+<td>host path 指定的目錄必須存在</td>
+</tr>
+<tr>
+<td><code>FileOrCreate</code></td>
+<td>若 host path 指定的檔案不存在，則會新建一個檔案，並設定為權限 0755，目錄的 ownership &amp; group 則是 kubelet</td>
+</tr>
+<tr>
+<td><code>File</code></td>
+<td>host path 指定的檔案必須存在</td>
+</tr>
+<tr>
+<td><code>Socket</code></td>
+<td>host path 指定的 UNIX socket 必須存在</td>
+</tr>
+<tr>
+<td><code>CharDevice</code></td>
+<td>host path 指定的 character device 必須存在</td>
+</tr>
+<tr>
+<td><code>BlockDevice</code></td>
+<td>host path 指定的 block device 必須存在</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>hostPath volume 的內容僅能被 root 修改，因此若有修改需求的話，就必須把 container 以 privileged mode 執行，或是修改 hostPath volume 的權限</p>
+</blockquote>
+<p>以下是個 hostPath 使用範例：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">test-pd</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">containers:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">image:</span> <span class="string">k8s.gcr.io/test-webserver</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">test-container</span></span><br><span class="line">    <span class="attr">volumeMounts:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">mountPath:</span> <span class="string">/test-pd</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">test-volume</span></span><br><span class="line">  <span class="attr">volumes:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">test-volume</span></span><br><span class="line">    <span class="attr">hostPath:</span></span><br><span class="line">      <span class="comment"># directory location on host</span></span><br><span class="line">      <span class="attr">path:</span> <span class="string">/data</span></span><br><span class="line">      <span class="comment"># this field is optional</span></span><br><span class="line">      <span class="attr">type:</span> <span class="string">Directory</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>目前 hostPath 無法限制使用量，因此在使用時可能必須注意磁碟空間的問題</p>
+</blockquote>
+<h2 id="local"><a href="#local" class="headerlink" title="local"></a>local</h2><p><code>local</code> volume type 在 v1.10 時變成 beta 版本，主要用來表示在 host 上掛載的 local storage device，例如：disk, partition, directory … 等等。</p>
+<p>相較於 hostPath，<code>local</code> volume type 有以下幾點的不同：</p>
+<ul>
+<li><p>只能以 PersistentVolume 的方式被使用，尚不支援 dynamic provisioning</p>
+</li>
+<li><p>由於 <code>local</code> 可以額外設定 <strong>nodeAffinity</strong>，因此 k8s scheduler 會協助挑選合適的 node 來使用</p>
+</li>
+</ul>
+<p><code>local</code> volume type 看似比 <code>hostPath</code> 更有彈性些，但使用上還是有些地方必須注意，例如：</p>
+<ul>
+<li><p>local volume 的可用性依然是跟著 node 走，因為不一定每個 node 都有相同的 disk or partition 配置</p>
+</li>
+<li><p>如果 node 的狀態轉變成 unhealthy，同時也會造成 local volume 無法使用(因為資料就是存在於該 unhealthy node 上)，進而造成掛載 local volume 的 pod 也無法存取資料</p>
+</li>
+<li><p>承上，若 application 只能使用 local volume 的話，那就要考量到資料無法正常存取時的容錯設計</p>
+</li>
+</ul>
+<p>以下是個設定 local volume 的範例：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">PersistentVolume</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">example-pv</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">capacity:</span></span><br><span class="line">    <span class="attr">storage:</span> <span class="string">100Gi</span></span><br><span class="line">  <span class="comment"># 若要額外設定 volumeMode 這個欄位</span></span><br><span class="line">  <span class="comment"># 就必須要開啟 feature gate "BlockVolume"</span></span><br><span class="line">  <span class="comment"># 除了 Filesystem 之外，也可以設定為 "Block"(預設為 "Filesystem")</span></span><br><span class="line">  <span class="comment"># 來指定使用 raw block device</span></span><br><span class="line">  <span class="attr">volumeMode:</span> <span class="string">Filesystem</span></span><br><span class="line">  <span class="attr">accessModes:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">ReadWriteOnce</span></span><br><span class="line">  <span class="attr">persistentVolumeReclaimPolicy:</span> <span class="string">Delete</span></span><br><span class="line">  <span class="attr">storageClassName:</span> <span class="string">local-storage</span></span><br><span class="line">  <span class="attr">local:</span></span><br><span class="line">    <span class="attr">path:</span> <span class="string">/mnt/disks/ssd1</span></span><br><span class="line">  <span class="comment"># nodeAffinity 為必要欄位</span></span><br><span class="line">  <span class="comment"># 目的是為了讓 k8s scheduler 可以協助找到合適的 node</span></span><br><span class="line">  <span class="attr">nodeAffinity:</span></span><br><span class="line">    <span class="attr">required:</span></span><br><span class="line">      <span class="attr">nodeSelectorTerms:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">matchExpressions:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">key:</span> <span class="string">kubernetes.io/hostname</span></span><br><span class="line">          <span class="attr">operator:</span> <span class="string">In</span></span><br><span class="line">          <span class="attr">values:</span></span><br><span class="line">          <span class="bullet">-</span> <span class="string">example-node</span></span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">StorageClass</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">storage.k8s.io/v1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">local-storage</span></span><br><span class="line"><span class="attr">provisioner:</span> <span class="string">kubernetes.io/no-provisioner</span></span><br><span class="line"><span class="attr">volumeBindingMode:</span> <span class="string">WaitForFirstConsumer</span></span><br></pre></td></tr></table></figure>
+
+<p>從上面的範例可以看出，local volume 是由 Storageclass 所產生，透過 <code>volumeBindingMode: WaitForFirstConsumer</code> 的設定，讓 PV 會在 PVC 需求實際發生(可能透過 node selector, pod affinity, pod anti-affinity … 等設定)時才會產生。</p>
+<h2 id="nfs"><a href="#nfs" class="headerlink" title="nfs"></a>nfs</h2><p>NFS volume type 就是利用外部的 NFS share(這部份要自己準備好，k8s 不負責這個) 來存放資料，有以下幾種特性：</p>
+<ul>
+<li><p>跟 emptyDir 不同，NFS volume 中的資料不會因為 pod 被刪除而一併被刪除</p>
+</li>
+<li><p>可以預先把資料存放在 NFS volume 後再掛載</p>
+</li>
+<li><p>NFS volume 可以同時被多個 pod 掛載 &amp; 寫入，因此可以利用此特性來同時分享資料給多個 pod</p>
+</li>
+</ul>
+<h2 id="secret"><a href="#secret" class="headerlink" title="secret"></a>secret</h2><p>secret 顧名思義就是存放機密性的資料，而 secret volume 有以下幾個特點：</p>
+<ul>
+<li><p>要使用 secret volume 必須先定義 secret resource object 後，再掛載為 secret volume</p>
+</li>
+<li><p>secret volume 會存在於 <code>/tmpfs</code> 中，也就是 RAM 中，不會存在於硬碟上</p>
+</li>
+<li><p>若透過 <a href="https://kubernetes.io/docs/concepts/storage/volumes/#using-subpath" target="_blank" rel="noopener">subPath</a> 掛載 secret volume，若是後續 secret volume 有更新，就不會反應到該 subPath 上</p>
+</li>
+</ul>
+<p>而 secret 的詳細使用方式可以參考<a href="https://kubernetes.io/docs/concepts/configuration/secret/" target="_blank" rel="noopener">此篇文章</a>。</p>
+<h2 id="configMap"><a href="#configMap" class="headerlink" title="configMap"></a>configMap</h2><p>k8s 透過 configMap，提供使用者一個可以將任何設定相關資料放到 pod 中的方式，透過 <code>configMap</code> 關鍵字就可以將 configMap resource object 以 volume 的型式掛載到 pod 中使用。</p>
+<p>以下是一個 <strong>configMap -&gt; File</strong> 簡單的範例：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ConfigMap</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">special-config</span></span><br><span class="line"><span class="attr">data:</span></span><br><span class="line">  <span class="attr">special.level:</span> <span class="string">very</span></span><br><span class="line">  <span class="attr">special.type:</span> <span class="string">charm</span></span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">dapi-test-pod</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">containers:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">test-container</span></span><br><span class="line">      <span class="attr">image:</span> <span class="string">k8s.gcr.io/busybox</span></span><br><span class="line">      <span class="comment"># 在 /etc/config 目錄中就會看到兩個檔案</span></span><br><span class="line">      <span class="comment"># /etc/config/special.level =&gt; very</span></span><br><span class="line">      <span class="comment"># /etc/config/special.type =&gt; charm</span></span><br><span class="line">      <span class="attr">command:</span> <span class="string">[</span> <span class="string">"/bin/sh"</span><span class="string">,</span> <span class="string">"-c"</span><span class="string">,</span> <span class="string">"ls /etc/config/"</span> <span class="string">]</span></span><br><span class="line">      <span class="attr">volumeMounts:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">config-volume</span></span><br><span class="line">        <span class="attr">mountPath:</span> <span class="string">/etc/config</span></span><br><span class="line">  <span class="attr">volumes:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">config-volume</span></span><br><span class="line">      <span class="attr">configMap:</span></span><br><span class="line">        <span class="comment"># 指定要掛載的 configMap 名稱</span></span><br><span class="line">        <span class="attr">name:</span> <span class="string">special-config</span></span><br><span class="line">  <span class="attr">restartPolicy:</span> <span class="string">Never</span></span><br></pre></td></tr></table></figure>
+
+<p>然而 configMap 掛載到 pod 之後不一定只能以 file 的型式存在，也可以是以環境變數(Environment Variable)的型式存在，詳細的操作可以參考<a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/" target="_blank" rel="noopener">官網文件</a>。</p>
+<h1 id="使用-subPath"><a href="#使用-subPath" class="headerlink" title="使用 subPath"></a>使用 subPath</h1><p>有時候我們要掛載的目錄中可能包含了多個子目錄，而這些子目錄恰巧又分別被多個不同的 container 使用，此時就可以透過 <code>subPath</code> 的方式來簡化 volume 的設定，以下有個簡單的 LAMP 範例，在這個範例的 volume 中有兩個目錄，分別是 <code>mysql</code> &amp; <code>html</code>，然後透過 subPath 的方式分別掛載到 pod 中的不同 container 上：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">my-lamp-site</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">    <span class="attr">containers:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">mysql</span></span><br><span class="line">      <span class="attr">image:</span> <span class="string">mysql</span></span><br><span class="line">      <span class="attr">env:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">MYSQL_ROOT_PASSWORD</span></span><br><span class="line">        <span class="attr">value:</span> <span class="string">"rootpasswd"</span></span><br><span class="line">      <span class="comment"># 掛載 volume 中的 "mysql" subPath</span></span><br><span class="line">      <span class="attr">volumeMounts:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">mountPath:</span> <span class="string">/var/lib/mysql</span></span><br><span class="line">        <span class="attr">name:</span> <span class="string">site-data</span></span><br><span class="line">        <span class="attr">subPath:</span> <span class="string">mysql</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">php</span></span><br><span class="line">      <span class="attr">image:</span> <span class="string">php:7.0-apache</span></span><br><span class="line">      <span class="comment"># 掛載 volume 中的 "html" subPath</span></span><br><span class="line">      <span class="attr">volumeMounts:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">mountPath:</span> <span class="string">/var/www/html</span></span><br><span class="line">        <span class="attr">name:</span> <span class="string">site-data</span></span><br><span class="line">        <span class="attr">subPath:</span> <span class="string">html</span></span><br><span class="line">    <span class="comment"># 包含多個目錄(mysql &amp; html)的 volume 設定</span></span><br><span class="line">    <span class="attr">volumes:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">site-data</span></span><br><span class="line">      <span class="attr">persistentVolumeClaim:</span></span><br><span class="line">        <span class="attr">claimName:</span> <span class="string">my-lamp-site-data</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="搭配-Expanded-Environment-Variables"><a href="#搭配-Expanded-Environment-Variables" class="headerlink" title="搭配 Expanded Environment Variables"></a>搭配 Expanded Environment Variables</h2><p>透過 Expanded Environment Variables　的搭配，可以在 YAML 定義檔中，使用與 pod 相關的識別資訊，可以讓 subPath 在使用上更加的彈性，<br>以下是一個簡單的範例：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">pod1</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">containers:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">container1</span></span><br><span class="line">    <span class="attr">env:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">POD_NAME</span></span><br><span class="line">      <span class="attr">valueFrom:</span></span><br><span class="line">        <span class="attr">fieldRef:</span></span><br><span class="line">          <span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line">          <span class="attr">fieldPath:</span> <span class="string">metadata.name</span></span><br><span class="line">    <span class="attr">image:</span> <span class="string">busybox</span></span><br><span class="line">    <span class="attr">command:</span> <span class="string">[</span> <span class="string">"sh"</span><span class="string">,</span> <span class="string">"-c"</span><span class="string">,</span> <span class="string">"while [ true ]; do echo 'Hello'; sleep 10; done | tee -a /logs/hello.txt"</span> <span class="string">]</span></span><br><span class="line">    <span class="attr">volumeMounts:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">workdir1</span></span><br><span class="line">      <span class="attr">mountPath:</span> <span class="string">/logs</span></span><br><span class="line">      <span class="attr">subPath:</span> <span class="string">$(POD_NAME)</span></span><br><span class="line">  <span class="attr">restartPolicy:</span> <span class="string">Never</span></span><br><span class="line">  <span class="attr">volumes:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">workdir1</span></span><br><span class="line">    <span class="attr">hostPath:</span></span><br><span class="line">      <span class="attr">path:</span> <span class="string">/var/log/pods</span></span><br></pre></td></tr></table></figure>
+
+<p>透過 <code>$(POD_NAME)</code> 讓不同的 pod 的 log 可以存放在不同的目錄中，並以 pod name 作為區別，藉此可以提升 debug 的困難度。</p>
+<h1 id="Out-of-Tree-Volume-Plugins"><a href="#Out-of-Tree-Volume-Plugins" class="headerlink" title="Out-of-Tree Volume Plugins"></a>Out-of-Tree Volume Plugins</h1><p><a href="https://kubernetes.io/docs/concepts/storage/volumes/#types-of-volumes" target="_blank" rel="noopener">k8s 支援了相當多的 volume type</a>，市面上常看到的 storage 基本上都包含了，而使用這些 storage 所需要的程式碼都被整合到 k8s 的 code repository 中，這表示都是經過驗證，使用者不需要安裝任何額外的 plguin 就可以使用的，但程式碼要進入到 k8s code repository 也代表的要進行嚴格的審查。</p>
+<p>但若是其他的 storage 廠商也希望可以跟 k8s 整合時該怎麼做呢? 答案就是透過 <code>Container Storage Interface (CSI)</code> &amp; <code>Flexvolume</code> 這兩種 volume plugin。</p>
+<p>透過 CSI &amp; Flexvolume，storage 廠商可以自行開發 volume plugin 而不需要經過 k8s 社群的審查(不代表不嚴謹)，可以獨立的開發而不受影響，並佈署在 k8s 上成為一個擴充套件來使用，而關於 out-of-tree volume plugin 如何使用，可以參考<a href="https://github.com/kubernetes/community/blob/master/contributors/devel/flexvolume.md" target="_blank" rel="noopener">官網文件</a>。</p>
+<h2 id="FlexVolume"><a href="#FlexVolume" class="headerlink" title="FlexVolume"></a>FlexVolume</h2><p>從 v1.2 版開始，k8s 提供了 FlexVolume 的方式讓 storage 廠商可以自行開發可以與 k8s 整合的 volume plugin(driver)。k8s 會以 exec-based 的方式與 volume driver 溝通，因此相對應的 FlexVolume driver binary 就要預先放到每個 node 預定定義好的目錄下。</p>
+<p>而 FlexVolume 在使用上也會有些限制與問題存在，例如：</p>
+<ul>
+<li><p>FlexVolume 為了要安裝 driver 相關檔案到每個 node 上，需要 root 存取權限</p>
+</li>
+<li><p>FlexVolume driver 的相依性套件也要預先準備在每個 node 上，%這代表著也要 root 權限來安裝</p>
+</li>
+</ul>
+<p>因此現在 k8s 社群建議使用 CSI，而非 FlexVolume。</p>
+<h2 id="Container-Storage-Interface-CSI"><a href="#Container-Storage-Interface-CSI" class="headerlink" title="Container Storage Interface (CSI)"></a>Container Storage Interface (CSI)</h2><p>顧名思義，<a href="https://github.com/kubernetes/community/blob/master/contributors/design-proposals/storage/container-storage-interface.md" target="_blank" rel="noopener">CSI</a> 就是為了 container orchestration systems(例如：k8s，但不僅限於 k8s) 定義了一系列的標準 interface，讓 container 可以透過這些 interface 與 storage 互動。</p>
+<p>而 CSI 在 k8s 的支援上，從 v1.9 為 alpha，v1.10 為 beta，最後到 v1.13 正式 GA。</p>
+<p>關於 CSI 的使用細節，由於目前還沒使用過，所以這個部份就先跳過，但還是有些額外的資訊需要注意：</p>
+<ul>
+<li><p>k8s v1.13 後開始要廢除 CSI spec 0.2 &amp; 0.3 版本的支援</p>
+</li>
+<li><p>CSI driver 不一定會與所有的 k8s 版本相容，使用前要注意一下</p>
+</li>
+<li><p>從 k8s v1.11 開始，CSI 開始支援 <strong>raw block volume</strong>，目前為 <code>alpha</code>，需要額外開啟 <code>BlockVolume</code> &amp; <code>CSIBlockVolume</code> 兩個 feature gate</p>
+</li>
+<li><p>無法在 pod 定義中直接使用 CSI volume，必須透過 <code>PersistentVolumeClaim</code> 才可以使用</p>
+</li>
+<li><p>若要自行開發 CSI plugin，可以參考 <a href="https://kubernetes-csi.github.io/docs/" target="_blank" rel="noopener">Kubernetes CSI Developer Reference</a></p>
+</li>
+</ul>
+<h1 id="Mount-Propagation"><a href="#Mount-Propagation" class="headerlink" title="Mount Propagation"></a>Mount Propagation</h1><p>Mount Propagation 允許可以將掛載在某個 container 中的 volume 分享給在同一個 pod 中的 container，甚至是該 pod 所在的 node 的一種特殊功能。</p>
+<p>要使用 Mount Propagation 功能，必須在 <code>Container.volume.mounts</code> 中加上 <code>propagation</code> 參數，而可用的選項有以下幾種：</p>
+<ul>
+<li><p><code>None</code>：已經掛載到 container 的 volume，即使從 host 端在其子目錄上加上其他 mount，container 也不會收到；在 container 中建立的 mount 也不會讓 host 看到(<strong>default mode</strong>，等同於 Linux 中的 <code>private</code> mount propagation)</p>
+</li>
+<li><p><code>HostToContainer</code>：與上面較為不同，container 可以收到 host 後續在子目錄加上的 mount；但在 container 中建立的 mount 不會讓 host 看到(等同於 Linux 中的 <code>rslave</code> mount propagation)</p>
+</li>
+<li><p><code>Bidirectional</code>：除了有 <code>HostToContainer</code> 的行為之外，在 container 中掛載的其他內容也會在 host 上出現 (等同於 Linux 中的 <code>rshared</code> mount propagation)</p>
+</li>
+</ul>
+<p><code>Bidirectional</code> 模式在使用上其實蠻危險的，因此僅限於 Priviledged Container 中使用，此外在 container 中建立的任何 volume 都必須在 container 結束時一併移除。</p>
+<p>最後，若真的要使用到 Mount Propagation 的功能，必須在 Docker 中加上 <code>MountFlags=shared</code> 設定，並重新啟動 Docker service。</p>
+<h1 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h1><p>在 k8s 中，透過將 volume 抽離出 container 成為一個獨立的 resource object，透過此方式 <strong>volume state</strong> 可以被保存，即使分別由不同的 container 存取，而存在 volume 裡面的資料也就跟著 volume 本身的 life cycle 一起走。</p>
+<p>藉由以上方式，讓開發者與 storage 管理者可以分開管理各自負責的領域，最終的目的就是要讓開發者可以專注在開發上，而非 infrastucture 本身。</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a href="https://kubernetes.io/docs/concepts/storage/volumes/" target="_blank" rel="noopener">Volumes - Kubernetes</a></p>
+</li>
+<li><p><a href="https://www.youtube.com/watch?v=VB7vI9OT-WQ" target="_blank" rel="noopener">(39) Kubernetes Volumes 1: emptydir, NFS, YAML, volumes, and intro to Persistent Volume Claims - YouTube</a></p>
+</li>
+<li><p><a href="https://www.youtube.com/watch?v=OulmwTYTauI" target="_blank" rel="noopener">(39) Kubernetes Volumes 2: Understanding Persistent Volume (PV) and Persistent Volume Claim (PVC) - YouTube</a></p>
+</li>
+<li><p><a href="https://www.youtube.com/watch?v=X6Vkz-ny574" target="_blank" rel="noopener">(39) Kubernetes Volumes 3: How things connect - YouTube</a></p>
+</li>
+<li><p><a href="https://kubernetes.io/docs/concepts/storage/storage-classes/#local" target="_blank" rel="noopener">Storage Classes - Kubernetes</a></p>
+</li>
+<li><p><a href="https://github.com/kubernetes-sigs/sig-storage-local-static-provisioner" target="_blank" rel="noopener">kubernetes-sigs/sig-storage-local-static-provisioner: Static provisioner of local volumes</a></p>
+</li>
+<li><p><a href="https://github.com/kubernetes/community/blob/master/sig-storage/volume-plugin-faq.md" target="_blank" rel="noopener">community/volume-plugin-faq.md at master · kubernetes/community</a></p>
+</li>
+<li><p><a href="https://segmentfault.com/a/1190000016567617" target="_blank" rel="noopener">談談k8s1.12新特性–Mount propagation(掛載命名空間的傳播) - k8s小店 - SegmentFault 思否</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/Kubernetes/" rel="tag"># Kubernetes</a>
+              <a href="/blog/tags/CKA/" rel="tag"># CKA</a>
+              <a href="/blog/tags/Kubernetes-Storage/" rel="tag"># Kubernetes Storage</a>
+              <a href="/blog/tags/CKA-Storage/" rel="tag"># CKA Storage</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/blog/Kubernetes/k8s-Network-Policy-Overview/" rel="prev" title="[Kubernetes] Network Policy Overview">
+      <i class="fa fa-chevron-left"></i> [Kubernetes] Network Policy Overview
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/blog/Kubernetes/k8s-PersistentVolume-Overview/" rel="next" title="[Kubernetes] Persistent Volume (Claim) Overview">
+      [Kubernetes] Persistent Volume (Claim) Overview <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Preface"><span class="nav-number">1.</span> <span class="nav-text">Preface</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kubernetes-支援那些-Volume-Type"><span class="nav-number">2.</span> <span class="nav-text">Kubernetes 支援那些 Volume Type ?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#emptyDir"><span class="nav-number">2.1.</span> <span class="nav-text">emptyDir</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#hostPath"><span class="nav-number">2.2.</span> <span class="nav-text">hostPath</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#local"><span class="nav-number">2.3.</span> <span class="nav-text">local</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nfs"><span class="nav-number">2.4.</span> <span class="nav-text">nfs</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#secret"><span class="nav-number">2.5.</span> <span class="nav-text">secret</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#configMap"><span class="nav-number">2.6.</span> <span class="nav-text">configMap</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用-subPath"><span class="nav-number">3.</span> <span class="nav-text">使用 subPath</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#搭配-Expanded-Environment-Variables"><span class="nav-number">3.1.</span> <span class="nav-text">搭配 Expanded Environment Variables</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Out-of-Tree-Volume-Plugins"><span class="nav-number">4.</span> <span class="nav-text">Out-of-Tree Volume Plugins</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#FlexVolume"><span class="nav-number">4.1.</span> <span class="nav-text">FlexVolume</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Container-Storage-Interface-CSI"><span class="nav-number">4.2.</span> <span class="nav-text">Container Storage Interface (CSI)</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Mount-Propagation"><span class="nav-number">5.</span> <span class="nav-text">Mount Propagation</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Summary"><span class="nav-number">6.</span> <span class="nav-text">Summary</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">7.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives/">
+        
+          <span class="site-state-item-count">105</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">58</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/blog/lib/anime.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/blog/js/utils.js"></script>
+
+<script src="/blog/js/motion.js"></script>
+
+
+<script src="/blog/js/schemes/muse.js"></script>
+
+
+<script src="/blog/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

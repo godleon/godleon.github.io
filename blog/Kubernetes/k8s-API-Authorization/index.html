@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+<link rel="stylesheet" href="/blog/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="本篇文章介紹在 Kubernetes 中存取 API 時的授權機制">
+<meta property="og:type" content="article">
+<meta property="og:title" content="了解 Kubernetes 中的授權機制">
+<meta property="og:url" content="https://godleon.github.io/blog/Kubernetes/k8s-API-Authorization/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="本篇文章介紹在 Kubernetes 中存取 API 時的授權機制">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2018-06-19T08:30:00.000Z">
+<meta property="article:modified_time" content="2020-04-26T04:42:44.173Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="Kubernetes">
+<meta property="article:tag" content="Kubernetes Security">
+<meta property="article:tag" content="CKA">
+<meta property="article:tag" content="CKA Security">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://godleon.github.io/blog/Kubernetes/k8s-API-Authorization/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-tw'
+  };
+</script>
+
+  <title>了解 Kubernetes 中的授權機制 | 小信豬的原始部落</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/blog/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/blog/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/Kubernetes/k8s-API-Authorization/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          了解 Kubernetes 中的授權機制
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-06-19 16:30:00" itemprop="dateCreated datePublished" datetime="2018-06-19T16:30:00+08:00">2018-06-19</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-04-26 12:42:44" itemprop="dateModified" datetime="2020-04-26T12:42:44+08:00">2020-04-26</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Kubernetes/" itemprop="url" rel="index"><span itemprop="name">Kubernetes</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">本篇文章介紹在 Kubernetes 中存取 API 時的授權機制</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>在進行授權(Authorization) 之前，一定要先完成認證(Authentication) 的過程，而認證的說明可以參考<a href="https://godleon.github.io/blog/2018/06/19/Kubernetes/k8s-API-Authentication/">上一篇文章</a>。</p>
+<p>k8s 對於 REST API request 的屬性要求是通用的，因此可以與企業中 or 公有雲平台中現存的管理控制系統進行整合。</p>
+<p>而在 k8s 中，負責對 API request 進行授權的是 API server，藉由檢查所有的 <strong>request attribute</strong> 並查詢所有的 policy 來決定是否允許或拒絕 API request 的存取。</p>
+<blockquote>
+<p>預設情況下所有權限都是預設關閉的</p>
+</blockquote>
+<p>k8s 支援同時多個授權機制，並且為循序式的進行檢查，若有任何一個授權機制通過檢查，就會馬上允許存取，若是沒有通過任何的授權機制檢查，此 API request 就會被拒絕存取；而被拒絕存取的 API request 都會收到 HTTP 403 error。</p>
+<h1 id="名詞釋疑"><a href="#名詞釋疑" class="headerlink" title="名詞釋疑"></a>名詞釋疑</h1><h2 id="NameSpace"><a href="#NameSpace" class="headerlink" title="NameSpace"></a>NameSpace</h2><p>用來進行資源的虛擬隔離之用，在 k8s 剛建立好的初期會有預設的 <code>default</code> &amp; <code>kube-system</code> 兩個 namespace</p>
+<h2 id="User-Account-amp-Service-Account"><a href="#User-Account-amp-Service-Account" class="headerlink" title="User Account &amp; Service Account"></a>User Account &amp; Service Account</h2><p>User Account &amp; Service Account 是用來區別作用的範圍，但會有以下的差別：</p>
+<ol>
+<li><p>User Account 是用來辨識使用者，而 Service Account 則是用來辨識 k8s 中的各種服務</p>
+</li>
+<li><p>User Account 對應人的身份，因此是跨 namespace；而 Service Account 對應的是 service 的身份，因此是與 namespace 有相關</p>
+</li>
+</ol>
+<h1 id="Request-Attributes"><a href="#Request-Attributes" class="headerlink" title="Request Attributes"></a>Request Attributes</h1><p>上面有提到，API server 會檢查 <strong>API request attribute</strong> 來決定是否進行授權存取，在 k8s 有以下 API request attributes：</p>
+<ul>
+<li><p>user, group, extra(額外的 key/value 資訊)</p>
+</li>
+<li><p>API、Request Path(/api, /healthz), API request verb(get, list, create, update, patch, watch … etc)</p>
+</li>
+<li><p>HTTP request verb(get, post, put, delete)</p>
+</li>
+<li><p>Resource, Subresource (存取 resource 時需要的資訊)</p>
+</li>
+<li><p>Namespace</p>
+</li>
+<li><p><a href="https://kubernetes.io/docs/concepts/overview/kubernetes-api/#api-groups" target="_blank" rel="noopener">API group</a> (存取 resource 時需要的資訊)</p>
+</li>
+</ul>
+<h1 id="Authorization-Modules"><a href="#Authorization-Modules" class="headerlink" title="Authorization Modules"></a>Authorization Modules</h1><p>目前 k8s 支援以下幾種 Authorization Modules：</p>
+<h2 id="Node"><a href="#Node" class="headerlink" title="Node"></a><a href="https://kubernetes.io/docs/reference/access-authn-authz/node/" target="_blank" rel="noopener">Node</a></h2><p>此模組是為了授權在每一個 node 上的 kubelet 所發出的 API request 所設計出來的，讓 kubelet 的 API request 可進行特定的權限控制；例如對於以下的 resource 的讀取的權限：</p>
+<ul>
+<li><p>services</p>
+</li>
+<li><p>endpoints</p>
+</li>
+<li><p>nodes</p>
+</li>
+<li><p>pods</p>
+</li>
+<li><p>secrets / configmaps / presistent volume (claim)</p>
+</li>
+</ul>
+<p>另外透過 NodeRestriction 的 plugin，可以針對以下 resource 進行寫入：</p>
+<ul>
+<li><p>node (status)</p>
+</li>
+<li><p>pod (status)</p>
+</li>
+<li><p>event</p>
+</li>
+</ul>
+<blockquote>
+<p>未來可能還會繼續透過 Node Authorization 來對於 kubelet 進行更細膩的權限控管</p>
+</blockquote>
+<h2 id="ABAC-Attribute-based-access-control"><a href="#ABAC-Attribute-based-access-control" class="headerlink" title="ABAC (Attribute-based access control)"></a><a href="https://kubernetes.io/docs/reference/access-authn-authz/abac/" target="_blank" rel="noopener">ABAC (Attribute-based access control)</a></h2><p>此種方式就是在 master node 上保留一份 policy 文件，指定不同的使用者對於 resource 的存取權限，不彈性也不容易擴充，修改了 policy 文件之後還需要重新啟動 master node。</p>
+<h2 id="RBAC-Role-based-access-control"><a href="#RBAC-Role-based-access-control" class="headerlink" title="RBAC (Role-based access control)"></a><a href="https://kubernetes.io/docs/reference/access-authn-authz/rbac/" target="_blank" rel="noopener">RBAC (Role-based access control)</a></h2><p>RBAC 是目前 k8s 預設會啟動的 authorization module。</p>
+<p>在 RBAC API 中定義了 resource target，用來描述使用者以及 resource 之間的權限關係：</p>
+<ul>
+<li><p>Role：定義在特定 namespace 下的 resource 的存取權限</p>
+</li>
+<li><p>RoleBinding： 設定哪些使用者(or service account)與 role 綁定而擁有存取權限</p>
+</li>
+<li><p>ClusterRole：定義在整個 k8s cluster 下的 resource 的存取權限</p>
+</li>
+<li><p>ClusterRoleBinding：設定哪些使用者(or service account)與 role 綁定而擁有存取權限</p>
+</li>
+</ul>
+<p>接著以下以 role <strong>kubernetes-dashboard-minimal</strong> 做個簡單的示範：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">root@kube-master0:~<span class="comment"># kubectl get role --all-namespaces</span></span><br><span class="line">NAMESPACE     NAME                                             AGE</span><br><span class="line">default       pod-reader                                       4d</span><br><span class="line">kube-public   system:controller:bootstrap-signer               5d</span><br><span class="line">kube-system   extension-apiserver-authentication-reader        5d</span><br><span class="line">kube-system   kubernetes-dashboard-minimal                     5d</span><br><span class="line">..... (略)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl get rolebinding --all-namespaces</span></span><br><span class="line">NAMESPACE     NAME                                             AGE</span><br><span class="line">kube-public   system:controller:bootstrap-signer               5d</span><br><span class="line">kube-system   kubernetes-dashboard-minimal                     5d</span><br><span class="line">..... (略)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 檢視 role "kubernetes-dashboard-minimal" 中有那些 resource 的存取權限</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl describe role/kubernetes-dashboard-minimal -n kube-system</span></span><br><span class="line">Name:         kubernetes-dashboard-minimal</span><br><span class="line">Labels:       &lt;none&gt;</span><br><span class="line">Annotations:  kubectl.kubernetes.io/last-applied-configuration=&#123;<span class="string">"apiVersion"</span>:<span class="string">"rbac.authorization.k8s.io/v1"</span>,<span class="string">"kind"</span>:<span class="string">"Role"</span>,<span class="string">"metadata"</span>:&#123;<span class="string">"annotations"</span>:&#123;&#125;,<span class="string">"name"</span>:<span class="string">"kubernetes-dashboard-minimal"</span>,<span class="string">"namespace"</span>:<span class="string">"kube-system"</span>...</span><br><span class="line">PolicyRule:</span><br><span class="line">  Resources       Non-Resource URLs  Resource Names                     Verbs</span><br><span class="line">  ---------       -----------------  --------------                     -----</span><br><span class="line">  configmaps      []                 [kubernetes-dashboard-settings]    [get update]</span><br><span class="line">  configmaps      []                 []                                 [create]</span><br><span class="line">  secrets         []                 [kubernetes-dashboard-certs]       [get update delete]</span><br><span class="line">  secrets         []                 [kubernetes-dashboard-key-holder]  [get update delete]</span><br><span class="line">  secrets         []                 []                                 [create]</span><br><span class="line">  services        []                 [heapster]                         [proxy]</span><br><span class="line">  services/proxy  []                 [heapster]                         [get]</span><br><span class="line">  services/proxy  []                 [http:heapster:]                   [get]</span><br><span class="line">  services/proxy  []                 [https:heapster:]                  [get]</span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 檢視目前與 role "kubernetes-dashboard-minimal" 相關連的使用者(名稱為 "kubernetes-dashboard" 的 service account)</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl describe rolebinding/kubernetes-dashboard-minimal -n kube-system</span></span><br><span class="line">Name:         kubernetes-dashboard-minimal</span><br><span class="line">Labels:       &lt;none&gt;</span><br><span class="line">Annotations:  kubectl.kubernetes.io/last-applied-configuration=&#123;<span class="string">"apiVersion"</span>:<span class="string">"rbac.authorization.k8s.io/v1"</span>,<span class="string">"kind"</span>:<span class="string">"RoleBinding"</span>,<span class="string">"metadata"</span>:&#123;<span class="string">"annotations"</span>:&#123;&#125;,<span class="string">"name"</span>:<span class="string">"kubernetes-dashboard-minimal"</span>,<span class="string">"namespace"</span>:<span class="string">"kube-...</span></span><br><span class="line"><span class="string">Role:</span></span><br><span class="line"><span class="string">  Kind:  Role</span></span><br><span class="line"><span class="string">  Name:  kubernetes-dashboard-minimal</span></span><br><span class="line"><span class="string">Subjects:</span></span><br><span class="line"><span class="string">  Kind            Name                  Namespace</span></span><br><span class="line"><span class="string">  ----            ----                  ---------</span></span><br><span class="line"><span class="string">  ServiceAccount  kubernetes-dashboard  kube-system</span></span><br></pre></td></tr></table></figure>
+
+<p>接著以 clusterole <strong>system:controller:deployment-controller</strong> 做示範：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 檢視目前 k8s cluster 中的 ClusteRole 資訊</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl get clusterrole</span></span><br><span class="line">NAME                                                                   AGE</span><br><span class="line">admin                                                                  5d</span><br><span class="line">calico-node                                                            5d</span><br><span class="line">cluster-admin                                                          5d</span><br><span class="line">..... (略)</span><br><span class="line">system:controller:deployment-controller                                5d</span><br><span class="line">..... (略)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 檢視 "system:controller:deployment-controller" ClusteRole 的 resource 存取權限</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl describe clusterrole/system:controller:deployment-controller</span></span><br><span class="line">Name:         system:controller:deployment-controller</span><br><span class="line">Labels:       kubernetes.io/bootstrapping=rbac-defaults</span><br><span class="line">Annotations:  rbac.authorization.kubernetes.io/autoupdate=<span class="literal">true</span></span><br><span class="line">PolicyRule:</span><br><span class="line">  Resources                          Non-Resource URLs  Resource Names  Verbs</span><br><span class="line">  ---------                          -----------------  --------------  -----</span><br><span class="line">  events                             []                 []              [create patch update]</span><br><span class="line">  pods                               []                 []              [get list update watch]</span><br><span class="line">  deployments.apps                   []                 []              [get list update watch]</span><br><span class="line">  deployments.apps/finalizers        []                 []              [update]</span><br><span class="line">  deployments.apps/status            []                 []              [update]</span><br><span class="line">  replicasets.apps                   []                 []              [create delete get list patch update watch]</span><br><span class="line">  deployments.extensions             []                 []              [get list update watch]</span><br><span class="line">  deployments.extensions/finalizers  []                 []              [update]</span><br><span class="line">  deployments.extensions/status      []                 []              [update]</span><br><span class="line">  replicasets.extensions             []                 []              [create delete get list patch update watch]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 檢視目前 k8s cluster 中的 ClusteRoleBinding 資訊</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl get clusterrolebinding</span></span><br><span class="line">NAME                                                   AGE</span><br><span class="line">..... (略)</span><br><span class="line">system:controller:deployment-controller                5d</span><br><span class="line">..... (略)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 檢視目前 k8s cluster 中與 "system:controller:deployment-controller" ClusteRoleBinding 連結的使用者(or service account)</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl describe clusterrolebinding/system:controller:deployment-controller</span></span><br><span class="line">Name:         system:controller:deployment-controller</span><br><span class="line">Labels:       kubernetes.io/bootstrapping=rbac-defaults</span><br><span class="line">Annotations:  rbac.authorization.kubernetes.io/autoupdate=<span class="literal">true</span></span><br><span class="line">Role:</span><br><span class="line">  Kind:  ClusterRole</span><br><span class="line">  Name:  system:controller:deployment-controller</span><br><span class="line">Subjects:</span><br><span class="line">  Kind            Name                   Namespace</span><br><span class="line">  ----            ----                   ---------</span><br><span class="line">  ServiceAccount  deployment-controller  kube-system</span><br></pre></td></tr></table></figure>
+
+<p>API server 已經預先建立了一系列的 ClusterRole &amp; ClusteRoleBinding，名稱都以 <strong>system</strong> 開頭，並涵蓋了維持系統正常服務所需要的所有權限，因此整個 k8s cluster 都可以在 RBAC 的基礎下進行權限的管理與授權。</p>
+<blockquote>
+<p>這也代表著隨意對 system 開頭的 ClusteRole 修改，可能會造成系統無法正常運作。</p>
+</blockquote>
+<h2 id="Webhook"><a href="#Webhook" class="headerlink" title="Webhook"></a><a href="https://kubernetes.io/docs/reference/access-authn-authz/webhook/" target="_blank" rel="noopener">Webhook</a></h2><p>此模式是管理者在外部提供 HTTPS 授權服務，並設定 API server 透過與外部服務互動的方式進行授權。</p>
+<h1 id="檢查-API-存取權限"><a href="#檢查-API-存取權限" class="headerlink" title="檢查 API 存取權限"></a>檢查 API 存取權限</h1><p>kubectl 提供了 <code>auth can-i</code> 命令，可用來查詢當前的使用者有沒有特定 resource 的存取權限：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 檢查有無在 "dev" namespace 中建立 deployment 的權限</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl auth can-i create deployments --namespace dev</span></span><br><span class="line">yes</span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 檢查有無在 "prod" namespace 中建立 deployment 的權限</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl auth can-i create deployments --namespace prod</span></span><br><span class="line">yes</span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 檢查有無在 "dev" namespace 中以 dave 的身份來列出 secret 的權限</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">root@kube-master0:~<span class="comment"># kubectl auth can-i list secrets --namespace dev --as dave</span></span><br><span class="line">yes</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a href="https://kubernetes.io/docs/reference/access-authn-authz/authorization/" target="_blank" rel="noopener">Authorization Overview - Kubernetes</a></p>
+</li>
+<li><p><a href="https://zhangchenchen.github.io/2017/08/17/kubernetes-authentication-authorization-admission-control/" target="_blank" rel="noopener">Kubernetes– 漫谈kubernetes 中的认证 &amp; 授权 &amp; 准入机制 | Solar</a></p>
+</li>
+<li><p><a href="http://cizixs.com/2017/06/16/kubernetes-authentication-and-authorization" target="_blank" rel="noopener">kubernetes 權限管理 – Cizixs Writes Here</a></p>
+</li>
+<li><p><a href="https://k8smeetup.github.io/docs/admin/authorization/rbac/" target="_blank" rel="noopener">https://k8smeetup.github.io/docs/admin/authorization/rbac/</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/Kubernetes/" rel="tag"># Kubernetes</a>
+              <a href="/blog/tags/Kubernetes-Security/" rel="tag"># Kubernetes Security</a>
+              <a href="/blog/tags/CKA/" rel="tag"># CKA</a>
+              <a href="/blog/tags/CKA-Security/" rel="tag"># CKA Security</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/blog/Kubernetes/k8s-API-Authentication/" rel="prev" title="了解 Kubernetes 中的認證機制">
+      <i class="fa fa-chevron-left"></i> 了解 Kubernetes 中的認證機制
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/blog/Kubernetes/k8s-Deploy-and-Access-Dashboard/" rel="next" title="佈署 & 存取 Kubernetes Dashboard">
+      佈署 & 存取 Kubernetes Dashboard <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#名詞釋疑"><span class="nav-number">2.</span> <span class="nav-text">名詞釋疑</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#NameSpace"><span class="nav-number">2.1.</span> <span class="nav-text">NameSpace</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#User-Account-amp-Service-Account"><span class="nav-number">2.2.</span> <span class="nav-text">User Account &amp; Service Account</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Request-Attributes"><span class="nav-number">3.</span> <span class="nav-text">Request Attributes</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Authorization-Modules"><span class="nav-number">4.</span> <span class="nav-text">Authorization Modules</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Node"><span class="nav-number">4.1.</span> <span class="nav-text">Node</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ABAC-Attribute-based-access-control"><span class="nav-number">4.2.</span> <span class="nav-text">ABAC (Attribute-based access control)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RBAC-Role-based-access-control"><span class="nav-number">4.3.</span> <span class="nav-text">RBAC (Role-based access control)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Webhook"><span class="nav-number">4.4.</span> <span class="nav-text">Webhook</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#檢查-API-存取權限"><span class="nav-number">5.</span> <span class="nav-text">檢查 API 存取權限</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives/">
+        
+          <span class="site-state-item-count">105</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">58</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/blog/lib/anime.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/blog/js/utils.js"></script>
+
+<script src="/blog/js/motion.js"></script>
+
+
+<script src="/blog/js/schemes/muse.js"></script>
+
+
+<script src="/blog/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

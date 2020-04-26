@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+<link rel="stylesheet" href="/blog/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="本篇文章的主題圍繞在 Kubernetes 中的 ReplicaSet resource object，並對其概念 &amp; 特性作概略的介紹">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[Kubernetes] ReplicaSet 介紹">
+<meta property="og:url" content="https://godleon.github.io/blog/Kubernetes/k8s-ReplicaSet-Overview/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="本篇文章的主題圍繞在 Kubernetes 中的 ReplicaSet resource object，並對其概念 &amp; 特性作概略的介紹">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/k8s-replicaset.png">
+<meta property="article:published_time" content="2018-09-07T01:00:00.000Z">
+<meta property="article:modified_time" content="2020-04-26T04:42:44.177Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="Kubernetes">
+<meta property="article:tag" content="CKA">
+<meta property="article:tag" content="Kubernetes Core Concept">
+<meta property="article:tag" content="CKA Core Concept">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/kubernetes/k8s-replicaset.png">
+
+<link rel="canonical" href="https://godleon.github.io/blog/Kubernetes/k8s-ReplicaSet-Overview/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-tw'
+  };
+</script>
+
+  <title>[Kubernetes] ReplicaSet 介紹 | 小信豬的原始部落</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/blog/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/blog/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/Kubernetes/k8s-ReplicaSet-Overview/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [Kubernetes] ReplicaSet 介紹
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-09-07 09:00:00" itemprop="dateCreated datePublished" datetime="2018-09-07T09:00:00+08:00">2018-09-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-04-26 12:42:44" itemprop="dateModified" datetime="2020-04-26T12:42:44+08:00">2020-04-26</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Kubernetes/" itemprop="url" rel="index"><span itemprop="name">Kubernetes</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">本篇文章的主題圍繞在 Kubernetes 中的 ReplicaSet resource object，並對其概念 & 特性作概略的介紹</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="What-is-ReplicaSet"><a href="#What-is-ReplicaSet" class="headerlink" title="What is ReplicaSet ?"></a>What is ReplicaSet ?</h1><p><img src="/blog/images/kubernetes/k8s-replicaset.png" alt="ReplicaSet"></p>
+<p>ReplicaSet 是用來確保在 k8s 中，在資源允許的前提下，指定的 pod 的數量會跟使用者所期望的一致，也就是所謂的 desired status。</p>
+<p>而 ReplicaSet 其實是 ReplicationController 的進化版，其中的差別僅在於 ReplicaSet 支援 set-based label selector，而 ReplicationController 僅支援 equality-based label selector。</p>
+<h1 id="如何使用-ReplicaSet"><a href="#如何使用-ReplicaSet" class="headerlink" title="如何使用 ReplicaSet?"></a>如何使用 ReplicaSet?</h1><p>官方建議 ReplicaSet 要搭配 Deployment 一起來使用，原因如下：</p>
+<ul>
+<li><p>若是有 <a href="https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#rolling-update" target="_blank" rel="noopener">rolling update</a> 的需求 只有在 Deployment 有相關的 kubectl 指令可以協助，單單使用 ReplicaSet 是沒有的</p>
+</li>
+<li><p>Deployment 是個更上層的抽象概念，也因此支援了更多好用的 feature，因此官方才會建議不要單獨使用 ReplicaSet，而是使用 Deployment，並將 ReplicaSet 的資訊設定到 Deployment 的 spec 中</p>
+</li>
+</ul>
+<h1 id="ReplicaSet-定義說明"><a href="#ReplicaSet-定義說明" class="headerlink" title="ReplicaSet 定義說明"></a>ReplicaSet 定義說明</h1><h2 id="範例介紹"><a href="#範例介紹" class="headerlink" title="範例介紹"></a>範例介紹</h2><p>以下用一個簡單的範例來介紹 ReplicaSet 的結構定義：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># apiVersion, kind, metadata 是必備欄位</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ReplicaSet</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">frontend</span></span><br><span class="line">  <span class="comment"># replicaset 也可以定義 label</span></span><br><span class="line">  <span class="comment"># 一般會與 .spec.template.metadata.labels 設定相同，但不同其實也沒差</span></span><br><span class="line">  <span class="attr">labels:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">guestbook</span></span><br><span class="line">    <span class="attr">tier:</span> <span class="string">frontend</span></span><br><span class="line"><span class="comment"># 以下透過 spec 設定 replicaset 的規格 </span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="comment"># 要產生幾份副本(沒設定則預設為 1)</span></span><br><span class="line">  <span class="attr">replicas:</span> <span class="number">3</span></span><br><span class="line">  <span class="comment"># 設定 label selector，用來選擇產生副本用的 pod</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">matchLabels:</span></span><br><span class="line">      <span class="attr">tier:</span> <span class="string">frontend</span></span><br><span class="line">    <span class="attr">matchExpressions:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">&#123;key:</span> <span class="string">tier,</span> <span class="attr">operator:</span> <span class="string">In,</span> <span class="attr">values:</span> <span class="string">[frontend]&#125;</span></span><br><span class="line">  <span class="comment"># .spec.template 是 .spec 中唯一的必要欄位</span></span><br><span class="line">  <span class="comment"># 其實就是 pod template</span></span><br><span class="line">  <span class="attr">template:</span></span><br><span class="line">    <span class="attr">metadata:</span></span><br><span class="line">      <span class="comment"># .spec.template.metadata.labels 必須符合 .spec.selector 中的設定才行</span></span><br><span class="line">      <span class="comment"># 否則 API server 會拒絕產生此物件</span></span><br><span class="line">      <span class="attr">labels:</span></span><br><span class="line">        <span class="attr">app:</span> <span class="string">guestbook</span></span><br><span class="line">        <span class="attr">tier:</span> <span class="string">frontend</span></span><br><span class="line">    <span class="attr">spec:</span></span><br><span class="line">      <span class="comment"># 所有 .spec.template.spec.restartPolicy 的設定，僅能設定為 Always (同時也是預設值)</span></span><br><span class="line">      <span class="attr">containers:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">php-redis</span></span><br><span class="line">        <span class="attr">image:</span> <span class="string">gcr.io/google_samples/gb-frontend:v3</span></span><br><span class="line">        <span class="attr">resources:</span></span><br><span class="line">          <span class="attr">requests:</span></span><br><span class="line">            <span class="attr">cpu:</span> <span class="string">100m</span></span><br><span class="line">            <span class="attr">memory:</span> <span class="string">100Mi</span></span><br><span class="line">        <span class="attr">env:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">GET_HOSTS_FROM</span></span><br><span class="line">          <span class="attr">value:</span> <span class="string">dns</span></span><br><span class="line">          <span class="comment"># If your cluster config does not include a dns service, then to</span></span><br><span class="line">          <span class="comment"># instead access environment variables to find service host</span></span><br><span class="line">          <span class="comment"># info, comment out the 'value: dns' line above, and uncomment the</span></span><br><span class="line">          <span class="comment"># line below.</span></span><br><span class="line">          <span class="comment"># value: env</span></span><br><span class="line">        <span class="attr">ports:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">containerPort:</span> <span class="number">80</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="使用上需要注意的事情"><a href="#使用上需要注意的事情" class="headerlink" title="使用上需要注意的事情"></a>使用上需要注意的事情</h2><p>在設定 ReplicaSet 的時候，有幾點是必須注意的：</p>
+<ul>
+<li><p><code>.spec.template.metadata.labels</code> 的設定必須符合 <code>.spec.selector</code>，否則 API server 會拒絕產生此物件</p>
+</li>
+<li><p>從 v1.9 後，apiVersion 已經從 <code>apps/v1beta2</code> 改為 <code>apps/v1</code></p>
+</li>
+<li><p>當 ReplicaSet 物件建立後，不要建立帶有完全相同 label 組合設定的 pod, deployment 或是其他 replicaset，這樣會造成運作上的混淆 (k8s 並不會阻止你這麼做….) </p>
+</li>
+<li><p>如果有建立多個帶有相同 label selector 的 controller，<strong>刪除</strong>這件事情你就要自己動手了</p>
+</li>
+<li><p><code>.spec.replicas</code> 若沒有設定就預設為 <strong>1</strong></p>
+</li>
+<li><p>如果要運行一個執行完工作就自動終止的 pod，就不要使用 ReplicaSet，而是要改用 <a href="https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/" target="_blank" rel="noopener">Job</a></p>
+</li>
+<li><p>如果要運行一個 machine level 的功能(例如：monitoring, logging)，確保 pod lifetime 與 machine lifetime 一致，且希望這個 pod 可以比其他 pod 更早啟動，也不要使用 ReplicaSet，而是要改用 <a href="https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/" target="_blank" rel="noopener">DaemonSet</a></p>
+</li>
+</ul>
+<h1 id="ReplicaSet-相關操作"><a href="#ReplicaSet-相關操作" class="headerlink" title="ReplicaSet 相關操作"></a>ReplicaSet 相關操作</h1><h2 id="刪除-ReplicaSet-amp-相關的-Pod"><a href="#刪除-ReplicaSet-amp-相關的-Pod" class="headerlink" title="刪除 ReplicaSet &amp; 相關的 Pod"></a>刪除 ReplicaSet &amp; 相關的 Pod</h2><p>透過 <a href="https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#delete" target="_blank" rel="noopener">kubectl delete</a> 刪除，k8s 中的 <a href="https://kubernetes.io/docs/concepts/workloads/controllers/garbage-collection/" target="_blank" rel="noopener">Garbage Controller</a> 會自動的刪除相對應的 pod。</p>
+<p>但若是透過 REST API k的方式，則必須要將 <code>propagationPolicy</code> 設定為 <strong>Foreground</strong> 才可以：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl proxy --port=8080</span><br><span class="line"></span><br><span class="line">$ curl -X DELETE  <span class="string">'localhost:8080/apis/extensions/v1beta1/namespaces/default/replicasets/frontend'</span> \</span><br><span class="line">&gt; -d <span class="string">'&#123;"kind":"DeleteOptions","apiVersion":"v1","propagationPolicy":"Foreground"&#125;'</span> \</span><br><span class="line">&gt; -H <span class="string">"Content-Type: application/json"</span></span><br></pre></td></tr></table></figure>
+
+
+<h2 id="僅刪除-ReplicaSet"><a href="#僅刪除-ReplicaSet" class="headerlink" title="僅刪除 ReplicaSet"></a>僅刪除 ReplicaSet</h2><p>若只要刪除 ReplicaSet 而不影響 pod，透過 <a href="https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#delete" target="_blank" rel="noopener">kubectl delete</a> 搭配 <code>--cascade=false</code> 參數就可以完成。</p>
+<p>若使用 REST API，則必須要將 <code>propagationPolicy</code> 設定為 <strong>Orphan</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl proxy --port=8080</span><br><span class="line"></span><br><span class="line">$ curl -X DELETE  <span class="string">'localhost:8080/apis/extensions/v1beta1/namespaces/default/replicasets/frontend'</span> \</span><br><span class="line">&gt; -d <span class="string">'&#123;"kind":"DeleteOptions","apiVersion":"v1","propagationPolicy":"Orphan"&#125;'</span> \</span><br><span class="line">&gt; -H <span class="string">"Content-Type: application/json"</span></span><br></pre></td></tr></table></figure>
+
+
+<h2 id="將-ReplicaSet-與-Pod-隔離"><a href="#將-ReplicaSet-與-Pod-隔離" class="headerlink" title="將 ReplicaSet 與 Pod 隔離"></a>將 ReplicaSet 與 Pod 隔離</h2><p>通常會這麼做的目的大多在於進行 debugging 或是 data recovery。</p>
+<p>作法不困難，只要修改 pod label，讓 ReplicaSet 的 label selector 選不到該 pod 即可；但同時要搭配調整 ReplicaSet 中的 <code>.spec.replicas</code> 的設定，不然新的 pod 又會被產生出來。</p>
+<h2 id="ReplicaSet-Scaling"><a href="#ReplicaSet-Scaling" class="headerlink" title="ReplicaSet Scaling"></a>ReplicaSet Scaling</h2><p>調整 <code>.spec.replicas</code> 設定即可，k8s 會自動維護使用者所指定的 desired status。</p>
+<h2 id="與-HPA-Horizontal-Pod-Autoscaler-Target-的搭配"><a href="#與-HPA-Horizontal-Pod-Autoscaler-Target-的搭配" class="headerlink" title="與 HPA(Horizontal Pod Autoscaler Target) 的搭配"></a>與 HPA(Horizontal Pod Autoscaler Target) 的搭配</h2><p>透過與 <a href="https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/" target="_blank" rel="noopener">Horizontal Pod Autoscaler Target(HPA)</a> 搭配，可以指定 ReplicaSet Scaling 的上下限範圍，在資源使用率達到指定門檻時，讓 k8s 自動進行 scale out/in，以下是個簡單範例：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">autoscaling/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">HorizontalPodAutoscaler</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">frontend-scaler</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="comment"># 指定要搭配的 resource object，這裡是 ReplicaSet</span></span><br><span class="line">  <span class="attr">scaleTargetRef:</span></span><br><span class="line">    <span class="attr">kind:</span> <span class="string">ReplicaSet</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">frontend</span></span><br><span class="line">  <span class="comment"># 指定 scale in/out 的 pod 數量為 3~10 個</span></span><br><span class="line">  <span class="attr">minReplicas:</span> <span class="number">3</span></span><br><span class="line">  <span class="attr">maxReplicas:</span> <span class="number">10</span></span><br><span class="line">  <span class="comment"># 資源使用率門檻為 CPU 使用率 50%</span></span><br><span class="line">  <span class="attr">targetCPUUtilizationPercentage:</span> <span class="number">50</span></span><br></pre></td></tr></table></figure>
+
+
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><a href="https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/" target="_blank" rel="noopener">ReplicaSet - Kubernetes</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/Kubernetes/" rel="tag"># Kubernetes</a>
+              <a href="/blog/tags/CKA/" rel="tag"># CKA</a>
+              <a href="/blog/tags/Kubernetes-Core-Concept/" rel="tag"># Kubernetes Core Concept</a>
+              <a href="/blog/tags/CKA-Core-Concept/" rel="tag"># CKA Core Concept</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/blog/Kubernetes/k8s-Pod-Overview/" rel="prev" title="[Kubernetes] Pod 的設計 & 相關運作機制">
+      <i class="fa fa-chevron-left"></i> [Kubernetes] Pod 的設計 & 相關運作機制
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/blog/Kubernetes/k8s-Deployment-Overview/" rel="next" title="[Kubernetes] Deployment Overview">
+      [Kubernetes] Deployment Overview <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#What-is-ReplicaSet"><span class="nav-number">1.</span> <span class="nav-text">What is ReplicaSet ?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#如何使用-ReplicaSet"><span class="nav-number">2.</span> <span class="nav-text">如何使用 ReplicaSet?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ReplicaSet-定義說明"><span class="nav-number">3.</span> <span class="nav-text">ReplicaSet 定義說明</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#範例介紹"><span class="nav-number">3.1.</span> <span class="nav-text">範例介紹</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用上需要注意的事情"><span class="nav-number">3.2.</span> <span class="nav-text">使用上需要注意的事情</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ReplicaSet-相關操作"><span class="nav-number">4.</span> <span class="nav-text">ReplicaSet 相關操作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#刪除-ReplicaSet-amp-相關的-Pod"><span class="nav-number">4.1.</span> <span class="nav-text">刪除 ReplicaSet &amp; 相關的 Pod</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#僅刪除-ReplicaSet"><span class="nav-number">4.2.</span> <span class="nav-text">僅刪除 ReplicaSet</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#將-ReplicaSet-與-Pod-隔離"><span class="nav-number">4.3.</span> <span class="nav-text">將 ReplicaSet 與 Pod 隔離</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ReplicaSet-Scaling"><span class="nav-number">4.4.</span> <span class="nav-text">ReplicaSet Scaling</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#與-HPA-Horizontal-Pod-Autoscaler-Target-的搭配"><span class="nav-number">4.5.</span> <span class="nav-text">與 HPA(Horizontal Pod Autoscaler Target) 的搭配</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives/">
+        
+          <span class="site-state-item-count">105</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">58</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/blog/lib/anime.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/blog/js/utils.js"></script>
+
+<script src="/blog/js/motion.js"></script>
+
+
+<script src="/blog/js/schemes/muse.js"></script>
+
+
+<script src="/blog/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
