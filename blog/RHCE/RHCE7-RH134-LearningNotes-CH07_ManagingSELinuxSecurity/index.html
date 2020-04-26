@@ -29,7 +29,7 @@
 <meta property="og:locale" content="zh_TW">
 <meta property="og:image" content="https://lh3.googleusercontent.com/bR6HlmRdHb9TosMXahqB3BxjdVdlFnfgpHh3bYbHeOmr2xGY_tvnAd7YBE4S4UWVzO_DX56XWwh6ytRqH1V27HhfcgRVlSHI5il3oCrJDaq0CRj_SBKElh8LLtCi4oDh3X1YXTK0gRX3p39i0soYp_ILkDBUku85ao5bYgFwmADGGN7S4Hd2FCQaREgbk9SFKgXQRJgMsvpfwmCg3KBKR6yEhG9T9iiQZg2cxZdXxELuzOFLx0jjrbgn84jxtXNnkNJJlWaOKQKtq8qGReElZkvZy2F1ZaJTcJtO208xPgEtoHHbI4N9GJyGUIcQzDhQ3rlXBuPbcuo0TT_W1yULLmLxA-uGR_JnA4cm9wv16tJZs3zMdeUKsFNxALBFZptxtOkOcpi1jopCJUEvCw4NAHhExPVHVHkVdFS2a-KUjRMBRyrFX-sa-xC5Ey3l7dbgKgjHjYta11VozADz7WIUV1FUVkR2tUmdXv6_XJVwVpclaD2PXnd7tHbOmM8Mnf4mwMP4E6yjjWiuTk9YVpoGx_2_8Nyw3xzzJ9CHYJy-WVPgSI1Q-m0Co6ZcR2bK_6p02bE8h9nft0354PiugpLIqV6dKQ0SW6g=w888-h225-no">
 <meta property="article:published_time" content="2016-05-08T21:10:00.000Z">
-<meta property="article:modified_time" content="2020-04-26T04:42:44.177Z">
+<meta property="article:modified_time" content="2020-04-26T04:53:08.608Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="Linux">
 <meta property="article:tag" content="RHCE">
@@ -185,7 +185,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-04-26 12:42:44" itemprop="dateModified" datetime="2020-04-26T12:42:44+08:00">2020-04-26</time>
+                <time title="Modified: 2020-04-26 12:53:08" itemprop="dateModified" datetime="2020-04-26T12:53:08+08:00">2020-04-26</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -198,6 +198,20 @@
             </span>
 
           
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/RHCE/RHCE7-RH134-LearningNotes-CH07_ManagingSELinuxSecurity/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="RHCE/RHCE7-RH134-LearningNotes-CH07_ManagingSELinuxSecurity/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
             <div class="post-description">此文章記錄學習 RHCE7 RH134 Chapter 07. Managing SELinux Security 留下的內容</div>
 
         </div>
@@ -375,6 +389,13 @@
 
           </div>
           
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
 
 <script>
   window.addEventListener('tabs:register', () => {
@@ -532,6 +553,37 @@
   
 
   
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/RHCE/RHCE7-RH134-LearningNotes-CH07_ManagingSELinuxSecurity/";
+    this.page.identifier = "RHCE/RHCE7-RH134-LearningNotes-CH07_ManagingSELinuxSecurity/";
+    this.page.title = "[RHCE7] RH134 Chapter 7. Managing SELinux Security 學習筆記";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
 
 </body>
 </html>

@@ -28,7 +28,7 @@
 <meta property="og:description" content="此篇文章是學習 AWS S3(Simple Storage Service) 時所留下的學習筆記">
 <meta property="og:locale" content="zh_TW">
 <meta property="article:published_time" content="2020-04-26T04:00:00.000Z">
-<meta property="article:modified_time" content="2020-04-26T04:42:44.169Z">
+<meta property="article:modified_time" content="2020-04-26T04:53:08.600Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="S3">
@@ -176,7 +176,7 @@
               <span class="post-meta-item-text">Posted on</span>
               
 
-              <time title="Created: 2020-04-26 12:00:00 / Modified: 12:42:44" itemprop="dateCreated datePublished" datetime="2020-04-26T12:00:00+08:00">2020-04-26</time>
+              <time title="Created: 2020-04-26 12:00:00 / Modified: 12:53:08" itemprop="dateCreated datePublished" datetime="2020-04-26T12:00:00+08:00">2020-04-26</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -189,6 +189,20 @@
             </span>
 
           
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/AWS/AWS-Learning-Notes-S3/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="AWS/AWS-Learning-Notes-S3/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
             <div class="post-description">此篇文章是學習 AWS S3(Simple Storage Service) 時所留下的學習筆記</div>
 
         </div>
@@ -891,6 +905,13 @@
 
           </div>
           
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
 
 <script>
   window.addEventListener('tabs:register', () => {
@@ -1048,6 +1069,37 @@
   
 
   
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/AWS/AWS-Learning-Notes-S3/";
+    this.page.identifier = "AWS/AWS-Learning-Notes-S3/";
+    this.page.title = "AWS 學習筆記 - S3(Simple Storage Service)";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
 
 </body>
 </html>
