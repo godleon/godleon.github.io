@@ -29,7 +29,7 @@
 <meta property="og:locale" content="zh_TW">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_Storage-Classes-comparision.png">
 <meta property="article:published_time" content="2020-04-26T04:00:00.000Z">
-<meta property="article:modified_time" content="2020-04-26T09:41:03.664Z">
+<meta property="article:modified_time" content="2020-04-26T21:39:10.856Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="S3">
@@ -176,10 +176,16 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
-              
 
-              <time title="Created: 2020-04-26 12:00:00 / Modified: 17:41:03" itemprop="dateCreated datePublished" datetime="2020-04-26T12:00:00+08:00">2020-04-26</time>
+              <time title="Created: 2020-04-26 12:00:00" itemprop="dateCreated datePublished" datetime="2020-04-26T12:00:00+08:00">2020-04-26</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-04-27 05:39:10" itemprop="dateModified" datetime="2020-04-27T05:39:10+08:00">2020-04-27</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
@@ -310,6 +316,9 @@
 </li>
 </ul>
 <h1 id="S3-Storage-Class"><a href="#S3-Storage-Class" class="headerlink" title="S3 Storage Class"></a>S3 Storage Class</h1><p>S3 根據使用者存取的頻率與需求，提供不同的 storage class 供使用者選擇：</p>
+<blockquote>
+<p>調整單位可以細到 object level，而非 bucket level</p>
+</blockquote>
 <h2 id="Standard"><a href="#Standard" class="headerlink" title="Standard"></a>Standard</h2><ul>
 <li><p>存取速度最快</p>
 </li>
@@ -358,6 +367,9 @@
 <li><p>透過人工智慧分析，自動將使用成本最佳化，且不會造成效能的影響，也可以減輕管理上的負擔</p>
 </li>
 </ul>
+<blockquote>
+<p>但最多幫使用者將資料移動到 IA tier 的費率，無法更低了(例如：<strong>One Zone-IA</strong> or <strong>Glacier</strong>)</p>
+</blockquote>
 <h3 id="參考資料-3"><a href="#參考資料-3" class="headerlink" title="參考資料"></a>參考資料</h3><ul>
 <li><a href="https://aws.amazon.com/tw/s3/storage-classes/#Unknown_or_changing_access" target="_blank" rel="noopener">物件儲存類別 – Amazon S3 Storage Class(Intelligent Tiering)</a></li>
 </ul>
@@ -436,6 +448,8 @@
 <li><p>若是更新 or 刪除檔案，則需要一段時間才會取得最新結果</p>
 </li>
 <li><p>S3 有眾多的 storage class 可以選用，使用者可以根據實際需求進行不同 storage class 的搭配以降低費用；若是懶的管理可以考慮選用 <code>Intelligent Tiering</code>，AWS 會根據實際使用狀況，最佳化使用成本 (但要長期備份的資料還是要自己移到 <code>Glacier</code> or <code>Glacier Deep Archive</code>)</p>
+</li>
+<li><p>用來控制 Bucket 存取權限有兩個手段，分別是 <code>bucket ACL</code>(控制存取 bucket 本身的權限) &amp; <code>bucket policies</code>(控制 bucket 與其他 AWS service 互相存取的權限)</p>
 </li>
 <li><p>S3 FAQ 很重要，考前必讀!</p>
 </li>
