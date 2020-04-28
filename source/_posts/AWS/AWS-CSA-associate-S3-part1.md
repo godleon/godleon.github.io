@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  "AWS 學習筆記 - S3(Simple Storage Service) 101"
-description: "此篇文章是學習 AWS S3(Simple Storage Service) 時所留下的學習筆記"
+title:  "AWS CSA Associate 學習筆記 - S3(Simple Storage Service) Part 1"
+description: "此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 S3 服務，共分為四個部份，此為第一個部份"
 date: 2020-04-26 12:00:00
 published: true
 comments: true
@@ -9,6 +9,7 @@ categories:
   - AWS
 tags:
   - AWS
+  - CSA
   - S3
 ---
 
