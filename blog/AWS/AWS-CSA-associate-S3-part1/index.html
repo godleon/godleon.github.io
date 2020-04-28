@@ -20,23 +20,24 @@
     var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="此篇文章是學習 AWS S3(Simple Storage Service) 時所留下的學習筆記">
+  <meta name="description" content="此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 S3 服務，共分為四個部份，此為第一個部份">
 <meta property="og:type" content="article">
-<meta property="og:title" content="AWS 學習筆記 - S3(Simple Storage Service) 101">
-<meta property="og:url" content="https://godleon.github.io/blog/AWS/AWS-Learning-Notes-S3-101/index.html">
+<meta property="og:title" content="AWS CSA Associate 學習筆記 - S3(Simple Storage Service) Part 1">
+<meta property="og:url" content="https://godleon.github.io/blog/AWS/AWS-CSA-associate-S3-part1/index.html">
 <meta property="og:site_name" content="小信豬的原始部落">
-<meta property="og:description" content="此篇文章是學習 AWS S3(Simple Storage Service) 時所留下的學習筆記">
+<meta property="og:description" content="此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 S3 服務，共分為四個部份，此為第一個部份">
 <meta property="og:locale" content="zh_TW">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_Storage-Classes-comparision.png">
 <meta property="article:published_time" content="2020-04-26T04:00:00.000Z">
-<meta property="article:modified_time" content="2020-04-26T21:39:10.856Z">
+<meta property="article:modified_time" content="2020-04-28T21:51:38.163Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
+<meta property="article:tag" content="CSA">
 <meta property="article:tag" content="S3">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://godleon.github.io/blog/images/aws/S3_Storage-Classes-comparision.png">
 
-<link rel="canonical" href="https://godleon.github.io/blog/AWS/AWS-Learning-Notes-S3-101/">
+<link rel="canonical" href="https://godleon.github.io/blog/AWS/AWS-CSA-associate-S3-part1/">
 
 
 <script id="page-configurations">
@@ -49,7 +50,7 @@
   };
 </script>
 
-  <title>AWS 學習筆記 - S3(Simple Storage Service) 101 | 小信豬的原始部落</title>
+  <title>AWS CSA Associate 學習筆記 - S3(Simple Storage Service) Part 1 | 小信豬的原始部落</title>
   
 
 
@@ -154,7 +155,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
-    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/AWS/AWS-Learning-Notes-S3-101/">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/AWS/AWS-CSA-associate-S3-part1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/blog/images/avatar.gif">
@@ -167,7 +168,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          AWS 學習筆記 - S3(Simple Storage Service) 101
+          AWS CSA Associate 學習筆記 - S3(Simple Storage Service) Part 1
         </h1>
 
         <div class="post-meta">
@@ -184,7 +185,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-04-27 05:39:10" itemprop="dateModified" datetime="2020-04-27T05:39:10+08:00">2020-04-27</time>
+                <time title="Modified: 2020-04-29 05:51:38" itemprop="dateModified" datetime="2020-04-29T05:51:38+08:00">2020-04-29</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -205,13 +206,13 @@
       </span>
       <span class="post-meta-item-text">Disqus: </span>
     
-    <a title="disqus" href="/blog/AWS/AWS-Learning-Notes-S3-101/#disqus_thread" itemprop="discussionUrl">
-      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="AWS/AWS-Learning-Notes-S3-101/" itemprop="commentCount"></span>
+    <a title="disqus" href="/blog/AWS/AWS-CSA-associate-S3-part1/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="AWS/AWS-CSA-associate-S3-part1/" itemprop="commentCount"></span>
     </a>
   </span>
   
   
-            <div class="post-description">此篇文章是學習 AWS S3(Simple Storage Service) 時所留下的學習筆記</div>
+            <div class="post-description">此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 S3 服務，共分為四個部份，此為第一個部份</div>
 
         </div>
       </header>
@@ -472,6 +473,7 @@
       <footer class="post-footer">
           <div class="post-tags">
               <a href="/blog/tags/AWS/" rel="tag"># AWS</a>
+              <a href="/blog/tags/CSA/" rel="tag"># CSA</a>
               <a href="/blog/tags/S3/" rel="tag"># S3</a>
           </div>
 
@@ -484,7 +486,10 @@
     <a href="/blog/AWS/AWS-Learning-Notes-IAM/" rel="prev" title="AWS 學習筆記 - IAM(Identity and Access Management)">
       <i class="fa fa-chevron-left"></i> AWS 學習筆記 - IAM(Identity and Access Management)
     </a></div>
-      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/blog/AWS/AWS-CSA-associate-S3-part2/" rel="next" title="AWS CSA Associate 學習筆記 - S3(Simple Storage Service) Part 2">
+      AWS CSA Associate 學習筆記 - S3(Simple Storage Service) Part 2 <i class="fa fa-chevron-right"></i>
+    </a></div>
     </div>
       </footer>
     
@@ -564,7 +569,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/blog/archives/">
         
-          <span class="site-state-item-count">105</span>
+          <span class="site-state-item-count">106</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -575,7 +580,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/blog/tags/">
-        <span class="site-state-item-count">58</span>
+        <span class="site-state-item-count">59</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -674,9 +679,9 @@
 </script>
 <script>
   var disqus_config = function() {
-    this.page.url = "https://godleon.github.io/blog/AWS/AWS-Learning-Notes-S3-101/";
-    this.page.identifier = "AWS/AWS-Learning-Notes-S3-101/";
-    this.page.title = "AWS 學習筆記 - S3(Simple Storage Service) 101";
+    this.page.url = "https://godleon.github.io/blog/AWS/AWS-CSA-associate-S3-part1/";
+    this.page.identifier = "AWS/AWS-CSA-associate-S3-part1/";
+    this.page.title = "AWS CSA Associate 學習筆記 - S3(Simple Storage Service) Part 1";
     };
   NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
     if (window.DISQUS) {
