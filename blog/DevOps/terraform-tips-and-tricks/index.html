@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+<link rel="stylesheet" href="/blog/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="本篇文章是學習 Terraform 的過程中，將覺得值得記錄的一些注意事項 &amp; 小技巧進行整理後所留下的筆記，後續若是有其他值得記錄的內容，會再繼續補上">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[Terraform] 使用上的小技巧整理">
+<meta property="og:url" content="https://godleon.github.io/blog/DevOps/terraform-tips-and-tricks/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="本篇文章是學習 Terraform 的過程中，將覺得值得記錄的一些注意事項 &amp; 小技巧進行整理後所留下的筆記，後續若是有其他值得記錄的內容，會再繼續補上">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2020-05-10T21:45:00.000Z">
+<meta property="article:modified_time" content="2020-05-10T21:45:35.503Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="DevOps">
+<meta property="article:tag" content="Terraform">
+<meta property="article:tag" content="IaC">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://godleon.github.io/blog/DevOps/terraform-tips-and-tricks/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-tw'
+  };
+</script>
+
+  <title>[Terraform] 使用上的小技巧整理 | 小信豬的原始部落</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/blog/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/blog/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/DevOps/terraform-tips-and-tricks/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [Terraform] 使用上的小技巧整理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2020-05-11 05:45:00 / Modified: 05:45:35" itemprop="dateCreated datePublished" datetime="2020-05-11T05:45:00+08:00">2020-05-11</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Terraform/" itemprop="url" rel="index"><span itemprop="name">Terraform</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/DevOps/terraform-tips-and-tricks/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="DevOps/terraform-tips-and-tricks/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">本篇文章是學習 Terraform 的過程中，將覺得值得記錄的一些注意事項 & 小技巧進行整理後所留下的筆記，後續若是有其他值得記錄的內容，會再繼續補上</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="規劃-Provider-Plugin-Cache-存放位置"><a href="#規劃-Provider-Plugin-Cache-存放位置" class="headerlink" title="規劃 Provider Plugin Cache 存放位置"></a>規劃 Provider Plugin Cache 存放位置</h1><p>當執行 <code>terraform init</code> 時，terraform 會下載 provider plugin 並放在目前的目錄中，但如果專案中有相當多個目錄，就表示這樣的下載行為會被執行很多次，且會浪費不少空間。</p>
+<p>因此為了解決這個問題，可以搭配 <a href="https://www.terraform.io/docs/commands/cli-config.html" target="_blank" rel="noopener">CLI configuragion file</a> 一起使用，只要在 <code>$HOME</code> 中放入 <code>.terraformrc</code> 檔案(only for non-Windows OS)，內容如下：(<strong>指定目錄必須先建立好</strong>)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">plugin_cache_dir &#x3D; &quot;$HOME&#x2F;.terraform.d&#x2F;plugin-cache&quot;</span><br></pre></td></tr></table></figure>
+
+<p>這樣每次進行 <code>terraform init</code> 的時候，plugin cache 就會被放到同樣的地方囉!</p>
+<blockquote>
+<p>若是設定環境變數 <code>TF_PLUGIN_CACHE_DIR</code> 也是可以有相同效果</p>
+</blockquote>
+<blockquote>
+<p>另外比較需要注意的是，plugin cache 目錄不能與 third party plugin 目錄放在相同地方，會有問題，目前 terraform 還無法處理這樣的規劃安排</p>
+</blockquote>
+<h1 id="Terraform-的使用限制"><a href="#Terraform-的使用限制" class="headerlink" title="Terraform 的使用限制"></a>Terraform 的使用限制</h1><h2 id="count-amp-for-each-無法與-resource-output-搭配使用"><a href="#count-amp-for-each-無法與-resource-output-搭配使用" class="headerlink" title="count &amp; for_each 無法與 resource output 搭配使用"></a>count &amp; for_each 無法與 resource output 搭配使用</h2><p>原因是因為 terraform 在 plan 階段就必須預測 infra 建立後的樣子，但 resource output 卻必須等待 resource 產生後才可以取得，因此無法在 plan 階段預測結果，因此會失敗。</p>
+<h2 id="count-amp-for-each-無法用在-module-設定中"><a href="#count-amp-for-each-無法用在-module-設定中" class="headerlink" title="count &amp; for_each 無法用在 module 設定中"></a>count &amp; for_each 無法用在 module 設定中</h2><p>以下的設定會失敗：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">module &quot;webserver_cluster&quot; &#123;</span><br><span class="line">  source &#x3D; &quot;..&#x2F;..&#x2F;..&#x2F;..&#x2F;modules&#x2F;services&#x2F;webserver-cluster&quot;</span><br><span class="line"></span><br><span class="line">  count &#x3D; 3</span><br><span class="line"></span><br><span class="line">  ....</span><br><span class="line">  ....</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="Zero-Downtime-Deployment-有其限制"><a href="#Zero-Downtime-Deployment-有其限制" class="headerlink" title="Zero Downtime Deployment 有其限制"></a>Zero Downtime Deployment 有其限制</h1><p>使用 <strong>ASG(Auto Scaling Group)</strong> 搭配 <code>create_before_destroy</code> policy 雖然可以達到 zero-download 的佈署，但並不會考慮到 auto scaling policy 的部份，因為 ASG 被產生後，只會使用 min_size 中所設定的值。</p>
+<p>有兩個 workaround 可以解這個問題：</p>
+<ol>
+<li><p>將 <strong>aws_autoscaling_schedule</strong> 從 <code>0 9 * * *</code> 改成 <code>0-59 9-17 * * *</code>，若目前環境已經達到 schedule 的要求則不會變更，若是沒有，則一分鐘內就會套用規則</p>
+</li>
+<li><p>開發 script，使用 <a href="https://www.terraform.io/docs/providers/external/data_source.html" target="_blank" rel="noopener">External Data Source</a> 的機制，搭配 <code>desired_capacity</code> 參數，也可以達成相同效果；但這樣會造成 terraform code 可攜性降低，也會變得較難維護</p>
+</li>
+</ol>
+<h1 id="看起來可執行的-plan-還是有可能會壞掉"><a href="#看起來可執行的-plan-還是有可能會壞掉" class="headerlink" title="看起來可執行的 plan 還是有可能會壞掉"></a>看起來可執行的 plan 還是有可能會壞掉</h1><p>這通常是因為除了 terraform 之外，可能還使用了 CLI 之類的工具進行了資源上的管理，因此在佈署資源時產生了衝突。</p>
+<p>而這樣的問題有兩種解法：</p>
+<ol>
+<li><p>全部用 terraform</p>
+<blockquote>
+<p>讓 terraform state 可以完全符合現況</p>
+</blockquote>
+</li>
+<li><p>若已經有現存的 infra 存在，則使用 import 命令產生 state</p>
+</li>
+</ol>
+<h1 id="重構-Refactoring-要很小心"><a href="#重構-Refactoring-要很小心" class="headerlink" title="重構(Refactoring) 要很小心"></a>重構(Refactoring) 要很小心</h1><p>重構在一般程式語言的開發中是很常見的，但在 terraform 中可不是這樣子，在有些情況下，terraform 會出現非預期的結果，例如：</p>
+<ul>
+<li><p>修改某個 resource name</p>
+</li>
+<li><p>修改 resource identifier</p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 將 instance 改為 cluster_instance</span><br><span class="line">resource &quot;aws_security_group&quot; &quot;instance&quot; &#123;.....&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然後 terraform 就會把原本的 resource 移除，重新建立一個新的，但這並非我們所想要的結果。</p>
+<p>因此可用以下方式避免這個問題的發生：</p>
+<ul>
+<li><p>先用 <code>terraform plan</code> 確認將要發生的事情，確保沒有任何 resource 會被不小心移除</p>
+<blockquote>
+<p>特別是不小心改到無法變動的 resource parameter 時，就一定會造成 resource 被移除再重建，請務必小心</p>
+</blockquote>
+</li>
+<li><p>若是真的要進行 resource replace 的動作，可透過 <code>create_before_destroy</code> 先產生可用的 resource，再移除不需要的</p>
+</li>
+<li><p>調整 identifier 也同時需要調整 terraform state</p>
+<blockquote>
+<p>建議不要手動修改 terraform state 內容，可搭配 <code>terraform state mv &lt;ORIGINAL_REF&gt; &lt;NEW_REG&gt;</code> 的方式進行調整</p>
+</blockquote>
+</li>
+</ul>
+<h1 id="Eventual-Consistency"><a href="#Eventual-Consistency" class="headerlink" title="Eventual Consistency"></a>Eventual Consistency</h1><p>terraform 與 cloud provider API 是以非同步的方式進行通訊，因此即使 API 立即回傳了訊息，這訊息也不見得可以馬上拿來使用。</p>
+<p>舉例來說，當建立一個 AWS EC2 instance，API 很快的回傳 <strong>201 Created</strong>，但實際上要馬上存取到相關資訊可能還是不行的，可能是以下原因造成的：</p>
+<ul>
+<li><p>實際上 EC2 instance 並未完全建立成功</p>
+</li>
+<li><p>相關的資訊還沒有完全在整個 AWS region 中同步</p>
+</li>
+</ul>
+<p>因此，若是在 CI/CD 的自動化流程中，有透過 terraform 產生 resource，並立即要拿來使用的情境，中間就必須設定一些等待時間，或是持續的監測是否能取到所需要的資訊，才能確保自動化流程才可以每一次都順利完成。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/DevOps/" rel="tag"># DevOps</a>
+              <a href="/blog/tags/Terraform/" rel="tag"># Terraform</a>
+              <a href="/blog/tags/IaC/" rel="tag"># IaC</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/blog/AWS/AWS-CSA-associate-S3-part3/" rel="prev" title="AWS CSA Associate 學習筆記 - S3(Simple Storage Service) Part 3">
+      <i class="fa fa-chevron-left"></i> AWS CSA Associate 學習筆記 - S3(Simple Storage Service) Part 3
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#規劃-Provider-Plugin-Cache-存放位置"><span class="nav-number">1.</span> <span class="nav-text">規劃 Provider Plugin Cache 存放位置</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Terraform-的使用限制"><span class="nav-number">2.</span> <span class="nav-text">Terraform 的使用限制</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#count-amp-for-each-無法與-resource-output-搭配使用"><span class="nav-number">2.1.</span> <span class="nav-text">count &amp; for_each 無法與 resource output 搭配使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#count-amp-for-each-無法用在-module-設定中"><span class="nav-number">2.2.</span> <span class="nav-text">count &amp; for_each 無法用在 module 設定中</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Zero-Downtime-Deployment-有其限制"><span class="nav-number">3.</span> <span class="nav-text">Zero Downtime Deployment 有其限制</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#看起來可執行的-plan-還是有可能會壞掉"><span class="nav-number">4.</span> <span class="nav-text">看起來可執行的 plan 還是有可能會壞掉</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#重構-Refactoring-要很小心"><span class="nav-number">5.</span> <span class="nav-text">重構(Refactoring) 要很小心</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Eventual-Consistency"><span class="nav-number">6.</span> <span class="nav-text">Eventual Consistency</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives/">
+        
+          <span class="site-state-item-count">108</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">21</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">60</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/blog/lib/anime.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/blog/js/utils.js"></script>
+
+<script src="/blog/js/motion.js"></script>
+
+
+<script src="/blog/js/schemes/muse.js"></script>
+
+
+<script src="/blog/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/DevOps/terraform-tips-and-tricks/";
+    this.page.identifier = "DevOps/terraform-tips-and-tricks/";
+    this.page.title = "[Terraform] 使用上的小技巧整理";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>
