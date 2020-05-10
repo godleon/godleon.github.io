@@ -2,7 +2,7 @@
 layout: post
 title:  "AWS CSA Associate 學習筆記 - S3(Simple Storage Service) Part 3"
 description: "此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 S3 服務，共分為四個部份，此為第三個部份"
-date: 2020-04-29 05:50:00
+date: 2020-05-10 10:00:00
 published: true
 comments: true
 categories:
