@@ -10,6 +10,7 @@ categories:
 tags:
   - Terraform
   - DevOps
+  - IaC
 ---
 
 
