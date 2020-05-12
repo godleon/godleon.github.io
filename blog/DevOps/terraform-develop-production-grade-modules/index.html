@@ -20,25 +20,24 @@
     var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="此篇文章簡單介紹 docker network">
+  <meta name="description" content="此篇文章是閱讀 &quot;Terraform Up and Running 2nd&quot; 中關於 module 設計時，將一些覺得重要的觀念 &amp; 內容節錄下來的內容">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Docker 網路簡介">
-<meta property="og:url" content="https://godleon.github.io/blog/Docker/docker-network-overview/index.html">
+<meta property="og:title" content="[Terraform] Module 設計的思考與源怎">
+<meta property="og:url" content="https://godleon.github.io/blog/DevOps/terraform-develop-production-grade-modules/index.html">
 <meta property="og:site_name" content="小信豬的原始部落">
-<meta property="og:description" content="此篇文章簡單介紹 docker network">
+<meta property="og:description" content="此篇文章是閱讀 &quot;Terraform Up and Running 2nd&quot; 中關於 module 設計時，將一些覺得重要的觀念 &amp; 內容節錄下來的內容">
 <meta property="og:locale" content="zh_TW">
-<meta property="og:image" content="https://cdn-images-1.medium.com/max/1060/0*cMUND9w1bO1o5sPe.png">
-<meta property="og:image" content="https://success.docker.com/api/images/.%2Frefarch%2Fnetworking%2Fimages%2Fhost-driver.png">
-<meta property="og:image" content="http://img.scoop.it/1nNoIXGkJiDax7l5g5GxH7nTzqrqzN7Y9aBZTaXoQ8Q=">
-<meta property="og:image" content="http://img.scoop.it/zD6OR5JZu3qF9dxWL79Gc7nTzqrqzN7Y9aBZTaXoQ8Q=">
-<meta property="article:published_time" content="2018-07-09T07:10:00.000Z">
+<meta property="og:image" content="https://godleon.github.io/blog/images/devops/terraform_module-example-structure.png">
+<meta property="article:published_time" content="2020-05-12T22:35:00.000Z">
 <meta property="article:modified_time" content="2020-05-12T22:36:46.407Z">
 <meta property="article:author" content="godleon">
-<meta property="article:tag" content="Docker">
+<meta property="article:tag" content="DevOps">
+<meta property="article:tag" content="Terraform">
+<meta property="article:tag" content="IaC">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://cdn-images-1.medium.com/max/1060/0*cMUND9w1bO1o5sPe.png">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/devops/terraform_module-example-structure.png">
 
-<link rel="canonical" href="https://godleon.github.io/blog/Docker/docker-network-overview/">
+<link rel="canonical" href="https://godleon.github.io/blog/DevOps/terraform-develop-production-grade-modules/">
 
 
 <script id="page-configurations">
@@ -51,7 +50,7 @@
   };
 </script>
 
-  <title>Docker 網路簡介 | 小信豬的原始部落</title>
+  <title>[Terraform] Module 設計的思考與源怎 | 小信豬的原始部落</title>
   
 
 
@@ -156,7 +155,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
-    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/Docker/docker-network-overview/">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/DevOps/terraform-develop-production-grade-modules/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/blog/images/avatar.gif">
@@ -169,7 +168,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Docker 網路簡介
+          [Terraform] Module 設計的思考與源怎
         </h1>
 
         <div class="post-meta">
@@ -178,23 +177,17 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
+              
 
-              <time title="Created: 2018-07-09 15:10:00" itemprop="dateCreated datePublished" datetime="2018-07-09T15:10:00+08:00">2018-07-09</time>
+              <time title="Created: 2020-05-13 06:35:00 / Modified: 06:36:46" itemprop="dateCreated datePublished" datetime="2020-05-13T06:35:00+08:00">2020-05-13</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-05-13 06:36:46" itemprop="dateModified" datetime="2020-05-13T06:36:46+08:00">2020-05-13</time>
-              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
               <span class="post-meta-item-text">In</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/blog/categories/Docker/" itemprop="url" rel="index"><span itemprop="name">Docker</span></a>
+                  <a href="/blog/categories/Terraform/" itemprop="url" rel="index"><span itemprop="name">Terraform</span></a>
                 </span>
             </span>
 
@@ -207,13 +200,13 @@
       </span>
       <span class="post-meta-item-text">Disqus: </span>
     
-    <a title="disqus" href="/blog/Docker/docker-network-overview/#disqus_thread" itemprop="discussionUrl">
-      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="Docker/docker-network-overview/" itemprop="commentCount"></span>
+    <a title="disqus" href="/blog/DevOps/terraform-develop-production-grade-modules/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="DevOps/terraform-develop-production-grade-modules/" itemprop="commentCount"></span>
     </a>
   </span>
   
   
-            <div class="post-description">此篇文章簡單介紹 docker network</div>
+            <div class="post-description">此篇文章是閱讀 "Terraform Up and Running 2nd" 中關於 module 設計時，將一些覺得重要的觀念 & 內容節錄下來的內容</div>
 
         </div>
       </header>
@@ -224,83 +217,79 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>剛開始使用 docker 的人可能不會對於 docker network 的細節有過多的研究，但若是要將 docker 的功能發揮的淋漓盡致，docker network 相關的知識可是必須要必備的。</p>
-<p>以下將會介紹目前 docker 預設支援的網路類型，包含：</p>
+        <h1 id="Module-設計上越小越好"><a href="#Module-設計上越小越好" class="headerlink" title="Module 設計上越小越好"></a>Module 設計上越小越好</h1><p>開發小的 module，而非大的，專注在單一且簡單的部份，大的 module 有不少缺點，列舉如下：</p>
 <ul>
-<li><p>bridge</p>
+<li><p>module 太大，執行會很慢，會伴隨著很大的 state &amp; 檢查，執行 <code>terraform plan</code> 可能會花上個數分鐘都有可能</p>
 </li>
-<li><p>host</p>
+<li><p>若是把整個 infra 都寫進同一個 module，任何要修改的開發者都給予權限，而這權限就可以存取所有資源，這表示每個人必須是 admin，這完全了違反最小權限原則</p>
 </li>
-<li><p>overlay</p>
+<li><p>任何一個小修改都可能會毀了很大一部份的現存系統</p>
 </li>
-<li><p>macvlan</p>
-</li>
-<li><p>none</p>
+<li><p>module 不僅會讓人難以了解，很難協助做 review，且難以測試</p>
 </li>
 </ul>
-<p>讓使用者可以知道在何種情況下，啟用 container 時應該要選擇哪一種網路類型。</p>
-<h1 id="Network-Drivers"><a href="#Network-Drivers" class="headerlink" title="Network Drivers"></a>Network Drivers</h1><p>為了讓 docker 支援多種網路類型，docker networking subsystem 被設計成是以可抽換 driver 的形式來運作，可根據使用者需求置換不同的 driver 來達到不同的網路設定目的；其中有以下5個 driver 已經是預設存在的，用來提供核心的網路功能：</p>
+<h1 id="設計可組合使用-Module"><a href="#設計可組合使用-Module" class="headerlink" title="設計可組合使用 Module"></a>設計可組合使用 Module</h1><p>為了設計出可組合搭配使用的 module，在設計時可以考慮使用類似一般程式語言的思考方式，將一個 module 視為一個有 input &amp; output 的 function，而 module 只是中間處理 input 資訊後，輸出 output 給使用者，甚至是其他的 module。</p>
+<p>因此幾個設計重點如下：</p>
 <ul>
-<li><p>bridge</p>
+<li><p>避免從外面讀取 state 資訊，而是改成由 input 取得 </p>
 </li>
-<li><p>host</p>
-</li>
-<li><p>overlay</p>
-</li>
-<li><p>macvlan</p>
-</li>
-<li><p>none </p>
+<li><p>避免將 state 資訊寫到外部，而是將需要回傳的資訊透過 output 傳出</p>
 </li>
 </ul>
-<h1 id="Bridge-Network"><a href="#Bridge-Network" class="headerlink" title="Bridge Network"></a>Bridge Network</h1><p>此為預設的 network driver(沒特別指定就是這個)，通常會用在當 container 都是以 standalone 的方式運作並與其他的 container 相互溝通時，架構圖如下：</p>
-<p><img src="https://cdn-images-1.medium.com/max/1060/0*cMUND9w1bO1o5sPe.png" alt="docker network - bridge"></p>
+<blockquote>
+<p>上面兩個原則主要是為了避免 side effect，同時也讓 module 本身內容更為合理、更容易測試並重複使用</p>
+</blockquote>
 <ul>
-<li><p>docker 會新增一個 software bridge 作為 container 網路對外的出口，預設名稱為 <code>docker0</code></p>
+<li>透過將 small module 組合的方式，來開發更為複雜的 module</li>
+</ul>
+<h1 id="設計可測試的-Module"><a href="#設計可測試的-Module" class="headerlink" title="設計可測試的 Module"></a>設計可測試的 Module</h1><p>Module 被開發出來，確保可用是很重要的，大概有幾個方向可以參考：</p>
+<ul>
+<li><p>為 module 撰寫相關的 RAEDME 說明，包含用途 &amp; 使用方法</p>
 </li>
-<li><p>docker0 會與 host 中的對外網卡(上圖為 <code>eth0</code>)相連，藉此取得對外連線的能力</p>
+<li><p>開發使用 module 的範例程式，若是可以是一個可直接執行的 script 最好(讓使用者不用寫太多的程式就可以執行測試)，可以作為確認可執行的參考</p>
 </li>
-<li><p>每個 container 會使用一個 veth device 與 docker0 相連，因此具備連外能力</p>
+<li><p>為範例程式撰寫相關的 README 說明</p>
+</li>
+<li><p>開發測試程式，也可以是一個作為 module 使用範例的內容</p>
+</li>
+<li><p>如果 module 設計上有考慮到在各種不同的情境下的處理，那就可以多寫幾個範例來作為說明，以下圖為例：</p>
 </li>
 </ul>
-<h1 id="Host-Network"><a href="#Host-Network" class="headerlink" title="Host Network"></a>Host Network</h1><p>此模式的網路有以下特點：</p>
+<p><img src="/blog/images/devops/terraform_module-example-structure.png" alt="Terraform module example structure"></p>
+<blockquote>
+<p>同一個 <code>asg-rolling-deploy</code> module 就可以有各式不同的應用，可以搭配單一 EC2 instance，也可以加上 load balancer，或是自訂 tag</p>
+</blockquote>
 <ul>
-<li><p>不使用獨立的網路(並非獨立的 network stack)，而是與 Docker Host 使用相同的網路</p>
+<li><p>在開始開發 module 前，可以先試著寫 example，藉由範例思考 module 應該如何被使用，並嘗試描繪出 module 該有的 input &amp; output，嘗試從使用者的角度來思考 module 應該如何被設計，在開發 module 時的方向就會明確的多</p>
+<blockquote>
+<p>其實這樣的思考方式也是 TDD(Test-Driven Development) 的精神</p>
+</blockquote>
 </li>
-<li><p>目前這個模式僅在 Linux 上有效，無法在 Mac or Windows 上使用</p>
-</li>
-<li><p>在 Docker 17.06 版以後可以在 swarm service 上使用此模式，但同一個 port 只能被用一次</p>
-</li>
-<li><p>container 如果沒有對外開 port 提供服務，其實設定為 host mode 並沒有意義</p>
+<li><p>在 module 中要鎖定 terraform &amp; provider 的版本，因為 terraform 不同版本間並不相容，以下是範例：</p>
 </li>
 </ul>
-<p>網路架構如下圖：</p>
-<p><img src="https://success.docker.com/api/images/.%2Frefarch%2Fnetworking%2Fimages%2Fhost-driver.png" alt="docker network - host"></p>
-<h1 id="Overlay-Network"><a href="#Overlay-Network" class="headerlink" title="Overlay Network"></a>Overlay Network</h1><p>overlay network 是藉由將多個 docker daemon 連結起來，並啟用 swarm service 來讓多個 container 可以相互溝通，有以下特點：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">terraform &#123;</span><br><span class="line">  required_version &#x3D; &quot;&gt;&#x3D; 0.12, &lt; 0.13&quot;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">provider &quot;aws&quot; &#123;</span><br><span class="line">  region &#x3D; &quot;us-east-2&quot;</span><br><span class="line"></span><br><span class="line">  # AWS provider 2.0 以上的版本皆可</span><br><span class="line">  version &#x3D; &quot;~&gt; 2.0&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>若是針對 production 環境，可以考慮鎖定更細的版本號</p>
+</blockquote>
+<h1 id="Release-Modules"><a href="#Release-Modules" class="headerlink" title="Release Modules"></a>Release Modules</h1><p>當 module 開發 &amp; 測試到一個穩定階段，準備要釋出時，有幾項重點原則可以參考：</p>
 <ul>
-<li><p>需要 Docker Swarm</p>
+<li><p>為每一個穩定的版本加上 tag，搭配 git，使用者就可以指定要使用哪個版本的 module</p>
 </li>
-<li><p>可讓在不同 host 上的 standalone container 互相溝通</p>
+<li><p>有落實版本控管的 module，即使版本更新發生問題了，也可以很快的恢復到上一個版本</p>
 </li>
-<li><p>可讓 standalone container 與 swarm service 互相溝通</p>
+<li><p>若是泛用性很高的 module，也可以考慮發布到 <a href="https://registry.terraform.io/" target="_blank" rel="noopener">Terraform Registry</a> 開源給大家使用，目前 Terraform Registry 已經有很多現成的 module 可用了</p>
+</li>
+<li><p>要在 Terraform Registry 開源自己所開發的 module，其實是有不少規範要遵循的，例如：命名規格、檔案結構、版本控管 …. 等等</p>
+</li>
+<li><p>若要直接使用 Terraform Registry 上的 module，不一定要完整指定 Git Repo ＆ version 來達成，可以類似以下比較簡單的宣告方式：</p>
 </li>
 </ul>
-<p>由於 overlay mode 需要 Docker Swarm，因此會先忽略不深入討論，因為未來的學習方向會以 Kubernetes 為主。</p>
-<p>Overlay network 的網路架構如下圖：</p>
-<p><img src="http://img.scoop.it/1nNoIXGkJiDax7l5g5GxH7nTzqrqzN7Y9aBZTaXoQ8Q=" alt="docker network - overlay"></p>
-<h1 id="MACVLAN-Network"><a href="#MACVLAN-Network" class="headerlink" title="MACVLAN Network"></a>MACVLAN Network</h1><p>macvlan network 可以讓使用者直接分配實體網卡的 MAC address 給特定的 container，讓 container 可以透過實體的網卡使用網路；有些需要獨立使用實體網卡的老舊應用程式，可能會用到 macvlan 來設定網路。</p>
-<p>換個角度思考，若是要將上述老舊應用程式的網路與 Host 網路隔開，多加一張實體網卡並設定 macvlan 是個不錯的方式。</p>
-<p>此外，若是實體網路接的是 switch 上的 trunk port，也可以透過 MACVLAN driver 將不同的 VLAN 分配給不同的 container 使用，而 MACVLAN 的網路架構如下：</p>
-<p><img src="http://img.scoop.it/zD6OR5JZu3qF9dxWL79Gc7nTzqrqzN7Y9aBZTaXoQ8Q=" alt="docker network - macvlan"></p>
-<h1 id="None"><a href="#None" class="headerlink" title="None"></a>None</h1><p>不設定 container 的網路，因此 container 無法對外通訊</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"># 使用範本</span><br><span class="line">module &quot;&lt;Name&gt;&quot; &#123;</span><br><span class="line">    source  &#x3D; &quot;&lt;OWNER&gt;&#x2F;&lt;REPO&gt;&#x2F;&lt;PROVIDER&gt;&quot;</span><br><span class="line">    version &#x3D; &quot;&lt;VERSION&gt;&quot;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># 實際使用範例</span><br><span class="line">module &quot;vault&quot; &#123;</span><br><span class="line">    source  &#x3D; &quot;hashicorp&#x2F;vault&#x2F;aws&quot;</span><br><span class="line">    version &#x3D; &quot;0.12.2&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
 <h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
-<li><p><a href="https://docs.docker.com/network" target="_blank" rel="noopener">Configure Network | Docker Documentation</a></p>
-</li>
-<li><p><a href="https://docs.docker.com/engine/swarm/" target="_blank" rel="noopener">Swarm mode overview | Docker Documentation</a></p>
-</li>
-<li><p><a href="https://blog.docker.com/2016/12/understanding-docker-networking-drivers-use-cases/" target="_blank" rel="noopener">Understanding Docker Networking Drivers and their use cases - Docker Blog</a></p>
-</li>
-<li><p><a href="http://blog.daocloud.io/docker-source-code-analysis-part7-first/" target="_blank" rel="noopener">Docker源码分析（七）：Docker Container网络 （上） - DaoCloud</a></p>
-</li>
+<li><a href="https://www.terraformupandrunning.com/" target="_blank" rel="noopener">Terraform: Up and Running</a></li>
 </ul>
 
     </div>
@@ -311,7 +300,9 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/blog/tags/Docker/" rel="tag"># Docker</a>
+              <a href="/blog/tags/DevOps/" rel="tag"># DevOps</a>
+              <a href="/blog/tags/Terraform/" rel="tag"># Terraform</a>
+              <a href="/blog/tags/IaC/" rel="tag"># IaC</a>
           </div>
 
         
@@ -320,13 +311,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/blog/Kubernetes/k8s-Install-traefik-as-Ingress-Controller/" rel="prev" title="[Kubernetes] 設定 Ingress Controller (以 Traefik 為例)">
-      <i class="fa fa-chevron-left"></i> [Kubernetes] 設定 Ingress Controller (以 Traefik 為例)
+    <a href="/blog/DevOps/terraform-tips-and-tricks/" rel="prev" title="[Terraform] 使用上的小技巧整理">
+      <i class="fa fa-chevron-left"></i> [Terraform] 使用上的小技巧整理
     </a></div>
-      <div class="post-nav-item">
-    <a href="/blog/Docker/docker-network-bridge/" rel="next" title="[Docker] Bridge Network 簡介">
-      [Docker] Bridge Network 簡介 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -392,7 +380,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Network-Drivers"><span class="nav-number">1.</span> <span class="nav-text">Network Drivers</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Bridge-Network"><span class="nav-number">2.</span> <span class="nav-text">Bridge Network</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Host-Network"><span class="nav-number">3.</span> <span class="nav-text">Host Network</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Overlay-Network"><span class="nav-number">4.</span> <span class="nav-text">Overlay Network</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MACVLAN-Network"><span class="nav-number">5.</span> <span class="nav-text">MACVLAN Network</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#None"><span class="nav-number">6.</span> <span class="nav-text">None</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">7.</span> <span class="nav-text">References</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Module-設計上越小越好"><span class="nav-number">1.</span> <span class="nav-text">Module 設計上越小越好</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#設計可組合使用-Module"><span class="nav-number">2.</span> <span class="nav-text">設計可組合使用 Module</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#設計可測試的-Module"><span class="nav-number">3.</span> <span class="nav-text">設計可測試的 Module</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Release-Modules"><span class="nav-number">4.</span> <span class="nav-text">Release Modules</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -516,9 +504,9 @@
 </script>
 <script>
   var disqus_config = function() {
-    this.page.url = "https://godleon.github.io/blog/Docker/docker-network-overview/";
-    this.page.identifier = "Docker/docker-network-overview/";
-    this.page.title = "Docker 網路簡介";
+    this.page.url = "https://godleon.github.io/blog/DevOps/terraform-develop-production-grade-modules/";
+    this.page.identifier = "DevOps/terraform-develop-production-grade-modules/";
+    this.page.title = "[Terraform] Module 設計的思考與源怎";
     };
   NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
     if (window.DISQUS) {
