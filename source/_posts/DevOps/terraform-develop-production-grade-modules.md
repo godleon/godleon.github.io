@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "[Terraform] Module 設計的思考與源怎"
+title:  "[Terraform] Module 設計上的思考與原則"
 description: "此篇文章是閱讀 \"Terraform Up and Running 2nd\" 中關於 module 設計時，將一些覺得重要的觀念 & 內容節錄下來的內容"
 date: 2020-05-13 06:35:00
 published: true
