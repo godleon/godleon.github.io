@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "AWS CSA Associate 學習筆記 - EC2(Elastic Compute Cloud) Part 1 (概觀)"
-description: "此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 EC2 服務，會分成多篇文章來記錄，此為第一部份(概觀)"
+description: "此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 EC2 服務，會分成多篇文章來記錄，此為第一部份，包含了 "
 date: 2020-05-17 17:30:00
 published: true
 comments: true
@@ -192,8 +192,48 @@ EC2 Instance 管理功能
 
 
 
+Security Group
+==============
+
+## EC2 & Security Group
+
+- EC2 instance 可以同時與多個 security group 綁定
+
+- EC2 instance 一旦綁定 security group，規則馬上就會生效
+
+- 一個 security group 可以對應到多個 EC2 instance
+
+> 所以 EC2 instance & security group 是多對多的關係
+
+## Security Group v.s. VPC Network ACL(Access Control List)
+
+### Security Group
+
+- Security Group rule 是 stateful 的
+
+- 承上，若是 allow HTTP in，就會有一個隱性的 allow HTTP out 存在
+
+- 承上，即使將 outbound rule 中允許向外的流量規則刪除，EC2 還是可以回應 HTTP request
+
+- 預設所有 inbound traffic 都會被擋住，需要根據需求一條一條規則打開
+
+- 預設所有 outbound traffic 都是開放的
+
+- 無法設定黑名單(blacklist)，因此無法進行類似 "**阻擋存取特定服務的 traffic**" 這樣的設定
+
+### VPC Network ACL(Access Control List)
+
+- VPC network ACL 是 stateless 的
+
+- 承上，若是建立了 inbound rule，就要建立相對應的 outbound rule，否則對應的服務不會通
+
+- 可以設定黑名單，因此 "**阻擋存取特定服務的 traffic**" 這類的規則是可以設定的
+
+
 應考重點整理
 ==========
+
+## EC2 概觀
 
 - **Termination Protection 預設是關閉的**，有需要就必須自己打開
 
@@ -202,6 +242,20 @@ EC2 Instance 管理功能
 - Root volume 可以加密，可以搭配第三方工具(例如：bot locker)使用，或是透過 AWS 提供的 API
 
 - 額外加入的 volume 也可以加密
+
+## Security Group
+
+- 所有 inbound traffic 預設都會被擋住
+
+- 所有 outbound traffic 預設是開放的
+
+- security group 規則修改後馬上會生效
+
+- EC2 instance & security group 是多對多的關係
+
+- security group 是 stateful，在 inbound 設定的規則會同時在 outbound 中自動開放
+
+- security group 無法設定黑名單，若需要黑名單功能，則需要使用 Network ACL 來做 (只可以設定 allow rules，無法設定 deny rules)
 
 
 
@@ -215,3 +269,5 @@ References
 - [Savings Plans – Amazon Web Services](https://aws.amazon.com/tw/savingsplans/)
 
 - [Amazon EC2 常見問答集 – Amazon Web Services](https://aws.amazon.com/tw/ec2/faqs/) [(英文版)](https://aws.amazon.com/ec2/faqs/?nc1=h_ls)
+
+- [Security groups for your VPC - Amazon Virtual Private Cloud](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html)
