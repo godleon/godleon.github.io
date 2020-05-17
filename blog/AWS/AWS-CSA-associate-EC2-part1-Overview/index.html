@@ -20,15 +20,15 @@
     var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 EC2 服務，會分成多篇文章來記錄，此為第一部份(概觀)">
+  <meta name="description" content="此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 EC2 服務，會分成多篇文章來記錄，此為第一部份，包含了">
 <meta property="og:type" content="article">
 <meta property="og:title" content="AWS CSA Associate 學習筆記 - EC2(Elastic Compute Cloud) Part 1 (概觀)">
 <meta property="og:url" content="https://godleon.github.io/blog/AWS/AWS-CSA-associate-EC2-part1-Overview/index.html">
 <meta property="og:site_name" content="小信豬的原始部落">
-<meta property="og:description" content="此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 EC2 服務，會分成多篇文章來記錄，此為第一部份(概觀)">
+<meta property="og:description" content="此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 EC2 服務，會分成多篇文章來記錄，此為第一部份，包含了">
 <meta property="og:locale" content="zh_TW">
 <meta property="article:published_time" content="2020-05-17T09:30:00.000Z">
-<meta property="article:modified_time" content="2020-05-17T09:30:03.668Z">
+<meta property="article:modified_time" content="2020-05-17T10:03:39.685Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -177,7 +177,7 @@
               <span class="post-meta-item-text">Posted on</span>
               
 
-              <time title="Created: 2020-05-17 17:30:00 / Modified: 17:30:03" itemprop="dateCreated datePublished" datetime="2020-05-17T17:30:00+08:00">2020-05-17</time>
+              <time title="Created: 2020-05-17 17:30:00 / Modified: 18:03:39" itemprop="dateCreated datePublished" datetime="2020-05-17T17:30:00+08:00">2020-05-17</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -204,7 +204,7 @@
   </span>
   
   
-            <div class="post-description">此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 EC2 服務，會分成多篇文章來記錄，此為第一部份(概觀)</div>
+            <div class="post-description">此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 EC2 服務，會分成多篇文章來記錄，此為第一部份，包含了 </div>
 
         </div>
       </header>
@@ -359,7 +359,40 @@
 <h2 id="Actions"><a href="#Actions" class="headerlink" title="Actions"></a>Actions</h2><ul>
 <li>若有開啟 <strong>Termination Protection</strong> 的功能，要先在 <strong>Instance Settings -&gt; Change Termination Protection</strong> 中關閉此功能，才可以砍掉此 VM</li>
 </ul>
-<h1 id="應考重點整理"><a href="#應考重點整理" class="headerlink" title="應考重點整理"></a>應考重點整理</h1><ul>
+<h1 id="Security-Group"><a href="#Security-Group" class="headerlink" title="Security Group"></a>Security Group</h1><h2 id="EC2-amp-Security-Group"><a href="#EC2-amp-Security-Group" class="headerlink" title="EC2 &amp; Security Group"></a>EC2 &amp; Security Group</h2><ul>
+<li><p>EC2 instance 可以同時與多個 security group 綁定</p>
+</li>
+<li><p>EC2 instance 一旦綁定 security group，規則馬上就會生效</p>
+</li>
+<li><p>一個 security group 可以對應到多個 EC2 instance</p>
+</li>
+</ul>
+<blockquote>
+<p>所以 EC2 instance &amp; security group 是多對多的關係</p>
+</blockquote>
+<h2 id="Security-Group-v-s-VPC-Network-ACL-Access-Control-List"><a href="#Security-Group-v-s-VPC-Network-ACL-Access-Control-List" class="headerlink" title="Security Group v.s. VPC Network ACL(Access Control List)"></a>Security Group v.s. VPC Network ACL(Access Control List)</h2><h3 id="Security-Group-1"><a href="#Security-Group-1" class="headerlink" title="Security Group"></a>Security Group</h3><ul>
+<li><p>Security Group rule 是 stateful 的</p>
+</li>
+<li><p>承上，若是 allow HTTP in，就會有一個隱性的 allow HTTP out 存在</p>
+</li>
+<li><p>承上，即使將 outbound rule 中允許向外的流量規則刪除，EC2 還是可以回應 HTTP request</p>
+</li>
+<li><p>預設所有 inbound traffic 都會被擋住，需要根據需求一條一條規則打開</p>
+</li>
+<li><p>預設所有 outbound traffic 都是開放的</p>
+</li>
+<li><p>無法設定黑名單(blacklist)，因此無法進行類似 “<strong>阻擋存取特定服務的 traffic</strong>“ 這樣的設定</p>
+</li>
+</ul>
+<h3 id="VPC-Network-ACL-Access-Control-List"><a href="#VPC-Network-ACL-Access-Control-List" class="headerlink" title="VPC Network ACL(Access Control List)"></a>VPC Network ACL(Access Control List)</h3><ul>
+<li><p>VPC network ACL 是 stateless 的</p>
+</li>
+<li><p>承上，若是建立了 inbound rule，就要建立相對應的 outbound rule，否則對應的服務不會通</p>
+</li>
+<li><p>可以設定黑名單，因此 “<strong>阻擋存取特定服務的 traffic</strong>“ 這類的規則是可以設定的</p>
+</li>
+</ul>
+<h1 id="應考重點整理"><a href="#應考重點整理" class="headerlink" title="應考重點整理"></a>應考重點整理</h1><h2 id="EC2-概觀"><a href="#EC2-概觀" class="headerlink" title="EC2 概觀"></a>EC2 概觀</h2><ul>
 <li><p><strong>Termination Protection 預設是關閉的</strong>，有需要就必須自己打開</p>
 </li>
 <li><p>VM 被刪除(Terminated)，Root volume 會一起被刪除</p>
@@ -367,6 +400,20 @@
 <li><p>Root volume 可以加密，可以搭配第三方工具(例如：bot locker)使用，或是透過 AWS 提供的 API</p>
 </li>
 <li><p>額外加入的 volume 也可以加密</p>
+</li>
+</ul>
+<h2 id="Security-Group-2"><a href="#Security-Group-2" class="headerlink" title="Security Group"></a>Security Group</h2><ul>
+<li><p>所有 inbound traffic 預設都會被擋住</p>
+</li>
+<li><p>所有 outbound traffic 預設是開放的</p>
+</li>
+<li><p>security group 規則修改後馬上會生效</p>
+</li>
+<li><p>EC2 instance &amp; security group 是多對多的關係</p>
+</li>
+<li><p>security group 是 stateful，在 inbound 設定的規則會同時在 outbound 中自動開放</p>
+</li>
+<li><p>security group 無法設定黑名單，若需要黑名單功能，則需要使用 Network ACL 來做 (只可以設定 allow rules，無法設定 deny rules)</p>
 </li>
 </ul>
 <h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
@@ -377,6 +424,8 @@
 <li><p><a href="https://aws.amazon.com/tw/savingsplans/" target="_blank" rel="noopener">Savings Plans – Amazon Web Services</a></p>
 </li>
 <li><p><a href="https://aws.amazon.com/tw/ec2/faqs/" target="_blank" rel="noopener">Amazon EC2 常見問答集 – Amazon Web Services</a> <a href="https://aws.amazon.com/ec2/faqs/?nc1=h_ls" target="_blank" rel="noopener">(英文版)</a></p>
+</li>
+<li><p><a href="https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html" target="_blank" rel="noopener">Security groups for your VPC - Amazon Virtual Private Cloud</a></p>
 </li>
 </ul>
 
@@ -468,7 +517,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#EC2-簡介"><span class="nav-number">1.</span> <span class="nav-text">EC2 簡介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Overview"><span class="nav-number">1.1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pricing-Type"><span class="nav-number">1.2.</span> <span class="nav-text">Pricing Type</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spot-Instance-計費"><span class="nav-number">1.3.</span> <span class="nav-text">Spot Instance 計費</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Instance-Type"><span class="nav-number">1.4.</span> <span class="nav-text">Instance Type</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#關於-EC2-設定的選項"><span class="nav-number">2.</span> <span class="nav-text">關於 EC2 設定的選項</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#設定-Instance"><span class="nav-number">2.1.</span> <span class="nav-text">設定 Instance</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#選項中的-AZ-跟實際中的-AZ-並不同"><span class="nav-number">2.1.1.</span> <span class="nav-text">選項中的 AZ 跟實際中的 AZ 並不同</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#監控"><span class="nav-number">2.1.2.</span> <span class="nav-text">監控</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一般選項"><span class="nav-number">2.1.3.</span> <span class="nav-text">一般選項</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#進階選項"><span class="nav-number">2.1.4.</span> <span class="nav-text">進階選項</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#增加-Storage"><span class="nav-number">2.2.</span> <span class="nav-text">增加 Storage</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#設定-Security-Group"><span class="nav-number">2.3.</span> <span class="nav-text">設定 Security Group</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#設定-Key-Pair"><span class="nav-number">2.4.</span> <span class="nav-text">設定 Key Pair</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EC2-Instance-管理功能"><span class="nav-number">3.</span> <span class="nav-text">EC2 Instance 管理功能</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Status-Check"><span class="nav-number">3.1.</span> <span class="nav-text">Status Check</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Actions"><span class="nav-number">3.2.</span> <span class="nav-text">Actions</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#應考重點整理"><span class="nav-number">4.</span> <span class="nav-text">應考重點整理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#EC2-簡介"><span class="nav-number">1.</span> <span class="nav-text">EC2 簡介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Overview"><span class="nav-number">1.1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pricing-Type"><span class="nav-number">1.2.</span> <span class="nav-text">Pricing Type</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spot-Instance-計費"><span class="nav-number">1.3.</span> <span class="nav-text">Spot Instance 計費</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Instance-Type"><span class="nav-number">1.4.</span> <span class="nav-text">Instance Type</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#關於-EC2-設定的選項"><span class="nav-number">2.</span> <span class="nav-text">關於 EC2 設定的選項</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#設定-Instance"><span class="nav-number">2.1.</span> <span class="nav-text">設定 Instance</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#選項中的-AZ-跟實際中的-AZ-並不同"><span class="nav-number">2.1.1.</span> <span class="nav-text">選項中的 AZ 跟實際中的 AZ 並不同</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#監控"><span class="nav-number">2.1.2.</span> <span class="nav-text">監控</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一般選項"><span class="nav-number">2.1.3.</span> <span class="nav-text">一般選項</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#進階選項"><span class="nav-number">2.1.4.</span> <span class="nav-text">進階選項</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#增加-Storage"><span class="nav-number">2.2.</span> <span class="nav-text">增加 Storage</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#設定-Security-Group"><span class="nav-number">2.3.</span> <span class="nav-text">設定 Security Group</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#設定-Key-Pair"><span class="nav-number">2.4.</span> <span class="nav-text">設定 Key Pair</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EC2-Instance-管理功能"><span class="nav-number">3.</span> <span class="nav-text">EC2 Instance 管理功能</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Status-Check"><span class="nav-number">3.1.</span> <span class="nav-text">Status Check</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Actions"><span class="nav-number">3.2.</span> <span class="nav-text">Actions</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Security-Group"><span class="nav-number">4.</span> <span class="nav-text">Security Group</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#EC2-amp-Security-Group"><span class="nav-number">4.1.</span> <span class="nav-text">EC2 &amp; Security Group</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Security-Group-v-s-VPC-Network-ACL-Access-Control-List"><span class="nav-number">4.2.</span> <span class="nav-text">Security Group v.s. VPC Network ACL(Access Control List)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Security-Group-1"><span class="nav-number">4.2.1.</span> <span class="nav-text">Security Group</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VPC-Network-ACL-Access-Control-List"><span class="nav-number">4.2.2.</span> <span class="nav-text">VPC Network ACL(Access Control List)</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#應考重點整理"><span class="nav-number">5.</span> <span class="nav-text">應考重點整理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#EC2-概觀"><span class="nav-number">5.1.</span> <span class="nav-text">EC2 概觀</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Security-Group-2"><span class="nav-number">5.2.</span> <span class="nav-text">Security Group</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text">References</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
