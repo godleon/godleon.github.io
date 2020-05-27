@@ -2,7 +2,7 @@
 layout: post
 title:  "AWS CSA Associate 學習筆記 - EC2(Elastic Compute Cloud) Part 1 (概觀)"
 description: "此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 EC2 服務，會分成多篇文章來記錄，此為第一部份，包含了簡介、設定、Security Group ... 等內容"
-date: 2020-05-17 17:30:00
+date: 2020-05-28 04:50:00
 published: true
 comments: true
 categories:
@@ -11,6 +11,7 @@ tags:
   - AWS
   - CSA
   - EC2
+  - VPC
 ---
 
 
