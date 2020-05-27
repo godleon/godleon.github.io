@@ -15,6 +15,9 @@ script:
   - rm -rf dir_to_commit/*
   - hexo clean
   - hexo generate
+  - hexo new page "categories"
+  - hexo new page "tags"
+  - hexo new page "about"
   - ls -al blog/
   - cp blog/index.html dir_to_commit/
   - cp -r blog dir_to_commit/
