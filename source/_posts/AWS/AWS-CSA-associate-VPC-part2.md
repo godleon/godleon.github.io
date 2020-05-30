@@ -269,6 +269,8 @@ VPC Endpoint
 References
 ==========
 
+- [AWS Certified Solutions Architect: Associate Certification Exam | Udemy](https://www.udemy.com/course/aws-certified-solutions-architect-associate/)
+
 - [VPC 流程日誌 - Amazon Virtual Private Cloud](https://docs.aws.amazon.com/zh_tw/vpc/latest/userguide/flow-logs.html)
 
 - [AWS 上的 Linux 堡壘主機 - 快速入門](https://aws.amazon.com/tw/quickstart/architecture/linux-bastion/) ([英文](https://aws.amazon.com/quickstart/architecture/linux-bastion/))

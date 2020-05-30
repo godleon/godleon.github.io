@@ -332,6 +332,8 @@ Network ACLs
 References
 ==========
 
+- [AWS Certified Solutions Architect: Associate Certification Exam | Udemy](https://www.udemy.com/course/aws-certified-solutions-architect-associate/)
+
 - [Amazon Virtual Private Cloud (VPC)](https://aws.amazon.com/tw/vpc/)
 
 - [NAT - Amazon Virtual Private Cloud](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat.html)

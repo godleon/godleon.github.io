@@ -261,6 +261,8 @@ aws_secret_access_key=[YOUR_SECRET_ACCESS_KEY]
 References
 ==========
 
+- [AWS Certified Solutions Architect: Associate Certification Exam | Udemy](https://www.udemy.com/course/aws-certified-solutions-architect-associate/)
+
 - [Amazon Elastic Block Store (EBS) - Amazon Web Services](https://aws.amazon.com/ebs/?ebs-whats-new.sort-by=item.additionalFields.postDateTime&ebs-whats-new.sort-order=desc)
 
 - [Deep Dive on EBS | Complete Think](https://rickhw.github.io/2017/07/16/AWS/Deep-Dive_EBS/)

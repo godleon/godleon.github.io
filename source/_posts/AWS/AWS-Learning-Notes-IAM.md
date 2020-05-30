@@ -156,6 +156,8 @@ Summary
 References
 ==========
 
+- [AWS Certified Solutions Architect: Associate Certification Exam | Udemy](https://www.udemy.com/course/aws-certified-solutions-architect-associate/)
+
 - [AWS Identity and Access Management Documentation](https://docs.aws.amazon.com/iam/index.html)
 
 - [IAM Roles - AWS Identity and Access Management](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html)

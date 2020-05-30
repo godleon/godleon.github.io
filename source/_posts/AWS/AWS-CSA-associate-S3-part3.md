@@ -201,6 +201,8 @@ Athena vs Macie
 References
 ==========
 
+- [AWS Certified Solutions Architect: Associate Certification Exam | Udemy](https://www.udemy.com/course/aws-certified-solutions-architect-associate/)
+
 ## S3
 
 - [Amazon S3 Transfer Acceleration - Amazon Simple Storage Service](https://docs.aws.amazon.com/zh_tw/AmazonS3/latest/dev/transfer-acceleration.html)

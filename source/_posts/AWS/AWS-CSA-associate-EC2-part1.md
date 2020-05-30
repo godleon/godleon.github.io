@@ -262,6 +262,8 @@ Security Group
 References
 ==========
 
+- [AWS Certified Solutions Architect: Associate Certification Exam | Udemy](https://www.udemy.com/course/aws-certified-solutions-architect-associate/)
+
 - [Amazon EC2](https://aws.amazon.com/tw/ec2/)
 
 - [Amazon EC2 定價 – Amazon Web Services](https://aws.amazon.com/tw/ec2/pricing/)
