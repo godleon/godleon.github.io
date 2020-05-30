@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+<link rel="stylesheet" href="/blog/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 EC2 服務，會分成三篇文章來記錄，此為第二部份，包含了 EBS、Snapshot、Volume Encryption、AMI、ENA、EGA、CloudWatch、CloudTrail、IAM Role ... 等內容">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AWS CSA Associate 學習筆記 - EC2(Elastic Compute Cloud) Part 2">
+<meta property="og:url" content="https://godleon.github.io/blog/AWS/AWS-CSA-associate-EC2-part2/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 EC2 服務，會分成三篇文章來記錄，此為第二部份，包含了 EBS、Snapshot、Volume Encryption、AMI、ENA、EGA、CloudWatch、CloudTrail、IAM Role ... 等內容">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/EBS_Storage-Type-Comparison.png">
+<meta property="article:published_time" content="2020-05-30T01:10:00.000Z">
+<meta property="article:modified_time" content="2020-05-30T01:14:46.832Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="AWS">
+<meta property="article:tag" content="CSA">
+<meta property="article:tag" content="EC2">
+<meta property="article:tag" content="EBS">
+<meta property="article:tag" content="AMI">
+<meta property="article:tag" content="CloudWatch">
+<meta property="article:tag" content="CloudTrail">
+<meta property="article:tag" content="IAM">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/aws/EBS_Storage-Type-Comparison.png">
+
+<link rel="canonical" href="https://godleon.github.io/blog/AWS/AWS-CSA-associate-EC2-part2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-tw'
+  };
+</script>
+
+  <title>AWS CSA Associate 學習筆記 - EC2(Elastic Compute Cloud) Part 2 | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/blog/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/blog/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/blog/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/blog/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/AWS/AWS-CSA-associate-EC2-part2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AWS CSA Associate 學習筆記 - EC2(Elastic Compute Cloud) Part 2
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2020-05-30 09:10:00 / Modified: 09:14:46" itemprop="dateCreated datePublished" datetime="2020-05-30T09:10:00+08:00">2020-05-30</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/AWS/" itemprop="url" rel="index"><span itemprop="name">AWS</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/AWS/AWS-CSA-associate-EC2-part2/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="AWS/AWS-CSA-associate-EC2-part2/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 EC2 服務，會分成三篇文章來記錄，此為第二部份，包含了 EBS、Snapshot、Volume Encryption、AMI、ENA、EGA、CloudWatch、CloudTrail、IAM Role ... 等內容</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="EBS-Elastic-Block-Store"><a href="#EBS-Elastic-Block-Store" class="headerlink" title="EBS(Elastic Block Store)"></a>EBS(Elastic Block Store)</h1><h2 id="EBS-是什麼"><a href="#EBS-是什麼" class="headerlink" title="EBS 是什麼?"></a>EBS 是什麼?</h2><p>EBS 是 AWS 提供的 block storage 服務，可提供以下服務：</p>
+<ul>
+<li><p>與 EC2 instance 搭配使用的 block storage service</p>
+</li>
+<li><p>EBS 會自動在 volume 所在的 region 產生複本備份，確保資料安全 &amp; 可用性</p>
+</li>
+<li><p>可根據效能需求 or 預算考量，選擇合適的 volume type</p>
+</li>
+<li><p>可使用 EBS snapshot 將資料備份到 S3，並搭配 S3 lifecycle 管理機制來提高資料的安全性</p>
+</li>
+</ul>
+<h2 id="EBS-Volume-Type"><a href="#EBS-Volume-Type" class="headerlink" title="EBS Volume Type"></a>EBS Volume Type</h2><p>EBS volume type 有四種(官方宣稱)，直接使用下表來進行比較：</p>
+<blockquote>
+<p>第五種為前一代的 <code>EBS Magnetic</code>，但應該之後會消失</p>
+</blockquote>
+<p><img src="/blog/images/aws/EBS_Storage-Type-Comparison.png" alt="EBS storage type comparison"></p>
+<ul>
+<li><p>不同的應用其實都有合適的 volume type 可以對應</p>
+</li>
+<li><p>每個 volume type 對應的 API Name 需要稍微記一下</p>
+</li>
+</ul>
+<h2 id="Volumes-amp-Snapshots"><a href="#Volumes-amp-Snapshots" class="headerlink" title="Volumes &amp; Snapshots"></a>Volumes &amp; Snapshots</h2><ul>
+<li><p>EBS volume 與 EC2 instance 會在同一個 AZ 中</p>
+</li>
+<li><p>volume 存在於 EBS 中；snapshot 則是存在於 S3 中</p>
+</li>
+<li><p>snapshot 是 volume 在特定時間點的複本</p>
+</li>
+<li><p>snapshot 的特性是 incremental，因此對 volume 進行 snapshot 只會針對有變動的 block 進行處理</p>
+</li>
+<li><p>第一次的 snapshot 需要花費較長的時間完成</p>
+</li>
+<li><p>不建議在 EC2 instance 運行中建立 snapshot，會影響效能；但還是可以這麼做</p>
+</li>
+<li><p>EBS volume 可以直接線上擴展容量 or 更改 volume type，不會造成資料毀損 (但需要花幾分鐘的時間完成)</p>
+</li>
+<li><p>EC2 instance 中的 root disk 是其實來自於 AWS 準備的 EBS volume snapshot</p>
+</li>
+<li><p>當 EC2 instance 被移除時，root disk 會跟著被移除，只有額外新增的 volume 保留下來</p>
+</li>
+</ul>
+<h2 id="如何將-EC2-instance-或-EBS-volume-移到不同的-AZ-中"><a href="#如何將-EC2-instance-或-EBS-volume-移到不同的-AZ-中" class="headerlink" title="如何將 EC2 instance 或 EBS volume 移到不同的 AZ 中?"></a>如何將 EC2 instance 或 EBS volume 移到不同的 AZ 中?</h2><ol>
+<li><p>對 EBS volume 進行 snapshot</p>
+</li>
+<li><p>透過上一個步驟產生的 snapshot 建立一個 AMI(Amazon Machine Image)</p>
+<blockquote>
+<p>從 EBS snapshot 建立 Image 時，<strong>Virtualization Type</strong> 建議選用 <code>Hardware-assisted viirtualization</code>，之後使用 image 時可以支援校多種 EC2 instance type；若選擇 <code>paravirtual</code> 會導致可以選擇的 EC2 instance type 變得很少</p>
+</blockquote>
+</li>
+<li><p>使用 AMI 在不同的 AZ 中建立 EC2 instance</p>
+</li>
+</ol>
+<p>上面的範例是說明如何將 EBS volume 移到不同的 AZ 上；但如果要移到另外一個 region 呢?</p>
+<ol>
+<li><p>執行上面的前兩個步驟</p>
+</li>
+<li><p>執行 <strong>Copy AMI</strong> 操作，將 AMI 複製到不同的 region 中</p>
+<blockquote>
+<p>若是要實現跨 region 移動 EBS volume，就要使用 <strong>Copy AMI</strong> 的方式</p>
+</blockquote>
+</li>
+</ol>
+<h2 id="磁碟加密-Encrypt-功能"><a href="#磁碟加密-Encrypt-功能" class="headerlink" title="磁碟加密(Encrypt)功能"></a>磁碟加密(Encrypt)功能</h2><ul>
+<li><p>若是 EBS volume 有加密，則對其進行的 snapshot 也都會被自動加密</p>
+</li>
+<li><p>從加密後的 snapshot 還原成 EBS volume，也會自動被加密</p>
+</li>
+<li><p>snapshot 可以在同一個帳號或是跨帳號，甚至公開進行分享，但必須是沒有加密的狀態下</p>
+</li>
+<li><p>目前在建立 EC2 instance 時，支援將 root device 進行加密</p>
+</li>
+</ul>
+<h3 id="將-EC2-Instance-未加密的-root-device-進行加密的流程"><a href="#將-EC2-Instance-未加密的-root-device-進行加密的流程" class="headerlink" title="將 EC2 Instance 未加密的 root device 進行加密的流程"></a>將 EC2 Instance 未加密的 root device 進行加密的流程</h3><p>若是有某台帶有未 root device 的 EC2 instance，因為某些原因需要將其加密，可透過以下流程進行：</p>
+<ol>
+<li><p>對未加密的 root device volume 進行 snapshot</p>
+</li>
+<li><p><strong>複製 snapshot，並選擇進行加密</strong></p>
+</li>
+<li><p>使用上一個步驟已經加密後的 snapshot 建立一個 AMI</p>
+</li>
+<li><p>透過新建立的 AMI 產生一個新的 EC2 instance (此時 root device 已經加密)</p>
+</li>
+</ol>
+<h1 id="AMI-Type"><a href="#AMI-Type" class="headerlink" title="AMI Type"></a>AMI Type</h1><p>AMI 是產生 EC2 instance 的基礎，使用者在選擇 AMI 時，可基於以下幾個項目進行選擇：</p>
+<ul>
+<li><p>Region</p>
+</li>
+<li><p>作業系統</p>
+</li>
+<li><p>系統架構(32-bit 或是 64-bit)</p>
+</li>
+<li><p>啟動權限</p>
+</li>
+<li><p>root device 所使用的 storage 類型，可能會是 <code>Instance Store</code> 或是 <code>EBS Backed Volume</code></p>
+</li>
+</ul>
+<h2 id="AMI-類型"><a href="#AMI-類型" class="headerlink" title="AMI 類型"></a>AMI 類型</h2><ul>
+<li><p>所有的 AMI 都是來自於兩個來源：<strong>Amazon EBS</strong> or <strong>Instance Store</strong>(Ephemeral Storage)</p>
+</li>
+<li><p>EBS volume 的來源是透過 Amazon 預先準備好的 EBS snapshot 所產生的</p>
+</li>
+<li><p>Instance Store volume 則是從預先儲存在 S3 的 template 中建立出來的 (Console 中的 <strong>Community AMI</strong> 頁面可看到)</p>
+</li>
+</ul>
+<h2 id="考試重點"><a href="#考試重點" class="headerlink" title="考試重點"></a>考試重點</h2><ul>
+<li><p>當啟動 EC2 instance 之前，可以新增額外的 instance store volume &amp; EBS volume</p>
+</li>
+<li><p>但是當 EC2 instance 被啟動後，就無法新增額外的 instance store volume，只能新增 EBS volume</p>
+</li>
+<li><p>Instance Store Volume 所建立的 instance 無法停止，因此一旦 instance 出問題，資料就會遺失了；但透過 EBS backed instance 是可以停止的</p>
+</li>
+<li><p>兩種類型的 instance 重新啟動都不會遺失資料</p>
+</li>
+<li><p>預設情況下，兩種類型的 instance 被移除後，root device 都會一併移除</p>
+</li>
+<li><p>可以設定當 instance 被移除後不移除 EBS backed volume，不過 instance store volume 無法做這樣的設定</p>
+</li>
+</ul>
+<h1 id="ENI-ENA-EFA-的比較"><a href="#ENI-ENA-EFA-的比較" class="headerlink" title="ENI, ENA, EFA 的比較"></a>ENI, ENA, EFA 的比較</h1><p>這個部份可能會需要曾經有硬體相關的背景可能會看比較懂….</p>
+<p>總之有些時候可能會有一些特殊應用，會需要 VM 可以有接近 Bare Metal(實體機器) 的網路效能(包含延遲)，但又不想管理不甚彈性的實體機器，那 AWS 提供一些額外的加強型網路選項可以協助這個部份；若是真的無法達到需求，再考慮實體機器也可以….</p>
+<h2 id="ENI-Elastic-Network-Interface"><a href="#ENI-Elastic-Network-Interface" class="headerlink" title="ENI (Elastic Network Interface)"></a>ENI (Elastic Network Interface)</h2><ul>
+<li>就是一般啟動 EC2 instance 預設使用的虛擬網路卡</li>
+</ul>
+<blockquote>
+<p>若是需要獨立網路(例如：logging network)，但不需要特別高效能，希望便宜些，就用此選項</p>
+</blockquote>
+<h2 id="ENA-Elastic-Network-Adapter"><a href="#ENA-Elastic-Network-Adapter" class="headerlink" title="ENA (Elastic Network Adapter)"></a>ENA (Elastic Network Adapter)</h2><ul>
+<li><p>加強型的虛擬網路卡，使用 SR-IOV 功能，讓 VM 對硬體設備的存取可以繞過 Hypervisor 直接對硬體存取，大幅提昇網路效能、降低延遲 &amp; CPU 使用率</p>
+<blockquote>
+<p>SR-IOV 技術不僅可用在網路設備上，儲存設備也可以….簡單來說就是支援 SR-IOV 的 PCIe 設備都行</p>
+</blockquote>
+</li>
+<li><p>ENA 在網路部份提供了更高的頻寬、穩定且更低的延遲</p>
+</li>
+<li><p>啟用這個功能不會用任何無外費用產生，但僅有部份 Instance type 支援此功能</p>
+</li>
+<li><p>ENA 可以支援到 100Gbps 的網路頻寬；而在以前的 instance type 有支援 10Gbps 頻寬的 VF(Intel 82599 Virtual Function) 選項，現在都以 ENA 為主</p>
+</li>
+<li><p>若是要建立一個獨立網段做特定的工作(例如：storage data plan)並兼顧低成本且高可用的需求，就可以利用這樣的功能</p>
+</li>
+</ul>
+<blockquote>
+<p>若需要 10Gbps ~ 100Gbps 且穩定的網路品質，可以選用 ENA</p>
+</blockquote>
+<h2 id="EFA-Elastic-Fabric-Adapter"><a href="#EFA-Elastic-Fabric-Adapter" class="headerlink" title="EFA (Elastic Fabric Adapter)"></a>EFA (Elastic Fabric Adapter)</h2><ul>
+<li><p>一種特殊的網路設備，可用來提昇 HPC 或是機器學習相關應用的效能</p>
+</li>
+<li><p>比起傳統 cloud-based HCP 系統，可以提高更低的網路延遲 &amp; 更高的網路輸出入</p>
+</li>
+<li><p>讓 instance 中的應用可以 bypass Linux kernel(OS-bypass)，直接與硬體通訊，藉此大幅提高速度並降低延遲</p>
+</li>
+<li><p>目前此功能僅支援 Linux 平台</p>
+</li>
+</ul>
+<blockquote>
+<p>特殊與 HPC 相關的應用(例如：機器學習)，就可以考慮此選項</p>
+</blockquote>
+<h1 id="CloudWatch-amp-CloudTrail"><a href="#CloudWatch-amp-CloudTrail" class="headerlink" title="CloudWatch &amp; CloudTrail"></a>CloudWatch &amp; CloudTrail</h1><p>CloudWatch &amp; CloudTrail 都是很大的主題，這邊暫時以 CSA 的考試需求為主，因此了解一下兩個服務的功能特性 &amp; 比較即可。</p>
+<h2 id="CloudWatch"><a href="#CloudWatch" class="headerlink" title="CloudWatch"></a>CloudWatch</h2><ul>
+<li><p><strong>主要作為監控效能用</strong>，是 AWS 重要服務之一</p>
+</li>
+<li><p>同時與其他 AWS 服務都有高度整合(例如：EC2, ASG, ELB, Route53, EBS, CloudFront … 等等)，方便進行監控的設定</p>
+</li>
+<li><p>除了 AWS 服務之外，也可以同時用來監控自行開發的應用程式</p>
+</li>
+<li><p>CloudWatch 預設每五分鐘會對 EC2 進行監控資訊的蒐集；但若是希望可以監控到更細節的資訊，可以設定成每一分鐘(在啟用 instance 時勾選 <code>Enable CloudWatch detailed monitoring</code>)</p>
+</li>
+<li><p>CloudWatch 有幾個重要的組成部分：</p>
+<ul>
+<li><p><code>Dashboard</code>：以圖形展現的方式呈現監控數據，可以是 region level or global level</p>
+</li>
+<li><p><code>Alarm</code>：設定某個 thrshold 到達時，觸發告警</p>
+</li>
+<li><p><code>Event</code>：可指定當某個 AWS resource 變更時，執行預先指定的工作</p>
+</li>
+<li><p><code>Logs</code>：CloudWatch 也可以協助蒐集 &amp; 監控、儲存文字型態的 log 資訊</p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="CloudTrail"><a href="#CloudTrail" class="headerlink" title="CloudTrail"></a>CloudTrail</h2><ul>
+<li><p>用來檢視使用者對於 AWS 各項資源的使用記錄 &amp; 狀況，<strong>主要用來提供稽核用</strong></p>
+</li>
+<li><p>記錄內容包含 console 的操作 &amp; API call，以及來源 IP … 等資訊</p>
+</li>
+</ul>
+<h1 id="與-IAM-Role-的搭配使用"><a href="#與-IAM-Role-的搭配使用" class="headerlink" title="與 IAM Role 的搭配使用"></a>與 IAM Role 的搭配使用</h1><p>不論要存取任何 AWS resource，都必須要有合法且足夠的權限才有辦法進行；在一般情況下，要取得權限，可以到 IAM 中新增 user，指定需要的權限，並取得 Access Key ID &amp; Secret Access Key 來使用。</p>
+<p>以 EC2 instance 為例，若要設定 AWS credential，就必須在檔案 <code>~/.aws/credentials</code> 中，設定以下內容：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[default]</span></span><br><span class="line"><span class="attr">aws_access_key_id</span>=[YOUR_ACCESS_KEY_ID]</span><br><span class="line"><span class="attr">aws_secret_access_key</span>=[YOUR_SECRET_ACCESS_KEY]</span><br></pre></td></tr></table></figure>
+
+<p>但若是需要串接很多不同服務，就可能需要在很多不同的 EC2 instace 都對 AWS resource 進行存取，在每一台 instance 中設定 Access Key ID &amp; Secret Access Key 並不切實際且難以管理，因此這問題就可以用 <code>IAM Role</code> 來解決。</p>
+<p>流程如下：</p>
+<ol>
+<li><p>在 <code>IAM</code> 中新增 Role，並設定所需要的權限</p>
+</li>
+<li><p>將上一個步驟新增的 role 與 EC2 instance 進行繫結</p>
+</li>
+</ol>
+<p>如此一來，即使在 EC2 instance 沒有 AWS credential 也可以直接對有權限的 AWS resource 進行存取</p>
+<h2 id="考試重點-1"><a href="#考試重點-1" class="headerlink" title="考試重點"></a>考試重點</h2><ul>
+<li><p>若要賦予 EC2 instance 存取其他 AWS resource 的權限，使用 IAM role 會比 Access Key ID &amp; Secret Access Key 更安全</p>
+</li>
+<li><p>Role 的概念比較容易管理 &amp; 直覺</p>
+</li>
+<li><p>Role 可以在 EC2 instance 被建立後，透過 console 或是 command line 進行繫結</p>
+</li>
+<li><p>Role 的有效範圍是 global，因此設定之後可以在所有 region 中使用</p>
+</li>
+</ul>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a href="https://aws.amazon.com/ebs/?ebs-whats-new.sort-by=item.additionalFields.postDateTime&ebs-whats-new.sort-order=desc" target="_blank" rel="noopener">Amazon Elastic Block Store (EBS) - Amazon Web Services</a></p>
+</li>
+<li><p><a href="https://rickhw.github.io/2017/07/16/AWS/Deep-Dive_EBS/" target="_blank" rel="noopener">Deep Dive on EBS | Complete Think</a></p>
+</li>
+<li><p><a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html" target="_blank" rel="noopener">Enhanced networking on Linux - Amazon Elastic Compute Cloud</a></p>
+</li>
+<li><p><a href="https://b8807053.pixnet.net/blog/post/345974548" target="_blank" rel="noopener">SR-IOV 簡介 @ 立你斯學習記錄 :: 痞客邦 ::</a></p>
+</li>
+<li><p><a href="http://www.ipshop.xyz/12470.html" target="_blank" rel="noopener">詳解“硬核”虛擬化技術SR-IOV原理-知識星球</a></p>
+</li>
+<li><p><a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/efa.html" target="_blank" rel="noopener">Elastic Fabric Adapter - Amazon Elastic Compute Cloud</a></p>
+</li>
+<li><p><a href="https://aws.amazon.com/cloudwatch/" target="_blank" rel="noopener">Amazon CloudWatch - Application and Infrastructure Monitoring</a></p>
+</li>
+<li><p><a href="https://aws.amazon.com/cloudtrail/" target="_blank" rel="noopener">AWS CloudTrail – Amazon Web Services</a></p>
+</li>
+<li><p><a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html" target="_blank" rel="noopener">IAM Roles - AWS Identity and Access Management</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/AWS/" rel="tag"># AWS</a>
+              <a href="/blog/tags/CSA/" rel="tag"># CSA</a>
+              <a href="/blog/tags/EC2/" rel="tag"># EC2</a>
+              <a href="/blog/tags/EBS/" rel="tag"># EBS</a>
+              <a href="/blog/tags/AMI/" rel="tag"># AMI</a>
+              <a href="/blog/tags/CloudWatch/" rel="tag"># CloudWatch</a>
+              <a href="/blog/tags/CloudTrail/" rel="tag"># CloudTrail</a>
+              <a href="/blog/tags/IAM/" rel="tag"># IAM</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/blog/AWS/AWS-CSA-associate-EC2-part1/" rel="prev" title="AWS CSA Associate 學習筆記 - EC2(Elastic Compute Cloud) Part 1">
+      <i class="fa fa-chevron-left"></i> AWS CSA Associate 學習筆記 - EC2(Elastic Compute Cloud) Part 1
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#EBS-Elastic-Block-Store"><span class="nav-number">1.</span> <span class="nav-text">EBS(Elastic Block Store)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#EBS-是什麼"><span class="nav-number">1.1.</span> <span class="nav-text">EBS 是什麼?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EBS-Volume-Type"><span class="nav-number">1.2.</span> <span class="nav-text">EBS Volume Type</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Volumes-amp-Snapshots"><span class="nav-number">1.3.</span> <span class="nav-text">Volumes &amp; Snapshots</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何將-EC2-instance-或-EBS-volume-移到不同的-AZ-中"><span class="nav-number">1.4.</span> <span class="nav-text">如何將 EC2 instance 或 EBS volume 移到不同的 AZ 中?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#磁碟加密-Encrypt-功能"><span class="nav-number">1.5.</span> <span class="nav-text">磁碟加密(Encrypt)功能</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#將-EC2-Instance-未加密的-root-device-進行加密的流程"><span class="nav-number">1.5.1.</span> <span class="nav-text">將 EC2 Instance 未加密的 root device 進行加密的流程</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#AMI-Type"><span class="nav-number">2.</span> <span class="nav-text">AMI Type</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#AMI-類型"><span class="nav-number">2.1.</span> <span class="nav-text">AMI 類型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#考試重點"><span class="nav-number">2.2.</span> <span class="nav-text">考試重點</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ENI-ENA-EFA-的比較"><span class="nav-number">3.</span> <span class="nav-text">ENI, ENA, EFA 的比較</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ENI-Elastic-Network-Interface"><span class="nav-number">3.1.</span> <span class="nav-text">ENI (Elastic Network Interface)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ENA-Elastic-Network-Adapter"><span class="nav-number">3.2.</span> <span class="nav-text">ENA (Elastic Network Adapter)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EFA-Elastic-Fabric-Adapter"><span class="nav-number">3.3.</span> <span class="nav-text">EFA (Elastic Fabric Adapter)</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CloudWatch-amp-CloudTrail"><span class="nav-number">4.</span> <span class="nav-text">CloudWatch &amp; CloudTrail</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#CloudWatch"><span class="nav-number">4.1.</span> <span class="nav-text">CloudWatch</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CloudTrail"><span class="nav-number">4.2.</span> <span class="nav-text">CloudTrail</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#與-IAM-Role-的搭配使用"><span class="nav-number">5.</span> <span class="nav-text">與 IAM Role 的搭配使用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#考試重點-1"><span class="nav-number">5.1.</span> <span class="nav-text">考試重點</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives/">
+        
+          <span class="site-state-item-count">115</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+          
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+          
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/blog/lib/anime.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/blog/js/utils.js"></script>
+
+<script src="/blog/js/motion.js"></script>
+
+
+<script src="/blog/js/schemes/muse.js"></script>
+
+
+<script src="/blog/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/AWS/AWS-CSA-associate-EC2-part2/";
+    this.page.identifier = "AWS/AWS-CSA-associate-EC2-part2/";
+    this.page.title = "AWS CSA Associate 學習筆記 - EC2(Elastic Compute Cloud) Part 2";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>
