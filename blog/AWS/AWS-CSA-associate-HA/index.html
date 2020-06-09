@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+<link rel="stylesheet" href="/blog/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為學習 AWS 提供哪些服務 &amp; 功能，可以協助使用者建立高可用(High Availability)的架構">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AWS CSA Associate 學習筆記 - HA Architecture">
+<meta property="og:url" content="https://godleon.github.io/blog/AWS/AWS-CSA-associate-HA/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為學習 AWS 提供哪些服務 &amp; 功能，可以協助使用者建立高可用(High Availability)的架構">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/ELB_Sitcky-Session.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/ELB_without-Cross-Zone-Load-Balancing.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/ELB_with-Cross-Zone-Load-Balancing.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/ELB_Cross-Zone-Load-Balancing-common-scenario.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/ELB_Path-Patterns.png">
+<meta property="article:published_time" content="2020-06-09T22:35:00.000Z">
+<meta property="article:modified_time" content="2020-06-09T22:36:42.996Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="AWS">
+<meta property="article:tag" content="CSA">
+<meta property="article:tag" content="ELB">
+<meta property="article:tag" content="Auto Scaling">
+<meta property="article:tag" content="High Availability">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/aws/ELB_Sitcky-Session.png">
+
+<link rel="canonical" href="https://godleon.github.io/blog/AWS/AWS-CSA-associate-HA/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-tw'
+  };
+</script>
+
+  <title>AWS CSA Associate 學習筆記 - HA Architecture | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/blog/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/blog/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/blog/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/blog/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/AWS/AWS-CSA-associate-HA/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AWS CSA Associate 學習筆記 - HA Architecture
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2020-06-10 06:35:00 / Modified: 06:36:42" itemprop="dateCreated datePublished" datetime="2020-06-10T06:35:00+08:00">2020-06-10</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/AWS/" itemprop="url" rel="index"><span itemprop="name">AWS</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/AWS/AWS-CSA-associate-HA/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="AWS/AWS-CSA-associate-HA/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為學習 AWS 提供哪些服務 & 功能，可以協助使用者建立高可用(High Availability)的架構</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Load-Balancer"><a href="#Load-Balancer" class="headerlink" title="Load Balancer"></a>Load Balancer</h1><p>AWS 提供三種 Load Balancer 類型，分別是：</p>
+<ul>
+<li><p>Application Load Balancer</p>
+</li>
+<li><p>Network Load Balancer</p>
+</li>
+<li><p>Classic Load Balancer</p>
+</li>
+</ul>
+<h2 id="Application-Load-Balancer"><a href="#Application-Load-Balancer" class="headerlink" title="Application Load Balancer"></a>Application Load Balancer</h2><ul>
+<li><p>分流 HTTP &amp; HTTPS 流量的最佳選擇</p>
+</li>
+<li><p>Application aware，可以讓源端的服務獲得額外的資訊(例如：使用者所在位置、使用的語系…等等)</p>
+</li>
+<li><p>可以根據使用者資訊 &amp; 條件設定 request routing policy，將流量導向特定的服務</p>
+</li>
+</ul>
+<h2 id="Network-Load-Balancer"><a href="#Network-Load-Balancer" class="headerlink" title="Network Load Balancer"></a>Network Load Balancer</h2><ul>
+<li><p>分流 TCP traffic(Layer 4) 的最佳選擇</p>
+</li>
+<li><p>效能非常好，可以輕鬆處理每秒百萬級別的 request，且保持低延遲的狀態</p>
+</li>
+</ul>
+<h2 id="Classic-Load-Balancer"><a href="#Classic-Load-Balancer" class="headerlink" title="Classic Load Balancer"></a>Classic Load Balancer</h2><ul>
+<li><p>其實前身就是 ELB(Elastic Load Balancer)</p>
+</li>
+<li><p>可以同時處理 Layer 7 &amp; Layer 4 的流量</p>
+</li>
+<li><p>支援 Layer 7 特性，例如：X-Forwarded-For &amp; sticky session</p>
+</li>
+<li><p>但其他更進階的設定則是沒有支援，必須改用 ALB or NLB</p>
+</li>
+<li><p>源端服務若是有問題，會回應 504 Error(Gateway Timeout)</p>
+</li>
+</ul>
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><ul>
+<li><p>若是 Load Balancer 回應 504 Error(Gateway Timeout)，就是源端的服務出問題，超過 idle timeout 的設定</p>
+<blockquote>
+<p>此時就需要去檢查 web server or DB service … 等等</p>
+</blockquote>
+</li>
+<li><p>當網路流量經過 load balancer 進入終端 server，且需要在終端 server 取得來源使用者的 IP，就需要查看 <code>X-Forwarded-For</code> header </p>
+</li>
+<li><p>Load Balancer 都會提供一個 DNS name，不會給 IP address</p>
+</li>
+<li><p><strong>考試前請認真讀一下 <a href="https://aws.amazon.com/elasticloadbalancing/faqs" target="_blank" rel="noopener">Elastic Load Balancing FAQs</a>，會出不少關於三種不同 LB 差異的考題</strong></p>
+</li>
+</ul>
+<h3 id="Health-Check"><a href="#Health-Check" class="headerlink" title="Health Check"></a>Health Check</h3><ul>
+<li><p>從 Load Balancer 角度來監控 target(Instance, IP or Labmda)，會有 <code>InService</code> &amp; <code>OutofService</code> 兩種狀態</p>
+</li>
+<li><p>Health check 的機制是透過不斷的詢問 target 實現的</p>
+</li>
+</ul>
+<h1 id="Advanced-Load-Balancer-須知"><a href="#Advanced-Load-Balancer-須知" class="headerlink" title="Advanced Load Balancer 須知"></a>Advanced Load Balancer 須知</h1><h2 id="Sticky-Session"><a href="#Sticky-Session" class="headerlink" title="Sticky Session"></a>Sticky Session</h2><p><img src="/blog/images/aws/ELB_Sitcky-Session.png" alt="ELB sticky session"></p>
+<ul>
+<li><p>sticky session 可以讓使用者使用固定的 EC2 instance(透過將 user session 與固定的 instance 綁定)</p>
+<blockquote>
+<p>若是在某些應用會將使用者相關資訊存在本機上時特別有用</p>
+</blockquote>
+</li>
+<li><p>若開啟 sticky session，當某位使用者的流量被導向到特定的 instance 後，他就會一直被導向同樣的 instance</p>
+</li>
+<li><p>ALB 也支援 sticky session，但流量僅能導向 target group level</p>
+</li>
+</ul>
+<h2 id="Cross-Zone-Load-Balancing"><a href="#Cross-Zone-Load-Balancing" class="headerlink" title="Cross Zone Load Balancing"></a>Cross Zone Load Balancing</h2><p>簡單來說，Cross Zone Load Balancing 可以讓 Load Balancer 將流量分散到不同的 AZ 上，細節的部份可用以下三張圖說明，在那之前有幾個假設狀況：</p>
+<ol>
+<li><p>使用者存取某個在 Route 53 設定好的 domain name</p>
+</li>
+<li><p>domain name 指定兩筆記錄，分別指到不同 AZ 的兩個 Load Balancer</p>
+</li>
+<li><p>預設情況下，Route 53 會引導各 50% 的流量到不同 AZ 上的 Load Balancer</p>
+</li>
+</ol>
+<h3 id="未開啟-Cross-Zone-Load-Balancing"><a href="#未開啟-Cross-Zone-Load-Balancing" class="headerlink" title="未開啟 Cross Zone Load Balancing"></a>未開啟 Cross Zone Load Balancing</h3><p>首先是一般情況下沒有開啟 Cross Zone Load Balancing 功能的情況下：</p>
+<p><img src="/blog/images/aws/ELB_without-Cross-Zone-Load-Balancing.png" alt="without Cross Zone Load Balancing"></p>
+<ul>
+<li><p>上面的 AZ 有四個 instance，下方的 AZ 僅有一個 instance</p>
+</li>
+<li><p>每個 AZ 都得到 50% 的流量</p>
+</li>
+<li><p>上方的四個 instance 共同分攤了 50% 的流量，但下方單獨的 instance 一台就扛了該 AZ 所有的流量</p>
+</li>
+</ul>
+<h3 id="開啟-Cross-Zone-Load-Balancing"><a href="#開啟-Cross-Zone-Load-Balancing" class="headerlink" title="開啟 Cross Zone Load Balancing"></a>開啟 Cross Zone Load Balancing</h3><p>很明顯上面的流量分配是有問題，還是有優化空間的，這時候就可以透過開啟 Cross Zone Load Balancing 功能來處理，當開啟了 Cross Zone Load Balancing，流量的分配就會變成如下：</p>
+<p><img src="/blog/images/aws/ELB_with-Cross-Zone-Load-Balancing.png" alt="with Cross Zone Load Balancing"></p>
+<ul>
+<li><p>負載平均是以整體來計算，而非單一 AZ</p>
+</li>
+<li><p>下方 AZ 可以知道上方 AZ 中的 instance 所得到的流量相對少，因此就會有一部份流量會轉回上方 AZ 中</p>
+</li>
+<li><p>透過 ELB 將流量導向另外一個 AZ，藉此平均分散流量到 instance 上</p>
+</li>
+</ul>
+<h3 id="單一-AZ-ELB-開啟-Cross-Zone-Load-Balancing"><a href="#單一-AZ-ELB-開啟-Cross-Zone-Load-Balancing" class="headerlink" title="單一 AZ ELB + 開啟 Cross Zone Load Balancing"></a>單一 AZ ELB + 開啟 Cross Zone Load Balancing</h3><p>如果只有一個 AZ 有 ELB 的設定，加上開啟了 開啟 Cross Zone Load Balancing，會是怎麼樣呢? 結果會變成下圖：</p>
+<p><img src="/blog/images/aws/ELB_Cross-Zone-Load-Balancing-common-scenario.png" alt="single AZ ELB with Cross Zone Load Balancing"></p>
+<ul>
+<li><p>流量 100% 發到上方 AZ 的 ELB 上</p>
+</li>
+<li><p>但有 20% 的流量會跨 AZ 轉發到下方 AZ 的 instance 中</p>
+</li>
+</ul>
+<h2 id="Path-Patterns"><a href="#Path-Patterns" class="headerlink" title="Path Patterns"></a>Path Patterns</h2><p>簡單來說，<code>path pattern</code> 的功能是可以讓管理者根據 request url 來決定將流量導向不同的 EC2 instance 上，那實際上這是如何實現的呢?</p>
+<ol>
+<li><p>建立 listener，並根據 url path 指定 rule</p>
+</li>
+<li><p>設定 target group，並與 listener 進行繫結，讓符合 listener rule 的流量導向指定的 target group</p>
+</li>
+</ol>
+<p>以下用一張圖進行範例說明：</p>
+<p><img src="/blog/images/aws/ELB_Path-Patterns.png" alt="ELB path patterns"></p>
+<ul>
+<li><p>管理者設定兩個 target group，分別是上方 AZ 的四個 instance，與下方 AZ 的一個 instance</p>
+</li>
+<li><p>設定兩個 listener rules，分別是處理送往 <code>www.myurl.com</code> &amp; <code>www.myurl.com/images</code> 的流量</p>
+</li>
+<li><p>將 listener rules 與 target group 繫結，符合第一個存取路徑的流量會導向上方 AZ 的 instance，而 image 相關的流量則會轉發到下方 AZ 中的 instance</p>
+</li>
+</ul>
+<h1 id="Auto-Scaling"><a href="#Auto-Scaling" class="headerlink" title="Auto Scaling"></a>Auto Scaling</h1><h2 id="Auto-Scaling-是什麼"><a href="#Auto-Scaling-是什麼" class="headerlink" title="Auto Scaling 是什麼?"></a>Auto Scaling 是什麼?</h2><p>Auto Scaling 是在公有雲上必用的功能之一，可以根據系統負載來自動調整資源佈署，以下是 AWS 官方對 Auto Scaling 這項功能的介紹：</p>
+<blockquote>
+<p>AWS Auto Scaling monitors your applications and automatically adjusts capacity to maintain steady, predictable performance at the lowest possible cost. Using AWS Auto Scaling, it’s easy to setup application scaling for multiple resources across multiple services in minutes. The service provides a simple, powerful user interface that lets you build scaling plans for resources including Amazon EC2 instances and Spot Fleets, Amazon ECS tasks, Amazon DynamoDB tables and indexes, and Amazon Aurora Replicas. AWS Auto Scaling makes scaling simple with recommendations that allow you to optimize performance, costs, or balance between them. If you’re already using Amazon EC2 Auto Scaling to dynamically scale your Amazon EC2 instances, you can now combine it with AWS Auto Scaling to scale additional resources for other AWS services. With AWS Auto Scaling, your applications always have the right resources at the right time.</p>
+</blockquote>
+<p>看完上述介紹，重點就大概可以理解的差不多了，以下整理歸納一下：</p>
+<ul>
+<li><p>Auto Scaling 的運作基礎在監控，有監控數據，才會有實現 auto scaling 的依據 (至於哪些數據可以被監控，就是比較細節的部份了)</p>
+</li>
+<li><p>Auto Scaling 並非 EC2 獨有的選項，也可以與 ECS、DynamoDB、Aurora … 等服務搭配</p>
+</li>
+<li><p>Auto Scaling 提供了一些特性讓整體設定變得簡單(例如：Launch Template、Scaling Option … 等等)</p>
+</li>
+<li><p>透過 Auto Scaling 可以協助優化資源使用率、降低成本</p>
+</li>
+</ul>
+<p>這功能看起來相當好用，誰不希望系統可以自動幫忙些什麼事情呢?</p>
+<h2 id="Auto-Scaling-的組成"><a href="#Auto-Scaling-的組成" class="headerlink" title="Auto Scaling 的組成"></a>Auto Scaling 的組成</h2><p>Auto Scaling 共分為三個部份，分別是：</p>
+<ul>
+<li><p>Groups</p>
+<blockquote>
+<p>這屬於邏輯上服務的群組，例如：一群 web server，一群 DB server</p>
+</blockquote>
+</li>
+<li><p>Configuration Templates</p>
+<blockquote>
+<p>用來指示 Auto Scaling 機制，要自動生成的服務的樣貌，以 EC2 為例，就會有 AMI ID、instance type、key pair、security group、storage … 等資訊</p>
+</blockquote>
+</li>
+<li><p>Scaling Options</p>
+<blockquote>
+<p>這是進行 Auto Scaling 的依據，可能根據負載、或是特定時間；以及可以進行 Auto Scaling 的資源上下限</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="有哪些-Scaling-Option-可用"><a href="#有哪些-Scaling-Option-可用" class="headerlink" title="有哪些 Scaling Option 可用?"></a>有哪些 Scaling Option 可用?</h2><p>Group &amp; Configuration Template 都是相對容易理解的部份，這裡需要注意的是有哪些 scaling option 是可以設定的? 目前共支援五種，以下一一介紹。</p>
+<h3 id="Maintain-current-instance-levels-at-all-times"><a href="#Maintain-current-instance-levels-at-all-times" class="headerlink" title="Maintain current instance levels at all times"></a>Maintain current instance levels at all times</h3><ul>
+<li><p>明確告知 ASG，無論何時都一定要有特定數量的 instance 存在</p>
+</li>
+<li><p>AWS 會定期對 instance 進行健康檢查</p>
+</li>
+<li><p>若是發現有不健康的 instance，就會把它移除，並重啟一個新的</p>
+</li>
+</ul>
+<h3 id="Scale-manually"><a href="#Scale-manually" class="headerlink" title="Scale manually"></a>Scale manually</h3><ul>
+<li><p>這是最基礎的 ASG 設定方式</p>
+</li>
+<li><p>其實就只有指定 maximum, minimum, desired capacity 這三個參數作為 ASG 執行的依據(不一定全部都要設定)</p>
+</li>
+</ul>
+<h3 id="Scale-based-on-a-schedule"><a href="#Scale-based-on-a-schedule" class="headerlink" title="Scale based on a schedule"></a>Scale based on a schedule</h3><ul>
+<li><p>根據指定的時間 or 日期進行伸縮</p>
+</li>
+<li><p>適合用在清楚知道 scale out/in 的時機</p>
+</li>
+</ul>
+<h3 id="Scale-based-on-demand"><a href="#Scale-based-on-demand" class="headerlink" title="Scale based on demand"></a>Scale based on demand</h3><ul>
+<li><p>這是進階版的伸縮方式，透過提供 scaling policy 的方式達成</p>
+</li>
+<li><p>scaling policy 的依據可以來自監控的數據，例如：CPU 使用率</p>
+</li>
+<li><p>應該可以搭配自訂的監控數據，但要搞清楚如何串接 (這部份待確認)</p>
+</li>
+</ul>
+<h3 id="Use-predictive-scaling"><a href="#Use-predictive-scaling" class="headerlink" title="Use predictive scaling"></a>Use predictive scaling</h3><ul>
+<li><p>將 EC2 Auto Scaling 搭配 AWS Auto Scaling，進行多個服務的彈性伸縮</p>
+</li>
+<li><p>AWS Auto Scaling 可以透過預測的方式，對資源進行動態的伸縮，協助使用者維持最佳的可用性與系統效能</p>
+</li>
+</ul>
+<h2 id="關於-Maximum-Minimum-Desired-Capacity"><a href="#關於-Maximum-Minimum-Desired-Capacity" class="headerlink" title="關於 Maximum, Minimum, Desired Capacity"></a>關於 Maximum, Minimum, Desired Capacity</h2><p>有人可能會有疑問，若是 Desired Capacity 跟 Maximum or Minimum 設定衝突時怎辦? 原則大概如下：</p>
+<ul>
+<li><p>Desired Capacity 是實際上使用者告訴 ASG 希望可以達到的目標</p>
+</li>
+<li><p>其他可能會造成這數字自動改變的行為，可能來自於 CloudWatch alarm，自動觸發的 instace scale out/in 的行為</p>
+</li>
+<li><p>當自動 scale out/in 行為被觸發，要一直維持 Desired Capacity 就會沒有辦法，因此就會需要 Maximum &amp; Minimum 來規範上下限範圍</p>
+</li>
+</ul>
+<h1 id="Auto-Scaling-實作須知"><a href="#Auto-Scaling-實作須知" class="headerlink" title="Auto Scaling 實作須知"></a>Auto Scaling 實作須知</h1><ul>
+<li><p>設定 Auto Scaling Group 之前，必須先設定 <code>Launch Configurations</code></p>
+</li>
+<li><p>Group size 若是與 subnet 數量一致，佈署的時候就會被平均分散放置</p>
+</li>
+<li><p>作為自動 scale group size 的 metric type 有四種，分別是：</p>
+<ul>
+<li><p>Application Load Balancer Request Per Target</p>
+</li>
+<li><p>Average CPU Utilization</p>
+</li>
+<li><p>Avergae Network In (Bytes)</p>
+</li>
+<li><p>Average Network Out (Bytes)</p>
+</li>
+</ul>
+</li>
+<li><p>可設定新增的 instance 開始提供服務時間之前的 warm up 週期</p>
+<blockquote>
+<p>若是設定 300 秒，那該 instance 有五分鐘可以 warm up 的時間(根據需求自行處理此部份)，然後前端的 ELB 才會將流量送過來</p>
+</blockquote>
+</li>
+<li><p>當 ASG 設定被移除，與其相關的 instance 也會一併被移除</p>
+</li>
+</ul>
+<h1 id="HA-Architechture"><a href="#HA-Architechture" class="headerlink" title="HA Architechture"></a>HA Architechture</h1><p>此部份是記錄設計 HA(高可用) 架構時需要注意的重點</p>
+<h2 id="重點觀念"><a href="#重點觀念" class="headerlink" title="重點觀念"></a>重點觀念</h2><ul>
+<li><p>硬體一定會故障，基礎設施一定會有問題，因此必須 always design for failure</p>
+</li>
+<li><p>multiple AZ 的設計是必須的；如果是非常關鍵的應用，multiple region 的設計也可以考慮進來</p>
+</li>
+<li><p>搞清楚 RDS multi-AZ(避免故障導致無法服務) &amp; read-replica(提昇效能) 的差異</p>
+</li>
+<li><p>設計高可用架構，成本支出必然提昇，因此了解成本結構，如何有效節省支出是一件很重要的事情</p>
+</li>
+<li><p>S3 storage tier 的差異需要了解(standard, standard-IA, Glacier …. etc)</p>
+</li>
+</ul>
+<h2 id="實作課程中的重點整理"><a href="#實作課程中的重點整理" class="headerlink" title="實作課程中的重點整理"></a>實作課程中的重點整理</h2><p>在 <a href="https://www.udemy.com/course/aws-certified-solutions-architect-associate/" target="_blank" rel="noopener">AWS Certified Solutions Architect: Associate Certification Exam | Udemy</a> 課程中，有針對 HA 架構實作了一個 WordPress 的網站，過程中有一些值得記錄的重點：</p>
+<ul>
+<li><p>EC2 instance 中有設定 policy 可以存取 S3，因此可以將靜態資源上傳到 S3 上，但缺乏持續同步靜態資源的部份，因此持續同步的部份還是要另外處理</p>
+</li>
+<li><p>將靜態圖片從 EC2 instance 指向 CloudFront，是透過 url rewrite 功能達成的；這功能一般在 web server 都會有，可以善用</p>
+</li>
+<li><p>範例中 S3 是設定可以 public read，基於安全性需求，可能改成設定只有 CloudFront 可以 read …?</p>
+</li>
+<li><p>設定 ALB 時要指定到後方的 Target Group；而 Target Group 則是指到後方已經設定好 WP 的 EC2 instance</p>
+</li>
+<li><p>若要在二級域名(例如範例中的 <code>acloudguru2019.com</code>)直接指到 ALB，則是在 Route 53 中設定 <code>Alias</code> record</p>
+<blockquote>
+<p>二級域名並非使用 CName，而是要用 Alias</p>
+</blockquote>
+</li>
+</ul>
+<h1 id="其他-1"><a href="#其他-1" class="headerlink" title="其他"></a>其他</h1><h2 id="CloudFormation"><a href="#CloudFormation" class="headerlink" title="CloudFormation"></a>CloudFormation</h2><p>CloudFormation 跟之前研究 OpenStack 時學到的 HEAT 看起來幾乎是一模一樣概念的東西；基本上概念是這樣：</p>
+<ul>
+<li><p>是種 Infrastructure as Code 的工具</p>
+</li>
+<li><p>透過預先定義好的 template 快速產生環境(稱為 <code>stack</code>)的一種工具</p>
+</li>
+<li><p>AWS 已經預先定義好非常多 template 了，甚至還有很多廠商也提供了不少現成的 template 可以直接套用</p>
+<blockquote>
+<p>如果你的環境很固定是要跑特定的應用，那倒是可以試試看</p>
+</blockquote>
+</li>
+</ul>
+<p>基本上這套工具並不吸引我，我個人是會選擇泛用性更高的工具，例如：<a href="https://www.terraform.io/" target="_blank" rel="noopener">Terraform</a> or <a href="https://www.pulumi.com/" target="_blank" rel="noopener">pulumi</a> 來做一樣的事情，避免被特定平台綁死</p>
+<h2 id="Elastic-Beanstalk"><a href="#Elastic-Beanstalk" class="headerlink" title="Elastic Beanstalk"></a>Elastic Beanstalk</h2><p>這服務就是很簡單很快的給使用者一個特定的環境(例如：PHP)，然後後續的調整在自己慢慢來，基本上概念是這樣：</p>
+<ul>
+<li><p>AWS 快速產生一個可運行的特定環境給使用者</p>
+</li>
+<li><p>AWS 幫忙處理掉像是 provisioning、Load Balancing, scaling, application health monitoring 這些複雜瑣碎的事情了</p>
+</li>
+<li><p>使用者再根據需求自己慢慢調整</p>
+</li>
+<li><p>可以後續設定比較進階的功能來搭配，例如：Auto Scaling Group</p>
+</li>
+</ul>
+<p>但其實很多東西在本地環境就可以測試了，尤其現在 Docker 這麼方便…..相信這服務會慢慢式微的….XD</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a href="https://aws.amazon.com/blogs/devops/introducing-application-load-balancer-unlocking-and-optimizing-architectures/" target="_blank" rel="noopener">Introducing Application Load Balancer – Unlocking and Optimizing Architectures | AWS DevOps Blog</a></p>
+</li>
+<li><p><a href="https://aws.amazon.com/elasticloadbalancing/faqs" target="_blank" rel="noopener">Elastic Load Balancing FAQs - Amazon Web Services</a></p>
+</li>
+<li><p><a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/classic/elb-sticky-sessions.html" target="_blank" rel="noopener">Configure Sticky Sessions for Your Classic Load Balancer - Elastic Load Balancing</a></p>
+</li>
+<li><p><a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html" target="_blank" rel="noopener">Configure Cross-Zone Load Balancing for Your Classic Load Balancer - Elastic Load Balancing</a></p>
+</li>
+<li><p><a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-listeners.html" target="_blank" rel="noopener">Listeners for Your Application Load Balancers - Elastic Load Balancing</a></p>
+</li>
+<li><p><a href="https://aws.amazon.com/autoscaling/" target="_blank" rel="noopener">AWS Auto Scaling</a></p>
+</li>
+<li><p><a href="https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html" target="_blank" rel="noopener">What Is Amazon EC2 Auto Scaling? - Amazon EC2 Auto Scaling</a></p>
+</li>
+<li><p><a href="https://docs.aws.amazon.com/autoscaling/ec2/userguide/scaling_plan.html#scaling_typesof" target="_blank" rel="noopener">Scaling the Size of Your Auto Scaling Group - Amazon EC2 Auto Scaling</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/AWS/" rel="tag"># AWS</a>
+              <a href="/blog/tags/CSA/" rel="tag"># CSA</a>
+              <a href="/blog/tags/ELB/" rel="tag"># ELB</a>
+              <a href="/blog/tags/Auto-Scaling/" rel="tag"># Auto Scaling</a>
+              <a href="/blog/tags/High-Availability/" rel="tag"># High Availability</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/blog/AWS/AWS-CSA-associate-DNS/" rel="prev" title="AWS CSA Associate 學習筆記 - Route 53">
+      <i class="fa fa-chevron-left"></i> AWS CSA Associate 學習筆記 - Route 53
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Load-Balancer"><span class="nav-number">1.</span> <span class="nav-text">Load Balancer</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Application-Load-Balancer"><span class="nav-number">1.1.</span> <span class="nav-text">Application Load Balancer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Network-Load-Balancer"><span class="nav-number">1.2.</span> <span class="nav-text">Network Load Balancer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Classic-Load-Balancer"><span class="nav-number">1.3.</span> <span class="nav-text">Classic Load Balancer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他"><span class="nav-number">1.4.</span> <span class="nav-text">其他</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Health-Check"><span class="nav-number">1.4.1.</span> <span class="nav-text">Health Check</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Advanced-Load-Balancer-須知"><span class="nav-number">2.</span> <span class="nav-text">Advanced Load Balancer 須知</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Sticky-Session"><span class="nav-number">2.1.</span> <span class="nav-text">Sticky Session</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cross-Zone-Load-Balancing"><span class="nav-number">2.2.</span> <span class="nav-text">Cross Zone Load Balancing</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#未開啟-Cross-Zone-Load-Balancing"><span class="nav-number">2.2.1.</span> <span class="nav-text">未開啟 Cross Zone Load Balancing</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#開啟-Cross-Zone-Load-Balancing"><span class="nav-number">2.2.2.</span> <span class="nav-text">開啟 Cross Zone Load Balancing</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#單一-AZ-ELB-開啟-Cross-Zone-Load-Balancing"><span class="nav-number">2.2.3.</span> <span class="nav-text">單一 AZ ELB + 開啟 Cross Zone Load Balancing</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Path-Patterns"><span class="nav-number">2.3.</span> <span class="nav-text">Path Patterns</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Auto-Scaling"><span class="nav-number">3.</span> <span class="nav-text">Auto Scaling</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Auto-Scaling-是什麼"><span class="nav-number">3.1.</span> <span class="nav-text">Auto Scaling 是什麼?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Auto-Scaling-的組成"><span class="nav-number">3.2.</span> <span class="nav-text">Auto Scaling 的組成</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#有哪些-Scaling-Option-可用"><span class="nav-number">3.3.</span> <span class="nav-text">有哪些 Scaling Option 可用?</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Maintain-current-instance-levels-at-all-times"><span class="nav-number">3.3.1.</span> <span class="nav-text">Maintain current instance levels at all times</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Scale-manually"><span class="nav-number">3.3.2.</span> <span class="nav-text">Scale manually</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Scale-based-on-a-schedule"><span class="nav-number">3.3.3.</span> <span class="nav-text">Scale based on a schedule</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Scale-based-on-demand"><span class="nav-number">3.3.4.</span> <span class="nav-text">Scale based on demand</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Use-predictive-scaling"><span class="nav-number">3.3.5.</span> <span class="nav-text">Use predictive scaling</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#關於-Maximum-Minimum-Desired-Capacity"><span class="nav-number">3.4.</span> <span class="nav-text">關於 Maximum, Minimum, Desired Capacity</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Auto-Scaling-實作須知"><span class="nav-number">4.</span> <span class="nav-text">Auto Scaling 實作須知</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#HA-Architechture"><span class="nav-number">5.</span> <span class="nav-text">HA Architechture</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#重點觀念"><span class="nav-number">5.1.</span> <span class="nav-text">重點觀念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#實作課程中的重點整理"><span class="nav-number">5.2.</span> <span class="nav-text">實作課程中的重點整理</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#其他-1"><span class="nav-number">6.</span> <span class="nav-text">其他</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#CloudFormation"><span class="nav-number">6.1.</span> <span class="nav-text">CloudFormation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Elastic-Beanstalk"><span class="nav-number">6.2.</span> <span class="nav-text">Elastic Beanstalk</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">7.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives/">
+        
+          <span class="site-state-item-count">118</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+          
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+          
+        <span class="site-state-item-count">81</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/blog/lib/anime.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/blog/js/utils.js"></script>
+
+<script src="/blog/js/motion.js"></script>
+
+
+<script src="/blog/js/schemes/muse.js"></script>
+
+
+<script src="/blog/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/AWS/AWS-CSA-associate-HA/";
+    this.page.identifier = "AWS/AWS-CSA-associate-HA/";
+    this.page.title = "AWS CSA Associate 學習筆記 - HA Architecture";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>
