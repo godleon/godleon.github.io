@@ -72,7 +72,7 @@ EBS volume type 有四種(官方宣稱)，直接使用下表來進行比較：
 1. 對 EBS volume 進行 snapshot
 
 2. 透過上一個步驟產生的 snapshot 建立一個 AMI(Amazon Machine Image)
-> 從 EBS snapshot 建立 Image 時，**Virtualization Type** 建議選用 `Hardware-assisted viirtualization`，之後使用 image 時可以支援校多種 EC2 instance type；若選擇 `paravirtual` 會導致可以選擇的 EC2 instance type 變得很少
+> 從 EBS snapshot 建立 Image 時，**Virtualization Type** 建議選用 `Hardware-assisted viirtualization`，之後使用 image 時可以支援較多種 EC2 instance type；若選擇 `paravirtual` 會導致可以選擇的 EC2 instance type 變得很少
 
 3. 使用 AMI 在不同的 AZ 中建立 EC2 instance
 
