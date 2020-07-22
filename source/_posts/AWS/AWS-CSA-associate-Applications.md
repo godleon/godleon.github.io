@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  "AWS CSA Associate 學習筆記 - DB"
+title:  "AWS CSA Associate 學習筆記 - Application"
 description: "此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 Application 相關服務，包含 SQS、SNS、SWF、Elastic Transcoder、API Gateway、Kinesis、Cognito ... 等等內容"
-date: 2020-05-25 06:20:00
+date: 2020-07-21 06:00:00
 published: true
 comments: true
 categories:
