@@ -9,7 +9,7 @@ categories:
   - AWS
 tags:
   - AWS
-  - CSA
+  - CSAA
   - ELB
   - Auto Scaling
   - High Availability

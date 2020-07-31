@@ -9,7 +9,7 @@ categories:
   - AWS
 tags:
   - AWS
-  - CSA
+  - CSAA
   - SQS
   - SNS
   - SWF
@@ -99,13 +99,14 @@ AWS SQS 提供了兩種 Queue Type，分別是：
 - SQS 是 pull-based 類型的服務，非 pushed-based；這表示 SQS 不會主動送訊息出來，需要有個服務主動去拉(例如：EC2 instance)
 
 - Message 的大小是可以從 1 byte ~ 256 KB (可參考[官方文件](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-quotas.html))
+> 可以超過 256 KB，但過大的 payload 會需要以 reference 的方式放到 S3，不能直接傳到 SQS 中
 
 - 訊息可以保留在 Queue 中的時間範圍為 1 分鐘 ~ 14 天，可以自由設定 (預設是 4 天)
 
 - Visibility Timeout 是指當 consumer 拿走特定 message 之後，該 message 就會進入 invisible 的狀態，其他 consumer 自然就無法取來處理；一旦超過 timeout 設定，同一個 message 就可以被其他 consumer 取走並處理
 > **若是 visibility timeout 設定太小，可能工作還沒處理結束，其他 consumer 又從 Queue 上面取下來作(等於傳送兩次)**，這樣就會發生預期之外的結果，因此在設定 visibility timeout 必須搞清楚每個 job 會需要的執行時間才能做正確的設定
 
-- Visibility Timeout 的設定最長是 12 小時
+- Visibility Timeout 的設定最長是 12 小時(超過了 timeout 設定後，訊息就會重新回到 SQS 中，然後就可能造成重複消費的情況發生)
 > 因此若是 job 會執行超過 12 小時，可能 SQS 就不是適合拿來搭配的服務.....
 
 - SQS 會保證訊息至少會送出一次
