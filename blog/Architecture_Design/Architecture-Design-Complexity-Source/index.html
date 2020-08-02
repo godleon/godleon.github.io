@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+<link rel="stylesheet" href="/blog/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="此篇文章是極客時間&quot;從 0 開始學架構&quot;課程時所留下的學習筆記，主要內容為架構設計的目的 &amp; 複雜度(高性能、高可用、高擴展性、低成本、安全、規模)來源">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[架構設計] 目的 &amp; 複雜度來源">
+<meta property="og:url" content="https://godleon.github.io/blog/Architecture_Design/Architecture-Design-Complexity-Source/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章是極客時間&quot;從 0 開始學架構&quot;課程時所留下的學習筆記，主要內容為架構設計的目的 &amp; 複雜度(高性能、高可用、高擴展性、低成本、安全、規模)來源">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2020-08-02T13:15:00.000Z">
+<meta property="article:modified_time" content="2020-08-02T13:17:52.416Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="Architecture Design">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://godleon.github.io/blog/Architecture_Design/Architecture-Design-Complexity-Source/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-tw'
+  };
+</script>
+
+  <title>[架構設計] 目的 & 複雜度來源 | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/blog/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/blog/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/blog/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/blog/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/Architecture_Design/Architecture-Design-Complexity-Source/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [架構設計] 目的 & 複雜度來源
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2020-08-02 21:15:00 / Modified: 21:17:52" itemprop="dateCreated datePublished" datetime="2020-08-02T21:15:00+08:00">2020-08-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Architecture-Design/" itemprop="url" rel="index"><span itemprop="name">Architecture Design</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/Architecture_Design/Architecture-Design-Complexity-Source/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="Architecture_Design/Architecture-Design-Complexity-Source/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此篇文章是極客時間"從 0 開始學架構"課程時所留下的學習筆記，主要內容為架構設計的目的 & 複雜度(高性能、高可用、高擴展性、低成本、安全、規模)來源</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="架構設計的目的"><a href="#架構設計的目的" class="headerlink" title="架構設計的目的"></a>架構設計的目的</h1><h2 id="對架構設計常見的誤解"><a href="#對架構設計常見的誤解" class="headerlink" title="對架構設計常見的誤解"></a>對架構設計常見的誤解</h2><h3 id="因為架構很重要，所以要做架構設計"><a href="#因為架構很重要，所以要做架構設計" class="headerlink" title="因為架構很重要，所以要做架構設計"></a>因為架構很重要，所以要做架構設計</h3><ul>
+<li><p>其實不一定，一間公司的初期產品可能是沒有架構設計的，而一開始沒有架構設計時，反而開發效率是最高的，進行架構設計畢竟需要投入時間和人力</p>
+</li>
+<li><p>如果系統使用人數沒有很多，或是資料量不大，沒有架構設計也不一定會發生什麼問題</p>
+</li>
+<li><p>架構設計並無法保證可以促進業務發展</p>
+</li>
+</ul>
+<h3 id="不是每個系統都要做架構設計嗎"><a href="#不是每個系統都要做架構設計嗎" class="headerlink" title="不是每個系統都要做架構設計嗎?"></a>不是每個系統都要做架構設計嗎?</h3><ul>
+<li><p>架構師很容易直接套用業界其他公司的架構，但卻沒仔細思考是否符合公司實際需求</p>
+</li>
+<li><p>不適合的系統架構可能會導致不斷重構、甚至砍掉重練</p>
+</li>
+</ul>
+<h3 id="公司流程中要求系統開發過程中必須有架構設計"><a href="#公司流程中要求系統開發過程中必須有架構設計" class="headerlink" title="公司流程中要求系統開發過程中必須有架構設計"></a>公司流程中要求系統開發過程中必須有架構設計</h3><ul>
+<li>不要為了做架構設計而做</li>
+</ul>
+<h3 id="為了高性能、高可用、可擴展，所以要做架構設計"><a href="#為了高性能、高可用、可擴展，所以要做架構設計" class="headerlink" title="為了高性能、高可用、可擴展，所以要做架構設計"></a>為了高性能、高可用、可擴展，所以要做架構設計</h3><p>不經過審慎思考，直接就設計高性能、高可用、可擴展的架構，可能會出現以下問題：</p>
+<ul>
+<li><p>系統初期就過於複雜</p>
+</li>
+<li><p>專案項目落地的時間遙遙無期</p>
+</li>
+<li><p>上線後運行不夠穩定，遇到問題不容易定位，很難解決</p>
+</li>
+</ul>
+<h2 id="架構設計的真正目的"><a href="#架構設計的真正目的" class="headerlink" title="架構設計的真正目的"></a>架構設計的真正目的</h2><ul>
+<li><p>架構設計的主要目的是<strong>為了解決軟體系統複雜度帶來的問題</strong></p>
+<blockquote>
+<p>遵循這條準則能夠讓”新手”架構師心中有數，而不是一頭霧水。</p>
+</blockquote>
+</li>
+<li><p>架構設計的目的不是為了”防範”後期變化，而是要<strong>適當預測然後做好準備</strong></p>
+</li>
+</ul>
+<p>以下舉例說明：</p>
+<ul>
+<li><p>我們的系統一定要做到每秒 TPS 10 萬</p>
+<blockquote>
+<p>如果系統的複雜度不是在性能這部分，TPS 做到 10 萬並沒有什麼用</p>
+</blockquote>
+</li>
+<li><p>淘寶的架構是這麼做的，我們也要這麼做</p>
+<blockquote>
+<p>淘寶的架構是為瞭解決淘寶業務的複雜度而設計的，淘寶的業務複雜度並不就是我們的業務複雜度，絕大多數業務的用戶量都不可能有淘寶那麼大</p>
+</blockquote>
+</li>
+<li><p>Docker 現在很流行，我們的架構應該將 Docker 應用進來</p>
+<blockquote>
+<p>Docker 並非萬能的，只是為瞭解決資源重用和動態分配而設計的，如果我們的系統複雜度根本不是在這方面，引入 Docker 沒有什麼意義</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="討論整理精華"><a href="#討論整理精華" class="headerlink" title="討論整理精華"></a>討論整理精華</h2><ul>
+<li><p>架構是為了應對軟體系統複雜度而提出的一個解決方案</p>
+</li>
+<li><p>架構即(重要)決策，是在一個有約束的盒子裡去求解或接近最合適的解</p>
+</li>
+<li><p>這個有約束的盒子是團隊經驗、成本、資源、進度、業務所處階段等所編織、摻雜在一起的綜合體(人，財，物，時間，事情等)</p>
+</li>
+<li><p>架構無優劣，但是存在恰當的架構用在合適的軟體系統中，而這些就是決策的結果</p>
+</li>
+<li><p>需求驅動架構；在分析設計階段，需要考慮一定的人力與時間去”跳出代碼，總攬全局”，為業務和IT技術之間搭建一座”橋樑”</p>
+</li>
+<li><p>軟體架構是為兩件事服務的：<code>業務架構</code>和<code>業務量級</code>，業務架構和業務量級都是從每個具體項目的實際應用場景中提煉出來的</p>
+</li>
+<li><p>業務架構是對業務需求的提煉和抽象，開發軟體必須要滿足業務需求，否則就是空中樓閣。軟體系統業務上的複雜度問題，可以從業務架構的角度切分工作交界面來解決。設計軟體架構，首先是要保證能和業務架構對的上，這也是從業務邏輯轉向代碼邏輯的過程，所以軟體架構的設計為開發指明了方向。另外架構設計也為接下來的開發工作分工奠定了基礎。</p>
+</li>
+<li><p>業務量級表現在存儲能力、吞吐能力和容錯能力等，主要是軟體運維期業務的複雜度。做軟體架構設計，是要保證軟體有能力托起它在業務量級上的要求的，如果軟體到運行使用期廢了，前面所有的工作都付諸東流了。不同的業務量級，對應的軟體的架構複雜度是不同的，所以對於不同的項目，業務量級不同，架構設計也不同。</p>
+</li>
+<li><p>做業務架構必須與其面向的實際應用場景相匹配；所以每個軟體在開發前，都要結合自己的應用場景設計適合自身的軟體架構，現成的架構方案只能借鑑，不能直接套用</p>
+</li>
+<li><p>由於業務架構和業務量級也會不斷調整或長大，軟體架構也不是一勞永逸的，會隨業務不斷調整</p>
+</li>
+</ul>
+<h1 id="複雜度來源：高性能-High-Performance"><a href="#複雜度來源：高性能-High-Performance" class="headerlink" title="複雜度來源：高性能(High Performance)"></a>複雜度來源：高性能(High Performance)</h1><p>軟體系統中高性能帶來的複雜度主要體現在兩方面：</p>
+<ul>
+<li><p>單機內部為了高性能帶來的複雜度</p>
+</li>
+<li><p>多機集群為了高性能帶來的複雜度</p>
+</li>
+</ul>
+<h2 id="單機複雜度"><a href="#單機複雜度" class="headerlink" title="單機複雜度"></a>單機複雜度</h2><ul>
+<li><p>將硬體性能充分發揮出來的關鍵就是 OS(Operating System)，所以 OS 本身其實也是跟隨硬體的發展而發展的， OS 是軟體系統的運行環境，OS的複雜度直接決定了軟體系統的複雜度</p>
+</li>
+<li><p>OS 中和性能最相關的就是 <code>Process</code> 和 <code>Thread</code></p>
+</li>
+<li><p>為了解決手工操作帶來的低效率，批次處理 OS 應運而生</p>
+</li>
+<li><p>為了進一步提升性能，人們發明了 <code>Process</code> 來對應一個任務，每個任務都有自己獨立的內存空間，process 間互不相關，由 OS 來進行調度</p>
+</li>
+<li><p>此時的 CPU 還沒有 multiple core 和 multiple thread 的概念，為了達到 multiple process 並行運行的目的，採取了分時的方式，即把 CPU 的時間分成很多片段，每個片段只能執行某個 process 中的指令</p>
+</li>
+<li><p>從用戶的角度來看，兩個任務之間能夠在運行過程中就進行通信，會讓任務設計變得更加靈活高效；為了解決這個問題，process 間通信的各種方式被設計出來了，包括 pipeline、message queue、signal、shared storage …. 等等</p>
+</li>
+<li><p>單個 process 內部只能串行處理，而實際上很多 process 內部的子任務並不要求是嚴格按照時間順序來執行的，也需要並行處理；為了解決這個問題，人們又發明了 thread，thread 是 process 內部的子任務，但這些子任務都共享同一份 process 數據。為了保證數據的正確性，又發明了 Mutex(互斥鎖)機制。</p>
+</li>
+<li><p>有了 multiple thread 後， <strong>OS 調度的最小單位就變成了 thread</strong>，而 <strong>process 變成了 OS 分配資源的最小單位</strong></p>
+</li>
+<li><p>multiple process, multiple thread 雖然讓多任務並行處理的性能大大提升，但本質上還是分時系統，並不能做到時間上真正的並行</p>
+</li>
+<li><p>如何達到真正並行處理? =&gt; 讓多個 CPU 能夠同時執行計算任務，從而實現真正意義上的多任務並行，以下是常見架構：</p>
+<ul>
+<li>SMP（Symmetric Multi-Processor，對稱多處理器結構）</li>
+<li>NUMA（Non-Uniform Memory Access，非一致存儲訪問結構）</li>
+<li>MPP（Massive Parallel Processing，海量並行處理結構）</li>
+</ul>
+</li>
+</ul>
+<h2 id="Cluster-集群-的複雜度"><a href="#Cluster-集群-的複雜度" class="headerlink" title="Cluster(集群)的複雜度"></a>Cluster(集群)的複雜度</h2><p>透過大量機器來提升性能，並不僅僅是增加機器這麼簡單，讓多台機器配合起來達到高性能的目的，是一個複雜的任務</p>
+<h3 id="任務分配"><a href="#任務分配" class="headerlink" title="任務分配"></a>任務分配</h3><ul>
+<li><p>任務分配的意思是指每台機器都可以處理完整的業務任務，不同的任務分配到不同的機器上執行</p>
+</li>
+<li><p>實際上”<strong>任務</strong>“涵蓋的範圍很廣，可以指完整的業務處理，也可以單指某個具體的任務。例如：”存儲”、”運算”、”cache”..等都可以作為一項任務，因此存儲系統、運算系統、緩存系統都可以按照任務分配的方式來搭建架構。</p>
+</li>
+<li><p>“任務分配器”也並不一定只能是物理上存在的機器或者一個獨立運行的程序，也可以是嵌入在其他程序中的算法，例如 Memcache 的集群架構</p>
+</li>
+<li><p>雖然系統拆分可能在某種程度上能提升業務處理性能，但提升性能也是有限的，因為<strong>最終決定業務處理性能的還是業務邏輯本身，業務邏輯本身沒有發生大的變化下，理論上的性能是有一個上限的，系統拆分能夠讓性能逼近這個極限，但無法突破這個極限</strong></p>
+</li>
+</ul>
+<h2 id="討論整理精華-1"><a href="#討論整理精華-1" class="headerlink" title="討論整理精華"></a>討論整理精華</h2><ul>
+<li><p>性能是軟體的一個重要質量屬性。衡量軟體性能包括了響應時間、TPS、 server 資源利用率等客觀指標，也可以是用戶的主觀感受（從程式設計師、業務用戶、終端用戶/客戶不同的視角，可能會得出不同的結論）。</p>
+</li>
+<li><p>在說性能的時候，有一個概念與之緊密相關 =&gt; <code>伸縮性</code>，這是兩個有區別的概念</p>
+<blockquote>
+<p>性能更多的是衡量軟體系統處理一個請求或執行一個任務需要耗費的時間長短；而伸縮性則更加關注軟體系統在不影響用戶體驗的前提下，能夠隨著請求數量或執行任務數量的增加（減少）而相應地擁有相適應的處理能力</p>
+</blockquote>
+</li>
+<li><p>什麼是<strong>“高”性能</strong>？這可能是一個動態概念，與當前的技術發展狀況與業務所處的階段緊密相關。比如，現在在行業/企業內部認為的高性能，站在5年後來看，未必是高性能</p>
+<ul>
+<li>站在架構師、設計師的角度，高性能需要和業務所處的階段來衡量。高到什麼程度才能與當前或可預見的未來業務增長相匹配。一味去追求絕對意義上的高，沒有太大的實際意義。因為，<strong>伴隨性能越來越高，相應的方法和系統複雜度也是越來越高，而這可能會與當前團隊的人力、技術、資源等不相匹配</strong></li>
+<li>但是什麼才是合適的高性能? 這可能需要從國、內外的同行業規模相當、比自己強的競爭者、終端用戶使用反饋中獲取答案並不斷迭代發展</li>
+</ul>
+</li>
+<li><p>為什麼需要高性能？</p>
+<ul>
+<li>追求良好的用戶體驗</li>
+<li>滿足業務增長的需要</li>
+</ul>
+</li>
+<li><p>如何做好高性能？</p>
+<blockquote>
+<p>可以從垂直與水平兩個維度來考慮。垂直維度主要是針對單台計算機，通過升級軟、硬體能力實現性能提升；水平維度則主要針對集群系統，利用合理的任務分配與任務分解實現性能的提升。</p>
+</blockquote>
+</li>
+<li><p>垂直維度可包括以下措施：</p>
+<ul>
+<li>增加 memory，減少 I/O 操作</li>
+<li>更換 SSD 提升 I/O 訪問速度</li>
+<li>使用 RAID 增加 I/O 吞吐能力</li>
+<li>更換 server 獲得更多的 CPU 或分配更多的 virtual core</li>
+<li>升級網絡接口或增加網絡接口</li>
+</ul>
+</li>
+<li><p>水平維度可包括以下措施：</p>
+<ul>
+<li>功能分解：基於功能將系統分解為更小的子系統</li>
+<li>多實例副本：同一元件重複部署到多台不同的 server </li>
+<li>數據分割：在每台機器上都只部署一部分數據</li>
+</ul>
+</li>
+<li><p>垂直維度方案比較適合業務階段早期和成本可接受的階段，該方案是提升性能最簡單直接的方式，但是<strong>受成本與硬體能力天花板的限制</strong></p>
+</li>
+<li><p>水平維度方案所帶來的好處要在業務發展的後期才能體現出來；此方案會花費更多的硬體成本，另外一方面對技術團隊也提出了更高的要求；但是沒有垂直方案的天花板問題</p>
+<ul>
+<li>一旦達到一定的業務階段，水平維度是技術發展的必由之路</li>
+<li>作為技術部門，需要提前佈局 ，未雨綢繆，不要被業務拋的太遠</li>
+</ul>
+</li>
+</ul>
+<h1 id="複雜度來源：高可用-High-Availability"><a href="#複雜度來源：高可用-High-Availability" class="headerlink" title="複雜度來源：高可用(High Availability)"></a>複雜度來源：高可用(High Availability)</h1><ul>
+<li><p>高可用定義：<strong>系統無中斷地執行其功能的能力，代表系統的可用性程度</strong>，是進行系統設計時的準則之一</p>
+</li>
+<li><p>這個定義的關鍵在於”無中斷”，但恰好困難點也在”無中斷”上面，因為無論是單個硬體還是單個軟體，都不可能做到無中斷，硬體會出故障，軟體會有 bug；硬體會逐漸老化，軟體會越來越複雜和龐大 …. 等等</p>
+</li>
+<li><p>系統的高可用方案五花八門，但萬變不離其宗，本質上都是通過”<strong>冗餘</strong>“來實現高可用</p>
+</li>
+</ul>
+<h2 id="計算高可用"><a href="#計算高可用" class="headerlink" title="計算高可用"></a>計算高可用</h2><p>計算有一個特點就是無論在哪台機器上進行計算，同樣的算法和輸入數據，產出的結果都是一樣的</p>
+<h2 id="存儲高可用"><a href="#存儲高可用" class="headerlink" title="存儲高可用"></a>存儲高可用</h2><ul>
+<li><p>將數據從一台機器搬到到另一台機器，需要經過線路進行傳輸</p>
+</li>
+<li><p>除了物理上的傳輸速度限制，傳輸線路本身也存在可用性問題，傳輸線路可能中斷、可能擁塞、可能異常（錯包、丟包）</p>
+</li>
+<li><p>存儲高可用的困難點不在於如何備份數據，而在於<strong>如何減少或者規避數據不一致對業務造成的影響</strong></p>
+</li>
+<li><p>存儲高可用不可能同時滿足 <strong><a href="https://zh.wikipedia.org/wiki/CAP%E5%AE%9A%E7%90%86" target="_blank" rel="noopener">CAP(“一致性、可用性、分區容錯性”)</a></strong>，最多滿足其中兩個，這就要求我們在做架構設計時結合業務進行取捨</p>
+<ul>
+<li>Consistency</li>
+<li>Availability</li>
+<li>Partition tolerance</li>
+</ul>
+</li>
+</ul>
+<h2 id="高可用狀態決策"><a href="#高可用狀態決策" class="headerlink" title="高可用狀態決策"></a>高可用狀態決策</h2><ul>
+<li><p><strong>系統需要能夠判斷當前的狀態是正常還是異常</strong>，如果出現了異常就要採取行動來保證高可用</p>
+</li>
+<li><p>三種常見的決策方式：</p>
+<ul>
+<li><strong>獨裁式</strong>：當決策者本身故障時，整個系統就無法實現準確的狀態決策</li>
+<li><strong>協商式</strong>：協商式決策的架構不複雜，規則也不複雜，其難點在於，如果兩者的信息交換出現問題（比如主備連接中斷），此時狀態決策應該怎麼做</li>
+<li><strong>民主式</strong>：民主式決策還有一個固有的缺陷：腦裂(split brain)。</li>
+</ul>
+</li>
+<li><p>無論採取什麼樣的方案，狀態決策都不可能做到任何場景下都沒有問題，但完全不做高可用方案又會產生更大的問題，如何選取適合系統的高可用方案，也是一個複雜的分析、判斷和選擇的過程</p>
+</li>
+</ul>
+<h2 id="討論整理精華-2"><a href="#討論整理精華-2" class="headerlink" title="討論整理精華"></a>討論整理精華</h2><ul>
+<li><p>高可用與高性能，是架構設計中兩個非常重要的決策因素；因此在面對不同業務系統的不同需求，對高可用與高性能也會有不同的決策結論，其實現的複雜度也各不相同</p>
+</li>
+<li><p>支付寶業務，對於可用性和性能就會有很高的要求，在可用性方面希望能提供 7x24 不間斷服務，在高性能方面則希望能即時收付款；而對於一個學生管理系統，在可用性與性能方面就不一定要有多高的要求，比如晚上可關機，幾秒內能查詢到信息也可接受</p>
+<blockquote>
+<p>高可用性與高性能的複雜度討論需要結合業務需求</p>
+</blockquote>
+</li>
+<li><p>可以利用百分比來對網站可用性進行度量：</p>
+<ul>
+<li>網站不可用時間 = 完成故障修復的時間點 - 故障發現的時間點</li>
+<li>網站年度可用時間 = 年度總時間 - 網站不可用時間</li>
+<li>網站年度可用性 = (網站年度可用時間/年度總時間) x 100%<blockquote>
+<p>高可用性就是技術實力的象徵，高可用性就是競爭力</p>
+</blockquote>
+</li>
+</ul>
+</li>
+<li><p>為什麼會出現不可用 ?</p>
+<ul>
+<li>硬體故障：網站多運行在普通的商用 server ，而這些 server 本身就不具備高可用性，再加之網站系統背後有數量眾多 server ，那麼一定時間內 server 當機的機率自然會提昇，直接導致部署在該 server 上的服務受影響</li>
+<li>軟體 bug 或網站更新升級發佈：bug 不能消滅，只能減少；上線後的系統在運行過程中，難免會出現故障，而這些故障同樣直接導致某些網站服務不可用；此外，網站更新升級發佈也可能會引起相對較頻繁的 server 當機</li>
+<li>不可抗拒力：如地震、水災、戰爭…等</li>
+</ul>
+</li>
+<li><p>如何做到高可用? <strong>核心思想：網站高可用的主要技術手段是服務與數據的冗餘備份與失效轉移</strong></p>
+<ul>
+<li>同一服務組件部署在多台 server 上</li>
+<li>數據存儲在多台 server 上互相備份<blockquote>
+<p>通過上述技術手段，當任何一台 server 當機或出現各種不可預期的問題時，就將相應的服務切換到其他可用的 server 上，不影響系統的整體可用性，也不會導致數據丟失</p>
+</blockquote>
+</li>
+</ul>
+</li>
+<li><p>從架構角度看可用性：當前網站系統多採用經典的分層模型，從上到下為：<strong>應用層</strong>、<strong>服務層</strong>與<strong>數據層</strong></p>
+<ul>
+<li>應用層主要實現業務邏輯處理</li>
+<li>服務層提供可復用的服務</li>
+<li>數據層負責數據讀寫<blockquote>
+<p>在部署架構上常採用應用和數據分離部署，應用會部署到不同 server 上，這些 server 被稱為應用層的 server；這些可復用的服務也會各自部署在不同 server 上，稱為服務層的 server；而各類數據庫系統、文件櫃等數據則部署在數據層的 server</p>
+</blockquote>
+</li>
+</ul>
+</li>
+<li><p>硬體故障方面引起不可用的技術解決措施：</p>
+<ol>
+<li>應用 server：可通過負載均衡設備將多個應用 server 構建為 cluster 對外提供服務(前提是這些服務需要設計為 stateless，即應用 server 不保存業務的上下文信息，而僅根據每次請求提交的數據進行業務邏輯的操作回應)，當 load balancer 通過心跳檢測手段檢測到應用 server 不可用時，則將其從集群中移除，並將請求切換到其他可用的應用服務上</li>
+<li>服務層 server：這些 server 被應用層通過分佈式服務框架(例如：Dubbo)訪問，分佈式服務框架可在應用層客戶端程序中實現軟體負載均衡，並通過服務註冊中心提供服務的 server 進行心跳檢測，當發現有 server 不可用時，立即通知客戶端程序修改服務列表，同時移除回應的 server</li>
+<li>數據 server：需要在數據寫入時進行數據同步複製，將數據寫入多台 server 上，實現數據冗餘備份；當數據 server 當機時，應用程序將訪問切換到有備份數據的 server 上</li>
+</ol>
+</li>
+<li><p>軟體方面引起不可用的技術解決措施：通過軟體開發過程進行質量保證</p>
+<blockquote>
+<p>通過預發佈驗證、嚴格測試、Gray release 等手段，儘量減少上線服務的故障</p>
+</blockquote>
+</li>
+</ul>
+<h1 id="複雜度來源：可擴展性-Scalability"><a href="#複雜度來源：可擴展性-Scalability" class="headerlink" title="複雜度來源：可擴展性(Scalability)"></a>複雜度來源：可擴展性(Scalability)</h1><ul>
+<li><p>可擴展性(Scalability)指系統為了應對將來需求變化而提供的一種擴展能力，當有新的需求出現時，系統不需要或者僅需要少量修改就可以支持，無須整個系統重構或者重建</p>
+</li>
+<li><p>設計具備良好可擴展性的系統，有兩個基本條件：</p>
+<ol>
+<li><strong>正確預測變化</strong></li>
+<li><strong>完美封裝變化</strong></li>
+</ol>
+</li>
+<li><p>軟體系統與硬體或者建築相比，有一個很大的差異：<strong>軟體系統在發佈後還可以不斷地修改和演進，這就表示不斷有新的需求需要實現</strong></p>
+</li>
+<li><p>預測變化的複雜性在於：</p>
+<ul>
+<li>不能每個設計點都考慮可擴展性</li>
+<li>不能完全不考慮可擴展性</li>
+<li>所有的預測都存在出錯的可能性</li>
+</ul>
+</li>
+<li><p>預測變化是一回事，採取什麼方案來應對變化，又是另外一個複雜的事情；即使預測很準確，如果方案不合適，則系統擴展一樣很麻煩</p>
+</li>
+</ul>
+<h2 id="討論整理精華-3"><a href="#討論整理精華-3" class="headerlink" title="討論整理精華"></a>討論整理精華</h2><ul>
+<li><p>什麼是架構的可擴展性? (What)</p>
+<blockquote>
+<p>業務需求、運行環境方面的變化都會導致軟體系統發生變化，而這種軟體系統對上述變化的適應能力就是可擴展性</p>
+</blockquote>
+</li>
+<li><p>一個具備良好可擴展性的架構設計應當符合開閉原則：<strong>對擴展開放，對修改關閉</strong></p>
+</li>
+<li><p>衡量一個軟體系統具備良好可擴展性主要表現但不限於：</p>
+<ol>
+<li>軟體自身內部方面。在軟體系統實現新增的業務功能時，對現有系統功能影響較少，即不需要對現有功能作任何改動或者很少改動</li>
+<li>軟體外部方面。軟體系統本身與其他存在協同關係的外部系統之間存在鬆耦合關係，軟體系統的變化對其他軟體系統無影響，其他軟體系統和功能不需要進行改動</li>
+</ol>
+</li>
+<li><p>為什麼要求架構具備良好的可擴展性? (Why)</p>
+<blockquote>
+<p>伴隨業務的發展、創新，運行環境的變化，對技術也就提出了更多、更高的要求。<strong>能夠快速響應上述變化，並最大程度降低對現有系統的影響</strong>，是設計可擴展性好的架構的主要目的</p>
+</blockquote>
+</li>
+<li><p>如何設計可擴展性好的架構? (How)</p>
+<blockquote>
+<p>object oriented、design pattern 都是為了解決可擴展性的而出現的方法與技術</p>
+</blockquote>
+</li>
+<li><p>設計具備良好可擴展性的系統，有兩個思考角度：</p>
+<ol>
+<li>從業務維度。對業務深入理解，對可預計的業務變化進行預測</li>
+<li>從技術維度。利用擴展性好的技術，實現對變化的封裝</li>
+</ol>
+</li>
+<li><p>在業務維度。對業務深入理解，對業務的發展方向進行預判，也就是不能完全不考慮可擴展性；但是，變化無處不在，在業務看得遠一點的同時，需要注意:警惕過度設計；不能每個設計點都考慮可擴展性；所有的預測都存在不正確的可能性。</p>
+</li>
+<li><p>在技術維度。預測變化是一回事，採取什麼方案來應對變化，又是另外一個複雜的事情。即使預測很準確，如果方案不合適，則系統擴展一樣很麻煩</p>
+<ol>
+<li>第一種應對變化的常見方案是將”變化”封裝在一個”變化層”，將不變的部分封裝在一個獨立的”穩定層”</li>
+<li>第二種常見的應對變化的方案是提煉出一個”抽象層”和一個”實現層”</li>
+</ol>
+</li>
+<li><p>在實際軟體系統架構設計中，常通過以下技術手段實現良好的可擴展性：</p>
+<ol>
+<li>使用分佈式服務(框架)構建可復用的業務平台</li>
+<li>使用分佈式消息隊列降低業務模組間的耦合性</li>
+</ol>
+</li>
+<li><p>利用分佈式服務框架(例如：Dubbo)可以將業務邏輯實現和可復用組件服務分離開，通過接口降低子系統或模組間的耦合性</p>
+<ul>
+<li>新增功能時，可以通過調用可復用的組件實現自身的業務邏輯，而對現有系統沒有任何影響</li>
+<li>可復用組件升級變更的時候，可以提供多版本服務對應用實現透明升級，對現有應用不會造成影響</li>
+</ul>
+</li>
+<li><p>基於<strong>生產者-消費者</strong>開發模式，利用分佈式消息隊列(例如：RabbitMQ、Kafka)：</p>
+<ul>
+<li>將用戶請求、業務請求作為消息發佈者將事件構造成消息發佈到消息隊列</li>
+<li>消息的訂閱者作為消費者從消息隊列中獲取消息進行處理<blockquote>
+<p>通過這種方式將消息生產和消息處理分離開來，可以透明地增加新的消息生產者任務或者新的消息消費者任務。</p>
+</blockquote>
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="複雜度來源：低成本、安全、規模"><a href="#複雜度來源：低成本、安全、規模" class="headerlink" title="複雜度來源：低成本、安全、規模"></a>複雜度來源：低成本、安全、規模</h1><h2 id="低成本"><a href="#低成本" class="headerlink" title="低成本"></a>低成本</h2><ul>
+<li><p>當我們設計”高性能” or “高可用”的架構時，通用的手段都是增加更多 server 來滿足”高性能”和”高可用”的要求；而低成本正好與此相反，我們需要減少 server 的數量才能達成低成本的目標</p>
+</li>
+<li><p>低成本很多時候不會是架構設計的首要目標，而是<strong>架構設計的附加約束</strong></p>
+</li>
+<li><p>低成本給架構設計帶來的主要複雜度體現在 =&gt; <strong>往往只有”創新”才能達到低成本目標</strong></p>
+</li>
+<li><p>引入新技術的主要複雜度在於<strong>需要去熟悉新技術，並且將新技術與已有技術結合起來</strong></p>
+</li>
+<li><p>創造新技術的主要複雜度在於需要自己去創造全新的理念和技術，並且新技術跟舊技術相比，需要有質的飛躍</p>
+</li>
+</ul>
+<h2 id="安全"><a href="#安全" class="headerlink" title="安全"></a>安全</h2><p>從技術的角度來講，安全可以分為兩類：(<code>功能安全</code> &amp; <code>架構安全</code>)</p>
+<h3 id="功能安全"><a href="#功能安全" class="headerlink" title="功能安全"></a>功能安全</h3><ul>
+<li><p>常見的 XSS 攻擊、CSRF 攻擊、SQL 注入、Windows 漏洞、密碼破解等，本質上是因為系統實現有漏洞，hacker 有了可乘之機，功能安全其實就是”防小偷”</p>
+</li>
+<li><p>從實現的角度來看，功能安全更多地是和具體的編碼相關，與架構關係不大</p>
+</li>
+<li><p>功能安全其實也是一個”攻”與”防”的矛盾，只能在這種攻防大戰中逐步完善，不可能在系統架構設計的時候一勞永逸地解決</p>
+</li>
+</ul>
+<h3 id="架構安全"><a href="#架構安全" class="headerlink" title="架構安全"></a>架構安全</h3><ul>
+<li><p>架構安全就是”防強盜”</p>
+</li>
+<li><p>傳統的架構安全主要依靠防火牆，防火牆最基本的功能就是隔離網絡，通過將網絡劃分成不同的區域，制定出不同區域之間的訪問控制策略來控制不同信任程度區域間傳送的數據流</p>
+</li>
+<li><p>防火牆的功能雖然強大，<strong>但性能一般</strong>，所以在傳統的銀行和企業應用領域應用較多。但在互聯網領域，防火牆的應用場景並不多</p>
+</li>
+<li><p>DDoS 攻擊最大的影響是大量消耗機房的出口總頻寬</p>
+</li>
+<li><p>不管防火牆處理能力有多強，當出口頻寬被耗盡時，整個業務在用戶看來就是不可用的</p>
+</li>
+<li><p>互聯網系統的架構安全目前並沒有太好的設計手段來實現，更多地是依靠運營商或者雲服務商強大的頻寬和流量清洗的能力</p>
+</li>
+</ul>
+<h2 id="規模"><a href="#規模" class="headerlink" title="規模"></a>規模</h2><ul>
+<li><p>規模帶來複雜度的主要原因就是”量變引起質變”，當數量超過一定的閾值後，複雜度會發生質的變化</p>
+</li>
+<li><p>常見的規模帶來的複雜度有：</p>
+<ul>
+<li>功能越來越多，導致系統複雜度指數級上升</li>
+<li>數據越來越多，系統複雜度發生質變<blockquote>
+<p>數據太多以後，傳統的數據收集、加工、存儲、分析的手段和工具已經無法適應，必須應用新的技術才能解決</p>
+</blockquote>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="討論整理精華-4"><a href="#討論整理精華-4" class="headerlink" title="討論整理精華"></a>討論整理精華</h2><ul>
+<li><p>低成本是架構設計中需要考慮一個約束條件，但不會是首要目標。低成本本質上是與高性能和高可用衝突的，當無法設計出滿足成本要求的方案，就只能協調並調整成本目標</p>
+</li>
+<li><p>一般通過”創新”達到低成本的目標</p>
+<ul>
+<li>引入新技術。主要複雜度在於需要去熟悉新技術，並且將新技術與已有技術結合；一般中小型公司基本採用該方式達到目標</li>
+<li>開創一個全新技術領域。主要複雜度在於需要去創造全新的理念和技術，並且與舊技術相比，需要有質的飛躍，複雜度更高；一般大公司擁有更多的資源、技術實力會採用該方式來達到低成本的目標</li>
+</ul>
+</li>
+<li><p>安全是一個龐大而又複雜的技術領域，一旦出問題，對業務和企業形象影響非常大。從技術的角度來講，包括：</p>
+<ul>
+<li>功能安全(“防小偷”)，減少系統潛在的缺陷，阻止 hacker 破壞行為</li>
+<li>架構安全(“防強盜”)，保護系統不受惡意訪問和攻擊，保護系統的重要數據不被竊取。由於是蓄意破壞系統，因此對影響也大得多。架構設計時需要特別關注架構安全。</li>
+</ul>
+</li>
+<li><p>規模帶來複雜度的主要原因就是”量變引起質變”，當數量超過一定的閾值後，複雜度會發生質的變化</p>
+<blockquote>
+<p>隨著業務的發展，規模帶來的常見複雜度有：(1)業務功能越來越多，調用邏輯越來越複雜；(2)數據容量、類型、關聯關係越來越多</p>
+</blockquote>
+</li>
+<li><p>規模問題需要與高性能、高可用、高擴展、高伸縮性統一考慮。常採用”分而治之，各個擊破”的方法策略</p>
+</li>
+<li><p>是否還有其他複雜度原因？ =&gt; <strong>可伸縮性</strong></p>
+</li>
+<li><p>當前大型互聯網網站需要面對大量用戶高並發訪問、存儲更多數據、處理更高頻次的用戶交互。網站系統一般通過多種分佈式技術將多台 server 組成集群對外提供服務。伸縮性一般是系統可以根據需求和成本調整自身處理能力的一種能力</p>
+</li>
+<li><p>伸縮性常意味著系統可以通過低成本並能夠快速改變自身的處理能力以滿足更多用戶訪問、處理更多數據而不會對用戶體驗造成任何影響</p>
+</li>
+<li><p>伸縮性度量指標包括：</p>
+<ul>
+<li>處理更高並發</li>
+<li>處理更多數據</li>
+<li>處理更高頻次的用戶交互</li>
+</ul>
+</li>
+<li><p>伸縮性複雜度體現在：</p>
+<ul>
+<li>伸：增強系統在上述三個方面的處理能力</li>
+<li>縮：縮減系統處理能力</li>
+<li>上述伸縮過程還必須相對低成本和快速</li>
+</ul>
+</li>
+</ul>
+<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><ul>
+<li><a href="https://time.geekbang.org/column/intro/81" target="_blank" rel="noopener">從0開始學架構_架構基礎_架構入門-極客時間</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/Architecture-Design/" rel="tag"># Architecture Design</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/blog/AWS/AWS-CSA-associate-Security/" rel="prev" title="AWS CSA Associate 學習筆記 - Security">
+      <i class="fa fa-chevron-left"></i> AWS CSA Associate 學習筆記 - Security
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#架構設計的目的"><span class="nav-number">1.</span> <span class="nav-text">架構設計的目的</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#對架構設計常見的誤解"><span class="nav-number">1.1.</span> <span class="nav-text">對架構設計常見的誤解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#因為架構很重要，所以要做架構設計"><span class="nav-number">1.1.1.</span> <span class="nav-text">因為架構很重要，所以要做架構設計</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#不是每個系統都要做架構設計嗎"><span class="nav-number">1.1.2.</span> <span class="nav-text">不是每個系統都要做架構設計嗎?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#公司流程中要求系統開發過程中必須有架構設計"><span class="nav-number">1.1.3.</span> <span class="nav-text">公司流程中要求系統開發過程中必須有架構設計</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#為了高性能、高可用、可擴展，所以要做架構設計"><span class="nav-number">1.1.4.</span> <span class="nav-text">為了高性能、高可用、可擴展，所以要做架構設計</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#架構設計的真正目的"><span class="nav-number">1.2.</span> <span class="nav-text">架構設計的真正目的</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#討論整理精華"><span class="nav-number">1.3.</span> <span class="nav-text">討論整理精華</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#複雜度來源：高性能-High-Performance"><span class="nav-number">2.</span> <span class="nav-text">複雜度來源：高性能(High Performance)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#單機複雜度"><span class="nav-number">2.1.</span> <span class="nav-text">單機複雜度</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cluster-集群-的複雜度"><span class="nav-number">2.2.</span> <span class="nav-text">Cluster(集群)的複雜度</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#任務分配"><span class="nav-number">2.2.1.</span> <span class="nav-text">任務分配</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#討論整理精華-1"><span class="nav-number">2.3.</span> <span class="nav-text">討論整理精華</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#複雜度來源：高可用-High-Availability"><span class="nav-number">3.</span> <span class="nav-text">複雜度來源：高可用(High Availability)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#計算高可用"><span class="nav-number">3.1.</span> <span class="nav-text">計算高可用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#存儲高可用"><span class="nav-number">3.2.</span> <span class="nav-text">存儲高可用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#高可用狀態決策"><span class="nav-number">3.3.</span> <span class="nav-text">高可用狀態決策</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#討論整理精華-2"><span class="nav-number">3.4.</span> <span class="nav-text">討論整理精華</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#複雜度來源：可擴展性-Scalability"><span class="nav-number">4.</span> <span class="nav-text">複雜度來源：可擴展性(Scalability)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#討論整理精華-3"><span class="nav-number">4.1.</span> <span class="nav-text">討論整理精華</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#複雜度來源：低成本、安全、規模"><span class="nav-number">5.</span> <span class="nav-text">複雜度來源：低成本、安全、規模</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#低成本"><span class="nav-number">5.1.</span> <span class="nav-text">低成本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安全"><span class="nav-number">5.2.</span> <span class="nav-text">安全</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#功能安全"><span class="nav-number">5.2.1.</span> <span class="nav-text">功能安全</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#架構安全"><span class="nav-number">5.2.2.</span> <span class="nav-text">架構安全</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#規模"><span class="nav-number">5.3.</span> <span class="nav-text">規模</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#討論整理精華-4"><span class="nav-number">5.4.</span> <span class="nav-text">討論整理精華</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Reference"><span class="nav-number">6.</span> <span class="nav-text">Reference</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives/">
+        
+          <span class="site-state-item-count">121</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+          
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+          
+        <span class="site-state-item-count">93</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/blog/lib/anime.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/blog/js/utils.js"></script>
+
+<script src="/blog/js/motion.js"></script>
+
+
+<script src="/blog/js/schemes/muse.js"></script>
+
+
+<script src="/blog/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/Architecture_Design/Architecture-Design-Complexity-Source/";
+    this.page.identifier = "Architecture_Design/Architecture-Design-Complexity-Source/";
+    this.page.title = "[架構設計] 目的 & 複雜度來源";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>
