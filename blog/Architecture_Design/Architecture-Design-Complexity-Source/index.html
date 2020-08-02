@@ -28,7 +28,7 @@
 <meta property="og:description" content="此篇文章是極客時間&quot;從 0 開始學架構&quot;課程時所留下的學習筆記，主要內容為架構設計的目的 &amp; 複雜度(高性能、高可用、高擴展性、低成本、安全、規模)來源">
 <meta property="og:locale" content="zh_TW">
 <meta property="article:published_time" content="2020-08-02T13:15:00.000Z">
-<meta property="article:modified_time" content="2020-08-02T13:17:52.416Z">
+<meta property="article:modified_time" content="2020-08-02T13:24:38.336Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="Architecture Design">
 <meta name="twitter:card" content="summary">
@@ -194,7 +194,7 @@
               <span class="post-meta-item-text">Posted on</span>
               
 
-              <time title="Created: 2020-08-02 21:15:00 / Modified: 21:17:52" itemprop="dateCreated datePublished" datetime="2020-08-02T21:15:00+08:00">2020-08-02</time>
+              <time title="Created: 2020-08-02 21:15:00 / Modified: 21:24:38" itemprop="dateCreated datePublished" datetime="2020-08-02T21:15:00+08:00">2020-08-02</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -451,12 +451,14 @@
 <ul>
 <li>網站不可用時間 = 完成故障修復的時間點 - 故障發現的時間點</li>
 <li>網站年度可用時間 = 年度總時間 - 網站不可用時間</li>
-<li>網站年度可用性 = (網站年度可用時間/年度總時間) x 100%<blockquote>
-<p>高可用性就是技術實力的象徵，高可用性就是競爭力</p>
-</blockquote>
-</li>
+<li>網站年度可用性 = (網站年度可用時間/年度總時間) x 100%</li>
 </ul>
 </li>
+</ul>
+<blockquote>
+<p>高可用性就是技術實力的象徵，高可用性就是競爭力</p>
+</blockquote>
+<ul>
 <li><p>為什麼會出現不可用 ?</p>
 <ul>
 <li>硬體故障：網站多運行在普通的商用 server ，而這些 server 本身就不具備高可用性，再加之網站系統背後有數量眾多 server ，那麼一定時間內 server 當機的機率自然會提昇，直接導致部署在該 server 上的服務受影響</li>
@@ -467,22 +469,25 @@
 <li><p>如何做到高可用? <strong>核心思想：網站高可用的主要技術手段是服務與數據的冗餘備份與失效轉移</strong></p>
 <ul>
 <li>同一服務組件部署在多台 server 上</li>
-<li>數據存儲在多台 server 上互相備份<blockquote>
+<li>數據存儲在多台 server 上互相備份</li>
+</ul>
+</li>
+</ul>
+<blockquote>
 <p>通過上述技術手段，當任何一台 server 當機或出現各種不可預期的問題時，就將相應的服務切換到其他可用的 server 上，不影響系統的整體可用性，也不會導致數據丟失</p>
 </blockquote>
-</li>
-</ul>
-</li>
-<li><p>從架構角度看可用性：當前網站系統多採用經典的分層模型，從上到下為：<strong>應用層</strong>、<strong>服務層</strong>與<strong>數據層</strong></p>
 <ul>
+<li>從架構角度看可用性：當前網站系統多採用經典的分層模型，從上到下為：<strong>應用層</strong>、<strong>服務層</strong>與<strong>數據層</strong><ul>
 <li>應用層主要實現業務邏輯處理</li>
 <li>服務層提供可復用的服務</li>
-<li>數據層負責數據讀寫<blockquote>
-<p>在部署架構上常採用應用和數據分離部署，應用會部署到不同 server 上，這些 server 被稱為應用層的 server；這些可復用的服務也會各自部署在不同 server 上，稱為服務層的 server；而各類數據庫系統、文件櫃等數據則部署在數據層的 server</p>
-</blockquote>
-</li>
+<li>數據層負責數據讀寫</li>
 </ul>
 </li>
+</ul>
+<blockquote>
+<p>在部署架構上常採用應用和數據分離部署，應用會部署到不同 server 上，這些 server 被稱為應用層的 server；這些可復用的服務也會各自部署在不同 server 上，稱為服務層的 server；而各類數據庫系統、文件櫃等數據則部署在數據層的 server</p>
+</blockquote>
+<ul>
 <li><p>硬體故障方面引起不可用的技術解決措施：</p>
 <ol>
 <li>應用 server：可通過負載均衡設備將多個應用 server 構建為 cluster 對外提供服務(前提是這些服務需要設計為 stateless，即應用 server 不保存業務的上下文信息，而僅根據每次請求提交的數據進行業務邏輯的操作回應)，當 load balancer 通過心跳檢測手段檢測到應用 server 不可用時，則將其從集群中移除，並將請求切換到其他可用的應用服務上</li>
@@ -570,13 +575,13 @@
 <li><p>基於<strong>生產者-消費者</strong>開發模式，利用分佈式消息隊列(例如：RabbitMQ、Kafka)：</p>
 <ul>
 <li>將用戶請求、業務請求作為消息發佈者將事件構造成消息發佈到消息隊列</li>
-<li>消息的訂閱者作為消費者從消息隊列中獲取消息進行處理<blockquote>
+<li>消息的訂閱者作為消費者從消息隊列中獲取消息進行處理</li>
+</ul>
+</li>
+</ul>
+<blockquote>
 <p>通過這種方式將消息生產和消息處理分離開來，可以透明地增加新的消息生產者任務或者新的消息消費者任務。</p>
 </blockquote>
-</li>
-</ul>
-</li>
-</ul>
 <h1 id="複雜度來源：低成本、安全、規模"><a href="#複雜度來源：低成本、安全、規模" class="headerlink" title="複雜度來源：低成本、安全、規模"></a>複雜度來源：低成本、安全、規模</h1><h2 id="低成本"><a href="#低成本" class="headerlink" title="低成本"></a>低成本</h2><ul>
 <li><p>當我們設計”高性能” or “高可用”的架構時，通用的手段都是增加更多 server 來滿足”高性能”和”高可用”的要求；而低成本正好與此相反，我們需要減少 server 的數量才能達成低成本的目標</p>
 </li>
@@ -618,13 +623,13 @@
 <li><p>常見的規模帶來的複雜度有：</p>
 <ul>
 <li>功能越來越多，導致系統複雜度指數級上升</li>
-<li>數據越來越多，系統複雜度發生質變<blockquote>
+<li>數據越來越多，系統複雜度發生質變</li>
+</ul>
+</li>
+</ul>
+<blockquote>
 <p>數據太多以後，傳統的數據收集、加工、存儲、分析的手段和工具已經無法適應，必須應用新的技術才能解決</p>
 </blockquote>
-</li>
-</ul>
-</li>
-</ul>
 <h2 id="討論整理精華-4"><a href="#討論整理精華-4" class="headerlink" title="討論整理精華"></a>討論整理精華</h2><ul>
 <li><p>低成本是架構設計中需要考慮一個約束條件，但不會是首要目標。低成本本質上是與高性能和高可用衝突的，當無法設計出滿足成本要求的方案，就只能協調並調整成本目標</p>
 </li>
