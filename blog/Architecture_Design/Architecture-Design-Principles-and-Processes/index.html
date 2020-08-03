@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+<link rel="stylesheet" href="/blog/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="此篇文章是極客時間&quot;從 0 開始學架構&quot;課程時所留下的學習筆記，主要內容為架構設計原則 &amp; 設計流程(識別複雜度、設計備選方案、評估和選擇備選方案、詳細方案設計)">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[架構設計] 原則 &amp; 設計流程">
+<meta property="og:url" content="https://godleon.github.io/blog/Architecture_Design/Architecture-Design-Principles-and-Processes/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章是極客時間&quot;從 0 開始學架構&quot;課程時所留下的學習筆記，主要內容為架構設計原則 &amp; 設計流程(識別複雜度、設計備選方案、評估和選擇備選方案、詳細方案設計)">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2020-08-03T01:30:00.000Z">
+<meta property="article:modified_time" content="2020-08-03T01:33:45.897Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="Architecture Design">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://godleon.github.io/blog/Architecture_Design/Architecture-Design-Principles-and-Processes/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-tw'
+  };
+</script>
+
+  <title>[架構設計] 原則 & 設計流程 | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/blog/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/blog/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/blog/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/blog/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/Architecture_Design/Architecture-Design-Principles-and-Processes/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [架構設計] 原則 & 設計流程
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2020-08-03 09:30:00 / Modified: 09:33:45" itemprop="dateCreated datePublished" datetime="2020-08-03T09:30:00+08:00">2020-08-03</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Architecture-Design/" itemprop="url" rel="index"><span itemprop="name">Architecture Design</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/Architecture_Design/Architecture-Design-Principles-and-Processes/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="Architecture_Design/Architecture-Design-Principles-and-Processes/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此篇文章是極客時間"從 0 開始學架構"課程時所留下的學習筆記，主要內容為架構設計原則 & 設計流程(識別複雜度、設計備選方案、評估和選擇備選方案、詳細方案設計)</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="架構設計三原則"><a href="#架構設計三原則" class="headerlink" title="架構設計三原則"></a>架構設計三原則</h1><ul>
+<li><p>程式設計師和架構師之間還有一個明顯的鴻溝需要跨越，這個鴻溝就是”<strong>不確定性</strong>“</p>
+</li>
+<li><p>對於開發程式來說，本質上是不能存在不確定的，對於同樣一段程式，不管是誰寫的，不管什麼時候執行，執行的結果應該都是確定的</p>
+</li>
+<li><p>對於架構設計來說，本質上是不確定的，同樣的一個系統，A 公司和 B 公司做出來的架構可能差異很大，但最後都能正常運轉</p>
+</li>
+<li><p>架構設計領域並沒有一套通用的規範來指導架構師進行架構設計，更多是依賴架構師的經驗和直覺</p>
+</li>
+</ul>
+<p>架構設計時遵循以下幾個原則，有助於你做出最好的選擇：</p>
+<h2 id="合適原則"><a href="#合適原則" class="headerlink" title="合適原則"></a>合適原則</h2><ul>
+<li><p>合適原則宣言：<strong>“合適優於業界領先”</strong></p>
+</li>
+<li><p>常見失敗原因：</p>
+<ol>
+<li>將軍難打無兵之仗：沒那麼多人，卻想幹那麼多活，是失敗的第一個主要原因</li>
+<li>羅馬不是一天建成的：沒有那麼多累積，卻想一步登天，是失敗的第二個主要原因</li>
+<li>冰山下面才是關鍵：沒有那麼卓越的業務場景，卻幻想靈光一閃成為天才，是失敗的第三個主要原因</li>
+</ol>
+</li>
+</ul>
+<h2 id="簡單原則"><a href="#簡單原則" class="headerlink" title="簡單原則"></a>簡單原則</h2><ul>
+<li><p>簡單原則宣言：<strong>“簡單優於複雜”</strong></p>
+</li>
+<li><p>“複雜”在製造領域代表先進，在建築領域代表領先，但<strong>在軟體領域，卻恰恰相反，代表的是”問題”</strong></p>
+</li>
+<li><p>軟體領域的複雜性體現在兩個方面：</p>
+<ul>
+<li>結構的複雜性：<ul>
+<li>元件越多，就越有可能其中某個元件出現故障</li>
+<li>某個元件改動，會影響關聯的所有元件</li>
+<li>定位一個複雜系統中的問題總是比簡單系統更加困難</li>
+</ul>
+</li>
+<li>邏輯的複雜性：<ul>
+<li>邏輯複雜的元件，一個典型特徵就是單個元件承擔了太多的功能</li>
+<li>邏輯複雜幾乎會導致軟體工程的每個環節都有問題</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>一個軟體系統在投入使用後，後續還有源源不斷的需求要實現，因此要不斷地修改系統，複雜性在整個系統生命週期中都有很大影響</p>
+</li>
+<li><p><strong>架構設計時如果簡單的方案和複雜的方案都可以滿足需求，最好選擇簡單的方案</strong></p>
+</li>
+</ul>
+<h2 id="演化原則"><a href="#演化原則" class="headerlink" title="演化原則"></a>演化原則</h2><ul>
+<li>演化原則宣言：<strong>“演化優於一步到位”</strong></li>
+</ul>
+<p>建築一旦完成（甚至一旦開建）就不可再變，而<strong>軟體卻需要根據業務的發展不斷地變化</strong></p>
+<blockquote>
+<p>對於建築來說，永恆是主題；而對於軟體來說，<strong>變化</strong>才是主題</p>
+</blockquote>
+<ul>
+<li><p>如果沒有把握”<strong>軟體架構需要根據業務發展不斷變化</strong>“這個本質，在做架構設計的時候就很容易陷入一個誤區：<strong>試圖一步到位設計一個軟體架構，期望不管業務如何變化，架構都穩如磐石</strong></p>
+</li>
+<li><p>軟體架構設計其實更加類似於大自然”設計”一個生物，通過演化讓生物適應環境，逐步變得更加強大</p>
+</li>
+<li><p>軟體架構設計正常流程：</p>
+<ol>
+<li>設計出來的架構要滿足當時的業務需要。</li>
+<li>架構要不斷地在實際應用過程中迭代，保留優秀的設計，修復有缺陷的設計，改正錯誤的設計，去掉無用的設計，使得架構逐漸完善。</li>
+<li>當業務發生變化時，架構要擴展、重構，甚至重寫；程式也許會重寫，但有價值的經驗、教訓、邏輯、設計等(類似生物體內的基因)卻可以在新架構中延續</li>
+</ol>
+</li>
+<li><p>架構師應該時刻提醒自己不要貪大求全，或者盲目照搬大公司的做法：應該認真分析當前業務的特點，明確業務面臨的主要問題，設計合理的架構，快速落地以滿足業務需要，然後在運行過程中不斷完善架構，不斷隨著業務演化架構</p>
+</li>
+<li><p>不可能完美預測所有的業務發展和變化路徑</p>
+</li>
+</ul>
+<h2 id="討論整理精華"><a href="#討論整理精華" class="headerlink" title="討論整理精華"></a>討論整理精華</h2><ul>
+<li><p>架構即決策。架構需要面向業務需求，並在各種資源(人、財、物、時、事)限制條件下去做權衡、取捨</p>
+</li>
+<li><p>決策就會存在不確定性。採用一些高屋建瓴的設計原則有助於去消除不確定，去逼近解決問題的最優解</p>
+</li>
+<li><p><strong>合適原則</strong>：架構無優劣，但存合適性。”汝之蜜糖，吾之砒霜”；架構一定要匹配企業所在的業務階段；不要面向簡歷去設計架構，高大上的架構不等於適用；削足適履與打腫充胖都不符合合適原則；所謂合適，一定要匹配業務所處階段，能夠合理地將資源整合在一起並發揮出最大功效，並能夠快速落地</p>
+</li>
+<li><p><strong>簡單原則</strong>：其實，簡單比複雜更加困難。面對系統結構、業務邏輯和複雜性，我們可以編寫出複雜的系統，但在軟體領域，複雜代表的是”問題”。架構設計時如果簡單的方案和複雜的方案都可以滿足需求，最好選擇簡單的方案。但是，事實上，當軟體系統變得太複雜後，就會有人換一個思路進行重構、升級，將它重新變得簡單，這也是軟體開發的大趨勢。簡單原則是一個樸素且偉大的原則，Google 的 MapReduce 系統就採用了分而治之的思想，而背後就是將複雜問題轉化為簡單問題的典型案例。</p>
+</li>
+<li><p><strong>演化原則</strong>：大到人類社會、自然生物，小到一個細胞，似乎都遵循這一普世原則，軟體架構也不例外。業務在發展、技術在創新、外部環境在變化，這一切都是在告誡架構師不要貪大求全，或者盲目照搬大公司的做法。應該認真分析當前業務的特點，明確業務面臨的主要問題，設計合理的架構，快速落地以滿足業務需要，然後在運行過程中不斷完善架構，不斷隨著業務演化架構</p>
+</li>
+</ul>
+<h1 id="架構設計流程：識別複雜度"><a href="#架構設計流程：識別複雜度" class="headerlink" title="架構設計流程：識別複雜度"></a>架構設計流程：識別複雜度</h1><ul>
+<li><p>只有正確分析出了系統的複雜性，後續的架構設計方案才不會偏離方向</p>
+</li>
+<li><p>如果對系統的複雜性判斷錯誤，即使後續的架構設計方案再完美再先進，都是南轅北轍，做的越好，錯的越多、越離譜</p>
+</li>
+<li><p>架構的複雜度主要來源於”<strong>高性能</strong>“、”<strong>高可用</strong>“、”<strong>可擴展</strong>“等幾個方面，但架構師在具體判斷複雜性的時候，不能生搬硬套，認為任何時候架構都必須同時滿足這三方面的要求</p>
+</li>
+<li><p>將主要的複雜度問題列出來，然後根據業務、技術、團隊等綜合情況進行排序，優先解決當前面臨的最主要的複雜度問題</p>
+</li>
+<li><p>對於架構師來說，關注的不是一天的數據，而是 1 秒的數據，即 <code>TPS</code>(Transactions per second) 和 <code>QPS</code>(Queries per second)</p>
+</li>
+<li><p>雖然根據當前業務規模計算的性能要求並不高，但業務會增長，因此系統設計需要考慮一定的性能餘量</p>
+</li>
+</ul>
+<h2 id="討論整理精華-1"><a href="#討論整理精華-1" class="headerlink" title="討論整理精華"></a>討論整理精華</h2><p>架構設計由需求所驅動，本質目的是<strong>為了解決軟件系統的複雜性</strong>；為此，我們在進行架構設計時，需要以理解需求為前提，首要進行系統複雜性的分析。具體做法是：</p>
+<ol>
+<li><p>構建複雜度的來源清單 - 高性能、可用性、擴展性、安全、低成本、規模 … 等等</p>
+</li>
+<li><p>結合需求、技術、團隊、資源等對上述複雜度逐一分析是否需要？是否關鍵？</p>
+<ul>
+<li>“高性能”主要從軟件系統未來的TPS、響應時間、server 資源利用率等客觀指標，也可以從用戶的主觀感受方面去考慮</li>
+<li>“可用性”主要從服務不中斷等質量屬性，符合行業政策、國家法規等方面去考慮</li>
+<li>“擴展性”則主要從功能需求的未來變更幅度等方面去考慮</li>
+</ul>
+</li>
+<li><p>按照上述的分析結論，得到複雜度按照優先級的排序清單，越是排在前面的複雜度，就越關鍵，就越優先解決；不建議一下子同時出來過多的複雜性來源，例如同時處理高性能、高可用和可擴展是不合理的</p>
+</li>
+</ol>
+<ul>
+<li><p>需要特別注意的是：隨著所處的業務階段不同、外部的技術條件和環境的不同，得到的複雜度問題的優先級排序就會有所不同。一切皆變化</p>
+</li>
+<li><p>如果運氣真的不好，接手了一個每個複雜度都存在問題的系統，那應該怎麼辦呢？答案是一個個來解決問題，不要幻想一次架構重構解決所有問題</p>
+</li>
+<li><p>識別複雜度對架構師來說是一項挑戰，因為原始的需求中並沒有哪個地方會明確地說明複雜度在哪裡，需要架構師在理解需求的基礎上進行分析</p>
+<blockquote>
+<p>有經驗的架構師可能一看需求就知道複雜度大概在哪裡；如果經驗不足，那只能採取”排查法”，從不同的角度逐一進行分析</p>
+</blockquote>
+</li>
+</ul>
+<h1 id="架構設計流程：設計備選方案"><a href="#架構設計流程：設計備選方案" class="headerlink" title="架構設計流程：設計備選方案"></a>架構設計流程：設計備選方案</h1><ul>
+<li><p>成熟的架構師需要對已經存在的技術非常熟悉，對已經經過驗證的架構模式爛熟於心，然後根據自己對業務的理解，挑選合適的架構模式進行組合，再對組合後的方案進行修改和調整</p>
+</li>
+<li><p>架構設計備選方案的工作更多的是從需求、團隊、技術、資源等綜合情況出發，對主流、成熟的架構模式進行選擇、組合、調整、創新</p>
+</li>
+<li><p>雖說基於已有的技術或者架構模式進行組合，然後調整，大部分情況下就能夠得到我們需要的方案，但並不意味著架構設計是一件很簡單的事情</p>
+</li>
+</ul>
+<h2 id="常見錯誤"><a href="#常見錯誤" class="headerlink" title="常見錯誤"></a>常見錯誤</h2><h3 id="設計最優秀的方案"><a href="#設計最優秀的方案" class="headerlink" title="設計最優秀的方案"></a>設計最優秀的方案</h3><p>根據架構設計原則中”合適原則”和”簡單原則”的要求，挑選合適自己業務、團隊、技術能力的方案才是好方案；否則可能會浪費大量資源開發了無用的系統</p>
+<h3 id="只做一個方案"><a href="#只做一個方案" class="headerlink" title="只做一個方案"></a>只做一個方案</h3><ul>
+<li><p>心裡評估過於簡單，可能沒有想得全面</p>
+</li>
+<li><p>架構師再怎麼牛，經驗知識和技能也有侷限，有可能某個評估的標準或者經驗是不正確的</p>
+</li>
+<li><p>單一方案設計會出現過度辯護的情況</p>
+</li>
+</ul>
+<p>合理的作法：</p>
+<ul>
+<li>備選方案的數量以 3 ~ 5 個為最佳</li>
+<li>備選方案的差異要比較明顯</li>
+<li>備選方案的技術不要只侷限於已經熟悉的技術</li>
+</ul>
+<h3 id="備選方案過於詳細"><a href="#備選方案過於詳細" class="headerlink" title="備選方案過於詳細"></a>備選方案過於詳細</h3><p>正確的做法是備選階段關注的是技術選型，而不是技術細節</p>
+<h2 id="討論整理精華-2"><a href="#討論整理精華-2" class="headerlink" title="討論整理精華"></a>討論整理精華</h2><ul>
+<li><p>從架構設計三原則出發，也可考慮第四個備選方案：上雲方案，該方案是直接採用商業解決方案，就好比阿里前期採用 IOE 類似</p>
+</li>
+<li><p>如果是創業公司的業務早、中期階段，可直接考慮採用阿里雲/騰訊雲，性能、HA、伸縮性都有保證</p>
+</li>
+<li><p><strong>做事情永遠都要有 plan B</strong></p>
+</li>
+</ul>
+<h1 id="架構設計流程：評估和選擇備選方案"><a href="#架構設計流程：評估和選擇備選方案" class="headerlink" title="架構設計流程：評估和選擇備選方案"></a>架構設計流程：評估和選擇備選方案</h1><ul>
+<li><p>如何挑選出最終的方案也是一個很大的挑戰，主要原因有：</p>
+<ul>
+<li>每個方案都是可行的，如果方案不可行就根本不應該作為備選方案</li>
+<li>沒有哪個方案是完美的</li>
+<li>評價標準主觀性比較強</li>
+</ul>
+</li>
+<li><p>實踐中很多設計師或者架構師就採取了下面幾種指導思想：</p>
+<ul>
+<li>最簡派</li>
+<li>最牛派</li>
+<li>最熟派</li>
+<li>領導派</li>
+</ul>
+</li>
+<li><p>列出我們需要關注的質量屬性點，然後分別從這些質量屬性的維度去評估每個方案，再綜合挑選適合當時情況的最優方案</p>
+</li>
+<li><p>常見的方案質量屬性點有：性能、可用性、硬體成本、項目投入、複雜度、安全性、可擴展性等</p>
+</li>
+<li><p>在評估這些質量屬性時，需要遵循架構設計原則(合適、簡單)，避免貪大求全，基本上某個質量屬性能夠滿足一定時期內業務發展就可以了</p>
+</li>
+<li><p>如果每次做方案都考慮這種發生機率很小的事件，我們的方案會出現過度設計，導致投入浪費</p>
+</li>
+<li><p>量變會引起質變，具體哪些地方質變，是很難提前很長時間預測到的</p>
+</li>
+<li><p>備選方案的選擇上，有幾種看似正確但實際錯誤的做法：</p>
+<ul>
+<li>數量對比法：簡單地看哪個方案的優點多就選哪個 =&gt; 這種方案主要的問題在於把所有質量屬性的重要性等同，而沒有考慮質量屬性的優先級</li>
+<li>加權法：每個質量屬性給一個權重 =&gt; 無法客觀地給出每個質量屬性的權重得分</li>
+</ul>
+</li>
+<li><p>架構師綜合當前的<strong>業務發展情況</strong>、<strong>團隊人員規模和技能</strong>、<strong>業務發展預測</strong>等因素，將質量屬性按照優先級排序</p>
+</li>
+<li><p>備選方案的選擇和很多因素相關，並不單單考慮性能高低、技術是否優越這些純技術因素。業務的需求特點、運維團隊的經驗、已有的技術體系、團隊人員的技術水平都會影響備選方案的選擇</p>
+</li>
+</ul>
+<h1 id="架構設計流程：詳細方案設計"><a href="#架構設計流程：詳細方案設計" class="headerlink" title="架構設計流程：詳細方案設計"></a>架構設計流程：詳細方案設計</h1><ul>
+<li><p>Nginx 的負載均衡策略，簡單按照下面的規則選擇就可以了：</p>
+<ul>
+<li><strong>輪詢(預設)</strong>：每個請求按時間順序逐一分配到不同的後端 server，後端 server 分配的請求數基本一致，如果後端 server 無法正常提供服務，能自動剔除。</li>
+<li><strong>加權輪詢</strong>：根據權重來進行輪詢，權重高的 server 分配的請求更多，主要適應於後端 server 性能不均的情況，如新舊 server 混用</li>
+<li><strong>ip_hash</strong>：每個請求按訪問 IP 的 hash 結果分配，這樣每個訪客固定訪問一個後端 server ，主要用於解決 session 的問題，如購物車類的應用</li>
+<li><strong>fair</strong>：按後端 server 的響應時間來分配請求，響應時間短的優先分配，能夠最大化地平衡各後端 server 的壓力，可以適用於後端server 性能不均衡的情況，也可以防止某台後端 server 性能不足的情況下還繼續接收同樣多的請求從而造成雪崩效應</li>
+<li>url_hash</li>
+</ul>
+</li>
+<li><p>按訪問 URL 的 hash 結果來分配請求，每個 URL 定向到同一個後端 server ，適用於後端 server 能夠將 URL 的響應結果緩存的情況。</p>
+</li>
+<li><p>詳細設計方案階段可能遇到的一種極端情況就是<strong>在詳細設計階段發現備選方案不可行</strong>，一般情況下主要的原因是備選方案設計時<strong>遺漏了某個關鍵技術點或者關鍵的質量屬性</strong>(例如：開發週期)</p>
+</li>
+<li><p>如何避免上述情況發生：</p>
+<ul>
+<li>架構師不但要進行備選方案設計和選型，還需要對備選方案的關鍵細節有較深入的理解</li>
+<li>通過分步驟、分階段、分系統等方式，儘量降低方案複雜度</li>
+<li>如果方案本身就很複雜，那就採取設計團隊的方式來進行設計</li>
+</ul>
+</li>
+</ul>
+<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><ul>
+<li><a href="https://time.geekbang.org/column/intro/81" target="_blank" rel="noopener">從0開始學架構_架構基礎_架構入門-極客時間</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/Architecture-Design/" rel="tag"># Architecture Design</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/blog/Architecture_Design/Architecture-Design-Complexity-Source/" rel="prev" title="[架構設計] 目的 & 複雜度來源">
+      <i class="fa fa-chevron-left"></i> [架構設計] 目的 & 複雜度來源
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#架構設計三原則"><span class="nav-number">1.</span> <span class="nav-text">架構設計三原則</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#合適原則"><span class="nav-number">1.1.</span> <span class="nav-text">合適原則</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#簡單原則"><span class="nav-number">1.2.</span> <span class="nav-text">簡單原則</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#演化原則"><span class="nav-number">1.3.</span> <span class="nav-text">演化原則</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#討論整理精華"><span class="nav-number">1.4.</span> <span class="nav-text">討論整理精華</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#架構設計流程：識別複雜度"><span class="nav-number">2.</span> <span class="nav-text">架構設計流程：識別複雜度</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#討論整理精華-1"><span class="nav-number">2.1.</span> <span class="nav-text">討論整理精華</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#架構設計流程：設計備選方案"><span class="nav-number">3.</span> <span class="nav-text">架構設計流程：設計備選方案</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#常見錯誤"><span class="nav-number">3.1.</span> <span class="nav-text">常見錯誤</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#設計最優秀的方案"><span class="nav-number">3.1.1.</span> <span class="nav-text">設計最優秀的方案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#只做一個方案"><span class="nav-number">3.1.2.</span> <span class="nav-text">只做一個方案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#備選方案過於詳細"><span class="nav-number">3.1.3.</span> <span class="nav-text">備選方案過於詳細</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#討論整理精華-2"><span class="nav-number">3.2.</span> <span class="nav-text">討論整理精華</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#架構設計流程：評估和選擇備選方案"><span class="nav-number">4.</span> <span class="nav-text">架構設計流程：評估和選擇備選方案</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#架構設計流程：詳細方案設計"><span class="nav-number">5.</span> <span class="nav-text">架構設計流程：詳細方案設計</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Reference"><span class="nav-number">6.</span> <span class="nav-text">Reference</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives/">
+        
+          <span class="site-state-item-count">122</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+          
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+          
+        <span class="site-state-item-count">93</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/blog/lib/anime.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/blog/js/utils.js"></script>
+
+<script src="/blog/js/motion.js"></script>
+
+
+<script src="/blog/js/schemes/muse.js"></script>
+
+
+<script src="/blog/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/Architecture_Design/Architecture-Design-Principles-and-Processes/";
+    this.page.identifier = "Architecture_Design/Architecture-Design-Principles-and-Processes/";
+    this.page.title = "[架構設計] 原則 & 設計流程";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>
