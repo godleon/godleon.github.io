@@ -28,7 +28,7 @@
 <meta property="og:description" content="此篇文章是極客時間&quot;從 0 開始學架構&quot;課程時所留下的學習筆記，主要內容為架構設計原則 &amp; 設計流程(識別複雜度、設計備選方案、評估和選擇備選方案、詳細方案設計)">
 <meta property="og:locale" content="zh_TW">
 <meta property="article:published_time" content="2020-08-03T01:30:00.000Z">
-<meta property="article:modified_time" content="2020-08-03T01:33:45.897Z">
+<meta property="article:modified_time" content="2020-08-03T02:12:06.933Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="Architecture Design">
 <meta name="twitter:card" content="summary">
@@ -194,7 +194,7 @@
               <span class="post-meta-item-text">Posted on</span>
               
 
-              <time title="Created: 2020-08-03 09:30:00 / Modified: 09:33:45" itemprop="dateCreated datePublished" datetime="2020-08-03T09:30:00+08:00">2020-08-03</time>
+              <time title="Created: 2020-08-03 09:30:00 / Modified: 10:12:06" itemprop="dateCreated datePublished" datetime="2020-08-03T09:30:00+08:00">2020-08-03</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -280,13 +280,13 @@
 </li>
 </ul>
 <h2 id="演化原則"><a href="#演化原則" class="headerlink" title="演化原則"></a>演化原則</h2><ul>
-<li>演化原則宣言：<strong>“演化優於一步到位”</strong></li>
-</ul>
-<p>建築一旦完成（甚至一旦開建）就不可再變，而<strong>軟體卻需要根據業務的發展不斷地變化</strong></p>
+<li><p>演化原則宣言：<strong>“演化優於一步到位”</strong></p>
+</li>
+<li><p>建築一旦完成（甚至一旦開建）就不可再變，而<strong>軟體卻需要根據業務的發展不斷地變化</strong></p>
 <blockquote>
 <p>對於建築來說，永恆是主題；而對於軟體來說，<strong>變化</strong>才是主題</p>
 </blockquote>
-<ul>
+</li>
 <li><p>如果沒有把握”<strong>軟體架構需要根據業務發展不斷變化</strong>“這個本質，在做架構設計的時候就很容易陷入一個誤區：<strong>試圖一步到位設計一個軟體架構，期望不管業務如何變化，架構都穩如磐石</strong></p>
 </li>
 <li><p>軟體架構設計其實更加類似於大自然”設計”一個生物，通過演化讓生物適應環境，逐步變得更加強大</p>
@@ -329,21 +329,19 @@
 <li><p>雖然根據當前業務規模計算的性能要求並不高，但業務會增長，因此系統設計需要考慮一定的性能餘量</p>
 </li>
 </ul>
-<h2 id="討論整理精華-1"><a href="#討論整理精華-1" class="headerlink" title="討論整理精華"></a>討論整理精華</h2><p>架構設計由需求所驅動，本質目的是<strong>為了解決軟件系統的複雜性</strong>；為此，我們在進行架構設計時，需要以理解需求為前提，首要進行系統複雜性的分析。具體做法是：</p>
+<h2 id="討論整理精華-1"><a href="#討論整理精華-1" class="headerlink" title="討論整理精華"></a>討論整理精華</h2><ul>
+<li><p>架構設計由需求所驅動，本質目的是<strong>為了解決軟件系統的複雜性</strong>；為此，我們在進行架構設計時，需要以理解需求為前提，首要進行系統複雜性的分析。具體做法是：</p>
 <ol>
-<li><p>構建複雜度的來源清單 - 高性能、可用性、擴展性、安全、低成本、規模 … 等等</p>
-</li>
-<li><p>結合需求、技術、團隊、資源等對上述複雜度逐一分析是否需要？是否關鍵？</p>
-<ul>
+<li>構建複雜度的來源清單 - 高性能、可用性、擴展性、安全、低成本、規模 … 等等</li>
+<li>結合需求、技術、團隊、資源等對上述複雜度逐一分析是否需要？是否關鍵？<ul>
 <li>“高性能”主要從軟件系統未來的TPS、響應時間、server 資源利用率等客觀指標，也可以從用戶的主觀感受方面去考慮</li>
 <li>“可用性”主要從服務不中斷等質量屬性，符合行業政策、國家法規等方面去考慮</li>
 <li>“擴展性”則主要從功能需求的未來變更幅度等方面去考慮</li>
 </ul>
 </li>
-<li><p>按照上述的分析結論，得到複雜度按照優先級的排序清單，越是排在前面的複雜度，就越關鍵，就越優先解決；不建議一下子同時出來過多的複雜性來源，例如同時處理高性能、高可用和可擴展是不合理的</p>
-</li>
+<li>按照上述的分析結論，得到複雜度按照優先級的排序清單，越是排在前面的複雜度，就越關鍵，就越優先解決；不建議一下子同時出來過多的複雜性來源，例如同時處理高性能、高可用和可擴展是不合理的</li>
 </ol>
-<ul>
+</li>
 <li><p>需要特別注意的是：隨著所處的業務階段不同、外部的技術條件和環境的不同，得到的複雜度問題的優先級排序就會有所不同。一切皆變化</p>
 </li>
 <li><p>如果運氣真的不好，接手了一個每個複雜度都存在問題的系統，那應該怎麼辦呢？答案是一個個來解決問題，不要幻想一次架構重構解決所有問題</p>
@@ -414,8 +412,8 @@
 </li>
 <li><p>備選方案的選擇上，有幾種看似正確但實際錯誤的做法：</p>
 <ul>
-<li>數量對比法：簡單地看哪個方案的優點多就選哪個 =&gt; 這種方案主要的問題在於把所有質量屬性的重要性等同，而沒有考慮質量屬性的優先級</li>
-<li>加權法：每個質量屬性給一個權重 =&gt; 無法客觀地給出每個質量屬性的權重得分</li>
+<li><strong>數量對比法</strong>：簡單地看哪個方案的優點多就選哪個 =&gt; 這種方案主要的問題在於把所有質量屬性的重要性等同，而沒有考慮質量屬性的優先級</li>
+<li><strong>加權法</strong>：每個質量屬性給一個權重 =&gt; 無法客觀地給出每個質量屬性的權重得分</li>
 </ul>
 </li>
 <li><p>架構師綜合當前的<strong>業務發展情況</strong>、<strong>團隊人員規模和技能</strong>、<strong>業務發展預測</strong>等因素，將質量屬性按照優先級排序</p>
@@ -430,10 +428,8 @@
 <li><strong>加權輪詢</strong>：根據權重來進行輪詢，權重高的 server 分配的請求更多，主要適應於後端 server 性能不均的情況，如新舊 server 混用</li>
 <li><strong>ip_hash</strong>：每個請求按訪問 IP 的 hash 結果分配，這樣每個訪客固定訪問一個後端 server ，主要用於解決 session 的問題，如購物車類的應用</li>
 <li><strong>fair</strong>：按後端 server 的響應時間來分配請求，響應時間短的優先分配，能夠最大化地平衡各後端 server 的壓力，可以適用於後端server 性能不均衡的情況，也可以防止某台後端 server 性能不足的情況下還繼續接收同樣多的請求從而造成雪崩效應</li>
-<li>url_hash</li>
+<li><strong>url_hash</strong>：按訪問 URL 的 hash 結果來分配請求，每個 URL 定向到同一個後端 server ，適用於後端 server 能夠將 URL 的響應結果緩存的情況。</li>
 </ul>
-</li>
-<li><p>按訪問 URL 的 hash 結果來分配請求，每個 URL 定向到同一個後端 server ，適用於後端 server 能夠將 URL 的響應結果緩存的情況。</p>
 </li>
 <li><p>詳細設計方案階段可能遇到的一種極端情況就是<strong>在詳細設計階段發現備選方案不可行</strong>，一般情況下主要的原因是備選方案設計時<strong>遺漏了某個關鍵技術點或者關鍵的質量屬性</strong>(例如：開發週期)</p>
 </li>
