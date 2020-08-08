@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "[架構設計] 高性能 DB 架構設計(RDBMS, NoSQL & Cache)
+title:  "[架構設計] 高性能 DB 架構設計(RDBMS / NoSQL / Cache)"
 description: "此篇文章是極客時間\"從 0 開始學架構\"課程時所留下的學習筆記，主要內容為高性能 DB 架構設計，包含了 RDBMS、NoSQL & Cache 的架構設計考量 & 運用方式"
 date: 2020-08-09 06:30:00
 published: true
