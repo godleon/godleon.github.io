@@ -9,7 +9,7 @@ categories:
   - AWS
 tags:
   - AWS
-  - CSAA
+  - SAA
   - Serverless
   - Lambda
   - ECS

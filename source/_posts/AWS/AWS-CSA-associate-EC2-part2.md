@@ -9,7 +9,7 @@ categories:
   - AWS
 tags:
   - AWS
-  - CSAA
+  - SAA
   - EC2
   - EBS
   - AMI

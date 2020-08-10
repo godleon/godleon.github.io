@@ -9,6 +9,7 @@ categories:
   - AWS
 tags:
   - AWS
+  - SAA
   - IAM
 ---
 
