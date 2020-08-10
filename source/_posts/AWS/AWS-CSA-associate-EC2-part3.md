@@ -9,7 +9,7 @@ categories:
   - AWS
 tags:
   - AWS
-  - SAA
+  - CSA
   - EC2
   - EFS
   - FSx
