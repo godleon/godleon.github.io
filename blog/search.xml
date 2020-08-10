@@ -59,7 +59,7 @@
             
             <tag> AWS </tag>
             
-            <tag> CSAA </tag>
+            <tag> SAA </tag>
             
             <tag> Serverless </tag>
             
@@ -142,7 +142,7 @@
             
             <tag> AWS </tag>
             
-            <tag> CSAA </tag>
+            <tag> SAA </tag>
             
             <tag> Security </tag>
             
@@ -177,7 +177,7 @@
             
             <tag> AWS </tag>
             
-            <tag> CSAA </tag>
+            <tag> SAA </tag>
             
             <tag> SQS </tag>
             
@@ -218,7 +218,7 @@
             
             <tag> AWS </tag>
             
-            <tag> CSAA </tag>
+            <tag> SAA </tag>
             
             <tag> ELB </tag>
             
@@ -251,7 +251,7 @@
             
             <tag> AWS </tag>
             
-            <tag> CSAA </tag>
+            <tag> SAA </tag>
             
             <tag> Route 53 </tag>
             
@@ -280,7 +280,7 @@
             
             <tag> AWS </tag>
             
-            <tag> CSAA </tag>
+            <tag> SAA </tag>
             
             <tag> EC2 </tag>
             
@@ -317,7 +317,7 @@
             
             <tag> AWS </tag>
             
-            <tag> CSAA </tag>
+            <tag> SAA </tag>
             
             <tag> EC2 </tag>
             
@@ -356,7 +356,7 @@
             
             <tag> AWS </tag>
             
-            <tag> CSAA </tag>
+            <tag> SAA </tag>
             
             <tag> EC2 </tag>
             
@@ -387,7 +387,7 @@
             
             <tag> AWS </tag>
             
-            <tag> CSAA </tag>
+            <tag> SAA </tag>
             
             <tag> VPC </tag>
             
@@ -416,7 +416,7 @@
             
             <tag> AWS </tag>
             
-            <tag> CSAA </tag>
+            <tag> SAA </tag>
             
             <tag> RDS </tag>
             
@@ -453,7 +453,7 @@
             
             <tag> AWS </tag>
             
-            <tag> CSAA </tag>
+            <tag> SAA </tag>
             
             <tag> VPC </tag>
             
@@ -540,7 +540,7 @@
             
             <tag> AWS </tag>
             
-            <tag> CSAA </tag>
+            <tag> SAA </tag>
             
             <tag> S3 </tag>
             
@@ -569,7 +569,7 @@
             
             <tag> AWS </tag>
             
-            <tag> CSAA </tag>
+            <tag> SAA </tag>
             
             <tag> S3 </tag>
             
@@ -598,7 +598,7 @@
             
             <tag> AWS </tag>
             
-            <tag> CSAA </tag>
+            <tag> SAA </tag>
             
             <tag> S3 </tag>
             
@@ -626,6 +626,8 @@
         <tags>
             
             <tag> AWS </tag>
+            
+            <tag> SAA </tag>
             
             <tag> IAM </tag>
             
