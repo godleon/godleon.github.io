@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 4.2.0">
+<meta name="generator" content="Hexo 5.0.2">
   <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
@@ -28,7 +28,7 @@
 <meta property="og:description" content="此文章記錄學習 RHCE RH124 Chapter 11 Managing Red Hat Enterprise Linux Networking 留下的內容">
 <meta property="og:locale" content="zh_TW">
 <meta property="article:published_time" content="2016-04-26T02:10:00.000Z">
-<meta property="article:modified_time" content="2020-08-16T22:27:02.115Z">
+<meta property="article:modified_time" content="2020-08-16T22:33:23.821Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="Linux">
 <meta property="article:tag" content="RHCE">
@@ -202,7 +202,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">عُدل في</span>
-                <time title="عُدل: 2020-08-17 06:27:02" itemprop="dateModified" datetime="2020-08-17T06:27:02+08:00">2020-08-17</time>
+                <time title="عُدل: 2020-08-17 06:33:23" itemprop="dateModified" datetime="2020-08-17T06:33:23+08:00">2020-08-17</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -274,7 +274,7 @@
 ===================================
 
 <p>在 RHEL 7 中提供了 <strong><font color='red'>nmcli</font></strong>(NetworkManager) 作為網路設定管理之用。</p>
-<h2 id="11-3-1-Network-Manager"><a href="#11-3-1-Network-Manager" class="headerlink" title="11.3.1 Network Manager"></a>11.3.1 Network Manager</h2><p><code>nmcli</code> 命令是修改 <code>/etc/sysconfig/network-scripts/ifcfg-*</code> 中的內容，有兩個觀念必須弄清楚，分別是 <strong><font color='red'>device</font></strong> &amp; <strong><font color='red'>connection</font></strong>：</p>
+<h2 id="11-3-1-Network-Manager"><a href="#11-3-1-Network-Manager" class="headerlink" title="11.3.1 Network Manager"></a>11.3.1 Network Manager</h2><p><code>nmcli</code> 命令是修改 <code>/etc/sysconfig/network-scripts/ifcfg-*</code> 中的內容，有兩個觀念必須弄清楚，分別是 <strong><font color='red'>device</font></strong> &amp; **<font color='red'>connection</font>**：</p>
 <ul>
 <li><p><code>device</code>：每一個網路卡(介面)都屬於一個 device</p>
 </li>
@@ -291,7 +291,7 @@
 <li><p><code>nmcli connection show &quot;System eth0&quot;</code>：顯示指定 connection 的詳細內容 (小寫的部分可以變更、大寫的部分無法變更)</p>
 </li>
 </ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[student@server0 ~]$ nmcli connection show --active</span><br><span class="line">NAME         UUID                                  TYPE            DEVICE</span><br><span class="line">System eth0  5fb06bd0-0bb0-7ffb-45f1-d6edd65f3e03  802-3-ethernet  eth0</span><br><span class="line">[student@server0 ~]$ nmcli connection show <span class="string">"System eth0"</span></span><br><span class="line">connection.id:                          System eth0</span><br><span class="line">connection.uuid:                        5fb06bd0-0bb0-7ffb-45f1-d6edd65f3e03</span><br><span class="line">connection.interface-name:              eth0</span><br><span class="line">connection.type:                        802-3-ethernet</span><br><span class="line">.....</span><br><span class="line">GENERAL.NAME:                           System eth0</span><br><span class="line">GENERAL.UUID:                           5fb06bd0-0bb0-7ffb-45f1-d6edd65f3e03</span><br><span class="line">GENERAL.DEVICES:                        eth0</span><br><span class="line">GENERAL.STATE:                          activated</span><br><span class="line">.....</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[student@server0 ~]$ nmcli connection show --active</span><br><span class="line">NAME         UUID                                  TYPE            DEVICE</span><br><span class="line">System eth0  5fb06bd0-0bb0-7ffb-45f1-d6edd65f3e03  802-3-ethernet  eth0</span><br><span class="line">[student@server0 ~]$ nmcli connection show <span class="string">&quot;System eth0&quot;</span></span><br><span class="line">connection.id:                          System eth0</span><br><span class="line">connection.uuid:                        5fb06bd0-0bb0-7ffb-45f1-d6edd65f3e03</span><br><span class="line">connection.interface-name:              eth0</span><br><span class="line">connection.type:                        802-3-ethernet</span><br><span class="line">.....</span><br><span class="line">GENERAL.NAME:                           System eth0</span><br><span class="line">GENERAL.UUID:                           5fb06bd0-0bb0-7ffb-45f1-d6edd65f3e03</span><br><span class="line">GENERAL.DEVICES:                        eth0</span><br><span class="line">GENERAL.STATE:                          activated</span><br><span class="line">.....</span><br></pre></td></tr></table></figure>
 
 <ul>
 <li><p><code>nmcli device status</code>：顯示目前 device 的狀態</p>

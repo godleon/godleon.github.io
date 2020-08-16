@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 4.2.0">
+<meta name="generator" content="Hexo 5.0.2">
   <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
@@ -34,7 +34,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/kubernetes-node-arch.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/CKA-CoreConcept-k8s-cluster-architecture-high-level.jpg">
 <meta property="article:published_time" content="2018-08-26T09:35:00.000Z">
-<meta property="article:modified_time" content="2020-08-16T22:27:02.107Z">
+<meta property="article:modified_time" content="2020-08-16T22:33:23.821Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="Kubernetes">
 <meta property="article:tag" content="CKA">
@@ -210,7 +210,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">عُدل في</span>
-                <time title="عُدل: 2020-08-17 06:27:02" itemprop="dateModified" datetime="2020-08-17T06:27:02+08:00">2020-08-17</time>
+                <time title="عُدل: 2020-08-17 06:33:23" itemprop="dateModified" datetime="2020-08-17T06:33:23+08:00">2020-08-17</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -283,20 +283,20 @@
 <blockquote>
 <p>若 cluster 的 node 數量龐大，etcd 也有可能會被獨立於 master 之外來單獨安裝。</p>
 </blockquote>
-<h2 id="Worker-Node"><a href="#Worker-Node" class="headerlink" title="Worker Node"></a><a href="https://github.com/kubernetes/community/blob/master/contributors/design-proposals/architecture/architecture.md#the-kubernetes-node" target="_blank" rel="noopener">Worker Node</a></h2><p>在 Kubernetes 中，worker node 也稱為 <strong>minion</strong>，可以是實體機或是 VM，以下是 worker node 的架構圖：</p>
+<h2 id="Worker-Node"><a href="#Worker-Node" class="headerlink" title="Worker Node"></a><a target="_blank" rel="noopener" href="https://github.com/kubernetes/community/blob/master/contributors/design-proposals/architecture/architecture.md#the-kubernetes-node">Worker Node</a></h2><p>在 Kubernetes 中，worker node 也稱為 <strong>minion</strong>，可以是實體機或是 VM，以下是 worker node 的架構圖：</p>
 <p><img src="/blog/images/kubernetes/kubernetes-node-arch.png" alt="Abstract Kubernetes Architecture"></p>
-<h3 id="Container-Runtime"><a href="#Container-Runtime" class="headerlink" title="Container Runtime"></a>Container Runtime</h3><p>負責 container image 的管理並透過 <a href="https://github.com/kubernetes/community/blob/master/contributors/devel/container-runtime-interface.md" target="_blank" rel="noopener">CRI(Container Runtime Interface)</a> 來管理 pod 的運行。 </p>
+<h3 id="Container-Runtime"><a href="#Container-Runtime" class="headerlink" title="Container Runtime"></a>Container Runtime</h3><p>負責 container image 的管理並透過 <a target="_blank" rel="noopener" href="https://github.com/kubernetes/community/blob/master/contributors/devel/container-runtime-interface.md">CRI(Container Runtime Interface)</a> 來管理 pod 的運行。 </p>
 <p>大部份時候會以 Docker 作為 container runtime，但其實可以作為 container runtime 的除了 Docker 之外，還有以下幾個選項：</p>
 <ul>
-<li><p><a href="https://github.com/rkt/rkt" target="_blank" rel="noopener">rkt - the pod-native container engine</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://github.com/rkt/rkt">rkt - the pod-native container engine</a></p>
 </li>
-<li><p><a href="https://github.com/kubernetes-incubator/cri-o" target="_blank" rel="noopener">CRI-O - OCI-based implementation of Kubernetes Container Runtime Interface</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://github.com/kubernetes-incubator/cri-o">CRI-O - OCI-based implementation of Kubernetes Container Runtime Interface</a></p>
 </li>
-<li><p><a href="https://github.com/kubernetes/frakti" target="_blank" rel="noopener">Frakti - The hypervisor-based container runtime for Kubernetes</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/frakti">Frakti - The hypervisor-based container runtime for Kubernetes</a></p>
 </li>
 </ul>
 <h3 id="kubelet"><a href="#kubelet" class="headerlink" title="kubelet"></a>kubelet</h3><p>負責接收來自 API server 的命令、維護 container 的生命周期，並負責 CSI(Container Storage Interface) &amp; CNI(Container Network Interface) 的管理。</p>
-<h3 id="kube-proxy"><a href="#kube-proxy" class="headerlink" title="kube-proxy"></a>kube-proxy</h3><p>在 Kubernetes 中，<strong><a href="https://kubernetes.io/docs/concepts/services-networking/service/" target="_blank" rel="noopener">service</a></strong> 將多個 pod 抽象化成一個單一群組，並為此群組提供一個 virtual IP，並提供其他 pod or service 進行存取。</p>
+<h3 id="kube-proxy"><a href="#kube-proxy" class="headerlink" title="kube-proxy"></a>kube-proxy</h3><p>在 Kubernetes 中，**<a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/services-networking/service/">service</a>** 將多個 pod 抽象化成一個單一群組，並為此群組提供一個 virtual IP，並提供其他 pod or service 進行存取。</p>
 <p>而 kube-proxy 就是負責在 host 中針對 service 與 pod 的配置設定，產生相對應的 iptables rule，讓送到 service virtual IP 的流量可以正確的導向 service 後端的 pod 中。</p>
 <p>因此總結來說，kube-proxy 就是負責為 service 提供 cluster 內部的 service discovery &amp; load balance</p>
 <h1 id="核心元件之間的通訊"><a href="#核心元件之間的通訊" class="headerlink" title="核心元件之間的通訊"></a>核心元件之間的通訊</h1><p>接著來探討一下 Kubernetes 核心元件之間的通信細節，以下面的圖片進行說明：</p>
@@ -305,13 +305,13 @@
 <li>管理者從外面僅能透過 API server 進行對 Kubernetes cluster 的管理 (傳送 JSON 格式的資料)</li>
 </ul>
 <h2 id="Inside-Master"><a href="#Inside-Master" class="headerlink" title="Inside Master"></a>Inside Master</h2><ul>
-<li><p>不論是負責管理 cluster 狀態的 controller manager，或是負責任務調度的 scheduler，要調整 worker 的工作狀態，都必須透過送 request 給 API server，再由 API server 統一對 host 上的 kubelet 進行操作 (這幾個元件之間傳送的資料格式為 <a href="https://developers.google.com/protocol-buffers/" target="_blank" rel="noopener" title="protobuf">protobuf</a>)</p>
+<li><p>不論是負責管理 cluster 狀態的 controller manager，或是負責任務調度的 scheduler，要調整 worker 的工作狀態，都必須透過送 request 給 API server，再由 API server 統一對 host 上的 kubelet 進行操作 (這幾個元件之間傳送的資料格式為 <a target="_blank" rel="noopener" href="https://developers.google.com/protocol-buffers/" title="protobuf">protobuf</a>)</p>
 </li>
 <li><p>在 master node 中的元件，唯一會對 etcd 服務進行 cluster 狀態存取的僅有 API server，雙方使用 gRPC 進行通訊</p>
 </li>
 </ul>
 <h2 id="Master-lt-–-gt-Worker"><a href="#Master-lt-–-gt-Worker" class="headerlink" title="Master &lt;–&gt; Worker"></a>Master &lt;–&gt; Worker</h2><ul>
-<li>所有對 worker node 上的狀態變更，都是由 master node 上的 API server 所發過來，並由 kubelet 接收後進行處理 (透過 <a href="https://developers.google.com/protocol-buffers/" target="_blank" rel="noopener" title="protobuf">protobuf</a>) 資料格式傳送資料)</li>
+<li>所有對 worker node 上的狀態變更，都是由 master node 上的 API server 所發過來，並由 kubelet 接收後進行處理 (透過 <a target="_blank" rel="noopener" href="https://developers.google.com/protocol-buffers/" title="protobuf">protobuf</a>) 資料格式傳送資料)</li>
 </ul>
 <h2 id="Inside-Worker"><a href="#Inside-Worker" class="headerlink" title="Inside Worker"></a>Inside Worker</h2><ul>
 <li><p>kubelet 透過 CRI(Container Runtime Interface)，控制 container runtime 進行 pod 的管理</p>
@@ -323,26 +323,26 @@
 </ul>
 <h1 id="Add-Ons"><a href="#Add-Ons" class="headerlink" title="Add-Ons"></a>Add-Ons</h1><p>除了上面在 master &amp; worker node 上的核心元件外，還有一些 add-on 可以讓 Kubernetes 運作的更好，例如：</p>
 <ul>
-<li><p><strong>DNS</strong>：目前以 <a href="https://github.com/coredns/coredns" target="_blank" rel="noopener">CoreDNS</a> 為主，以前則是 <a href="https://github.com/kubernetes/kubernetes/tree/master/cluster/addons/dns/kube-dns" target="_blank" rel="noopener">kube-dns</a></p>
+<li><p><strong>DNS</strong>：目前以 <a target="_blank" rel="noopener" href="https://github.com/coredns/coredns">CoreDNS</a> 為主，以前則是 <a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/tree/master/cluster/addons/dns/kube-dns">kube-dns</a></p>
 </li>
 <li><p><strong>Ingress controller</strong>：負責讓外部的流量可以正確的導到 Kubernetes 內部的 service</p>
 </li>
-<li><p><strong>Resource Monitoring</strong>：原先是由 <a href="https://github.com/kubernetes/heapster" target="_blank" rel="noopener">Heapster</a> 來負責，但由於 <a href="https://prometheus.io/" target="_blank" rel="noopener">Prometheus</a> 從 CNCF 變成正式專案後，在 resource monitoring 這個部份開始推薦使用 Prometheus 來實現</p>
+<li><p><strong>Resource Monitoring</strong>：原先是由 <a target="_blank" rel="noopener" href="https://github.com/kubernetes/heapster">Heapster</a> 來負責，但由於 <a target="_blank" rel="noopener" href="https://prometheus.io/">Prometheus</a> 從 CNCF 變成正式專案後，在 resource monitoring 這個部份開始推薦使用 Prometheus 來實現</p>
 </li>
-<li><p><strong>Dashboard</strong>：為了提供使用者更好的體驗，除了 <a href="https://github.com/kubernetes/dashboard/" target="_blank" rel="noopener">Kubernetes 官方正式維護的 Dashboard</a> 之外，也可以考慮其他的選項，例如：<a href="https://cockpit-project.org/guide/latest/feature-kubernetes.html" target="_blank" rel="noopener">Cockpit</a> or <a href="https://rancher.com/" target="_blank" rel="noopener">Rancher</a>(透過 import Kubernetes Clusters 的功能)</p>
+<li><p><strong>Dashboard</strong>：為了提供使用者更好的體驗，除了 <a target="_blank" rel="noopener" href="https://github.com/kubernetes/dashboard/">Kubernetes 官方正式維護的 Dashboard</a> 之外，也可以考慮其他的選項，例如：<a target="_blank" rel="noopener" href="https://cockpit-project.org/guide/latest/feature-kubernetes.html">Cockpit</a> or <a target="_blank" rel="noopener" href="https://rancher.com/">Rancher</a>(透過 import Kubernetes Clusters 的功能)</p>
 </li>
 </ul>
-<p>當然上面的 add-on 並不是全部，詳細的 add-on 清單可以到 <a href="https://github.com/kubernetes/kubernetes/tree/master/cluster/addons" target="_blank" rel="noopener">Kubernetes 的專案</a>中去查詢。</p>
+<p>當然上面的 add-on 並不是全部，詳細的 add-on 清單可以到 <a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/tree/master/cluster/addons">Kubernetes 的專案</a>中去查詢。</p>
 <h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
-<li><p><a href="https://kubernetes.io/docs/concepts/architecture/" target="_blank" rel="noopener">Kubernetes Architecture - Kubernetes</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/architecture/">Kubernetes Architecture - Kubernetes</a></p>
 </li>
-<li><p><a href="https://github.com/kubernetes/community/blob/master/contributors/design-proposals/architecture/architecture.md" target="_blank" rel="noopener">Kubernetes Design and Architecture</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/community/blob/master/contributors/design-proposals/architecture/architecture.md">Kubernetes Design and Architecture</a></p>
 </li>
-<li><p><a href="https://jimmysong.io/kubernetes-handbook/concepts/" target="_blank" rel="noopener">Kubernetes架构 · Kubernetes Handbook - Kubernetes中文指南/云原生应用架构实践手册 by Jimmy Song(宋净超)</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://jimmysong.io/kubernetes-handbook/concepts/">Kubernetes架构 · Kubernetes Handbook - Kubernetes中文指南/云原生应用架构实践手册 by Jimmy Song(宋净超)</a></p>
 </li>
-<li><p><a href="https://kubernetes.feisky.xyz/zh/architecture/architecture.html" target="_blank" rel="noopener">架构原理 · Kubernetes Handbook</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.feisky.xyz/zh/architecture/architecture.html">架构原理 · Kubernetes Handbook</a></p>
 </li>
-<li><p><a href="https://kubernetes.feisky.xyz/zh/architecture/architecture.html" target="_blank" rel="noopener">Kubernetes指南 - 架构原理 · Kubernetes Handbook</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.feisky.xyz/zh/architecture/architecture.html">Kubernetes指南 - 架构原理 · Kubernetes Handbook</a></p>
 </li>
 </ul>
 
@@ -438,7 +438,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Kubernetes-的前身-Google-Borg"><span class="nav-number">1.</span> <span class="nav-text">Kubernetes 的前身 - Google Borg</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#BorgMaster"><span class="nav-number">1.1.</span> <span class="nav-text">BorgMaster</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Borglet"><span class="nav-number">1.2.</span> <span class="nav-text">Borglet</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Scheduler"><span class="nav-number">1.3.</span> <span class="nav-text">Scheduler</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Paxos-persistent-store"><span class="nav-number">1.4.</span> <span class="nav-text">Paxos (persistent store)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#borgcfg"><span class="nav-number">1.5.</span> <span class="nav-text">borgcfg</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kubernets-架構"><span class="nav-number">2.</span> <span class="nav-text">Kubernets 架構</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Master-Node"><span class="nav-number">2.1.</span> <span class="nav-text">Master Node</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#API-server"><span class="nav-number">2.1.1.</span> <span class="nav-text">API server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Scheduler-1"><span class="nav-number">2.1.2.</span> <span class="nav-text">Scheduler</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Controller-Manager"><span class="nav-number">2.1.3.</span> <span class="nav-text">Controller Manager</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#etcd"><span class="nav-number">2.1.4.</span> <span class="nav-text">etcd</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Worker-Node"><span class="nav-number">2.2.</span> <span class="nav-text">Worker Node</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Container-Runtime"><span class="nav-number">2.2.1.</span> <span class="nav-text">Container Runtime</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kubelet"><span class="nav-number">2.2.2.</span> <span class="nav-text">kubelet</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kube-proxy"><span class="nav-number">2.2.3.</span> <span class="nav-text">kube-proxy</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#核心元件之間的通訊"><span class="nav-number">3.</span> <span class="nav-text">核心元件之間的通訊</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#External-lt-–-gt-Master"><span class="nav-number">3.1.</span> <span class="nav-text">External &lt;–&gt; Master</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Inside-Master"><span class="nav-number">3.2.</span> <span class="nav-text">Inside Master</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Master-lt-–-gt-Worker"><span class="nav-number">3.3.</span> <span class="nav-text">Master &lt;–&gt; Worker</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Inside-Worker"><span class="nav-number">3.4.</span> <span class="nav-text">Inside Worker</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Add-Ons"><span class="nav-number">4.</span> <span class="nav-text">Add-Ons</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Kubernetes-%E7%9A%84%E5%89%8D%E8%BA%AB-Google-Borg"><span class="nav-number">1.</span> <span class="nav-text">Kubernetes 的前身 - Google Borg</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#BorgMaster"><span class="nav-number">1.1.</span> <span class="nav-text">BorgMaster</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Borglet"><span class="nav-number">1.2.</span> <span class="nav-text">Borglet</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Scheduler"><span class="nav-number">1.3.</span> <span class="nav-text">Scheduler</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Paxos-persistent-store"><span class="nav-number">1.4.</span> <span class="nav-text">Paxos (persistent store)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#borgcfg"><span class="nav-number">1.5.</span> <span class="nav-text">borgcfg</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kubernets-%E6%9E%B6%E6%A7%8B"><span class="nav-number">2.</span> <span class="nav-text">Kubernets 架構</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Master-Node"><span class="nav-number">2.1.</span> <span class="nav-text">Master Node</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#API-server"><span class="nav-number">2.1.1.</span> <span class="nav-text">API server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Scheduler-1"><span class="nav-number">2.1.2.</span> <span class="nav-text">Scheduler</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Controller-Manager"><span class="nav-number">2.1.3.</span> <span class="nav-text">Controller Manager</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#etcd"><span class="nav-number">2.1.4.</span> <span class="nav-text">etcd</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Worker-Node"><span class="nav-number">2.2.</span> <span class="nav-text">Worker Node</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Container-Runtime"><span class="nav-number">2.2.1.</span> <span class="nav-text">Container Runtime</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kubelet"><span class="nav-number">2.2.2.</span> <span class="nav-text">kubelet</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kube-proxy"><span class="nav-number">2.2.3.</span> <span class="nav-text">kube-proxy</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E5%85%83%E4%BB%B6%E4%B9%8B%E9%96%93%E7%9A%84%E9%80%9A%E8%A8%8A"><span class="nav-number">3.</span> <span class="nav-text">核心元件之間的通訊</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#External-lt-%E2%80%93-gt-Master"><span class="nav-number">3.1.</span> <span class="nav-text">External &lt;–&gt; Master</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Inside-Master"><span class="nav-number">3.2.</span> <span class="nav-text">Inside Master</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Master-lt-%E2%80%93-gt-Worker"><span class="nav-number">3.3.</span> <span class="nav-text">Master &lt;–&gt; Worker</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Inside-Worker"><span class="nav-number">3.4.</span> <span class="nav-text">Inside Worker</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Add-Ons"><span class="nav-number">4.</span> <span class="nav-text">Add-Ons</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

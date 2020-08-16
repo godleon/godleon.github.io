@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 4.2.0">
+<meta name="generator" content="Hexo 5.0.2">
   <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
@@ -28,7 +28,7 @@
 <meta property="og:description" content="本篇文章的主題在介紹在 Kubernetes 中，&#39;taint&#39; &amp; &#39;toleration&#39; 這兩種機制的設計會如何影響 scheduler &amp; k8s 相關自動化維運的行為">
 <meta property="og:locale" content="zh_TW">
 <meta property="article:published_time" content="2018-10-30T20:30:00.000Z">
-<meta property="article:modified_time" content="2020-08-16T22:27:02.111Z">
+<meta property="article:modified_time" content="2020-08-16T22:33:23.821Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="Kubernetes">
 <meta property="article:tag" content="CKA">
@@ -203,7 +203,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">عُدل في</span>
-                <time title="عُدل: 2020-08-17 06:27:02" itemprop="dateModified" datetime="2020-08-17T06:27:02+08:00">2020-08-17</time>
+                <time title="عُدل: 2020-08-17 06:33:23" itemprop="dateModified" datetime="2020-08-17T06:33:23+08:00">2020-08-17</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -283,10 +283,10 @@
 <p>kubectl taint nodes node1 key:NoSchedule-</p>
 </blockquote>
 <h2 id="設定-pod-toleration"><a href="#設定-pod-toleration" class="headerlink" title="設定 pod toleration"></a>設定 pod toleration</h2><p>pod toleration 是設定在 pod spec 中，我們可以設定以下的 pod toleration 讓 pod 可以接受經過上面指令所產生的 node taint：</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 表示可以接受"帶有 key=value &amp; effect=NoSchedule" 的 taint</span></span><br><span class="line"><span class="attr">tolerations:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">key:</span> <span class="string">"key"</span></span><br><span class="line">  <span class="attr">operator:</span> <span class="string">"Equal"</span></span><br><span class="line">  <span class="attr">value:</span> <span class="string">"value"</span></span><br><span class="line">  <span class="attr">effect:</span> <span class="string">"NoSchedule"</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 表示可以接受&quot;帶有 key=value &amp; effect=NoSchedule&quot; 的 taint</span></span><br><span class="line"><span class="attr">tolerations:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">key:</span> <span class="string">&quot;key&quot;</span></span><br><span class="line">  <span class="attr">operator:</span> <span class="string">&quot;Equal&quot;</span></span><br><span class="line">  <span class="attr">value:</span> <span class="string">&quot;value&quot;</span></span><br><span class="line">  <span class="attr">effect:</span> <span class="string">&quot;NoSchedule&quot;</span></span><br></pre></td></tr></table></figure>
 
 <p>也可以是下面這樣設定：</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 表示可以接受"存在 key(不論 value 為何) &amp; effect=NoSchedule" 的 taint</span></span><br><span class="line"><span class="attr">tolerations:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">key:</span> <span class="string">"key"</span></span><br><span class="line">  <span class="attr">operator:</span> <span class="string">"Exists"</span></span><br><span class="line">  <span class="attr">effect:</span> <span class="string">"NoSchedule"</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 表示可以接受&quot;存在 key(不論 value 為何) &amp; effect=NoSchedule&quot; 的 taint</span></span><br><span class="line"><span class="attr">tolerations:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">key:</span> <span class="string">&quot;key&quot;</span></span><br><span class="line">  <span class="attr">operator:</span> <span class="string">&quot;Exists&quot;</span></span><br><span class="line">  <span class="attr">effect:</span> <span class="string">&quot;NoSchedule&quot;</span></span><br></pre></td></tr></table></figure>
 
 <p>在 toleration 的設定中，有一些比較特別的案例需要說明一下：</p>
 <ul>
@@ -295,12 +295,12 @@
 <li><p>若僅有設定 operator 為 Exists，卻沒有設定 key，那表示會 tolerate(容忍) 所有的 taint</p>
 </li>
 </ul>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">tolerations:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">operator:</span> <span class="string">"Exists"</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">tolerations:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">operator:</span> <span class="string">&quot;Exists&quot;</span></span><br></pre></td></tr></table></figure>
 
 <ul>
 <li>僅有設定 key，沒有設定 effect，表示只有帶有相同 key 的 taint 都會被容忍</li>
 </ul>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">tolerations:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">key:</span> <span class="string">"key"</span></span><br><span class="line">  <span class="attr">operator:</span> <span class="string">"Exists"</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">tolerations:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">key:</span> <span class="string">&quot;key&quot;</span></span><br><span class="line">  <span class="attr">operator:</span> <span class="string">&quot;Exists&quot;</span></span><br></pre></td></tr></table></figure>
 
 
 
@@ -328,7 +328,7 @@
 <blockquote>
 <p>kubectl taint nodes nodename dedicated=groupName:NoSchedule</p>
 </blockquote>
-<p>有了上面的 taint 設定後，一般的 pod 就不會被分派到上面；而該群組的使用者只要在 pod spec 加入對應的 toleration 即可讓 pod 分配到專用的 node 上，而若是覺得每次都要設定 pod spec 很麻煩，或許可以考慮 k8s <a href="https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/" target="_blank" rel="noopener" title="Kubernetes Admission Controllers">Admission Controller</a> 來讓這件事情變得簡單些。</p>
+<p>有了上面的 taint 設定後，一般的 pod 就不會被分派到上面；而該群組的使用者只要在 pod spec 加入對應的 toleration 即可讓 pod 分配到專用的 node 上，而若是覺得每次都要設定 pod spec 很麻煩，或許可以考慮 k8s <a target="_blank" rel="noopener" href="https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/" title="Kubernetes Admission Controllers">Admission Controller</a> 來讓這件事情變得簡單些。</p>
 <blockquote>
 <p>Admission Contoller 可以自動幫 pod 加上 toleration</p>
 </blockquote>
@@ -339,7 +339,7 @@
 <p>因此，可以在帶有這些特殊硬體的 node 上設定類似以下的 taint：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl taint nodes nodename special=<span class="literal">true</span>:NoSchedule</span><br><span class="line"></span><br><span class="line">$ kubectl taint nodes nodename special=<span class="literal">true</span>:PreferNoSchedule</span><br><span class="line"></span><br><span class="line">$ kubectl taint nodes nodename gpu=<span class="literal">true</span>:NoSchedule</span><br><span class="line"></span><br><span class="line">$ kubectl taint nodes nodename fpga=<span class="literal">true</span>:NoSchedule</span><br></pre></td></tr></table></figure>
 
-<p>而 pod toleration or <a href="https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/" target="_blank" rel="noopener" title="Kubernetes Admission Controllers">Kubernetes Admission Controller</a> 的設定當然也不能或缺；但若是真的使用特殊硬體，也可以考慮使用 <a href="https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#extended-resources" target="_blank" rel="noopener">Extended Resource</a> + <a href="https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#extendedresourcetoleration" target="_blank" rel="noopener">ExtendedResourceToleration admission controller</a> 的機制來處理 &amp; 運用。</p>
+<p>而 pod toleration or <a target="_blank" rel="noopener" href="https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/" title="Kubernetes Admission Controllers">Kubernetes Admission Controller</a> 的設定當然也不能或缺；但若是真的使用特殊硬體，也可以考慮使用 <a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#extended-resources">Extended Resource</a> + <a target="_blank" rel="noopener" href="https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#extendedresourcetoleration">ExtendedResourceToleration admission controller</a> 的機制來處理 &amp; 運用。</p>
 <blockquote>
 <p>透過 <code>Extended Resource</code> + <code>ExtendedResourceToleration admission controller</code> 可以確保 pod 可以被自動的加上被分派到帶有特殊硬體的 node 上所需要的 toleration 設定</p>
 </blockquote>
@@ -379,7 +379,7 @@
 <p>可能會有人有疑問….如果 node 一旦被偵測出有問題，上面的 pod 就會馬上被驅離，但可能只是斷線一下就回復了，馬上驅離的作法妥當嗎?</p>
 <p>因此為了處理這樣的狀況，當 node 發生問題時，除了在該 node 上增加一個 taint 的設定外，還會在該 node 上的每個 pod 加上相對應的 toleration 設定，並設定 tolerationSeconds=300，這表示每個 pod 都還可以留在該 node 上 5 分鐘。</p>
 <blockquote>
-<p>tolerationSeconds 的設定是 k8s 自動給進去的，若要更改預設值 300，可以透過 <a href="https://github.com/kubernetes/kubernetes/tree/master/plugin/pkg/admission/defaulttolerationseconds" target="_blank" rel="noopener">DefaultTolerationSeconds admission controller</a></p>
+<p>tolerationSeconds 的設定是 k8s 自動給進去的，若要更改預設值 300，可以透過 <a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/tree/master/plugin/pkg/admission/defaulttolerationseconds">DefaultTolerationSeconds admission controller</a></p>
 </blockquote>
 <p>此外，要讓 taint based eviction 運作，必須要開啟 <code>TaintBasedEvictions</code> feature gate (預設是關閉的)</p>
 <blockquote>
@@ -419,11 +419,11 @@
 </ul>
 <p>但在 v1.12 的環境下檢視已經存在的 DaemonSet，並沒有看到這樣的設定，這部份有帶後續釐清。</p>
 <h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
-<li><p><a href="https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/" target="_blank" rel="noopener">Taints and Tolerations - Kubernetes</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/">Taints and Tolerations - Kubernetes</a></p>
 </li>
-<li><p><a href="https://jimmysong.io/posts/kubernetes-taint-and-toleration/" target="_blank" rel="noopener">Kubernetes中的Taint和Toleration（污点和容忍） - 宋净超的博客|Cloud Native|云原生布道师</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://jimmysong.io/posts/kubernetes-taint-and-toleration/">Kubernetes中的Taint和Toleration（污点和容忍） - 宋净超的博客|Cloud Native|云原生布道师</a></p>
 </li>
-<li><p><a href="https://blog.frognew.com/2018/05/taint-and-toleration.html" target="_blank" rel="noopener">Kubernetes Pod调度进阶：Taints(污点)和Tolerations(容忍) — 青蛙小白</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://blog.frognew.com/2018/05/taint-and-toleration.html">Kubernetes Pod调度进阶：Taints(污点)和Tolerations(容忍) — 青蛙小白</a></p>
 </li>
 </ul>
 
@@ -519,7 +519,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#設定-Taint-amp-Toleration"><span class="nav-number">2.</span> <span class="nav-text">設定 Taint &amp; Toleration</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#如何設定-node-taint"><span class="nav-number">2.1.</span> <span class="nav-text">如何設定 node taint</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何移除-taint"><span class="nav-number">2.2.</span> <span class="nav-text">如何移除 taint</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#設定-pod-toleration"><span class="nav-number">2.3.</span> <span class="nav-text">設定 pod toleration</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Effect-運作規則說明"><span class="nav-number">3.</span> <span class="nav-text">Effect 運作規則說明</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#NoSchedule"><span class="nav-number">3.1.</span> <span class="nav-text">NoSchedule</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PreferNoSchedule"><span class="nav-number">3.2.</span> <span class="nav-text">PreferNoSchedule</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NoExecute"><span class="nav-number">3.3.</span> <span class="nav-text">NoExecute</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#實際上如何運用"><span class="nav-number">4.</span> <span class="nav-text">實際上如何運用?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#專用的-Node"><span class="nav-number">4.1.</span> <span class="nav-text">專用的 Node</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#帶有特殊硬體的-Node"><span class="nav-number">4.2.</span> <span class="nav-text">帶有特殊硬體的 Node</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#當-Node-發生問題時"><span class="nav-number">4.3.</span> <span class="nav-text">當 Node 發生問題時</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Taint-based-Evictions"><span class="nav-number">5.</span> <span class="nav-text">Taint based Evictions</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Taint-Nodes-by-Condition"><span class="nav-number">6.</span> <span class="nav-text">Taint Nodes by Condition</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">7.</span> <span class="nav-text">References</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%A8%AD%E5%AE%9A-Taint-amp-Toleration"><span class="nav-number">2.</span> <span class="nav-text">設定 Taint &amp; Toleration</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%A8%AD%E5%AE%9A-node-taint"><span class="nav-number">2.1.</span> <span class="nav-text">如何設定 node taint</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E7%A7%BB%E9%99%A4-taint"><span class="nav-number">2.2.</span> <span class="nav-text">如何移除 taint</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A8%AD%E5%AE%9A-pod-toleration"><span class="nav-number">2.3.</span> <span class="nav-text">設定 pod toleration</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Effect-%E9%81%8B%E4%BD%9C%E8%A6%8F%E5%89%87%E8%AA%AA%E6%98%8E"><span class="nav-number">3.</span> <span class="nav-text">Effect 運作規則說明</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#NoSchedule"><span class="nav-number">3.1.</span> <span class="nav-text">NoSchedule</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PreferNoSchedule"><span class="nav-number">3.2.</span> <span class="nav-text">PreferNoSchedule</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NoExecute"><span class="nav-number">3.3.</span> <span class="nav-text">NoExecute</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AF%A6%E9%9A%9B%E4%B8%8A%E5%A6%82%E4%BD%95%E9%81%8B%E7%94%A8"><span class="nav-number">4.</span> <span class="nav-text">實際上如何運用?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%88%E7%94%A8%E7%9A%84-Node"><span class="nav-number">4.1.</span> <span class="nav-text">專用的 Node</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B6%E6%9C%89%E7%89%B9%E6%AE%8A%E7%A1%AC%E9%AB%94%E7%9A%84-Node"><span class="nav-number">4.2.</span> <span class="nav-text">帶有特殊硬體的 Node</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%95%B6-Node-%E7%99%BC%E7%94%9F%E5%95%8F%E9%A1%8C%E6%99%82"><span class="nav-number">4.3.</span> <span class="nav-text">當 Node 發生問題時</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Taint-based-Evictions"><span class="nav-number">5.</span> <span class="nav-text">Taint based Evictions</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Taint-Nodes-by-Condition"><span class="nav-number">6.</span> <span class="nav-text">Taint Nodes by Condition</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">7.</span> <span class="nav-text">References</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

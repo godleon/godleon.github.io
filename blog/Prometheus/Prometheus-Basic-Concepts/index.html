@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 4.2.0">
+<meta name="generator" content="Hexo 5.0.2">
   <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
@@ -28,7 +28,7 @@
 <meta property="og:description" content="這篇文章單純是研究 Prometheus 時隨手記下的筆記....">
 <meta property="og:locale" content="zh_TW">
 <meta property="article:published_time" content="2019-03-24T09:00:00.000Z">
-<meta property="article:modified_time" content="2020-08-16T22:27:02.111Z">
+<meta property="article:modified_time" content="2020-08-16T22:33:23.821Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="Prometheus">
 <meta property="article:tag" content="Telemetry">
@@ -201,7 +201,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">عُدل في</span>
-                <time title="عُدل: 2020-08-17 06:27:02" itemprop="dateModified" datetime="2020-08-17T06:27:02+08:00">2020-08-17</time>
+                <time title="عُدل: 2020-08-17 06:33:23" itemprop="dateModified" datetime="2020-08-17T06:33:23+08:00">2020-08-17</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -239,7 +239,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>這篇文章單純是研究 <a href="https://prometheus.io/" target="_blank" rel="noopener">Prometheus</a> 時隨手記下的筆記….</p>
+        <p>這篇文章單純是研究 <a target="_blank" rel="noopener" href="https://prometheus.io/">Prometheus</a> 時隨手記下的筆記….</p>
 <h1 id="關鍵名詞"><a href="#關鍵名詞" class="headerlink" title="關鍵名詞"></a>關鍵名詞</h1><h2 id="Sample"><a href="#Sample" class="headerlink" title="Sample"></a>Sample</h2><p>sample 表示實際的時間序列資料，包含以下內容：</p>
 <ul>
 <li><p>一個精度為 float64 的值</p>
@@ -251,7 +251,7 @@
 <h2 id="Job"><a href="#Job" class="headerlink" title="Job"></a>Job</h2><p>一群 instance 的集合，稱為一個 Job，一般會是用來收集相同目的的資料，例如：因為 scalability &amp; reliability 而讓同一個 process 跑在多台機器上，然後同時監控多台機器中的該 process。</p>
 <h1 id="Data-Model"><a href="#Data-Model" class="headerlink" title="Data Model"></a>Data Model</h1><p>Prometheus 中的 multiple dimension 是透過 <code>metric</code> + <code>label</code> 所呈現出來的，同樣的 metric 資料，但透過不同的 label 搭配可以呈現出不同的維度的資料。</p>
 <h2 id="如何表示資料"><a href="#如何表示資料" class="headerlink" title="如何表示資料"></a>如何表示資料</h2><p>資料的表示需要 <code>metric</code> &amp; <code>label</code> 兩種資訊，範例如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;metric name&gt;&#123;&lt;label name&gt;&#x3D;&lt;label value&gt;, ...&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;metric name&gt;&#123;&lt;label name&gt;=&lt;label value&gt;, ...&#125;</span><br></pre></td></tr></table></figure>
 
 <p>以下是個實際範例：</p>
 <blockquote>
@@ -260,38 +260,38 @@
 <p>以上的資料表示法可以在 Prometheus console 的查詢畫面中使用。</p>
 <h1 id="Jobs-amp-Instances"><a href="#Jobs-amp-Instances" class="headerlink" title="Jobs &amp; Instances"></a>Jobs &amp; Instances</h1><p>Prometheus 除了收集 instance metrics 外，還會有其他自動產生並帶上相對應 label 的資料，例如：</p>
 <ul>
-<li><p><code>up{job=&quot;&lt;job-name&gt;&quot;, instance=&quot;&lt;instance-id&gt;&quot;}</code>：<code>1</code> 表示 instance 目前很健康，可以正常取得 metric 資料；若 <code>0</code> 則反之</p>
+<li><p><code>up&#123;job=&quot;&lt;job-name&gt;&quot;, instance=&quot;&lt;instance-id&gt;&quot;&#125;</code>：<code>1</code> 表示 instance 目前很健康，可以正常取得 metric 資料；若 <code>0</code> 則反之</p>
 </li>
-<li><p><code>scrape_duration_seconds{job=&quot;&lt;job-name&gt;&quot;, instance=&quot;&lt;instance-id&gt;&quot;}</code>：擷取 metric 資料的時間間隔</p>
+<li><p><code>scrape_duration_seconds&#123;job=&quot;&lt;job-name&gt;&quot;, instance=&quot;&lt;instance-id&gt;&quot;&#125;</code>：擷取 metric 資料的時間間隔</p>
 </li>
-<li><p><code>scrape_samples_post_metric_relabeling{job=&quot;&lt;job-name&gt;&quot;, instance=&quot;&lt;instance-id&gt;&quot;}</code>：有多少個 sample</p>
+<li><p><code>scrape_samples_post_metric_relabeling&#123;job=&quot;&lt;job-name&gt;&quot;, instance=&quot;&lt;instance-id&gt;&quot;&#125;</code>：有多少個 sample</p>
 </li>
-<li><p><code>scrape_samples_scraped{job=&quot;&lt;job-name&gt;&quot;, instance=&quot;&lt;instance-id&gt;&quot;}</code></p>
+<li><p><code>scrape_samples_scraped&#123;job=&quot;&lt;job-name&gt;&quot;, instance=&quot;&lt;instance-id&gt;&quot;&#125;</code></p>
 </li>
 </ul>
 <h1 id="Service-Discovery"><a href="#Service-Discovery" class="headerlink" title="Service Discovery"></a>Service Discovery</h1><p>在一般 Prometheus 的 <code>scrape_configs</code> 設定中，會看到 <code>static_configs</code> 的設定，用來指定 metric endpoint，使用者可以根據需要設定 endpoint list。</p>
 <p>但若是 metrics endpoint 時常變動時怎麼辦? 例如在 OpenStack or Kubernetes 的環境中，VM or Pod 可能都是來來去去，IP address 都是會一直變動的，此時 <code>static_configs</code> 根本無法正確指定要擷取資料的 instance。</p>
 <p>為了解決這個問題，就要透過 <strong>service discovery</strong> 的方式來動態取得 instance list，而 Prometheus 支援很多種 service discovery 的機制，例如：</p>
 <ul>
-<li><p><a href="https://prometheus.io/docs/prometheus/latest/configuration/configuration/#file_sd_config" target="_blank" rel="noopener">file_sd_config</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://prometheus.io/docs/prometheus/latest/configuration/configuration/#file_sd_config">file_sd_config</a></p>
 </li>
-<li><p><a href="https://prometheus.io/docs/prometheus/latest/configuration/configuration/#kubernetes_sd_config" target="_blank" rel="noopener">kubernetes_sd_config</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://prometheus.io/docs/prometheus/latest/configuration/configuration/#kubernetes_sd_config">kubernetes_sd_config</a></p>
 </li>
-<li><p><a href="https://prometheus.io/docs/prometheus/latest/configuration/configuration/#openstack_sd_config" target="_blank" rel="noopener">openstack_sd_config</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://prometheus.io/docs/prometheus/latest/configuration/configuration/#openstack_sd_config">openstack_sd_config</a></p>
 </li>
 </ul>
-<p>除了上面的幾個之外，Prometheus 還支援了很多種其他的服務，也包含了多個 public cloud，詳細的清單可以參考<a href="https://prometheus.io/docs/prometheus/latest/configuration/configuration" target="_blank" rel="noopener">官網</a>。</p>
+<p>除了上面的幾個之外，Prometheus 還支援了很多種其他的服務，也包含了多個 public cloud，詳細的清單可以參考<a target="_blank" rel="noopener" href="https://prometheus.io/docs/prometheus/latest/configuration/configuration">官網</a>。</p>
 <p>以下蒐集了一些幾個 service discovery 的範例供參考：</p>
 <h2 id="consul-sd-configs"><a href="#consul-sd-configs" class="headerlink" title="consul_sd_configs"></a>consul_sd_configs</h2><ul>
-<li><p><a href="http://ylzheng.com/2018/01/17/prometheus-sd-and-relabel/" target="_blank" rel="noopener">Prometheus中的服务发现和relabel | I’m Yunlong</a></p>
+<li><p><a target="_blank" rel="noopener" href="http://ylzheng.com/2018/01/17/prometheus-sd-and-relabel/">Prometheus中的服务发现和relabel | I’m Yunlong</a></p>
 </li>
-<li><p><a href="https://blog.52itstyle.vip/archives/2084/" target="_blank" rel="noopener">Consul+Prometheus系统监控之注册发现 - 柒’s Blog</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://blog.52itstyle.vip/archives/2084/">Consul+Prometheus系统监控之注册发现 - 柒’s Blog</a></p>
 </li>
 </ul>
 <h2 id="kubernetes-sd-config"><a href="#kubernetes-sd-config" class="headerlink" title="kubernetes_sd_config"></a>kubernetes_sd_config</h2><ul>
-<li><p><a href="http://ylzheng.com/2017/07/04/prometheus-kubernates/" target="_blank" rel="noopener">Prometheus在Kubernetes下的监控实践 | I’m Yunlong</a></p>
+<li><p><a target="_blank" rel="noopener" href="http://ylzheng.com/2017/07/04/prometheus-kubernates/">Prometheus在Kubernetes下的监控实践 | I’m Yunlong</a></p>
 </li>
-<li><p><a href="https://yunlzheng.gitbook.io/prometheus-book/part-iii-prometheus-shi-zhan/readmd/use-prometheus-monitor-kubernetes" target="_blank" rel="noopener">监控Kubernetes集群 - prometheus-book</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://yunlzheng.gitbook.io/prometheus-book/part-iii-prometheus-shi-zhan/readmd/use-prometheus-monitor-kubernetes">监控Kubernetes集群 - prometheus-book</a></p>
 </li>
 </ul>
 <h1 id="在-Kubernetes-上佈署-Prometheus-的流程"><a href="#在-Kubernetes-上佈署-Prometheus-的流程" class="headerlink" title="在 Kubernetes 上佈署 Prometheus 的流程"></a>在 Kubernetes 上佈署 Prometheus 的流程</h1><p>若是 Prometheus 佈署在 k8s cluster 之外，從外面與 API server 溝通，就必須要準備好正確的憑證資訊。</p>
@@ -315,9 +315,9 @@
 <p>如此一來，Prometheus pod 就可以跟 k8s API server 通訊了!</p>
 <h1 id="Rules"><a href="#Rules" class="headerlink" title="Rules"></a>Rules</h1><p>Prometheus 中提供了兩種 rule type，分別是：</p>
 <ul>
-<li><p><a href="https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/" target="_blank" rel="noopener">Recording Rule</a>：用來協助預先處理 or 計算某些 metric 的值，透過 recording rule，將較為複雜的需求先計算完成，後續就可以直接使用，會比起每次都重新查詢 &amp; 計算來的快的多且省資源</p>
+<li><p><a target="_blank" rel="noopener" href="https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/">Recording Rule</a>：用來協助預先處理 or 計算某些 metric 的值，透過 recording rule，將較為複雜的需求先計算完成，後續就可以直接使用，會比起每次都重新查詢 &amp; 計算來的快的多且省資源</p>
 </li>
-<li><p><a href="https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/" target="_blank" rel="noopener">Alerting Rule</a>：讓使用者可以透過 rometheus expression language expressions 自訂需要發送 alarm 的條件</p>
+<li><p><a target="_blank" rel="noopener" href="https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/">Alerting Rule</a>：讓使用者可以透過 rometheus expression language expressions 自訂需要發送 alarm 的條件</p>
 </li>
 </ul>
 <p>rule 在使用上有幾點需要注意：</p>
@@ -329,31 +329,31 @@
 </ul>
 <h2 id="Recording-Rule-範例"><a href="#Recording-Rule-範例" class="headerlink" title="Recording Rule 範例"></a>Recording Rule 範例</h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">groups:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">example</span></span><br><span class="line">    <span class="attr">rules:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">record:</span> <span class="string">job:http_inprogress_requests:sum</span></span><br><span class="line">      <span class="attr">expr:</span> <span class="string">sum(http_inprogress_requests)</span> <span class="string">by</span> <span class="string">(job)</span></span><br></pre></td></tr></table></figure>
 
-<h2 id="Alerting-Rule-範例"><a href="#Alerting-Rule-範例" class="headerlink" title="Alerting Rule 範例"></a>Alerting Rule 範例</h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">groups:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">name:</span> <span class="string">example</span></span><br><span class="line">  <span class="attr">rules:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">alert:</span> <span class="string">HighErrorRate</span></span><br><span class="line">    <span class="attr">expr:</span> <span class="string">job:request_latency_seconds:mean5m&#123;job="myjob"&#125;</span> <span class="string">&gt;</span> <span class="number">0.5</span></span><br><span class="line">    <span class="comment"># alert 成立後，進入 pending 狀態，持續超過 10 mins 則進入 firing </span></span><br><span class="line">    <span class="attr">for:</span> <span class="string">10m</span></span><br><span class="line">    <span class="comment"># 為 alert 標記 tag</span></span><br><span class="line">    <span class="attr">labels:</span></span><br><span class="line">      <span class="attr">severity:</span> <span class="string">page</span></span><br><span class="line">    <span class="comment"># 可儲存較為複雜的 metadata 資訊</span></span><br><span class="line">    <span class="attr">annotations:</span></span><br><span class="line">      <span class="attr">summary:</span> <span class="string">High</span> <span class="string">request</span> <span class="string">latency</span></span><br></pre></td></tr></table></figure>
+<h2 id="Alerting-Rule-範例"><a href="#Alerting-Rule-範例" class="headerlink" title="Alerting Rule 範例"></a>Alerting Rule 範例</h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">groups:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">name:</span> <span class="string">example</span></span><br><span class="line">  <span class="attr">rules:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">alert:</span> <span class="string">HighErrorRate</span></span><br><span class="line">    <span class="attr">expr:</span> <span class="string">job:request_latency_seconds:mean5m&#123;job=&quot;myjob&quot;&#125;</span> <span class="string">&gt;</span> <span class="number">0.5</span></span><br><span class="line">    <span class="comment"># alert 成立後，進入 pending 狀態，持續超過 10 mins 則進入 firing </span></span><br><span class="line">    <span class="attr">for:</span> <span class="string">10m</span></span><br><span class="line">    <span class="comment"># 為 alert 標記 tag</span></span><br><span class="line">    <span class="attr">labels:</span></span><br><span class="line">      <span class="attr">severity:</span> <span class="string">page</span></span><br><span class="line">    <span class="comment"># 可儲存較為複雜的 metadata 資訊</span></span><br><span class="line">    <span class="attr">annotations:</span></span><br><span class="line">      <span class="attr">summary:</span> <span class="string">High</span> <span class="string">request</span> <span class="string">latency</span></span><br></pre></td></tr></table></figure>
 
-<p>與 <a href="https://prometheus.io/docs/visualization/consoles/" target="_blank" rel="noopener">Console Templates</a> 搭配使用：</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">groups:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">name:</span> <span class="string">example</span></span><br><span class="line">  <span class="attr">rules:</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># Alert for any instance that is unreachable for &gt;5 minutes.</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">alert:</span> <span class="string">InstanceDown</span></span><br><span class="line">    <span class="attr">expr:</span> <span class="string">up</span> <span class="string">==</span> <span class="number">0</span></span><br><span class="line">    <span class="attr">for:</span> <span class="string">5m</span></span><br><span class="line">    <span class="attr">labels:</span></span><br><span class="line">      <span class="attr">severity:</span> <span class="string">page</span></span><br><span class="line">    <span class="attr">annotations:</span></span><br><span class="line">      <span class="attr">summary:</span> <span class="string">"Instance <span class="template-variable">&#123;&#123; $labels.instance &#125;&#125;</span> down"</span></span><br><span class="line">      <span class="attr">description:</span> <span class="string">"<span class="template-variable">&#123;&#123; $labels.instance &#125;&#125;</span> of job <span class="template-variable">&#123;&#123; $labels.job &#125;&#125;</span> has been down for more than 5 minutes."</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># Alert for any instance that has a median request latency &gt;1s.</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">alert:</span> <span class="string">APIHighRequestLatency</span></span><br><span class="line">    <span class="attr">expr:</span> <span class="string">api_http_request_latencies_second&#123;quantile="0.5"&#125;</span> <span class="string">&gt;</span> <span class="number">1</span></span><br><span class="line">    <span class="attr">for:</span> <span class="string">10m</span></span><br><span class="line">    <span class="attr">annotations:</span></span><br><span class="line">      <span class="attr">summary:</span> <span class="string">"High request latency on <span class="template-variable">&#123;&#123; $labels.instance &#125;&#125;</span>"</span></span><br><span class="line">      <span class="attr">description:</span> <span class="string">"<span class="template-variable">&#123;&#123; $labels.instance &#125;&#125;</span> has a median request latency above 1s (current value: <span class="template-variable">&#123;&#123; $value &#125;&#125;</span>s)"</span></span><br></pre></td></tr></table></figure>
+<p>與 <a target="_blank" rel="noopener" href="https://prometheus.io/docs/visualization/consoles/">Console Templates</a> 搭配使用：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">groups:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">name:</span> <span class="string">example</span></span><br><span class="line">  <span class="attr">rules:</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># Alert for any instance that is unreachable for &gt;5 minutes.</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">alert:</span> <span class="string">InstanceDown</span></span><br><span class="line">    <span class="attr">expr:</span> <span class="string">up</span> <span class="string">==</span> <span class="number">0</span></span><br><span class="line">    <span class="attr">for:</span> <span class="string">5m</span></span><br><span class="line">    <span class="attr">labels:</span></span><br><span class="line">      <span class="attr">severity:</span> <span class="string">page</span></span><br><span class="line">    <span class="attr">annotations:</span></span><br><span class="line">      <span class="attr">summary:</span> <span class="string">&quot;Instance <span class="template-variable">&#123;&#123; $labels.instance &#125;&#125;</span> down&quot;</span></span><br><span class="line">      <span class="attr">description:</span> <span class="string">&quot;<span class="template-variable">&#123;&#123; $labels.instance &#125;&#125;</span> of job <span class="template-variable">&#123;&#123; $labels.job &#125;&#125;</span> has been down for more than 5 minutes.&quot;</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># Alert for any instance that has a median request latency &gt;1s.</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">alert:</span> <span class="string">APIHighRequestLatency</span></span><br><span class="line">    <span class="attr">expr:</span> <span class="string">api_http_request_latencies_second&#123;quantile=&quot;0.5&quot;&#125;</span> <span class="string">&gt;</span> <span class="number">1</span></span><br><span class="line">    <span class="attr">for:</span> <span class="string">10m</span></span><br><span class="line">    <span class="attr">annotations:</span></span><br><span class="line">      <span class="attr">summary:</span> <span class="string">&quot;High request latency on <span class="template-variable">&#123;&#123; $labels.instance &#125;&#125;</span>&quot;</span></span><br><span class="line">      <span class="attr">description:</span> <span class="string">&quot;<span class="template-variable">&#123;&#123; $labels.instance &#125;&#125;</span> has a median request latency above 1s (current value: <span class="template-variable">&#123;&#123; $value &#125;&#125;</span>s)&quot;</span></span><br></pre></td></tr></table></figure>
 
 
 <h1 id="儲存系統"><a href="#儲存系統" class="headerlink" title="儲存系統"></a>儲存系統</h1><p>可參考以下文章：</p>
 <ul>
-<li><p><a href="https://k2r2bai.com/2018/06/27/devops/prometheus-storage/" target="_blank" rel="noopener">Prometheus 儲存系統解析 - KaiRen’s Blog</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://k2r2bai.com/2018/06/27/devops/prometheus-storage/">Prometheus 儲存系統解析 - KaiRen’s Blog</a></p>
 </li>
-<li><p><a href="http://ylzheng.com/2018/03/06/promethus-local-storage/" target="_blank" rel="noopener">Prometheus高可用(1)：理解本地存储 | I’m Yunlong</a></p>
+<li><p><a target="_blank" rel="noopener" href="http://ylzheng.com/2018/03/06/promethus-local-storage/">Prometheus高可用(1)：理解本地存储 | I’m Yunlong</a></p>
 </li>
-<li><p><a href="http://ylzheng.com/2018/03/07/promethues-remote-storage/" target="_blank" rel="noopener">Prometheus高可用(2)：理解远端存储 | I’m Yunlong</a></p>
+<li><p><a target="_blank" rel="noopener" href="http://ylzheng.com/2018/03/07/promethues-remote-storage/">Prometheus高可用(2)：理解远端存储 | I’m Yunlong</a></p>
 </li>
 </ul>
 <h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
-<li><p><a href="https://k2r2bai.com/2018/06/10/devops/prometheus-intro/" target="_blank" rel="noopener">Prometheus 介紹與基礎入門 - KaiRen’s Blog</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://k2r2bai.com/2018/06/10/devops/prometheus-intro/">Prometheus 介紹與基礎入門 - KaiRen’s Blog</a></p>
 </li>
-<li><p><a href="https://k2r2bai.com/2018/06/27/devops/prometheus-storage/" target="_blank" rel="noopener">Prometheus 儲存系統解析 - KaiRen’s Blog</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://k2r2bai.com/2018/06/27/devops/prometheus-storage/">Prometheus 儲存系統解析 - KaiRen’s Blog</a></p>
 </li>
-<li><p><a href="https://k2r2bai.com/2018/06/29/devops/prometheus-federation/" target="_blank" rel="noopener">了解 Prometheus Federation 功能 - KaiRen’s Blog</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://k2r2bai.com/2018/06/29/devops/prometheus-federation/">了解 Prometheus Federation 功能 - KaiRen’s Blog</a></p>
 </li>
-<li><p><a href="https://k2r2bai.com/2018/07/01/devops/prometheus-ha/" target="_blank" rel="noopener">Prometheus 高可靠實現方式 - KaiRen’s Blog</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://k2r2bai.com/2018/07/01/devops/prometheus-ha/">Prometheus 高可靠實現方式 - KaiRen’s Blog</a></p>
 </li>
-<li><p><a href="https://github.com/kubernetes/kubernetes/tree/master/cluster/addons/prometheus" target="_blank" rel="noopener">Kubernetes - Prometheus Add-on</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/tree/master/cluster/addons/prometheus">Kubernetes - Prometheus Add-on</a></p>
 </li>
 </ul>
 
@@ -447,7 +447,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#關鍵名詞"><span class="nav-number">1.</span> <span class="nav-text">關鍵名詞</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Sample"><span class="nav-number">1.1.</span> <span class="nav-text">Sample</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Instance"><span class="nav-number">1.2.</span> <span class="nav-text">Instance</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Job"><span class="nav-number">1.3.</span> <span class="nav-text">Job</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Data-Model"><span class="nav-number">2.</span> <span class="nav-text">Data Model</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#如何表示資料"><span class="nav-number">2.1.</span> <span class="nav-text">如何表示資料</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Jobs-amp-Instances"><span class="nav-number">3.</span> <span class="nav-text">Jobs &amp; Instances</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Service-Discovery"><span class="nav-number">4.</span> <span class="nav-text">Service Discovery</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#consul-sd-configs"><span class="nav-number">4.1.</span> <span class="nav-text">consul_sd_configs</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#kubernetes-sd-config"><span class="nav-number">4.2.</span> <span class="nav-text">kubernetes_sd_config</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#在-Kubernetes-上佈署-Prometheus-的流程"><span class="nav-number">5.</span> <span class="nav-text">在 Kubernetes 上佈署 Prometheus 的流程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Rules"><span class="nav-number">6.</span> <span class="nav-text">Rules</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Recording-Rule-範例"><span class="nav-number">6.1.</span> <span class="nav-text">Recording Rule 範例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Alerting-Rule-範例"><span class="nav-number">6.2.</span> <span class="nav-text">Alerting Rule 範例</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#儲存系統"><span class="nav-number">7.</span> <span class="nav-text">儲存系統</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">8.</span> <span class="nav-text">References</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%97%9C%E9%8D%B5%E5%90%8D%E8%A9%9E"><span class="nav-number">1.</span> <span class="nav-text">關鍵名詞</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Sample"><span class="nav-number">1.1.</span> <span class="nav-text">Sample</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Instance"><span class="nav-number">1.2.</span> <span class="nav-text">Instance</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Job"><span class="nav-number">1.3.</span> <span class="nav-text">Job</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Data-Model"><span class="nav-number">2.</span> <span class="nav-text">Data Model</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%A1%A8%E7%A4%BA%E8%B3%87%E6%96%99"><span class="nav-number">2.1.</span> <span class="nav-text">如何表示資料</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Jobs-amp-Instances"><span class="nav-number">3.</span> <span class="nav-text">Jobs &amp; Instances</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Service-Discovery"><span class="nav-number">4.</span> <span class="nav-text">Service Discovery</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#consul-sd-configs"><span class="nav-number">4.1.</span> <span class="nav-text">consul_sd_configs</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#kubernetes-sd-config"><span class="nav-number">4.2.</span> <span class="nav-text">kubernetes_sd_config</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9C%A8-Kubernetes-%E4%B8%8A%E4%BD%88%E7%BD%B2-Prometheus-%E7%9A%84%E6%B5%81%E7%A8%8B"><span class="nav-number">5.</span> <span class="nav-text">在 Kubernetes 上佈署 Prometheus 的流程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Rules"><span class="nav-number">6.</span> <span class="nav-text">Rules</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Recording-Rule-%E7%AF%84%E4%BE%8B"><span class="nav-number">6.1.</span> <span class="nav-text">Recording Rule 範例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Alerting-Rule-%E7%AF%84%E4%BE%8B"><span class="nav-number">6.2.</span> <span class="nav-text">Alerting Rule 範例</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%84%B2%E5%AD%98%E7%B3%BB%E7%B5%B1"><span class="nav-number">7.</span> <span class="nav-text">儲存系統</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">8.</span> <span class="nav-text">References</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

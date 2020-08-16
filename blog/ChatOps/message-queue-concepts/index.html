@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 4.2.0">
+<meta name="generator" content="Hexo 5.0.2">
   <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
@@ -36,7 +36,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/middleware/message-queue_concept-binding.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/middleware/message-queue_concept-binding.png">
 <meta property="article:published_time" content="2020-02-12T09:20:00.000Z">
-<meta property="article:modified_time" content="2020-08-16T22:27:02.103Z">
+<meta property="article:modified_time" content="2020-08-16T22:33:23.817Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="Message Queue">
 <meta property="article:tag" content="RabbitMQ">
@@ -210,7 +210,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">عُدل في</span>
-                <time title="عُدل: 2020-08-17 06:27:02" itemprop="dateModified" datetime="2020-08-17T06:27:02+08:00">2020-08-17</time>
+                <time title="عُدل: 2020-08-17 06:33:23" itemprop="dateModified" datetime="2020-08-17T06:33:23+08:00">2020-08-17</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -248,7 +248,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h1 id="Preface"><a href="#Preface" class="headerlink" title="Preface"></a>Preface</h1><p>以下內容是學習線上課程 <a href="https://www.udemy.com/course/rabbitmq-and-messaging-concepts/" target="_blank" rel="noopener">RabbitMQ and Messaging Concepts</a> 時所留下的學習筆記。</p>
+        <h1 id="Preface"><a href="#Preface" class="headerlink" title="Preface"></a>Preface</h1><p>以下內容是學習線上課程 <a target="_blank" rel="noopener" href="https://www.udemy.com/course/rabbitmq-and-messaging-concepts/">RabbitMQ and Messaging Concepts</a> 時所留下的學習筆記。</p>
 <p>由於目前 Message Queue 在系統架設設計時很常出現，到底這類型的元件有什麼特性? 可以為系統帶來什麼優點? 以及其相關的特性 &amp; 運作方式 (以 RabbitMQ 為例)。以下的部份會進行說明解釋。</p>
 <h1 id="Application-整合模式"><a href="#Application-整合模式" class="headerlink" title="Application 整合模式"></a>Application 整合模式</h1><p>在一個系統中，一般不會只有一隻程式在運作，而是會有多隻程式同時負責各種不同的任務，而程式之間難免會有互相傳遞資料進行處理的需求，而這類的需求，以下都統稱為 applcation 的整合。</p>
 <p>而一般常見的 application 整合方式大概可以分為以下幾種：</p>
@@ -347,7 +347,7 @@
 </ul>
 <h1 id="細部探究-Message-Queue-amp-Exchange-的屬性資訊"><a href="#細部探究-Message-Queue-amp-Exchange-的屬性資訊" class="headerlink" title="細部探究 Message, Queue &amp; Exchange 的屬性資訊"></a>細部探究 Message, Queue &amp; Exchange 的屬性資訊</h1><p>了解了上面關於 Messaging System 的標準組成元素之後，可以大致了解一個 Message Queue 大概是如何與外部 application 進行溝通運作的；但如果要更探究 Message Queue 內部的運作細節，可以從標準組成元素中的屬性(attribute)來進行了解。</p>
 <blockquote>
-<p>這部份的學習會以 <a href="https://www.rabbitmq.com/" target="_blank" rel="noopener">RabbitMQ</a> 為主，因此以下屬性介紹會以 RabiitMQ 為主，但跟其他主流的 Message Queue 應該不會差異太大</p>
+<p>這部份的學習會以 <a target="_blank" rel="noopener" href="https://www.rabbitmq.com/">RabbitMQ</a> 為主，因此以下屬性介紹會以 RabiitMQ 為主，但跟其他主流的 Message Queue 應該不會差異太大</p>
 </blockquote>
 <h2 id="Message-的屬性"><a href="#Message-的屬性" class="headerlink" title="Message 的屬性"></a>Message 的屬性</h2><ul>
 <li><p><strong>Routing Key</strong>：用來決定訊息進入到 Messaging System 後如何被轉發的資訊</p>
@@ -404,7 +404,7 @@
 </li>
 <li><p><strong>Alternate Exchange</strong>：指定無法 route 的 message 的去向</p>
 </li>
-<li><p><strong>Other Arguments(x-arguments)</strong>：Exchange 其他的 metadata，可能會用於其他的 plugin 中</p>
+<li><p>**Other Arguments(x-arguments)**：Exchange 其他的 metadata，可能會用於其他的 plugin 中</p>
 </li>
 </ul>
 <h1 id="Exchange"><a href="#Exchange" class="headerlink" title="Exchange"></a>Exchange</h1><p>要切入 RabbitMQ 之前，<code>Exchange</code> 的概念是必須先了解的，以下是 RabbitMQ 的內部架構圖： </p>
@@ -428,9 +428,9 @@
 <h1 id="總結"><a href="#總結" class="headerlink" title="總結"></a>總結</h1><p>透過上面關於 Messaging System 的標準組成元素說明，可以了解到一個 Message Queue 在整體系統上所扮演的角色；加上內部組件的屬性(attribute)說明，也大致可以推敲出一個 Messaging System(以 RabbitMQ 為主) 內部運作的狀況。</p>
 <p>因此在實際使用上，我們可以利用 Message Queue 有效的將 application 進行解耦，讓大問題拆分為小問題，並且讓 developer 可以專注在特定的系統功能上，讓 application 面對的，就是 Message Queue 而已。</p>
 <h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
-<li><p><a href="https://www.udemy.com/course/rabbitmq-and-messaging-concepts" target="_blank" rel="noopener">Free RabbitMQ Tutorial - RabbitMQ and Messaging Concepts | Udemy</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://www.udemy.com/course/rabbitmq-and-messaging-concepts">Free RabbitMQ Tutorial - RabbitMQ and Messaging Concepts | Udemy</a></p>
 </li>
-<li><p><a href="https://www.rabbitmq.com/documentation.html" target="_blank" rel="noopener">Documentation: Table of Contents — RabbitMQ</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://www.rabbitmq.com/documentation.html">Documentation: Table of Contents — RabbitMQ</a></p>
 </li>
 </ul>
 
@@ -524,7 +524,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Preface"><span class="nav-number">1.</span> <span class="nav-text">Preface</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Application-整合模式"><span class="nav-number">2.</span> <span class="nav-text">Application 整合模式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Filed-Based-Integration"><span class="nav-number">2.1.</span> <span class="nav-text">Filed Based Integration</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Shared-Database-Integration"><span class="nav-number">2.2.</span> <span class="nav-text">Shared Database Integration</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Direct-Connection-Integration"><span class="nav-number">2.3.</span> <span class="nav-text">Direct Connection Integration</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#透過-Message-Broker-以非同步的方式傳遞訊息Asynchronous-Messaging"><span class="nav-number">2.4.</span> <span class="nav-text">透過 Message Broker 以非同步的方式傳遞訊息Asynchronous Messaging</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用-Message-Queue-有什麼優點"><span class="nav-number">3.</span> <span class="nav-text">使用 Message Queue 有什麼優點?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用場景範例"><span class="nav-number">4.</span> <span class="nav-text">使用場景範例</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Case-1"><span class="nav-number">4.1.</span> <span class="nav-text">Case 1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Case-2"><span class="nav-number">4.2.</span> <span class="nav-text">Case 2</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Messaging-System-中的標準組成元素"><span class="nav-number">5.</span> <span class="nav-text">Messaging System 中的標準組成元素</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#細部探究-Message-Queue-amp-Exchange-的屬性資訊"><span class="nav-number">6.</span> <span class="nav-text">細部探究 Message, Queue &amp; Exchange 的屬性資訊</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Message-的屬性"><span class="nav-number">6.1.</span> <span class="nav-text">Message 的屬性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Queue-的屬性"><span class="nav-number">6.2.</span> <span class="nav-text">Queue 的屬性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Exchange-的屬性"><span class="nav-number">6.3.</span> <span class="nav-text">Exchange 的屬性</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Exchange"><span class="nav-number">7.</span> <span class="nav-text">Exchange</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#總結"><span class="nav-number">8.</span> <span class="nav-text">總結</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">9.</span> <span class="nav-text">References</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Preface"><span class="nav-number">1.</span> <span class="nav-text">Preface</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Application-%E6%95%B4%E5%90%88%E6%A8%A1%E5%BC%8F"><span class="nav-number">2.</span> <span class="nav-text">Application 整合模式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Filed-Based-Integration"><span class="nav-number">2.1.</span> <span class="nav-text">Filed Based Integration</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Shared-Database-Integration"><span class="nav-number">2.2.</span> <span class="nav-text">Shared Database Integration</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Direct-Connection-Integration"><span class="nav-number">2.3.</span> <span class="nav-text">Direct Connection Integration</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%8F%E9%81%8E-Message-Broker-%E4%BB%A5%E9%9D%9E%E5%90%8C%E6%AD%A5%E7%9A%84%E6%96%B9%E5%BC%8F%E5%82%B3%E9%81%9E%E8%A8%8A%E6%81%AFAsynchronous-Messaging"><span class="nav-number">2.4.</span> <span class="nav-text">透過 Message Broker 以非同步的方式傳遞訊息Asynchronous Messaging</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-Message-Queue-%E6%9C%89%E4%BB%80%E9%BA%BC%E5%84%AA%E9%BB%9E"><span class="nav-number">3.</span> <span class="nav-text">使用 Message Queue 有什麼優點?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E5%A0%B4%E6%99%AF%E7%AF%84%E4%BE%8B"><span class="nav-number">4.</span> <span class="nav-text">使用場景範例</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Case-1"><span class="nav-number">4.1.</span> <span class="nav-text">Case 1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Case-2"><span class="nav-number">4.2.</span> <span class="nav-text">Case 2</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Messaging-System-%E4%B8%AD%E7%9A%84%E6%A8%99%E6%BA%96%E7%B5%84%E6%88%90%E5%85%83%E7%B4%A0"><span class="nav-number">5.</span> <span class="nav-text">Messaging System 中的標準組成元素</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%B4%B0%E9%83%A8%E6%8E%A2%E7%A9%B6-Message-Queue-amp-Exchange-%E7%9A%84%E5%B1%AC%E6%80%A7%E8%B3%87%E8%A8%8A"><span class="nav-number">6.</span> <span class="nav-text">細部探究 Message, Queue &amp; Exchange 的屬性資訊</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Message-%E7%9A%84%E5%B1%AC%E6%80%A7"><span class="nav-number">6.1.</span> <span class="nav-text">Message 的屬性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Queue-%E7%9A%84%E5%B1%AC%E6%80%A7"><span class="nav-number">6.2.</span> <span class="nav-text">Queue 的屬性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Exchange-%E7%9A%84%E5%B1%AC%E6%80%A7"><span class="nav-number">6.3.</span> <span class="nav-text">Exchange 的屬性</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Exchange"><span class="nav-number">7.</span> <span class="nav-text">Exchange</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%B8%BD%E7%B5%90"><span class="nav-number">8.</span> <span class="nav-text">總結</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">9.</span> <span class="nav-text">References</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

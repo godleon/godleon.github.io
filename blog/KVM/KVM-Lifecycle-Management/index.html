@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 4.2.0">
+<meta name="generator" content="Hexo 5.0.2">
   <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
@@ -28,7 +28,7 @@
 <meta property="og:description" content="This article introduces how to manage the lifecycle of virtual machines in KVM">
 <meta property="og:locale" content="zh_TW">
 <meta property="article:published_time" content="2016-11-30T00:30:00.000Z">
-<meta property="article:modified_time" content="2020-08-16T22:27:02.107Z">
+<meta property="article:modified_time" content="2020-08-16T22:33:23.817Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="Linux">
 <meta property="article:tag" content="KVM">
@@ -203,7 +203,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">عُدل في</span>
-                <time title="عُدل: 2020-08-17 06:27:02" itemprop="dateModified" datetime="2020-08-17T06:27:02+08:00">2020-08-17</time>
+                <time title="عُدل: 2020-08-17 06:33:23" itemprop="dateModified" datetime="2020-08-17T06:33:23+08:00">2020-08-17</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -302,20 +302,20 @@
 </ul>
 <hr>
 <h1 id="QEMU-guest-agent"><a href="#QEMU-guest-agent" class="headerlink" title="QEMU guest agent"></a>QEMU guest agent</h1><p>在安裝 virtualbox or VMware 的 VM 時，安裝結束之後都會詢問要不要額外安裝 agent 在 guest VM 中，透過這個 agent，hypervisor 可以更有效率的管理每一個 VM；同樣的在 KVM 中，也是有相同的作法，稱為 <strong>QEMU guest agent</strong>。</p>
-<p><strong>QEMU guest agent</strong> 是一個裝在 guest VM 中的套件，會以 service 的形式存在於背景，接著 service 就變成了 hypervisor &amp; guest OS 之間溝通的橋樑(channel)，hypervisor 會透過這個 channle 取得 VM 的資訊，以及對 VM 進行後續更多的操作；而兩者相互通訊的協定稱為 <strong>Qemu Machine Protocol(QMP)</strong>。</p>
+<p><strong>QEMU guest agent</strong> 是一個裝在 guest VM 中的套件，會以 service 的形式存在於背景，接著 service 就變成了 hypervisor &amp; guest OS 之間溝通的橋樑(channel)，hypervisor 會透過這個 channle 取得 VM 的資訊，以及對 VM 進行後續更多的操作；而兩者相互通訊的協定稱為 **Qemu Machine Protocol(QMP)**。</p>
 <p>其中 Hypervisor 與 guest agent 是透過一個名稱為 <code>org.qemu.guest_agent.0</code> 的 virtio-serial channel 或是 isa-serial channel 來處理；而在 Hypervisor 這一端，相對應處理這些資訊交換的 socket file 則是存在於 <code>/var/lib/libvirt/qemu/channel/target</code> 目錄中，且同一個 socket file 可以同時被多個 VM 所共享，因此不會產生太多檔案。</p>
 <p>若 guest VM 為 Linux，可安裝名稱為 <code>qemu-guest-agent</code> 的套件，若是 windows，則可以參考以下連結：</p>
 <ul>
-<li><p><a href="http://www.linux-kvm.org/page/WindowsGuestDrivers/Download_Drivers" target="_blank" rel="noopener">WindowsGuestDrivers/Download Drivers - KVM</a></p>
+<li><p><a target="_blank" rel="noopener" href="http://www.linux-kvm.org/page/WindowsGuestDrivers/Download_Drivers">WindowsGuestDrivers/Download Drivers - KVM</a></p>
 </li>
-<li><p><a href="https://fedoraproject.org/wiki/Windows_Virtio_Drivers" target="_blank" rel="noopener">Windows Virtio Drivers - FedoraProject</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://fedoraproject.org/wiki/Windows_Virtio_Drivers">Windows Virtio Drivers - FedoraProject</a></p>
 </li>
 </ul>
 <p>除了安裝 <code>qemu-guest-agent</code> 套件之外，還要確認 <code>qemu-guest-agent</code> service 是否有正確啟動：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ systemctl status qemu-guest-agent</span><br><span class="line">● qemu-guest-agent.service - QEMU Guest Agent</span><br><span class="line">   Loaded: loaded (/usr/lib/systemd/system/qemu-guest-agent.service; enabled; vendor preset: enabled)</span><br><span class="line">   Active: active (running) since Thu 2016-11-24 22:25:07 EST; 35min ago</span><br><span class="line">   ......</span><br></pre></td></tr></table></figure>
 
 <p>確認服務沒有問題，我們就可以使用類似以下的命令在 KVM host 端取得 guest VM 的相關資訊：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$ virsh qemu-agent-command &lt;GUEST_VM_NAME&gt; <span class="string">'&#123;"execute": "guest-info"&#125;'</span> --pretty</span><br><span class="line">&#123;</span><br><span class="line">    <span class="string">"return"</span>: &#123;</span><br><span class="line">        <span class="string">"version"</span>: <span class="string">"2.3.0"</span>,</span><br><span class="line">        <span class="string">"supported_commands"</span>: [</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="string">"enabled"</span>: <span class="literal">true</span>,</span><br><span class="line">                <span class="string">"name"</span>: <span class="string">"guest-get-memory-block-info"</span>,</span><br><span class="line">                <span class="string">"success-response"</span>: <span class="literal">true</span></span><br><span class="line">            &#125;,</span><br><span class="line">.......</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$ virsh qemu-agent-command &lt;GUEST_VM_NAME&gt; <span class="string">&#x27;&#123;&quot;execute&quot;: &quot;guest-info&quot;&#125;&#x27;</span> --pretty</span><br><span class="line">&#123;</span><br><span class="line">    <span class="string">&quot;return&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;version&quot;</span>: <span class="string">&quot;2.3.0&quot;</span>,</span><br><span class="line">        <span class="string">&quot;supported_commands&quot;</span>: [</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="string">&quot;enabled&quot;</span>: <span class="literal">true</span>,</span><br><span class="line">                <span class="string">&quot;name&quot;</span>: <span class="string">&quot;guest-get-memory-block-info&quot;</span>,</span><br><span class="line">                <span class="string">&quot;success-response&quot;</span>: <span class="literal">true</span></span><br><span class="line">            &#125;,</span><br><span class="line">.......</span><br></pre></td></tr></table></figure>
 
 <blockquote>
 <p>QMP 資料通訊使用 JSON format</p>
@@ -341,10 +341,10 @@
 </li>
 </ul>
 <p>在安裝 VM 時，libvirt 就會根據安裝的 OS，協助選擇一個最合適的顯示卡，通常安裝最近發佈的 OS，都會直接選配 QXL；若是 Windows 或是比較舊版的 Linux，可能就會使用 Cirrus。</p>
-<h2 id="Graphics"><a href="#Graphics" class="headerlink" title="Graphics"></a>Graphics</h2><p>當 VM 有了顯示卡之後，接著需要一個可以存取圖形訊號的方法，在 KVM 中是透過 <strong>graphic server</strong> 的方式，目前提供了 <strong>VNC</strong> &amp; <em>*SPICE</em> 兩種 graphic server。</p>
+<h2 id="Graphics"><a href="#Graphics" class="headerlink" title="Graphics"></a>Graphics</h2><p>當 VM 有了顯示卡之後，接著需要一個可以存取圖形訊號的方法，在 KVM 中是透過 <strong>graphic server</strong> 的方式，目前提供了 <strong>VNC</strong> &amp; *<em>SPICE</em> 兩種 graphic server。</p>
 <p>當 VM 確定好顯示卡之後，QEMU 就會啟動相對應的 Spice or VNC server，並與 VM 的顯示卡進行連接，以便讓外部的 client 可以使用圖形化的方式存取 VM。</p>
 <h3 id="1-VNC"><a href="#1-VNC" class="headerlink" title="(1) VNC"></a>(1) VNC</h3><p>要為 VM 設定一個 VNC graphic server，可在 XML 定義檔中的 <code>&lt;device&gt;</code> section 內部加入類似以下的定義：(IP &amp; port 都可以自己定義)</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">graphics</span> <span class="attr">type</span>=<span class="string">'vnc'</span> <span class="attr">port</span>=<span class="string">'-1'</span> <span class="attr">autoport</span>=<span class="string">'yes'</span> <span class="attr">listen</span>=<span class="string">'192.168.122.1'</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">listen</span> <span class="attr">type</span>=<span class="string">'address'</span> <span class="attr">address</span>=<span class="string">'192.168.122.1'</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">graphics</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">graphics</span> <span class="attr">type</span>=<span class="string">&#x27;vnc&#x27;</span> <span class="attr">port</span>=<span class="string">&#x27;-1&#x27;</span> <span class="attr">autoport</span>=<span class="string">&#x27;yes&#x27;</span> <span class="attr">listen</span>=<span class="string">&#x27;192.168.122.1&#x27;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">listen</span> <span class="attr">type</span>=<span class="string">&#x27;address&#x27;</span> <span class="attr">address</span>=<span class="string">&#x27;192.168.122.1&#x27;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">graphics</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
 <h3 id="2-SPICE"><a href="#2-SPICE" class="headerlink" title="(2) SPICE"></a>(2) SPICE</h3><p>SPICE(Simple Protocol for Independent Computing Environment) 僅有在 Linux 上支援，有以下特色：</p>
 <ol>
@@ -361,15 +361,15 @@
 </ol>
 <p>因此若要規劃把 KVM 用在 VDI 的應用上，使用 <code>QXL</code> + <code>SPICE</code> 目前是最好的組合。</p>
 <p>要為 VM 設定一個 SPICE graphic server，可在 XML 定義檔中的 <code>&lt;device&gt;</code> section 內部加入類似以下的定義：(IP &amp; port 都可以自己定義)</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">graphics</span> <span class="attr">type</span>=<span class="string">'spice'</span> <span class="attr">autoport</span>=<span class="string">'yes'</span> <span class="attr">listen</span>=<span class="string">'0.0.0.0'</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">listen</span> <span class="attr">type</span>=<span class="string">'address'</span> <span class="attr">address</span>=<span class="string">'0.0.0.0'</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">graphics</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">graphics</span> <span class="attr">type</span>=<span class="string">&#x27;spice&#x27;</span> <span class="attr">autoport</span>=<span class="string">&#x27;yes&#x27;</span> <span class="attr">listen</span>=<span class="string">&#x27;0.0.0.0&#x27;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">listen</span> <span class="attr">type</span>=<span class="string">&#x27;address&#x27;</span> <span class="attr">address</span>=<span class="string">&#x27;0.0.0.0&#x27;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">graphics</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
 <hr>
 <h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
-<li><p><a href="https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/6/html/Virtualization_Administration_Guide/sect-QEMU_Guest_Agent-Running_the_QEMU_guest_agent_on_a_Windows_guest.html" target="_blank" rel="noopener">Virtualization Administration Guide &gt; Running the QEMU Guest Agent on a Windows Guest</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/6/html/Virtualization_Administration_Guide/sect-QEMU_Guest_Agent-Running_the_QEMU_guest_agent_on_a_Windows_guest.html">Virtualization Administration Guide &gt; Running the QEMU Guest Agent on a Windows Guest</a></p>
 </li>
-<li><p><a href="http://www.linux-kvm.org/page/WindowsGuestDrivers/Download_Drivers" target="_blank" rel="noopener">WindowsGuestDrivers/Download Drivers - KVM</a></p>
+<li><p><a target="_blank" rel="noopener" href="http://www.linux-kvm.org/page/WindowsGuestDrivers/Download_Drivers">WindowsGuestDrivers/Download Drivers - KVM</a></p>
 </li>
-<li><p><a href="https://fedoraproject.org/wiki/Windows_Virtio_Drivers" target="_blank" rel="noopener">Windows Virtio Drivers - FedoraProject</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://fedoraproject.org/wiki/Windows_Virtio_Drivers">Windows Virtio Drivers - FedoraProject</a></p>
 </li>
 </ul>
 
@@ -465,7 +465,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#VM-Lifecycle"><span class="nav-number">1.</span> <span class="nav-text">VM Lifecycle</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#檢視-VM"><span class="nav-number">2.</span> <span class="nav-text">檢視 VM</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#操作-VM"><span class="nav-number">3.</span> <span class="nav-text">操作 VM</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#QEMU-guest-agent"><span class="nav-number">4.</span> <span class="nav-text">QEMU guest agent</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Virtual-Video-cards-amp-graphics"><span class="nav-number">5.</span> <span class="nav-text">Virtual Video cards &amp; graphics</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Virtual-Video-Card"><span class="nav-number">5.1.</span> <span class="nav-text">Virtual Video Card</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Graphics"><span class="nav-number">5.2.</span> <span class="nav-text">Graphics</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-VNC"><span class="nav-number">5.2.1.</span> <span class="nav-text">(1) VNC</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-SPICE"><span class="nav-number">5.2.2.</span> <span class="nav-text">(2) SPICE</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text">References</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#VM-Lifecycle"><span class="nav-number">1.</span> <span class="nav-text">VM Lifecycle</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%AA%A2%E8%A6%96-VM"><span class="nav-number">2.</span> <span class="nav-text">檢視 VM</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%93%8D%E4%BD%9C-VM"><span class="nav-number">3.</span> <span class="nav-text">操作 VM</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#QEMU-guest-agent"><span class="nav-number">4.</span> <span class="nav-text">QEMU guest agent</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Virtual-Video-cards-amp-graphics"><span class="nav-number">5.</span> <span class="nav-text">Virtual Video cards &amp; graphics</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Virtual-Video-Card"><span class="nav-number">5.1.</span> <span class="nav-text">Virtual Video Card</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Graphics"><span class="nav-number">5.2.</span> <span class="nav-text">Graphics</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-VNC"><span class="nav-number">5.2.1.</span> <span class="nav-text">(1) VNC</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-SPICE"><span class="nav-number">5.2.2.</span> <span class="nav-text">(2) SPICE</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text">References</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

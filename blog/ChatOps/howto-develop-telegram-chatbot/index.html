@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 4.2.0">
+<meta name="generator" content="Hexo 5.0.2">
   <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
@@ -31,7 +31,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/chatbot/telegraf-inline_query_flow.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/chatbot/telegraf-inline_query_result.png">
 <meta property="article:published_time" content="2020-02-08T22:30:00.000Z">
-<meta property="article:modified_time" content="2020-08-16T22:27:02.103Z">
+<meta property="article:modified_time" content="2020-08-16T22:33:23.817Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="ChatOps">
@@ -206,7 +206,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">عُدل في</span>
-                <time title="عُدل: 2020-08-17 06:27:02" itemprop="dateModified" datetime="2020-08-17T06:27:02+08:00">2020-08-17</time>
+                <time title="عُدل: 2020-08-17 06:33:23" itemprop="dateModified" datetime="2020-08-17T06:33:23+08:00">2020-08-17</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -260,7 +260,7 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">bot.use((ctx) &#x3D;&gt; &#123;</span><br><span class="line">    ctx.reply(&quot;You used the bot&quot;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
 
 
-<h2 id="middleware"><a href="#middleware" class="headerlink" title="middleware"></a>middleware</h2><p>先搞清楚什麼是 <a href="https://telegraf.js.org/#/?id=middleware" target="_blank" rel="noopener">middleware</a>，簡單範例如下：</p>
+<h2 id="middleware"><a href="#middleware" class="headerlink" title="middleware"></a>middleware</h2><p>先搞清楚什麼是 <a target="_blank" rel="noopener" href="https://telegraf.js.org/#/?id=middleware">middleware</a>，簡單範例如下：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">const bot &#x3D; new Telegraf(process.env.BOT_TOKEN)</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;這是一個 middleware</span><br><span class="line">bot.use(async (ctx, next) &#x3D;&gt; &#123;</span><br><span class="line">  const start &#x3D; new Date()</span><br><span class="line">  await next()</span><br><span class="line">  const ms &#x3D; new Date() - start</span><br><span class="line">  console.log(&#39;Response time: %sms&#39;, ms)</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;這是另一個 middleware</span><br><span class="line">bot.on(&#39;text&#39;, (ctx) &#x3D;&gt; ctx.reply(&#39;Hello World&#39;))</span><br><span class="line"></span><br><span class="line">bot.launch()</span><br></pre></td></tr></table></figure>
 
 <p><img src="/blog/images/chatbot/telegraf-middleware.png" alt="Telegram Middleware"></p>
@@ -287,9 +287,9 @@
 
 <h1 id="Media-Bot"><a href="#Media-Bot" class="headerlink" title="Media Bot"></a>Media Bot</h1><h2 id="傳送檔案"><a href="#傳送檔案" class="headerlink" title="傳送檔案"></a>傳送檔案</h2><p>在範例中會以傳送圖片來進行說明，以下說明幾個重點：</p>
 <ul>
-<li><p>Telegram 物件(來自於 <code>(new Telegraf()).telegram</code>)傳送物件是透過 <a href="https://telegraf.js.org/#/?id=sendphoto" target="_blank" rel="noopener">sendPhoto</a> 方法來完成</p>
+<li><p>Telegram 物件(來自於 <code>(new Telegraf()).telegram</code>)傳送物件是透過 <a target="_blank" rel="noopener" href="https://telegraf.js.org/#/?id=sendphoto">sendPhoto</a> 方法來完成</p>
 </li>
-<li><p>在 telegraf 中處理 file 的方式有五種(<a href="https://telegraf.js.org/#/?id=working-with-files" target="_blank" rel="noopener">官網說明</a>)</p>
+<li><p>在 telegraf 中處理 file 的方式有五種(<a target="_blank" rel="noopener" href="https://telegraf.js.org/#/?id=working-with-files">官網說明</a>)</p>
 </li>
 <li><p>在 <code>sendPhoto</code> 中的 <code>File</code> type，就是上述的五種方法其中之一</p>
 </li>
@@ -299,7 +299,7 @@
 <h2 id="針對使用者訊息進行回覆"><a href="#針對使用者訊息進行回覆" class="headerlink" title="針對使用者訊息進行回覆"></a>針對使用者訊息進行回覆</h2><p>這個部份需要透過 <code>ctx.message.message_id</code> 取得使用者訊息的 ID 並進行回覆</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">bot.command(&quot;newyork&quot;, ctx &#x3D;&gt; &#123;</span><br><span class="line">    bot.telegram.sendPhoto(ctx.chat.id, &#123;</span><br><span class="line">        source: &quot;res&#x2F;newyork.jpg&quot;</span><br><span class="line">    &#125;, &#123;</span><br><span class="line">        reply_to_message_id: ctx.message.message_id</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
 
-<h2 id="chat-action"><a href="#chat-action" class="headerlink" title="chat action"></a>chat action</h2><p>透過 <a href="https://core.telegram.org/bots/api#sendchataction" target="_blank" rel="noopener">chat action</a> 可以在 telegram 的界面上告知使用者目前 bot 正在進行的動作，可視為是一種狀態資訊。</p>
+<h2 id="chat-action"><a href="#chat-action" class="headerlink" title="chat action"></a>chat action</h2><p>透過 <a target="_blank" rel="noopener" href="https://core.telegram.org/bots/api#sendchataction">chat action</a> 可以在 telegram 的界面上告知使用者目前 bot 正在進行的動作，可視為是一種狀態資訊。</p>
 <blockquote>
 <p>訊息只會五秒或是更短，一旦訊息成功送給使用者後，chat action 的訊息就會消失</p>
 </blockquote>
@@ -325,11 +325,11 @@
 <h1 id="Inline-Query"><a href="#Inline-Query" class="headerlink" title="Inline Query"></a>Inline Query</h1><h2 id="原理-amp-流程說明"><a href="#原理-amp-流程說明" class="headerlink" title="原理 &amp; 流程說明"></a>原理 &amp; 流程說明</h2><p>以下透過 <strong>Telegram Inline Query Flow</strong> 來說明整體開發流程：</p>
 <p><img src="/blog/images/chatbot/telegraf-inline_query_flow.png" alt="Telegram Inline Query Result"></p>
 <p>首先使用者可以在 telegram 界面中透過 <code>@bot [search term]</code> 的方式觸發 inline query。</p>
-<p>接著 inline query 會被送到 bot 端的程式(這個部份就是自己開發的 bot code)進行處理，若是透過 [nodejs telegraf][<a href="https://telegraf.js.org/]" target="_blank" rel="noopener">https://telegraf.js.org/]</a> 套件，則以透過 <code>context.inlineQuery(&#39;search_term&#39;, ()=&gt;{})</code> or <code>context.on(&#39;inline_query&#39;, ()=&gt;{})</code> 來進行處理。</p>
+<p>接著 inline query 會被送到 bot 端的程式(這個部份就是自己開發的 bot code)進行處理，若是透過 [nodejs telegraf][<a target="_blank" rel="noopener" href="https://telegraf.js.org/]">https://telegraf.js.org/]</a> 套件，則以透過 <code>context.inlineQuery(&#39;search_term&#39;, ()=&gt;&#123;&#125;)</code> or <code>context.on(&#39;inline_query&#39;, ()=&gt;&#123;&#125;)</code> 來進行處理。</p>
 <blockquote>
-<p>其中 <code>on</code> 是 <a href="https://telegraf.js.org/#/?id=middleware" target="_blank" rel="noopener">middleware</a>，<code>inline_query</code> 則是 <a href="https://telegraf.js.org/#/?id=update-types" target="_blank" rel="noopener">update type</a></p>
+<p>其中 <code>on</code> 是 <a target="_blank" rel="noopener" href="https://telegraf.js.org/#/?id=middleware">middleware</a>，<code>inline_query</code> 則是 <a target="_blank" rel="noopener" href="https://telegraf.js.org/#/?id=update-types">update type</a></p>
 </blockquote>
-<p>最後開發者可以根據攔截到的訊息，經過處理之後，回應 <a href="https://core.telegram.org/bots/api#inlinequeryresult" target="_blank" rel="noopener">Inline Query Result</a>，而在 telegram 中可使用多達 20 種的 Inline Query Result：</p>
+<p>最後開發者可以根據攔截到的訊息，經過處理之後，回應 <a target="_blank" rel="noopener" href="https://core.telegram.org/bots/api#inlinequeryresult">Inline Query Result</a>，而在 telegram 中可使用多達 20 種的 Inline Query Result：</p>
 <p><img src="/blog/images/chatbot/telegraf-inline_query_result.png" alt="Telegram Inline Query Result"></p>
 <blockquote>
 <p>需要注意的是，一般透過 <code>@botfather</code> 新增的 bot 預設是不會啟動 Inline Query Mode，必須在 Bot Settings 中開啟才行。</p>
@@ -374,20 +374,20 @@
 </ol>
 <p>可以看出上面的流程比起 polling mode 有相當大的改善，但使用 webhook 需要提供一個 telegram server 可以存取到的 public URL，但這個部份也不難，可以考慮以下項目：</p>
 <ul>
-<li><p><a href="https://aws.amazon.com/tw/api-gateway/" target="_blank" rel="noopener">AWS API Gateway</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/tw/api-gateway/">AWS API Gateway</a></p>
 <blockquote>
 <p>若是 bot 程式需要取用外部公有資源(例如上面範例的 pixabay &amp; wiki)，那就適合放在這裡</p>
 </blockquote>
 </li>
-<li><p><a href="https://ngrok.com/" target="_blank" rel="noopener">ngrok</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://ngrok.com/">ngrok</a></p>
 <blockquote>
 <p>若是要存取的資源都在內部，那就用這個吧(ngrok 可以提供一個 public URL，並從 ngrok server 建立一個 network tunnel 到內部程式)，對於開發者開發也方便</p>
 </blockquote>
 </li>
 </ul>
-<p>而開啟 <a href="https://core.telegram.org/bots/api#setwebhook" target="_blank" rel="noopener">bot wehbook mode</a>，則是要使用以下 template URL 來完成：</p>
+<p>而開啟 <a target="_blank" rel="noopener" href="https://core.telegram.org/bots/api#setwebhook">bot wehbook mode</a>，則是要使用以下 template URL 來完成：</p>
 <blockquote>
-<p><a href="https://api.telegram.org/bot" target="_blank" rel="noopener">https://api.telegram.org/bot</a><token>/setWebhook?url=<endpoint></p>
+<p><a target="_blank" rel="noopener" href="https://api.telegram.org/bot">https://api.telegram.org/bot</a><token>/setWebhook?url=<endpoint></p>
 </blockquote>
 <p>假如設定如下：</p>
 <ul>
@@ -398,16 +398,16 @@
 </ul>
 <p>那設定 telegram bot webhook 就可以使用下列網址：</p>
 <blockquote>
-<p><a href="https://api.telegram.org/bot808328592:AAFFUBCK2g7olBWpncLlfsrLh1AQee_sIzk/setWebhook?url=https://3bao3o4fy3.execute-api.us-east-1.amazonaws.com/v1" target="_blank" rel="noopener">https://api.telegram.org/bot808328592:AAFFUBCK2g7olBWpncLlfsrLh1AQee_sIzk/setWebhook?url=https://3bao3o4fy3.execute-api.us-east-1.amazonaws.com/v1</a></p>
+<p><a target="_blank" rel="noopener" href="https://api.telegram.org/bot808328592:AAFFUBCK2g7olBWpncLlfsrLh1AQee_sIzk/setWebhook?url=https://3bao3o4fy3.execute-api.us-east-1.amazonaws.com/v1">https://api.telegram.org/bot808328592:AAFFUBCK2g7olBWpncLlfsrLh1AQee_sIzk/setWebhook?url=https://3bao3o4fy3.execute-api.us-east-1.amazonaws.com/v1</a></p>
 </blockquote>
 <h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
-<li><p><a href="https://www.udemy.com/course/build-telegram-bots-with-javascript-the-complete-guide" target="_blank" rel="noopener">Build Telegram Bots with JavaScript: The Complete Guide | Udemy</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://www.udemy.com/course/build-telegram-bots-with-javascript-the-complete-guide">Build Telegram Bots with JavaScript: The Complete Guide | Udemy</a></p>
 </li>
-<li><p><a href="https://telegraf.js.org/" target="_blank" rel="noopener">Telegraf: Modern Telegram Bot Framework for Node.js</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://telegraf.js.org/">Telegraf: Modern Telegram Bot Framework for Node.js</a></p>
 </li>
-<li><p><a href="https://core.telegram.org/bots" target="_blank" rel="noopener">Telegram Bots: An introduction for developers</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://core.telegram.org/bots">Telegram Bots: An introduction for developers</a></p>
 </li>
-<li><p><a href="https://core.telegram.org/api" target="_blank" rel="noopener">Telegram APIs</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://core.telegram.org/api">Telegram APIs</a></p>
 </li>
 </ul>
 
@@ -502,7 +502,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#注意事項"><span class="nav-number">1.</span> <span class="nav-text">注意事項</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#基本觀念"><span class="nav-number">2.</span> <span class="nav-text">基本觀念</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#use"><span class="nav-number">2.1.</span> <span class="nav-text">use</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#middleware"><span class="nav-number">2.2.</span> <span class="nav-text">middleware</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#state"><span class="nav-number">2.3.</span> <span class="nav-text">state</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#context-shortcut"><span class="nav-number">2.4.</span> <span class="nav-text">context shortcut</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Echo-Bot"><span class="nav-number">3.</span> <span class="nav-text">Echo Bot</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#help-command"><span class="nav-number">3.1.</span> <span class="nav-text">help command</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#echo"><span class="nav-number">3.2.</span> <span class="nav-text">echo</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Logging"><span class="nav-number">3.3.</span> <span class="nav-text">Logging</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Media-Bot"><span class="nav-number">4.</span> <span class="nav-text">Media Bot</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#傳送檔案"><span class="nav-number">4.1.</span> <span class="nav-text">傳送檔案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#針對使用者訊息進行回覆"><span class="nav-number">4.2.</span> <span class="nav-text">針對使用者訊息進行回覆</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#chat-action"><span class="nav-number">4.3.</span> <span class="nav-text">chat action</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#傳送多張圖片"><span class="nav-number">4.4.</span> <span class="nav-text">傳送多張圖片</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#傳送文件"><span class="nav-number">4.5.</span> <span class="nav-text">傳送文件</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#互動式鍵盤"><span class="nav-number">5.</span> <span class="nav-text">互動式鍵盤</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#產生-inline-keyboard"><span class="nav-number">5.1.</span> <span class="nav-text">產生 inline keyboard</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#點選-keyboard-後進行回應"><span class="nav-number">5.2.</span> <span class="nav-text">點選 keyboard 後進行回應</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#來回選單的開發"><span class="nav-number">5.3.</span> <span class="nav-text">來回選單的開發</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Inline-Query"><span class="nav-number">6.</span> <span class="nav-text">Inline Query</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#原理-amp-流程說明"><span class="nav-number">6.1.</span> <span class="nav-text">原理 &amp; 流程說明</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#搜尋範例"><span class="nav-number">6.2.</span> <span class="nav-text">搜尋範例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#透過-switch-inline-query-current-chat-提供-template-command"><span class="nav-number">6.3.</span> <span class="nav-text">透過 switch_inline_query_current_chat 提供 template command</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Polling-Mode-v-s-Webhook"><span class="nav-number">7.</span> <span class="nav-text">Polling Mode v.s. Webhook</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Polling-Mode"><span class="nav-number">7.1.</span> <span class="nav-text">Polling Mode</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Webhook"><span class="nav-number">7.2.</span> <span class="nav-text">Webhook</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">8.</span> <span class="nav-text">References</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A0%85"><span class="nav-number">1.</span> <span class="nav-text">注意事項</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E8%A7%80%E5%BF%B5"><span class="nav-number">2.</span> <span class="nav-text">基本觀念</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#use"><span class="nav-number">2.1.</span> <span class="nav-text">use</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#middleware"><span class="nav-number">2.2.</span> <span class="nav-text">middleware</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#state"><span class="nav-number">2.3.</span> <span class="nav-text">state</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#context-shortcut"><span class="nav-number">2.4.</span> <span class="nav-text">context shortcut</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Echo-Bot"><span class="nav-number">3.</span> <span class="nav-text">Echo Bot</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#help-command"><span class="nav-number">3.1.</span> <span class="nav-text">help command</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#echo"><span class="nav-number">3.2.</span> <span class="nav-text">echo</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Logging"><span class="nav-number">3.3.</span> <span class="nav-text">Logging</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Media-Bot"><span class="nav-number">4.</span> <span class="nav-text">Media Bot</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%82%B3%E9%80%81%E6%AA%94%E6%A1%88"><span class="nav-number">4.1.</span> <span class="nav-text">傳送檔案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%87%9D%E5%B0%8D%E4%BD%BF%E7%94%A8%E8%80%85%E8%A8%8A%E6%81%AF%E9%80%B2%E8%A1%8C%E5%9B%9E%E8%A6%86"><span class="nav-number">4.2.</span> <span class="nav-text">針對使用者訊息進行回覆</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#chat-action"><span class="nav-number">4.3.</span> <span class="nav-text">chat action</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%82%B3%E9%80%81%E5%A4%9A%E5%BC%B5%E5%9C%96%E7%89%87"><span class="nav-number">4.4.</span> <span class="nav-text">傳送多張圖片</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%82%B3%E9%80%81%E6%96%87%E4%BB%B6"><span class="nav-number">4.5.</span> <span class="nav-text">傳送文件</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%92%E5%8B%95%E5%BC%8F%E9%8D%B5%E7%9B%A4"><span class="nav-number">5.</span> <span class="nav-text">互動式鍵盤</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%A2%E7%94%9F-inline-keyboard"><span class="nav-number">5.1.</span> <span class="nav-text">產生 inline keyboard</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%BB%9E%E9%81%B8-keyboard-%E5%BE%8C%E9%80%B2%E8%A1%8C%E5%9B%9E%E6%87%89"><span class="nav-number">5.2.</span> <span class="nav-text">點選 keyboard 後進行回應</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BE%86%E5%9B%9E%E9%81%B8%E5%96%AE%E7%9A%84%E9%96%8B%E7%99%BC"><span class="nav-number">5.3.</span> <span class="nav-text">來回選單的開發</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Inline-Query"><span class="nav-number">6.</span> <span class="nav-text">Inline Query</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8E%9F%E7%90%86-amp-%E6%B5%81%E7%A8%8B%E8%AA%AA%E6%98%8E"><span class="nav-number">6.1.</span> <span class="nav-text">原理 &amp; 流程說明</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%90%9C%E5%B0%8B%E7%AF%84%E4%BE%8B"><span class="nav-number">6.2.</span> <span class="nav-text">搜尋範例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%8F%E9%81%8E-switch-inline-query-current-chat-%E6%8F%90%E4%BE%9B-template-command"><span class="nav-number">6.3.</span> <span class="nav-text">透過 switch_inline_query_current_chat 提供 template command</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Polling-Mode-v-s-Webhook"><span class="nav-number">7.</span> <span class="nav-text">Polling Mode v.s. Webhook</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Polling-Mode"><span class="nav-number">7.1.</span> <span class="nav-text">Polling Mode</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Webhook"><span class="nav-number">7.2.</span> <span class="nav-text">Webhook</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">8.</span> <span class="nav-text">References</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

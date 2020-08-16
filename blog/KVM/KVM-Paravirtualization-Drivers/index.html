@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 4.2.0">
+<meta name="generator" content="Hexo 5.0.2">
   <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
@@ -33,7 +33,7 @@
 <meta property="og:image" content="http://smilejay.com/wp-content/uploads/2012/11/linux-ballooning-demo.jpg">
 <meta property="og:image" content="https://github.com/godleon/godleon.github.io/blob/master/_posts/images/2016/KVM-Paravirtualization-Drivers/kvm_virtio_balloon.PNG?raw=true">
 <meta property="article:published_time" content="2016-08-20T07:30:00.000Z">
-<meta property="article:modified_time" content="2020-08-16T22:27:02.107Z">
+<meta property="article:modified_time" content="2020-08-16T22:33:23.817Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="Linux">
 <meta property="article:tag" content="KVM">
@@ -207,7 +207,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">عُدل في</span>
-                <time title="عُدل: 2020-08-17 06:27:02" itemprop="dateModified" datetime="2020-08-17T06:27:02+08:00">2020-08-17</time>
+                <time title="عُدل: 2020-08-17 06:33:23" itemprop="dateModified" datetime="2020-08-17T06:33:23+08:00">2020-08-17</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -264,7 +264,7 @@
 </ol>
 <p>透過 QEMU 可以模擬出各式各樣的 I/O device，甚至很老舊的設備都沒有問題；但從上面複雜的步驟不難看出為何使用 QEMU 模擬 device I/O 會效率不彰，除了每次 I/O request 處理的流程繁複之外，過多的 VMEntry, VMExit, context switch，也都是拖垮 QEMU 效能的原因。</p>
 <hr>
-<h1 id="virtio-Overview"><a href="#virtio-Overview" class="headerlink" title="virtio Overview"></a>virtio Overview</h1><p>有鑑於此，<a href="http://www.linux-kvm.org/page/Virtio" target="_blank" rel="noopener">virtio</a> 被提出來，作為運行在 Hypervisor 上的一組 API interface，讓 virtual machine 知道自己運行在虛擬環境中，並根據 virtio 標準與 hypervisor 互動，藉此達到更好的運作效能(I/O 效能提升最為明顯)。</p>
+<h1 id="virtio-Overview"><a href="#virtio-Overview" class="headerlink" title="virtio Overview"></a>virtio Overview</h1><p>有鑑於此，<a target="_blank" rel="noopener" href="http://www.linux-kvm.org/page/Virtio">virtio</a> 被提出來，作為運行在 Hypervisor 上的一組 API interface，讓 virtual machine 知道自己運行在虛擬環境中，並根據 virtio 標準與 hypervisor 互動，藉此達到更好的運作效能(I/O 效能提升最為明顯)。</p>
 <p>以下是純 QEMU 模擬 &amp; virtio 的架構比較，可以看出 virtio 省略了 I/O trap，讓 virtual machine 可以直接與 QEMU 的 I/O 模組通訊：</p>
 <p><img src="http://images0.cnblogs.com/blog2015/697113/201506/011807259737673.jpg" alt="QEMU v.s. virtio"></p>
 <p>更細部一點檢視 virtio 的架構：</p>
@@ -272,7 +272,7 @@
 <ol>
 <li><p>第一層 <strong>virtio_blk</strong>、<strong>virtio_net</strong>、<strong>virtio_scsi</strong> …. 等等屬於 <strong><font color='red'>virtio Frontend，存在於</font></strong> virtual machine OS kernel module 中</p>
 </li>
-<li><p>最下面一層稱為 <strong><font color='red'>virtio Backend</font></strong>，是在 QEMU 中實作，讓 I/O request 可以透過 QEMU 直接送給 host machine 中的 device driver，減少整體 I/O 的 overhead</p>
+<li><p>最下面一層稱為 **<font color='red'>virtio Backend</font>**，是在 QEMU 中實作，讓 I/O request 可以透過 QEMU 直接送給 host machine 中的 device driver，減少整體 I/O 的 overhead</p>
 </li>
 <li><p><strong><font color='red'>virtio</font></strong> 屬於虛擬佇列，目的是將 Frontend 的驅動程序附加到 Backend 的處理程序 (一個 Frontend 的驅動程序可以根據需求使用 0 個或多個佇列，例如 virtio_net 同時需要傳送 &amp; 接收用的兩個虛擬佇列，virtio_blk 則僅需要一個)</p>
 </li>
@@ -285,7 +285,7 @@
 </blockquote>
 <hr>
 <h1 id="檢查-virtio-環境"><a href="#檢查-virtio-環境" class="headerlink" title="檢查 virtio 環境"></a>檢查 virtio 環境</h1><h2 id="1-1-virtio-Backend"><a href="#1-1-virtio-Backend" class="headerlink" title="1.1 virtio Backend"></a>1.1 virtio Backend</h2><p>由於 host machine 安裝的是 CentOS 7，因此都已經預設安裝 virtio driver 了! 可以用以下指令查詢：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$ find / -name <span class="string">'virtio*.ko'</span> | grep $(uname -r)</span><br><span class="line">/usr/lib/modules/3.10.0-327.28.2.el7.x86_64/kernel/drivers/virtio/virtio_pci.ko</span><br><span class="line">/usr/lib/modules/3.10.0-327.28.2.el7.x86_64/kernel/drivers/virtio/virtio.ko</span><br><span class="line">/usr/lib/modules/3.10.0-327.28.2.el7.x86_64/kernel/drivers/virtio/virtio_ring.ko</span><br><span class="line">/usr/lib/modules/3.10.0-327.28.2.el7.x86_64/kernel/drivers/virtio/virtio_input.ko</span><br><span class="line">/usr/lib/modules/3.10.0-327.28.2.el7.x86_64/kernel/drivers/virtio/virtio_balloon.ko</span><br><span class="line">/usr/lib/modules/3.10.0-327.28.2.el7.x86_64/kernel/drivers/char/virtio_console.ko</span><br><span class="line">/usr/lib/modules/3.10.0-327.28.2.el7.x86_64/kernel/drivers/char/hw_random/virtio-rng.ko</span><br><span class="line">/usr/lib/modules/3.10.0-327.28.2.el7.x86_64/kernel/drivers/scsi/virtio_scsi.ko</span><br><span class="line">/usr/lib/modules/3.10.0-327.28.2.el7.x86_64/kernel/drivers/block/virtio_blk.ko</span><br><span class="line">/usr/lib/modules/3.10.0-327.28.2.el7.x86_64/kernel/drivers/net/virtio_net.ko</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$ find / -name <span class="string">&#x27;virtio*.ko&#x27;</span> | grep $(uname -r)</span><br><span class="line">/usr/lib/modules/3.10.0-327.28.2.el7.x86_64/kernel/drivers/virtio/virtio_pci.ko</span><br><span class="line">/usr/lib/modules/3.10.0-327.28.2.el7.x86_64/kernel/drivers/virtio/virtio.ko</span><br><span class="line">/usr/lib/modules/3.10.0-327.28.2.el7.x86_64/kernel/drivers/virtio/virtio_ring.ko</span><br><span class="line">/usr/lib/modules/3.10.0-327.28.2.el7.x86_64/kernel/drivers/virtio/virtio_input.ko</span><br><span class="line">/usr/lib/modules/3.10.0-327.28.2.el7.x86_64/kernel/drivers/virtio/virtio_balloon.ko</span><br><span class="line">/usr/lib/modules/3.10.0-327.28.2.el7.x86_64/kernel/drivers/char/virtio_console.ko</span><br><span class="line">/usr/lib/modules/3.10.0-327.28.2.el7.x86_64/kernel/drivers/char/hw_random/virtio-rng.ko</span><br><span class="line">/usr/lib/modules/3.10.0-327.28.2.el7.x86_64/kernel/drivers/scsi/virtio_scsi.ko</span><br><span class="line">/usr/lib/modules/3.10.0-327.28.2.el7.x86_64/kernel/drivers/block/virtio_blk.ko</span><br><span class="line">/usr/lib/modules/3.10.0-327.28.2.el7.x86_64/kernel/drivers/net/virtio_net.ko</span><br></pre></td></tr></table></figure>
 
 <h2 id="1-2-virtio-Frontend"><a href="#1-2-virtio-Frontend" class="headerlink" title="1.2 virtio Frontend"></a>1.2 virtio Frontend</h2><h3 id="1-2-1-Linux"><a href="#1-2-1-Linux" class="headerlink" title="1.2.1 Linux"></a>1.2.1 Linux</h3><p>目前新版本的 Linux(Ubuntu / CentOS / …. 等等)都已經內建 virtio driver 了，不需要再額外安裝囉!</p>
 <h3 id="1-2-2-Windows"><a href="#1-2-2-Windows" class="headerlink" title="1.2.2 Windows"></a>1.2.2 Windows</h3><p>若是要安裝 Windows 的 virtio driver，可以使用以下指令：</p>
@@ -298,7 +298,7 @@
 <blockquote>
 <p>yum –enablerepo=virtio-win-latest update virtio-win</p>
 </blockquote>
-<p>使用方式很容易，只要在啟動 windows virtual machine 時，指定 CDRom 裝置掛載 <font color='red'><strong>/usr/share/virtio-win/virtio-win-0.1.102.iso</strong></font> 後，進入 Windows 把相關的 virtio 裝置驅動即可，詳細的使用方式可以參考 =&gt; <a href="http://www.lijyyh.com/2015/12/linux-kvm-set-up-linux-kvm.html" target="_blank" rel="noopener">傲笑紅塵路: 架設 Linux KVM 虛擬化主機 (Set up Linux KVM virtualization host)</a></p>
+<p>使用方式很容易，只要在啟動 windows virtual machine 時，指定 CDRom 裝置掛載 <font color='red'><strong>/usr/share/virtio-win/virtio-win-0.1.102.iso</strong></font> 後，進入 Windows 把相關的 virtio 裝置驅動即可，詳細的使用方式可以參考 =&gt; <a target="_blank" rel="noopener" href="http://www.lijyyh.com/2015/12/linux-kvm-set-up-linux-kvm.html">傲笑紅塵路: 架設 Linux KVM 虛擬化主機 (Set up Linux KVM virtualization host)</a></p>
 <hr>
 <h1 id="使用-virtio-balloon"><a href="#使用-virtio-balloon" class="headerlink" title="使用 virtio_balloon"></a>使用 virtio_balloon</h1><h2 id="balloonning-Overview"><a href="#balloonning-Overview" class="headerlink" title="balloonning Overview"></a>balloonning Overview</h2><p><img src="http://smilejay.com/wp-content/uploads/2012/11/linux-ballooning-demo.jpg" alt="KVM ballooning"></p>
 <p>透過 balloon 的技術，可以如上圖所示，在 virtual machine 運行時動態調整記憶體的配置，而不需要 virtual machine 關機。</p>
@@ -400,21 +400,21 @@
 
 <hr>
 <h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
-<li><p><a href="https://read01.com/4aJdOL.html" target="_blank" rel="noopener">Virtio 基本概念和設備操作 - 壹讀</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://read01.com/4aJdOL.html">Virtio 基本概念和設備操作 - 壹讀</a></p>
 </li>
-<li><p><a href="http://www.cnblogs.com/sammyliu/p/4543657.html" target="_blank" rel="noopener">KVM 介绍（3）：I/O 全虚拟化和准虚拟化 [KVM I/O QEMU Full-Virtualizaiton Para-virtualization] - SammyLiu - 博客园</a></p>
+<li><p><a target="_blank" rel="noopener" href="http://www.cnblogs.com/sammyliu/p/4543657.html">KVM 介绍（3）：I/O 全虚拟化和准虚拟化 [KVM I/O QEMU Full-Virtualizaiton Para-virtualization] - SammyLiu - 博客园</a></p>
 </li>
-<li><p><a href="http://www.lijyyh.com/2015/12/linux-kvm-set-up-linux-kvm.html" target="_blank" rel="noopener">傲笑紅塵路: 架設 Linux KVM 虛擬化主機 (Set up Linux KVM virtualization host)</a></p>
+<li><p><a target="_blank" rel="noopener" href="http://www.lijyyh.com/2015/12/linux-kvm-set-up-linux-kvm.html">傲笑紅塵路: 架設 Linux KVM 虛擬化主機 (Set up Linux KVM virtualization host)</a></p>
 </li>
-<li><p><a href="https://fedoraproject.org/wiki/Windows_Virtio_Drivers" target="_blank" rel="noopener">Windows Virtio Drivers - FedoraProject</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://fedoraproject.org/wiki/Windows_Virtio_Drivers">Windows Virtio Drivers - FedoraProject</a></p>
 </li>
-<li><p><a href="http://www.linux-kvm.org/page/Virtio" target="_blank" rel="noopener">Virtio - KVM</a></p>
+<li><p><a target="_blank" rel="noopener" href="http://www.linux-kvm.org/page/Virtio">Virtio - KVM</a></p>
 </li>
-<li><p><a href="http://seitran.com/2015/04/13/01-gso-gro-lro/" target="_blank" rel="noopener">网卡TSO/GSO/LRO/GRO简要介绍 | Chenny的部落格</a></p>
+<li><p><a target="_blank" rel="noopener" href="http://seitran.com/2015/04/13/01-gso-gro-lro/">网卡TSO/GSO/LRO/GRO简要介绍 | Chenny的部落格</a></p>
 </li>
-<li><p><a href="http://lirobo.blogspot.tw/2014/12/tso-gso-lro-gro.html" target="_blank" rel="noopener">小蘿蔔工作室 Little Robot Studio: TSO, GSO, LRO, GRO</a></p>
+<li><p><a target="_blank" rel="noopener" href="http://lirobo.blogspot.tw/2014/12/tso-gso-lro-gro.html">小蘿蔔工作室 Little Robot Studio: TSO, GSO, LRO, GRO</a></p>
 </li>
-<li><p><a href="https://kris.io/2015/10/01/kvm-network-performance-tso-and-gso-turn-it-off/" target="_blank" rel="noopener">KVM Network Performance : TSO and GSO - Turn it off - kris.io : virtualization &amp; cloud</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://kris.io/2015/10/01/kvm-network-performance-tso-and-gso-turn-it-off/">KVM Network Performance : TSO and GSO - Turn it off - kris.io : virtualization &amp; cloud</a></p>
 </li>
 </ul>
 
@@ -508,7 +508,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#QEMU-I-O-Overview"><span class="nav-number">1.</span> <span class="nav-text">QEMU I&#x2F;O Overview</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#virtio-Overview"><span class="nav-number">2.</span> <span class="nav-text">virtio Overview</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#檢查-virtio-環境"><span class="nav-number">3.</span> <span class="nav-text">檢查 virtio 環境</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-virtio-Backend"><span class="nav-number">3.1.</span> <span class="nav-text">1.1 virtio Backend</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-virtio-Frontend"><span class="nav-number">3.2.</span> <span class="nav-text">1.2 virtio Frontend</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-1-Linux"><span class="nav-number">3.2.1.</span> <span class="nav-text">1.2.1 Linux</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-2-Windows"><span class="nav-number">3.2.2.</span> <span class="nav-text">1.2.2 Windows</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用-virtio-balloon"><span class="nav-number">4.</span> <span class="nav-text">使用 virtio_balloon</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#balloonning-Overview"><span class="nav-number">4.1.</span> <span class="nav-text">balloonning Overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-balloonning-技術的優缺點"><span class="nav-number">4.2.</span> <span class="nav-text">使用 balloonning 技術的優缺點</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#在-QEMU-KVM-中使用-balloonning"><span class="nav-number">4.3.</span> <span class="nav-text">在 QEMU&#x2F;KVM 中使用 balloonning</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用-virtio-net"><span class="nav-number">5.</span> <span class="nav-text">使用 virtio_net</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1、啟用支援-virtio-net-的-vitual-machine"><span class="nav-number">5.1.</span> <span class="nav-text">1、啟用支援 virtio_net 的 vitual machine</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2、進一步提升半虛擬化網卡效能"><span class="nav-number">5.2.</span> <span class="nav-text">2、進一步提升半虛擬化網卡效能</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-關閉-TSO-amp-GSO-以提升-virtio-net-的效能"><span class="nav-number">5.2.1.</span> <span class="nav-text">(1) 關閉 TSO &amp; GSO 以提升 virtio_net 的效能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-使用-vhost-net-後端驅動"><span class="nav-number">5.2.2.</span> <span class="nav-text">(2) 使用 vhost-net 後端驅動</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用-virtio-blk"><span class="nav-number">6.</span> <span class="nav-text">使用 virtio_blk</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">7.</span> <span class="nav-text">References</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#QEMU-I-O-Overview"><span class="nav-number">1.</span> <span class="nav-text">QEMU I&#x2F;O Overview</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#virtio-Overview"><span class="nav-number">2.</span> <span class="nav-text">virtio Overview</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%AA%A2%E6%9F%A5-virtio-%E7%92%B0%E5%A2%83"><span class="nav-number">3.</span> <span class="nav-text">檢查 virtio 環境</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-virtio-Backend"><span class="nav-number">3.1.</span> <span class="nav-text">1.1 virtio Backend</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-virtio-Frontend"><span class="nav-number">3.2.</span> <span class="nav-text">1.2 virtio Frontend</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-1-Linux"><span class="nav-number">3.2.1.</span> <span class="nav-text">1.2.1 Linux</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-2-Windows"><span class="nav-number">3.2.2.</span> <span class="nav-text">1.2.2 Windows</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-virtio-balloon"><span class="nav-number">4.</span> <span class="nav-text">使用 virtio_balloon</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#balloonning-Overview"><span class="nav-number">4.1.</span> <span class="nav-text">balloonning Overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-balloonning-%E6%8A%80%E8%A1%93%E7%9A%84%E5%84%AA%E7%BC%BA%E9%BB%9E"><span class="nav-number">4.2.</span> <span class="nav-text">使用 balloonning 技術的優缺點</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%A8-QEMU-KVM-%E4%B8%AD%E4%BD%BF%E7%94%A8-balloonning"><span class="nav-number">4.3.</span> <span class="nav-text">在 QEMU&#x2F;KVM 中使用 balloonning</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-virtio-net"><span class="nav-number">5.</span> <span class="nav-text">使用 virtio_net</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1%E3%80%81%E5%95%9F%E7%94%A8%E6%94%AF%E6%8F%B4-virtio-net-%E7%9A%84-vitual-machine"><span class="nav-number">5.1.</span> <span class="nav-text">1、啟用支援 virtio_net 的 vitual machine</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2%E3%80%81%E9%80%B2%E4%B8%80%E6%AD%A5%E6%8F%90%E5%8D%87%E5%8D%8A%E8%99%9B%E6%93%AC%E5%8C%96%E7%B6%B2%E5%8D%A1%E6%95%88%E8%83%BD"><span class="nav-number">5.2.</span> <span class="nav-text">2、進一步提升半虛擬化網卡效能</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E9%97%9C%E9%96%89-TSO-amp-GSO-%E4%BB%A5%E6%8F%90%E5%8D%87-virtio-net-%E7%9A%84%E6%95%88%E8%83%BD"><span class="nav-number">5.2.1.</span> <span class="nav-text">(1) 關閉 TSO &amp; GSO 以提升 virtio_net 的效能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E4%BD%BF%E7%94%A8-vhost-net-%E5%BE%8C%E7%AB%AF%E9%A9%85%E5%8B%95"><span class="nav-number">5.2.2.</span> <span class="nav-text">(2) 使用 vhost-net 後端驅動</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-virtio-blk"><span class="nav-number">6.</span> <span class="nav-text">使用 virtio_blk</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">7.</span> <span class="nav-text">References</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

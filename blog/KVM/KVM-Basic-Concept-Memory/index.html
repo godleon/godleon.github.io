@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 4.2.0">
+<meta name="generator" content="Hexo 5.0.2">
   <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
@@ -31,7 +31,7 @@
 <meta property="og:image" content="http://image.slidesharecdn.com/windays-virtualization-090428034228-phpapp01/95/windows-server-virtualization-hyperv-2008-r2-30-728.jpg?cb=1240890219">
 <meta property="og:image" content="http://virtualization.info/images/EPT-716833.png">
 <meta property="article:published_time" content="2016-08-01T19:40:00.000Z">
-<meta property="article:modified_time" content="2020-08-16T22:27:02.107Z">
+<meta property="article:modified_time" content="2020-08-16T22:33:23.817Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="Linux">
 <meta property="article:tag" content="KVM">
@@ -205,7 +205,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">عُدل في</span>
-                <time title="عُدل: 2020-08-17 06:27:02" itemprop="dateModified" datetime="2020-08-17T06:27:02+08:00">2020-08-17</time>
+                <time title="عُدل: 2020-08-17 06:33:23" itemprop="dateModified" datetime="2020-08-17T06:33:23+08:00">2020-08-17</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -287,14 +287,14 @@
 <hr>
 <h1 id="VPID"><a href="#VPID" class="headerlink" title="VPID"></a>VPID</h1><p>要了解 VPID，首先要知道 TLB(Translation Lookaside Buffer) 是什麼? 可以參考以下連結：</p>
 <ul>
-<li><a href="http://www.wikiwand.com/zh-hk/%E8%BD%89%E8%AD%AF%E5%BE%8C%E5%82%99%E7%B7%A9%E8%A1%9D%E5%8D%80" target="_blank" rel="noopener">TLB 轉譯後備緩衝區 - Wikiwand</a></li>
+<li><a target="_blank" rel="noopener" href="http://www.wikiwand.com/zh-hk/%E8%BD%89%E8%AD%AF%E5%BE%8C%E5%82%99%E7%B7%A9%E8%A1%9D%E5%8D%80">TLB 轉譯後備緩衝區 - Wikiwand</a></li>
 </ul>
 <blockquote>
 <p>分配給 virtual machine 的每一個 vCPU 都會有一個 TLB</p>
 </blockquote>
 <p>而 VPID 則是在硬體層級對 TLB 資源管理的優化，在 virtual machine 進行 migration / VM Entry / VM Exit 時，避免對 TLB 進行轉存 &amp; 清除，進而降低 memory 的額外消耗，對於 live migration 有顯著的效能提升。</p>
 <hr>
-<h1 id="查詢-EPT-amp-VPID-的支援度"><a href="#查詢-EPT-amp-VPID-的支援度" class="headerlink" title="查詢 EPT &amp; VPID 的支援度"></a>查詢 EPT &amp; VPID 的支援度</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查詢 CPU 是否支援 EPT &amp; VPID</span></span><br><span class="line">$  grep -E <span class="string">"\sept\s|\svpid\s"</span> /proc/cpuinfo | uniq</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查詢 kvm_intel 模組是否有開啟 EPT &amp; VPID 的功能</span></span><br><span class="line">$ cat /sys/module/kvm_intel/parameters/ept</span><br><span class="line">Y</span><br><span class="line">$ cat /sys/module/kvm_intel/parameters/vpid</span><br><span class="line">Y</span><br><span class="line"></span><br><span class="line"><span class="comment"># 開啟 kvm_intel 模組 EPT &amp; VPID 的功能</span></span><br><span class="line">$ modprobe kvm_intel ept=1,vpid=1</span><br></pre></td></tr></table></figure>
+<h1 id="查詢-EPT-amp-VPID-的支援度"><a href="#查詢-EPT-amp-VPID-的支援度" class="headerlink" title="查詢 EPT &amp; VPID 的支援度"></a>查詢 EPT &amp; VPID 的支援度</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查詢 CPU 是否支援 EPT &amp; VPID</span></span><br><span class="line">$  grep -E <span class="string">&quot;\sept\s|\svpid\s&quot;</span> /proc/cpuinfo | uniq</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查詢 kvm_intel 模組是否有開啟 EPT &amp; VPID 的功能</span></span><br><span class="line">$ cat /sys/module/kvm_intel/parameters/ept</span><br><span class="line">Y</span><br><span class="line">$ cat /sys/module/kvm_intel/parameters/vpid</span><br><span class="line">Y</span><br><span class="line"></span><br><span class="line"><span class="comment"># 開啟 kvm_intel 模組 EPT &amp; VPID 的功能</span></span><br><span class="line">$ modprobe kvm_intel ept=1,vpid=1</span><br></pre></td></tr></table></figure>
 
 <hr>
 <h1 id="Huge-Page"><a href="#Huge-Page" class="headerlink" title="Huge Page"></a>Huge Page</h1><p>x86 架構的 CPU 預設的 memory page table 大小為 4KB，而 x86-64 則可以支援到 2MB 大小的 memory page table(亦稱為 <strong><font color='red'>Huge Page</font></strong>)，在 Linux 2.6 以上的 kernel 都支援這個特性。</p>
@@ -337,14 +337,14 @@
 <h1 id="Memory-Overcommit"><a href="#Memory-Overcommit" class="headerlink" title="Memory Overcommit"></a>Memory Overcommit</h1><p>除了之前介紹 CPU 可以 overcommit 之外，memory 也可以設定一定程度的 overcommit，原因是因為每台電腦在運作時一般都不會耗盡記憶體。對 host machine 來說，virtual machine 也只是一個 QEMU process，在啟動的當下是不會分配完整記憶體的，而是隨著 virtual machine 的更多要求下逐步分配到位，因此可以在此行為的前提下設定 memory overcommit。</p>
 <p>在 KVM 中有三種方式可以達到 memory overcommit：</p>
 <ol>
-<li><p><strong><font color='red'>Swapping</font></strong>：透過 system swap(一般為硬碟空間) 來彌補 memory 不足的問題</p>
+<li><p>**<font color='red'>Swapping</font>**：透過 system swap(一般為硬碟空間) 來彌補 memory 不足的問題</p>
 </li>
-<li><p><strong><font color='red'>Ballooning</font></strong>：透過 <code>virtio_balloon</code> driver 來達成</p>
+<li><p>**<font color='red'>Ballooning</font>**：透過 <code>virtio_balloon</code> driver 來達成</p>
 </li>
-<li><p><strong><font color='red'>Page Sharing</font></strong>：使用 <code>KSM(Kernel Samepage Merging)</code> 合併多台 virtual machine 中相同的 memory page</p>
+<li><p>**<font color='red'>Page Sharing</font>**：使用 <code>KSM(Kernel Samepage Merging)</code> 合併多台 virtual machine 中相同的 memory page</p>
 </li>
 </ol>
-<p>關於第一個方式的 swap，根據 <a href="https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Storage_Administration_Guide/ch-swapspace.html#tb-recommended-system-swap-space" target="_blank" rel="noopener">RedHat RHEL 7 官方文件</a>所提供的建議，swap 大小的設定建議如下：</p>
+<p>關於第一個方式的 swap，根據 <a target="_blank" rel="noopener" href="https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Storage_Administration_Guide/ch-swapspace.html#tb-recommended-system-swap-space">RedHat RHEL 7 官方文件</a>所提供的建議，swap 大小的設定建議如下：</p>
 <table>
 <thead>
 <tr>
@@ -371,17 +371,17 @@
 </tbody></table>
 <hr>
 <h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
-<li><p><a href="http://linux.die.net/man/1/qemu-kvm" target="_blank" rel="noopener">qemu-kvm(1): QEMU Emulator User Documentation - Linux man page</a></p>
+<li><p><a target="_blank" rel="noopener" href="http://linux.die.net/man/1/qemu-kvm">qemu-kvm(1): QEMU Emulator User Documentation - Linux man page</a></p>
 </li>
-<li><p><a href="http://www.gegugu.com/2016/03/22/9088.html" target="_blank" rel="noopener">精品：KVM學習筆記 : 歌穀穀</a></p>
+<li><p><a target="_blank" rel="noopener" href="http://www.gegugu.com/2016/03/22/9088.html">精品：KVM學習筆記 : 歌穀穀</a></p>
 </li>
-<li><p><a href="http://tc.wangchao.net.cn/it/detail_128378.html" target="_blank" rel="noopener">Huge Page 是否是拯救性能的萬能良藥？ - 王朝網路 - wangchao.net.cn</a></p>
+<li><p><a target="_blank" rel="noopener" href="http://tc.wangchao.net.cn/it/detail_128378.html">Huge Page 是否是拯救性能的萬能良藥？ - 王朝網路 - wangchao.net.cn</a></p>
 </li>
-<li><p><a href="http://brandon-hy-lin.blogspot.tw/2016/04/compound-page-huge-page-transparent.html" target="_blank" rel="noopener">隨意寫寫: Compound Page, Huge Page, 和Transparent Huge Page(THP)</a></p>
+<li><p><a target="_blank" rel="noopener" href="http://brandon-hy-lin.blogspot.tw/2016/04/compound-page-huge-page-transparent.html">隨意寫寫: Compound Page, Huge Page, 和Transparent Huge Page(THP)</a></p>
 </li>
-<li><p><a href="http://jaychu649.blogspot.tw/2014/09/linux-huge-memory-greater-then-hundred.html" target="_blank" rel="noopener">IT 研究室 ( 前IT DBA’s 資訊站): 如何在Linux 使用大記憶體(huge memory greater then hundred of GB)</a></p>
+<li><p><a target="_blank" rel="noopener" href="http://jaychu649.blogspot.tw/2014/09/linux-huge-memory-greater-then-hundred.html">IT 研究室 ( 前IT DBA’s 資訊站): 如何在Linux 使用大記憶體(huge memory greater then hundred of GB)</a></p>
 </li>
-<li><p><a href="https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Storage_Administration_Guide/ch-swapspace.html#tb-recommended-system-swap-space" target="_blank" rel="noopener">RedHat RHEL 7 Support &gt; Product Documentation &gt; Storage &gt; Administration Guide</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Storage_Administration_Guide/ch-swapspace.html#tb-recommended-system-swap-space">RedHat RHEL 7 Support &gt; Product Documentation &gt; Storage &gt; Administration Guide</a></p>
 </li>
 </ul>
 
@@ -475,7 +475,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#VM-可以使用多少記憶體"><span class="nav-number">2.</span> <span class="nav-text">VM 可以使用多少記憶體?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#配置-VM-記憶體"><span class="nav-number">3.</span> <span class="nav-text">配置 VM 記憶體</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EPT"><span class="nav-number">4.</span> <span class="nav-text">EPT</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#VPID"><span class="nav-number">5.</span> <span class="nav-text">VPID</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#查詢-EPT-amp-VPID-的支援度"><span class="nav-number">6.</span> <span class="nav-text">查詢 EPT &amp; VPID 的支援度</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Huge-Page"><span class="nav-number">7.</span> <span class="nav-text">Huge Page</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#優點："><span class="nav-number">7.0.1.</span> <span class="nav-text">優點：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#缺點："><span class="nav-number">7.0.2.</span> <span class="nav-text">缺點：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#在-KVM-中使用-Huge-Page"><span class="nav-number">7.1.</span> <span class="nav-text">在 KVM 中使用 Huge Page</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1、檢查-host-machine-中-Huge-Page-的設定資訊："><span class="nav-number">7.1.1.</span> <span class="nav-text">1、檢查 host machine 中 Huge Page 的設定資訊：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2、掛載-hugetlbfs-檔案系統"><span class="nav-number">7.1.2.</span> <span class="nav-text">2、掛載 hugetlbfs 檔案系統</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3、設定-Huge-Page-的數量"><span class="nav-number">7.1.3.</span> <span class="nav-text">3、設定 Huge Page 的數量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4、啟動-virtual-machine-使用-Huge-Page"><span class="nav-number">7.1.4.</span> <span class="nav-text">4、啟動 virtual machine 使用 Huge Page</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Memory-Overcommit"><span class="nav-number">8.</span> <span class="nav-text">Memory Overcommit</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">9.</span> <span class="nav-text">References</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#VM-%E5%8F%AF%E4%BB%A5%E4%BD%BF%E7%94%A8%E5%A4%9A%E5%B0%91%E8%A8%98%E6%86%B6%E9%AB%94"><span class="nav-number">2.</span> <span class="nav-text">VM 可以使用多少記憶體?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE-VM-%E8%A8%98%E6%86%B6%E9%AB%94"><span class="nav-number">3.</span> <span class="nav-text">配置 VM 記憶體</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EPT"><span class="nav-number">4.</span> <span class="nav-text">EPT</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#VPID"><span class="nav-number">5.</span> <span class="nav-text">VPID</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9F%A5%E8%A9%A2-EPT-amp-VPID-%E7%9A%84%E6%94%AF%E6%8F%B4%E5%BA%A6"><span class="nav-number">6.</span> <span class="nav-text">查詢 EPT &amp; VPID 的支援度</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Huge-Page"><span class="nav-number">7.</span> <span class="nav-text">Huge Page</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%84%AA%E9%BB%9E%EF%BC%9A"><span class="nav-number">7.0.1.</span> <span class="nav-text">優點：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%BA%E9%BB%9E%EF%BC%9A"><span class="nav-number">7.0.2.</span> <span class="nav-text">缺點：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%A8-KVM-%E4%B8%AD%E4%BD%BF%E7%94%A8-Huge-Page"><span class="nav-number">7.1.</span> <span class="nav-text">在 KVM 中使用 Huge Page</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E6%AA%A2%E6%9F%A5-host-machine-%E4%B8%AD-Huge-Page-%E7%9A%84%E8%A8%AD%E5%AE%9A%E8%B3%87%E8%A8%8A%EF%BC%9A"><span class="nav-number">7.1.1.</span> <span class="nav-text">1、檢查 host machine 中 Huge Page 的設定資訊：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E6%8E%9B%E8%BC%89-hugetlbfs-%E6%AA%94%E6%A1%88%E7%B3%BB%E7%B5%B1"><span class="nav-number">7.1.2.</span> <span class="nav-text">2、掛載 hugetlbfs 檔案系統</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3%E3%80%81%E8%A8%AD%E5%AE%9A-Huge-Page-%E7%9A%84%E6%95%B8%E9%87%8F"><span class="nav-number">7.1.3.</span> <span class="nav-text">3、設定 Huge Page 的數量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4%E3%80%81%E5%95%9F%E5%8B%95-virtual-machine-%E4%BD%BF%E7%94%A8-Huge-Page"><span class="nav-number">7.1.4.</span> <span class="nav-text">4、啟動 virtual machine 使用 Huge Page</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Memory-Overcommit"><span class="nav-number">8.</span> <span class="nav-text">Memory Overcommit</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">9.</span> <span class="nav-text">References</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

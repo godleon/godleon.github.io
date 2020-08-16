@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 4.2.0">
+<meta name="generator" content="Hexo 5.0.2">
   <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
@@ -30,7 +30,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/proxmox/vm_hw_info.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images//proxmox/vm_cloud-init_info.png">
 <meta property="article:published_time" content="2018-06-07T01:50:00.000Z">
-<meta property="article:modified_time" content="2020-08-16T22:27:02.111Z">
+<meta property="article:modified_time" content="2020-08-16T22:33:23.821Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="Proxmox">
 <meta property="article:tag" content="cloud-init">
@@ -204,7 +204,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">عُدل في</span>
-                <time title="عُدل: 2020-08-17 06:27:02" itemprop="dateModified" datetime="2020-08-17T06:27:02+08:00">2020-08-17</time>
+                <time title="عُدل: 2020-08-17 06:33:23" itemprop="dateModified" datetime="2020-08-17T06:33:23+08:00">2020-08-17</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -243,12 +243,12 @@
 
       
         <p>本文將會介紹如何在 Proxmox 上使用 cloud-init 產生 VM</p>
-<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>使用 <a href="https://www.proxmox.com/en/proxmox-ve" target="_blank" rel="noopener">Proxmox</a> 也有一段時間了，這套免費的 KVM virtualization platform 真是佛心來的，好用穩定又有 Web GUI，但唯一的缺憾就是要作 Infrastructure as code 真的有點困難，因為他本身並不具備 cloud-init 的功能。</p>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>使用 <a target="_blank" rel="noopener" href="https://www.proxmox.com/en/proxmox-ve">Proxmox</a> 也有一段時間了，這套免費的 KVM virtualization platform 真是佛心來的，好用穩定又有 Web GUI，但唯一的缺憾就是要作 Infrastructure as code 真的有點困難，因為他本身並不具備 cloud-init 的功能。</p>
 <p>還好這個功能終於在 5.2 的時候被支援了，不過看起來還是很陽春，但基本使用上應該還算足夠。</p>
 <blockquote>
 <p>希望未來會有 scheduler 也被開發出來，不然我都要自己指定 host 來擺 VM….</p>
 </blockquote>
-<h1 id="準備-Template-VM"><a href="#準備-Template-VM" class="headerlink" title="準備 Template VM"></a>準備 Template VM</h1><p>以下將以 <a href="https://cloud-images.ubuntu.com/xenial/current" target="_blank" rel="noopener">ubuntu 16.04 cloud image</a> 做示範來準備 template VM</p>
+<h1 id="準備-Template-VM"><a href="#準備-Template-VM" class="headerlink" title="準備 Template VM"></a>準備 Template VM</h1><p>以下將以 <a target="_blank" rel="noopener" href="https://cloud-images.ubuntu.com/xenial/current">ubuntu 16.04 cloud image</a> 做示範來準備 template VM</p>
 <p>在準備 template VM 前必須有以下資訊：</p>
 <ol>
 <li><p>VM ID：這個不要跟其他 VM 重複到即可，下面使用 <code>9999</code></p>
@@ -267,14 +267,14 @@
 <p><img src="/blog/images/proxmox/vm_hw_info.png" alt="Template VM Hardware Information"></p>
 <p><img src="/blog/images//proxmox/vm_cloud-init_info.png" alt="Template VM cloud-init Information"></p>
 <h1 id="產生-VM"><a href="#產生-VM" class="headerlink" title="產生 VM"></a>產生 VM</h1><p>接著就可以使用這個 template VM 來快速產生 VM 了，以下用個簡單的 script 來完成：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 複製 VM</span></span><br><span class="line">qm <span class="built_in">clone</span> 9999 1001 --name ubuntu1604-1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 將 storage size 擴大到 64GB</span></span><br><span class="line">qm resize 1001 virtio0 64G; </span><br><span class="line"></span><br><span class="line"><span class="comment"># 網路設定 (以下是對應到上面的 tag 1310，請自行修改以對應自己的環境)</span></span><br><span class="line">qm <span class="built_in">set</span> 1001 --ipconfig0 ip=10.103.10.51/24,gw=10.103.10.1 --nameserver <span class="string">'8.8.8.8 1.1.1.1'</span></span><br><span class="line"></span><br><span class="line">qm start 1001</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 複製 VM</span></span><br><span class="line">qm <span class="built_in">clone</span> 9999 1001 --name ubuntu1604-1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 將 storage size 擴大到 64GB</span></span><br><span class="line">qm resize 1001 virtio0 64G; </span><br><span class="line"></span><br><span class="line"><span class="comment"># 網路設定 (以下是對應到上面的 tag 1310，請自行修改以對應自己的環境)</span></span><br><span class="line">qm <span class="built_in">set</span> 1001 --ipconfig0 ip=10.103.10.51/24,gw=10.103.10.1 --nameserver <span class="string">&#x27;8.8.8.8 1.1.1.1&#x27;</span></span><br><span class="line"></span><br><span class="line">qm start 1001</span><br></pre></td></tr></table></figure>
 
 <p>以上的 script 修改一下，放到 loop 中，一下子要產生多個 VM 其實就是一件很簡單的事情了!</p>
 <h1 id="其他限制"><a href="#其他限制" class="headerlink" title="其他限制"></a>其他限制</h1><p>目前 cloud-init 這個功能無法在 CentOS cloud image 上使用</p>
 <h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
-<li><p><a href="https://pve.proxmox.com/wiki/Cloud-Init_Support" target="_blank" rel="noopener">Cloud-Init Support - Proxmox VE</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://pve.proxmox.com/wiki/Cloud-Init_Support">Cloud-Init Support - Proxmox VE</a></p>
 </li>
-<li><p><a href="https://pve.proxmox.com/pve-docs/qm.1.html" target="_blank" rel="noopener">qm(1)</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://pve.proxmox.com/pve-docs/qm.1.html">qm(1)</a></p>
 </li>
 </ul>
 
@@ -368,7 +368,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#準備-Template-VM"><span class="nav-number">2.</span> <span class="nav-text">準備 Template VM</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#產生-VM"><span class="nav-number">3.</span> <span class="nav-text">產生 VM</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#其他限制"><span class="nav-number">4.</span> <span class="nav-text">其他限制</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%BA%96%E5%82%99-Template-VM"><span class="nav-number">2.</span> <span class="nav-text">準備 Template VM</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%94%A2%E7%94%9F-VM"><span class="nav-number">3.</span> <span class="nav-text">產生 VM</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E9%99%90%E5%88%B6"><span class="nav-number">4.</span> <span class="nav-text">其他限制</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 4.2.0">
+<meta name="generator" content="Hexo 5.0.2">
   <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
@@ -33,7 +33,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_StorageGateway-VolumeGateway-StoredVolume.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_StorageGateway-VolumeGateway-CachedVolume.png">
 <meta property="article:published_time" content="2020-05-10T02:00:00.000Z">
-<meta property="article:modified_time" content="2020-08-16T22:27:02.103Z">
+<meta property="article:modified_time" content="2020-08-16T22:33:23.813Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -208,7 +208,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">عُدل في</span>
-                <time title="عُدل: 2020-08-17 06:27:02" itemprop="dateModified" datetime="2020-08-17T06:27:02+08:00">2020-08-17</time>
+                <time title="عُدل: 2020-08-17 06:33:23" itemprop="dateModified" datetime="2020-08-17T06:33:23+08:00">2020-08-17</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -261,7 +261,7 @@
 </li>
 </ul>
 <p><img src="/blog/images/aws/S3_Transfer-Acceleration.png" alt="S3 Transfer Acceleration"></p>
-<p>此外，AWS 也提供了一個<a href="https://s3-accelerate-speedtest.s3-accelerate.amazonaws.com/en/accelerate-speed-comparsion.html" target="_blank" rel="noopener">測速的網頁</a>，使用者可以自行評估須不需要開啟 S3 Transfer Acceleration 功能。</p>
+<p>此外，AWS 也提供了一個<a target="_blank" rel="noopener" href="https://s3-accelerate-speedtest.s3-accelerate.amazonaws.com/en/accelerate-speed-comparsion.html">測速的網頁</a>，使用者可以自行評估須不需要開啟 S3 Transfer Acceleration 功能。</p>
 <h1 id="CloudFront"><a href="#CloudFront" class="headerlink" title="CloudFront"></a>CloudFront</h1><p>CloudFront 就是 AWS 透過佈建在全世界各地的 edge server 所提供的 CDN 服務，有以下幾個重點知識需要了解：</p>
 <ul>
 <li><p>AWS 在全世界各地建立了 edge server，確保大多數的使用者都有一個相對源頭教近的地方可以取得資料</p>
@@ -344,7 +344,7 @@
 <li><p>一旦將資料移動到 S3 後，就可以使用 S3 提供的 versioning, lifecycle management, cross-region replication … 等功能</p>
 </li>
 </ul>
-<h3 id="Volume-Gateway"><a href="#Volume-Gateway" class="headerlink" title="Volume Gateway"></a>Volume Gateway</h3><p>Volume Gateway 提供了 <code>iSCSI</code> 的方式，讓資料可透過<strong>單一磁碟(volume)</strong>為單位的角度來進行資料的儲存與管理；寫入 volume 的資料會以非同步的方式透過 volume snapshot 的方式進行儲存，也因為是 block device 的關係，因此每次的變更備份都是只有處理變更的 block 部份而已。</p>
+<h3 id="Volume-Gateway"><a href="#Volume-Gateway" class="headerlink" title="Volume Gateway"></a>Volume Gateway</h3><p>Volume Gateway 提供了 <code>iSCSI</code> 的方式，讓資料可透過**單一磁碟(volume)**為單位的角度來進行資料的儲存與管理；寫入 volume 的資料會以非同步的方式透過 volume snapshot 的方式進行儲存，也因為是 block device 的關係，因此每次的變更備份都是只有處理變更的 block 部份而已。</p>
 <p>而根據 volume 使用情境的不同，Volume Gateway 還可以分成以下兩種：</p>
 <h4 id="Stored-Volume"><a href="#Stored-Volume" class="headerlink" title="Stored Volume"></a>Stored Volume</h4><p><img src="/blog/images/aws/S3_StorageGateway-VolumeGateway-StoredVolume.png" alt="Storage Gateway - File Gateway"></p>
 <ul>
@@ -403,42 +403,42 @@
 </li>
 </ul>
 <h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
-<li><a href="https://www.udemy.com/course/aws-certified-solutions-architect-associate/" target="_blank" rel="noopener">AWS Certified Solutions Architect: Associate Certification Exam | Udemy</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.udemy.com/course/aws-certified-solutions-architect-associate/">AWS Certified Solutions Architect: Associate Certification Exam | Udemy</a></li>
 </ul>
 <h2 id="S3"><a href="#S3" class="headerlink" title="S3"></a>S3</h2><ul>
-<li><p><a href="https://docs.aws.amazon.com/zh_tw/AmazonS3/latest/dev/transfer-acceleration.html" target="_blank" rel="noopener">Amazon S3 Transfer Acceleration - Amazon Simple Storage Service</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/zh_tw/AmazonS3/latest/dev/transfer-acceleration.html">Amazon S3 Transfer Acceleration - Amazon Simple Storage Service</a></p>
 </li>
-<li><p><a href="https://aws.amazon.com/s3/faqs/" target="_blank" rel="noopener">Amazon Simple Storage Service (S3) FAQs</a> <a href="https://aws.amazon.com/tw/s3/faqs/" target="_blank" rel="noopener">(中文)</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/s3/faqs/">Amazon Simple Storage Service (S3) FAQs</a> <a target="_blank" rel="noopener" href="https://aws.amazon.com/tw/s3/faqs/">(中文)</a></p>
 </li>
 </ul>
 <h2 id="CloudFront-1"><a href="#CloudFront-1" class="headerlink" title="CloudFront"></a>CloudFront</h2><ul>
-<li><p><a href="https://docs.aws.amazon.com/zh_tw/AmazonS3/latest/dev/website-hosting-cloudfront-walkthrough.html" target="_blank" rel="noopener">以 Amazon CloudFront 加速您的網站 - Amazon Simple Storage Service</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/zh_tw/AmazonS3/latest/dev/website-hosting-cloudfront-walkthrough.html">以 Amazon CloudFront 加速您的網站 - Amazon Simple Storage Service</a></p>
 </li>
-<li><p><a href="https://aws.amazon.com/cloudfront/faqs/?nc=sn&loc=6" target="_blank" rel="noopener">FAQs | CDN, Zone Apex, Edge Cache | Amazon CloudFront</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/cloudfront/faqs/?nc=sn&loc=6">FAQs | CDN, Zone Apex, Edge Cache | Amazon CloudFront</a></p>
 </li>
 </ul>
 <h2 id="Snowball"><a href="#Snowball" class="headerlink" title="Snowball"></a>Snowball</h2><ul>
-<li><p><a href="https://aws.amazon.com/tw/snowball/" target="_blank" rel="noopener">AWS Snowball | 安全邊緣運算和離線資料傳輸 | Amazon Web Services</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/tw/snowball/">AWS Snowball | 安全邊緣運算和離線資料傳輸 | Amazon Web Services</a></p>
 </li>
-<li><p><a href="https://aws.amazon.com/tw/snowball/faqs/" target="_blank" rel="noopener">AWS Snowball 常見問答集</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/tw/snowball/faqs/">AWS Snowball 常見問答集</a></p>
 </li>
 </ul>
 <h2 id="Snowmobile-1"><a href="#Snowmobile-1" class="headerlink" title="Snowmobile"></a>Snowmobile</h2><ul>
-<li><p><a href="https://aws.amazon.com/tw/snowmobile/" target="_blank" rel="noopener">AWS Snowmobile | EB 級資料傳輸 | Amazon Web Serivces</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/tw/snowmobile/">AWS Snowmobile | EB 級資料傳輸 | Amazon Web Serivces</a></p>
 </li>
-<li><p><a href="https://aws.amazon.com/tw/snowmobile/faqs/" target="_blank" rel="noopener">https://aws.amazon.com/tw/snowmobile/faqs/</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/tw/snowmobile/faqs/">https://aws.amazon.com/tw/snowmobile/faqs/</a></p>
 </li>
 </ul>
 <h2 id="Storage-Gateway-1"><a href="#Storage-Gateway-1" class="headerlink" title="Storage Gateway"></a>Storage Gateway</h2><ul>
-<li><p><a href="https://aws.amazon.com/tw/storagegateway" target="_blank" rel="noopener">AWS Storage Gateway - Amazon Web Services</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/tw/storagegateway">AWS Storage Gateway - Amazon Web Services</a></p>
 </li>
-<li><p><a href="https://aws.amazon.com/tw/storagegateway/volume/" target="_blank" rel="noopener">AWS Storage Gateway – 磁碟區閘道</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/tw/storagegateway/volume/">AWS Storage Gateway – 磁碟區閘道</a></p>
 </li>
 </ul>
 <h2 id="Athena-amp-Macie"><a href="#Athena-amp-Macie" class="headerlink" title="Athena &amp; Macie"></a>Athena &amp; Macie</h2><ul>
-<li><p><a href="https://aws.amazon.com/tw/athena/" target="_blank" rel="noopener">Amazon Athena - 無伺服器互動式查詢服務 - Amazon Web Services</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/tw/athena/">Amazon Athena - 無伺服器互動式查詢服務 - Amazon Web Services</a></p>
 </li>
-<li><p><a href="https://aws.amazon.com/tw/macie/" target="_blank" rel="noopener">Amazon Macie | 探索、分類和保護敏感資料 | Amazon Web Services (AWS)</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/tw/macie/">Amazon Macie | 探索、分類和保護敏感資料 | Amazon Web Services (AWS)</a></p>
 </li>
 </ul>
 
@@ -533,7 +533,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Transfer-Acceleration"><span class="nav-number">1.</span> <span class="nav-text">Transfer Acceleration</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CloudFront"><span class="nav-number">2.</span> <span class="nav-text">CloudFront</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#進階設定"><span class="nav-number">2.1.</span> <span class="nav-text">進階設定</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Snowball-系列服務"><span class="nav-number">3.</span> <span class="nav-text">Snowball 系列服務</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Snowball-Edge"><span class="nav-number">3.1.</span> <span class="nav-text">Snowball Edge</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Snowmobile"><span class="nav-number">3.2.</span> <span class="nav-text">Snowmobile</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Storage-Gateway"><span class="nav-number">4.</span> <span class="nav-text">Storage Gateway</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#什麼是-Storage-Gateway"><span class="nav-number">4.1.</span> <span class="nav-text">什麼是 Storage Gateway ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Storage-Gateway-如何處理不同類型的資料"><span class="nav-number">4.2.</span> <span class="nav-text">Storage Gateway 如何處理不同類型的資料 ?</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#File-Gateway"><span class="nav-number">4.2.1.</span> <span class="nav-text">File Gateway</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Volume-Gateway"><span class="nav-number">4.2.2.</span> <span class="nav-text">Volume Gateway</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Stored-Volume"><span class="nav-number">4.2.2.1.</span> <span class="nav-text">Stored Volume</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Cached-Volume"><span class="nav-number">4.2.2.2.</span> <span class="nav-text">Cached Volume</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Tape-Gateway"><span class="nav-number">4.2.3.</span> <span class="nav-text">Tape Gateway</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Athena-vs-Macie"><span class="nav-number">5.</span> <span class="nav-text">Athena vs Macie</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Athena"><span class="nav-number">5.1.</span> <span class="nav-text">Athena</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Macie"><span class="nav-number">5.2.</span> <span class="nav-text">Macie</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text">References</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#S3"><span class="nav-number">6.1.</span> <span class="nav-text">S3</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CloudFront-1"><span class="nav-number">6.2.</span> <span class="nav-text">CloudFront</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Snowball"><span class="nav-number">6.3.</span> <span class="nav-text">Snowball</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Snowmobile-1"><span class="nav-number">6.4.</span> <span class="nav-text">Snowmobile</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Storage-Gateway-1"><span class="nav-number">6.5.</span> <span class="nav-text">Storage Gateway</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Athena-amp-Macie"><span class="nav-number">6.6.</span> <span class="nav-text">Athena &amp; Macie</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Transfer-Acceleration"><span class="nav-number">1.</span> <span class="nav-text">Transfer Acceleration</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CloudFront"><span class="nav-number">2.</span> <span class="nav-text">CloudFront</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%B2%E9%9A%8E%E8%A8%AD%E5%AE%9A"><span class="nav-number">2.1.</span> <span class="nav-text">進階設定</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Snowball-%E7%B3%BB%E5%88%97%E6%9C%8D%E5%8B%99"><span class="nav-number">3.</span> <span class="nav-text">Snowball 系列服務</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Snowball-Edge"><span class="nav-number">3.1.</span> <span class="nav-text">Snowball Edge</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Snowmobile"><span class="nav-number">3.2.</span> <span class="nav-text">Snowmobile</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Storage-Gateway"><span class="nav-number">4.</span> <span class="nav-text">Storage Gateway</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-Storage-Gateway"><span class="nav-number">4.1.</span> <span class="nav-text">什麼是 Storage Gateway ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Storage-Gateway-%E5%A6%82%E4%BD%95%E8%99%95%E7%90%86%E4%B8%8D%E5%90%8C%E9%A1%9E%E5%9E%8B%E7%9A%84%E8%B3%87%E6%96%99"><span class="nav-number">4.2.</span> <span class="nav-text">Storage Gateway 如何處理不同類型的資料 ?</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#File-Gateway"><span class="nav-number">4.2.1.</span> <span class="nav-text">File Gateway</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Volume-Gateway"><span class="nav-number">4.2.2.</span> <span class="nav-text">Volume Gateway</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Stored-Volume"><span class="nav-number">4.2.2.1.</span> <span class="nav-text">Stored Volume</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Cached-Volume"><span class="nav-number">4.2.2.2.</span> <span class="nav-text">Cached Volume</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Tape-Gateway"><span class="nav-number">4.2.3.</span> <span class="nav-text">Tape Gateway</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Athena-vs-Macie"><span class="nav-number">5.</span> <span class="nav-text">Athena vs Macie</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Athena"><span class="nav-number">5.1.</span> <span class="nav-text">Athena</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Macie"><span class="nav-number">5.2.</span> <span class="nav-text">Macie</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text">References</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#S3"><span class="nav-number">6.1.</span> <span class="nav-text">S3</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CloudFront-1"><span class="nav-number">6.2.</span> <span class="nav-text">CloudFront</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Snowball"><span class="nav-number">6.3.</span> <span class="nav-text">Snowball</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Snowmobile-1"><span class="nav-number">6.4.</span> <span class="nav-text">Snowmobile</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Storage-Gateway-1"><span class="nav-number">6.5.</span> <span class="nav-text">Storage Gateway</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Athena-amp-Macie"><span class="nav-number">6.6.</span> <span class="nav-text">Athena &amp; Macie</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 

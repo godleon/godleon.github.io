@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 4.2.0">
+<meta name="generator" content="Hexo 5.0.2">
   <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
@@ -32,7 +32,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/k8s_storageclass.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/dynamic-volume-provision.jpg">
 <meta property="article:published_time" content="2018-08-31T14:55:00.000Z">
-<meta property="article:modified_time" content="2020-08-16T22:27:02.107Z">
+<meta property="article:modified_time" content="2020-08-16T22:33:23.821Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="Kubernetes">
 <meta property="article:tag" content="CKA">
@@ -208,7 +208,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">عُدل في</span>
-                <time title="عُدل: 2020-08-17 06:27:02" itemprop="dateModified" datetime="2020-08-17T06:27:02+08:00">2020-08-17</time>
+                <time title="عُدل: 2020-08-17 06:33:23" itemprop="dateModified" datetime="2020-08-17T06:33:23+08:00">2020-08-17</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -259,7 +259,7 @@
 </ul>
 <p>此外，每個 resource object 都包含了 spec &amp; status 兩個部份，其中 spec 是用來描述 object 要以什麼樣的形式(規格 or 內容)呈現，而 status 則是用來描述這個 object 希望由 K8s 所維持的狀態(desired state)。</p>
 <blockquote>
-<p>關於 spec &amp; status 的細節，可以參考官網的 <a href="https://github.com/kubernetes/community/blob/master/contributors/devel/api-conventions.md" target="_blank" rel="noopener">API Conventions</a></p>
+<p>關於 spec &amp; status 的細節，可以參考官網的 <a target="_blank" rel="noopener" href="https://github.com/kubernetes/community/blob/master/contributors/devel/api-conventions.md">API Conventions</a></p>
 </blockquote>
 <h1 id="Kubernetes-提供了那些-Resource-Object-Type"><a href="#Kubernetes-提供了那些-Resource-Object-Type" class="headerlink" title="Kubernetes 提供了那些 Resource Object Type?"></a>Kubernetes 提供了那些 Resource Object Type?</h1><p>k8s 提供的 resource object 種類相當多，以下根據運用的類型作成以下四大分類：</p>
 <table>
@@ -320,7 +320,7 @@
 <p>ReplicationController 僅能支援 <strong>=</strong> 以及 <strong>!=</strong> 兩種，而 ReplicaSet 還支援了 chain &amp; subset 等更複雜的 selector 功能</p>
 </blockquote>
 <p>雖然 ReplicaSet 提供了更強大的 selector 功能，但不建議單獨使用，而是透過與 Deployment 來搭配使用。</p>
-<h2 id="Deployment"><a href="#Deployment" class="headerlink" title="Deployment"></a>Deployment</h2><p>Deployment 其實就是 <a href="https://kubernetes.io/docs/concepts/workloads/pods/pod/" target="_blank" rel="noopener">Pod</a> + <a href="https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/" target="_blank" rel="noopener">ReplicaSet</a>，同樣的，使用者對 k8s 宣告 Deployment 的 desired status，接著 Deployment controller 就會在資源允許的範圍內幫你達成。</p>
+<h2 id="Deployment"><a href="#Deployment" class="headerlink" title="Deployment"></a>Deployment</h2><p>Deployment 其實就是 <a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/workloads/pods/pod/">Pod</a> + <a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/">ReplicaSet</a>，同樣的，使用者對 k8s 宣告 Deployment 的 desired status，接著 Deployment controller 就會在資源允許的範圍內幫你達成。</p>
 <blockquote>
 <p>請不要直接控制包在 Deployment 內部的 ReplicaSet，應該是要透過調整 Deployment 來改變實際 workload 運作的行為</p>
 </blockquote>
@@ -358,7 +358,7 @@
 </li>
 <li><p>運行蒐集 log 用的 daemon，例如: fluentd, logstash … 等等</p>
 </li>
-<li><p>運行監控用的 daemon，例如: <a href="https://github.com/prometheus/node_exporter" target="_blank" rel="noopener">Prometheus Node Exporter</a>, collectd … 等等</p>
+<li><p>運行監控用的 daemon，例如: <a target="_blank" rel="noopener" href="https://github.com/prometheus/node_exporter">Prometheus Node Exporter</a>, collectd … 等等</p>
 </li>
 </ul>
 <h2 id="Job"><a href="#Job" class="headerlink" title="Job"></a>Job</h2><p>Job 很直覺，跟 Linux 中的 <code>at</code> 是類似的概念。</p>
@@ -440,7 +440,7 @@
 </ul>
 <p>了解 RBAC 的運作機制，在使用一些 k8s extension(例如：Helm) 的時候會有幫助，可以了解這些 extension 是如何在 k8s 中取得合法的運作權限。</p>
 <h1 id="Storage-管理類型的-Resource-Object"><a href="#Storage-管理類型的-Resource-Object" class="headerlink" title="Storage 管理類型的 Resource Object"></a>Storage 管理類型的 Resource Object</h1><h2 id="Volume"><a href="#Volume" class="headerlink" title="Volume"></a>Volume</h2><p>由於 container 的生命周期是短暫的，並且可能會隨時被 reschedule 到其他的 node 上面運行，這看似資源有效的被管理的前提下，同時也衍生出了 application 資料儲存的問題，而 <strong>volume</strong> 就是在 k8s 中被提出來的一個抽象概念，要來解決資料儲存的問題，並隱藏底層複雜的 storage 相關細節。</p>
-<p>類似於 Docker 中的 volume 概念，k8s 支援的 volume 有相當多種，例如：hostPath, iSCSI, NFS, GlusterFS, Ceph … 等等，詳細清單可以參考<a href="https://kubernetes.io/docs/concepts/storage/volumes/#types-of-volumes" target="_blank" rel="noopener">官網的列表</a>。</p>
+<p>類似於 Docker 中的 volume 概念，k8s 支援的 volume 有相當多種，例如：hostPath, iSCSI, NFS, GlusterFS, Ceph … 等等，詳細清單可以參考<a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/volumes/#types-of-volumes">官網的列表</a>。</p>
 <h2 id="PersistentVolume-amp-PersistentVolumeClaim"><a href="#PersistentVolume-amp-PersistentVolumeClaim" class="headerlink" title="PersistentVolume &amp; PersistentVolumeClaim"></a>PersistentVolume &amp; PersistentVolumeClaim</h2><p>有了 volume 被設計出來的目的後，接著進入到在 k8s 實作的細節；由於 storage 的管理一直是一個獨立且複雜的課題這個部份，因此k8s 提出了 <strong>PersistentVolume(PV)</strong> &amp; <strong>PersistentVolumeClaim(PVC)</strong> 兩個抽象概念來實現永久性資料的儲存，藉由提供標準的 API，讓 storage 的管理與應用抽象化。</p>
 <p>其中，PersistentVolume(簡稱 <code>PV</code>) resource 在概念上可以視為可讓 pod 掛載的 storage，後面的實作(NFS, iCSCI, RBD … etc)都已經被標準的 API 隱藏，管理者可以透過標準的宣告方式佈署所需要的 storage resource；而 PersistentVolume 的 lifecycle 會跟著使用 PersistentVolume 的 pod 走，當所有 pod 都消失，PersistentVolume resource 也會跟著消失，但儲存在上面的資料依然會存在。</p>
 <p>PersistentVolumeClaim(簡稱 <code>PVC</code>) resource 則是來自於使用者的 request，概念上類似 pod，只是 pod 使用 worker node 上的運算資源，可限定 CPU &amp; Memory；而 PersistentVolumeClaim 使用的則是 PV，可限定 storage 的 size &amp; access mode(read/write or read-only)。</p>
@@ -517,53 +517,53 @@
 <p>兩種資源控制的機制都是以 namespace 為單位，其中 <code>ResourceQuota</code> 是用來設定在 namespace 所有 pod 佔用資源的 request &amp; limit，而 <code>LimitRange</code> 則是用來設定 namespace 中 pod 的預設使用資源的 request &amp; limit。</p>
 <h1 id="Extension-類型的-Resource-Object"><a href="#Extension-類型的-Resource-Object" class="headerlink" title="Extension 類型的 Resource Object"></a>Extension 類型的 Resource Object</h1><h2 id="CustomResourceDefinitions"><a href="#CustomResourceDefinitions" class="headerlink" title="CustomResourceDefinitions"></a>CustomResourceDefinitions</h2><p>k8s 原生的 resource type 有 pod, deployment, daemonset, service … 等等，但若這些 resource type 並不完全符合使用者需求時，使用者可以自行定義所謂的 Custom Resource &amp; 相對應的 controller 來進行進階的 container 應用，而在操作使用上同樣也可以透過 kubectl 來進行管理。</p>
 <h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
-<li><p><a href="https://kubernetes.io/docs/concepts/workloads/pods/pod-overview/" target="_blank" rel="noopener">Pod Overview - Kubernetes</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/workloads/pods/pod-overview/">Pod Overview - Kubernetes</a></p>
 </li>
-<li><p><a href="https://ithelp.ithome.com.tw/articles/10193232" target="_blank" rel="noopener">[Day 5] 在 Minikube 上跑起你的 Docker Containers - Pod &amp; kubectl 常用指令 - iT 邦幫忙::一起幫忙解決難題，拯救 IT 人的一天</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://ithelp.ithome.com.tw/articles/10193232">[Day 5] 在 Minikube 上跑起你的 Docker Containers - Pod &amp; kubectl 常用指令 - iT 邦幫忙::一起幫忙解決難題，拯救 IT 人的一天</a></p>
 </li>
-<li><p><a href="https://ithelp.ithome.com.tw/articles/10194152" target="_blank" rel="noopener">[Day 8] 還在用Replication Controller嗎？不妨考慮Deployment - iT 邦幫忙::一起幫忙解決難題，拯救 IT 人的一天</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://ithelp.ithome.com.tw/articles/10194152">[Day 8] 還在用Replication Controller嗎？不妨考慮Deployment - iT 邦幫忙::一起幫忙解決難題，拯救 IT 人的一天</a></p>
 </li>
-<li><p><a href="https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/" target="_blank" rel="noopener">ReplicaSet - Kubernetes</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/">ReplicaSet - Kubernetes</a></p>
 </li>
-<li><p><a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/" target="_blank" rel="noopener">Deployments - Kubernetes</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Deployments - Kubernetes</a></p>
 </li>
-<li><p><a href="https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/" target="_blank" rel="noopener">StatefulSets - Kubernetes</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/">StatefulSets - Kubernetes</a></p>
 </li>
-<li><p><a href="https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/" target="_blank" rel="noopener">Jobs - Run to Completion - Kubernetes</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/">Jobs - Run to Completion - Kubernetes</a></p>
 </li>
-<li><p><a href="https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/" target="_blank" rel="noopener">CronJob - Kubernetes</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/">CronJob - Kubernetes</a></p>
 </li>
-<li><p><a href="https://kubernetes.io/docs/concepts/services-networking/service/" target="_blank" rel="noopener">Services - Kubernetes</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/services-networking/service/">Services - Kubernetes</a></p>
 </li>
-<li><p><a href="https://kubernetes.io/docs/concepts/services-networking/ingress/" target="_blank" rel="noopener">Ingress - Kubernetes</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/services-networking/ingress/">Ingress - Kubernetes</a></p>
 </li>
-<li><p><a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/" target="_blank" rel="noopener">Configure Service Accounts for Pods - Kubernetes</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/">Configure Service Accounts for Pods - Kubernetes</a></p>
 </li>
-<li><p><a href="https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/" target="_blank" rel="noopener">Managing Service Accounts - Kubernetes</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/">Managing Service Accounts - Kubernetes</a></p>
 </li>
-<li><p><a href="https://kubernetes.io/docs/reference/access-authn-authz/rbac/" target="_blank" rel="noopener">Using RBAC Authorization - Kubernetes</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/reference/access-authn-authz/rbac/">Using RBAC Authorization - Kubernetes</a></p>
 </li>
-<li><p><a href="https://kubernetes.io/docs/concepts/storage/volumes/" target="_blank" rel="noopener">Volumes - Kubernetes</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/volumes/">Volumes - Kubernetes</a></p>
 </li>
-<li><p><a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/" target="_blank" rel="noopener">Persistent Volumes - Kubernetes</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/">Persistent Volumes - Kubernetes</a></p>
 </li>
-<li><p><a href="https://kubernetes.io/docs/concepts/storage/storage-classes/" target="_blank" rel="noopener">Storage Classes - Kubernetes</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/storage-classes/">Storage Classes - Kubernetes</a></p>
 </li>
-<li><p><a href="https://kubernetes.io/docs/concepts/configuration/secret/" target="_blank" rel="noopener">Secrets - Kubernetes</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/configuration/secret/">Secrets - Kubernetes</a></p>
 </li>
-<li><p><a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/" target="_blank" rel="noopener">Configure a Pod to Use a ConfigMap - Kubernetes</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/">Configure a Pod to Use a ConfigMap - Kubernetes</a></p>
 </li>
-<li><p><a href="https://kubernetes.io/docs/concepts/services-networking/network-policies/" target="_blank" rel="noopener">Network Policies - Kubernetes</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/services-networking/network-policies/">Network Policies - Kubernetes</a></p>
 </li>
-<li><p><a href="https://kubernetes.io/docs/tasks/configure-pod-container/security-context/" target="_blank" rel="noopener">Configure a Security Context for a Pod or Container - Kubernetes</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/configure-pod-container/security-context/">Configure a Security Context for a Pod or Container - Kubernetes</a></p>
 </li>
-<li><p><a href="https://github.com/feiskyer/kubernetes-handbook/blob/master/zh/concepts/security-context.md" target="_blank" rel="noopener">Security Context 和 Pod Security Policy· feiskyer/kubernetes-handbook</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://github.com/feiskyer/kubernetes-handbook/blob/master/zh/concepts/security-context.md">Security Context 和 Pod Security Policy· feiskyer/kubernetes-handbook</a></p>
 </li>
-<li><p><a href="https://kubernetes.io/docs/concepts/policy/resource-quotas/" target="_blank" rel="noopener">Resource Quotas - Kubernetes</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/policy/resource-quotas/">Resource Quotas - Kubernetes</a></p>
 </li>
-<li><p><a href="https://jimmysong.io/posts/kubernetes-resourcequota-limitrange-management/" target="_blank" rel="noopener">Kubernetes中的ResourceQuota和LimitRange配置资源限额 - 宋净超的博客|Cloud Native Developer Advocate|jimmysong.io</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://jimmysong.io/posts/kubernetes-resourcequota-limitrange-management/">Kubernetes中的ResourceQuota和LimitRange配置资源限额 - 宋净超的博客|Cloud Native Developer Advocate|jimmysong.io</a></p>
 </li>
-<li><p><a href="https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/" target="_blank" rel="noopener">Custom Resources - Kubernetes</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/">Custom Resources - Kubernetes</a></p>
 </li>
 </ul>
 
@@ -659,7 +659,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#What-is-Resource-Object"><span class="nav-number">1.</span> <span class="nav-text">What is Resource Object?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kubernetes-提供了那些-Resource-Object-Type"><span class="nav-number">2.</span> <span class="nav-text">Kubernetes 提供了那些 Resource Object Type?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Workload-類型的-Resource-Object"><span class="nav-number">3.</span> <span class="nav-text">Workload 類型的 Resource Object</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Pod"><span class="nav-number">3.1.</span> <span class="nav-text">Pod</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Controller-類型的-Resource-Object"><span class="nav-number">4.</span> <span class="nav-text">Controller 類型的 Resource Object</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ReplicationController"><span class="nav-number">4.1.</span> <span class="nav-text">ReplicationController</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ReplicaSet"><span class="nav-number">4.2.</span> <span class="nav-text">ReplicaSet</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Deployment"><span class="nav-number">4.3.</span> <span class="nav-text">Deployment</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#StatefulSets"><span class="nav-number">4.4.</span> <span class="nav-text">StatefulSets</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DaemonSet"><span class="nav-number">4.5.</span> <span class="nav-text">DaemonSet</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Job"><span class="nav-number">4.6.</span> <span class="nav-text">Job</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CronJob"><span class="nav-number">4.7.</span> <span class="nav-text">CronJob</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TTL-Controller"><span class="nav-number">4.8.</span> <span class="nav-text">TTL Controller</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Service-Discovery-類型的-Resource-Object"><span class="nav-number">5.</span> <span class="nav-text">Service Discovery 類型的 Resource Object</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Service"><span class="nav-number">5.1.</span> <span class="nav-text">Service</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Ingress"><span class="nav-number">5.2.</span> <span class="nav-text">Ingress</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#權限管理類型的-Resource-Object"><span class="nav-number">6.</span> <span class="nav-text">權限管理類型的 Resource Object</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Service-Account"><span class="nav-number">6.1.</span> <span class="nav-text">Service Account</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RBAC-機制"><span class="nav-number">6.2.</span> <span class="nav-text">RBAC 機制</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Storage-管理類型的-Resource-Object"><span class="nav-number">7.</span> <span class="nav-text">Storage 管理類型的 Resource Object</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Volume"><span class="nav-number">7.1.</span> <span class="nav-text">Volume</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PersistentVolume-amp-PersistentVolumeClaim"><span class="nav-number">7.2.</span> <span class="nav-text">PersistentVolume &amp; PersistentVolumeClaim</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#StorageClass"><span class="nav-number">7.3.</span> <span class="nav-text">StorageClass</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Secret"><span class="nav-number">7.4.</span> <span class="nav-text">Secret</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ConfigMap"><span class="nav-number">7.5.</span> <span class="nav-text">ConfigMap</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Policy-類型的-Resource-Object"><span class="nav-number">8.</span> <span class="nav-text">Policy 類型的 Resource Object</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#NetworkPolicy"><span class="nav-number">8.1.</span> <span class="nav-text">NetworkPolicy</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SecurityContext"><span class="nav-number">8.2.</span> <span class="nav-text">SecurityContext</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ResourceQuota"><span class="nav-number">8.3.</span> <span class="nav-text">ResourceQuota</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LimitRange"><span class="nav-number">8.4.</span> <span class="nav-text">LimitRange</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Extension-類型的-Resource-Object"><span class="nav-number">9.</span> <span class="nav-text">Extension 類型的 Resource Object</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#CustomResourceDefinitions"><span class="nav-number">9.1.</span> <span class="nav-text">CustomResourceDefinitions</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">10.</span> <span class="nav-text">References</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#What-is-Resource-Object"><span class="nav-number">1.</span> <span class="nav-text">What is Resource Object?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kubernetes-%E6%8F%90%E4%BE%9B%E4%BA%86%E9%82%A3%E4%BA%9B-Resource-Object-Type"><span class="nav-number">2.</span> <span class="nav-text">Kubernetes 提供了那些 Resource Object Type?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Workload-%E9%A1%9E%E5%9E%8B%E7%9A%84-Resource-Object"><span class="nav-number">3.</span> <span class="nav-text">Workload 類型的 Resource Object</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Pod"><span class="nav-number">3.1.</span> <span class="nav-text">Pod</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Controller-%E9%A1%9E%E5%9E%8B%E7%9A%84-Resource-Object"><span class="nav-number">4.</span> <span class="nav-text">Controller 類型的 Resource Object</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ReplicationController"><span class="nav-number">4.1.</span> <span class="nav-text">ReplicationController</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ReplicaSet"><span class="nav-number">4.2.</span> <span class="nav-text">ReplicaSet</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Deployment"><span class="nav-number">4.3.</span> <span class="nav-text">Deployment</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#StatefulSets"><span class="nav-number">4.4.</span> <span class="nav-text">StatefulSets</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DaemonSet"><span class="nav-number">4.5.</span> <span class="nav-text">DaemonSet</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Job"><span class="nav-number">4.6.</span> <span class="nav-text">Job</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CronJob"><span class="nav-number">4.7.</span> <span class="nav-text">CronJob</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TTL-Controller"><span class="nav-number">4.8.</span> <span class="nav-text">TTL Controller</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Service-Discovery-%E9%A1%9E%E5%9E%8B%E7%9A%84-Resource-Object"><span class="nav-number">5.</span> <span class="nav-text">Service Discovery 類型的 Resource Object</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Service"><span class="nav-number">5.1.</span> <span class="nav-text">Service</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Ingress"><span class="nav-number">5.2.</span> <span class="nav-text">Ingress</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%AC%8A%E9%99%90%E7%AE%A1%E7%90%86%E9%A1%9E%E5%9E%8B%E7%9A%84-Resource-Object"><span class="nav-number">6.</span> <span class="nav-text">權限管理類型的 Resource Object</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Service-Account"><span class="nav-number">6.1.</span> <span class="nav-text">Service Account</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RBAC-%E6%A9%9F%E5%88%B6"><span class="nav-number">6.2.</span> <span class="nav-text">RBAC 機制</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Storage-%E7%AE%A1%E7%90%86%E9%A1%9E%E5%9E%8B%E7%9A%84-Resource-Object"><span class="nav-number">7.</span> <span class="nav-text">Storage 管理類型的 Resource Object</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Volume"><span class="nav-number">7.1.</span> <span class="nav-text">Volume</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PersistentVolume-amp-PersistentVolumeClaim"><span class="nav-number">7.2.</span> <span class="nav-text">PersistentVolume &amp; PersistentVolumeClaim</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#StorageClass"><span class="nav-number">7.3.</span> <span class="nav-text">StorageClass</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Secret"><span class="nav-number">7.4.</span> <span class="nav-text">Secret</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ConfigMap"><span class="nav-number">7.5.</span> <span class="nav-text">ConfigMap</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Policy-%E9%A1%9E%E5%9E%8B%E7%9A%84-Resource-Object"><span class="nav-number">8.</span> <span class="nav-text">Policy 類型的 Resource Object</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#NetworkPolicy"><span class="nav-number">8.1.</span> <span class="nav-text">NetworkPolicy</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SecurityContext"><span class="nav-number">8.2.</span> <span class="nav-text">SecurityContext</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ResourceQuota"><span class="nav-number">8.3.</span> <span class="nav-text">ResourceQuota</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LimitRange"><span class="nav-number">8.4.</span> <span class="nav-text">LimitRange</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Extension-%E9%A1%9E%E5%9E%8B%E7%9A%84-Resource-Object"><span class="nav-number">9.</span> <span class="nav-text">Extension 類型的 Resource Object</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#CustomResourceDefinitions"><span class="nav-number">9.1.</span> <span class="nav-text">CustomResourceDefinitions</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">10.</span> <span class="nav-text">References</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

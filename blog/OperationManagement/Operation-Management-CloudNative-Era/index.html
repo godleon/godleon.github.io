@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 4.2.0">
+<meta name="generator" content="Hexo 5.0.2">
   <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
@@ -28,7 +28,7 @@
 <meta property="og:description" content="此篇文章是學習極客時間專欄(趙成的運維體系管理課)中的&quot;Cloud Native 時代的維運實踐&quot;相關章節時，將文中的重要精華節錄下來的一篇筆記，對於維運觀念上的調整與改善，有很大的幫助">
 <meta property="og:locale" content="zh_TW">
 <meta property="article:published_time" content="2020-04-18T03:50:00.000Z">
-<meta property="article:modified_time" content="2020-08-16T22:27:02.111Z">
+<meta property="article:modified_time" content="2020-08-16T22:33:23.821Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="Operation">
 <meta name="twitter:card" content="summary">
@@ -200,7 +200,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">عُدل في</span>
-                <time title="عُدل: 2020-08-17 06:27:02" itemprop="dateModified" datetime="2020-08-17T06:27:02+08:00">2020-08-17</time>
+                <time title="عُدل: 2020-08-17 06:33:23" itemprop="dateModified" datetime="2020-08-17T06:33:23+08:00">2020-08-17</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -309,7 +309,7 @@
 </li>
 </ul>
 <h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
-<li><a href="https://time.geekbang.org/column/intro/63" target="_blank" rel="noopener">趙成的運維體系管理課 - 極客時間</a></li>
+<li><a target="_blank" rel="noopener" href="https://time.geekbang.org/column/intro/63">趙成的運維體系管理課 - 極客時間</a></li>
 </ul>
 
     </div>
@@ -401,7 +401,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#為什麼要選擇上雲"><span class="nav-number">1.</span> <span class="nav-text">為什麼要選擇上雲?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#電商案例探討"><span class="nav-number">1.1.</span> <span class="nav-text">電商案例探討</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#技術發展趨勢"><span class="nav-number">1.2.</span> <span class="nav-text">技術發展趨勢</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Hybrid-Cloud-將是未來的主流"><span class="nav-number">2.</span> <span class="nav-text">Hybrid Cloud 將是未來的主流</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#面對應用層的雲架構解決方案"><span class="nav-number">3.</span> <span class="nav-text">面對應用層的雲架構解決方案</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#可預見的技術發展趨勢"><span class="nav-number">3.1.</span> <span class="nav-text">可預見的技術發展趨勢</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">4.</span> <span class="nav-text">References</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%82%BA%E4%BB%80%E9%BA%BC%E8%A6%81%E9%81%B8%E6%93%87%E4%B8%8A%E9%9B%B2"><span class="nav-number">1.</span> <span class="nav-text">為什麼要選擇上雲?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9B%BB%E5%95%86%E6%A1%88%E4%BE%8B%E6%8E%A2%E8%A8%8E"><span class="nav-number">1.1.</span> <span class="nav-text">電商案例探討</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%80%E8%A1%93%E7%99%BC%E5%B1%95%E8%B6%A8%E5%8B%A2"><span class="nav-number">1.2.</span> <span class="nav-text">技術發展趨勢</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Hybrid-Cloud-%E5%B0%87%E6%98%AF%E6%9C%AA%E4%BE%86%E7%9A%84%E4%B8%BB%E6%B5%81"><span class="nav-number">2.</span> <span class="nav-text">Hybrid Cloud 將是未來的主流</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%9D%A2%E5%B0%8D%E6%87%89%E7%94%A8%E5%B1%A4%E7%9A%84%E9%9B%B2%E6%9E%B6%E6%A7%8B%E8%A7%A3%E6%B1%BA%E6%96%B9%E6%A1%88"><span class="nav-number">3.</span> <span class="nav-text">面對應用層的雲架構解決方案</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%AF%E9%A0%90%E8%A6%8B%E7%9A%84%E6%8A%80%E8%A1%93%E7%99%BC%E5%B1%95%E8%B6%A8%E5%8B%A2"><span class="nav-number">3.1.</span> <span class="nav-text">可預見的技術發展趨勢</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">4.</span> <span class="nav-text">References</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

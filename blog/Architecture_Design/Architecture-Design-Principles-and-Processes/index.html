@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 4.2.0">
+<meta name="generator" content="Hexo 5.0.2">
   <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
@@ -28,7 +28,7 @@
 <meta property="og:description" content="此篇文章是極客時間&quot;從 0 開始學架構&quot;課程時所留下的學習筆記，主要內容為架構設計原則 &amp; 設計流程(識別複雜度、設計備選方案、評估和選擇備選方案、詳細方案設計)">
 <meta property="og:locale" content="zh_TW">
 <meta property="article:published_time" content="2020-08-03T01:30:00.000Z">
-<meta property="article:modified_time" content="2020-08-16T22:27:02.103Z">
+<meta property="article:modified_time" content="2020-08-16T22:33:23.817Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="Architecture Design">
 <meta name="twitter:card" content="summary">
@@ -200,7 +200,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">عُدل في</span>
-                <time title="عُدل: 2020-08-17 06:27:02" itemprop="dateModified" datetime="2020-08-17T06:27:02+08:00">2020-08-17</time>
+                <time title="عُدل: 2020-08-17 06:33:23" itemprop="dateModified" datetime="2020-08-17T06:33:23+08:00">2020-08-17</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -250,7 +250,7 @@
 </ul>
 <p>架構設計時遵循以下幾個原則，有助於你做出最好的選擇：</p>
 <h2 id="合適原則"><a href="#合適原則" class="headerlink" title="合適原則"></a>合適原則</h2><ul>
-<li><p>合適原則宣言：<strong>“合適優於業界領先”</strong></p>
+<li><p>合適原則宣言：**”合適優於業界領先”**</p>
 </li>
 <li><p>常見失敗原因：</p>
 <ol>
@@ -261,7 +261,7 @@
 </li>
 </ul>
 <h2 id="簡單原則"><a href="#簡單原則" class="headerlink" title="簡單原則"></a>簡單原則</h2><ul>
-<li><p>簡單原則宣言：<strong>“簡單優於複雜”</strong></p>
+<li><p>簡單原則宣言：**”簡單優於複雜”**</p>
 </li>
 <li><p>“複雜”在製造領域代表先進，在建築領域代表領先，但<strong>在軟體領域，卻恰恰相反，代表的是”問題”</strong></p>
 </li>
@@ -286,7 +286,7 @@
 </li>
 </ul>
 <h2 id="演化原則"><a href="#演化原則" class="headerlink" title="演化原則"></a>演化原則</h2><ul>
-<li><p>演化原則宣言：<strong>“演化優於一步到位”</strong></p>
+<li><p>演化原則宣言：**”演化優於一步到位”**</p>
 </li>
 <li><p>建築一旦完成（甚至一旦開建）就不可再變，而<strong>軟體卻需要根據業務的發展不斷地變化</strong></p>
 <blockquote>
@@ -430,7 +430,7 @@
 <h1 id="架構設計流程：詳細方案設計"><a href="#架構設計流程：詳細方案設計" class="headerlink" title="架構設計流程：詳細方案設計"></a>架構設計流程：詳細方案設計</h1><ul>
 <li><p>Nginx 的負載均衡策略，簡單按照下面的規則選擇就可以了：</p>
 <ul>
-<li><strong>輪詢(預設)</strong>：每個請求按時間順序逐一分配到不同的後端 server，後端 server 分配的請求數基本一致，如果後端 server 無法正常提供服務，能自動剔除。</li>
+<li>**輪詢(預設)**：每個請求按時間順序逐一分配到不同的後端 server，後端 server 分配的請求數基本一致，如果後端 server 無法正常提供服務，能自動剔除。</li>
 <li><strong>加權輪詢</strong>：根據權重來進行輪詢，權重高的 server 分配的請求更多，主要適應於後端 server 性能不均的情況，如新舊 server 混用</li>
 <li><strong>ip_hash</strong>：每個請求按訪問 IP 的 hash 結果分配，這樣每個訪客固定訪問一個後端 server ，主要用於解決 session 的問題，如購物車類的應用</li>
 <li><strong>fair</strong>：按後端 server 的響應時間來分配請求，響應時間短的優先分配，能夠最大化地平衡各後端 server 的壓力，可以適用於後端server 性能不均衡的情況，也可以防止某台後端 server 性能不足的情況下還繼續接收同樣多的請求從而造成雪崩效應</li>
@@ -448,7 +448,7 @@
 </li>
 </ul>
 <h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><ul>
-<li><a href="https://time.geekbang.org/column/intro/81" target="_blank" rel="noopener">從0開始學架構_架構基礎_架構入門-極客時間</a></li>
+<li><a target="_blank" rel="noopener" href="https://time.geekbang.org/column/intro/81">從0開始學架構_架構基礎_架構入門-極客時間</a></li>
 </ul>
 
     </div>
@@ -540,7 +540,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#架構設計三原則"><span class="nav-number">1.</span> <span class="nav-text">架構設計三原則</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#合適原則"><span class="nav-number">1.1.</span> <span class="nav-text">合適原則</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#簡單原則"><span class="nav-number">1.2.</span> <span class="nav-text">簡單原則</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#演化原則"><span class="nav-number">1.3.</span> <span class="nav-text">演化原則</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#討論整理精華"><span class="nav-number">1.4.</span> <span class="nav-text">討論整理精華</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#架構設計流程：識別複雜度"><span class="nav-number">2.</span> <span class="nav-text">架構設計流程：識別複雜度</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#討論整理精華-1"><span class="nav-number">2.1.</span> <span class="nav-text">討論整理精華</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#架構設計流程：設計備選方案"><span class="nav-number">3.</span> <span class="nav-text">架構設計流程：設計備選方案</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#常見錯誤"><span class="nav-number">3.1.</span> <span class="nav-text">常見錯誤</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#設計最優秀的方案"><span class="nav-number">3.1.1.</span> <span class="nav-text">設計最優秀的方案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#只做一個方案"><span class="nav-number">3.1.2.</span> <span class="nav-text">只做一個方案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#備選方案過於詳細"><span class="nav-number">3.1.3.</span> <span class="nav-text">備選方案過於詳細</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#討論整理精華-2"><span class="nav-number">3.2.</span> <span class="nav-text">討論整理精華</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#架構設計流程：評估和選擇備選方案"><span class="nav-number">4.</span> <span class="nav-text">架構設計流程：評估和選擇備選方案</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#架構設計流程：詳細方案設計"><span class="nav-number">5.</span> <span class="nav-text">架構設計流程：詳細方案設計</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Reference"><span class="nav-number">6.</span> <span class="nav-text">Reference</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9E%B6%E6%A7%8B%E8%A8%AD%E8%A8%88%E4%B8%89%E5%8E%9F%E5%89%87"><span class="nav-number">1.</span> <span class="nav-text">架構設計三原則</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%88%E9%81%A9%E5%8E%9F%E5%89%87"><span class="nav-number">1.1.</span> <span class="nav-text">合適原則</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B0%A1%E5%96%AE%E5%8E%9F%E5%89%87"><span class="nav-number">1.2.</span> <span class="nav-text">簡單原則</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%94%E5%8C%96%E5%8E%9F%E5%89%87"><span class="nav-number">1.3.</span> <span class="nav-text">演化原則</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A8%8E%E8%AB%96%E6%95%B4%E7%90%86%E7%B2%BE%E8%8F%AF"><span class="nav-number">1.4.</span> <span class="nav-text">討論整理精華</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9E%B6%E6%A7%8B%E8%A8%AD%E8%A8%88%E6%B5%81%E7%A8%8B%EF%BC%9A%E8%AD%98%E5%88%A5%E8%A4%87%E9%9B%9C%E5%BA%A6"><span class="nav-number">2.</span> <span class="nav-text">架構設計流程：識別複雜度</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A8%8E%E8%AB%96%E6%95%B4%E7%90%86%E7%B2%BE%E8%8F%AF-1"><span class="nav-number">2.1.</span> <span class="nav-text">討論整理精華</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9E%B6%E6%A7%8B%E8%A8%AD%E8%A8%88%E6%B5%81%E7%A8%8B%EF%BC%9A%E8%A8%AD%E8%A8%88%E5%82%99%E9%81%B8%E6%96%B9%E6%A1%88"><span class="nav-number">3.</span> <span class="nav-text">架構設計流程：設計備選方案</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E8%A6%8B%E9%8C%AF%E8%AA%A4"><span class="nav-number">3.1.</span> <span class="nav-text">常見錯誤</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A8%AD%E8%A8%88%E6%9C%80%E5%84%AA%E7%A7%80%E7%9A%84%E6%96%B9%E6%A1%88"><span class="nav-number">3.1.1.</span> <span class="nav-text">設計最優秀的方案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%AA%E5%81%9A%E4%B8%80%E5%80%8B%E6%96%B9%E6%A1%88"><span class="nav-number">3.1.2.</span> <span class="nav-text">只做一個方案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%82%99%E9%81%B8%E6%96%B9%E6%A1%88%E9%81%8E%E6%96%BC%E8%A9%B3%E7%B4%B0"><span class="nav-number">3.1.3.</span> <span class="nav-text">備選方案過於詳細</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A8%8E%E8%AB%96%E6%95%B4%E7%90%86%E7%B2%BE%E8%8F%AF-2"><span class="nav-number">3.2.</span> <span class="nav-text">討論整理精華</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9E%B6%E6%A7%8B%E8%A8%AD%E8%A8%88%E6%B5%81%E7%A8%8B%EF%BC%9A%E8%A9%95%E4%BC%B0%E5%92%8C%E9%81%B8%E6%93%87%E5%82%99%E9%81%B8%E6%96%B9%E6%A1%88"><span class="nav-number">4.</span> <span class="nav-text">架構設計流程：評估和選擇備選方案</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9E%B6%E6%A7%8B%E8%A8%AD%E8%A8%88%E6%B5%81%E7%A8%8B%EF%BC%9A%E8%A9%B3%E7%B4%B0%E6%96%B9%E6%A1%88%E8%A8%AD%E8%A8%88"><span class="nav-number">5.</span> <span class="nav-text">架構設計流程：詳細方案設計</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Reference"><span class="nav-number">6.</span> <span class="nav-text">Reference</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

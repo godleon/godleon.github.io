@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 4.2.0">
+<meta name="generator" content="Hexo 5.0.2">
   <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
@@ -28,7 +28,7 @@
 <meta property="og:description" content="此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為與 EC2 相關的服務，會分成三篇文章來記錄，此為第三部份，包含了 Bootstrap Scripts、Instance Metadata、Placement Group、WAF、EFS、FSx、FSx for Lustre ... 等內容">
 <meta property="og:locale" content="zh_TW">
 <meta property="article:published_time" content="2020-06-01T21:20:00.000Z">
-<meta property="article:modified_time" content="2020-08-16T22:27:02.103Z">
+<meta property="article:modified_time" content="2020-08-16T22:33:23.813Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -206,7 +206,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">عُدل في</span>
-                <time title="عُدل: 2020-08-17 06:27:02" itemprop="dateModified" datetime="2020-08-17T06:27:02+08:00">2020-08-17</time>
+                <time title="عُدل: 2020-08-17 06:33:23" itemprop="dateModified" datetime="2020-08-17T06:33:23+08:00">2020-08-17</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -410,15 +410,15 @@
 </li>
 </ul>
 <h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
-<li><p><a href="https://www.udemy.com/course/aws-certified-solutions-architect-associate/" target="_blank" rel="noopener">AWS Certified Solutions Architect: Associate Certification Exam | Udemy</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://www.udemy.com/course/aws-certified-solutions-architect-associate/">AWS Certified Solutions Architect: Associate Certification Exam | Udemy</a></p>
 </li>
-<li><p><a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instancedata-data-retrieval.html" target="_blank" rel="noopener">Retrieving instance metadata - Amazon Elastic Compute Cloud</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instancedata-data-retrieval.html">Retrieving instance metadata - Amazon Elastic Compute Cloud</a></p>
 </li>
-<li><p><a href="https://aws.amazon.com/efs/" target="_blank" rel="noopener">Amazon Elastic File System (EFS) | Cloud File Storage</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/efs/">Amazon Elastic File System (EFS) | Cloud File Storage</a></p>
 </li>
-<li><p><a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/placement-groups.html" target="_blank" rel="noopener">Placement groups - Amazon Elastic Compute Cloud</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/placement-groups.html">Placement groups - Amazon Elastic Compute Cloud</a></p>
 </li>
-<li><p><a href="https://aws.amazon.com/waf/" target="_blank" rel="noopener">AWS WAF - Web Application Firewall - Amazon Web Services (AWS)</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/waf/">AWS WAF - Web Application Firewall - Amazon Web Services (AWS)</a></p>
 </li>
 </ul>
 
@@ -517,7 +517,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Bootstrap-Scripts"><span class="nav-number">1.</span> <span class="nav-text">Bootstrap Scripts</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Instance-Meta-Data"><span class="nav-number">2.</span> <span class="nav-text">Instance Meta Data</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EFS-Elastic-File-System"><span class="nav-number">3.</span> <span class="nav-text">EFS(Elastic File System)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#FSX-amp-FSx-for-Lustre"><span class="nav-number">4.</span> <span class="nav-text">FSX &amp; FSx for Lustre</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#FSx"><span class="nav-number">4.1.</span> <span class="nav-text">FSx</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FSx-for-Lustre"><span class="nav-number">4.2.</span> <span class="nav-text">FSx for Lustre</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Placement-Group"><span class="nav-number">5.</span> <span class="nav-text">Placement Group</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Cluster"><span class="nav-number">5.1.</span> <span class="nav-text">Cluster</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spread"><span class="nav-number">5.2.</span> <span class="nav-text">Spread</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Partition"><span class="nav-number">5.3.</span> <span class="nav-text">Partition</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他"><span class="nav-number">5.4.</span> <span class="nav-text">其他</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#WAF-Web-Application-Firewall"><span class="nav-number">6.</span> <span class="nav-text">WAF(Web Application Firewall)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#考試重點"><span class="nav-number">6.1.</span> <span class="nav-text">考試重點</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">7.</span> <span class="nav-text">References</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Bootstrap-Scripts"><span class="nav-number">1.</span> <span class="nav-text">Bootstrap Scripts</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Instance-Meta-Data"><span class="nav-number">2.</span> <span class="nav-text">Instance Meta Data</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EFS-Elastic-File-System"><span class="nav-number">3.</span> <span class="nav-text">EFS(Elastic File System)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#FSX-amp-FSx-for-Lustre"><span class="nav-number">4.</span> <span class="nav-text">FSX &amp; FSx for Lustre</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#FSx"><span class="nav-number">4.1.</span> <span class="nav-text">FSx</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FSx-for-Lustre"><span class="nav-number">4.2.</span> <span class="nav-text">FSx for Lustre</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Placement-Group"><span class="nav-number">5.</span> <span class="nav-text">Placement Group</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Cluster"><span class="nav-number">5.1.</span> <span class="nav-text">Cluster</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spread"><span class="nav-number">5.2.</span> <span class="nav-text">Spread</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Partition"><span class="nav-number">5.3.</span> <span class="nav-text">Partition</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96"><span class="nav-number">5.4.</span> <span class="nav-text">其他</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#WAF-Web-Application-Firewall"><span class="nav-number">6.</span> <span class="nav-text">WAF(Web Application Firewall)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%80%83%E8%A9%A6%E9%87%8D%E9%BB%9E"><span class="nav-number">6.1.</span> <span class="nav-text">考試重點</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">7.</span> <span class="nav-text">References</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
