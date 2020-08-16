@@ -92,7 +92,7 @@
     <header class="header" itemscope itemtype="http://schema.org/WPHeader">
       <div class="header-inner"><div class="site-brand-container">
   <div class="site-nav-toggle">
-    <div class="toggle" aria-label="Toggle navigation bar">
+    <div class="toggle" aria-label="تشغيل شريط التصفح">
       <span class="toggle-line toggle-line-first"></span>
       <span class="toggle-line toggle-line-middle"></span>
       <span class="toggle-line toggle-line-last"></span>
@@ -126,17 +126,17 @@
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/blog/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+    <a href="/blog/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>الوسوم</a>
 
   </li>
         <li class="menu-item menu-item-categories">
 
-    <a href="/blog/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+    <a href="/blog/categories/" rel="section"><i class="fa fa-fw fa-th"></i>التصنيفات</a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/blog/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+    <a href="/blog/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>الأرشيفات</a>
 
   </li>
   </ul>
@@ -166,6 +166,101 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/Kubernetes/k8s-Taints-and-Tolerations/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/blog/Kubernetes/k8s-Taints-and-Tolerations/" class="post-title-link" itemprop="url">[Kubernetes] Taints and Tolerations</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">نُشر في</span>
+
+              <time title="أُنشأ: 2018-10-31 04:30:00" itemprop="dateCreated datePublished" datetime="2018-10-31T04:30:00+08:00">2018-10-31</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">عُدل في</span>
+                <time title="عُدل: 2020-08-16 17:01:14" itemprop="dateModified" datetime="2020-08-16T17:01:14+08:00">2020-08-16</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">في</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Kubernetes/" itemprop="url" rel="index"><span itemprop="name">Kubernetes</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/Kubernetes/k8s-Taints-and-Tolerations/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="Kubernetes/k8s-Taints-and-Tolerations/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>本篇文章的主題在介紹在 Kubernetes 中，'taint' & 'toleration' 這兩種機制的設計會如何影響 scheduler & k8s 相關自動化維運的行為</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/blog/Kubernetes/k8s-Taints-and-Tolerations/">
+                تابع القراءة &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
     <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/Kubernetes/k8s-Assigning-Pod-to-Nodes/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -188,22 +283,22 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">Posted on</span>
+              <span class="post-meta-item-text">نُشر في</span>
 
-              <time title="Created: 2018-10-27 05:20:00" itemprop="dateCreated datePublished" datetime="2018-10-27T05:20:00+08:00">2018-10-27</time>
+              <time title="أُنشأ: 2018-10-27 05:20:00" itemprop="dateCreated datePublished" datetime="2018-10-27T05:20:00+08:00">2018-10-27</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-08-11 06:03:13" itemprop="dateModified" datetime="2020-08-11T06:03:13+08:00">2020-08-11</time>
+                <span class="post-meta-item-text">عُدل في</span>
+                <time title="عُدل: 2020-08-16 17:01:14" itemprop="dateModified" datetime="2020-08-16T17:01:14+08:00">2020-08-16</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">In</span>
+              <span class="post-meta-item-text">في</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/blog/categories/Kubernetes/" itemprop="url" rel="index"><span itemprop="name">Kubernetes</span></a>
                 </span>
@@ -238,7 +333,7 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/blog/Kubernetes/k8s-Assigning-Pod-to-Nodes/">
-                Read more &raquo;
+                تابع القراءة &raquo;
               </a>
             </div>
           <!--/noindex-->
@@ -283,22 +378,22 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">Posted on</span>
+              <span class="post-meta-item-text">نُشر في</span>
 
-              <time title="Created: 2018-10-26 16:10:00" itemprop="dateCreated datePublished" datetime="2018-10-26T16:10:00+08:00">2018-10-26</time>
+              <time title="أُنشأ: 2018-10-26 16:10:00" itemprop="dateCreated datePublished" datetime="2018-10-26T16:10:00+08:00">2018-10-26</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-08-11 06:03:13" itemprop="dateModified" datetime="2020-08-11T06:03:13+08:00">2020-08-11</time>
+                <span class="post-meta-item-text">عُدل في</span>
+                <time title="عُدل: 2020-08-16 17:01:14" itemprop="dateModified" datetime="2020-08-16T17:01:14+08:00">2020-08-16</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">In</span>
+              <span class="post-meta-item-text">في</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/blog/categories/Kubernetes/" itemprop="url" rel="index"><span itemprop="name">Kubernetes</span></a>
                 </span>
@@ -333,7 +428,7 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/blog/Kubernetes/k8s-Config-StorageClass-with-NFS/">
-                Read more &raquo;
+                تابع القراءة &raquo;
               </a>
             </div>
           <!--/noindex-->
@@ -378,22 +473,22 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">Posted on</span>
+              <span class="post-meta-item-text">نُشر في</span>
 
-              <time title="Created: 2018-10-21 05:00:00" itemprop="dateCreated datePublished" datetime="2018-10-21T05:00:00+08:00">2018-10-21</time>
+              <time title="أُنشأ: 2018-10-21 05:00:00" itemprop="dateCreated datePublished" datetime="2018-10-21T05:00:00+08:00">2018-10-21</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-08-11 06:03:13" itemprop="dateModified" datetime="2020-08-11T06:03:13+08:00">2020-08-11</time>
+                <span class="post-meta-item-text">عُدل في</span>
+                <time title="عُدل: 2020-08-16 17:01:14" itemprop="dateModified" datetime="2020-08-16T17:01:14+08:00">2020-08-16</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">In</span>
+              <span class="post-meta-item-text">في</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/blog/categories/Kubernetes/" itemprop="url" rel="index"><span itemprop="name">Kubernetes</span></a>
                 </span>
@@ -428,7 +523,7 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/blog/Kubernetes/k8s-Scheduling-Manage-Compute-Resource-for-Container/">
-                Read more &raquo;
+                تابع القراءة &raquo;
               </a>
             </div>
           <!--/noindex-->
@@ -473,22 +568,22 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">Posted on</span>
+              <span class="post-meta-item-text">نُشر في</span>
 
-              <time title="Created: 2018-10-12 13:35:00" itemprop="dateCreated datePublished" datetime="2018-10-12T13:35:00+08:00">2018-10-12</time>
+              <time title="أُنشأ: 2018-10-12 13:35:00" itemprop="dateCreated datePublished" datetime="2018-10-12T13:35:00+08:00">2018-10-12</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-08-11 06:03:13" itemprop="dateModified" datetime="2020-08-11T06:03:13+08:00">2020-08-11</time>
+                <span class="post-meta-item-text">عُدل في</span>
+                <time title="عُدل: 2020-08-16 17:01:14" itemprop="dateModified" datetime="2020-08-16T17:01:14+08:00">2020-08-16</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">In</span>
+              <span class="post-meta-item-text">في</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/blog/categories/Kubernetes/" itemprop="url" rel="index"><span itemprop="name">Kubernetes</span></a>
                 </span>
@@ -523,7 +618,7 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/blog/Kubernetes/k8s-Job-Overview/">
-                Read more &raquo;
+                تابع القراءة &raquo;
               </a>
             </div>
           <!--/noindex-->
@@ -568,22 +663,22 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">Posted on</span>
+              <span class="post-meta-item-text">نُشر في</span>
 
-              <time title="Created: 2018-10-11 17:15:00" itemprop="dateCreated datePublished" datetime="2018-10-11T17:15:00+08:00">2018-10-11</time>
+              <time title="أُنشأ: 2018-10-11 17:15:00" itemprop="dateCreated datePublished" datetime="2018-10-11T17:15:00+08:00">2018-10-11</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-08-11 06:03:13" itemprop="dateModified" datetime="2020-08-11T06:03:13+08:00">2020-08-11</time>
+                <span class="post-meta-item-text">عُدل في</span>
+                <time title="عُدل: 2020-08-16 17:01:14" itemprop="dateModified" datetime="2020-08-16T17:01:14+08:00">2020-08-16</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">In</span>
+              <span class="post-meta-item-text">في</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/blog/categories/Proxmox/" itemprop="url" rel="index"><span itemprop="name">Proxmox</span></a>
                 </span>
@@ -618,7 +713,7 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/blog/Proxmox/proxmox-install-ceph/">
-                Read more &raquo;
+                تابع القراءة &raquo;
               </a>
             </div>
           <!--/noindex-->
@@ -663,22 +758,22 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">Posted on</span>
+              <span class="post-meta-item-text">نُشر في</span>
 
-              <time title="Created: 2018-10-04 05:00:00" itemprop="dateCreated datePublished" datetime="2018-10-04T05:00:00+08:00">2018-10-04</time>
+              <time title="أُنشأ: 2018-10-04 05:00:00" itemprop="dateCreated datePublished" datetime="2018-10-04T05:00:00+08:00">2018-10-04</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-08-11 06:03:13" itemprop="dateModified" datetime="2020-08-11T06:03:13+08:00">2020-08-11</time>
+                <span class="post-meta-item-text">عُدل في</span>
+                <time title="عُدل: 2020-08-16 17:01:14" itemprop="dateModified" datetime="2020-08-16T17:01:14+08:00">2020-08-16</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">In</span>
+              <span class="post-meta-item-text">في</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/blog/categories/Kubernetes/" itemprop="url" rel="index"><span itemprop="name">Kubernetes</span></a>
                 </span>
@@ -713,7 +808,7 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/blog/Kubernetes/k8s-DaemonSet-Overview/">
-                Read more &raquo;
+                تابع القراءة &raquo;
               </a>
             </div>
           <!--/noindex-->
@@ -758,22 +853,22 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">Posted on</span>
+              <span class="post-meta-item-text">نُشر في</span>
 
-              <time title="Created: 2018-09-27 11:30:00" itemprop="dateCreated datePublished" datetime="2018-09-27T11:30:00+08:00">2018-09-27</time>
+              <time title="أُنشأ: 2018-09-27 11:30:00" itemprop="dateCreated datePublished" datetime="2018-09-27T11:30:00+08:00">2018-09-27</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-08-11 06:03:13" itemprop="dateModified" datetime="2020-08-11T06:03:13+08:00">2020-08-11</time>
+                <span class="post-meta-item-text">عُدل في</span>
+                <time title="عُدل: 2020-08-16 17:01:14" itemprop="dateModified" datetime="2020-08-16T17:01:14+08:00">2020-08-16</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">In</span>
+              <span class="post-meta-item-text">في</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/blog/categories/Kubernetes/" itemprop="url" rel="index"><span itemprop="name">Kubernetes</span></a>
                 </span>
@@ -808,7 +903,7 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/blog/Kubernetes/k8s-StatefulSets-Overview/">
-                Read more &raquo;
+                تابع القراءة &raquo;
               </a>
             </div>
           <!--/noindex-->
@@ -853,22 +948,22 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">Posted on</span>
+              <span class="post-meta-item-text">نُشر في</span>
 
-              <time title="Created: 2018-09-26 14:50:00" itemprop="dateCreated datePublished" datetime="2018-09-26T14:50:00+08:00">2018-09-26</time>
+              <time title="أُنشأ: 2018-09-26 14:50:00" itemprop="dateCreated datePublished" datetime="2018-09-26T14:50:00+08:00">2018-09-26</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-08-11 06:03:13" itemprop="dateModified" datetime="2020-08-11T06:03:13+08:00">2020-08-11</time>
+                <span class="post-meta-item-text">عُدل في</span>
+                <time title="عُدل: 2020-08-16 17:01:14" itemprop="dateModified" datetime="2020-08-16T17:01:14+08:00">2020-08-16</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">In</span>
+              <span class="post-meta-item-text">في</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/blog/categories/Kubernetes/" itemprop="url" rel="index"><span itemprop="name">Kubernetes</span></a>
                 </span>
@@ -903,7 +998,7 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/blog/Kubernetes/k8s-use-GlusterFS-with-standalone-Heketi/">
-                Read more &raquo;
+                تابع القراءة &raquo;
               </a>
             </div>
           <!--/noindex-->
@@ -948,22 +1043,22 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">Posted on</span>
+              <span class="post-meta-item-text">نُشر في</span>
 
-              <time title="Created: 2018-09-16 20:20:00" itemprop="dateCreated datePublished" datetime="2018-09-16T20:20:00+08:00">2018-09-16</time>
+              <time title="أُنشأ: 2018-09-16 20:20:00" itemprop="dateCreated datePublished" datetime="2018-09-16T20:20:00+08:00">2018-09-16</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-08-11 06:03:13" itemprop="dateModified" datetime="2020-08-11T06:03:13+08:00">2020-08-11</time>
+                <span class="post-meta-item-text">عُدل في</span>
+                <time title="عُدل: 2020-08-16 17:01:14" itemprop="dateModified" datetime="2020-08-16T17:01:14+08:00">2020-08-16</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">In</span>
+              <span class="post-meta-item-text">في</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/blog/categories/Kubernetes/" itemprop="url" rel="index"><span itemprop="name">Kubernetes</span></a>
                 </span>
@@ -998,102 +1093,7 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/blog/Kubernetes/k8s-Deployment-Overview/">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
-    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/Kubernetes/k8s-ReplicaSet-Overview/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/blog/images/avatar.gif">
-      <meta itemprop="name" content="godleon">
-      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="小信豬的原始部落">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/blog/Kubernetes/k8s-ReplicaSet-Overview/" class="post-title-link" itemprop="url">[Kubernetes] ReplicaSet 介紹</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2018-09-07 09:00:00" itemprop="dateCreated datePublished" datetime="2018-09-07T09:00:00+08:00">2018-09-07</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-08-11 06:03:13" itemprop="dateModified" datetime="2020-08-11T06:03:13+08:00">2020-08-11</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/blog/categories/Kubernetes/" itemprop="url" rel="index"><span itemprop="name">Kubernetes</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="fa fa-comment-o"></i>
-      </span>
-      <span class="post-meta-item-text">Disqus: </span>
-    
-    <a title="disqus" href="/blog/Kubernetes/k8s-ReplicaSet-Overview/#disqus_thread" itemprop="discussionUrl">
-      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="Kubernetes/k8s-ReplicaSet-Overview/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>本篇文章的主題圍繞在 Kubernetes 中的 ReplicaSet resource object，並對其概念 & 特性作概略的介紹</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/blog/Kubernetes/k8s-ReplicaSet-Overview/">
-                Read more &raquo;
+                تابع القراءة &raquo;
               </a>
             </div>
           <!--/noindex-->
@@ -1115,7 +1115,7 @@
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/blog/page/5/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/blog/">1</a><span class="space">&hellip;</span><a class="page-number" href="/blog/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/blog/page/7/">7</a><span class="space">&hellip;</span><a class="page-number" href="/blog/page/13/">13</a><a class="extend next" rel="next" href="/blog/page/7/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
+    <a class="extend prev" rel="prev" href="/blog/page/5/"><i class="fa fa-angle-left" aria-label="الصفحة السابقة"></i></a><a class="page-number" href="/blog/">1</a><span class="space">&hellip;</span><a class="page-number" href="/blog/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/blog/page/7/">7</a><span class="space">&hellip;</span><a class="page-number" href="/blog/page/13/">13</a><a class="extend next" rel="next" href="/blog/page/7/"><i class="fa fa-angle-right" aria-label="الصفحة التالية"></i></a>
   </nav>
 
 
@@ -1159,10 +1159,10 @@
 
       <ul class="sidebar-nav motion-element">
         <li class="sidebar-nav-toc">
-          Table of Contents
+          المحتويات
         </li>
         <li class="sidebar-nav-overview">
-          Overview
+          عام
         </li>
       </ul>
 
@@ -1181,21 +1181,21 @@
       <div class="site-state-item site-state-posts">
           <a href="/blog/archives/">
         
-          <span class="site-state-item-count">124</span>
-          <span class="site-state-item-name">posts</span>
+          <span class="site-state-item-count">125</span>
+          <span class="site-state-item-name">المقالات</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/blog/categories/">
           
         <span class="site-state-item-count">23</span>
-        <span class="site-state-item-name">categories</span></a>
+        <span class="site-state-item-name">التصنيفات</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/blog/tags/">
           
         <span class="site-state-item-count">101</span>
-        <span class="site-state-item-name">tags</span></a>
+        <span class="site-state-item-name">الوسوم</span></a>
       </div>
   </nav>
 </div>
@@ -1227,7 +1227,7 @@
   </span>
   <span class="author" itemprop="copyrightHolder">godleon</span>
 </div>
-  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  <div class="powered-by">تطبيق الموقع <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
   </div>
 
         
