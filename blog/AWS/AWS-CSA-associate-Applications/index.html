@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-tw">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
@@ -28,7 +28,7 @@
 <meta property="og:url" content="https://godleon.github.io/blog/AWS/AWS-CSA-associate-Applications/index.html">
 <meta property="og:site_name" content="小信豬的原始部落">
 <meta property="og:description" content="此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 Application 相關服務，包含 SQS、SNS、SWF、Elastic Transcoder、API Gateway、Kinesis、Cognito ... 等等內容">
-<meta property="og:locale" content="zh_TW">
+<meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/SQS_Message-Queue.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/SQS_Standard-Queue.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/SQS_FIFO-Queue.png">
@@ -42,7 +42,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/Cognito_Example3.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/Cognito_Example2.png">
 <meta property="article:published_time" content="2020-07-20T22:00:00.000Z">
-<meta property="article:modified_time" content="2020-08-17T02:22:00.409Z">
+<meta property="article:modified_time" content="2020-08-17T02:24:54.856Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -66,7 +66,7 @@
     sidebar: "",
     isHome : false,
     isPost : true,
-    lang   : 'zh-tw'
+    lang   : 'en'
   };
 </script>
 
@@ -131,7 +131,7 @@
     <header class="header" itemscope itemtype="http://schema.org/WPHeader">
       <div class="header-inner"><div class="site-brand-container">
   <div class="site-nav-toggle">
-    <div class="toggle" aria-label="تشغيل شريط التصفح">
+    <div class="toggle" aria-label="Toggle navigation bar">
     </div>
   </div>
 
@@ -170,10 +170,10 @@
     <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
-          المحتويات
+          Table of Contents
         </li>
         <li class="sidebar-nav-overview">
-          عام
+          Overview
         </li>
       </ul>
 
@@ -193,18 +193,18 @@
       <div class="site-state-item site-state-posts">
           <a href="/blog/archives">
           <span class="site-state-item-count">124</span>
-          <span class="site-state-item-name">المقالات</span>
+          <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/blog/categories/">
         <span class="site-state-item-count">23</span>
-        <span class="site-state-item-name">التصنيفات</span></a>
+        <span class="site-state-item-name">categories</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/blog/tags/">
         <span class="site-state-item-count">101</span>
-        <span class="site-state-item-name">الوسوم</span></a>
+        <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
 </div>
@@ -238,7 +238,7 @@
     
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/AWS/AWS-CSA-associate-Applications/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -263,22 +263,22 @@
               <span class="post-meta-item-icon">
                 <i class="far fa-calendar"></i>
               </span>
-              <span class="post-meta-item-text">نُشر في</span>
+              <span class="post-meta-item-text">Posted on</span>
 
-              <time title="أُنشأ: 2020-07-21 06:00:00" itemprop="dateCreated datePublished" datetime="2020-07-21T06:00:00+08:00">2020-07-21</time>
+              <time title="Created: 2020-07-21 06:00:00" itemprop="dateCreated datePublished" datetime="2020-07-21T06:00:00+08:00">2020-07-21</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
-                <span class="post-meta-item-text">عُدل في</span>
-                <time title="عُدل: 2020-08-17 10:22:00" itemprop="dateModified" datetime="2020-08-17T10:22:00+08:00">2020-08-17</time>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-08-17 10:24:54" itemprop="dateModified" datetime="2020-08-17T10:24:54+08:00">2020-08-17</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
               </span>
-              <span class="post-meta-item-text">في</span>
+              <span class="post-meta-item-text">In</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/blog/categories/AWS/" itemprop="url" rel="index"><span itemprop="name">AWS</span></a>
                 </span>
@@ -814,7 +814,7 @@
   </span>
   <span class="author" itemprop="copyrightHolder">godleon</span>
 </div>
-  <div class="powered-by">تطبيق الموقع <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
   </div>
 
     </div>
