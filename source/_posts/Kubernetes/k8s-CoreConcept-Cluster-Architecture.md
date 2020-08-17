@@ -124,7 +124,7 @@ Kubernetes 的架構設計上也極為類似 Borg，如下圖所示：
 
 ### kube-proxy
 
-在 Kubernetes 中，**[service](https://kubernetes.io/docs/concepts/services-networking/service/)** 將多個 pod 抽象化成一個單一群組，並為此群組提供一個 virtual IP，並提供其他 pod or service 進行存取。
+在 Kubernetes 中，[**service**](https://kubernetes.io/docs/concepts/services-networking/service/) 將多個 pod 抽象化成一個單一群組，並為此群組提供一個 virtual IP，並提供其他 pod or service 進行存取。
 
 而 kube-proxy 就是負責在 host 中針對 service 與 pod 的配置設定，產生相對應的 iptables rule，讓送到 service virtual IP 的流量可以正確的導向 service 後端的 pod 中。
 
