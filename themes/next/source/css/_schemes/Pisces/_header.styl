@@ -18,10 +18,16 @@
   margin: 10px 10px 0;
 }
 
-.custom-logo-image {
-  margin-top: 20px;
+.site-nav-toggle, .site-nav-right {
+  +tablet() {
+    flex-column();
+  }
 
-  +tablet-mobile() {
-    display: none;
+  .toggle {
+    color: white;
+
+    .toggle-line {
+      background: white;
+    }
   }
 }

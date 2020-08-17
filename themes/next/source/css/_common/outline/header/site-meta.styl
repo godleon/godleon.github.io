@@ -7,13 +7,19 @@
   }
 }
 
+.custom-logo-image {
+  margin-top: 20px;
+
+  +tablet-mobile() {
+    display: none;
+  }
+}
+
 .brand {
   border-bottom: none;
   color: var(--brand-color);
   display: inline-block;
-  line-height: $font-size-title;
   padding: 0 40px;
-  position: relative;
 
   &:hover {
     color: var(--brand-hover-color);
@@ -34,10 +40,6 @@
 }
 
 .use-motion {
-  .brand {
-    opacity: 0;
-  }
-
   .site-title, .site-subtitle, .custom-logo-image {
     opacity: 0;
     position: relative;

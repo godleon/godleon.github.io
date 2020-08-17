@@ -1,30 +1,21 @@
 .site-state {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   line-height: 1.4;
   margin-top: 10px;
-  overflow: hidden;
-  text-align: center;
-  white-space: nowrap;
 }
 
-.site-state-item {
+.site-state-item a {
+  border-bottom: none;
+  display: block;
   padding: 0 15px;
-
-  &:not(:first-child) {
-    border-left: 1px solid $site-state-item-border-color;
-  }
-
-  a {
-    border-bottom: none;
-  }
 }
 
 .site-state-item-count {
   display: block;
   font-size: $site-state-item-count-font-size;
   font-weight: 600;
-  text-align: center;
 }
 
 .site-state-item-name {
