@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="此文章記錄學習 RHCE7 RH254 Chapter 2 Managing IPv6 Networking 留下的內容">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[RHCE7] RH254 Chapter 2 Managing IPv6 Networking Learning Notes">
+<meta property="og:url" content="https://godleon.github.io/blog/RHCE/RHCE7-RH254-LearningNotes-CH02_ManagingIPv6Networking/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此文章記錄學習 RHCE7 RH254 Chapter 2 Managing IPv6 Networking 留下的內容">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="https://lh3.googleusercontent.com/M6--ZzzQCdXEj7HPZ2HNgI304o4xkBiUwCq0WAKL8pNQSHyvWs9fRiOgjCV32b2AkoMwNmYXU5umlO9TVWL-CeQ6Kh4tZEXfhYQ8_f60JDc7bHwgt6wFGSoYRyRex7_UmYLL9HAoofc_5wi5P7p3aEhQVJds1ZVEjgdmF-2g6ZTQ2DMloS0R0s3vJelc7QG8j7unlYjRf8QEuzF-mRSwU5xcYtfy3yn66ytEoiE0eIxJDlPrzDKHiLmk1M6-RPlCJJHMmEO9Bd7mAweT4TKMkO6o4lB8QLjwkDSODKf_hOpBls_AvmVWJMrTrFD-9JV-KuYp5o5LSr18Hp5cwm4N4NkUrJgwGpf2bLBdshT0AHgt3k6863PVTSAkbZJyKqKP4_6Ot1rg5RZehlJnRqEEZFnXUaJbTZJZc4G3fd7w5zOjvmYIuYW6wUKz3Pu2-6ttyWFCzGbgqMytn1XOelwbUEkgP4WxV3IpZ-Ou3eQmfZROn1FHh9jZ84UgoYspcHRptpPgoxUP710J3OhVEDFOz825EUL3U4Huhcc_gPqSchZf27Hr1AoCsw48zMmwa66oCyDgBA2Ey2sY4DeDLPQF82l0-vR666c=w650-h232-no">
+<meta property="article:published_time" content="2016-05-23T20:55:00.000Z">
+<meta property="article:modified_time" content="2020-08-17T02:22:00.417Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="RHCE">
+<meta property="article:tag" content="RH254">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://lh3.googleusercontent.com/M6--ZzzQCdXEj7HPZ2HNgI304o4xkBiUwCq0WAKL8pNQSHyvWs9fRiOgjCV32b2AkoMwNmYXU5umlO9TVWL-CeQ6Kh4tZEXfhYQ8_f60JDc7bHwgt6wFGSoYRyRex7_UmYLL9HAoofc_5wi5P7p3aEhQVJds1ZVEjgdmF-2g6ZTQ2DMloS0R0s3vJelc7QG8j7unlYjRf8QEuzF-mRSwU5xcYtfy3yn66ytEoiE0eIxJDlPrzDKHiLmk1M6-RPlCJJHMmEO9Bd7mAweT4TKMkO6o4lB8QLjwkDSODKf_hOpBls_AvmVWJMrTrFD-9JV-KuYp5o5LSr18Hp5cwm4N4NkUrJgwGpf2bLBdshT0AHgt3k6863PVTSAkbZJyKqKP4_6Ot1rg5RZehlJnRqEEZFnXUaJbTZJZc4G3fd7w5zOjvmYIuYW6wUKz3Pu2-6ttyWFCzGbgqMytn1XOelwbUEkgP4WxV3IpZ-Ou3eQmfZROn1FHh9jZ84UgoYspcHRptpPgoxUP710J3OhVEDFOz825EUL3U4Huhcc_gPqSchZf27Hr1AoCsw48zMmwa66oCyDgBA2Ey2sY4DeDLPQF82l0-vR666c=w650-h232-no">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/RHCE/RHCE7-RH254-LearningNotes-CH02_ManagingIPv6Networking/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-tw'
+  };
+</script>
+
+  <title>[RHCE7] RH254 Chapter 2 Managing IPv6 Networking Learning Notes | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="تشغيل شريط التصفح">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          المحتويات
+        </li>
+        <li class="sidebar-nav-overview">
+          عام
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%80%81%E5%B8%AB%E8%A3%9C%E5%85%85"><span class="nav-number">1.</span> <span class="nav-text">老師補充</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A8%AD%E5%AE%9A%E7%B6%B2%E8%B7%AF%E5%8D%A1%E4%BB%A5%E8%88%8A%E7%9A%84%E6%96%B9%E5%BC%8F%E5%91%88%E7%8F%BE-eth0-eth1%E2%80%A6"><span class="nav-number">1.0.1.</span> <span class="nav-text">設定網路卡以舊的方式呈現(eth0, eth1…)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ip-%E6%8C%87%E4%BB%A4%E5%8F%AF%E9%81%94%E6%88%90%E7%9A%84%E5%8A%9F%E8%83%BD"><span class="nav-number">1.0.2.</span> <span class="nav-text">ip 指令可達成的功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#nmcli"><span class="nav-number">1.0.3.</span> <span class="nav-text">nmcli</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IPV6"><span class="nav-number">1.0.4.</span> <span class="nav-text">IPV6</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B6%E4%BB%96"><span class="nav-number">1.0.5.</span> <span class="nav-text">其他</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-1-Reviewing-of-IPv4-Networking-Configuration"><span class="nav-number">2.</span> <span class="nav-text">2.1 Reviewing of IPv4 Networking Configuration</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%9C%E6%96%BC-autoconnect"><span class="nav-number">2.1.</span> <span class="nav-text">關於 autoconnect</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%9C%E6%96%BC-nmcli-%E7%9A%84%E8%A8%AD%E5%AE%9A%E5%8F%83%E6%95%B8"><span class="nav-number">2.2.</span> <span class="nav-text">關於 nmcli 的設定參數</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-6-Deleting-a-network-connection"><span class="nav-number">2.3.</span> <span class="nav-text">2.1.6 Deleting a network connection</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-7-Modifying-the-system-host-name"><span class="nav-number">2.4.</span> <span class="nav-text">2.1.7 Modifying the system host name</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Practice-Configuring-IPv4-Networking"><span class="nav-number">3.</span> <span class="nav-text">Practice: Configuring IPv4 Networking</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%AE%E6%A8%99"><span class="nav-number">3.1.</span> <span class="nav-text">目標</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%A6%E4%BD%9C%E9%81%8E%E7%A8%8B"><span class="nav-number">3.2.</span> <span class="nav-text">實作過程</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-2-IPv6-Networking-Concepts"><span class="nav-number">4.</span> <span class="nav-text">2.2 IPv6 Networking Concepts</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-1-IPv6-overview"><span class="nav-number">4.1.</span> <span class="nav-text">2.2.1 IPv6 overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-2-Interpreting-IPv6-addresses"><span class="nav-number">4.2.</span> <span class="nav-text">2.2.2 Interpreting IPv6 addresses</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#IPv6-subnets"><span class="nav-number">4.2.1.</span> <span class="nav-text">IPv6 subnets</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-3-IPv6-address-allocation"><span class="nav-number">4.3.</span> <span class="nav-text">2.2.3 IPv6 address allocation</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Link-local-addresses"><span class="nav-number">4.3.1.</span> <span class="nav-text">Link-local addresses</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Multicast"><span class="nav-number">4.3.2.</span> <span class="nav-text">Multicast</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-4-IPv6-address-configuration"><span class="nav-number">4.4.</span> <span class="nav-text">2.2.4 IPv6 address configuration</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Static-addressing"><span class="nav-number">4.4.1.</span> <span class="nav-text">Static addressing</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DHCPv6-configuration"><span class="nav-number">4.4.2.</span> <span class="nav-text">DHCPv6 configuration</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SLAAC-configuration"><span class="nav-number">4.4.3.</span> <span class="nav-text">SLAAC configuration</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-3-IPv6-Networking-Configuration"><span class="nav-number">5.</span> <span class="nav-text">2.3 IPv6 Networking Configuration</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-2-Adding-an-IPv6-network-connection"><span class="nav-number">5.1.</span> <span class="nav-text">2.3.2 Adding an IPv6 network connection</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-3-Modifying-network-connection-settings-for-IPv6"><span class="nav-number">5.2.</span> <span class="nav-text">2.3.3 Modifying network connection settings for IPv6</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%EF%BC%9AIPv6-%E7%9B%B8%E9%97%9C%E6%8C%87%E4%BB%A4"><span class="nav-number">5.3.</span> <span class="nav-text">其他：IPv6 相關指令</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Practice-Configuration-IPv6-Networking"><span class="nav-number">6.</span> <span class="nav-text">Practice: Configuration IPv6 Networking</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%AE%E6%A8%99-1"><span class="nav-number">6.1.</span> <span class="nav-text">目標</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%A6%E4%BD%9C%E9%81%8E%E7%A8%8B-1"><span class="nav-number">6.2.</span> <span class="nav-text">實作過程</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Lab-Managing-IPv6-Networking"><span class="nav-number">7.</span> <span class="nav-text">Lab: Managing IPv6 Networking</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%AE%E6%A8%99-2"><span class="nav-number">7.1.</span> <span class="nav-text">目標</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%A6%E4%BD%9C%E9%81%8E%E7%A8%8B-2"><span class="nav-number">7.2.</span> <span class="nav-text">實作過程</span></a></li></ol></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">124</span>
+          <span class="site-state-item-name">المقالات</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">التصنيفات</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">101</span>
+        <span class="site-state-item-name">الوسوم</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/RHCE/RHCE7-RH254-LearningNotes-CH02_ManagingIPv6Networking/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [RHCE7] RH254 Chapter 2 Managing IPv6 Networking Learning Notes
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">نُشر في</span>
+
+              <time title="أُنشأ: 2016-05-24 04:55:00" itemprop="dateCreated datePublished" datetime="2016-05-24T04:55:00+08:00">2016-05-24</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">عُدل في</span>
+                <time title="عُدل: 2020-08-17 10:22:00" itemprop="dateModified" datetime="2020-08-17T10:22:00+08:00">2020-08-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">في</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/RHCE/" itemprop="url" rel="index"><span itemprop="name">RHCE</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/RHCE/RHCE7-RH254-LearningNotes-CH02_ManagingIPv6Networking/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="RHCE/RHCE7-RH254-LearningNotes-CH02_ManagingIPv6Networking/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此文章記錄學習 RHCE7 RH254 Chapter 2 Managing IPv6 Networking 留下的內容</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="老師補充"><a href="#老師補充" class="headerlink" title="老師補充"></a>老師補充</h1><h3 id="設定網路卡以舊的方式呈現-eth0-eth1…"><a href="#設定網路卡以舊的方式呈現-eth0-eth1…" class="headerlink" title="設定網路卡以舊的方式呈現(eth0, eth1…)"></a>設定網路卡以舊的方式呈現(eth0, eth1…)</h3><ol>
+<li><p>編輯 <code>/boot/grub2/grub.cfg</code></p>
+</li>
+<li><p>尋找 kernel 參數列：尋找 <code>linux16</code> 開頭的設定</p>
+</li>
+<li><p>加上參數 <code>biosdevname=0 net.ifnames=0</code>，重開機後即完成</p>
+</li>
+</ol>
+<h3 id="ip-指令可達成的功能"><a href="#ip-指令可達成的功能" class="headerlink" title="ip 指令可達成的功能"></a>ip 指令可達成的功能</h3><ul>
+<li><p>不考慮 network namespace 的前提下，Linux kernel 有 256 個 routing table</p>
+</li>
+<li><p>設定 tc(traffic control) 的功能</p>
+</li>
+<li><p><code>ip route show</code>：可查詢 default gateway</p>
+</li>
+<li><p>查詢 network namespace：<code>ip netns show</code></p>
+</li>
+<li><p>切換到指定的 network namespace(<strong>hidden</strong>)：<code>ip exec netns hidden bash</code></p>
+</li>
+</ul>
+<h3 id="nmcli"><a href="#nmcli" class="headerlink" title="nmcli"></a>nmcli</h3><ul>
+<li><p>沒有加上 ip 資訊則表示設定為 DHCP：<code>nmcli connection add con-name office type ethernet ifname eth1</code></p>
+</li>
+<li><p>把跟 eth1 相關的 connection 全部停掉：<code>nmcli device disconnect eth1</code></p>
+</li>
+<li><p>把 DHCP 改為 static 的示範：<code>nmcli connection modify office ipv4.method manual ipv4.addresses &quot;192.168.0.1/24 192.168.0.254&quot;</code></p>
+</li>
+</ul>
+<h3 id="IPV6"><a href="#IPV6" class="headerlink" title="IPV6"></a>IPV6</h3><ul>
+<li><p><code>::1/128</code>：等同於 ipv4 的 <strong>127.0.0.1/8</strong></p>
+</li>
+<li><p><code>::</code>：等同於 ipv4 的 <strong>0.0.0.0</strong>(for listen port check)</p>
+</li>
+<li><p><code>::/0</code>：default gateway ipv4 的 <strong>0.0.0.0/0</strong></p>
+</li>
+<li><p><code>2000::/3</code>：<code>2000::/16</code> ~ <code>3ffff::/16</code>：為 ipv6 的 public ip</p>
+</li>
+<li><p><code>fd00::/8</code>：ipv6 所使用的 private ip</p>
+</li>
+<li><p><code>fe80::/64</code>：link local address，沒有 DHCP service 的時候會用這一段的 ip(避免 ip 衝突，Linux 會把 MAC address 嵌入到 ip 內)</p>
+</li>
+<li><p><code>ff00::/8</code>：作為 multicast 之用，等同 ipv4 的 <strong>224.0.0.0/4</strong></p>
+</li>
+<li><p>顯示 ipv6 address：<code>ip -6 addr show</code></p>
+</li>
+<li><p>顯示 ipv6 routing table：<code>ip -6 route show</code></p>
+</li>
+<li><p>指定網卡 ping 其他 ipv6 ip(<strong>%</strong> 之後帶網卡名稱)：<code>ping6 ff02:;1%eth0</code></p>
+</li>
+<li><p>持續監控傳遞延遲時間：<code>mtr 8.8.8.8</code></p>
+</li>
+</ul>
+<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><ul>
+<li><p>參數補齊功能要安裝 <code>bash-completion</code> 套件才會有</p>
+</li>
+<li><p>查詢 hostname 對應的 ip：<code>dig server0.example.com</code></p>
+</li>
+<li><p>查詢 ip 對應的 hostname：<code>dig -x 172.25.0.11</code></p>
+<ul>
+<li>client 向 DHCP 要求 ip</li>
+<li>client 取得 ip</li>
+<li>client 拿 ip 向 DNS server 作反向名稱解析</li>
+<li>DNS server 給 client 對應的 hostname</li>
+<li>client 使用上一個步驟給的 hostname 作為自己的 hostname</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>透過 DHCP 取得 ip 的狀況下不會有 <code>/etc/hostname</code> 這個檔案</p>
+</blockquote>
+<hr>
+<h1 id="2-1-Reviewing-of-IPv4-Networking-Configuration"><a href="#2-1-Reviewing-of-IPv4-Networking-Configuration" class="headerlink" title="2.1 Reviewing of IPv4 Networking Configuration"></a>2.1 Reviewing of IPv4 Networking Configuration</h1><h2 id="關於-autoconnect"><a href="#關於-autoconnect" class="headerlink" title="關於 autoconnect"></a>關於 autoconnect</h2><p>若透過 nmcli 設定的 connection 有加上 <code>autoconnect yes</code> 的屬性，當執行 <code>sudo nmcli connection down [CONNECTION_NAME]</code> 時，nmcli 會自動帶起其他有 autoconnect yes 屬性的 connection。</p>
+<h2 id="關於-nmcli-的設定參數"><a href="#關於-nmcli-的設定參數" class="headerlink" title="關於 nmcli 的設定參數"></a>關於 nmcli 的設定參數</h2><ul>
+<li><p>設定好的 connection 會有相對應的檔案存放在 <code>/etc/sysconfig/network-scripts/ifcfg-[CONNECTION_NAME]</code> 中</p>
+</li>
+<li><p>詳細設定可以參考 man page <code>nm-settings(5)</code></p>
+</li>
+<li><p>若要將原本為 DHCP 設定改成 static IP 指定，要特別加上 <code>ipv4.method manual</code>，並附上 IP 相關資訊，以下為範例：</p>
+</li>
+</ul>
+<blockquote>
+<p>sudo nmcli connection modify “System eth0” ipv4.addresses “192.168.0.10/24 192.168.0.1” ipv4.method manual</p>
+</blockquote>
+<ul>
+<li><code>nm-settings</code> 與 <code>ifcfg-*</code> 的對應：</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>nmcli con mod</th>
+<th>ifcfg-* file</th>
+<th>效果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ipv4.method manual</td>
+<td>BOOTPROTO=none</td>
+<td>IPv4 IP 以固定的方式指定</td>
+</tr>
+<tr>
+<td>ipv4.method auto</td>
+<td>BOOTPROTO=dhcp</td>
+<td>以 DHCP 方式取得 ip</td>
+</tr>
+<tr>
+<td>ipv4.addresses “192.168.0.10/24 192.168.0.1”</td>
+<td>IPADDR0=192.168.0.10<br />PREFIX0=24<br />GATEWAY0=192.168.0.1</td>
+<td>指定 IP, Netmask, and Gateway</td>
+</tr>
+<tr>
+<td>ipv4.dns 8.8.8.8</td>
+<td>DNS0=8.8.8.8</td>
+<td>修改 <code>/etc/resolv.conf</code> 中的設定，加入 <code>nameserver 8.8.8.8</code></td>
+</tr>
+<tr>
+<td>ipv4.dns-search example.com</td>
+<td>DOMAIN=example.com</td>
+<td>修改 <code>/etc/resolv.conf</code> 中的 <code>search</code> 設定</td>
+</tr>
+<tr>
+<td>ipv4.ignore-auto-dns true</td>
+<td>PEERDNS=no</td>
+<td>忽略來自 DHCP 的 DNS server 資訊</td>
+</tr>
+<tr>
+<td>connection.autoconnect yes</td>
+<td>ONBOOT=yes</td>
+<td>開機自動啟動</td>
+</tr>
+<tr>
+<td>connection.id eth0</td>
+<td>NAME=eth0</td>
+<td>指定 connection 名稱</td>
+</tr>
+<tr>
+<td>connection.interface-name eth0</td>
+<td>DEVICE=eth0</td>
+<td>指定 connection 所要綁定的裝置名稱</td>
+</tr>
+<tr>
+<td>802-3-ethernet.mac-address xxxxx</td>
+<td>HWADDR=xxxxx</td>
+<td>指定 connection 所要綁定裝置的 MAC address</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>因為 nmcli 都會直接去改 <code>/etc/resolv.conf</code> 的設定，因此若是每個 connection 有不同的DNS 設定，建議直接去 <code>/etc/sysconfig/network-scripts/ifcfg-*</code> 檔案中修改 <code>DNSn</code> &amp; <code>DOMAIN</code> 的設定值</p>
+</blockquote>
+<h2 id="2-1-6-Deleting-a-network-connection"><a href="#2-1-6-Deleting-a-network-connection" class="headerlink" title="2.1.6 Deleting a network connection"></a>2.1.6 Deleting a network connection</h2><p>移除 connection 的指令為 <code>sudo nmcli connection delete [CONNECTION_NAME]</code></p>
+<p>同時間也會將此 connection 斷線，並移除 /etc/sysconfig/network-scripts 目錄中相對應的 ifcfg 檔案</p>
+<h2 id="2-1-7-Modifying-the-system-host-name"><a href="#2-1-7-Modifying-the-system-host-name" class="headerlink" title="2.1.7 Modifying the system host name"></a>2.1.7 Modifying the system host name</h2><p>hostname 相關指令：</p>
+<ul>
+<li><p><code>hostnamectl status</code>：查詢 host 狀態</p>
+</li>
+<li><p><code>sudo hostnamectl set-hostname [HOSTNAME]</code>：變更 hostname</p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查詢 host 狀態</span></span><br><span class="line">[student@server0 ~]$ hostnamectl status</span><br><span class="line">   Static hostname: server5.example.com</span><br><span class="line">         Icon name: computer</span><br><span class="line">           Chassis: n/a</span><br><span class="line">        Machine ID: 946cb0e817ea4adb916183df8c4fc817</span><br><span class="line">           Boot ID: 87802c89e9a54f7087857bf5e6de16de</span><br><span class="line">  Operating System: Red Hat Enterprise Linux Server 7.0 (Maipo)</span><br><span class="line">       CPE OS Name: cpe:/o:redhat:enterprise_linux:7.0:GA:server</span><br><span class="line">            Kernel: Linux 3.10.0-123.el7.x86_64</span><br><span class="line">      Architecture: x86_64</span><br><span class="line"></span><br><span class="line"><span class="comment"># 修改 hostname</span></span><br><span class="line">[student@server0 ~]$ sudo hostnamectl <span class="built_in">set</span>-hostname server1.example.com</span><br><span class="line">[student@server0 ~]$ hostnamectl status</span><br><span class="line">   Static hostname: server1.example.com</span><br><span class="line">         Icon name: computer</span><br><span class="line">           Chassis: n/a</span><br><span class="line">        Machine ID: 946cb0e817ea4adb916183df8c4fc817</span><br><span class="line">           Boot ID: 87802c89e9a54f7087857bf5e6de16de</span><br><span class="line">  Operating System: Red Hat Enterprise Linux Server 7.0 (Maipo)</span><br><span class="line">       CPE OS Name: cpe:/o:redhat:enterprise_linux:7.0:GA:server</span><br><span class="line">            Kernel: Linux 3.10.0-123.el7.x86_64</span><br><span class="line">      Architecture: x86_64</span><br><span class="line"></span><br><span class="line">$ cat /etc/hostname</span><br><span class="line">server1.example.com</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>透過 hostnamectl 修改 hostname 之後，會反映到 /etc/hostname 的內容上</p>
+</blockquote>
+<hr>
+<h1 id="Practice-Configuring-IPv4-Networking"><a href="#Practice-Configuring-IPv4-Networking" class="headerlink" title="Practice: Configuring IPv4 Networking"></a>Practice: Configuring IPv4 Networking</h1><h2 id="目標"><a href="#目標" class="headerlink" title="目標"></a>目標</h2><ol>
+<li><p>透過 nmcli 建立一個 connection，名稱為 <code>eno1</code></p>
+</li>
+<li><p>設定 connection 使用的網路介面為 <code>eno1</code>，IP <code>192.168.0.1/24</code>，沒有 Gateway</p>
+</li>
+<li><p>進行 DNS 查詢時，會把 <code>otherhost</code> 解析為 <code>192.168.0.254</code></p>
+</li>
+</ol>
+<h2 id="實作過程"><a href="#實作過程" class="headerlink" title="實作過程"></a>實作過程</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">$ sudo nmcli connection add con-name eno1 ifname eno1 <span class="built_in">type</span> ethernet autoconnect yes ip4 192.168.0.1/24</span><br><span class="line">Connection <span class="string">&#x27;eno1&#x27;</span> (4b182e51-8798-406c-a07c-c63289733543) successfully added.</span><br><span class="line">$ sudo nmcli connection up eno1</span><br><span class="line"> successfully activated (D-Bus active path: /org/freedesktop/NetworkManager/ActiveConnection/2)</span><br><span class="line"></span><br><span class="line"> [student@server0 ~]$ ip addr show eno1</span><br><span class="line"> 6: eno1: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast state UP qlen 1000</span><br><span class="line">     link/ether f6:0f:ec:b7:98:e1 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">     inet 192.168.0.1/24 brd 192.168.0.255 scope global eno1</span><br><span class="line">        valid_lft forever preferred_lft forever</span><br><span class="line">     inet6 fe80::f40f:ecff:feb7:98e1/64 scope link</span><br><span class="line">        valid_lft forever preferred_lft forever</span><br><span class="line"></span><br><span class="line">$ <span class="built_in">echo</span> <span class="string">&quot;192.168.0.254 otherhost&quot;</span> | sudo tee --append /etc/hosts</span><br><span class="line">192.168.0.254 otherhost</span><br><span class="line"></span><br><span class="line">$ ping otherhost</span><br><span class="line">PING otherhost (192.168.0.254) 56(84) bytes of data.</span><br><span class="line">64 bytes from otherhost (192.168.0.254): icmp_seq=1 ttl=64 time=0.055 ms</span><br><span class="line">♥</span><br><span class="line">--- otherhost ping statistics ---</span><br><span class="line">1 packets transmitted, 1 received, 0% packet loss, time 0ms</span><br><span class="line">rtt min/avg/max/mdev = 0.055/0.055/0.055/0.000 ms</span><br><span class="line"></span><br><span class="line"><span class="comment"># 顯示目前有那些額外的 network namespace</span></span><br><span class="line">$ ip netns show</span><br><span class="line">hidden</span><br><span class="line"><span class="comment"># 切換到指定的 network namespace</span></span><br><span class="line">$ ip <span class="built_in">exec</span> netns hidden bash</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="2-2-IPv6-Networking-Concepts"><a href="#2-2-IPv6-Networking-Concepts" class="headerlink" title="2.2 IPv6 Networking Concepts"></a>2.2 IPv6 Networking Concepts</h1><h2 id="2-2-1-IPv6-overview"><a href="#2-2-1-IPv6-overview" class="headerlink" title="2.2.1 IPv6 overview"></a>2.2.1 IPv6 overview</h2><p>IPv6 目的是要解決 IPv4 IP 不足的問題，但因為沒有一個簡單的方式可以直接讓 IPv6 獨立運作，因此目前屬於過渡時期的方式，稱為 <code>dual-stack</code>，即是讓 IPv4 與 IPv6 同時存在</p>
+<h2 id="2-2-2-Interpreting-IPv6-addresses"><a href="#2-2-2-Interpreting-IPv6-addresses" class="headerlink" title="2.2.2 Interpreting IPv6 addresses"></a>2.2.2 Interpreting IPv6 addresses</h2><p>IPv6 address 長度為 128 bits，以 16 進位顯示，每 16 個 bits 會用冒號隔開，格式大概如下：</p>
+<blockquote>
+<p>2001:0DB8:02de:0000:0000:0000:0000:0e13</p>
+</blockquote>
+<p>但這樣太難記了，所以可以用較簡單的表示方式：(<strong>都以小寫表示</strong>)</p>
+<ul>
+<li><p>2001:db8:2de:0000:0000:0000:0000:e13</p>
+</li>
+<li><p>2001:db8:2de:000:000:000:000:e13</p>
+</li>
+<li><p>2001:db8:2de:00:00:00:00:e13</p>
+</li>
+<li><p>2001:db8:2de:0:0:0:0:e13</p>
+</li>
+<li><p>2001:db8:2de::e13</p>
+<p>以上這幾種所表示的 IPv6 address 都是同一個(<strong>每個由冒號區隔的 group，開頭的 0 都可以省略不寫</strong>)</p>
+</li>
+</ul>
+<blockquote>
+<p>雙冒號不能同時出現兩個，這樣會無法推斷出正確的 IPv6 address</p>
+</blockquote>
+<blockquote>
+<p>若要指定特定的 port，則會以類似這樣的形式表示：<code>[2001:DB8:2de::e13]:80</code></p>
+</blockquote>
+<h3 id="IPv6-subnets"><a href="#IPv6-subnets" class="headerlink" title="IPv6 subnets"></a>IPv6 subnets</h3><ul>
+<li><p>IPv6 同樣也有 subnet 的概念，標準的 IPv6 <code>network prefix</code> 長度為 64 bits(<code>/64</code>)，其餘 64 bits 則是屬於 <code>interface ID</code></p>
+</li>
+<li><p>從上面可知，每個 subnet 可包含的網路裝置數量是很驚人的…..(<code>2^64</code>)</p>
+</li>
+<li><p>實際應用上，64 bits 真是太大了，而且一個 subnet 當然也不夠用，因此使用上還是會切成 <code>/48</code> 居多，這樣就可以從只有一個 subnet 變成有 <code>65536(2^16)</code> 個 subnet 可用</p>
+</li>
+</ul>
+<p><img src="https://lh3.googleusercontent.com/M6--ZzzQCdXEj7HPZ2HNgI304o4xkBiUwCq0WAKL8pNQSHyvWs9fRiOgjCV32b2AkoMwNmYXU5umlO9TVWL-CeQ6Kh4tZEXfhYQ8_f60JDc7bHwgt6wFGSoYRyRex7_UmYLL9HAoofc_5wi5P7p3aEhQVJds1ZVEjgdmF-2g6ZTQ2DMloS0R0s3vJelc7QG8j7unlYjRf8QEuzF-mRSwU5xcYtfy3yn66ytEoiE0eIxJDlPrzDKHiLmk1M6-RPlCJJHMmEO9Bd7mAweT4TKMkO6o4lB8QLjwkDSODKf_hOpBls_AvmVWJMrTrFD-9JV-KuYp5o5LSr18Hp5cwm4N4NkUrJgwGpf2bLBdshT0AHgt3k6863PVTSAkbZJyKqKP4_6Ot1rg5RZehlJnRqEEZFnXUaJbTZJZc4G3fd7w5zOjvmYIuYW6wUKz3Pu2-6ttyWFCzGbgqMytn1XOelwbUEkgP4WxV3IpZ-Ou3eQmfZROn1FHh9jZ84UgoYspcHRptpPgoxUP710J3OhVEDFOz825EUL3U4Huhcc_gPqSchZf27Hr1AoCsw48zMmwa66oCyDgBA2Ey2sY4DeDLPQF82l0-vR666c=w650-h232-no" alt="IPv6"></p>
+<h2 id="2-2-3-IPv6-address-allocation"><a href="#2-2-3-IPv6-address-allocation" class="headerlink" title="2.2.3 IPv6 address allocation"></a>2.2.3 IPv6 address allocation</h2><p>IPv6 跟 IPv4 相同也有一些特定的位址，作為特定目的使用，例如：<code>localhost</code>、<code>multicast</code>、<code>unitcast</code>….等等。</p>
+<p>詳細資料可參考<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/IPv6#IPv6.E4.BD.8D.E5.9D.80.E7.9A.84.E5.88.86.E9.A1.9E">IPv6 - 維基百科，自由的百科全書</a></p>
+<h3 id="Link-local-addresses"><a href="#Link-local-addresses" class="headerlink" title="Link-local addresses"></a>Link-local addresses</h3><p>IPv6 中，Link-local address 是用來讓 host 指定的網路中互相交流之用(<strong>僅在內部</strong>)，以 <code>fe80::</code> 為開頭，完整的位址還包含了網路介面卡的名稱，例如：<code>fe80::211:22ff:fwaa:bbcc%eth0</code></p>
+<h3 id="Multicast"><a href="#Multicast" class="headerlink" title="Multicast"></a>Multicast</h3><p>在 IPv6 中已經沒有 broadcast，因此 multicast 扮演了一個更重要的角色，而 multicast 的位址為 <code>ff02::1</code>，後面還會帶上網路介面卡名稱，因此完整位址寫法是：<code>ff02::1%eth0</code></p>
+<h2 id="2-2-4-IPv6-address-configuration"><a href="#2-2-4-IPv6-address-configuration" class="headerlink" title="2.2.4 IPv6 address configuration"></a>2.2.4 IPv6 address configuration</h2><p>IPv6 位址同樣也可以透過靜態指定 or 動態指定(使用 <code>DHCPv6</code> 服務)</p>
+<h3 id="Static-addressing"><a href="#Static-addressing" class="headerlink" title="Static addressing"></a>Static addressing</h3><p>跟 IPv4 相同，每個 IPv6 subnet 會有保留位址供特定目的使用，因此在設定時要避開：</p>
+<ol>
+<li><p><code>0000:0000:0000:0000</code>：這位址是作為 routing 之用，以 <strong>2001:db8::/64</strong> 為例，此位址就是 <code>2001:db8::</code></p>
+</li>
+<li><p>從 <code>fdff:ffff:ffff:ff80</code> ~ <code>fdff:ffff:ffff:ffff</code> 這一段位址</p>
+</li>
+</ol>
+<h3 id="DHCPv6-configuration"><a href="#DHCPv6-configuration" class="headerlink" title="DHCPv6 configuration"></a>DHCPv6 configuration</h3><p>因為 IPv6 沒有 broadcast，因此 DHCPv6 的運作原理跟 DHCPv4 就不太一樣。</p>
+<p>DHCP client 會從自己的 link-local address 送出 DHCP request 到 all-dhcp-servers link-local multicast group 中(<code>ff02::1:2</code> port <code>547/UDP</code>)，而 DHCPv6 server 則會回到 DHCP client 的 link-local address port <code>546/UDP</code></p>
+<h3 id="SLAAC-configuration"><a href="#SLAAC-configuration" class="headerlink" title="SLAAC configuration"></a>SLAAC configuration</h3><p>這是另一種透過 router 協助來完成位址配發的技術，詳細的資訊可以參考下列網址：</p>
+<ul>
+<li><p><a target="_blank" rel="noopener" href="http://www.myhome.net.tw/2012_09/p03.htm">2012台網中心電子報─IPv6位址配發技術介紹</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="http://www.lijyyh.com/2012/04/ipv6ipv6-auto-configuration.html">傲笑紅塵路: IPv6自動組態配置(IPv6 Auto configuration)</a></p>
+</li>
+</ul>
+<hr>
+<h1 id="2-3-IPv6-Networking-Configuration"><a href="#2-3-IPv6-Networking-Configuration" class="headerlink" title="2.3 IPv6 Networking Configuration"></a>2.3 IPv6 Networking Configuration</h1><h2 id="2-3-2-Adding-an-IPv6-network-connection"><a href="#2-3-2-Adding-an-IPv6-network-connection" class="headerlink" title="2.3.2 Adding an IPv6 network connection"></a>2.3.2 Adding an IPv6 network connection</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ sudo nmcli connection add con-name <span class="string">&quot;eth2-ipv6&quot;</span> <span class="built_in">type</span> ethernet ifname eth2 ip6 2001:db8:0:1::c000:207/64 gw6 2001:db8:0:1::1 ip4 192.168.2.7/24 gw4 192.168.2.1</span><br><span class="line">Connection <span class="string">&#x27;eth2-ipv6&#x27;</span> (e7c97cdd-efea-43c2-a4d7-52b3bb4be4e2) successfully added.</span><br><span class="line"></span><br><span class="line">$ sudo nmcli connection modify eth2-ipv6 +ipv6.dns 2001:4860:4860::8888</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-3-3-Modifying-network-connection-settings-for-IPv6"><a href="#2-3-3-Modifying-network-connection-settings-for-IPv6" class="headerlink" title="2.3.3 Modifying network connection settings for IPv6"></a>2.3.3 Modifying network connection settings for IPv6</h2><p>修改的方式跟 IPv4 幾乎一模一樣：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 修改 IP 資訊</span></span><br><span class="line">$ sudo nmcli connection modify eth2-ipv6 ipv6.addresses <span class="string">&quot;2001:db8:0:1::a00:1/64 2001:db8:0:1::1&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 增加 DNS 資訊</span></span><br><span class="line">$[student@server0 ~]$ sudo nmcli connection modify eth2-ipv6 +ipv6.dns 2001:4860:4860::8888</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>nmcli con mod</th>
+<th>ifcfg-* file</th>
+<th>效果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ipv6.method manual</td>
+<td>IPV6_AUTOCONF=none</td>
+<td>IPv6 IP 以固定的方式指定</td>
+</tr>
+<tr>
+<td>ipv6.method auto</td>
+<td>IPV6_AUTOCONF=yes</td>
+<td>透過 SLAAC，從 router advertisements 取得 ip</td>
+</tr>
+<tr>
+<td>ipv6.method dhcp</td>
+<td>IPV6_AUTOCONF=no<br />DHCPV6C=yes</td>
+<td>使用 DHCPv6 取得 ip</td>
+</tr>
+<tr>
+<td>ipv6.addresses “2001:db8::a/64 2001:db8::1”</td>
+<td>IPV6ADDR=2001:db8::a/64<br />IPV6_DEFAULTGW=2001:db8::1</td>
+<td>指定 IP, Netmask, and Gateway</td>
+</tr>
+<tr>
+<td>ipv6.dns 8.8.8.8</td>
+<td>DNS0=8.8.8.8</td>
+<td>修改 <code>/etc/resolv.conf</code> 中的設定，加入 <code>nameserver 8.8.8.8</code>(與 IPv4 相同)</td>
+</tr>
+<tr>
+<td>ipv6.dns-search example.com</td>
+<td>DOMAIN=example.com</td>
+<td>修改 <code>/etc/resolv.conf</code> 中的 <code>search</code> 設定(與 IPv4 相同)</td>
+</tr>
+<tr>
+<td>ipv4.ignore-auto-dns true</td>
+<td>IPV6_PEERDNS=no</td>
+<td>忽略來自 DHCP 的 DNS server 資訊</td>
+</tr>
+<tr>
+<td>connection.autoconnect yes</td>
+<td>ONBOOT=yes</td>
+<td>開機自動啟動</td>
+</tr>
+<tr>
+<td>connection.id eth0</td>
+<td>NAME=eth0</td>
+<td>指定 connection 名稱</td>
+</tr>
+<tr>
+<td>connection.interface-name eth0</td>
+<td>DEVICE=eth0</td>
+<td>指定 connection 所要綁定的裝置名稱</td>
+</tr>
+<tr>
+<td>802-3-ethernet.mac-address xxxxx</td>
+<td>HWADDR=xxxxx</td>
+<td>指定 connection 所要綁定裝置的 MAC address</td>
+</tr>
+</tbody></table>
+<h2 id="其他：IPv6-相關指令"><a href="#其他：IPv6-相關指令" class="headerlink" title="其他：IPv6 相關指令"></a>其他：IPv6 相關指令</h2><p>檢視 IPv6 網路資訊：</p>
+<ul>
+<li><p><code>ip addr show eth0</code>：可檢視 eth0 上 IPv6 相關資訊，尋找關鍵字 <code>inet6</code> 即可</p>
+</li>
+<li><p><code>ip -6 route show</code>：顯示 IPv6 部分的 routing table</p>
+</li>
+</ul>
+<p>trouble shooting 相關指令：</p>
+<ul>
+<li><p><code>ping6 ff02::1%eth1</code>：ping <strong>link-local address</strong> &amp; <strong>link-local all-nodes multicast group</strong>，需要帶上 network interface name</p>
+</li>
+<li><p><code>tracepath6 2001:db8:0:2::451</code>：查詢連線到指定 host 所走的路徑</p>
+</li>
+<li><p><code>ss -A inet -n</code> &amp; <code>netstat -46n</code>：查詢目前 network socket 的狀態</p>
+</li>
+</ul>
+<hr>
+<h1 id="Practice-Configuration-IPv6-Networking"><a href="#Practice-Configuration-IPv6-Networking" class="headerlink" title="Practice: Configuration IPv6 Networking"></a>Practice: Configuration IPv6 Networking</h1><h2 id="目標-1"><a href="#目標-1" class="headerlink" title="目標"></a>目標</h2><ul>
+<li><p>建立一個名稱為 <code>eno1</code> 的連線</p>
+</li>
+<li><p>network interface 名稱為 <code>eno1</code>，設定 IP 為 <code>fddb:fe2a:ab1e::c0a8:1/64</code>，Gateway 為 <code>fddb:fe2a:ab1e::c0a8:fe</code></p>
+</li>
+</ul>
+<h2 id="實作過程-1"><a href="#實作過程-1" class="headerlink" title="實作過程"></a>實作過程</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 新增連線</span></span><br><span class="line">$ sudo nmcli connection add con-name eno1 <span class="built_in">type</span> ethernet ifname eno1 ip6 fddb:fe2a:ab1e::c0a8:1/64 gw6 fddb:fe2a:ab1e::c0a8:fe</span><br><span class="line">Connection <span class="string">&#x27;eno1&#x27;</span> (13505591-aeb6-452d-acaa-8f32810eebb3) successfully added.</span><br><span class="line"></span><br><span class="line"><span class="comment"># 修改連線設定</span></span><br><span class="line">$ sudo nmcli connection modify eno1 ipv6.method manual</span><br><span class="line"></span><br><span class="line"><span class="comment"># 啟用連線</span></span><br><span class="line">$ sudo nmcli connection up eno1</span><br><span class="line">Connection successfully activated (D-Bus active path: /org/freedesktop/NetworkManager/ActiveConnection/3)</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="Lab-Managing-IPv6-Networking"><a href="#Lab-Managing-IPv6-Networking" class="headerlink" title="Lab: Managing IPv6 Networking"></a>Lab: Managing IPv6 Networking</h1><h2 id="目標-2"><a href="#目標-2" class="headerlink" title="目標"></a>目標</h2><ul>
+<li><p>建立一個名稱為 <code>eno1</code> 的連線，使用 network interface 為 <code>eno1</code></p>
+</li>
+<li><p>IPv4 的位址為 <code>192.168.0.100/24</code>，IPv6 的位址為 <code>fddb:fe2a:ab1e::c0a8:64/64</code></p>
+</li>
+<li><p>啟動連線是否都有取得正確 IP</p>
+</li>
+<li><p>ping IPv4 gateway(<code>192.168.0.254</code>) &amp; IPv6 gateway(<code>fddb:fe2a:ab1e::c0a8:fe</code>) 確認網路設定正確</p>
+</li>
+</ul>
+<h2 id="實作過程-2"><a href="#實作過程-2" class="headerlink" title="實作過程"></a>實作過程</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 新增連線</span></span><br><span class="line">$ sudo nmcli connection add con-name eno1 <span class="built_in">type</span> ethernet ifname eno1 ip4 192.168.0.100/24 ip6 fddb:fe2a:ab1e::c0a8:64/64</span><br><span class="line">Connection <span class="string">&#x27;eno1&#x27;</span> (82399d91-7ae1-4544-975c-ae43424de35a) successfully added.</span><br><span class="line"></span><br><span class="line"><span class="comment"># 指定 ip 設定方式為 manual</span></span><br><span class="line">$ sudo nmcli connection modify eno1 ipv4.method manual ipv6.method manual\</span><br><span class="line"></span><br><span class="line"><span class="comment"># 啟動連線</span></span><br><span class="line">$ sudo nmcli connection up eno1</span><br><span class="line">Connection successfully activated (D-Bus active path: /org/freedesktop/NetworkManager/ActiveConnection/2)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查詢 IP 資訊</span></span><br><span class="line">$ ip addr show eno1</span><br><span class="line">6: eno1: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast state UP qlen 1000</span><br><span class="line">    link/ether da:f4:04:59:60:2c brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 192.168.0.100/24 brd 192.168.0.255 scope global eno1</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 fddb:fe2a:ab1e::c0a8:64/64 scope global</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 fe80::d8f4:4ff:fe59:602c/64 scope link</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line"></span><br><span class="line"><span class="comment"># ping IPv4 address</span></span><br><span class="line">[student@server0 ~]$ ping -c 1 192.168.0.254</span><br><span class="line">PING 192.168.0.254 (192.168.0.254) 56(84) bytes of data.</span><br><span class="line">64 bytes from 192.168.0.254: icmp_seq=1 ttl=64 time=0.085 ms</span><br><span class="line"></span><br><span class="line">--- 192.168.0.254 ping statistics ---</span><br><span class="line">1 packets transmitted, 1 received, 0% packet loss, time 0ms</span><br><span class="line">rtt min/avg/max/mdev = 0.085/0.085/0.085/0.000 ms</span><br><span class="line"></span><br><span class="line"><span class="comment"># ping IPv6 address</span></span><br><span class="line">$ ping6 -c 1 fddb:fe2a:ab1e::c0a8:fe</span><br><span class="line">PING fddb:fe2a:ab1e::c0a8:fe(fddb:fe2a:ab1e::c0a8:fe) 56 data bytes</span><br><span class="line">64 bytes from fddb:fe2a:ab1e::c0a8:fe: icmp_seq=1 ttl=64 time=0.187 ms</span><br><span class="line"></span><br><span class="line">--- fddb:fe2a:ab1e::c0a8:fe ping statistics ---</span><br><span class="line">1 packets transmitted, 1 received, 0% packet loss, time 0ms</span><br><span class="line">rtt min/avg/max/mdev = 0.187/0.187/0.187/0.000 ms</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/Linux/" rel="tag"># Linux</a>
+              <a href="/blog/tags/RHCE/" rel="tag"># RHCE</a>
+              <a href="/blog/tags/RH254/" rel="tag"># RH254</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/RHCE/RHCE7-RH254-LearningNotes-CH01_ControllingServicesAndDaemons/" rel="prev" title="[RHCE7] RH254 Chapter 1 Controlling Services and Daemons Learning Notes">
+                  <i class="fa fa-chevron-left"></i> [RHCE7] RH254 Chapter 1 Controlling Services and Daemons Learning Notes
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/blog/RHCE/RHCE7-RH254-LearningNotes-CH03_ConfiguringLinkAggregationAndBridging/" rel="next" title="[RHCE7] RH254 Chapter 3 Configuring Link Aggregation And Bridging Learning Notes">
+                  [RHCE7] RH254 Chapter 3 Configuring Link Aggregation And Bridging Learning Notes <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">تطبيق الموقع <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/RHCE/RHCE7-RH254-LearningNotes-CH02_ManagingIPv6Networking/";
+    this.page.identifier = "RHCE/RHCE7-RH254-LearningNotes-CH02_ManagingIPv6Networking/";
+    this.page.title = "[RHCE7] RH254 Chapter 2 Managing IPv6 Networking Learning Notes";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>

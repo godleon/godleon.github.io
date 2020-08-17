@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="此篇文章簡單介紹什麼是 Message Queue? 到底這類型的元件有什麼特性? 可以為系統帶來什麼優點? 以及其相關的特性 &amp; 運作方式 (以 RabbitMQ 為例)">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Message Queue 簡介(以 RabbitMQ 為例)">
+<meta property="og:url" content="https://godleon.github.io/blog/ChatOps/message-queue-concepts/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章簡單介紹什麼是 Message Queue? 到底這類型的元件有什麼特性? 可以為系統帶來什麼優點? 以及其相關的特性 &amp; 運作方式 (以 RabbitMQ 為例)">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="https://godleon.github.io/blog/images/middleware/message-queue_file-based-integration.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/middleware/message-queue_shared-db-integration.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/middleware/message-queue_direct-connection-integration.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/middleware/message-queue_message-broker-integration.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/middleware/message-queue_case-1.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/middleware/message-queue_case-2.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/middleware/message-queue_concept-binding.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/middleware/message-queue_concept-binding.png">
+<meta property="article:published_time" content="2020-02-12T09:20:00.000Z">
+<meta property="article:modified_time" content="2020-08-17T02:22:00.409Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="Message Queue">
+<meta property="article:tag" content="RabbitMQ">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/middleware/message-queue_file-based-integration.png">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/ChatOps/message-queue-concepts/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-tw'
+  };
+</script>
+
+  <title>Message Queue 簡介(以 RabbitMQ 為例) | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="تشغيل شريط التصفح">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          المحتويات
+        </li>
+        <li class="sidebar-nav-overview">
+          عام
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Preface"><span class="nav-number">1.</span> <span class="nav-text">Preface</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Application-%E6%95%B4%E5%90%88%E6%A8%A1%E5%BC%8F"><span class="nav-number">2.</span> <span class="nav-text">Application 整合模式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Filed-Based-Integration"><span class="nav-number">2.1.</span> <span class="nav-text">Filed Based Integration</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Shared-Database-Integration"><span class="nav-number">2.2.</span> <span class="nav-text">Shared Database Integration</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Direct-Connection-Integration"><span class="nav-number">2.3.</span> <span class="nav-text">Direct Connection Integration</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%8F%E9%81%8E-Message-Broker-%E4%BB%A5%E9%9D%9E%E5%90%8C%E6%AD%A5%E7%9A%84%E6%96%B9%E5%BC%8F%E5%82%B3%E9%81%9E%E8%A8%8A%E6%81%AFAsynchronous-Messaging"><span class="nav-number">2.4.</span> <span class="nav-text">透過 Message Broker 以非同步的方式傳遞訊息Asynchronous Messaging</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-Message-Queue-%E6%9C%89%E4%BB%80%E9%BA%BC%E5%84%AA%E9%BB%9E"><span class="nav-number">3.</span> <span class="nav-text">使用 Message Queue 有什麼優點?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E5%A0%B4%E6%99%AF%E7%AF%84%E4%BE%8B"><span class="nav-number">4.</span> <span class="nav-text">使用場景範例</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Case-1"><span class="nav-number">4.1.</span> <span class="nav-text">Case 1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Case-2"><span class="nav-number">4.2.</span> <span class="nav-text">Case 2</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Messaging-System-%E4%B8%AD%E7%9A%84%E6%A8%99%E6%BA%96%E7%B5%84%E6%88%90%E5%85%83%E7%B4%A0"><span class="nav-number">5.</span> <span class="nav-text">Messaging System 中的標準組成元素</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%B4%B0%E9%83%A8%E6%8E%A2%E7%A9%B6-Message-Queue-amp-Exchange-%E7%9A%84%E5%B1%AC%E6%80%A7%E8%B3%87%E8%A8%8A"><span class="nav-number">6.</span> <span class="nav-text">細部探究 Message, Queue &amp; Exchange 的屬性資訊</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Message-%E7%9A%84%E5%B1%AC%E6%80%A7"><span class="nav-number">6.1.</span> <span class="nav-text">Message 的屬性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Queue-%E7%9A%84%E5%B1%AC%E6%80%A7"><span class="nav-number">6.2.</span> <span class="nav-text">Queue 的屬性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Exchange-%E7%9A%84%E5%B1%AC%E6%80%A7"><span class="nav-number">6.3.</span> <span class="nav-text">Exchange 的屬性</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Exchange"><span class="nav-number">7.</span> <span class="nav-text">Exchange</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%B8%BD%E7%B5%90"><span class="nav-number">8.</span> <span class="nav-text">總結</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">9.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">124</span>
+          <span class="site-state-item-name">المقالات</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">التصنيفات</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">101</span>
+        <span class="site-state-item-name">الوسوم</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/ChatOps/message-queue-concepts/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Message Queue 簡介(以 RabbitMQ 為例)
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">نُشر في</span>
+
+              <time title="أُنشأ: 2020-02-12 17:20:00" itemprop="dateCreated datePublished" datetime="2020-02-12T17:20:00+08:00">2020-02-12</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">عُدل في</span>
+                <time title="عُدل: 2020-08-17 10:22:00" itemprop="dateModified" datetime="2020-08-17T10:22:00+08:00">2020-08-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">في</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Message-Queue/" itemprop="url" rel="index"><span itemprop="name">Message Queue</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/ChatOps/message-queue-concepts/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="ChatOps/message-queue-concepts/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此篇文章簡單介紹什麼是 Message Queue? 到底這類型的元件有什麼特性? 可以為系統帶來什麼優點? 以及其相關的特性 & 運作方式 (以 RabbitMQ 為例)</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="Preface"><a href="#Preface" class="headerlink" title="Preface"></a>Preface</h1><p>以下內容是學習線上課程 <a target="_blank" rel="noopener" href="https://www.udemy.com/course/rabbitmq-and-messaging-concepts/">RabbitMQ and Messaging Concepts</a> 時所留下的學習筆記。</p>
+<p>由於目前 Message Queue 在系統架設設計時很常出現，到底這類型的元件有什麼特性? 可以為系統帶來什麼優點? 以及其相關的特性 &amp; 運作方式 (以 RabbitMQ 為例)。以下的部份會進行說明解釋。</p>
+<h1 id="Application-整合模式"><a href="#Application-整合模式" class="headerlink" title="Application 整合模式"></a>Application 整合模式</h1><p>在一個系統中，一般不會只有一隻程式在運作，而是會有多隻程式同時負責各種不同的任務，而程式之間難免會有互相傳遞資料進行處理的需求，而這類的需求，以下都統稱為 applcation 的整合。</p>
+<p>而一般常見的 application 整合方式大概可以分為以下幾種：</p>
+<h2 id="Filed-Based-Integration"><a href="#Filed-Based-Integration" class="headerlink" title="Filed Based Integration"></a>Filed Based Integration</h2><p><img src="/blog/images/middleware/message-queue_file-based-integration.png" alt="File Based Integration"></p>
+<ul>
+<li><p>source application 會根據需要處理的工作，產生新的檔案到特定的路徑</p>
+</li>
+<li><p>其他的 process application 則會是一直監控該路徑有沒有新檔案，有新的檔案則取出進行處理</p>
+</li>
+</ul>
+<h2 id="Shared-Database-Integration"><a href="#Shared-Database-Integration" class="headerlink" title="Shared Database Integration"></a>Shared Database Integration</h2><p><img src="/blog/images/middleware/message-queue_shared-db-integration.png" alt="Shared Database Integration"></p>
+<ul>
+<li><p>source application 收到新任務時，或將資訊寫入 DB table 中</p>
+</li>
+<li><p>processor application 則是持續監控 DB 中的特定 table，若有新紀錄則取出進行處理</p>
+</li>
+<li><p>processor application 處理完工作後可能會將狀態回寫到 DB 中</p>
+</li>
+</ul>
+<h2 id="Direct-Connection-Integration"><a href="#Direct-Connection-Integration" class="headerlink" title="Direct Connection Integration"></a>Direct Connection Integration</h2><p><img src="/blog/images/middleware/message-queue_direct-connection-integration.png" alt="Direct Connection Integration"></p>
+<ul>
+<li><p>source application 直接傳遞訊息給 processor application</p>
+</li>
+<li><p>可能透過 TCP/IP 或是 named pipe connection 的方式傳遞資料</p>
+</li>
+<li><p>不限傳遞的資料格式，連線兩端的 application 傳遞的資料格式可自訂，可能是純文字、XML or JSON</p>
+</li>
+</ul>
+<h2 id="透過-Message-Broker-以非同步的方式傳遞訊息Asynchronous-Messaging"><a href="#透過-Message-Broker-以非同步的方式傳遞訊息Asynchronous-Messaging" class="headerlink" title="透過 Message Broker 以非同步的方式傳遞訊息Asynchronous Messaging"></a>透過 Message Broker 以非同步的方式傳遞訊息Asynchronous Messaging</h2><p><img src="/blog/images/middleware/message-queue_message-broker-integration.png" alt="Message Broker Based Integration"></p>
+<ul>
+<li><p>不限傳遞的資料格式</p>
+</li>
+<li><p>需要額外的 Message Queue middleware 的協助，也有可能被稱為 Message Broker 或是 Message Bus</p>
+</li>
+<li><p>Message Broker 搜到訊息後(來自 producer application )會轉發給 consumer application</p>
+</li>
+</ul>
+<blockquote>
+<p>從上面看得出來，其實透過 Message Broker 的方式是以上很多不同方式改良後所產生的結果</p>
+</blockquote>
+<h1 id="使用-Message-Queue-有什麼優點"><a href="#使用-Message-Queue-有什麼優點" class="headerlink" title="使用 Message Queue 有什麼優點?"></a>使用 Message Queue 有什麼優點?</h1><p>了解 Message Queue(Broker) 的簡單架構後，那接下來的問題可能是：到底在系統中加入 Message Queue，具體可以帶來哪些好處 or 優點呢?</p>
+<p>以下列出幾項說明：(<code>publisher</code> 為訊息傳送者，<code>consumer</code> 為訊息接收者)</p>
+<ul>
+<li><p>將 publisher &amp; consumer 進行 decouple 了，因此程式開發人員可以各自專心負責規模較小 &amp; 單純的程式開發工作</p>
+</li>
+<li><p>publisher &amp; consumer 不需要知道雙方的實際的位置(例如：IP address)，只要將資料往 message queue 送就好</p>
+</li>
+<li><p>即使 consumer 短暫的無法提供服務也沒關係，message queue 可以將資料暫存起來，等待 consumer 重新上線時再送過去</p>
+</li>
+<li><p>比起持續 polling 的方式相對有效率的多</p>
+</li>
+<li><p>提供了一個可靠的方式，讓<code>訊息傳遞</code> &amp; <code>工作處理</code>兩件事情可以用非同步的方式進行</p>
+</li>
+<li><p>當單一 consumer 不足以完成所有工作時，可以很容易的增加 consumer 數量進行水平擴展</p>
+</li>
+</ul>
+<p>從上面的優點可以看出，加入了 Message Queue，對於整體系統中各個不同元件的解耦很有幫助，同時了也帶來了水平擴展的可能性。(當然這部份也會牽涉到系統流程面上的設計，並非只透過系統架構就可以完成)</p>
+<h1 id="使用場景範例"><a href="#使用場景範例" class="headerlink" title="使用場景範例"></a>使用場景範例</h1><p>以下就透過兩個範例說明，介紹 Message Queue 在整體系統中可以作為什麼樣的角色。</p>
+<h2 id="Case-1"><a href="#Case-1" class="headerlink" title="Case 1"></a>Case 1</h2><p><img src="/blog/images/middleware/message-queue_case-1.png" alt="Message Queue Case 1"></p>
+<p>從上圖可以看出，當 product 有任何更動時，需要後端資料庫的 search index 時，相關的資訊會先傳進 message queue，然後會有其他 worker(consumer) 接收進行處理。</p>
+<h2 id="Case-2"><a href="#Case-2" class="headerlink" title="Case 2"></a>Case 2</h2><p><img src="/blog/images/middleware/message-queue_case-2.png" alt="Message Queue Case 2"></p>
+<p>在一個電子商務網站，可能會因為以下不同的理由，以<code>非同步</code>的方式寄送 email 給會員：</p>
+<ul>
+<li><p>驗證 E-Mail address</p>
+</li>
+<li><p>重設密碼</p>
+</li>
+<li><p>訂單確認</p>
+</li>
+<li><p>促銷活動</p>
+</li>
+</ul>
+<h1 id="Messaging-System-中的標準組成元素"><a href="#Messaging-System-中的標準組成元素" class="headerlink" title="Messaging System 中的標準組成元素"></a>Messaging System 中的標準組成元素</h1><p>了解 Message Queue 的功能之後，接著說明在一個 Messaging System 會包含的標準元素：</p>
+<ul>
+<li><p><strong>Message</strong>：這是最主要的部份，簡單來說 <strong>message 就是要從一個 application 傳遞到另一個 application 的資料</strong>，可以是很多形式，例如：command、query 或是任何事件資訊；而每個 message 會包含兩個部份，分別是 <code>routing information</code> &amp; <code>payload(實際資料)</code>。</p>
+</li>
+<li><p><strong>Producer/Publisher</strong>：producer 是產生 message 並將其傳到 message broker</p>
+</li>
+<li><p><strong>Consumer/Receiver</strong>：收取來自 message broker 的 message 並進行處理</p>
+</li>
+<li><p><strong>Message Queue</strong>：是個存放來自 producer 的 message list，通常一個 messaging system 中會有多個 queue，而每個 queue 都會有一個識別名稱</p>
+</li>
+<li><p><strong>Message Broker</strong>：將 message 從傳送者轉發到 receiver 的一個中間者</p>
+</li>
+<li><p><strong>Router/Exchange</strong>：根據軟體設定，決定 message 傳遞的路徑，將不同的訊息轉發進不同的 queue 中</p>
+<blockquote>
+<p>Routing 的概念在 RabbitMQ 中以 <code>Exchange</code> 來表示</p>
+</blockquote>
+</li>
+<li><p><strong>Connection</strong>：真實的 TCP 連接，像是 producer &amp; message broker 之間的連接，或是 message broker 與 consumer 之間的連接</p>
+</li>
+<li><p><strong>Channel</strong>：在真實的 TCP 連接中定義出來的 virtual connection，這才是實際上 producer/consumer 與 message broker 之間的連接改念</p>
+</li>
+<li><p><strong>Binding</strong>：Binding 定義了 <code>Exchange</code> &amp; <code>Queue</code> 之間的關係以及訊息 routing 的設定，可能還包含了一些 filter 的設定<br><img src="/blog/images/middleware/message-queue_concept-binding.png" alt="Message Queue Case 2"></p>
+</li>
+</ul>
+<h1 id="細部探究-Message-Queue-amp-Exchange-的屬性資訊"><a href="#細部探究-Message-Queue-amp-Exchange-的屬性資訊" class="headerlink" title="細部探究 Message, Queue &amp; Exchange 的屬性資訊"></a>細部探究 Message, Queue &amp; Exchange 的屬性資訊</h1><p>了解了上面關於 Messaging System 的標準組成元素之後，可以大致了解一個 Message Queue 大概是如何與外部 application 進行溝通運作的；但如果要更探究 Message Queue 內部的運作細節，可以從標準組成元素中的屬性(attribute)來進行了解。</p>
+<blockquote>
+<p>這部份的學習會以 <a target="_blank" rel="noopener" href="https://www.rabbitmq.com/">RabbitMQ</a> 為主，因此以下屬性介紹會以 RabiitMQ 為主，但跟其他主流的 Message Queue 應該不會差異太大</p>
+</blockquote>
+<h2 id="Message-的屬性"><a href="#Message-的屬性" class="headerlink" title="Message 的屬性"></a>Message 的屬性</h2><ul>
+<li><p><strong>Routing Key</strong>：用來決定訊息進入到 Messaging System 後如何被轉發的資訊</p>
+</li>
+<li><p><strong>Headers</strong>：key/value 的資訊集合，可用來作為訊息 routing 之後或是傳遞 publisher 想要傳遞的額外訊息</p>
+</li>
+<li><p><strong>Payload</strong>：實際所要傳遞的資料</p>
+</li>
+<li><p><strong>Publishing TimeStamp</strong>(optional)：publisher 所提供的 timestamp 資訊</p>
+</li>
+<li><p><strong>Expiration</strong>：Message 可停留在 Queue 中的存活時間，超過 expiration 的設定則 message 會視為 dead 而不會傳送</p>
+</li>
+<li><p><strong>Delivery Mode</strong>：會有 <code>persistent</code> or <code>trasient</code> 兩個選項，而 persistent 會將 message 寫入 disk 中，即使 RabiitMQ 服務重啟，訊息也都不會遺失，而 trasient 則不會</p>
+</li>
+<li><p><strong>Priority</strong>：message 的優先權(0~255, 這個需要 Queue 支援才可以)</p>
+</li>
+<li><p><strong>Message ID</strong>(optional)：由 publisher 給入，用來識別 message 的 ID 資訊</p>
+</li>
+<li><p><strong>Correlation ID</strong>(optional)：在 RPC 場景中用來匹配 request &amp; response 用的資訊</p>
+</li>
+<li><p><strong>Replay To</strong>(optional)：在 request-response 場景中會使用到的 exchange 或是 queue 的名稱</p>
+</li>
+</ul>
+<h2 id="Queue-的屬性"><a href="#Queue-的屬性" class="headerlink" title="Queue 的屬性"></a>Queue 的屬性</h2><ul>
+<li><p><strong>Name</strong>：唯一的名稱，最多 255 個字元的 UTF-8 字串</p>
+</li>
+<li><p><strong>Durable</strong>：指定在 RabbitMQ 重啟後保留 or 移除 Queue 的依據</p>
+</li>
+<li><p><strong>Auto Delete</strong>：沒有任何訂閱者的情況下是否自動移除</p>
+</li>
+<li><p><strong>Exclusive</strong>：只服務特定一個 connection，一旦該 connection 斷掉就會移除 Queue</p>
+</li>
+<li><p><strong>Max Length</strong>：最多可以停留在 Queue 中的 message 數量，可以指定若超過會從最舊的訊息開始移除或是拒絕新的 message 進入</p>
+</li>
+<li><p><strong>Max Priority</strong>：priority 可設定的最大值</p>
+</li>
+<li><p><strong>Message TTL</strong>：存入到 Queue 中的 Message 的 TTL(若是 Message &amp; Queue 都有 TTL 的設定，會以較低的為主)</p>
+</li>
+<li><p><strong>Dead-letter Exchange</strong>：可用來指定過期 or 被丟棄的 message 被自動傳送到某一個 exchange</p>
+</li>
+<li><p><strong>Binding Configuration</strong>：Queue &amp; Exchange 之間的關聯資訊 (每個 Queue 都必須與某個 Exchange 綁定，確保可以從 Exchange 取得 message)</p>
+</li>
+</ul>
+<h2 id="Exchange-的屬性"><a href="#Exchange-的屬性" class="headerlink" title="Exchange 的屬性"></a>Exchange 的屬性</h2><ul>
+<li><p><strong>Name</strong>：Exchange 的名稱(必須唯一)</p>
+</li>
+<li><p><strong>Type</strong>：Exchange 的運作類型，會是 <code>Fanout</code>, <code>Direct</code>, <code>Topic</code>, <code>Headers</code> 四種之一 </p>
+</li>
+<li><p><strong>Durability</strong>：與 Queue Durability 相同，用來決定在 RabbitMQ 服務重啟後會不會依然存在</p>
+</li>
+<li><p><strong>Auto Delete</strong>：設定是否在沒有任何 Queue 綁定的情況下，就自動移除</p>
+</li>
+<li><p><strong>Internal</strong>：若設定為 Internal，表示僅能接收來自其他 exchange 的 message，無法接收來自 publisher 的 message</p>
+</li>
+<li><p><strong>Alternate Exchange</strong>：指定無法 route 的 message 的去向</p>
+</li>
+<li><p>**Other Arguments(x-arguments)**：Exchange 其他的 metadata，可能會用於其他的 plugin 中</p>
+</li>
+</ul>
+<h1 id="Exchange"><a href="#Exchange" class="headerlink" title="Exchange"></a>Exchange</h1><p>要切入 RabbitMQ 之前，<code>Exchange</code> 的概念是必須先了解的，以下是 RabbitMQ 的內部架構圖： </p>
+<p><img src="/blog/images/middleware/message-queue_concept-binding.png" alt="RabbitMQ Exchange"></p>
+<ul>
+<li><p>Exchange 是 RabbitMQ 系統中負責轉發訊息的元件</p>
+</li>
+<li><p>Message Producer 無法將訊息直接傳到 Queue 中，在 RabbitMQ 中訊息的第一個進入點是 Exchange</p>
+</li>
+<li><p>實際儲存訊息的 Queue 會根據使用者的設定，與不同的 Exchange 進行綁定</p>
+</li>
+<li><p>當 Exchange 收到訊息後，就會轉發到與其綁定的 Queue (可能 0 到多個不等)</p>
+</li>
+<li><p>Exchange 僅能將訊息轉發到與其綁定的 Queue 上</p>
+</li>
+<li><p>Exchange 有四種轉發模式，分別是 <code>Fanout</code>, <code>Direct</code>, <code>Topic</code>, <code>Headers</code></p>
+</li>
+<li><p>至少會有一個預設 Exchange 存在於 RabbitMQ 系統中，稱為 <strong>default exchange</strong>，轉發的模式為 <code>direct</code>；每個新建立的 Queue，若是沒指定 exchane 資訊，就會與預設的綁定</p>
+</li>
+</ul>
+<h1 id="總結"><a href="#總結" class="headerlink" title="總結"></a>總結</h1><p>透過上面關於 Messaging System 的標準組成元素說明，可以了解到一個 Message Queue 在整體系統上所扮演的角色；加上內部組件的屬性(attribute)說明，也大致可以推敲出一個 Messaging System(以 RabbitMQ 為主) 內部運作的狀況。</p>
+<p>因此在實際使用上，我們可以利用 Message Queue 有效的將 application 進行解耦，讓大問題拆分為小問題，並且讓 developer 可以專注在特定的系統功能上，讓 application 面對的，就是 Message Queue 而已。</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a target="_blank" rel="noopener" href="https://www.udemy.com/course/rabbitmq-and-messaging-concepts">Free RabbitMQ Tutorial - RabbitMQ and Messaging Concepts | Udemy</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://www.rabbitmq.com/documentation.html">Documentation: Table of Contents — RabbitMQ</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/Message-Queue/" rel="tag"># Message Queue</a>
+              <a href="/blog/tags/RabbitMQ/" rel="tag"># RabbitMQ</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/ChatOps/howto-develop-telegram-chatbot/" rel="prev" title="[ChatOps] 簡單介紹如何開發一個 Telegram Bot">
+                  <i class="fa fa-chevron-left"></i> [ChatOps] 簡單介紹如何開發一個 Telegram Bot
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/blog/Rancher/Rancher-architecture-overview/" rel="next" title="Rancher Architecture Overview">
+                  Rancher Architecture Overview <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">تطبيق الموقع <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/ChatOps/message-queue-concepts/";
+    this.page.identifier = "ChatOps/message-queue-concepts/";
+    this.page.title = "Message Queue 簡介(以 RabbitMQ 為例)";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>

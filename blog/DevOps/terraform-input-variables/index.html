@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="本篇文章介紹 Terraform Input Variables 如何使用 &amp; 使用時的注意事項">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[Terraform] Input Variables ">
+<meta property="og:url" content="https://godleon.github.io/blog/DevOps/terraform-input-variables/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="本篇文章介紹 Terraform Input Variables 如何使用 &amp; 使用時的注意事項">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2019-10-15T07:15:00.000Z">
+<meta property="article:modified_time" content="2020-08-17T02:22:00.409Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="DevOps">
+<meta property="article:tag" content="Terraform">
+<meta property="article:tag" content="IaC">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/DevOps/terraform-input-variables/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-tw'
+  };
+</script>
+
+  <title>[Terraform] Input Variables  | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="تشغيل شريط التصفح">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          المحتويات
+        </li>
+        <li class="sidebar-nav-overview">
+          عام
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Overview"><span class="nav-number">1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%AE%8A%E6%95%B8%E5%AE%A3%E5%91%8A"><span class="nav-number">2.</span> <span class="nav-text">變數宣告</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-input-variable"><span class="nav-number">3.</span> <span class="nav-text">如何使用 input variable?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%AE%8A%E6%95%B8%E5%9E%8B%E6%85%8B"><span class="nav-number">4.</span> <span class="nav-text">變數型態</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%82%B3%E5%85%A5-variable-values"><span class="nav-number">5.</span> <span class="nav-text">如何傳入 variable values ?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%8F%E9%81%8E-command-line"><span class="nav-number">5.1.</span> <span class="nav-text">透過 command line</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E8%AE%8A%E6%95%B8%E5%AE%9A%E7%BE%A9%E6%AA%94-tfvars"><span class="nav-number">5.2.</span> <span class="nav-text">使用變數定義檔(.tfvars)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%A8-Environment-Variables-%E5%82%B3%E5%85%A5"><span class="nav-number">5.3.</span> <span class="nav-text">用 Environment Variables 傳入</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%82%B3%E5%85%A5%E8%AE%8A%E6%95%B8%E5%80%BC%E7%9A%84%E5%84%AA%E5%85%88%E6%AC%8A"><span class="nav-number">6.</span> <span class="nav-text">傳入變數值的優先權</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">7.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">124</span>
+          <span class="site-state-item-name">المقالات</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">التصنيفات</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">101</span>
+        <span class="site-state-item-name">الوسوم</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/DevOps/terraform-input-variables/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [Terraform] Input Variables 
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">نُشر في</span>
+
+              <time title="أُنشأ: 2019-10-15 15:15:00" itemprop="dateCreated datePublished" datetime="2019-10-15T15:15:00+08:00">2019-10-15</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">عُدل في</span>
+                <time title="عُدل: 2020-08-17 10:22:00" itemprop="dateModified" datetime="2020-08-17T10:22:00+08:00">2020-08-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">في</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Terraform/" itemprop="url" rel="index"><span itemprop="name">Terraform</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/DevOps/terraform-input-variables/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="DevOps/terraform-input-variables/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">本篇文章介紹 Terraform Input Variables 如何使用 & 使用時的注意事項</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h1><p>input variable 通常用來作為 module 的 parameter，而且在 root module 中定義好的 variable，可以根據需求透過 CLI or 環境變數來覆蓋。</p>
+<h1 id="變數宣告"><a href="#變數宣告" class="headerlink" title="變數宣告"></a>變數宣告</h1><p>要宣告一個變數檔，基本上就是新增一個副檔名為 <code>tf</code> 的文字檔，放入類似以下內容：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 變數名稱為 &quot;image_id&quot;，型態為 string</span></span><br><span class="line">variable <span class="string">&quot;image_id&quot;</span> &#123;</span><br><span class="line">  <span class="built_in">type</span> = string</span><br><span class="line">  <span class="comment"># 可透過 &quot;description&quot; 參數對變數加上額外說明</span></span><br><span class="line">  description = <span class="string">&quot;The id of the machine image (AMI) to use for the server.&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 變數名稱為 &quot;availability_zone_names&quot;，型態為 list(string)</span></span><br><span class="line">variable <span class="string">&quot;availability_zone_names&quot;</span> &#123;</span><br><span class="line">  <span class="built_in">type</span>    = list(string)</span><br><span class="line">  <span class="comment"># 可指定預設值</span></span><br><span class="line">  default = [<span class="string">&quot;us-west-1a&quot;</span>]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 變數名稱為 &quot;docker_ports&quot;，型態為 list(object)</span></span><br><span class="line">variable <span class="string">&quot;docker_ports&quot;</span> &#123;</span><br><span class="line">  <span class="built_in">type</span> = list(object(&#123;</span><br><span class="line">    internal = number</span><br><span class="line">    external = number</span><br><span class="line">    protocol = string</span><br><span class="line">  &#125;))</span><br><span class="line">  default = [</span><br><span class="line">    &#123;</span><br><span class="line">      internal = 8300</span><br><span class="line">      external = 8300</span><br><span class="line">      protocol = <span class="string">&quot;tcp&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>基本上變數的名稱可以隨意取(只要遵守<a target="_blank" rel="noopener" href="https://www.terraform.io/docs/configuration/syntax.html#identifiers">命名規則</a>即可)，但不可使用 <code>source</code>, <code>version</code>, <code>providers</code>, <code>count</code>, <code>for_each</code>, <code>lifecycle</code>, <code>depends_on</code>, <code>locals</code> … 等關鍵字。</p>
+<h1 id="如何使用-input-variable"><a href="#如何使用-input-variable" class="headerlink" title="如何使用 input variable?"></a>如何使用 input variable?</h1><p>使用方式很簡單，一個簡單的範例如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ami 設定中使用變數 image_id</span></span><br><span class="line">resource <span class="string">&quot;aws_instance&quot;</span> <span class="string">&quot;example&quot;</span> &#123;</span><br><span class="line">  instance_type = <span class="string">&quot;t2.micro&quot;</span></span><br><span class="line">  ami           = var.image_id</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="變數型態"><a href="#變數型態" class="headerlink" title="變數型態"></a>變數型態</h1><p>input variable 可以有很多型態，以下是目前支援的型態：</p>
+<ul>
+<li><p><code>string</code></p>
+</li>
+<li><p><code>number</code></p>
+</li>
+<li><p><code>bool</code></p>
+</li>
+<li><p><code>list(&lt;TYPE&gt;)</code></p>
+</li>
+<li><p><code>set(&lt;TYPE&gt;)</code></p>
+</li>
+<li><p><code>map(&lt;TYPE&gt;)</code></p>
+</li>
+<li><p><code>object(&#123;&lt;ATTR NAME&gt; = &lt;TYPE&gt;, ... &#125;)</code></p>
+</li>
+<li><p><code>tuple([&lt;TYPE&gt;, ...])</code></p>
+</li>
+</ul>
+<blockquote>
+<p>tuple 中每個元素可以是不同的型態，例如 <code>[&quot;a&quot;, 15, true]</code></p>
+</blockquote>
+<p>詳細的使用規範 &amp; 範例可以參考<a target="_blank" rel="noopener" href="https://www.terraform.io/docs/configuration/types.html">官網文件</a>。</p>
+<h1 id="如何傳入-variable-values"><a href="#如何傳入-variable-values" class="headerlink" title="如何傳入 variable values ?"></a>如何傳入 variable values ?</h1><p>定義了 variable 之後，就會面臨到如何傳入 value 的問題。</p>
+<p>以下的說明是將 value 傳入到 root module 中，若是要傳入到 child module 中，則是要在程式中自行處理。</p>
+<h2 id="透過-command-line"><a href="#透過-command-line" class="headerlink" title="透過 command line"></a>透過 command line</h2><p>透過 <code>-var</code> 關鍵字搭配 <code>terraform plan</code> or <code>terraform apply</code> 命令使用：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ terraform apply -var=<span class="string">&quot;image_id=ami-abc123&quot;</span></span><br><span class="line"></span><br><span class="line">$ terraform apply -var=<span class="string">&#x27;image_id_list=[&quot;ami-abc123&quot;,&quot;ami-def456&quot;]&#x27;</span></span><br><span class="line"></span><br><span class="line">$ terraform apply -var=<span class="string">&#x27;image_id_map=&#123;&quot;us-east-1&quot;:&quot;ami-abc123&quot;,&quot;us-east-2&quot;:&quot;ami-def456&quot;&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>-var</code> 可以在單一指令中使用多次，來傳入多個 variable value</p>
+</blockquote>
+<h2 id="使用變數定義檔-tfvars"><a href="#使用變數定義檔-tfvars" class="headerlink" title="使用變數定義檔(.tfvars)"></a>使用變數定義檔(<code>.tfvars</code>)</h2><p>可以撰寫以 <code>.tfvars</code> or <code>.tfvars.json</code> 為副檔名的變數定義檔，以下是一個簡單的範例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">image_id = <span class="string">&quot;ami-abc123&quot;</span></span><br><span class="line"></span><br><span class="line">availability_zone_names = [</span><br><span class="line">  <span class="string">&quot;us-east-1a&quot;</span>,</span><br><span class="line">  <span class="string">&quot;us-west-1c&quot;</span>,</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<p>以下是 json 格式的範例：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;image_id&quot;</span>: <span class="string">&quot;ami-abc123&quot;</span>,</span><br><span class="line"></span><br><span class="line">  <span class="attr">&quot;availability_zone_names&quot;</span>: [<span class="string">&quot;us-west-1a&quot;</span>, <span class="string">&quot;us-west-1c&quot;</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以透過類似以下的語法帶入變數定義檔：</p>
+<blockquote>
+<p>terraform apply -var-file=”testing.tfvars”</p>
+</blockquote>
+<p>而 Terraform 也可以自動將變數定義檔載入，只要符合以下任何一種命名規範即可：</p>
+<ul>
+<li><p>檔案名稱為 <code>terraform.tfvars</code> or <code>terraform.tfvars.json</code></p>
+</li>
+<li><p>任何檔名，副檔名為 <code>.auto.tfvars</code> or <code>.auto.tfvars</code></p>
+</li>
+</ul>
+<blockquote>
+<p>必須放在執行 <code>terraform apply</code> or <code>terraform plan</code> 時所在的目錄中</p>
+</blockquote>
+<h2 id="用-Environment-Variables-傳入"><a href="#用-Environment-Variables-傳入" class="headerlink" title="用 Environment Variables 傳入"></a>用 Environment Variables 傳入</h2><p>除了上面兩種外，Terraform 也會自動去使用環境變數開頭為 <code>TF_VAR_</code> 的環境變數來作為 variable value。</p>
+<p>假設變數名稱為 <code>image_id</code>，只要將變數值設定到 <code>TF_VAR_image_id</code> 環境變數中，terraform 就會自己載入了!</p>
+<h1 id="傳入變數值的優先權"><a href="#傳入變數值的優先權" class="headerlink" title="傳入變數值的優先權"></a>傳入變數值的優先權</h1><p>上面提到幾個方法可以傳入變數值，那如果同時有多個方法被使用，哪個會被優先採用呢?</p>
+<p>基本上順序是這樣的：</p>
+<ol>
+<li><p>首先會使用目錄中的 <code>terraform.tfvars</code> or <code>terraform.tfvars.json</code> 檔案</p>
+</li>
+<li><p>若目錄中有 <code>*.auto.tfvars</code> or <code>*.auto.tfvars.json</code> 檔案，則會覆蓋掉上一個檔案中的變數值</p>
+</li>
+<li><p>若在 command line 中透過 <code>-var</code> or <code>-var-file</code> 指定變數值或是檔案，則會覆蓋掉上面兩個檔案中提供的變數值</p>
+</li>
+</ol>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a target="_blank" rel="noopener" href="https://www.terraform.io/docs/configuration/variables.html">Input Variables - Configuration Language - Terraform by HashiCorp</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://www.terraform.io/docs/configuration/types.html">Type Constraints - Configuration Language - Terraform by HashiCorp</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/DevOps/" rel="tag"># DevOps</a>
+              <a href="/blog/tags/Terraform/" rel="tag"># Terraform</a>
+              <a href="/blog/tags/IaC/" rel="tag"># IaC</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/DevOps/tekton-pipeline-building-blocks/" rel="prev" title="[Tekton] Tekton Pipeline 的基本組成元件介紹">
+                  <i class="fa fa-chevron-left"></i> [Tekton] Tekton Pipeline 的基本組成元件介紹
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/blog/Elasticsearch/Elasticsearch-getting-started/" rel="next" title="[Elasticsearch] 基本概念 & 搜尋入門">
+                  [Elasticsearch] 基本概念 & 搜尋入門 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">تطبيق الموقع <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/DevOps/terraform-input-variables/";
+    this.page.identifier = "DevOps/terraform-input-variables/";
+    this.page.title = "[Terraform] Input Variables ";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>

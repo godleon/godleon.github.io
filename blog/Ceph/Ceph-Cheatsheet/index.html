@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="This artical contains simple commands for Ceph management and operation">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Ceph 簡單指令操作">
+<meta property="og:url" content="https://godleon.github.io/blog/Ceph/Ceph-Cheatsheet/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="This artical contains simple commands for Ceph management and operation">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2017-05-25T22:00:00.000Z">
+<meta property="article:modified_time" content="2020-08-17T02:22:00.409Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="Ceph">
+<meta property="article:tag" content="SDS">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/Ceph/Ceph-Cheatsheet/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-tw'
+  };
+</script>
+
+  <title>Ceph 簡單指令操作 | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="تشغيل شريط التصفح">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          المحتويات
+        </li>
+        <li class="sidebar-nav-overview">
+          عام
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Monitoring-and-Health"><span class="nav-number">1.</span> <span class="nav-text">Monitoring and Health</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Working-with-Pools-and-OSDs"><span class="nav-number">2.</span> <span class="nav-text">Working with Pools and OSDs</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RBD-Block-Storage"><span class="nav-number">3.</span> <span class="nav-text">RBD Block Storage</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Authentication-and-Authorization"><span class="nav-number">4.</span> <span class="nav-text">Authentication and Authorization</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">124</span>
+          <span class="site-state-item-name">المقالات</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">التصنيفات</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">101</span>
+        <span class="site-state-item-name">الوسوم</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/Ceph/Ceph-Cheatsheet/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Ceph 簡單指令操作
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">نُشر في</span>
+
+              <time title="أُنشأ: 2017-05-26 06:00:00" itemprop="dateCreated datePublished" datetime="2017-05-26T06:00:00+08:00">2017-05-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">عُدل في</span>
+                <time title="عُدل: 2020-08-17 10:22:00" itemprop="dateModified" datetime="2020-08-17T10:22:00+08:00">2020-08-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">في</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Ceph/" itemprop="url" rel="index"><span itemprop="name">Ceph</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/Ceph/Ceph-Cheatsheet/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="Ceph/Ceph-Cheatsheet/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">This artical contains simple commands for Ceph management and operation</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="Monitoring-and-Health"><a href="#Monitoring-and-Health" class="headerlink" title="Monitoring and Health"></a>Monitoring and Health</h1><p>剛安裝完，首先先檢查 ceph cluster 的狀態：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 檢視 ceph cluster status</span></span><br><span class="line">$ ceph -s</span><br><span class="line">    cluster cd6fcb41-c373-48fb-aab3-f8d330a26ccb</span><br><span class="line">     health HEALTH_WARN</span><br><span class="line">            too few PGs per OSD (16 &lt; min 30)</span><br><span class="line">     monmap e1: 3 mons at &#123;ceph01=10.102.41.101:6789/0,ceph02=10.102.41.102:6789/0,ceph03=10.102.41.103:6789/0&#125;</span><br><span class="line">            election epoch 8, quorum 0,1,2 ceph01,ceph02,ceph03</span><br><span class="line">     osdmap e36: 12 osds: 12 up, 12 <span class="keyword">in</span></span><br><span class="line">            flags sortbitwise,require_jewel_osds</span><br><span class="line">      pgmap v84: 64 pgs, 1 pools, 0 bytes data, 0 objects</span><br><span class="line">            405 MB used, 2174 GB / 2174 GB avail</span><br><span class="line">                  64 active+clean</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>也可以用 <code>ceph -w</code> 檢視即時的狀態</p>
+</blockquote>
+<p>檢查健康狀態：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ ceph health detail</span><br><span class="line">HEALTH_WARN too few PGs per OSD (16 &lt; min 30)</span><br><span class="line">too few PGs per OSD (16 &lt; min 30)</span><br></pre></td></tr></table></figure>
+
+
+<p>接著檢視目前 ceph cluster 提供了多少容量可用：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 檢視目前可用的容量、每個 pool 的使用狀況 &amp; quota 等資訊</span></span><br><span class="line">$ ceph df</span><br><span class="line">GLOBAL:</span><br><span class="line">    SIZE      AVAIL     RAW USED     %RAW USED </span><br><span class="line">    2174G     2174G         405M          0.02 </span><br><span class="line">POOLS:</span><br><span class="line">    NAME     ID     USED     %USED     MAX AVAIL     OBJECTS </span><br><span class="line">    rbd      0         0         0          724G           0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 連到 CRUSH tree, 顯示 weight, variance, capacity ... etc</span></span><br><span class="line">$ ceph osd df tree</span><br><span class="line">ID WEIGHT  REWEIGHT SIZE  USE    AVAIL %USE VAR  PGS TYPE NAME       </span><br><span class="line">-1 2.12384        - 2174G   405M 2174G 0.02 1.00   0 root default    </span><br><span class="line">-2 0.70795        -  724G   135M  724G 0.02 1.00   0     host ceph01 </span><br><span class="line"> 0 0.17699  1.00000  181G 35200k  181G 0.02 1.02  11         osd.0   </span><br><span class="line"> 3 0.17699  1.00000  181G 34708k  181G 0.02 1.00  19         osd.3   </span><br><span class="line"> 6 0.17699  1.00000  181G 34420k  181G 0.02 0.99  14         osd.6   </span><br><span class="line"> 8 0.17699  1.00000  181G 34336k  181G 0.02 0.99  20         osd.8   </span><br><span class="line">-3 0.70795        -  724G   135M  724G 0.02 1.00   0     host ceph03 </span><br><span class="line"> 1 0.17699  1.00000  181G 35568k  181G 0.02 1.03  17         osd.1   </span><br><span class="line"> 5 0.17699  1.00000  181G 34432k  181G 0.02 0.99  12         osd.5   </span><br><span class="line"> 9 0.17699  1.00000  181G 34272k  181G 0.02 0.99  18         osd.9   </span><br><span class="line">11 0.17699  1.00000  181G 34200k  181G 0.02 0.99  17         osd.11  </span><br><span class="line">-4 0.70795        -  724G   135M  724G 0.02 1.00   0     host ceph02 </span><br><span class="line"> 2 0.17699  1.00000  181G 35076k  181G 0.02 1.01  19         osd.2   </span><br><span class="line"> 4 0.17699  1.00000  181G 34652k  181G 0.02 1.00  18         osd.4   </span><br><span class="line"> 7 0.17699  1.00000  181G 34456k  181G 0.02 0.99  11         osd.7   </span><br><span class="line">10 0.17699  1.00000  181G 34280k  181G 0.02 0.99  16         osd.10  </span><br><span class="line">              TOTAL 2174G   405M 2174G 0.02                          </span><br></pre></td></tr></table></figure>
+
+
+<h1 id="Working-with-Pools-and-OSDs"><a href="#Working-with-Pools-and-OSDs" class="headerlink" title="Working with Pools and OSDs"></a>Working with Pools and OSDs</h1><p>若要尋找單顆 OSD 的相關資訊：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 尋找 OSD physical location</span></span><br><span class="line">$ ceph osd find 1</span><br><span class="line">&#123;</span><br><span class="line">    <span class="string">&quot;osd&quot;</span>: 1,</span><br><span class="line">    <span class="string">&quot;ip&quot;</span>: <span class="string">&quot;10.102.41.103:6800\/63011&quot;</span>,</span><br><span class="line">    <span class="string">&quot;crush_location&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;host&quot;</span>: <span class="string">&quot;ceph03&quot;</span>,</span><br><span class="line">        <span class="string">&quot;root&quot;</span>: <span class="string">&quot;default&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 顯示指定 OSD metadata</span></span><br><span class="line">$ ceph osd metadata 1</span><br><span class="line">&#123;</span><br><span class="line">    <span class="string">&quot;id&quot;</span>: 1,</span><br><span class="line">    <span class="string">&quot;arch&quot;</span>: <span class="string">&quot;x86_64&quot;</span>,</span><br><span class="line">    <span class="string">&quot;back_addr&quot;</span>: <span class="string">&quot;10.102.41.103:6801\/63011&quot;</span>,</span><br><span class="line">    <span class="string">&quot;backend_filestore_dev_node&quot;</span>: <span class="string">&quot;unknown&quot;</span>,</span><br><span class="line">    <span class="string">&quot;backend_filestore_partition_path&quot;</span>: <span class="string">&quot;unknown&quot;</span>,</span><br><span class="line">    <span class="string">&quot;ceph_version&quot;</span>: <span class="string">&quot;ceph version 10.2.5-37.el7cp (033f137cde8573cfc5a4662b4ed6a63b8a8d1464)&quot;</span>,</span><br><span class="line">    ......</span><br><span class="line">    <span class="string">&quot;osd_data&quot;</span>: <span class="string">&quot;\/var\/lib\/ceph\/osd\/ceph-1&quot;</span>,</span><br><span class="line">    <span class="string">&quot;osd_journal&quot;</span>: <span class="string">&quot;\/var\/lib\/ceph\/osd\/ceph-1\/journal&quot;</span>,</span><br><span class="line">    <span class="string">&quot;osd_objectstore&quot;</span>: <span class="string">&quot;filestore&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>建立/移除 pool: </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 建立 pool, 名稱為 pve_image, pg 數量為 1024</span></span><br><span class="line">$ ceph osd pool create pve_images 1024</span><br><span class="line">pool <span class="string">&#x27;pve_images&#x27;</span> created</span><br><span class="line"></span><br><span class="line"><span class="comment"># 顯示目前 pool 詳細狀態</span></span><br><span class="line">$ ceph osd pool ls detail</span><br><span class="line">pool 0 <span class="string">&#x27;rbd&#x27;</span> replicated size 3 min_size 2 crush_ruleset 0 object_hash rjenkins pg_num 64 pgp_num 64 last_change 1 flags hashpspool stripe_width 0</span><br><span class="line">pool 1 <span class="string">&#x27;pve_images&#x27;</span> replicated size 3 min_size 2 crush_ruleset 0 object_hash rjenkins pg_num 1024 pgp_num 1024 last_change 37 flags hashpspool stripe_width 0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 顯示指定 pool 的詳細資料</span></span><br><span class="line">$ ceph osd pool get pve_images all</span><br><span class="line">size: 3</span><br><span class="line">min_size: 2</span><br><span class="line">crash_replay_interval: 0</span><br><span class="line">pg_num: 1024</span><br><span class="line">pgp_num: 1024</span><br><span class="line">crush_ruleset: 0</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 移除 pool (要重複 pool name 兩次還要加上那有趣的參數)</span></span><br><span class="line">$ ceph osd pool delete pve_images pve_images --yes-i-really-really-mean-it</span><br><span class="line">pool <span class="string">&#x27;pve_images&#x27;</span> removed</span><br></pre></td></tr></table></figure>
+
+<p>調整現有 pool 的狀態：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 設定 placement groups 的數量</span></span><br><span class="line">$ ceph osd pool <span class="built_in">set</span> rbd pg_num 384</span><br><span class="line"><span class="built_in">set</span> pool 0 pg_num to 384</span><br><span class="line"></span><br><span class="line"><span class="comment"># pgp =&gt; The effective number of placement groups to use when calculating data placement.</span></span><br><span class="line">$ ceph osd pool <span class="built_in">set</span> rbd pgp_num 384</span><br><span class="line"><span class="built_in">set</span> pool 0 pgp_num to 384</span><br><span class="line"></span><br><span class="line"><span class="comment"># 調整完就會從原本的 warning 狀態變成 health_ok 了!</span></span><br><span class="line">$ ceph -s</span><br><span class="line">    cluster cd6fcb41-c373-48fb-aab3-f8d330a26ccb</span><br><span class="line">     health HEALTH_OK</span><br><span class="line">     monmap e1: 3 mons at &#123;ceph01=10.102.41.101:6789/0,ceph02=10.102.41.102:6789/0,ceph03=10.102.41.103:6789/0&#125;</span><br><span class="line">            election epoch 8, quorum 0,1,2 ceph01,ceph02,ceph03</span><br><span class="line">     osdmap e47: 12 osds: 12 up, 12 <span class="keyword">in</span></span><br><span class="line">            flags sortbitwise,require_jewel_osds</span><br><span class="line">      pgmap v177: 384 pgs, 1 pools, 0 bytes data, 0 objects</span><br><span class="line">            461 MB used, 2174 GB / 2174 GB avail</span><br><span class="line">                 384 active+clean</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="RBD-Block-Storage"><a href="#RBD-Block-Storage" class="headerlink" title="RBD Block Storage"></a>RBD Block Storage</h1><p>這個部份是用在把 Ceph 作為 block-based storage 時所需要了解的指令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 顯示目前的 RBD volume</span></span><br><span class="line">$ rbd ls</span><br><span class="line">vm-101-disk-1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 顯示指定 RBD volume 的狀態</span></span><br><span class="line">$ rbd status vm-101-disk-1</span><br><span class="line">Watchers:</span><br><span class="line">    watcher=10.102.70.124:0/3361738208 client.143192 cookie=140498849842176</span><br><span class="line"></span><br><span class="line"><span class="comment"># 顯示指定 RBD volume 的相關資訊</span></span><br><span class="line">$ rbd info vm-101-disk-1</span><br><span class="line">rbd image <span class="string">&#x27;vm-101-disk-1&#x27;</span>:</span><br><span class="line">    size 32768 MB <span class="keyword">in</span> 8192 objects</span><br><span class="line">    order 22 (4096 kB objects)</span><br><span class="line">    block_name_prefix: rbd_data.22f52238e1f29</span><br><span class="line">    format: 2</span><br><span class="line">    features: layering, exclusive-lock, object-map, fast-diff, deep-flatten</span><br><span class="line">    flags: </span><br><span class="line"></span><br><span class="line"><span class="comment"># 移除指定的 RBD volume</span></span><br><span class="line">$ rbd rm vm-101-disk-1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 建立名稱為 Jenkins_Data，大小為 40GB 的 RBD volume</span></span><br><span class="line">$ rbd create --pool rbd --image Jenkins_Data --size 40960</span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視 RBD volume 資訊</span></span><br><span class="line">$ rbd --image Jenkins_Data info</span><br><span class="line">rbd image <span class="string">&#x27;Jenkins_Data&#x27;</span>:</span><br><span class="line">    size 40960 MB <span class="keyword">in</span> 10240 objects</span><br><span class="line">    order 22 (4096 kB objects)</span><br><span class="line">    block_name_prefix: rbd_data.a71d6238e1f29</span><br><span class="line">    format: 2</span><br><span class="line">    features: layering, exclusive-lock, object-map, fast-diff, deep-flatten</span><br><span class="line">    flags: </span><br><span class="line"></span><br><span class="line"><span class="comment"># 變更 RBD volume 大小，縮小要加上 &quot;--allow-shrink&quot; 以確保安全</span></span><br><span class="line">$ rbd --image Jenkins_Data resize --size 10240 --allow-shrink</span><br><span class="line">Resizing image: 100% complete...done.</span><br><span class="line"></span><br><span class="line"><span class="comment"># 確認 RBD volume 容量正確變更</span></span><br><span class="line">$ rbd --image Jenkins_Data info</span><br><span class="line">rbd image <span class="string">&#x27;Jenkins_Data&#x27;</span>:</span><br><span class="line">    size 10240 MB <span class="keyword">in</span> 2560 objects</span><br><span class="line">    order 22 (4096 kB objects)</span><br><span class="line">    block_name_prefix: rbd_data.a71d6238e1f29</span><br><span class="line">    format: 2</span><br><span class="line">    features: layering, exclusive-lock, object-map, fast-diff, deep-flatten</span><br><span class="line">    flags: </span><br><span class="line"></span><br><span class="line"><span class="comment"># 放大 RBD Volume</span></span><br><span class="line">$ rbd --image Jenkins_Data resize --size 20480</span><br><span class="line">Resizing image: 100% complete...done.</span><br><span class="line"></span><br><span class="line"><span class="comment"># 確認 RBD volume 容量正確變更</span></span><br><span class="line">$ rbd --image Jenkins_Data info</span><br><span class="line">rbd image <span class="string">&#x27;Jenkins_Data&#x27;</span>:</span><br><span class="line">    size 20480 MB <span class="keyword">in</span> 5120 objects</span><br><span class="line">    order 22 (4096 kB objects)</span><br><span class="line">    block_name_prefix: rbd_data.a71d6238e1f29</span><br><span class="line">    format: 2</span><br><span class="line">    features: layering, exclusive-lock, object-map, fast-diff, deep-flatten</span><br><span class="line">    flags: </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="Authentication-and-Authorization"><a href="#Authentication-and-Authorization" class="headerlink" title="Authentication and Authorization"></a>Authentication and Authorization</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 檢視目前可使用 ceph cluster 的 user list</span></span><br><span class="line">$ ceph auth list</span><br><span class="line">installed auth entries:</span><br><span class="line"></span><br><span class="line">osd.0</span><br><span class="line">    key: ABxxxxxxx</span><br><span class="line">    caps: [mon] allow profile osd</span><br><span class="line">    caps: [osd] allow *</span><br><span class="line">......</span><br><span class="line">client.admin</span><br><span class="line">    key: ABxxxxxxx</span><br><span class="line">    caps: [mds] allow *</span><br><span class="line">    caps: [mon] allow *</span><br><span class="line">    caps: [osd] allow *</span><br><span class="line">client.bootstrap-mds</span><br><span class="line">    key: ABxxxxxxx</span><br><span class="line">    caps: [mon] allow profile bootstrap-mds</span><br><span class="line">client.bootstrap-osd</span><br><span class="line">    key: ABxxxxxxx</span><br><span class="line">    caps: [mon] allow profile bootstrap-osd</span><br><span class="line">client.bootstrap-rgw</span><br><span class="line">    key: ABxxxxxxx</span><br><span class="line">    caps: [mon] allow profile bootstrap-rgw</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a target="_blank" rel="noopener" href="https://www.gitbook.com/book/tobegit3hub1/ceph_from_scratch/details">Ceph From Scratch · GitBook</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://sabaini.at/pages/ceph-cheatsheet.html">Ceph Cheatsheet - sabaini.at</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="http://michaelkang.blog.51cto.com/1553154/1698287">最新ceph集群常用命令梳理 - 康建华 - 51CTO技术博客</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="http://docs.ceph.com/docs/jewel/rados/operations/pools/">Pools — Ceph Documentation</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="http://docs.ceph.com/docs/master/rados/operations/placement-groups/">Placement Groups — Ceph Documentation</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/Ceph/" rel="tag"># Ceph</a>
+              <a href="/blog/tags/SDS/" rel="tag"># SDS</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/KVM/KVM-Template-And-Snapshot/" rel="prev" title="[Linux KVM] Template & Snapshot 的運用">
+                  <i class="fa fa-chevron-left"></i> [Linux KVM] Template & Snapshot 的運用
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/blog/Kubernetes/Learning-Kubernetes/" rel="next" title="Kubernetes 學習筆記">
+                  Kubernetes 學習筆記 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">تطبيق الموقع <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/Ceph/Ceph-Cheatsheet/";
+    this.page.identifier = "Ceph/Ceph-Cheatsheet/";
+    this.page.title = "Ceph 簡單指令操作";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="This article introduces how to manage the lifecycle of virtual machines in KVM">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[Linux KVM] VM Life Cycle 管理">
+<meta property="og:url" content="https://godleon.github.io/blog/KVM/KVM-Lifecycle-Management/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="This article introduces how to manage the lifecycle of virtual machines in KVM">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2016-11-30T00:30:00.000Z">
+<meta property="article:modified_time" content="2020-08-17T02:22:00.413Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="KVM">
+<meta property="article:tag" content="SPICE">
+<meta property="article:tag" content="VNC">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/KVM/KVM-Lifecycle-Management/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-tw'
+  };
+</script>
+
+  <title>[Linux KVM] VM Life Cycle 管理 | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="تشغيل شريط التصفح">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          المحتويات
+        </li>
+        <li class="sidebar-nav-overview">
+          عام
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#VM-Lifecycle"><span class="nav-number">1.</span> <span class="nav-text">VM Lifecycle</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%AA%A2%E8%A6%96-VM"><span class="nav-number">2.</span> <span class="nav-text">檢視 VM</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%93%8D%E4%BD%9C-VM"><span class="nav-number">3.</span> <span class="nav-text">操作 VM</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#QEMU-guest-agent"><span class="nav-number">4.</span> <span class="nav-text">QEMU guest agent</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Virtual-Video-cards-amp-graphics"><span class="nav-number">5.</span> <span class="nav-text">Virtual Video cards &amp; graphics</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Virtual-Video-Card"><span class="nav-number">5.1.</span> <span class="nav-text">Virtual Video Card</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Graphics"><span class="nav-number">5.2.</span> <span class="nav-text">Graphics</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-VNC"><span class="nav-number">5.2.1.</span> <span class="nav-text">(1) VNC</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-SPICE"><span class="nav-number">5.2.2.</span> <span class="nav-text">(2) SPICE</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">124</span>
+          <span class="site-state-item-name">المقالات</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">التصنيفات</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">101</span>
+        <span class="site-state-item-name">الوسوم</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/KVM/KVM-Lifecycle-Management/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [Linux KVM] VM Life Cycle 管理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">نُشر في</span>
+
+              <time title="أُنشأ: 2016-11-30 08:30:00" itemprop="dateCreated datePublished" datetime="2016-11-30T08:30:00+08:00">2016-11-30</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">عُدل في</span>
+                <time title="عُدل: 2020-08-17 10:22:00" itemprop="dateModified" datetime="2020-08-17T10:22:00+08:00">2020-08-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">في</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/KVM/" itemprop="url" rel="index"><span itemprop="name">KVM</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/KVM/KVM-Lifecycle-Management/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="KVM/KVM-Lifecycle-Management/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">This article introduces how to manage the lifecycle of virtual machines in KVM</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>此篇文章將會介紹 VM 生命周期管理、Qemu Guest Agent、Virtual Video Card、Graphic Server … 等主題。</p>
+<h1 id="VM-Lifecycle"><a href="#VM-Lifecycle" class="headerlink" title="VM Lifecycle"></a>VM Lifecycle</h1><p>在 KVM 中的 virtual machine 共會有以下幾種狀態：</p>
+<ul>
+<li><p><strong>Undefined</strong>：未定義</p>
+</li>
+<li><p><strong>Defined / Shutoff</strong>：已定義，libvirtd 已經知道有此 VM 存在，但狀態為關機中(Stopped or Shutdown)</p>
+</li>
+<li><p><strong>Running</strong>：執行中</p>
+</li>
+<li><p><strong>Shutdown</strong>：關機中</p>
+</li>
+<li><p><strong>Paused</strong>：暫停中，VM 記憶體中的資料暫時被保留，並且可以在 guest OS 無法知悉的狀況下回復</p>
+</li>
+<li><p><strong>Saved</strong>：VM 處於完全暫停的狀態，記憶體中的資料被存到一般檔案中，並存在於 persistent storage (可回復到進行 save 時的狀態)</p>
+</li>
+<li><p><strong>Idle</strong>：等待 I/O，或是因為沒有工作需要進行而休眠中</p>
+</li>
+<li><p><strong>Crashed</strong>：可能因為 QEMU process 被強制移除 or core dump 所造成的 VM 損毀</p>
+</li>
+<li><p><strong>Dying</strong>：在 shutdown 的過程中失敗所產生的況狀</p>
+</li>
+<li><p><strong>Pmsuspended</strong>：透過 guest OS 中的電源管理功能進行 suspend 後進入的狀態</p>
+</li>
+</ul>
+<p>有了上面概念後，可以透過 virsh 來檢視目前 domain(virtual machine) 的狀態：</p>
+<hr>
+<h1 id="檢視-VM"><a href="#檢視-VM" class="headerlink" title="檢視 VM"></a>檢視 VM</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 顯示所有 VM (包含關機中的)</span></span><br><span class="line">$ virsh -c qemu+ssh://root@10.20.190.3/system list --all</span><br><span class="line"></span><br><span class="line"><span class="comment"># 顯示特定狀態的 VM</span></span><br><span class="line">$ virsh -c qemu+ssh://root@10.20.190.3/system list --state-[running|paused|shutoff|]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 顯示(未)包含 snapshot 的 VM</span></span><br><span class="line">$ virsh -c qemu+ssh://root@10.20.190.3/system list --[with|without]-snapshot</span><br><span class="line"></span><br><span class="line"><span class="comment"># 顯示(未)包含 managed save 狀態的 VM</span></span><br><span class="line">$ virsh -c qemu+ssh://root@10.20.190.3/system list --[with|without]-managed-save</span><br><span class="line"></span><br><span class="line"><span class="comment"># 僅顯示 uuid or name</span></span><br><span class="line">$ virsh -c qemu+ssh://root@10.20.190.3/system list --[uuid|name]</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>還有許多其他參數可用，使用者可透過 <code>virsh help</code> or <code>virsh help list</code> 來查詢更多使用方式</p>
+</blockquote>
+<hr>
+<h1 id="操作-VM"><a href="#操作-VM" class="headerlink" title="操作 VM"></a>操作 VM</h1><p>了解 VM 有這麼多狀態之後，自然就會有相對應的操作了，virsh 提供以下幾項對 VM 的操作：</p>
+<ul>
+<li><p><strong>start</strong>：啟動 VM</p>
+</li>
+<li><p><strong>shutdown</strong>：關閉 VM (正常關機程序)</p>
+</li>
+<li><p><strong>reboot</strong>：重新啟動 VM</p>
+</li>
+<li><p><strong>reset</strong>：與 power cycle 相同效果</p>
+</li>
+<li><p><strong>save</strong>：將 VM 狀態儲存到檔案中，並關閉 VM</p>
+</li>
+<li><p><strong>restore</strong>：從指定的檔案將 VM 狀態回復為執行中</p>
+</li>
+<li><p><strong>suspend</strong>：暫停 VM 運作</p>
+</li>
+<li><p><strong>resume</strong>：回復 VM 運作</p>
+</li>
+<li><p><strong>destroy</strong>：直接刪除 QEMU process (類似直接拔掉電腦電源線的效果)</p>
+</li>
+<li><p><strong>create</strong>：使用指定的 XML 建立 VM，並啟動 VM</p>
+</li>
+<li><p><strong>define</strong>：使用指定的 XML 建立 VM，但不啟動 VM</p>
+</li>
+<li><p><strong>undefine</strong>：將 VM 從 libvird 的控制中移除</p>
+</li>
+</ul>
+<hr>
+<h1 id="QEMU-guest-agent"><a href="#QEMU-guest-agent" class="headerlink" title="QEMU guest agent"></a>QEMU guest agent</h1><p>在安裝 virtualbox or VMware 的 VM 時，安裝結束之後都會詢問要不要額外安裝 agent 在 guest VM 中，透過這個 agent，hypervisor 可以更有效率的管理每一個 VM；同樣的在 KVM 中，也是有相同的作法，稱為 <strong>QEMU guest agent</strong>。</p>
+<p><strong>QEMU guest agent</strong> 是一個裝在 guest VM 中的套件，會以 service 的形式存在於背景，接著 service 就變成了 hypervisor &amp; guest OS 之間溝通的橋樑(channel)，hypervisor 會透過這個 channle 取得 VM 的資訊，以及對 VM 進行後續更多的操作；而兩者相互通訊的協定稱為 **Qemu Machine Protocol(QMP)**。</p>
+<p>其中 Hypervisor 與 guest agent 是透過一個名稱為 <code>org.qemu.guest_agent.0</code> 的 virtio-serial channel 或是 isa-serial channel 來處理；而在 Hypervisor 這一端，相對應處理這些資訊交換的 socket file 則是存在於 <code>/var/lib/libvirt/qemu/channel/target</code> 目錄中，且同一個 socket file 可以同時被多個 VM 所共享，因此不會產生太多檔案。</p>
+<p>若 guest VM 為 Linux，可安裝名稱為 <code>qemu-guest-agent</code> 的套件，若是 windows，則可以參考以下連結：</p>
+<ul>
+<li><p><a target="_blank" rel="noopener" href="http://www.linux-kvm.org/page/WindowsGuestDrivers/Download_Drivers">WindowsGuestDrivers/Download Drivers - KVM</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://fedoraproject.org/wiki/Windows_Virtio_Drivers">Windows Virtio Drivers - FedoraProject</a></p>
+</li>
+</ul>
+<p>除了安裝 <code>qemu-guest-agent</code> 套件之外，還要確認 <code>qemu-guest-agent</code> service 是否有正確啟動：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ systemctl status qemu-guest-agent</span><br><span class="line">● qemu-guest-agent.service - QEMU Guest Agent</span><br><span class="line">   Loaded: loaded (/usr/lib/systemd/system/qemu-guest-agent.service; enabled; vendor preset: enabled)</span><br><span class="line">   Active: active (running) since Thu 2016-11-24 22:25:07 EST; 35min ago</span><br><span class="line">   ......</span><br></pre></td></tr></table></figure>
+
+<p>確認服務沒有問題，我們就可以使用類似以下的命令在 KVM host 端取得 guest VM 的相關資訊：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$ virsh qemu-agent-command &lt;GUEST_VM_NAME&gt; <span class="string">&#x27;&#123;&quot;execute&quot;: &quot;guest-info&quot;&#125;&#x27;</span> --pretty</span><br><span class="line">&#123;</span><br><span class="line">    <span class="string">&quot;return&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;version&quot;</span>: <span class="string">&quot;2.3.0&quot;</span>,</span><br><span class="line">        <span class="string">&quot;supported_commands&quot;</span>: [</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="string">&quot;enabled&quot;</span>: <span class="literal">true</span>,</span><br><span class="line">                <span class="string">&quot;name&quot;</span>: <span class="string">&quot;guest-get-memory-block-info&quot;</span>,</span><br><span class="line">                <span class="string">&quot;success-response&quot;</span>: <span class="literal">true</span></span><br><span class="line">            &#125;,</span><br><span class="line">.......</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>QMP 資料通訊使用 JSON format</p>
+</blockquote>
+<hr>
+<h1 id="Virtual-Video-cards-amp-graphics"><a href="#Virtual-Video-cards-amp-graphics" class="headerlink" title="Virtual Video cards &amp; graphics"></a>Virtual Video cards &amp; graphics</h1><p>為了可以”看見” VM 的運作狀態，QEMU 需要提供兩個元素來達成這件任務：</p>
+<ol>
+<li><p><strong>virtual video card</strong>：讓每個 VM 都擁有一張虛擬的顯示卡</p>
+</li>
+<li><p>從遠端存取 VM 虛擬顯示卡的方式 or 協定</p>
+</li>
+</ol>
+<h2 id="Virtual-Video-Card"><a href="#Virtual-Video-Card" class="headerlink" title="Virtual Video Card"></a>Virtual Video Card</h2><p>顯示卡的用途在於顯示圖形資料到顯示設備上，而虛擬顯示卡同樣也是為了這個目的而存在的。</p>
+<p>然而在虛擬環境中當然沒有實體顯示卡，因此 QEMU 支援模擬以下幾種顯示卡：</p>
+<ul>
+<li><p><strong>Cirrus</strong>：libvirt 預設的顯示卡，可模擬 <strong>Cirrus Logic GD5446</strong> 顯示卡，Windows 95 之後的作業系統都支援這張顯示卡</p>
+</li>
+<li><p><strong>VGA</strong>：搭配 Bochs VBE extensions 的標準顯示卡，Windows XP 以後的作業系統可以支援(可設定 &gt;= 1280x1024x16 解析度 &amp; 大小的畫質)</p>
+</li>
+<li><p><strong>VMVGA</strong>：在 VGA 再更高階的虛擬顯示卡</p>
+</li>
+<li><p><strong>QXL</strong>：半虛擬化顯示卡，搭配在 VM 內安裝 QXL guest driver，可得到很不錯的顯示效果，而且是搭配 <strong>spice</strong> protocol 的最佳選擇</p>
+</li>
+</ul>
+<p>在安裝 VM 時，libvirt 就會根據安裝的 OS，協助選擇一個最合適的顯示卡，通常安裝最近發佈的 OS，都會直接選配 QXL；若是 Windows 或是比較舊版的 Linux，可能就會使用 Cirrus。</p>
+<h2 id="Graphics"><a href="#Graphics" class="headerlink" title="Graphics"></a>Graphics</h2><p>當 VM 有了顯示卡之後，接著需要一個可以存取圖形訊號的方法，在 KVM 中是透過 <strong>graphic server</strong> 的方式，目前提供了 <strong>VNC</strong> &amp; *<em>SPICE</em> 兩種 graphic server。</p>
+<p>當 VM 確定好顯示卡之後，QEMU 就會啟動相對應的 Spice or VNC server，並與 VM 的顯示卡進行連接，以便讓外部的 client 可以使用圖形化的方式存取 VM。</p>
+<h3 id="1-VNC"><a href="#1-VNC" class="headerlink" title="(1) VNC"></a>(1) VNC</h3><p>要為 VM 設定一個 VNC graphic server，可在 XML 定義檔中的 <code>&lt;device&gt;</code> section 內部加入類似以下的定義：(IP &amp; port 都可以自己定義)</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">graphics</span> <span class="attr">type</span>=<span class="string">&#x27;vnc&#x27;</span> <span class="attr">port</span>=<span class="string">&#x27;-1&#x27;</span> <span class="attr">autoport</span>=<span class="string">&#x27;yes&#x27;</span> <span class="attr">listen</span>=<span class="string">&#x27;192.168.122.1&#x27;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">listen</span> <span class="attr">type</span>=<span class="string">&#x27;address&#x27;</span> <span class="attr">address</span>=<span class="string">&#x27;192.168.122.1&#x27;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">graphics</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-SPICE"><a href="#2-SPICE" class="headerlink" title="(2) SPICE"></a>(2) SPICE</h3><p>SPICE(Simple Protocol for Independent Computing Environment) 僅有在 Linux 上支援，有以下特色：</p>
+<ol>
+<li><p>可以提供雙向的 audio</p>
+</li>
+<li><p>高效率的 2D 圖像繪製能力</p>
+</li>
+<li><p>可利用到 client 端的顯示卡的能力</p>
+</li>
+<li><p>支援加密、資料壓縮</p>
+</li>
+<li><p>支援透過網路的 USB passthrough</p>
+</li>
+</ol>
+<p>因此若要規劃把 KVM 用在 VDI 的應用上，使用 <code>QXL</code> + <code>SPICE</code> 目前是最好的組合。</p>
+<p>要為 VM 設定一個 SPICE graphic server，可在 XML 定義檔中的 <code>&lt;device&gt;</code> section 內部加入類似以下的定義：(IP &amp; port 都可以自己定義)</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">graphics</span> <span class="attr">type</span>=<span class="string">&#x27;spice&#x27;</span> <span class="attr">autoport</span>=<span class="string">&#x27;yes&#x27;</span> <span class="attr">listen</span>=<span class="string">&#x27;0.0.0.0&#x27;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">listen</span> <span class="attr">type</span>=<span class="string">&#x27;address&#x27;</span> <span class="attr">address</span>=<span class="string">&#x27;0.0.0.0&#x27;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">graphics</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a target="_blank" rel="noopener" href="https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/6/html/Virtualization_Administration_Guide/sect-QEMU_Guest_Agent-Running_the_QEMU_guest_agent_on_a_Windows_guest.html">Virtualization Administration Guide &gt; Running the QEMU Guest Agent on a Windows Guest</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="http://www.linux-kvm.org/page/WindowsGuestDrivers/Download_Drivers">WindowsGuestDrivers/Download Drivers - KVM</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://fedoraproject.org/wiki/Windows_Virtio_Drivers">Windows Virtio Drivers - FedoraProject</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/Linux/" rel="tag"># Linux</a>
+              <a href="/blog/tags/KVM/" rel="tag"># KVM</a>
+              <a href="/blog/tags/SPICE/" rel="tag"># SPICE</a>
+              <a href="/blog/tags/VNC/" rel="tag"># VNC</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/Git/Git-Cheat-Sheets/" rel="prev" title="[Git] Cheat Sheet">
+                  <i class="fa fa-chevron-left"></i> [Git] Cheat Sheet
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/blog/KVM/KVM-Template-And-Snapshot/" rel="next" title="[Linux KVM] Template & Snapshot 的運用">
+                  [Linux KVM] Template & Snapshot 的運用 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">تطبيق الموقع <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/KVM/KVM-Lifecycle-Management/";
+    this.page.identifier = "KVM/KVM-Lifecycle-Management/";
+    this.page.title = "[Linux KVM] VM Life Cycle 管理";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>

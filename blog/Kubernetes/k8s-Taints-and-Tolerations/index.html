@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="本篇文章的主題在介紹在 Kubernetes 中，&#39;taint&#39; &amp; &#39;toleration&#39; 這兩種機制的設計會如何影響 scheduler &amp; k8s 相關自動化維運的行為">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[Kubernetes] Taints and Tolerations">
+<meta property="og:url" content="https://godleon.github.io/blog/Kubernetes/k8s-Taints-and-Tolerations/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="本篇文章的主題在介紹在 Kubernetes 中，&#39;taint&#39; &amp; &#39;toleration&#39; 這兩種機制的設計會如何影響 scheduler &amp; k8s 相關自動化維運的行為">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2018-10-30T20:30:00.000Z">
+<meta property="article:modified_time" content="2020-08-17T02:22:00.417Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="Kubernetes">
+<meta property="article:tag" content="CKA">
+<meta property="article:tag" content="Kubernetes Scheduling">
+<meta property="article:tag" content="CKA Scheduling">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/Kubernetes/k8s-Taints-and-Tolerations/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-tw'
+  };
+</script>
+
+  <title>[Kubernetes] Taints and Tolerations | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="تشغيل شريط التصفح">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          المحتويات
+        </li>
+        <li class="sidebar-nav-overview">
+          عام
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%A8%AD%E5%AE%9A-Taint-amp-Toleration"><span class="nav-number">2.</span> <span class="nav-text">設定 Taint &amp; Toleration</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%A8%AD%E5%AE%9A-node-taint"><span class="nav-number">2.1.</span> <span class="nav-text">如何設定 node taint</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E7%A7%BB%E9%99%A4-taint"><span class="nav-number">2.2.</span> <span class="nav-text">如何移除 taint</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A8%AD%E5%AE%9A-pod-toleration"><span class="nav-number">2.3.</span> <span class="nav-text">設定 pod toleration</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Effect-%E9%81%8B%E4%BD%9C%E8%A6%8F%E5%89%87%E8%AA%AA%E6%98%8E"><span class="nav-number">3.</span> <span class="nav-text">Effect 運作規則說明</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#NoSchedule"><span class="nav-number">3.1.</span> <span class="nav-text">NoSchedule</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PreferNoSchedule"><span class="nav-number">3.2.</span> <span class="nav-text">PreferNoSchedule</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NoExecute"><span class="nav-number">3.3.</span> <span class="nav-text">NoExecute</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AF%A6%E9%9A%9B%E4%B8%8A%E5%A6%82%E4%BD%95%E9%81%8B%E7%94%A8"><span class="nav-number">4.</span> <span class="nav-text">實際上如何運用?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%88%E7%94%A8%E7%9A%84-Node"><span class="nav-number">4.1.</span> <span class="nav-text">專用的 Node</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B6%E6%9C%89%E7%89%B9%E6%AE%8A%E7%A1%AC%E9%AB%94%E7%9A%84-Node"><span class="nav-number">4.2.</span> <span class="nav-text">帶有特殊硬體的 Node</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%95%B6-Node-%E7%99%BC%E7%94%9F%E5%95%8F%E9%A1%8C%E6%99%82"><span class="nav-number">4.3.</span> <span class="nav-text">當 Node 發生問題時</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Taint-based-Evictions"><span class="nav-number">5.</span> <span class="nav-text">Taint based Evictions</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Taint-Nodes-by-Condition"><span class="nav-number">6.</span> <span class="nav-text">Taint Nodes by Condition</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">7.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">124</span>
+          <span class="site-state-item-name">المقالات</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">التصنيفات</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">101</span>
+        <span class="site-state-item-name">الوسوم</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/Kubernetes/k8s-Taints-and-Tolerations/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [Kubernetes] Taints and Tolerations
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">نُشر في</span>
+
+              <time title="أُنشأ: 2018-10-31 04:30:00" itemprop="dateCreated datePublished" datetime="2018-10-31T04:30:00+08:00">2018-10-31</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">عُدل في</span>
+                <time title="عُدل: 2020-08-17 10:22:00" itemprop="dateModified" datetime="2020-08-17T10:22:00+08:00">2020-08-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">في</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Kubernetes/" itemprop="url" rel="index"><span itemprop="name">Kubernetes</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/Kubernetes/k8s-Taints-and-Tolerations/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="Kubernetes/k8s-Taints-and-Tolerations/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">本篇文章的主題在介紹在 Kubernetes 中，'taint' & 'toleration' 這兩種機制的設計會如何影響 scheduler & k8s 相關自動化維運的行為</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p><code>taint</code> 跟<a href="k8s-Assigning-Pod-to-Nodes">上一篇</a>提到的 node affinity 雖然都是屬於 scheduling 的一部份，但要達成的目的其實完全相反：</p>
+<ul>
+<li><p><code>node affinity</code>：設計如何讓 pod 被分派到某個 worker node</p>
+</li>
+<li><p><code>taint</code>：設計讓 pod 如何<strong>不要</strong>被分派到某個 worker node</p>
+</li>
+</ul>
+<p>而 taint 並非單獨運作，而是與 <code>toleration</code> 共同搭配使用，目的就是要避免讓 pod 被分派到不正確 or 不合適的 worker node 上，運作原理大概如下：</p>
+<blockquote>
+<p>如果有特定的 node 被加上了 taint(汙點)，pod 就不會被分派到上面，除非 pod spec 有設定 toleration(容忍) 來接受這些 taint (必須全部 taint 都接受才行)</p>
+</blockquote>
+<h1 id="設定-Taint-amp-Toleration"><a href="#設定-Taint-amp-Toleration" class="headerlink" title="設定 Taint &amp; Toleration"></a>設定 Taint &amp; Toleration</h1><p>運作規則要分為以下幾個部份說明，分別是：</p>
+<ul>
+<li><p>如何為 node 設定 taint，避免 pod 被分派到上面</p>
+</li>
+<li><p>如何為 node 移除 taint</p>
+</li>
+<li><p>如何在 pod spec 中設定 toleration，讓 pod 可以分派到有 taint 的 node 上</p>
+</li>
+</ul>
+<h2 id="如何設定-node-taint"><a href="#如何設定-node-taint" class="headerlink" title="如何設定 node taint"></a>如何設定 node taint</h2><p>每個 taint 都有以下 3 個屬性：</p>
+<ol>
+<li><p><code>Key</code></p>
+</li>
+<li><p><code>Value</code></p>
+</li>
+<li><p><code>Effect</code>：共有三種，分別是 <strong>NoSchedule</strong>, <strong>PreferNoSchedule</strong> &amp; <strong>NoExecute</strong></p>
+</li>
+</ol>
+<p>而設定 node taint 很簡單，透過 kubectl 執行以下指令將 3 個屬性給入即可即可：</p>
+<blockquote>
+<p>kubectl taint nodes node1 key=value:NoSchedule</p>
+</blockquote>
+<p>以下是一個實際操作範例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl get node</span><br><span class="line">NAME              STATUS   ROLES    AGE   VERSION</span><br><span class="line">... (略)</span><br><span class="line">leon-k8s-node03   Ready    node     15d   v1.12.1</span><br><span class="line">leon-k8s-node04   Ready    node     15d   v1.12.1</span><br><span class="line">leon-k8s-node05   Ready    node     15d   v1.12.1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視 node 狀態細節，查看 taint 設定狀態</span></span><br><span class="line"><span class="comment"># 可以看出目前並沒有任何的 taint 設定</span></span><br><span class="line">$ kubectl describe node/leon-k8s-node03</span><br><span class="line">Name:               leon-k8s-node03</span><br><span class="line">Roles:              node</span><br><span class="line">Labels:             beta.kubernetes.io/arch=amd64</span><br><span class="line">                    beta.kubernetes.io/os=linux</span><br><span class="line">                    kubernetes.io/hostname=leon-k8s-node03</span><br><span class="line">                    node-role.kubernetes.io/node=<span class="literal">true</span></span><br><span class="line">... (略)</span><br><span class="line">Taints:             &lt;none&gt;</span><br><span class="line">Unschedulable:      <span class="literal">false</span></span><br><span class="line">... (略)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 為 node03 加上 taint</span></span><br><span class="line">$ kubectl taint nodes leon-k8s-node03 key=value:NoSchedule</span><br><span class="line">node/leon-k8s-node03 tainted</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重新檢視 node 狀態細節，察看 taint 設定狀態</span></span><br><span class="line"><span class="comment"># 目前已經多了一個 taint 的設定</span></span><br><span class="line">$ kubectl describe node/leon-k8s-node03</span><br><span class="line">Name:               leon-k8s-node03</span><br><span class="line">Roles:              node</span><br><span class="line">Labels:             beta.kubernetes.io/arch=amd64</span><br><span class="line">                    beta.kubernetes.io/os=linux</span><br><span class="line">                    kubernetes.io/hostname=leon-k8s-node03</span><br><span class="line">                    node-role.kubernetes.io/node=<span class="literal">true</span></span><br><span class="line">... (略)</span><br><span class="line">Taints:             key=value:NoSchedule</span><br><span class="line">Unschedulable:      <span class="literal">false</span></span><br><span class="line">... (略)</span><br></pre></td></tr></table></figure>
+
+<p>當以上步驟完成後，後續新增進來的 pod 就不會被分派到這個 node 上。</p>
+<h2 id="如何移除-taint"><a href="#如何移除-taint" class="headerlink" title="如何移除 taint"></a>如何移除 taint</h2><p>移除的語法很簡單，只要在 taint 的 Key:Effect 後面加上 <code>-</code> 即可：</p>
+<blockquote>
+<p>kubectl taint nodes node1 key:NoSchedule-</p>
+</blockquote>
+<h2 id="設定-pod-toleration"><a href="#設定-pod-toleration" class="headerlink" title="設定 pod toleration"></a>設定 pod toleration</h2><p>pod toleration 是設定在 pod spec 中，我們可以設定以下的 pod toleration 讓 pod 可以接受經過上面指令所產生的 node taint：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 表示可以接受&quot;帶有 key=value &amp; effect=NoSchedule&quot; 的 taint</span></span><br><span class="line"><span class="attr">tolerations:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">key:</span> <span class="string">&quot;key&quot;</span></span><br><span class="line">  <span class="attr">operator:</span> <span class="string">&quot;Equal&quot;</span></span><br><span class="line">  <span class="attr">value:</span> <span class="string">&quot;value&quot;</span></span><br><span class="line">  <span class="attr">effect:</span> <span class="string">&quot;NoSchedule&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>也可以是下面這樣設定：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 表示可以接受&quot;存在 key(不論 value 為何) &amp; effect=NoSchedule&quot; 的 taint</span></span><br><span class="line"><span class="attr">tolerations:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">key:</span> <span class="string">&quot;key&quot;</span></span><br><span class="line">  <span class="attr">operator:</span> <span class="string">&quot;Exists&quot;</span></span><br><span class="line">  <span class="attr">effect:</span> <span class="string">&quot;NoSchedule&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>在 toleration 的設定中，有一些比較特別的案例需要說明一下：</p>
+<ul>
+<li><p>operator 若是沒設定，預設值就是 <code>Equal</code></p>
+</li>
+<li><p>若僅有設定 operator 為 Exists，卻沒有設定 key，那表示會 tolerate(容忍) 所有的 taint</p>
+</li>
+</ul>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">tolerations:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">operator:</span> <span class="string">&quot;Exists&quot;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>僅有設定 key，沒有設定 effect，表示只有帶有相同 key 的 taint 都會被容忍</li>
+</ul>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">tolerations:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">key:</span> <span class="string">&quot;key&quot;</span></span><br><span class="line">  <span class="attr">operator:</span> <span class="string">&quot;Exists&quot;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="Effect-運作規則說明"><a href="#Effect-運作規則說明" class="headerlink" title="Effect 運作規則說明"></a>Effect 運作規則說明</h1><p>由於 key &amp; value 這兩個部份是比較容易理解的，而比較有差異的部份主要落在 <code>Effect</code> 的部份，因此以下就 Effect 進行比較詳細的說明。</p>
+<p>Taint Effect 共有分成三種，分別是：</p>
+<ul>
+<li><p><code>NoSchedule</code></p>
+</li>
+<li><p><code>PreferNoSchedule</code></p>
+</li>
+<li><p><code>NoExecute</code></p>
+</li>
+</ul>
+<p>由於 taint &amp; toleration 是互相抵消的關係，若 node 上有設定 taint，而 pod spec 中又有設定符合的 toleration，就會互相抵消；而 k8s scheduler 在判斷時會以最後剩下的 taint 來進行工作分派的依據。</p>
+<p>而 effect <code>NoExecute</code> 的 taint 被加到 node 的時候也會影響到目前正在該 node 上運作的 pod。</p>
+<h2 id="NoSchedule"><a href="#NoSchedule" class="headerlink" title="NoSchedule"></a>NoSchedule</h2><p>假設最後某個 node 上留下的 taint 的 effect 為 <code>NoSchedule</code>，那 k8s 就不會把該 pod 分派到該 node 上，但不影響正在運作中的 pod。</p>
+<h2 id="PreferNoSchedule"><a href="#PreferNoSchedule" class="headerlink" title="PreferNoSchedule"></a>PreferNoSchedule</h2><p>假設最後某個 node 上留下的 taint 的 effect 為 <code>PreferNoSchedule</code>，那 k8s 就儘量不會把該 pod 分派到該 node 上(最後要是沒辦法的時候還是會破功)，但不影響正在運作中的 pod。</p>
+<h2 id="NoExecute"><a href="#NoExecute" class="headerlink" title="NoExecute"></a>NoExecute</h2><p>假設某個 node 被設定了 effect 為 <code>NoExecute</code> 的 taint，那 k8s 還會把已經存在該 node 上的 pod 趕走，也不會把該 pod 分派到該 node 上。</p>
+<blockquote>
+<p>設定 <code>tolerationSeconds</code> 可以表示在 taint 被增加之後，<strong>帶有相對應 toleration 的 pod 還可以在該 node 上存在多久</strong></p>
+</blockquote>
+<h1 id="實際上如何運用"><a href="#實際上如何運用" class="headerlink" title="實際上如何運用?"></a>實際上如何運用?</h1><p>上面提到了 taint &amp; toleration 的運作規則，也說明了不同的 taint effect 會有哪些不同的影響，那實際上在什麼樣的情況可以用 taint &amp; toleration 機制來處理呢?</p>
+<p>基本上，taint 機制設計的目的，就是<strong>不要讓 pod 被分派到某個 node 上</strong>，而 toleration 則是在上述的前提下可以進行例外的設定，因此就可以有類似以下的 use case 產生：</p>
+<h2 id="專用的-Node"><a href="#專用的-Node" class="headerlink" title="專用的 Node"></a>專用的 Node</h2><p>如果希望某個 node 只給特定群組的使用者使用，可以使用以下的方式增加 taint：</p>
+<blockquote>
+<p>kubectl taint nodes nodename dedicated=groupName:NoSchedule</p>
+</blockquote>
+<p>有了上面的 taint 設定後，一般的 pod 就不會被分派到上面；而該群組的使用者只要在 pod spec 加入對應的 toleration 即可讓 pod 分配到專用的 node 上，而若是覺得每次都要設定 pod spec 很麻煩，或許可以考慮 k8s <a target="_blank" rel="noopener" href="https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/" title="Kubernetes Admission Controllers">Admission Controller</a> 來讓這件事情變得簡單些。</p>
+<blockquote>
+<p>Admission Contoller 可以自動幫 pod 加上 toleration</p>
+</blockquote>
+<blockquote>
+<p>設定 pod toleration 並不是保證一定會被分派到專屬的 node 上，也有可能還是被分派到到其他沒有 taint 的 node 上；因此若是要讓 pod scheduler 可以更精確的把 pod 放到專屬的 node，可以搭配 <strong>Node Label + nodeSelector</strong> 一起使用</p>
+</blockquote>
+<h2 id="帶有特殊硬體的-Node"><a href="#帶有特殊硬體的-Node" class="headerlink" title="帶有特殊硬體的 Node"></a>帶有特殊硬體的 Node</h2><p>由於特殊硬體(例如：GPU, FPGA … etc)一般來說都不便宜，因此在一個 cluster 中可能會僅有某些 node 安裝特殊硬體，而通常這一類的特殊硬體還是多少都會消耗 CPU &amp; memory 資源，因此在合理的思考下，就不會讓一般不需要用到到特殊硬體被分派到這些 node 上。</p>
+<p>因此，可以在帶有這些特殊硬體的 node 上設定類似以下的 taint：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl taint nodes nodename special=<span class="literal">true</span>:NoSchedule</span><br><span class="line"></span><br><span class="line">$ kubectl taint nodes nodename special=<span class="literal">true</span>:PreferNoSchedule</span><br><span class="line"></span><br><span class="line">$ kubectl taint nodes nodename gpu=<span class="literal">true</span>:NoSchedule</span><br><span class="line"></span><br><span class="line">$ kubectl taint nodes nodename fpga=<span class="literal">true</span>:NoSchedule</span><br></pre></td></tr></table></figure>
+
+<p>而 pod toleration or <a target="_blank" rel="noopener" href="https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/" title="Kubernetes Admission Controllers">Kubernetes Admission Controller</a> 的設定當然也不能或缺；但若是真的使用特殊硬體，也可以考慮使用 <a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#extended-resources">Extended Resource</a> + <a target="_blank" rel="noopener" href="https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#extendedresourcetoleration">ExtendedResourceToleration admission controller</a> 的機制來處理 &amp; 運用。</p>
+<blockquote>
+<p>透過 <code>Extended Resource</code> + <code>ExtendedResourceToleration admission controller</code> 可以確保 pod 可以被自動的加上被分派到帶有特殊硬體的 node 上所需要的 toleration 設定</p>
+</blockquote>
+<h2 id="當-Node-發生問題時"><a href="#當-Node-發生問題時" class="headerlink" title="當 Node 發生問題時"></a>當 Node 發生問題時</h2><p>當 node 發生問題時(或是任何其他會造成該 node 無法繼續提供服務的情況)，管理者需要考慮驅逐目前在上面運行中的 pod，可以透過加上 taint(Effect=<code>NoExecute</code>) 的方式達成，k8s 就會自動幫忙處理後續的作業。</p>
+<h1 id="Taint-based-Evictions"><a href="#Taint-based-Evictions" class="headerlink" title="Taint based Evictions"></a>Taint based Evictions</h1><p>首先再度說明當 node 被加上 taint(Effct=<code>NoExecute</code>) 後會自動的發生以下行為：</p>
+<ol>
+<li><p>沒有設定對應 toleration 的 pod 會被馬上驅離</p>
+</li>
+<li><p>有設定相對應 toleration 的 pod 則會繼續留在該 node 上</p>
+</li>
+<li><p>有設定對應 toleration 的 pod，也設定 <code>tolerationSeconds</code>，會在該 node 上停留一陣子(根據設定值)後就會被驅離</p>
+</li>
+</ol>
+<p>由於以上這些行為都是自動完成的，因此在 Kubernetes v1.6 之後，就可以開始利用這個機制來執行當特定 node 發生問題時的處理。</p>
+<blockquote>
+<p>由於 k8s 中有 node controller 會持續監控每個 node 的狀態並回報，因此當它發現某些 node 有狀況時，可以透過為這個 node 增加 taint 的方式，將上面正在運作的 pod 驅離到其他 node 上去執行</p>
+</blockquote>
+<p>為了自動化的完成這些事情，k8s 設計了幾個專用的 taint 來描述 node 的相關問題：</p>
+<ul>
+<li><p><code>node.kubernetes.io/not-ready</code>：Node is not ready</p>
+</li>
+<li><p><code>node.kubernetes.io/unreachable</code>：node controller 無法聯繫到該 node</p>
+</li>
+<li><p><code>node.kubernetes.io/out-of-disk</code>：磁碟空間不足</p>
+</li>
+<li><p><code>node.kubernetes.io/memory-pressure</code>：記憶體快要耗盡</p>
+</li>
+<li><p><code>node.kubernetes.io/disk-pressure</code>：磁碟空間快要耗盡</p>
+</li>
+<li><p><code>node.kubernetes.io/network-unavailable</code>：網路有問題</p>
+</li>
+<li><p><code>node.kubernetes.io/unschedulable</code>：無法分派 pod 到該 node</p>
+</li>
+<li><p><code>node.cloudprovider.kubernetes.io/uninitialized</code>：node 尚未初始化完成，還無法使用 (這是給 public cloud provider 用的 taint)</p>
+</li>
+</ul>
+<p>可能會有人有疑問….如果 node 一旦被偵測出有問題，上面的 pod 就會馬上被驅離，但可能只是斷線一下就回復了，馬上驅離的作法妥當嗎?</p>
+<p>因此為了處理這樣的狀況，當 node 發生問題時，除了在該 node 上增加一個 taint 的設定外，還會在該 node 上的每個 pod 加上相對應的 toleration 設定，並設定 tolerationSeconds=300，這表示每個 pod 都還可以留在該 node 上 5 分鐘。</p>
+<blockquote>
+<p>tolerationSeconds 的設定是 k8s 自動給進去的，若要更改預設值 300，可以透過 <a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/tree/master/plugin/pkg/admission/defaulttolerationseconds">DefaultTolerationSeconds admission controller</a></p>
+</blockquote>
+<p>此外，要讓 taint based eviction 運作，必須要開啟 <code>TaintBasedEvictions</code> feature gate (預設是關閉的)</p>
+<blockquote>
+<p>設定這功能需要注意 node controller 中的 <code>--node-eviction-rate</code>(預設 0.1，表示 10 秒驅離一個 pod) 設定，必須很小心的設定這個值，避免大規模驅離 pod 時造成整個 cluster 崩潰的連鎖效應 (特別是當 master node 發生崩潰的時候)</p>
+</blockquote>
+<p>最後，官網文件有提到 DaemonSet 最自動加上以下 toleration(Effect=<code>NoExecute</code>)：</p>
+<ul>
+<li><p><strong>node.alpha.kubernetes.io/unreachable</strong></p>
+</li>
+<li><p><strong>node.kubernetes.io/not-ready</strong></p>
+</li>
+</ul>
+<p>但在 v1.12 的環境下檢視已經存在的 DaemonSet，並沒有看到這樣的設定，這部份有帶後續釐清。</p>
+<h1 id="Taint-Nodes-by-Condition"><a href="#Taint-Nodes-by-Condition" class="headerlink" title="Taint Nodes by Condition"></a>Taint Nodes by Condition</h1><p>如果我們希望當 node 發生特定問題的時候，不要自動被加上 taint，避免 pod 無法被分派到該 node 時，可以怎麼做呢? 答案是透過 <code>TaintNodesByCondition</code> feature。</p>
+<p>在 v1.12 後，<code>TaintNodesByCondition</code> feature 已經變成 beta 功能且預設開啟，管理者可以透過這個功能<strong>選擇性</strong>的忽略某些 node 的狀況，而 <code>TaintNodesByCondition</code> 實際運作狀況是這樣的：</p>
+<ul>
+<li><p>若 node 發生狀況時，k8s 會自動加上 Effect=<code>NoSchedule</code> 的 taint 到該 node 上</p>
+</li>
+<li><p>若 TaintNodesByCondition 有設定忽略特定狀況，就不會加上 taint</p>
+</li>
+</ul>
+<blockquote>
+<p>跟 TaintBasedEviction 不同，一個是增加 Effect=<code>NoExecute</code>(TaintBasedEviction) 的 taint，一個是增加 Effect=<code>NoSchedule</code>(TaintNodesByCondition) 的 taint</p>
+</blockquote>
+<p>最後，官網文件有提到 DaemonSet controller 會為所有的 DaemonSet 自動增加以下 toleration(Effect=<code>NoSchedule</code>)：</p>
+<ul>
+<li><p><strong>node.kubernetes.io/memory-pressure</strong></p>
+</li>
+<li><p><strong>node.kubernetes.io/disk-pressure</strong></p>
+</li>
+<li><p><strong>node.kubernetes.io/out-of-disk</strong> (只有對重要的 pod)</p>
+</li>
+<li><p><strong>node.kubernetes.io/unschedulable</strong> (v1.10 之後)</p>
+</li>
+<li><p><strong>node.kubernetes.io/network-unavailable</strong> (若設定使用 hoet network 時)</p>
+</li>
+</ul>
+<p>但在 v1.12 的環境下檢視已經存在的 DaemonSet，並沒有看到這樣的設定，這部份有帶後續釐清。</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/">Taints and Tolerations - Kubernetes</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://jimmysong.io/posts/kubernetes-taint-and-toleration/">Kubernetes中的Taint和Toleration（污点和容忍） - 宋净超的博客|Cloud Native|云原生布道师</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://blog.frognew.com/2018/05/taint-and-toleration.html">Kubernetes Pod调度进阶：Taints(污点)和Tolerations(容忍) — 青蛙小白</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/Kubernetes/" rel="tag"># Kubernetes</a>
+              <a href="/blog/tags/CKA/" rel="tag"># CKA</a>
+              <a href="/blog/tags/Kubernetes-Scheduling/" rel="tag"># Kubernetes Scheduling</a>
+              <a href="/blog/tags/CKA-Scheduling/" rel="tag"># CKA Scheduling</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/Kubernetes/k8s-Assigning-Pod-to-Nodes/" rel="prev" title="[Kubernetes] Assigning Pods to Nodes">
+                  <i class="fa fa-chevron-left"></i> [Kubernetes] Assigning Pods to Nodes
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/blog/Kubernetes/k8s-Service-Overview/" rel="next" title="[Kubernetes] Service Overview">
+                  [Kubernetes] Service Overview <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">تطبيق الموقع <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/Kubernetes/k8s-Taints-and-Tolerations/";
+    this.page.identifier = "Kubernetes/k8s-Taints-and-Tolerations/";
+    this.page.title = "[Kubernetes] Taints and Tolerations";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>

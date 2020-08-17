@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="此文章記錄學習 Linux KVM 時所得到的基本觀念">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[KVM] Linux KVM 基本觀念">
+<meta property="og:url" content="https://godleon.github.io/blog/KVM/Linux-KVM-GettingStart/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此文章記錄學習 Linux KVM 時所得到的基本觀念">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2016-05-09T08:00:00.000Z">
+<meta property="article:modified_time" content="2020-08-17T02:22:00.413Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="KVM">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/KVM/Linux-KVM-GettingStart/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-tw'
+  };
+</script>
+
+  <title>[KVM] Linux KVM 基本觀念 | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="تشغيل شريط التصفح">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          المحتويات
+        </li>
+        <li class="sidebar-nav-overview">
+          عام
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1%E3%80%81libvirt-and-libvirt-tools"><span class="nav-number">1.</span> <span class="nav-text">1、libvirt and libvirt tools</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#libvirt"><span class="nav-number">1.1.</span> <span class="nav-text">libvirt</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#virsh"><span class="nav-number">1.2.</span> <span class="nav-text">virsh</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#virt-manager"><span class="nav-number">1.3.</span> <span class="nav-text">virt-manager</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#virt-install"><span class="nav-number">1.4.</span> <span class="nav-text">virt-install</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2%E3%80%81Virtualized-hardware-devices"><span class="nav-number">2.</span> <span class="nav-text">2、Virtualized hardware devices</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Para-virtualized-devices"><span class="nav-number">2.1.</span> <span class="nav-text">Para-virtualized devices</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VFIO"><span class="nav-number">2.2.</span> <span class="nav-text">VFIO</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SR-IOV"><span class="nav-number">2.3.</span> <span class="nav-text">SR-IOV</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NPIV"><span class="nav-number">2.4.</span> <span class="nav-text">NPIV</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3%E3%80%81Storage"><span class="nav-number">3.</span> <span class="nav-text">3、Storage</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Disk-Images-%E7%9A%84%E5%AD%98%E5%9C%A8%E5%9E%8B%E5%BC%8F"><span class="nav-number">3.1.</span> <span class="nav-text">Disk Images 的存在型式</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%83%E8%80%83%E8%B3%87%E6%96%99"><span class="nav-number">4.</span> <span class="nav-text">參考資料</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">124</span>
+          <span class="site-state-item-name">المقالات</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">التصنيفات</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">101</span>
+        <span class="site-state-item-name">الوسوم</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/KVM/Linux-KVM-GettingStart/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [KVM] Linux KVM 基本觀念
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">نُشر في</span>
+
+              <time title="أُنشأ: 2016-05-09 16:00:00" itemprop="dateCreated datePublished" datetime="2016-05-09T16:00:00+08:00">2016-05-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">عُدل في</span>
+                <time title="عُدل: 2020-08-17 10:22:00" itemprop="dateModified" datetime="2020-08-17T10:22:00+08:00">2020-08-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">في</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/KVM/" itemprop="url" rel="index"><span itemprop="name">KVM</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/KVM/Linux-KVM-GettingStart/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="KVM/Linux-KVM-GettingStart/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此文章記錄學習 Linux KVM 時所得到的基本觀念</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="1、libvirt-and-libvirt-tools"><a href="#1、libvirt-and-libvirt-tools" class="headerlink" title="1、libvirt and libvirt tools"></a>1、libvirt and libvirt tools</h1><h2 id="libvirt"><a href="#libvirt" class="headerlink" title="libvirt"></a>libvirt</h2><p><code>libvirt</code> 是一組獨立於 hypervisor 之外的 API：</p>
+<ol>
+<li><p>提供一個標準，一般化且穩定的虛擬層，且可安全的管理主機上的虛擬機器</p>
+</li>
+<li><p>可用來管理本地系統以及透過網路相連主機的標準介面</p>
+</li>
+<li><p>提供的 API 包含了 provision, create, modify, monitor, control, migrate, stop 虛擬主機等相關功能，但也必須要 hypervisor 支援的前提下才可使用，但這些 API 緊限定於單一主機上的操作</p>
+</li>
+</ol>
+<h2 id="virsh"><a href="#virsh" class="headerlink" title="virsh"></a>virsh</h2><p>virsh 是一個基於 libvirt management API 所打造出來的 CLI，提供非常多管理 hypervisor &amp; guest VM 的指令，且相當方便搭配 script 一起使用，同時也是 <code>virt-manager</code> GUI tool 的基礎。</p>
+<blockquote>
+<p>若不想用 virsh，也可以直接使用 <code>qemu-kvm</code> 指令</p>
+</blockquote>
+<h2 id="virt-manager"><a href="#virt-manager" class="headerlink" title="virt-manager"></a>virt-manager</h2><p>圖形介面的管理工具，也是提供了很多管理 VM 的功能(基於 virsh 為基礎所開發出來的)，包含了 provision VM, 管理 virtual network, 存取 VM console, 檢視效能統計資訊….等等。</p>
+<h2 id="virt-install"><a href="#virt-install" class="headerlink" title="virt-install"></a>virt-install</h2><p>virt-install 是專門用來協助 provision VM 的 CLI，支援純文字 &amp; 圖形安裝(可透過 serial, SPICE or VNC 等不同協定)，且可指定 local or remote(NFS, HTTP or FTP) 的安裝媒體，搭配 Kickstart 作大量自動化安裝很好用。</p>
+<hr>
+<h1 id="2、Virtualized-hardware-devices"><a href="#2、Virtualized-hardware-devices" class="headerlink" title="2、Virtualized hardware devices"></a>2、Virtualized hardware devices</h1><h2 id="Para-virtualized-devices"><a href="#Para-virtualized-devices" class="headerlink" title="Para-virtualized devices"></a>Para-virtualized devices</h2><p>para-virtualized 技術提供了 VM 一個更快速且有效率的方式跟 host 主機溝通；而 KVM 透過 <code>virtio</code> API 作為中介層，提供 para-virtualized devices 給 VM 使用，</p>
+<p>對於 I/O 工作頻繁的 VM 來說，建議使用 para-virtualized devices 來取代 emulated devices。</p>
+<p>所有的 virtio device 都包含兩個部份：<code>host device</code> &amp; <code>guest driver</code>，而 Para-virtualized device drivers 的目的是在於協助 guest VM 可以直接存取 host 主機上的實體裝置而不需要再經過模擬轉換。</p>
+<p>目前有 virtio-net, virtio-blk(block device), virtio-scsi(效能比 virtio-blk 好很多), virtio-balloon ….. 等等。</p>
+<h2 id="VFIO"><a href="#VFIO" class="headerlink" title="VFIO"></a>VFIO</h2><p>Virtual Function I/O (VFIO) 是個 kernel driver，讓 guest VM 可直接高效率的存取 host 主機上的硬體裝置；VFIO 將 device assignment 的工作移出 KVM hypervisor 中，並將實體裝置在 kernel level 中獨立出來以達成直接被 VM 存取的目的。</p>
+<h2 id="SR-IOV"><a href="#SR-IOV" class="headerlink" title="SR-IOV"></a>SR-IOV</h2><p>SR-IOV (Single Root I/O Virtualization) 是用在 PCI-e 的裝置上，讓裝置可以分享自身的 virtual fcuntion(VF) 出來直接給 guest VM 使用的一種技術。</p>
+<h2 id="NPIV"><a href="#NPIV" class="headerlink" title="NPIV"></a>NPIV</h2><p>N_Port ID Virtualization (NPIV) 是種應用在高速企業級儲存裝置的功能(例如：SAN)，功能類似 SR-IOV，都是讓 VM 可以直接存取硬體支援的技術。</p>
+<hr>
+<h1 id="3、Storage"><a href="#3、Storage" class="headerlink" title="3、Storage"></a>3、Storage</h1><h2 id="Disk-Images-的存在型式"><a href="#Disk-Images-的存在型式" class="headerlink" title="Disk Images 的存在型式"></a>Disk Images 的存在型式</h2><p>Disk Image 會根據在本地 or 遠端存放的不同，而已不同的型式存在：</p>
+<ol>
+<li>Image files</li>
+</ol>
+<p>直接以 image 檔案的方式存在，這又可分為 raw &amp; qcow2 兩種格式，其中 raw 格式速度快，但功能少；而 qcow2 則提供很多其他功能(例如：snapshot, compression, encryption, 從 template image 啟動 VM …. 等等)。</p>
+<ol start="2">
+<li>LVM volumes</li>
+</ol>
+<p>Logical volume 可以直接作為 disk image 使用，同時也提供了 thin provision, snapshot 等功能。</p>
+<ol start="3">
+<li>Host devices</li>
+</ol>
+<p>可以直接使用 CD-ROM, 或是透過 SAN or iSCSI 掛載的 LUN 作為 image</p>
+<ol start="4">
+<li>Distributed storage systems</li>
+</ol>
+<p>在 RHEL7 中甚至支援把 disk image 放在 GlusterFS 上</p>
+<hr>
+<h1 id="參考資料"><a href="#參考資料" class="headerlink" title="參考資料"></a>參考資料</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Virtualization_Getting_Started_Guide/index.html">https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Virtualization_Getting_Started_Guide/index.html</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/Linux/" rel="tag"># Linux</a>
+              <a href="/blog/tags/KVM/" rel="tag"># KVM</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/RHCE/RHCE7-RH134-LearningNotes-CH07_ManagingSELinuxSecurity/" rel="prev" title="[RHCE7] RH134 Chapter 7. Managing SELinux Security 學習筆記">
+                  <i class="fa fa-chevron-left"></i> [RHCE7] RH134 Chapter 7. Managing SELinux Security 學習筆記
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/blog/RHCE/RHCE7-RH134-LearningNotes-CH09_AddingDisksPartitionAndFileSystemsToALinuxSystem/" rel="next" title="[RHCE7] RH134 Chapter 09. Adding Disks, Partitions, and File Systems to a Linux System 學習筆記">
+                  [RHCE7] RH134 Chapter 09. Adding Disks, Partitions, and File Systems to a Linux System 學習筆記 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">تطبيق الموقع <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/KVM/Linux-KVM-GettingStart/";
+    this.page.identifier = "KVM/Linux-KVM-GettingStart/";
+    this.page.title = "[KVM] Linux KVM 基本觀念";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>

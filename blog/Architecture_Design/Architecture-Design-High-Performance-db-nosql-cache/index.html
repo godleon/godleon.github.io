@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="此篇文章是極客時間&quot;從 0 開始學架構&quot;課程時所留下的學習筆記，主要內容為高性能 DB 架構設計，包含了 RDBMS、NoSQL &amp; Cache 的架構設計考量 &amp; 運用方式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[架構設計] 高性能 DB 架構設計(RDBMS &#x2F; NoSQL &#x2F; Cache)">
+<meta property="og:url" content="https://godleon.github.io/blog/Architecture_Design/Architecture-Design-High-Performance-db-nosql-cache/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章是極客時間&quot;從 0 開始學架構&quot;課程時所留下的學習筆記，主要內容為高性能 DB 架構設計，包含了 RDBMS、NoSQL &amp; Cache 的架構設計考量 &amp; 運用方式">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="https://godleon.github.io/blog/images/architecture-design/db-read-write-separation.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/architecture-design/db-read-write-encapsulation-by-code.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/architecture-design/db-read-write-encapsulation-by-middleware.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/architecture-design/mysql-router.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/architecture-design/db-separate-by-business.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/architecture-design/db-separate-table.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/architecture-design/nosql-history.png">
+<meta property="article:published_time" content="2020-08-08T22:30:00.000Z">
+<meta property="article:modified_time" content="2020-08-17T02:22:00.409Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="Architecture Design">
+<meta property="article:tag" content="RDBMS">
+<meta property="article:tag" content="Performance Tunning">
+<meta property="article:tag" content="NoSQL">
+<meta property="article:tag" content="Redis">
+<meta property="article:tag" content="Elasticsearch">
+<meta property="article:tag" content="Cache">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/architecture-design/db-read-write-separation.png">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/Architecture_Design/Architecture-Design-High-Performance-db-nosql-cache/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-tw'
+  };
+</script>
+
+  <title>[架構設計] 高性能 DB 架構設計(RDBMS / NoSQL / Cache) | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="تشغيل شريط التصفح">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          المحتويات
+        </li>
+        <li class="sidebar-nav-overview">
+          عام
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%AB%98%E6%80%A7%E8%83%BD-DB-cluster%EF%BC%9A%E8%AE%80%E5%AF%AB%E5%88%86%E9%9B%A2"><span class="nav-number">1.</span> <span class="nav-text">高性能 DB cluster：讀寫分離</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%80%E5%AF%AB%E5%88%86%E9%9B%A2%E5%8E%9F%E7%90%86"><span class="nav-number">1.1.</span> <span class="nav-text">讀寫分離原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BB%E5%BE%9E%E8%A4%87%E8%A3%BD%E5%BB%B6%E9%81%B2"><span class="nav-number">1.2.</span> <span class="nav-text">主從複製延遲</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E9%85%8D%E6%A9%9F%E5%88%B6"><span class="nav-number">1.3.</span> <span class="nav-text">分配機制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A8%8B%E5%BC%8F%E5%B0%81%E8%A3%9D"><span class="nav-number">1.3.1.</span> <span class="nav-text">程式封裝</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#middleware-%E5%B0%81%E8%A3%9D"><span class="nav-number">1.3.2.</span> <span class="nav-text">middleware 封裝</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A8%8E%E8%AB%96%E6%95%B4%E7%90%86%E7%B2%BE%E8%8F%AF"><span class="nav-number">1.4.</span> <span class="nav-text">討論整理精華</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%AB%98%E6%80%A7%E8%83%BD-DB-cluster%EF%BC%9A%E5%88%86%E5%BA%AB%E5%88%86%E8%A1%A8"><span class="nav-number">2.</span> <span class="nav-text">高性能 DB cluster：分庫分表</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E5%BA%AB"><span class="nav-number">2.1.</span> <span class="nav-text">分庫</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E8%A1%A8"><span class="nav-number">2.2.</span> <span class="nav-text">分表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9E%82%E7%9B%B4%E5%88%86%E8%A1%A8%E5%BC%95%E5%85%A5%E7%9A%84%E8%A4%87%E9%9B%9C%E6%80%A7"><span class="nav-number">2.3.</span> <span class="nav-text">垂直分表引入的複雜性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B0%B4%E5%B9%B3%E5%88%86%E8%A1%A8%E5%BC%95%E5%85%A5%E7%9A%84%E8%A4%87%E9%9B%9C%E6%80%A7"><span class="nav-number">2.4.</span> <span class="nav-text">水平分表引入的複雜性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B7%AF%E7%94%B1"><span class="nav-number">2.4.1.</span> <span class="nav-text">路由</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#join-%E6%93%8D%E4%BD%9C"><span class="nav-number">2.4.2.</span> <span class="nav-text">join 操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#count-%E6%93%8D%E4%BD%9C"><span class="nav-number">2.4.3.</span> <span class="nav-text">count() 操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#order-by-%E6%93%8D%E4%BD%9C"><span class="nav-number">2.4.4.</span> <span class="nav-text">order by 操作</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%A6%E7%8F%BE%E6%96%B9%E6%B3%95%E6%AD%B8%E7%B4%8D"><span class="nav-number">2.5.</span> <span class="nav-text">實現方法歸納</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A8%8E%E8%AB%96%E6%95%B4%E7%90%86%E7%B2%BE%E8%8F%AF-1"><span class="nav-number">2.6.</span> <span class="nav-text">討論整理精華</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%AB%98%E6%80%A7%E8%83%BD-NoSQL"><span class="nav-number">3.</span> <span class="nav-text">高性能 NoSQL</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Key-Value-store"><span class="nav-number">3.1.</span> <span class="nav-text">Key&#x2F;Value store</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Document-DB"><span class="nav-number">3.2.</span> <span class="nav-text">Document DB</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Colume-Based-DB"><span class="nav-number">3.3.</span> <span class="nav-text">Colume-Based DB</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%A8%E6%96%87%E6%90%9C%E5%B0%8B%E5%BC%95%E6%93%8E"><span class="nav-number">3.4.</span> <span class="nav-text">全文搜尋引擎</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86"><span class="nav-number">3.4.1.</span> <span class="nav-text">基本原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F"><span class="nav-number">3.4.2.</span> <span class="nav-text">使用方式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A8%8E%E8%AB%96%E6%95%B4%E7%90%86%E7%B2%BE%E8%8F%AF-2"><span class="nav-number">3.5.</span> <span class="nav-text">討論整理精華</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%AB%98%E6%80%A7%E8%83%BD-cache-%E6%9E%B6%E6%A7%8B"><span class="nav-number">4.</span> <span class="nav-text">高性能 cache 架構</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Cache-penetration"><span class="nav-number">4.1.</span> <span class="nav-text">Cache penetration</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%84%B2%E5%AD%98%E6%95%B8%E6%93%9A%E4%B8%8D%E5%AD%98%E5%9C%A8"><span class="nav-number">4.1.1.</span> <span class="nav-text">儲存數據不存在</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#cache-%E6%95%B8%E6%93%9A%E7%94%9F%E6%88%90%E8%80%97%E8%B2%BB%E5%A4%A7%E9%87%8F%E6%99%82%E9%96%93%E6%88%96%E8%80%85%E8%B3%87%E6%BA%90"><span class="nav-number">4.1.2.</span> <span class="nav-text">cache 數據生成耗費大量時間或者資源</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cache-avalanche"><span class="nav-number">4.2.</span> <span class="nav-text">Cache avalanche</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hotspot-cache"><span class="nav-number">4.3.</span> <span class="nav-text">Hotspot cache</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A8%8E%E8%AB%96%E6%95%B4%E7%90%86%E7%B2%BE%E8%8F%AF-3"><span class="nav-number">4.4.</span> <span class="nav-text">討論整理精華</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">124</span>
+          <span class="site-state-item-name">المقالات</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">التصنيفات</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">101</span>
+        <span class="site-state-item-name">الوسوم</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/Architecture_Design/Architecture-Design-High-Performance-db-nosql-cache/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [架構設計] 高性能 DB 架構設計(RDBMS / NoSQL / Cache)
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">نُشر في</span>
+
+              <time title="أُنشأ: 2020-08-09 06:30:00" itemprop="dateCreated datePublished" datetime="2020-08-09T06:30:00+08:00">2020-08-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">عُدل في</span>
+                <time title="عُدل: 2020-08-17 10:22:00" itemprop="dateModified" datetime="2020-08-17T10:22:00+08:00">2020-08-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">في</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Architecture-Design/" itemprop="url" rel="index"><span itemprop="name">Architecture Design</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/Architecture_Design/Architecture-Design-High-Performance-db-nosql-cache/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="Architecture_Design/Architecture-Design-High-Performance-db-nosql-cache/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此篇文章是極客時間"從 0 開始學架構"課程時所留下的學習筆記，主要內容為高性能 DB 架構設計，包含了 RDBMS、NoSQL & Cache 的架構設計考量 & 運用方式</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="高性能-DB-cluster：讀寫分離"><a href="#高性能-DB-cluster：讀寫分離" class="headerlink" title="高性能 DB cluster：讀寫分離"></a>高性能 DB cluster：讀寫分離</h1><ul>
+<li><p>大部分情況下做架構設計主要都是基於已有的成熟模式，結合業務和團隊的具體情況，進行一定的優化或者調整</p>
+</li>
+<li><p>即使少部分情況需要進行較大的創新，前提也是需要對已有的各種架構模式和技術非常熟悉</p>
+</li>
+<li><p>不管是為了滿足業務發展的需要，還是為了提升自己的競爭力，RDBMS 廠商(Oracle、DB2、MySQL … 等)在優化和提升單一 DB server 的性能方面也做了非常多的技術優化和改進</p>
+<blockquote>
+<p>但業務發展速度和數據增長速度，遠遠超出 DB 廠商的優化速度</p>
+</blockquote>
+</li>
+<li><p>互聯網業務興起之後，海量用戶加上海量數據的特點，單個 DB server 已經難以滿足業務需要，必須考慮 DB cluster 的方式來提升性能</p>
+</li>
+</ul>
+<h2 id="讀寫分離原理"><a href="#讀寫分離原理" class="headerlink" title="讀寫分離原理"></a>讀寫分離原理</h2><ul>
+<li>讀寫分離的基本原理是將 DB 讀寫操作分散到不同的 node 上</li>
+</ul>
+<p><img src="/blog/images/architecture-design/db-read-write-separation.png" alt="DB 讀寫分離"></p>
+<ul>
+<li><p>讀寫分離的基本實現是：</p>
+<ul>
+<li>DB  server 搭建 master/slave cluster ，one master/one slave、one master/multiple slave 都可以</li>
+<li>DB master 負責 read/write 作業，slave 只負責 read 作業</li>
+<li>DB master 通過複製將數據同步到 slave，每台 DB server 都儲存了所有的業務相關資料</li>
+<li>線上服務將 write 作業發給 DB master，將 read 作業發給 DB slave</li>
+</ul>
+</li>
+<li><p>需要注意的是，這裡用的是 <code>master/slave cluster</code>，而不是 `primary/backup cluster”</p>
+</li>
+<li><p><code>slave</code> 需要提供讀數據的功能的；而 <code>backup</code> 一般被認為僅僅提供備份功能，不提供存取功能</p>
+</li>
+<li><p>讀寫分離的實現邏輯並不複雜，但是會引入兩個複雜度：<code>主從複製延遲</code> &amp; <code>分配機制</code></p>
+</li>
+</ul>
+<h2 id="主從複製延遲"><a href="#主從複製延遲" class="headerlink" title="主從複製延遲"></a>主從複製延遲</h2><ul>
+<li><p>以 MySQL 為例，主從複製延遲可能達到 1 秒，如果有大量數據同步，延遲 1 分鐘也是有可能的</p>
+</li>
+<li><p>解決主從複製延遲有幾種常見的方法：</p>
+<ul>
+<li>write 操作後的 read 操作指定發給 DB master server：和業務強綁定，對業務的侵入和影響較大</li>
+<li>讀 slave 失敗後再讀一次 master：如果有很多二次讀取，將大大增加主機的 read 操作壓力</li>
+<li>關鍵業務 read/write 操作全部指向 master，非關鍵業務採用讀寫分離</li>
+</ul>
+</li>
+</ul>
+<h2 id="分配機制"><a href="#分配機制" class="headerlink" title="分配機制"></a>分配機制</h2><p>將 read/write 操作區分開來，然後訪問不同的 DB server ，一般有兩種方式：程序程式封裝和 middleware 封裝</p>
+<h3 id="程式封裝"><a href="#程式封裝" class="headerlink" title="程式封裝"></a>程式封裝</h3><p>程式封裝指在程式中抽象出一個<strong>數據訪問層</strong>(or <strong>中間層封裝</strong>)，實現讀寫操作分離和 DB server 連接的管理<br><img src="/blog/images/architecture-design/db-read-write-encapsulation-by-code.png" alt="DB 讀寫分離 - 分配機制 - 程式封裝"></p>
+<p>程式封裝的方式具備幾個特點：</p>
+<ul>
+<li>實現簡單，而且可以根據業務做較多定製化的功能。</li>
+<li>每個程式語言都需要自己實現一次，無法通用，如果一個業務包含多個程式語言寫的多個子系統，則重複開發的工作量比較大。</li>
+<li>故障情況下，如果主從發生切換，則可能需要所有系統都修改設定 &amp; 重啟。</li>
+</ul>
+<h3 id="middleware-封裝"><a href="#middleware-封裝" class="headerlink" title="middleware 封裝"></a>middleware 封裝</h3><ul>
+<li><p>middleware 封裝指的是獨立一套系統出來，實現讀寫操作分離和 DB server 連接的管理</p>
+</li>
+<li><p>middleware 對服務提供 SQL 兼容的協議，服務本身無須自己進行讀寫分離</p>
+</li>
+</ul>
+<p><img src="/blog/images/architecture-design/db-read-write-encapsulation-by-middleware.png" alt="DB 讀寫分離 - 分配機制 - middleware 封裝"></p>
+<ul>
+<li><p>DB middleware 的方式具備的特點是：</p>
+<ul>
+<li>能夠支持多種程式語言，因為 DB middleware 對服務提供的是標準 SQL 接口</li>
+<li>DB middleware 要支持完整的 SQL 語法和 DB server 的協議(例如：MySQL client 與 server 的連接通訊協定)，實現比較複雜，細節特別多，很容易出現 bug，需要較長的時間才能穩定</li>
+<li>DB middleware 自己不執行真正的讀寫操作，但所有的 DB 操作請求都要經過 middleware，因此對於 middleware 的性能要求也會需要很高</li>
+<li>DB master/slave 切換對服務來說是無感的，DB middleware 可以偵測 DB server 的主從狀態(例如：向某個測試 table 寫入一筆資料，成功的就是 master，失敗的就是 slave)</li>
+</ul>
+</li>
+<li><p>由於 DB middleware 的複雜度要比程式封裝高出許多，一般情況下建議採用程序語言封裝的方式，或者使用成熟的開源 DB  middleware(例如：<a target="_blank" rel="noopener" href="https://www.mysql.com/products/enterprise/router.html">MySQL Router</a>, <a target="_blank" rel="noopener" href="http://shardingsphere.apache.org/">Apache ShardingSphere</a>, <a target="_blank" rel="noopener" href="http://www.mycat.org.cn/">Mycat</a>)<br><img src="/blog/images/architecture-design/mysql-router.png" alt="DB 讀寫分離 - 分配機制 - middleware 封裝 - MySQL Router"></p>
+</li>
+</ul>
+<h2 id="討論整理精華"><a href="#討論整理精華" class="headerlink" title="討論整理精華"></a>討論整理精華</h2><ul>
+<li><p>不需要有性能問題就馬上進行讀寫分離，而是應該先優化(例如：優化 slow query，調整不合理的業務邏輯，引入 cache 等，只有確定系統沒有優化空間後，才考慮讀寫分離或者 cluster </p>
+</li>
+<li><p>在單機 DB 情況下，table 加上 index 一般對查詢有優化作用卻影響寫入速度，讀寫分離後可以單獨對 read DB 進行優化，write DB 上減少 index，對讀寫的能力都有提升，且讀的提升更多一些</p>
+</li>
+<li><p>如果並發寫入特別高，單機寫入無法支撐，就不適合加入 index 的方式解決(加入 index 只會加重寫入負擔)</p>
+<blockquote>
+<p>可改用  cache 技術或者程序優化的方式滿足要求</p>
+</blockquote>
+</li>
+<li><p>因為業務查詢的關係，multiple table 之間的關聯，聚合，很難避免，但是查詢的條件太多，很動態，設計 cache 的方式：</p>
+<ul>
+<li>按照 80/20 原則，選出佔訪問量 80% 的前 20% 的請求條件進行 cache</li>
+<li>大部分人的查詢不會每次都非常多條件，以手機為例，查詢蘋果加華為的可能佔很大一部分</li>
+</ul>
+</li>
+<li><p>交易型業務 cache 應用不多， cache 一般都會用在查詢類業務上 (事實上大部分業務場景可能並不需要讀寫分離)</p>
+</li>
+<li><p>讀寫分離適用於單一 server 無法滿足所有請求的場景，從請求類型的角度對 server 進行拆分；在要求硬體資源能夠支撐的同時，對程式效能也會有更高的要求</p>
+</li>
+<li><p>一次刪除大量資料可能造成 master/slave 不同步 =&gt; 線上 delete 每次不能超過 1000 筆資料，超過就定時循環操作</p>
+</li>
+<li><p>middleware 並不是性能上有優勢，而是可以跨語言誇系統重複使用，大公司才有實力做(否則就選擇現有的成熟開源方案)</p>
+</li>
+<li><p>同步速度主要受網路延遲影響，和硬體關係不大</p>
+</li>
+<li><p>如果 cache 能承受業務請求，其實一般不用做讀寫分離，例如論壇的帖子瀏覽場景</p>
+</li>
+</ul>
+<h1 id="高性能-DB-cluster：分庫分表"><a href="#高性能-DB-cluster：分庫分表" class="headerlink" title="高性能 DB cluster：分庫分表"></a>高性能 DB cluster：分庫分表</h1><p>讀寫分離分散了 DB 讀寫操作的壓力，但沒有分散儲存壓力，當數據量達到千萬甚至上億條的時候，單台 DB server 的儲存能力會成為系統的瓶頸；這樣的狀況會造成以下問題：</p>
+<ul>
+<li><p>數據量太大，讀寫的性能會下降，即使有 index，index 也會變得很大，性能同樣會下降。</p>
+</li>
+<li><p>數據文件會變得很大， DB backup &amp; restore 需要耗費很長時間</p>
+</li>
+<li><p>數據文件越大，極端情況下丟失數據的風險越高(例如，機房火災導致 DB master/slave 都發生故障)</p>
+</li>
+</ul>
+<h2 id="分庫"><a href="#分庫" class="headerlink" title="分庫"></a>分庫</h2><ul>
+<li><p>業務分庫指的是按照業務模組將數據分散到不同的 DB server<br><img src="/blog/images/architecture-design/db-separate-by-business.png" alt="分庫"></p>
+</li>
+<li><p>雖然業務分庫能夠分散儲存和訪問壓力，但同時也帶來了新的問題：</p>
+<ul>
+<li><ol>
+<li>join 操作問題：原本在同一個 DB 中的 table 分散到不同 DB 中，導致無法使用 SQL 的 join 查詢</li>
+</ol>
+</li>
+<li><ol start="2">
+<li>事務問題：業務分庫後，table 分散到不同的 DB 中，無法通過事務統一修改</li>
+</ol>
+</li>
+<li><ol start="3">
+<li>成本問題：業務分庫同時也帶來了成本的代價，本來 1 台 server 可以搞定的事情，現在要 3 台，如果考慮備份，那就是 2 台變成了 6 台</li>
+</ol>
+</li>
+</ul>
+</li>
+<li><p>對於小公司初創業務，並不建議一開始就這樣拆分，主要有幾個原因：</p>
+<ul>
+<li>初創業務存在很大的不確定性，業務不一定能發展起來，業務開始的時候並沒有真正的儲存和訪問壓力，<strong>業務分庫並不能為業務帶來價值</strong></li>
+<li>業務分庫後，表之間的 join 查詢、 DB 事務無法簡單實現了</li>
+<li>業務分庫後，因為不同的數據要讀寫不同的 DB，程式中需要增加根據數據類型對應到不同 DB 的邏輯，增加了工作量；而業務初創期間最重要的是快速實現、快速驗證，<strong>業務分庫會拖慢業務節奏</strong></li>
+</ul>
+</li>
+<li><p>如果業務真的發展很快，豈不是很快就又要進行業務分庫了? 那為何不一開始就設計好呢? </p>
+<ul>
+<li>這裡的”如果”事實上發生的概率比較低</li>
+<li>如果業務真的發展很快，後面進行業務分庫也不遲</li>
+<li>單台 DB server 的性能其實也沒有想像的那麼弱</li>
+</ul>
+</li>
+<li><p>對於業界成熟的大公司來說，由於已經有了業務分庫的成熟解決方案，並且即使是嘗試性的新業務，用戶規模也是海量的，這與前面提到的初創業務的小公司有本質區別，因此最好在業務開始設計時就考慮業務分庫</p>
+</li>
+</ul>
+<h2 id="分表"><a href="#分表" class="headerlink" title="分表"></a>分表</h2><ul>
+<li><p>如果業務繼續發展，同一業務的單一 table 數據也會達到單台 DB server 的處理瓶頸</p>
+</li>
+<li><p>單一 table 數據拆分有兩種方式：</p>
+<ul>
+<li>垂直分表：對應到表的切分就是表記錄數相同但包含不同的 colume</li>
+<li>水平分表：對應到表的切分就是表的 colume 相同但包含不同的 row data<br><img src="/blog/images/architecture-design/db-separate-table.png" alt="分表"></li>
+</ul>
+</li>
+<li><p>實際架構設計過程中並不侷限切分的次數，可以切兩次，也可以切很多次</p>
+</li>
+<li><p>單一 table 進行切分後，是否要將切分後的多個 table 分散在不同的 DB server 中，可以根據實際的切分效果來確定</p>
+</li>
+<li><p>單一 table 切分為多個 table 後，新的 table 即使在同一個 DB  server 中，也可能帶來可觀的性能提升</p>
+</li>
+<li><p>如果單一 table 拆分為多個 table 後，單台 server 依然無法滿足性能要求，那就不得不再次進行業務分庫的設計了</p>
+</li>
+</ul>
+<h2 id="垂直分表引入的複雜性"><a href="#垂直分表引入的複雜性" class="headerlink" title="垂直分表引入的複雜性"></a>垂直分表引入的複雜性</h2><ul>
+<li><p>垂直分表適合將表中某些不常用且佔了大量空間的 colume 拆分出去</p>
+</li>
+<li><p>垂直分表引入的複雜性主要體現在 table 操作的數量要增加</p>
+</li>
+</ul>
+<h2 id="水平分表引入的複雜性"><a href="#水平分表引入的複雜性" class="headerlink" title="水平分表引入的複雜性"></a>水平分表引入的複雜性</h2><h3 id="路由"><a href="#路由" class="headerlink" title="路由"></a>路由</h3><p>常見的路由算法：</p>
+<ul>
+<li><p><strong>範圍路由</strong>：選取有序的 data colume (例如：integer、timestamp … 等等)作為路由的條件，不同分段分散到不同的 DB table 中</p>
+<ul>
+<li>複雜點：主要體現在分段大小的選取上，分段太小會導致切分後子表數量過多，增加維護複雜度</li>
+<li>優點：可以隨著數據的增加平滑地擴充新的表</li>
+<li>缺點：分佈不均勻</li>
+</ul>
+</li>
+<li><p><strong>Hash 路由</strong>：選取某個 colume(或者某幾個 colume 組合也可以)的值進行 Hash 運算，然後根據 Hash 結果分散到不同的 DB table 中</p>
+<ul>
+<li>複雜點：主要體現在初始 table 數量的選取上，table 數量太多維護比較麻煩，table 數量太少又可能導致單一 table 性能存在問題</li>
+<li>優點：table 分佈比較均勻</li>
+<li>缺點：擴充新的 table 很麻煩，所有數據都要重分佈</li>
+</ul>
+</li>
+<li><p><strong>配置路由</strong>：配置路由就是路由表，用一張獨立的 table 來記錄路由信息</p>
+<ul>
+<li>優點：設計簡單，使用起來非常靈活</li>
+<li>缺點：<strong>必須多查詢一次</strong>，會影響整體性能；而且路由表本身如果太大(例如：幾億條數據)，性能同樣可能成為瓶頸</li>
+</ul>
+</li>
+</ul>
+<h3 id="join-操作"><a href="#join-操作" class="headerlink" title="join 操作"></a>join 操作</h3><p>平分 table 後，數據分散在多個 table 中，如果需要與其他 table 進行 join 查詢，需要在業務程式或者 DB middleware 中進行多次 join 查詢，然後將結果合併</p>
+<h3 id="count-操作"><a href="#count-操作" class="headerlink" title="count() 操作"></a>count() 操作</h3><p>水平分表後，雖然物理上數據分散到多個表中，但某些業務邏輯上還是會將這些 table 當作單一 table 表來處理</p>
+<p>常見的處理方式有下面兩種：</p>
+<ul>
+<li><p>count() 相加：實現簡單，缺點就是性能比較低</p>
+</li>
+<li><p>count 資料表</p>
+<ul>
+<li>性能要大大優於 count() 相加的方式</li>
+<li>也增加了 DB 的寫壓力</li>
+<li>複雜度增加不少，對子表的操作要同步操作”記錄數表”，如果有一個業務邏輯遺漏了，數據就會不一致</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>對於一些不要求 count 數據即時保持精確的業務，也可以通過後台定時更新 count 資料表</p>
+</blockquote>
+<h3 id="order-by-操作"><a href="#order-by-操作" class="headerlink" title="order by 操作"></a>order by 操作</h3><p>水平分表後，數據分散到多個子表中，排序操作無法在 DB 中完成，只能由業務程式或者 DB middleware 分別查詢每個子表中的數據，然後彙總進行排序</p>
+<h2 id="實現方法歸納"><a href="#實現方法歸納" class="headerlink" title="實現方法歸納"></a>實現方法歸納</h2><ul>
+<li><p>和 DB 讀寫分離類似，分庫分表具體的實現方式也是<code>程式封裝</code>和<code>middleware 封裝</code>，但實現會更複雜</p>
+</li>
+<li><p>讀寫分離實現時只要識別 SQL 操作是 read 作業還是 write 作業，通過簡單的判斷 SELECT、UPDATE、INSERT、DELETE 幾個關鍵字就可以做到</p>
+</li>
+<li><p>分庫分表的實現除了要判斷操作類型外，還要判斷 SQL 中具體需要操作的 table、操作函數(例如：count)、order by、group by 操作等，然後再根據不同的操作進行不同的處理</p>
+</li>
+</ul>
+<h2 id="討論整理精華-1"><a href="#討論整理精華-1" class="headerlink" title="討論整理精華"></a>討論整理精華</h2><ul>
+<li><p>DB 優化的方向順序建議：</p>
+<ol>
+<li>進行硬體優化，例如：將 HDD 換成 SSD、增加 CPU core</li>
+<li>先做 DB server 的優化(例如：增加 index, 優化 slow query)</li>
+<li>引入 cache 技術(例如：redis)減少 DB 壓力</li>
+<li>服務與 DB table 優化，重構(例如：根據業務邏輯對程序邏輯做優化，減少不必要的查詢)</li>
+<li>在這些操作都不能大幅度優化性能的情況下，不能滿足將來的發展，再考慮分庫分表，但也要有預估性</li>
+</ol>
+</li>
+<li><p>針對 Mysql，發現如果 colume 是 blob 型態，select 時有無包含此欄位，效率差異很大啊，這個是什麼原因？</p>
+<blockquote>
+<p>blob 的欄位是和 row data 分開儲存的，而且 disk 上並不是連續的，因此 select blob 欄位會讓 disk 進入 random I/O 模式</p>
+</blockquote>
+</li>
+<li><p>分庫分表的實施前提：</p>
+<ol>
+<li>DB 存在性能問題，且用加索引、 slow query 優化、 cache 和讀寫分離都無法徹底解決問題的時候</li>
+<li>複雜查詢對應的單一 table 數據量級一般超過千萬以上，或簡單查詢的單一 table 數據量級一般超過 5000 萬以上</li>
+<li>對一致性要求不是特別高，只要求最終一致性</li>
+<li>用 Hadoop 等大數據技術，因為業務需求、技術成本、時間成本無法解決該問題</li>
+</ol>
+</li>
+<li><p>分表評估：</p>
+<ul>
+<li>業務對數據的操作主要集中在某些 colume 上，比較適合垂直分表</li>
+<li>業務對數據的操作在整個表層面較均勻分佈，適合水平分表</li>
+</ul>
+</li>
+<li><p>分庫使用時機：</p>
+<ul>
+<li>業務不複雜，但整體數據量已影響了 DB 的性能</li>
+<li>業務複雜，需要分模組由不同開發團隊負責開發，這個時候使用分庫可以減少團隊間交流</li>
+</ul>
+</li>
+<li><p>分表時機：單一 table 數據量太大，拖慢了 SQL 操作性能</p>
+</li>
+<li><p>並不是 DB 性能不夠的時候就分庫分表，提升 DB 性能方式很多，若有其他能在單一 DB 操作的方式則毫不猶豫使用，因為使用分表有固有的複雜性(join操作，事務，order by … 等)</p>
+</li>
+<li><p>通常 DB 剛表現出壓力的時候，大部分原因不是因為業務真的發展到 DB 撐不住了，而是很多 slow query 導致的</p>
+</li>
+</ul>
+<h1 id="高性能-NoSQL"><a href="#高性能-NoSQL" class="headerlink" title="高性能 NoSQL"></a>高性能 NoSQL</h1><p><img src="/blog/images/architecture-design/nosql-history.png" alt="NoSQL History"></p>
+<ul>
+<li><p>RDBMS 存在如下缺點：</p>
+<ul>
+<li>儲存的是 colume data，無法儲存數據結構</li>
+<li>schema 擴展很不方便(修改時可能會長時間鎖表)</li>
+<li>在大數據場景下 I/O 較高(做統計)</li>
+<li>全文搜尋功能比較弱(全文搜尋只能使用 like 進行整表掃瞄匹配，性能非常低)</li>
+</ul>
+</li>
+<li><p>NoSQL 方案帶來的優勢，本質上是犧牲 ACID 中的某個或者某幾個特性</p>
+</li>
+<li><p>不能盲目地迷信 NoSQL 是銀彈，而應該將 NoSQL 作為 SQL 的一個加強方式</p>
+</li>
+<li><p>常見的 NoSQL 方案分為 4 類：</p>
+<ul>
+<li>Key/Value store：解決 RDBMS 無法儲存數據結構的問題，以 redis 為代表。</li>
+<li>Document DB：解決 RDBMS 強 schema 約束的問題，以 MongoDB 為代表。</li>
+<li>Colume-Based DB：解決 RDBMS 大數據場景下的 I/O 問題，以 HBase 為代表。</li>
+<li>全文搜尋引擎：解決 RDBMS 的全文搜尋性能問題，以 Elasticsearch 為代表。</li>
+</ul>
+</li>
+</ul>
+<h2 id="Key-Value-store"><a href="#Key-Value-store" class="headerlink" title="Key/Value store"></a>Key/Value store</h2><ul>
+<li><p>redis 是 Key/Value store 的典型代表，它是一款 open source 的高性能 Key/value cache 和儲存系統</p>
+</li>
+<li><p>RDBMS 實現 Key/Value 的功能很麻煩，而且需要進行多次 SQL 操作，性能很低</p>
+</li>
+<li><p>redis 的缺點主要體現在並不支持完整的 ACID 事務</p>
+<blockquote>
+<p>redis 的事務只能保證隔離性(isolation)和一致性(consistency)，無法保證原子性(atomic)和持久性(durability)</p>
+</blockquote>
+</li>
+<li><p>雖然 redis 並沒有嚴格遵循 ACID 原則，但實際上大部分業務也不需要嚴格遵循 ACID 原則</p>
+</li>
+<li><p>在設計方案時，需要根據業務特性和要求來確定是否可以用 redis，而不能因為 redis 不遵循 ACID 原則就直接放棄</p>
+</li>
+</ul>
+<h2 id="Document-DB"><a href="#Document-DB" class="headerlink" title="Document DB"></a>Document DB</h2><ul>
+<li><p>Document DB 最大的特點就是 no-schema，可以儲存和讀取任意的數據</p>
+</li>
+<li><p>目前絕大部分 Document DB 儲存的數據格式是 JSON(or BSON)</p>
+</li>
+<li><p>Document DB的 no-schema 特性，給業務開發帶來了幾個明顯的優勢：</p>
+<ul>
+<li>新增欄位簡單</li>
+<li>歷史數據不會出錯</li>
+<li>可以很容易儲存複雜數據</li>
+</ul>
+</li>
+<li><p>Document DB 的這個特點，特別適合電商和遊戲這類的業務場景：</p>
+<ul>
+<li>以電商為例，不同商品的屬性差異很大</li>
+<li>即使是同類商品也有不同的屬性</li>
+</ul>
+</li>
+<li><p>上述的業務場景如果使用 RDBMS 來儲存數據，就會很麻煩，而使用 Document DB，會簡單、方便許多，擴展新的屬性也更加容易</p>
+</li>
+<li><p>缺點：</p>
+<ul>
+<li><strong>不支持事務</strong>，因此某些對事務要求嚴格的業務場景是不能使用 Document DB的</li>
+<li><strong>無法實現 RDBMS 的 join 操作</strong>，須多次查詢</li>
+</ul>
+</li>
+</ul>
+<h2 id="Colume-Based-DB"><a href="#Colume-Based-DB" class="headerlink" title="Colume-Based DB"></a>Colume-Based DB</h2><ul>
+<li><p>傳統 RDBMS 被稱為 Row-Based DB，優勢在於：</p>
+<ul>
+<li>業務同時讀取 multiple row 時效率高</li>
+<li>能夠一次性完成對 row 中的多個 colume 的寫操作，保證了針對 row data 寫操作的原子性和一致性</li>
+</ul>
+</li>
+<li><p>Colume-Based DB 的優勢是在特定的業務場景(<strong>海量數據進行統計</strong>)下才能體現，如果不存在這樣的業務場景，那麼 Colume-Based DB 的優勢也將不復存在，甚至成為劣勢</p>
+</li>
+<li><p>Colume-Based DB</p>
+<ul>
+<li>優點：<ul>
+<li>節省 I/O</li>
+<li>具備更高的儲存壓縮比</li>
+</ul>
+</li>
+<li>缺點：<ul>
+<li>若需要頻繁地更新多個 colume =&gt; 將不同 colume 儲存在 disk 上不連續的空間，導致更新多個 colume 時 disk 是 random write 操作(效率極差)</li>
+<li>高壓縮率在更新場景下也會成為劣勢，因為更新時需要將儲存數據解壓後更新，然後再壓縮，最後寫入 disk </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>一般將 Colume-Based DB 應用在離線的大數據分析和統計場景中，因為這種場景主要是針對部份 row 的單一 colume 進行操作，且數據寫入後就無須再更新刪除</p>
+</li>
+</ul>
+<h2 id="全文搜尋引擎"><a href="#全文搜尋引擎" class="headerlink" title="全文搜尋引擎"></a>全文搜尋引擎</h2><p>傳統的 RDBMS 通過 index 來達到快速查詢的目的，但是在全文搜尋的業務場景下，index 也無能為力，主要體現在：</p>
+<ul>
+<li><p>全文搜尋的條件可以隨意排列組合，如果通過 index 來滿足，則 index 的數量會非常多。</p>
+</li>
+<li><p>全文搜尋的模糊匹配方式，索引無法滿足，只能用 like 查詢，而 like 查詢是 full table scan，效率非常低。</p>
+</li>
+</ul>
+<h3 id="基本原理"><a href="#基本原理" class="headerlink" title="基本原理"></a>基本原理</h3><ul>
+<li><p>全文搜尋引擎的技術原理被稱為<code>&quot;倒排索引&quot;(Inverted index)</code>，也常被稱為反向索引、置入檔案或反向檔案，是一種索引方法，其基本原理是<strong>建立單詞到文件的索引</strong></p>
+</li>
+<li><p>正排索引適用於<strong>根據文件名稱來查詢文件內容</strong></p>
+</li>
+<li><p>倒排索引適用於<strong>根據 keyword 來查詢文件內容</strong></p>
+</li>
+</ul>
+<h3 id="使用方式"><a href="#使用方式" class="headerlink" title="使用方式"></a>使用方式</h3><ul>
+<li><p>全文搜尋引擎的索引對象是<code>單詞</code>和<code>文件</code>，而 RDBMS 的索引對象是 <code>key</code> 和 <code>row</code>，兩者的術語差異很大，不能簡單地等同起來</p>
+</li>
+<li><p>為了讓全文搜尋引擎支持關係型數據的全文搜尋，需要做一些轉換操作，即將關係型數據轉換為文件數據</p>
+</li>
+<li><p>目前常用的轉換方式是將關係型數據按照對象的形式轉換為 JSON 文件，然後將 JSON 文件輸入全文搜尋引擎進行索引</p>
+</li>
+<li><p>Elastcisearch 是分散式的文件儲存方式。它能儲存和檢索複雜的數據結構 - 以即時的方式序列化成為 JSON 文件</p>
+</li>
+<li><p>在 Elasticsearch 中，每個 field 的所有數據都是預設被索引的。即每個字段都有為了快速檢索設置的專用倒排索引</p>
+</li>
+<li><p>不像其他多數的 DB，Elasticsearch 能在相同的查詢中使用所有倒排索引，並以驚人的速度返回結果</p>
+</li>
+</ul>
+<h2 id="討論整理精華-2"><a href="#討論整理精華-2" class="headerlink" title="討論整理精華"></a>討論整理精華</h2><ul>
+<li><p>RDBMS 和 NoSQL DB 的選型。考慮幾個指標：<code>數據量</code>、<code>並發量</code>、<code>即時性</code>、<code>一致性要求</code>、<code>讀寫分佈和類型</code>、<code>安全性</code>、<code>運維性</code>等；根據這些指標，軟體系統可分成幾類。</p>
+<ol>
+<li>管理型系統(例如：運營類系統)，首選 RDBMS</li>
+<li>大流量系統(例如：電商單品頁的某個服務)，後台選 RDBMS，前台選內存型(Key/Value store)</li>
+<li>日誌型系統(例如：原始數據)選 Colume-Based DB，日誌搜尋選倒排索引</li>
+<li>搜尋型系統(例如：站內搜尋，非通用搜尋，如商品搜尋)，後台選 RDBMS，前台選倒排索引。</li>
+<li>事務型系統(例如：庫存、交易、記賬)，選<code>關係型 + cache + 一致性協議</code>，或新型 RDBMS</li>
+<li>離線計算(例如：大量數據分析)，首選 Colume-Based DB，RDBMS 也可以</li>
+<li>即時計算(例如：即時監控)，可以選 time-series DB ，或 colume-based DB </li>
+</ol>
+</li>
+<li><p>將商品/訂單/庫存等相關基本信息放在 RDBMS 中(如MySQL，業務操作上支持事務，保證邏輯正確性)，cache 可以用 redis(減少 DB 壓力)，搜尋可以用 Elasticsearch(提升搜尋性能，可通過定時任務定期將 DB 中的資料同步到 ES 中)</p>
+</li>
+<li><p>多種方案搭配混用必然會增加應用的複雜性與增加運維成本，但同時也帶來了系統更多的靈活性</p>
+</li>
+<li><p>RDBMS 使用 index 加快查詢速度；Key/Value store 使用 memory 加快查詢速度；Elasticsearch 使用倒排索引加快查詢速度；Colume-Based DB 使用將 colume 單獨儲存來加快查詢速度</p>
+</li>
+</ul>
+<h1 id="高性能-cache-架構"><a href="#高性能-cache-架構" class="headerlink" title="高性能 cache 架構"></a>高性能 cache 架構</h1><ul>
+<li><p>在某些複雜的業務場景下，單純依靠儲存系統的性能提升不夠的，典型的場景有：</p>
+<ul>
+<li>需要經過複雜運算後得出的數據，儲存系統無能為力</li>
+<li>read-many, write less(讀多寫少)的數據，儲存系統有心無力</li>
+</ul>
+</li>
+<li><p>cache 就是為了彌補儲存系統在這些複雜業務場景下的不足，基本原理就是<strong>將可能重複使用的數據放到 memory 中</strong>，一次生成、多次使用，避免每次使用都去存取速度相較 memory 慢很多的儲存系統</p>
+</li>
+<li><p>cache 能夠帶來性能的大幅提升</p>
+<blockquote>
+<p>單台 Memcache server 簡單的 key-value 查詢能夠達到 TPS 50,000 以上</p>
+</blockquote>
+</li>
+<li><p>cache 雖然能夠大大減輕儲存系統的壓力，但同時也給架構引入了更多複雜性</p>
+</li>
+</ul>
+<h2 id="Cache-penetration"><a href="#Cache-penetration" class="headerlink" title="Cache penetration"></a>Cache penetration</h2><p> cache penetration 是指 cache 沒有發揮作用，業務系統雖然去 cache 查詢數據，但 cache 中沒有數據，業務系統需要再次去儲存系統查詢數據。</p>
+<p> 通常情況下有兩種情況：</p>
+<h3 id="儲存數據不存在"><a href="#儲存數據不存在" class="headerlink" title="儲存數據不存在"></a>儲存數據不存在</h3><ul>
+<li><p>在 cache 中找不到對應的數據，每次都要去儲存系統中再查詢一遍，然後返回數據不存在</p>
+<blockquote>
+<p>cache 在這個場景中並沒有起到分擔儲存系統訪問壓力的作用</p>
+</blockquote>
+</li>
+<li><p>出現一些異常情況(例如：被 hacker 攻擊)，故意大量訪問某些讀取不存在數據的業務，有可能會將儲存系統拖垮</p>
+</li>
+</ul>
+<p>可能解決方案：</p>
+<ul>
+<li><p>如果查詢儲存系統的數據沒有找到，則直接設置一個預設值(可以是空值，也可以是具體的值)存到 cache 中，這樣第二次讀取 cache 時就會獲取到預設值，而不會繼續訪問儲存系統</p>
+</li>
+<li><p>使用 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Bloom_filter">Bloom filter</a></p>
+<blockquote>
+<p>實際應用上可能難以將所有 key 列出(例如：在分散式環境下很難完成這件事情)</p>
+</blockquote>
+</li>
+</ul>
+<h3 id="cache-數據生成耗費大量時間或者資源"><a href="#cache-數據生成耗費大量時間或者資源" class="headerlink" title="cache 數據生成耗費大量時間或者資源"></a>cache 數據生成耗費大量時間或者資源</h3><ul>
+<li><p>儲存系統中存在數據，但生成 cache 數據需要耗費較長時間或者耗費大量資源</p>
+</li>
+<li><p>剛好在業務訪問的時候 cache 失效了，那麼也會出現 cache 沒有發揮作用，訪問壓力全部集中在儲存系統上的情況</p>
+</li>
+<li><p>爬蟲來遍歷的時候，系統性能就可能出現問題</p>
+<blockquote>
+<p>由於很多分頁都沒有 cache 數據，從 DB 中生成 cache 數據又非常耗費性能(order by limit 操作)，因此爬蟲會將整個 DB 全部拖慢</p>
+</blockquote>
+</li>
+<li><p>爬蟲問題處理：(爬蟲並非攻擊)</p>
+<ul>
+<li>識別爬蟲然後禁止訪問，但這可能會影響 SEO 和推廣</li>
+<li>做好監控，發現問題後及時處理</li>
+</ul>
+</li>
+</ul>
+<h2 id="Cache-avalanche"><a href="#Cache-avalanche" class="headerlink" title="Cache avalanche"></a>Cache avalanche</h2><ul>
+<li><p>當 cache 失效(過期)後引起系統性能急劇下降的情況</p>
+</li>
+<li><p>舊的 cache 已經被清除，新的 cache 還未生成，並且處理這些請求的 thread 都不知道另外有一個 thread 正在生成 cache ，因此所有的請求都會去重新生成 cache，都會去訪問儲存系統，從而對儲存系統造成巨大的性能壓力</p>
+</li>
+</ul>
+<p>常見解決方法有兩種：</p>
+<ul>
+<li><p><strong>更新鎖</strong>：</p>
+<ul>
+<li>對 cache 更新操作進行加鎖保護，保證只有一個 thread 能夠進行 cache 更新，未能獲取更新鎖的 thread 要嘛等待鎖釋放後重新讀取 cache ，要嘛就返回空值或者預設值</li>
+<li>分散式 cluster 的業務系統要實現更新鎖機制，則需要用到分散式鎖，如 ZooKeeper</li>
+</ul>
+</li>
+<li><p><strong>後台更新</strong>：由後台 thread 來更新 cache ，而不是由業務 thread 來更新 cache </p>
+<ul>
+<li>業務 thread 發現 cache 失效後，通過 message queue 發送一條消息通知後台 thread 更新 cache </li>
+<li>後台更新既適應單機多 thread 的場景，也適合分散式 cluster 的場景，相比更新鎖機制要簡單一些</li>
+<li>後台更新機制還適合業務剛上線的時候進行 cache 預熱</li>
+</ul>
+</li>
+</ul>
+<h2 id="Hotspot-cache"><a href="#Hotspot-cache" class="headerlink" title="Hotspot cache"></a>Hotspot cache</h2><ul>
+<li><p>雖然 cache 系統本身的性能比較高，但對於一些特別熱點的數據，如果大部分甚至所有的業務請求都命中同一份 cache 數據，則這份數據所在的 cache server 的壓力也很大</p>
+</li>
+<li><p>cache 熱點的解決方案就是複製多份 cache 副本，將請求分散到多個 cache server 上，減輕 hotspot cache 導致的單台 cache server 壓力</p>
+</li>
+<li><p>不同的 cache 副本不要設置統一的過期時間，否則就會出現所有 cache 副本同時生成同時失效的情況，從而引發 cache 雪崩效應</p>
+</li>
+</ul>
+<h2 id="討論整理精華-3"><a href="#討論整理精華-3" class="headerlink" title="討論整理精華"></a>討論整理精華</h2><ul>
+<li><p>不要只從技術的角度考慮問題，結合業務考慮技術</p>
+</li>
+<li><p>將查詢條件組合成字符串再計算 md5，作為 cache key，優點是簡單靈活，缺點是浪費一部分 cache </p>
+</li>
+<li><p>DB 壓力大就可以考慮 cache 了</p>
+</li>
+<li><p>需要監控 cache 是否很快就滿了 or cache 命中率降低 … 等狀況，搭配告警進行處理</p>
+</li>
+<li><p>一般分頁 cache ， cache id 列表，不要 cache 所有數據</p>
+</li>
+<li><p>系統不是達到一定的系統查詢性能瓶頸，別一開始就用 cache </p>
+</li>
+<li><p>就算是 cache 修改頻率是一分鐘， cache 在這一分鐘也是有很大作用的，因為一分鐘可能就是幾千上萬次讀操作了，所以不要認為一天都不修改的數據才能用 cache </p>
+</li>
+<li><p>MySQL cache &amp; cache server 的比較：</p>
+<ul>
+<li>MySQL 第一種 cache 叫 sql 語句結果 cache ，但條件比較苛刻，程式設計師無法控制，一般 dba 都會關閉這個功能</li>
+<li>MySQL 第二種 cache 是 innodb buffer pool，cache 的是 disk 上的分頁數據，不是 sql 的查詢結果，<strong>sql 的執行過程省不了</strong></li>
+<li>memcached、redis 這些實際上都是 cache sql 的結果，兩種 cache 方式，性能差異是很大的</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>因此，可控性，性能是 DB  cache 和獨立 cache 的主要區別</p>
+</blockquote>
+<ul>
+<li><p>一個好的 cache 設計方案應該從這幾個方面入手設計：</p>
+<ol>
+<li>什麼數據應該 cache </li>
+<li>什麼時機觸發 cache 和以及觸發方式是什麼</li>
+<li>cache 的層次和粒度(網關 cache 如 nginx，本地 cache 如單機文件，分散式 cache 如 redis cluster，process 內 cache 如 global variables)</li>
+<li>cache 的命名規則和失效規則</li>
+<li>cache 的監控指標和故障應對方案</li>
+<li>可視化 cache 數據(例如：redis 具體 key 內容和大小)</li>
+</ol>
+</li>
+<li><p>監控爬蟲，發現問題後及時處理</p>
+<blockquote>
+<p>監控 DB 的各項指標，發現逐步變慢後看看是不是爬蟲，只要系統還撐得住就讓它爬，撐不住就不讓它爬</p>
+</blockquote>
+</li>
+<li><p>分頁數據有很多排序規則，而且可能在某個時間點要上架新商品，就會有即時性的要求，請問這樣使用分頁 cache 真的合適嗎?</p>
+<blockquote>
+<p>cache 是為瞭解決性能問題，實時性要求很高就不能用 cache 了，或者要做 cache 及時更新機制</p>
+</blockquote>
+</li>
+</ul>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a target="_blank" rel="noopener" href="https://time.geekbang.org/column/intro/81">從0開始學架構_架構基礎_架構入門-極客時間</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://www.twblogs.net/a/5db37939bd9eee310ee692db">當我們聊技術實力的時候，我們到底在聊什麼 - 台部落</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://www.pixelstech.net/article/1586522853-What-is-cache-penetration-cache-breakdown-and-cache-avalanche">What is cache penetration, cache breakdown and cache avalanche? | Pixelstech.net</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/Architecture-Design/" rel="tag"># Architecture Design</a>
+              <a href="/blog/tags/RDBMS/" rel="tag"># RDBMS</a>
+              <a href="/blog/tags/Performance-Tunning/" rel="tag"># Performance Tunning</a>
+              <a href="/blog/tags/NoSQL/" rel="tag"># NoSQL</a>
+              <a href="/blog/tags/Redis/" rel="tag"># Redis</a>
+              <a href="/blog/tags/Elasticsearch/" rel="tag"># Elasticsearch</a>
+              <a href="/blog/tags/Cache/" rel="tag"># Cache</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/AWS/AWS-CSA-associate-Serverless/" rel="prev" title="AWS CSA Associate 學習筆記 - Serverless">
+                  <i class="fa fa-chevron-left"></i> AWS CSA Associate 學習筆記 - Serverless
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">تطبيق الموقع <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/Architecture_Design/Architecture-Design-High-Performance-db-nosql-cache/";
+    this.page.identifier = "Architecture_Design/Architecture-Design-High-Performance-db-nosql-cache/";
+    this.page.title = "[架構設計] 高性能 DB 架構設計(RDBMS / NoSQL / Cache)";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>

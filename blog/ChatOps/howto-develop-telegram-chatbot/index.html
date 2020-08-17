@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="此篇文章簡單介紹如何開發一個 Telegram Bot">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[ChatOps] 簡單介紹如何開發一個 Telegram Bot">
+<meta property="og:url" content="https://godleon.github.io/blog/ChatOps/howto-develop-telegram-chatbot/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章簡單介紹如何開發一個 Telegram Bot">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="https://godleon.github.io/blog/images/chatbot/telegraf-middleware.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/chatbot/telegraf-inline_query_flow.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/chatbot/telegraf-inline_query_result.png">
+<meta property="article:published_time" content="2020-02-08T22:30:00.000Z">
+<meta property="article:modified_time" content="2020-08-17T02:22:00.409Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="AWS">
+<meta property="article:tag" content="ChatOps">
+<meta property="article:tag" content="Telegram">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/chatbot/telegraf-middleware.png">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/ChatOps/howto-develop-telegram-chatbot/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-tw'
+  };
+</script>
+
+  <title>[ChatOps] 簡單介紹如何開發一個 Telegram Bot | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="تشغيل شريط التصفح">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          المحتويات
+        </li>
+        <li class="sidebar-nav-overview">
+          عام
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A0%85"><span class="nav-number">1.</span> <span class="nav-text">注意事項</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E8%A7%80%E5%BF%B5"><span class="nav-number">2.</span> <span class="nav-text">基本觀念</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#use"><span class="nav-number">2.1.</span> <span class="nav-text">use</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#middleware"><span class="nav-number">2.2.</span> <span class="nav-text">middleware</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#state"><span class="nav-number">2.3.</span> <span class="nav-text">state</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#context-shortcut"><span class="nav-number">2.4.</span> <span class="nav-text">context shortcut</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Echo-Bot"><span class="nav-number">3.</span> <span class="nav-text">Echo Bot</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#help-command"><span class="nav-number">3.1.</span> <span class="nav-text">help command</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#echo"><span class="nav-number">3.2.</span> <span class="nav-text">echo</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Logging"><span class="nav-number">3.3.</span> <span class="nav-text">Logging</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Media-Bot"><span class="nav-number">4.</span> <span class="nav-text">Media Bot</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%82%B3%E9%80%81%E6%AA%94%E6%A1%88"><span class="nav-number">4.1.</span> <span class="nav-text">傳送檔案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%87%9D%E5%B0%8D%E4%BD%BF%E7%94%A8%E8%80%85%E8%A8%8A%E6%81%AF%E9%80%B2%E8%A1%8C%E5%9B%9E%E8%A6%86"><span class="nav-number">4.2.</span> <span class="nav-text">針對使用者訊息進行回覆</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#chat-action"><span class="nav-number">4.3.</span> <span class="nav-text">chat action</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%82%B3%E9%80%81%E5%A4%9A%E5%BC%B5%E5%9C%96%E7%89%87"><span class="nav-number">4.4.</span> <span class="nav-text">傳送多張圖片</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%82%B3%E9%80%81%E6%96%87%E4%BB%B6"><span class="nav-number">4.5.</span> <span class="nav-text">傳送文件</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%92%E5%8B%95%E5%BC%8F%E9%8D%B5%E7%9B%A4"><span class="nav-number">5.</span> <span class="nav-text">互動式鍵盤</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%A2%E7%94%9F-inline-keyboard"><span class="nav-number">5.1.</span> <span class="nav-text">產生 inline keyboard</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%BB%9E%E9%81%B8-keyboard-%E5%BE%8C%E9%80%B2%E8%A1%8C%E5%9B%9E%E6%87%89"><span class="nav-number">5.2.</span> <span class="nav-text">點選 keyboard 後進行回應</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BE%86%E5%9B%9E%E9%81%B8%E5%96%AE%E7%9A%84%E9%96%8B%E7%99%BC"><span class="nav-number">5.3.</span> <span class="nav-text">來回選單的開發</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Inline-Query"><span class="nav-number">6.</span> <span class="nav-text">Inline Query</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8E%9F%E7%90%86-amp-%E6%B5%81%E7%A8%8B%E8%AA%AA%E6%98%8E"><span class="nav-number">6.1.</span> <span class="nav-text">原理 &amp; 流程說明</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%90%9C%E5%B0%8B%E7%AF%84%E4%BE%8B"><span class="nav-number">6.2.</span> <span class="nav-text">搜尋範例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%8F%E9%81%8E-switch-inline-query-current-chat-%E6%8F%90%E4%BE%9B-template-command"><span class="nav-number">6.3.</span> <span class="nav-text">透過 switch_inline_query_current_chat 提供 template command</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Polling-Mode-v-s-Webhook"><span class="nav-number">7.</span> <span class="nav-text">Polling Mode v.s. Webhook</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Polling-Mode"><span class="nav-number">7.1.</span> <span class="nav-text">Polling Mode</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Webhook"><span class="nav-number">7.2.</span> <span class="nav-text">Webhook</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">8.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">124</span>
+          <span class="site-state-item-name">المقالات</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">التصنيفات</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">101</span>
+        <span class="site-state-item-name">الوسوم</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/ChatOps/howto-develop-telegram-chatbot/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [ChatOps] 簡單介紹如何開發一個 Telegram Bot
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">نُشر في</span>
+
+              <time title="أُنشأ: 2020-02-09 06:30:00" itemprop="dateCreated datePublished" datetime="2020-02-09T06:30:00+08:00">2020-02-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">عُدل في</span>
+                <time title="عُدل: 2020-08-17 10:22:00" itemprop="dateModified" datetime="2020-08-17T10:22:00+08:00">2020-08-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">في</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/ChatOps/" itemprop="url" rel="index"><span itemprop="name">ChatOps</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/ChatOps/howto-develop-telegram-chatbot/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="ChatOps/howto-develop-telegram-chatbot/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此篇文章簡單介紹如何開發一個 Telegram Bot</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="注意事項"><a href="#注意事項" class="headerlink" title="注意事項"></a>注意事項</h1><ul>
+<li><p>要透過 <code>@botfather</code> 來新增 bot(使用 <code>/newbot</code> 命令)</p>
+</li>
+<li><p>要讓 bot 可以在 group 裡面可以回應，要透過 <code>/mybots</code> -&gt; <strong>選擇 bot</strong> -&gt; <code>Bot Settings</code> -&gt; <code>Group Privacy</code> -&gt; 按下 <code>Turn Off</code>(畫面顯示 <strong>Privacy mode is disabled for xxxx</strong> 就表示啟用了)</p>
+</li>
+<li><p>開啟 bot inline query 功能，要透過 <code>/mybots</code> -&gt; <strong>選擇 bot</strong> -&gt; <code>Bot Settings</code> -&gt; <code>Inline Mode</code> -&gt; 按下 <code>Turn on</code>(畫面顯示 <strong>Inline mode is currently enabled for xxxx</strong> 就表示啟用了)</p>
+</li>
+<li><p>要設定 bot 使用提示功能，要透過 <code>/mybots</code> -&gt; <strong>選擇 bot</strong> -&gt; <code>Bot Settings</code> -&gt; <code>Inline Mode</code> -&gt; 按下 <code>Edit inline placeholder</code>，輸入使用提示即可 (例如：<code>&lt;type&gt; &lt;search query&gt;</code>)</p>
+</li>
+<li><p>安裝 <code>nodemon</code>(安裝方法 <code>npm install nodemon -g</code>)，當程式修改完後儲存，系統就會自動重新協助啟動程式</p>
+</li>
+</ul>
+<h1 id="基本觀念"><a href="#基本觀念" class="headerlink" title="基本觀念"></a>基本觀念</h1><h2 id="use"><a href="#use" class="headerlink" title="use"></a>use</h2><p>所有 bot 收到的命令都會經過 <code>use</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">bot.use((ctx) &#x3D;&gt; &#123;</span><br><span class="line">    ctx.reply(&quot;You used the bot&quot;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="middleware"><a href="#middleware" class="headerlink" title="middleware"></a>middleware</h2><p>先搞清楚什麼是 <a target="_blank" rel="noopener" href="https://telegraf.js.org/#/?id=middleware">middleware</a>，簡單範例如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">const bot &#x3D; new Telegraf(process.env.BOT_TOKEN)</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;這是一個 middleware</span><br><span class="line">bot.use(async (ctx, next) &#x3D;&gt; &#123;</span><br><span class="line">  const start &#x3D; new Date()</span><br><span class="line">  await next()</span><br><span class="line">  const ms &#x3D; new Date() - start</span><br><span class="line">  console.log(&#39;Response time: %sms&#39;, ms)</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;這是另一個 middleware</span><br><span class="line">bot.on(&#39;text&#39;, (ctx) &#x3D;&gt; ctx.reply(&#39;Hello World&#39;))</span><br><span class="line"></span><br><span class="line">bot.launch()</span><br></pre></td></tr></table></figure>
+
+<p><img src="/blog/images/chatbot/telegraf-middleware.png" alt="Telegram Middleware"></p>
+<ul>
+<li><p>當 bot 收到從 telegram channel 來的 request 之後，會經過一連串設定在 bot 上的 middleware(如上圖所示)，最後再回傳給 telegram channel</p>
+</li>
+<li><p>透過 <code>next</code> function 可以將 request 傳遞給下一個 middleware</p>
+</li>
+</ul>
+<h2 id="state"><a href="#state" class="headerlink" title="state"></a>state</h2><p>要在不同的 middleware 之間共享訊息，不需要靠全域變數，透過 <code>[State](https://telegraf.js.org/#/?id=state)</code> 就可以搞定</p>
+<h2 id="context-shortcut"><a href="#context-shortcut" class="headerlink" title="context shortcut"></a>context shortcut</h2><p>透過 context shortcut，可以不用繞一大圈用 telegram API，省略帶入 chatid 的部份</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">bot.command(&#39;start&#39;, ctx &#x3D;&gt; &#123;</span><br><span class="line">  ctx.reply(&quot;Hello World&quot;);</span><br><span class="line"></span><br><span class="line">  bot.telegram.sendMessage(ctx.chat.id, &quot;Hello World&quot;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="Echo-Bot"><a href="#Echo-Bot" class="headerlink" title="Echo Bot"></a>Echo Bot</h1><h2 id="help-command"><a href="#help-command" class="headerlink" title="help command"></a>help command</h2><p>若要提供給使用者一個 command 的清單可供參考，可以透過 helper command 的方式</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">const helpMessage &#x3D; &#96;</span><br><span class="line">Say something to me</span><br><span class="line">&#x2F;start - start the bot</span><br><span class="line">&#x2F;help - command reference</span><br><span class="line">&#96;;</span><br><span class="line"></span><br><span class="line">bot.start((ctx) &#x3D;&gt; &#123;</span><br><span class="line">  ctx.reply(&quot;Hi, I am Echo bot!&quot;);</span><br><span class="line">  ctx.reply(helpMessage);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">bot.help((ctx) &#x3D;&gt; &#123;</span><br><span class="line">  ctx.reply(helpMessage);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="echo"><a href="#echo" class="headerlink" title="echo"></a>echo</h2><p>telegraf 套件中並沒有對使用者輸入進行額外處理，所以要處理較為複雜的 command，就必須要自己開發相關邏輯</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">bot.command(&quot;echo&quot;, (ctx) &#x3D;&gt; &#123;</span><br><span class="line">  let input &#x3D; ctx.message.text;</span><br><span class="line">  let inputArray &#x3D; input.split(&quot; &quot;);</span><br><span class="line">  console.log(inputArray);</span><br><span class="line"></span><br><span class="line">  let message &#x3D; &quot;&quot;;</span><br><span class="line">  if(inputArray.length &#x3D;&#x3D; 1) &#123;</span><br><span class="line">    message &#x3D; &quot;You said &#x2F;echo&quot;;</span><br><span class="line">  &#125; else &#123;</span><br><span class="line">    inputArray.shift();</span><br><span class="line">    message &#x3D; inputArray.join(&quot; &quot;);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  ctx.reply(message);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="Logging"><a href="#Logging" class="headerlink" title="Logging"></a>Logging</h2><p>透過 <code>use</code>(所有的 command 都會經過 <code>use</code> middleware) 可以設計出 logging 的機制，讓使用者所有的 command 都會發到另外一個 group channel 做紀錄</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">bot.use((ctx, next) &#x3D;&gt; &#123;</span><br><span class="line">    &#x2F;&#x2F;可在 group channel 中傳訊息，並從 ctx.chat.id 中取得 chatid</span><br><span class="line">    if(ctx.updateSubTypes[0] &#x3D;&#x3D; &quot;text&quot;) &#123;</span><br><span class="line">        bot.telegram.sendMessage(-325114827, ctx.from.username + &quot; said &quot; + ctx.message.text);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        bot.telegram.sendMessage(-325114827, ctx.from.username + &quot; sent &quot; + ctx.updateSubTypes[0]);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F;完成 log 功能後，繼續將 context 往下傳給其他 middleware</span><br><span class="line">    next();</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="Media-Bot"><a href="#Media-Bot" class="headerlink" title="Media Bot"></a>Media Bot</h1><h2 id="傳送檔案"><a href="#傳送檔案" class="headerlink" title="傳送檔案"></a>傳送檔案</h2><p>在範例中會以傳送圖片來進行說明，以下說明幾個重點：</p>
+<ul>
+<li><p>Telegram 物件(來自於 <code>(new Telegraf()).telegram</code>)傳送物件是透過 <a target="_blank" rel="noopener" href="https://telegraf.js.org/#/?id=sendphoto">sendPhoto</a> 方法來完成</p>
+</li>
+<li><p>在 telegraf 中處理 file 的方式有五種(<a target="_blank" rel="noopener" href="https://telegraf.js.org/#/?id=working-with-files">官網說明</a>)</p>
+</li>
+<li><p>在 <code>sendPhoto</code> 中的 <code>File</code> type，就是上述的五種方法其中之一</p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">bot.command(&quot;test&quot;, ctx &#x3D;&gt; &#123;</span><br><span class="line">    bot.telegram.sendPhoto(ctx.chat.id, &quot;https:&#x2F;&#x2F;pgw.udn.com.tw&#x2F;gw&#x2F;photo.php?u&#x3D;https:&#x2F;&#x2F;uc.udn.com.tw&#x2F;photo&#x2F;2019&#x2F;11&#x2F;27&#x2F;99&#x2F;7117740.jpg&amp;x&#x3D;0&amp;y&#x3D;0&amp;sw&#x3D;0&amp;sh&#x3D;0&amp;sl&#x3D;W&amp;fw&#x3D;1050&quot;);</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F;file path</span><br><span class="line">    bot.telegram.sendPhoto(ctx.chat.id, &#123;</span><br><span class="line">        source: &quot;res&#x2F;london.jpg&quot;</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F;file id</span><br><span class="line">    &#x2F;&#x2F;這個部份可透過 &quot;on&quot; middleware，並自行上傳圖片後，透過 ctx.message.photo.file_id 取得正確的 file id</span><br><span class="line">    &#x2F;&#x2F;並在 sendPhoto 中作為第二個參數使用</span><br><span class="line">    &#x2F;&#x2F;(每一張上傳到 telegram 的圖片都會有獨一無二的 file id)</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="針對使用者訊息進行回覆"><a href="#針對使用者訊息進行回覆" class="headerlink" title="針對使用者訊息進行回覆"></a>針對使用者訊息進行回覆</h2><p>這個部份需要透過 <code>ctx.message.message_id</code> 取得使用者訊息的 ID 並進行回覆</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">bot.command(&quot;newyork&quot;, ctx &#x3D;&gt; &#123;</span><br><span class="line">    bot.telegram.sendPhoto(ctx.chat.id, &#123;</span><br><span class="line">        source: &quot;res&#x2F;newyork.jpg&quot;</span><br><span class="line">    &#125;, &#123;</span><br><span class="line">        reply_to_message_id: ctx.message.message_id</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="chat-action"><a href="#chat-action" class="headerlink" title="chat action"></a>chat action</h2><p>透過 <a target="_blank" rel="noopener" href="https://core.telegram.org/bots/api#sendchataction">chat action</a> 可以在 telegram 的界面上告知使用者目前 bot 正在進行的動作，可視為是一種狀態資訊。</p>
+<blockquote>
+<p>訊息只會五秒或是更短，一旦訊息成功送給使用者後，chat action 的訊息就會消失</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">bot.command(&quot;newyork&quot;, ctx &#x3D;&gt; &#123;</span><br><span class="line">    bot.telegram.sendChatAction(ctx.chat.id, &quot;upload_photo&quot;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="傳送多張圖片"><a href="#傳送多張圖片" class="headerlink" title="傳送多張圖片"></a>傳送多張圖片</h2><p>要同時傳送多張圖片可透過 <code>[sendMediaGroup](https://telegraf.js.org/#/?id=sendmediagroup)</code> 方法，並將圖片以 array 的形式傳入。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">bot.command(&quot;cities&quot;, ctx &#x3D;&gt; &#123;</span><br><span class="line">    let cities &#x3D; [&#39;res&#x2F;dubai.jpg&#39;, &#39;res&#x2F;hongkong.jpg&#39;, &#39;res&#x2F;london.jpg&#39;, &#39;res&#x2F;newyork.jpg&#39;, &#39;res&#x2F;singapore.jpg&#39;]</span><br><span class="line">    let result &#x3D; cities.map(city &#x3D;&gt; &#123;</span><br><span class="line">        return &#123;</span><br><span class="line">            type: &#39;photo&#39;, </span><br><span class="line">            media: &#123; source: city &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">    bot.telegram.sendMediaGroup(ctx.chat.id, result);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="傳送文件"><a href="#傳送文件" class="headerlink" title="傳送文件"></a>傳送文件</h2><p>傳送文件可以同時加上縮圖。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">bot.command(&quot;citieslist&quot;, ctx &#x3D;&gt; &#123;</span><br><span class="line">    bot.telegram.sendDocument(ctx.chat.id, &#123;</span><br><span class="line">        source: &quot;res&#x2F;citieslist.txt&quot;</span><br><span class="line">    &#125;, &#123;</span><br><span class="line">        thumb: &#123; source: &quot;res&#x2F;dubai.jpg&quot; &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="互動式鍵盤"><a href="#互動式鍵盤" class="headerlink" title="互動式鍵盤"></a>互動式鍵盤</h1><h2 id="產生-inline-keyboard"><a href="#產生-inline-keyboard" class="headerlink" title="產生 inline keyboard"></a>產生 inline keyboard</h2><p>要使用 telegram keyboard 功能，就必須要使用 <code>sendMessage</code> 而非單純的 <code>reply</code>(沒有 keyboard 的參數可用) 來產生</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">bot.command(&quot;test&quot;, ctx &#x3D;&gt; &#123;</span><br><span class="line">    ctx.telegram.sendMessage(ctx.chat.id, &#39;Welcome&#39;, &#123;</span><br><span class="line">        reply_markup: &#123;</span><br><span class="line">            inline_keyboard: [</span><br><span class="line">                [</span><br><span class="line">                    &#123; text: &quot;one&quot;, callback_data: &#39;one&#39; &#125;, </span><br><span class="line">                    &#123; text: &quot;one&quot;, callback_data: &#39;one&#39; &#125;</span><br><span class="line">                ], </span><br><span class="line">                [</span><br><span class="line">                    &#123; text: &quot;one&quot;, callback_data: &#39;one&#39; &#125;</span><br><span class="line">                ]</span><br><span class="line">            ]</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="點選-keyboard-後進行回應"><a href="#點選-keyboard-後進行回應" class="headerlink" title="點選 keyboard 後進行回應"></a>點選 keyboard 後進行回應</h2><p>回應 keyboard event 必須使用 <code>action</code> 方法，並根據在 keyboard 中設定的 callback data 來設定處理的邏輯</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">bot.command(&quot;test&quot;, ctx &#x3D;&gt; &#123;</span><br><span class="line">    ctx.telegram.sendMessage(ctx.chat.id, &#39;Welcome&#39;, &#123;</span><br><span class="line">        reply_markup: &#123;</span><br><span class="line">            inline_keyboard: [</span><br><span class="line">                [</span><br><span class="line">                    &#123; text: &quot;Click me&quot;, callback_data: &#39;one&#39; &#125;</span><br><span class="line">                ], </span><br><span class="line">            ]</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">bot.action(&#39;one&#39;, ctx &#x3D;&gt; &#123;</span><br><span class="line">    &#x2F;&#x2F; 透過 answerCbQuery 可以用來回應處理邏輯已經完成</span><br><span class="line">    ctx.answerCbQuery(&#39;Job has done!&#39;);</span><br><span class="line">    ctx.reply(&quot;You clicked the button&quot;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="來回選單的開發"><a href="#來回選單的開發" class="headerlink" title="來回選單的開發"></a>來回選單的開發</h2><p>若要開發來回選單的效果，建議透過刪除 message 的方式來進行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">bot.command(&quot;test&quot;, ctx &#x3D;&gt; &#123;</span><br><span class="line">    ctx.telegram.sendMessage(ctx.chat.id, &#39;Main Menu&#39;, &#123;</span><br><span class="line">        reply_markup: &#123;</span><br><span class="line">            inline_keyboard: [</span><br><span class="line">                [</span><br><span class="line">                    &#123; text: &quot;See Fruits List&quot;, callback_data: &#39;fruits&#39; &#125;</span><br><span class="line">                ], </span><br><span class="line">                [</span><br><span class="line">                    &#123; text: &quot;See Meats List&quot;, callback_data: &#39;meats&#39; &#125;</span><br><span class="line">                ]</span><br><span class="line">            ]</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">bot.action(&#39;fruits&#39;, ctx &#x3D;&gt; &#123;</span><br><span class="line">    ctx.deleteMessage();</span><br><span class="line">    ctx.telegram.sendMessage(ctx.chat.id, &#39;List of fruits:\n- Apples\n- Oranges\n- Pears&#39;, &#123;</span><br><span class="line">        reply_markup: &#123;</span><br><span class="line">            inline_keyboard: [</span><br><span class="line">                [</span><br><span class="line">                    &#123; text: &quot;Back to menu&quot;, callback_data: &#39;menu&#39; &#125;</span><br><span class="line">                ]</span><br><span class="line">            ]</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">bot.action(&#39;menu&#39;, ctx &#x3D;&gt; &#123;</span><br><span class="line">    ctx.deleteMessage();</span><br><span class="line">    ctx.telegram.sendMessage(ctx.chat.id, &#39;Main Menu&#39;, &#123;</span><br><span class="line">        reply_markup: &#123;</span><br><span class="line">            inline_keyboard: [</span><br><span class="line">                [</span><br><span class="line">                    &#123; text: &quot;See Fruits List&quot;, callback_data: &#39;fruits&#39; &#125;</span><br><span class="line">                ], </span><br><span class="line">                [</span><br><span class="line">                    &#123; text: &quot;See Meats List&quot;, callback_data: &#39;meats&#39; &#125;</span><br><span class="line">                ]</span><br><span class="line">            ]</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="Inline-Query"><a href="#Inline-Query" class="headerlink" title="Inline Query"></a>Inline Query</h1><h2 id="原理-amp-流程說明"><a href="#原理-amp-流程說明" class="headerlink" title="原理 &amp; 流程說明"></a>原理 &amp; 流程說明</h2><p>以下透過 <strong>Telegram Inline Query Flow</strong> 來說明整體開發流程：</p>
+<p><img src="/blog/images/chatbot/telegraf-inline_query_flow.png" alt="Telegram Inline Query Result"></p>
+<p>首先使用者可以在 telegram 界面中透過 <code>@bot [search term]</code> 的方式觸發 inline query。</p>
+<p>接著 inline query 會被送到 bot 端的程式(這個部份就是自己開發的 bot code)進行處理，若是透過 [nodejs telegraf][<a target="_blank" rel="noopener" href="https://telegraf.js.org/]">https://telegraf.js.org/]</a> 套件，則以透過 <code>context.inlineQuery(&#39;search_term&#39;, ()=&gt;&#123;&#125;)</code> or <code>context.on(&#39;inline_query&#39;, ()=&gt;&#123;&#125;)</code> 來進行處理。</p>
+<blockquote>
+<p>其中 <code>on</code> 是 <a target="_blank" rel="noopener" href="https://telegraf.js.org/#/?id=middleware">middleware</a>，<code>inline_query</code> 則是 <a target="_blank" rel="noopener" href="https://telegraf.js.org/#/?id=update-types">update type</a></p>
+</blockquote>
+<p>最後開發者可以根據攔截到的訊息，經過處理之後，回應 <a target="_blank" rel="noopener" href="https://core.telegram.org/bots/api#inlinequeryresult">Inline Query Result</a>，而在 telegram 中可使用多達 20 種的 Inline Query Result：</p>
+<p><img src="/blog/images/chatbot/telegraf-inline_query_result.png" alt="Telegram Inline Query Result"></p>
+<blockquote>
+<p>需要注意的是，一般透過 <code>@botfather</code> 新增的 bot 預設是不會啟動 Inline Query Mode，必須在 Bot Settings 中開啟才行。</p>
+</blockquote>
+<h2 id="搜尋範例"><a href="#搜尋範例" class="headerlink" title="搜尋範例"></a>搜尋範例</h2><p>以 <code>InlineQueryResultCachedPhoto</code> 回應 inline query 範例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;使用 middleware &quot;on&quot; + update type &quot;inline_query&quot; 來攔截事件</span><br><span class="line">bot.on(&#39;inline_query&#39;, async ctx &#x3D;&gt; &#123;</span><br><span class="line">    &#x2F;&#x2F;透過 context 的 inlineQuery.query 可以取得使用者輸入的資料</span><br><span class="line">    let query &#x3D; ctx.inlineQuery.query;</span><br><span class="line">    &#x2F;&#x2F;以下則是呼叫 pixabay API 的範例</span><br><span class="line">    let res &#x3D; await axios.get(&#96;https:&#x2F;&#x2F;pixabay.com&#x2F;api&#x2F;?key&#x3D;$&#123;apikey&#125;&amp;q&#x3D;$&#123;query&#125;&#96;);</span><br><span class="line">    </span><br><span class="line">    let data &#x3D; res.data.hits;</span><br><span class="line">    &#x2F;&#x2F;type&#x3D;&#39;photo&#39; 表示回應 InlineQueryResultCachedPhoto</span><br><span class="line">    &#x2F;&#x2F;回應內容可以用 markdown 的格式回應</span><br><span class="line">    let results &#x3D; data.map((item, index) &#x3D;&gt; &#123;</span><br><span class="line">        return &#123;</span><br><span class="line">            type: &#39;photo&#39;, </span><br><span class="line">            id: String(index), </span><br><span class="line">            photo_url: item.webformatURL, </span><br><span class="line">            thumb_url: item.previewURL, </span><br><span class="line">            photo_width: 300, </span><br><span class="line">            photo_height: 200, </span><br><span class="line">            caption: &#96;[Source]($&#123;item.webformatURL&#125;)\n[Large Iamge]($&#123;item.largeImageURL&#125;)&#96;, </span><br><span class="line">            parse_mode: &#39;Markdown&#39;</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F;透過 context 的 answerInlineQuery 可以直接回應 inline query 而不需要帶上 query id 參數</span><br><span class="line">    ctx.answerInlineQuery(results);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>以 <code>InlineQueryResultArticle</code> 回應 inline query 範例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">bot.on(&#39;inline_query&#39;, async ctx &#x3D;&gt; &#123;</span><br><span class="line">    let query &#x3D; ctx.inlineQuery.query;</span><br><span class="line">    let res &#x3D; await axios.get(&#96;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;w&#x2F;api.php?action&#x3D;opensearch&amp;format&#x3D;json&amp;search&#x3D;$&#123;query&#125;&amp;limit&#x3D;5&#96;);</span><br><span class="line"></span><br><span class="line">    let data &#x3D; res.data;</span><br><span class="line">    let allTitles &#x3D; data[1];</span><br><span class="line">    let allLinks &#x3D; data[3];</span><br><span class="line"></span><br><span class="line">    if(allTitles &#x3D;&#x3D; undefined) &#123;</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    let results &#x3D; allTitles.map((item, index) &#x3D;&gt; &#123;</span><br><span class="line">        return &#123;</span><br><span class="line">            type: &#39;article&#39;, </span><br><span class="line">            id: String(index), </span><br><span class="line">            title: item, </span><br><span class="line">            input_message_content: &#123;</span><br><span class="line">                message_text: &#96;$&#123;item&#125;\n$&#123;allLinks[index]&#125;&#96;</span><br><span class="line">            &#125;, </span><br><span class="line">            description: allLinks[index]</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    ctx.answerInlineQuery(results);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="透過-switch-inline-query-current-chat-提供-template-command"><a href="#透過-switch-inline-query-current-chat-提供-template-command" class="headerlink" title="透過 switch_inline_query_current_chat 提供 template command"></a>透過 switch_inline_query_current_chat 提供 template command</h2><p>為了方便使用者，可以透過按鈕的方式進行動作而非純敲鍵盤的方式，可以使用 callback function 中，使用 <code>reply_markup</code> + <code>inline_keyboard</code> + <code>switch_inline_query_current_chat</code> 來達成此目的，以下是個簡單範例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;使用者輸入 &#x2F;start 或是 &#x2F;help 之後，就會出現兩個搜尋按鈕</span><br><span class="line">bot.command([&#39;start&#39;, &#39;help&#39;], ctx &#x3D;&gt; &#123;</span><br><span class="line">    let message &#x3D; &#96;</span><br><span class="line">Welcome to Search Bot!</span><br><span class="line">Use the inline mode below</span><br><span class="line">@godleon_test_bot p &lt;search image&gt;</span><br><span class="line">@godleon_test_bot w &lt;search wiki&gt;</span><br><span class="line">&#96;;</span><br><span class="line">    &#x2F;&#x2F;按下第一個按鈕，會自動在使用者的訊息輸入欄中填入 &quot;@bot_id p&quot;</span><br><span class="line">    &#x2F;&#x2F;按下第一個按鈕，會自動在使用者的訊息輸入欄中填入 &quot;@bot_id w&quot;</span><br><span class="line">    ctx.reply(message, &#123;</span><br><span class="line">        reply_markup: &#123;</span><br><span class="line">            inline_keyboard: [</span><br><span class="line">                [</span><br><span class="line">                    &#123; text: &#39;Search Pixabay Image&#39;, switch_inline_query_current_chat: &#39;p &#39; &#125;</span><br><span class="line">                ], </span><br><span class="line">                [</span><br><span class="line">                    &#123; text: &#39;Search Wiki&#39;, switch_inline_query_current_chat: &#39;w &#39; &#125;</span><br><span class="line">                ]</span><br><span class="line">            ]</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="Polling-Mode-v-s-Webhook"><a href="#Polling-Mode-v-s-Webhook" class="headerlink" title="Polling Mode v.s. Webhook"></a>Polling Mode v.s. Webhook</h1><h2 id="Polling-Mode"><a href="#Polling-Mode" class="headerlink" title="Polling Mode"></a>Polling Mode</h2><p>當一個 telegram bot 被建立時，預設設定使用的是 polling mode，而此模式的行為如下：</p>
+<ol>
+<li><p>bot 程式會不斷的去詢問 telegram server 目前有沒有新的訊息</p>
+</li>
+<li><p>若是沒有新訊息，telegram server 則回應沒有，bot 程式也就不會做任何事情</p>
+</li>
+<li><p>一旦使用者輸入訊息，下次 bot 程式來詢問時，telegram server 就會回應該訊息</p>
+</li>
+<li><p>bot 程式收到新的訊息，進行處理</p>
+</li>
+</ol>
+<p>而 polling mode 有以下幾個優點：</p>
+<ul>
+<li><p>開發方便，開發者只要確定程式運作環境可以連上網路就可以進行開發</p>
+</li>
+<li><p>佈署也同時方便，放在任何可以連上網路的環境即可</p>
+</li>
+</ul>
+<p>但是從上面的流程看來，polling mode 的缺點也顯而易見，<strong>這其實蠻浪費資源的，會對 telegram server 產生很多詢問的 polling</strong>，整體來說並不是一個有效率的資源使用方法。</p>
+<h2 id="Webhook"><a href="#Webhook" class="headerlink" title="Webhook"></a>Webhook</h2><p>然而上面的問題可以改用 webhook 來解決，而 webhook 模式行為就很簡單：</p>
+<ol>
+<li><p>bot 不會主動去問 telegram server 任何訊息</p>
+</li>
+<li><p>當 telegram server 收到訊息後，主動通知 bot</p>
+</li>
+<li><p>bot 收到訊息後進行處理</p>
+</li>
+</ol>
+<p>可以看出上面的流程比起 polling mode 有相當大的改善，但使用 webhook 需要提供一個 telegram server 可以存取到的 public URL，但這個部份也不難，可以考慮以下項目：</p>
+<ul>
+<li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/tw/api-gateway/">AWS API Gateway</a></p>
+<blockquote>
+<p>若是 bot 程式需要取用外部公有資源(例如上面範例的 pixabay &amp; wiki)，那就適合放在這裡</p>
+</blockquote>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://ngrok.com/">ngrok</a></p>
+<blockquote>
+<p>若是要存取的資源都在內部，那就用這個吧(ngrok 可以提供一個 public URL，並從 ngrok server 建立一個 network tunnel 到內部程式)，對於開發者開發也方便</p>
+</blockquote>
+</li>
+</ul>
+<p>而開啟 <a target="_blank" rel="noopener" href="https://core.telegram.org/bots/api#setwebhook">bot wehbook mode</a>，則是要使用以下 template URL 來完成：</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://api.telegram.org/bot">https://api.telegram.org/bot</a><token>/setWebhook?url=<endpoint></p>
+</blockquote>
+<p>假如設定如下：</p>
+<ul>
+<li><p>Bot token：<code>808328592:AAFFUBCK2g7olBWpncLlfsrLh1AQee_sIzk</code></p>
+</li>
+<li><p>public URL：<code>https://3bao3o4fy3.execute-api.us-east-1.amazonaws.com/v1</code></p>
+</li>
+</ul>
+<p>那設定 telegram bot webhook 就可以使用下列網址：</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://api.telegram.org/bot808328592:AAFFUBCK2g7olBWpncLlfsrLh1AQee_sIzk/setWebhook?url=https://3bao3o4fy3.execute-api.us-east-1.amazonaws.com/v1">https://api.telegram.org/bot808328592:AAFFUBCK2g7olBWpncLlfsrLh1AQee_sIzk/setWebhook?url=https://3bao3o4fy3.execute-api.us-east-1.amazonaws.com/v1</a></p>
+</blockquote>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a target="_blank" rel="noopener" href="https://www.udemy.com/course/build-telegram-bots-with-javascript-the-complete-guide">Build Telegram Bots with JavaScript: The Complete Guide | Udemy</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://telegraf.js.org/">Telegraf: Modern Telegram Bot Framework for Node.js</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://core.telegram.org/bots">Telegram Bots: An introduction for developers</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://core.telegram.org/api">Telegram APIs</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/AWS/" rel="tag"># AWS</a>
+              <a href="/blog/tags/ChatOps/" rel="tag"># ChatOps</a>
+              <a href="/blog/tags/Telegram/" rel="tag"># Telegram</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/Elasticsearch/Elasticsearch-distributed-mechanism/" rel="prev" title="[Elasticsearch] 分散式特性 & 分散式搜尋的機制">
+                  <i class="fa fa-chevron-left"></i> [Elasticsearch] 分散式特性 & 分散式搜尋的機制
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/blog/ChatOps/message-queue-concepts/" rel="next" title="Message Queue 簡介(以 RabbitMQ 為例)">
+                  Message Queue 簡介(以 RabbitMQ 為例) <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">تطبيق الموقع <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/ChatOps/howto-develop-telegram-chatbot/";
+    this.page.identifier = "ChatOps/howto-develop-telegram-chatbot/";
+    this.page.title = "[ChatOps] 簡單介紹如何開發一個 Telegram Bot";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>

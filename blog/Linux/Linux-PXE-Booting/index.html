@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="This article introduces the booting process of PXE and iPXE">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[Linux] PXE Booting">
+<meta property="og:url" content="https://godleon.github.io/blog/Linux/Linux-PXE-Booting/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="This article introduces the booting process of PXE and iPXE">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="https://github.com/coreos/coreos-baremetal/raw/master/Documentation/img/pxelinux.png">
+<meta property="og:image" content="https://github.com/coreos/coreos-baremetal/raw/master/Documentation/img/ipxe.png">
+<meta property="article:published_time" content="2016-07-01T06:30:00.000Z">
+<meta property="article:modified_time" content="2020-08-17T02:22:00.417Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="Linux">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/coreos/coreos-baremetal/raw/master/Documentation/img/pxelinux.png">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/Linux/Linux-PXE-Booting/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-tw'
+  };
+</script>
+
+  <title>[Linux] PXE Booting | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="تشغيل شريط التصفح">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          المحتويات
+        </li>
+        <li class="sidebar-nav-overview">
+          عام
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#PXE"><span class="nav-number">1.</span> <span class="nav-text">PXE</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Network-Boot-Program-NBP-%E4%B9%9F%E7%A8%B1%E7%82%BA-bootloader"><span class="nav-number">2.</span> <span class="nav-text">Network Boot Program (NBP, 也稱為 bootloader)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#PXELINUX"><span class="nav-number">2.1.</span> <span class="nav-text">PXELINUX</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#iPXE"><span class="nav-number">2.2.</span> <span class="nav-text">iPXE</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">3.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">124</span>
+          <span class="site-state-item-name">المقالات</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">التصنيفات</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">101</span>
+        <span class="site-state-item-name">الوسوم</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/Linux/Linux-PXE-Booting/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [Linux] PXE Booting
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">نُشر في</span>
+
+              <time title="أُنشأ: 2016-07-01 14:30:00" itemprop="dateCreated datePublished" datetime="2016-07-01T14:30:00+08:00">2016-07-01</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">عُدل في</span>
+                <time title="عُدل: 2020-08-17 10:22:00" itemprop="dateModified" datetime="2020-08-17T10:22:00+08:00">2020-08-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">في</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/Linux/Linux-PXE-Booting/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="Linux/Linux-PXE-Booting/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">This article introduces the booting process of PXE and iPXE</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>此篇文章介紹 PXE &amp; iPXE 的開機流程</p>
+<h1 id="PXE"><a href="#PXE" class="headerlink" title="PXE"></a>PXE</h1><p>首先以下圖說明一下傳統 PXE 的流程：</p>
+<p><img src="https://github.com/coreos/coreos-baremetal/raw/master/Documentation/img/pxelinux.png" alt="PXE"></p>
+<p>PXE 的開機流程，簡單來說就是幾個步驟：</p>
+<ol>
+<li><p>network client 從 DHCP service 取得 IP &amp; 其他 metadata(例如：TFTP 資訊 &amp; NBP 檔名)</p>
+</li>
+<li><p>network client 從 TFTP 取得 NBP(Network Boot Program，上面中的 <code>pxelinux.0</code>)，並啟動</p>
+</li>
+<li><p>network client 使用 NBP 載入 configs, scripts, 以及執行 OS 需要的 kernel(範例中的 <code>kernel.vmlinuz</code>) &amp; ramfs image(上圖中的 <code>initrd.cpio.gz</code>)</p>
+</li>
+</ol>
+<hr>
+<h1 id="Network-Boot-Program-NBP-也稱為-bootloader"><a href="#Network-Boot-Program-NBP-也稱為-bootloader" class="headerlink" title="Network Boot Program (NBP, 也稱為 bootloader)"></a>Network Boot Program (NBP, 也稱為 bootloader)</h1><p>CoreOS 可用多種不同的 bootloader 開機 &amp; 設定，如果是一個全新的設定環境，<a target="_blank" rel="noopener" href="http://ipxe.org/">iPXE</a> 是個不錯的選擇。</p>
+<h2 id="PXELINUX"><a href="#PXELINUX" class="headerlink" title="PXELINUX"></a>PXELINUX</h2><p><a target="_blank" rel="noopener" href="http://www.syslinux.org/wiki/index.php?title=PXELINUX">PXELINUX</a> 是個相當普遍被使用的 bootloader(檔名為 <code>pxelinux.0</code>)，會自動從 <code>/tftp_bootdir/pxelinux.cfg</code> 目錄中載入設定檔。</p>
+<p>若要控制特定機器使用特定的設定檔，可以利用 network client 的 UUID、MAC address、IP or default 來進行設定，因此設定檔就會變成如下面的範例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">/tftp_bootdir/pxelinux.cfg/b8945908-d6a6-41a9-611d-74a6ab80b83d</span><br><span class="line">/tftp_bootdir/pxelinux.cfg/01-88-99-aa-bb-cc-dd</span><br><span class="line">/tftp_bootdir/pxelinux.cfg/default</span><br></pre></td></tr></table></figure>
+
+<p>按照上圖的流程，可以很清楚知道，設定檔的內容肯定就是會包含了像是 config / script / kernel / ramfs image …. 等檔案的位置資訊(可能還會包含<strong>開機選單</strong>)，以下是個簡單範例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">default coreos</span><br><span class="line">prompt 1</span><br><span class="line">timeout 15</span><br><span class="line"></span><br><span class="line">display boot.msg</span><br><span class="line"></span><br><span class="line">label coreos</span><br><span class="line">  menu default</span><br><span class="line">  kernel coreos_production_pxe.vmlinuz</span><br><span class="line">  append initrd=coreos_production_pxe_image.cpio.gz cloud-config-url=http://example.com/pxe-cloud-config.yml</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>上面範例中的檔案若沒有指定目錄，就表示應該將其放在 <code>/tftp_bootdir</code> 目錄中<br>其中設定了一個簡單的 menu、顯示訊息、kernel(coreos_production_pxe.vmlinuz)、ramfs(coreos_production_pxe_image.cpio.gz) &amp; 設定 CoreOS 用的 cloud-config.yaml</p>
+</blockquote>
+<p>PXE 雖然普遍使用，但的確是有些缺點存在的，例如：</p>
+<ol>
+<li><p>TFTP 速度慢</p>
+</li>
+<li><p>若有許多針對不同機器的客製化設定檔需求，會需要撰寫很多份 pxelinux config</p>
+</li>
+</ol>
+<h2 id="iPXE"><a href="#iPXE" class="headerlink" title="iPXE"></a>iPXE</h2><p><a target="_blank" rel="noopener" href="http://ipxe.org/">iPXE</a> 可是視為加強版的 PXE bootloader，使用的並非是設定檔，而是 <strong>iPXE script</strong>，而且 iPXE script &amp; image 都可以透過 HTTP 下載</p>
+<p>以下是 iPXE 開機流程示意圖：</p>
+<p><img src="https://github.com/coreos/coreos-baremetal/raw/master/Documentation/img/ipxe.png" alt="iPXE"></p>
+<p>從上圖可以看出，為了可以運作在原有的環境中，使用了一個名稱為 <a target="_blank" rel="noopener" href="http://boot.ipxe.org/undionly.kpxe">undionly.kpxe</a> 的 bootloader 來協助開機，接著會發生以下的事情：</p>
+<ol>
+<li><p>bootloader undionly.kpxe 會提供給 machine 上網 &amp; 處理後續 iPXE script 的能力</p>
+</li>
+<li><p>透過網路取得 iPXE script <code>boot.ipxes</code></p>
+</li>
+<li><p>並會使用檔名為 <code>boot.ipxe</code>(來源可以是 HTTP) 的 iPXE script 來繼續執行後續的開機流程</p>
+</li>
+</ol>
+<p>以下是個簡單的 iPXE script 範例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!ipxe</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">set</span> base-url http://stable.release.core-os.net/amd64-usr/current</span><br><span class="line">kernel <span class="variable">$&#123;base-url&#125;</span>/coreos_production_pxe.vmlinuz cloud-config-url=http://provisioner.example.net/cloud-config.yml</span><br><span class="line">initrd <span class="variable">$&#123;base-url&#125;</span>/coreos_production_pxe_image.cpio.gz</span><br><span class="line">boot</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>透過 iPXE script，可以用程式化的方式進行更多動態的開機設定</p>
+</blockquote>
+<p>在 iPXE 開機環境 for CoreOS 的架構中，有一些事情是值得注意一下的：</p>
+<ol>
+<li><p>TFTP 只用來提供 <a target="_blank" rel="noopener" href="http://boot.ipxe.org/undionly.kpxe">undionly.kpxe</a> bootloader，目的是為了讓老舊的 PXE firmware client 也可以使用 iPXE</p>
+</li>
+<li><p>CoreOS 提供了 [bootcfg](coreos-baremetal/bootcfg.md at master · coreos/coreos-baremetal) 工具，可根據硬體的屬性，用來產生相對應的 iPXE script (把 iPXE script 的來源指向 bootcfg iPXE endpoint)</p>
+</li>
+</ol>
+<hr>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a target="_blank" rel="noopener" href="http://www.syslinux.org/wiki/index.php?title=PXELINUX">PXELINUX - Syslinux Wiki</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="http://ipxe.org/howto/chainloading">iPXE - open source boot firmware [howto:chainloading]</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://github.com/coreos/coreos-baremetal/blob/master/Documentation/network-booting.md">coreos-baremetal/network-booting.md at master · coreos/coreos-baremetal</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/Linux/" rel="tag"># Linux</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/Linux/Auto-Authenticate-with-Password-Protected-SSHKeypair/" rel="prev" title="[Linux] 解決使用帶有密碼的 SSH keypair 時需要重複輸入密碼的問題">
+                  <i class="fa fa-chevron-left"></i> [Linux] 解決使用帶有密碼的 SSH keypair 時需要重複輸入密碼的問題
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/blog/KVM/QEMU-KVM-In-CentOS7-GettingStart/" rel="next" title="[Linux KVM] 使用 Linux KVM 啟用第一個 virtual machine">
+                  [Linux KVM] 使用 Linux KVM 啟用第一個 virtual machine <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">تطبيق الموقع <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/Linux/Linux-PXE-Booting/";
+    this.page.identifier = "Linux/Linux-PXE-Booting/";
+    this.page.title = "[Linux] PXE Booting";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 EC2 服務，會分成三篇文章來記錄，此為第一部份，包含了簡介、設定、Security Group ... 等內容">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AWS CSA Associate 學習筆記 - EC2(Elastic Compute Cloud) Part 1">
+<meta property="og:url" content="https://godleon.github.io/blog/AWS/AWS-CSA-associate-EC2-part1/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 EC2 服務，會分成三篇文章來記錄，此為第一部份，包含了簡介、設定、Security Group ... 等內容">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2020-05-27T20:50:00.000Z">
+<meta property="article:modified_time" content="2020-08-17T02:22:00.409Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="AWS">
+<meta property="article:tag" content="CSA">
+<meta property="article:tag" content="EC2">
+<meta property="article:tag" content="VPC">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/AWS/AWS-CSA-associate-EC2-part1/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-tw'
+  };
+</script>
+
+  <title>AWS CSA Associate 學習筆記 - EC2(Elastic Compute Cloud) Part 1 | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="تشغيل شريط التصفح">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          المحتويات
+        </li>
+        <li class="sidebar-nav-overview">
+          عام
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#EC2-%E7%B0%A1%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">EC2 簡介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Overview"><span class="nav-number">1.1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pricing-Type"><span class="nav-number">1.2.</span> <span class="nav-text">Pricing Type</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spot-Instance-%E8%A8%88%E8%B2%BB"><span class="nav-number">1.3.</span> <span class="nav-text">Spot Instance 計費</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Instance-Type"><span class="nav-number">1.4.</span> <span class="nav-text">Instance Type</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%97%9C%E6%96%BC-EC2-%E8%A8%AD%E5%AE%9A%E7%9A%84%E9%81%B8%E9%A0%85"><span class="nav-number">2.</span> <span class="nav-text">關於 EC2 設定的選項</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A8%AD%E5%AE%9A-Instance"><span class="nav-number">2.1.</span> <span class="nav-text">設定 Instance</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%81%B8%E9%A0%85%E4%B8%AD%E7%9A%84-AZ-%E8%B7%9F%E5%AF%A6%E9%9A%9B%E4%B8%AD%E7%9A%84-AZ-%E4%B8%A6%E4%B8%8D%E5%90%8C"><span class="nav-number">2.1.1.</span> <span class="nav-text">選項中的 AZ 跟實際中的 AZ 並不同</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%A3%E6%8E%A7"><span class="nav-number">2.1.2.</span> <span class="nav-text">監控</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E8%88%AC%E9%81%B8%E9%A0%85"><span class="nav-number">2.1.3.</span> <span class="nav-text">一般選項</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%B2%E9%9A%8E%E9%81%B8%E9%A0%85"><span class="nav-number">2.1.4.</span> <span class="nav-text">進階選項</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A2%9E%E5%8A%A0-Storage"><span class="nav-number">2.2.</span> <span class="nav-text">增加 Storage</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A8%AD%E5%AE%9A-Security-Group"><span class="nav-number">2.3.</span> <span class="nav-text">設定 Security Group</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A8%AD%E5%AE%9A-Key-Pair"><span class="nav-number">2.4.</span> <span class="nav-text">設定 Key Pair</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EC2-Instance-%E7%AE%A1%E7%90%86%E5%8A%9F%E8%83%BD"><span class="nav-number">3.</span> <span class="nav-text">EC2 Instance 管理功能</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Status-Check"><span class="nav-number">3.1.</span> <span class="nav-text">Status Check</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Actions"><span class="nav-number">3.2.</span> <span class="nav-text">Actions</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Security-Group"><span class="nav-number">4.</span> <span class="nav-text">Security Group</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#EC2-amp-Security-Group"><span class="nav-number">4.1.</span> <span class="nav-text">EC2 &amp; Security Group</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Security-Group-v-s-VPC-Network-ACL-Access-Control-List"><span class="nav-number">4.2.</span> <span class="nav-text">Security Group v.s. VPC Network ACL(Access Control List)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Security-Group-1"><span class="nav-number">4.2.1.</span> <span class="nav-text">Security Group</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VPC-Network-ACL-Access-Control-List"><span class="nav-number">4.2.2.</span> <span class="nav-text">VPC Network ACL(Access Control List)</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%87%89%E8%80%83%E9%87%8D%E9%BB%9E%E6%95%B4%E7%90%86"><span class="nav-number">5.</span> <span class="nav-text">應考重點整理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#EC2-%E6%A6%82%E8%A7%80"><span class="nav-number">5.1.</span> <span class="nav-text">EC2 概觀</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Security-Group-2"><span class="nav-number">5.2.</span> <span class="nav-text">Security Group</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">124</span>
+          <span class="site-state-item-name">المقالات</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">التصنيفات</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">101</span>
+        <span class="site-state-item-name">الوسوم</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/AWS/AWS-CSA-associate-EC2-part1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AWS CSA Associate 學習筆記 - EC2(Elastic Compute Cloud) Part 1
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">نُشر في</span>
+
+              <time title="أُنشأ: 2020-05-28 04:50:00" itemprop="dateCreated datePublished" datetime="2020-05-28T04:50:00+08:00">2020-05-28</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">عُدل في</span>
+                <time title="عُدل: 2020-08-17 10:22:00" itemprop="dateModified" datetime="2020-08-17T10:22:00+08:00">2020-08-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">في</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/AWS/" itemprop="url" rel="index"><span itemprop="name">AWS</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/AWS/AWS-CSA-associate-EC2-part1/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="AWS/AWS-CSA-associate-EC2-part1/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 EC2 服務，會分成三篇文章來記錄，此為第一部份，包含了簡介、設定、Security Group ... 等內容</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="EC2-簡介"><a href="#EC2-簡介" class="headerlink" title="EC2 簡介"></a>EC2 簡介</h1><h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><p>首先是原廠介紹：</p>
+<blockquote>
+<p>Amazon Elastic Compute Cloud (Amazon EC2) is a web service that provides secure, resizable compute capacity in the cloud. It is designed to make web-scale cloud computing easier for developers. Amazon EC2’s simple web service interface allows you to obtain and configure capacity with minimal friction. It provides you with complete control of your computing resources and lets you run on Amazon’s proven computing environment.</p>
+</blockquote>
+<p>可以看出 EC2 具備以下特性：</p>
+<ul>
+<li><p>提供 compute capacity，也就是俗稱的 virtual machine(VM)</p>
+</li>
+<li><p>包含了許多安全性功能</p>
+</li>
+<li><p>可以因應使用者需求，提供可大可小運算能力的 VM，並且可隨時 scale up &amp; down</p>
+</li>
+<li><p>大大降低了產生 VM 所花費的時間，讓使用者可以很低門檻的開始使用 VM 相關服務</p>
+</li>
+<li><p>VM 是運行在 AWS 長久以來被驗證很穩定的基礎建設上</p>
+</li>
+</ul>
+<h2 id="Pricing-Type"><a href="#Pricing-Type" class="headerlink" title="Pricing Type"></a>Pricing Type</h2><ul>
+<li><p><strong>Om Demand</strong>：用多少算多少，不用保證用量，但每個時間單位費用是最高的</p>
+</li>
+<li><p><strong>Reserved</strong>：預先跟 AWS 保留使用量，需要簽約 &amp; 預付一大筆金額，但整體來說可以得到很大的折扣(相較於 on demand 模式)，</p>
+</li>
+<li><p><strong>Spot</strong>：透過競價模式取得的 EC2 instance，最便宜，但由於價格是浮動的，一旦價格高過原本設定的出現，instance 就會被砍掉；適合用在使用時間彈性的應用上(例如：大數據資料處理)</p>
+</li>
+<li><p><strong>Dedicated Host</strong>：整台實體機器都給你用了，如果軟體必須跟實體機器綁定時 or 想要先把地端的運用完全不動的先移植到雲端時，才會用到的選項。</p>
+</li>
+<li><p><strong>Saving Plan</strong>：這是新一代的省錢方式，對使用者來說，運用彈性變大的(例如：可改變 instance type)，詳情可參考<a target="_blank" rel="noopener" href="https://aws.amazon.com/tw/savingsplans/">官網說明</a>，但同樣會需要使用者預付一筆費用</p>
+</li>
+</ul>
+<h2 id="Spot-Instance-計費"><a href="#Spot-Instance-計費" class="headerlink" title="Spot Instance 計費"></a>Spot Instance 計費</h2><ul>
+<li><p>spot instance 是以小時(hour)為單位計費</p>
+</li>
+<li><p>如果因為出價太低，導致 AWS 主動砍了 spot instance，未滿一小時的部份則不收費</p>
+</li>
+<li><p>如果使用者自行砍掉 VM，未滿一小時的部份則會被收一小時整的費用</p>
+</li>
+</ul>
+<h2 id="Instance-Type"><a href="#Instance-Type" class="headerlink" title="Instance Type"></a>Instance Type</h2><p>每個 instance type 的代碼其實都有其意義，可以對應到特別的場景 &amp; 應用，以下列出說明：</p>
+<ul>
+<li><p><code>F</code>：FPGA</p>
+</li>
+<li><p><code>I</code>：IOPS</p>
+</li>
+<li><p><code>G</code>：Graphics</p>
+</li>
+<li><p><code>H</code>：High Disk Throughput</p>
+</li>
+<li><p><code>T</code>：Cheap general purpose (例如：<strong>t2.micro</strong>)</p>
+</li>
+<li><p><code>D</code>：Density</p>
+</li>
+<li><p><code>R</code>：RAM</p>
+</li>
+<li><p><code>M</code>：Main choice for general purpose apps</p>
+</li>
+<li><p><code>C</code>：Compute</p>
+</li>
+<li><p><code>P</code>：Graphics (例如：Pics)</p>
+</li>
+<li><p><code>X</code>：Extreme Memory</p>
+</li>
+<li><p><code>Z</code>：Extreme Memory &amp; CPU</p>
+</li>
+<li><p><code>A</code>：ARM-based workloads</p>
+</li>
+<li><p><code>U</code>：Bare Metal</p>
+</li>
+</ul>
+<h1 id="關於-EC2-設定的選項"><a href="#關於-EC2-設定的選項" class="headerlink" title="關於 EC2 設定的選項"></a>關於 EC2 設定的選項</h1><h2 id="設定-Instance"><a href="#設定-Instance" class="headerlink" title="設定 Instance"></a>設定 Instance</h2><h3 id="選項中的-AZ-跟實際中的-AZ-並不同"><a href="#選項中的-AZ-跟實際中的-AZ-並不同" class="headerlink" title="選項中的 AZ 跟實際中的 AZ 並不同"></a>選項中的 AZ 跟實際中的 AZ 並不同</h3><p>在 subnet 的部份，可以選擇對應到不同 AZ 的 subnet，但上面的選項不一定會對應到實際的 AZ，例如在 region <strong>us-east-1</strong> 中，有以下 AZ：</p>
+<ul>
+<li><p><code>us-east-1a</code></p>
+</li>
+<li><p><code>us-east-1b</code></p>
+</li>
+<li><p><code>us-east-1c</code></p>
+</li>
+</ul>
+<p>假設使用者 Andy 選了 <code>us-east-1a</code>，另外一位使用者 Bill 也選了 <code>us-east-1a</code>，但實際上兩個使用者的 VM 並不一定放在同一個 AZ 中。</p>
+<p>但對同一個使用者來說，<code>us-east-1a</code>、<code>us-east-1b</code>、<code>us-east-1c</code> 就是三個不同實體的 AZ，只是你不需要去關心到底對應到那個實體 AZ；這表示使用者其實不需要知道或關心 AZ 代碼對應到的實際哪個 AZ，只要知道若是當 cloud resource 指定放置在不同的 AZ，AWS 就會幫你在實體上放在不同的 AZ 中。</p>
+<h3 id="監控"><a href="#監控" class="headerlink" title="監控"></a>監控</h3><ul>
+<li><p>預設情況下，CloudWatch 每五分鐘會收集 EC2 instance metrics</p>
+</li>
+<li><p>若希望可以取得更細節的資訊(例如：每一分鐘)，那可以勾選 <strong>Monitoring</strong> 選項中的 <code>Enable CloudWatch detailed monitoring</code></p>
+</li>
+</ul>
+<h3 id="一般選項"><a href="#一般選項" class="headerlink" title="一般選項"></a>一般選項</h3><ul>
+<li><p>**<a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-capacity-reservations.html">Capacity Reservation</a>**：跟 saving plan 有關係，看起來像是要在省錢 &amp; 確保有特定容量的資源可用所設計的機制，詳細的內容可以參考<a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-capacity-reservations.html">官方文件說明</a>。</p>
+</li>
+<li><p><strong>IAM Role</strong>：可以指定 EC2 instance 所使用的 IAM 身份為何，若是需要串接其他服務，這個部份需要有正確的設定才行</p>
+</li>
+<li><p><strong>Shutdown Behavior</strong>：可指定關閉 instance 時，只是單純的停止(stop)，或是直接將其終止(terminate)</p>
+</li>
+<li><p><strong>Enable Termination Protection</strong>：可以用來保護此 VM 不會被誤刪</p>
+</li>
+<li><p><strong>Tenancy</strong>：可用來決定是否可以跟別的使用者共享同一台實體機的資源，有 <code>Shared</code>、<code>Dedicated</code>、<code>Dedicated host</code> 三個選項</p>
+</li>
+</ul>
+<h3 id="進階選項"><a href="#進階選項" class="headerlink" title="進階選項"></a>進階選項</h3><ul>
+<li><strong>User data</strong>：這裡可以用來指定 bootstrap script</li>
+</ul>
+<h2 id="增加-Storage"><a href="#增加-Storage" class="headerlink" title="增加 Storage"></a>增加 Storage</h2><ul>
+<li><p>預設會有一個 Volume Type 為 <code>Root</code> 的磁碟，這個就是 EC2 instance 的開機磁碟，容量通常很小，預設只有 8GB</p>
+</li>
+<li><p>Root volume 只能選擇 <code>SSD</code> &amp; <code>Magnetic(standard)</code> 兩種 volume type</p>
+</li>
+<li><p>Root volume 中的 <code>Delete on Termination</code> 是固定會勾選的，表示 instance 砍了，Root volume 也會跟著不見</p>
+</li>
+<li><p>可以指定增加 EBS volume，指定容量 &amp; Volume Type(HDD, SSD … 等等)</p>
+</li>
+<li><p>EBS volume 則可以選擇更多種 Volume Type，例如：Cold HDD、Throughput Optimized HDD … 等等</p>
+</li>
+<li><p>若是選擇 <strong>Throughput Optimized HDD</strong>，畫面就會出現 Throughtput 能力(MB/s)的資訊，基本上容量越大 throughtput 就會越大</p>
+</li>
+<li><p>指定不同的 Volume Type 會顯示對應的 IOPS 資訊</p>
+</li>
+<li><p>General Purpose SSD 能提供的 IOPS 是根據磁碟容量而定的，另外有一個 burst 的上限</p>
+</li>
+<li><p>Provisioned IOPS SSD 則是可以提供固定 IOPS 能力的磁碟</p>
+</li>
+<li><p>原本 Root volume 是無法加密的，但現在已經可以進行加密了</p>
+</li>
+</ul>
+<h2 id="設定-Security-Group"><a href="#設定-Security-Group" class="headerlink" title="設定 Security Group"></a>設定 Security Group</h2><ul>
+<li><p>Security Group 就是個虛擬的防火牆</p>
+</li>
+<li><p>若要連到 EC2 instance，設定正確的 security group rule 是需要的</p>
+</li>
+<li><p>security group rule 在設定上不同的 protocol, port, source, destination …. 等規則</p>
+</li>
+</ul>
+<h2 id="設定-Key-Pair"><a href="#設定-Key-Pair" class="headerlink" title="設定 Key Pair"></a>設定 Key Pair</h2><ul>
+<li><p>要用來設定連線到 VM 的 ssk keypair，可以預先上傳自己的 key，也可以直接在 console 中產生</p>
+</li>
+<li><p>透過 SSH 連線，使用者名稱為 <code>ec2-user</code></p>
+</li>
+</ul>
+<h1 id="EC2-Instance-管理功能"><a href="#EC2-Instance-管理功能" class="headerlink" title="EC2 Instance 管理功能"></a>EC2 Instance 管理功能</h1><h2 id="Status-Check"><a href="#Status-Check" class="headerlink" title="Status Check"></a>Status Check</h2><ul>
+<li><p><strong>System Status Checks</strong>：這是用來檢查底層實體機器 &amp; Hypervisor 的狀態</p>
+</li>
+<li><p><strong>Instance Status Check</strong>：這是用來檢查 VM 本身的狀態</p>
+</li>
+</ul>
+<h2 id="Actions"><a href="#Actions" class="headerlink" title="Actions"></a>Actions</h2><ul>
+<li>若有開啟 <strong>Termination Protection</strong> 的功能，要先在 <strong>Instance Settings -&gt; Change Termination Protection</strong> 中關閉此功能，才可以砍掉此 VM</li>
+</ul>
+<h1 id="Security-Group"><a href="#Security-Group" class="headerlink" title="Security Group"></a>Security Group</h1><h2 id="EC2-amp-Security-Group"><a href="#EC2-amp-Security-Group" class="headerlink" title="EC2 &amp; Security Group"></a>EC2 &amp; Security Group</h2><ul>
+<li><p>EC2 instance 可以同時與多個 security group 綁定</p>
+</li>
+<li><p>EC2 instance 一旦綁定 security group，規則馬上就會生效</p>
+</li>
+<li><p>一個 security group 可以對應到多個 EC2 instance</p>
+</li>
+</ul>
+<blockquote>
+<p>所以 EC2 instance &amp; security group 是多對多的關係</p>
+</blockquote>
+<h2 id="Security-Group-v-s-VPC-Network-ACL-Access-Control-List"><a href="#Security-Group-v-s-VPC-Network-ACL-Access-Control-List" class="headerlink" title="Security Group v.s. VPC Network ACL(Access Control List)"></a>Security Group v.s. VPC Network ACL(Access Control List)</h2><h3 id="Security-Group-1"><a href="#Security-Group-1" class="headerlink" title="Security Group"></a>Security Group</h3><ul>
+<li><p>Security Group rule 是 stateful 的</p>
+</li>
+<li><p>承上，若是 allow HTTP in，就會有一個隱性的 allow HTTP out 存在</p>
+</li>
+<li><p>承上，即使將 outbound rule 中允許向外的流量規則刪除，EC2 還是可以回應 HTTP request</p>
+</li>
+<li><p>預設所有 inbound traffic 都會被擋住，需要根據需求一條一條規則打開</p>
+</li>
+<li><p>預設所有 outbound traffic 都是開放的</p>
+</li>
+<li><p>無法設定黑名單(blacklist)，因此無法進行類似 “<strong>阻擋存取特定服務的 traffic</strong>“ 這樣的設定</p>
+</li>
+</ul>
+<h3 id="VPC-Network-ACL-Access-Control-List"><a href="#VPC-Network-ACL-Access-Control-List" class="headerlink" title="VPC Network ACL(Access Control List)"></a>VPC Network ACL(Access Control List)</h3><ul>
+<li><p>VPC network ACL 是 stateless 的</p>
+</li>
+<li><p>承上，若是建立了 inbound rule，就要建立相對應的 outbound rule，否則對應的服務不會通</p>
+</li>
+<li><p>可以設定黑名單，因此 “<strong>阻擋存取特定服務的 traffic</strong>“ 這類的規則是可以設定的</p>
+</li>
+</ul>
+<h1 id="應考重點整理"><a href="#應考重點整理" class="headerlink" title="應考重點整理"></a>應考重點整理</h1><h2 id="EC2-概觀"><a href="#EC2-概觀" class="headerlink" title="EC2 概觀"></a>EC2 概觀</h2><ul>
+<li><p><strong>Termination Protection 預設是關閉的</strong>，有需要就必須自己打開</p>
+</li>
+<li><p>VM 被刪除(Terminated)，Root volume 會一起被刪除</p>
+</li>
+<li><p>Root volume 可以加密，可以搭配第三方工具(例如：bot locker)使用，或是透過 AWS 提供的 API</p>
+</li>
+<li><p>額外加入的 volume 也可以加密</p>
+</li>
+</ul>
+<h2 id="Security-Group-2"><a href="#Security-Group-2" class="headerlink" title="Security Group"></a>Security Group</h2><ul>
+<li><p>所有 inbound traffic 預設都會被擋住</p>
+</li>
+<li><p>所有 outbound traffic 預設是開放的</p>
+</li>
+<li><p>security group 規則修改後馬上會生效</p>
+</li>
+<li><p>EC2 instance &amp; security group 是多對多的關係</p>
+</li>
+<li><p>security group 是 stateful，在 inbound 設定的規則會同時在 outbound 中自動開放</p>
+</li>
+<li><p>security group 無法設定黑名單，若需要黑名單功能，則需要使用 Network ACL 來做 (只可以設定 allow rules，無法設定 deny rules)</p>
+</li>
+</ul>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a target="_blank" rel="noopener" href="https://www.udemy.com/course/aws-certified-solutions-architect-associate/">AWS Certified Solutions Architect: Associate Certification Exam | Udemy</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/tw/ec2/">Amazon EC2</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/tw/ec2/pricing/">Amazon EC2 定價 – Amazon Web Services</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/tw/savingsplans/">Savings Plans – Amazon Web Services</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/tw/ec2/faqs/">Amazon EC2 常見問答集 – Amazon Web Services</a> <a target="_blank" rel="noopener" href="https://aws.amazon.com/ec2/faqs/?nc1=h_ls">(英文版)</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html">Security groups for your VPC - Amazon Virtual Private Cloud</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/AWS/" rel="tag"># AWS</a>
+              <a href="/blog/tags/CSA/" rel="tag"># CSA</a>
+              <a href="/blog/tags/EC2/" rel="tag"># EC2</a>
+              <a href="/blog/tags/VPC/" rel="tag"># VPC</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/AWS/AWS-CSA-associate-VPC-part2/" rel="prev" title="AWS CSA Associate 學習筆記 - VPC(Virtual Private Cloud) Part 2">
+                  <i class="fa fa-chevron-left"></i> AWS CSA Associate 學習筆記 - VPC(Virtual Private Cloud) Part 2
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/blog/AWS/AWS-CSA-associate-EC2-part2/" rel="next" title="AWS CSA Associate 學習筆記 - EC2(Elastic Compute Cloud) Part 2">
+                  AWS CSA Associate 學習筆記 - EC2(Elastic Compute Cloud) Part 2 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">تطبيق الموقع <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/AWS/AWS-CSA-associate-EC2-part1/";
+    this.page.identifier = "AWS/AWS-CSA-associate-EC2-part1/";
+    this.page.title = "AWS CSA Associate 學習筆記 - EC2(Elastic Compute Cloud) Part 1";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>

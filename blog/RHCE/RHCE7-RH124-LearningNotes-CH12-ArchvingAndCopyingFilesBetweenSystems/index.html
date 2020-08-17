@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="此文章記錄學習 RHCE RH124 Chapter 12 Archiving And Copying Files Between Systems 留下的內容">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[RHCE] RH124 Chapter 12 Archiving And Copying Files Between Systems 學習筆記">
+<meta property="og:url" content="https://godleon.github.io/blog/RHCE/RHCE7-RH124-LearningNotes-CH12-ArchvingAndCopyingFilesBetweenSystems/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此文章記錄學習 RHCE RH124 Chapter 12 Archiving And Copying Files Between Systems 留下的內容">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2016-04-27T07:30:00.000Z">
+<meta property="article:modified_time" content="2020-08-17T02:22:00.417Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="RHCE">
+<meta property="article:tag" content="RH124">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/RHCE/RHCE7-RH124-LearningNotes-CH12-ArchvingAndCopyingFilesBetweenSystems/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-tw'
+  };
+</script>
+
+  <title>[RHCE] RH124 Chapter 12 Archiving And Copying Files Between Systems 學習筆記 | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="تشغيل شريط التصفح">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          المحتويات
+        </li>
+        <li class="sidebar-nav-overview">
+          عام
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#12-1-2-Archive-files-and-directories-with-tar"><span class="nav-number">1.</span> <span class="nav-text">12.1.2 Archive files and directories with tar</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#12-1-3-Extract-an-archive-created-with-tar"><span class="nav-number">2.</span> <span class="nav-text">12.1.3 Extract an archive created with tar</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#12-1-4-Create-a-compressed-tar-archive"><span class="nav-number">3.</span> <span class="nav-text">12.1.4 Create a compressed tar archive</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#12-1-5-Extract-a-compressed-tar-archive"><span class="nav-number">4.</span> <span class="nav-text">12.1.5 Extract a compressed tar archive</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">124</span>
+          <span class="site-state-item-name">المقالات</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">التصنيفات</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">101</span>
+        <span class="site-state-item-name">الوسوم</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/RHCE/RHCE7-RH124-LearningNotes-CH12-ArchvingAndCopyingFilesBetweenSystems/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [RHCE] RH124 Chapter 12 Archiving And Copying Files Between Systems 學習筆記
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">نُشر في</span>
+
+              <time title="أُنشأ: 2016-04-27 15:30:00" itemprop="dateCreated datePublished" datetime="2016-04-27T15:30:00+08:00">2016-04-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">عُدل في</span>
+                <time title="عُدل: 2020-08-17 10:22:00" itemprop="dateModified" datetime="2020-08-17T10:22:00+08:00">2020-08-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">في</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/RHCE/" itemprop="url" rel="index"><span itemprop="name">RHCE</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/RHCE/RHCE7-RH124-LearningNotes-CH12-ArchvingAndCopyingFilesBetweenSystems/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="RHCE/RHCE7-RH124-LearningNotes-CH12-ArchvingAndCopyingFilesBetweenSystems/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此文章記錄學習 RHCE RH124 Chapter 12 Archiving And Copying Files Between Systems 留下的內容</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <a name="ch12.1" />
+12.1 Managing Compressed tar Archives
+=====================================
+
+<h2 id="12-1-2-Archive-files-and-directories-with-tar"><a href="#12-1-2-Archive-files-and-directories-with-tar" class="headerlink" title="12.1.2 Archive files and directories with tar"></a>12.1.2 Archive files and directories with tar</h2><p>tar 指令要先輸入目的地檔案，後面才是來源檔案 (跟 cp &amp; mv 等指令相反)</p>
+<p>tar 打包檔案中若包含絕對路徑檔案，則會把最開頭的 <code>/</code> 拿掉 (安全因素)</p>
+<p>tar 打包檔案時會包含檔案的修改時間、權限 … 等資訊，但預設不儲存檔案 SELinux conext &amp; ACL 屬性(若要一起打包則要在指令最後方加上 <code>--xattrs</code> 參數)</p>
+<p>指令參考：</p>
+<ul>
+<li><p><code>tar cf archive.tar file1 file2 file3</code>：將三個檔案打包為 archive.tar</p>
+</li>
+<li><p><code>tar tf archive.tar</code>：列出 archive.tar 中的內容</p>
+</li>
+<li><p><code>sudo tar cf /root/etc.tar /etc</code>：打包整個 /etc 目錄成 /root/etc.tar</p>
+</li>
+</ul>
+<h2 id="12-1-3-Extract-an-archive-created-with-tar"><a href="#12-1-3-Extract-an-archive-created-with-tar" class="headerlink" title="12.1.3 Extract an archive created with tar"></a>12.1.3 Extract an archive created with tar</h2><p><code>mkdir test &amp;&amp; sudo sudo tar xf /root/etc.tar -C test/</code>：將 /root/etc.tar 解開後放到 test 目錄中</p>
+<blockquote>
+<p>用 tar 解開打包檔，若要保留原有檔案的權限資訊，要加上 <code>-p</code> 參數 (這是 root 預設就會包含的選項)</p>
+</blockquote>
+<h2 id="12-1-4-Create-a-compressed-tar-archive"><a href="#12-1-4-Create-a-compressed-tar-archive" class="headerlink" title="12.1.4 Create a compressed tar archive"></a>12.1.4 Create a compressed tar archive</h2><ul>
+<li><p>‘z’：gzip (archive.tgz / archive.tar.gz)</p>
+</li>
+<li><p>‘j’：bz2 (archive.tar.bz2)</p>
+</li>
+<li><p>‘J’：xz (archive.tar.xz) (壓縮效率最好，但速度最慢)</p>
+</li>
+</ul>
+<p>參考指令：</p>
+<ul>
+<li><p><code>sudo tar czf /root/etc.tar.gz /etc</code>：以 /etc 為資料來源，建立 gzip 打包壓縮檔</p>
+</li>
+<li><p><code>sudo tar cjf /root/etc.tar.bz2 /etc</code>：以 /etc 為資料來源，建立 bzip2 打包壓縮檔</p>
+</li>
+<li><p><code>sudo tar cJf /root/etc.tar.xz /etc</code>：以 /etc 為資料來源，建立 xz 打包壓縮檔</p>
+</li>
+</ul>
+<h2 id="12-1-5-Extract-a-compressed-tar-archive"><a href="#12-1-5-Extract-a-compressed-tar-archive" class="headerlink" title="12.1.5 Extract a compressed tar archive"></a>12.1.5 Extract a compressed tar archive</h2><p>系統會清楚知道檔案壓縮的格式，因此解壓縮時不用加上 <code>z</code> or <code>j</code> or <code>J</code> 也沒關係</p>
+<p>參考指令：</p>
+<ul>
+<li><code>sudo tar xJf /root/etc.tar.xz -C test/</code>：將上述 xz 壓縮檔解壓縮到 test 目錄下</li>
+</ul>
+<hr>
+<a name="ch12.2" />
+12.2 Copying Files Between Systems Securely
+===========================================
+
+<p><code>scp</code>：適合用於單一檔案</p>
+<p><code>rsync</code>：可用於單一檔案，但特色是目錄的同步與屬性的保留</p>
+<p><code>sftp</code>：互動功能，Windows 作業系統上較常用</p>
+<p>參考指令：</p>
+<ul>
+<li><code>scp /etc/yum.conf /etc/hosts student@172.25.0.11:/home/student</code>：透過 scp 直接傳兩個檔案到遠端主機</li>
+</ul>
+<hr>
+<a name="ch12.3" />
+12.3 Synchronizing Files Between Systems Securely
+=================================================
+
+<p><code>-n</code>：Dry run，不會真的執行<br><code>-a</code>：<code>-r</code> + <code>-l</code> + <code>-p</code> + <code>-t</code> + <code>-g</code> + <code>-o</code> + <code>-D</code><br><code>-H</code>：保留 Hard Link<br><code>-A</code>：保留 ACLs 設定<br><code>-X</code>：保留 SELinux context 設定</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ sudo rm -rf /tmp/*</span><br><span class="line"></span><br><span class="line"><span class="comment"># 同步目錄下所有檔案(只會有一個 log 目錄)</span></span><br><span class="line">$ sudo rsync -av /var/<span class="built_in">log</span> /tmp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 同步目錄下所有檔案(會跑出很多檔案 &amp; 目錄)</span></span><br><span class="line">$ sudo rsync -av /var/<span class="built_in">log</span>/ /tmp</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/Linux/" rel="tag"># Linux</a>
+              <a href="/blog/tags/RHCE/" rel="tag"># RHCE</a>
+              <a href="/blog/tags/RH124/" rel="tag"># RH124</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/RHCE/RHCE7-RH124-LearningNotes-CH11_ManagingRedHatEnterpriseLinuxNetworking/" rel="prev" title="[RHCE] RH124 Chapter 11 Managing Red Hat Enterprise Linux Networking 學習筆記">
+                  <i class="fa fa-chevron-left"></i> [RHCE] RH124 Chapter 11 Managing Red Hat Enterprise Linux Networking 學習筆記
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/blog/RHCE/RHCE7-RH124-LearningNotes-CH13_InstallingAndUpdatingSoftwarePackages/" rel="next" title="[RHCE] RH124 Chapter 13 Installing and Updating Software Packages 學習筆記">
+                  [RHCE] RH124 Chapter 13 Installing and Updating Software Packages 學習筆記 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">تطبيق الموقع <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/RHCE/RHCE7-RH124-LearningNotes-CH12-ArchvingAndCopyingFilesBetweenSystems/";
+    this.page.identifier = "RHCE/RHCE7-RH124-LearningNotes-CH12-ArchvingAndCopyingFilesBetweenSystems/";
+    this.page.title = "[RHCE] RH124 Chapter 12 Archiving And Copying Files Between Systems 學習筆記";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>

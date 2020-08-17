@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="本篇文章介紹在使用 Kubernetes 時遇到的各種錯誤狀況時，可用的一些思考 &amp; 處理方式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[Kubernetes] Debug &amp; Troubleshooting 簡介">
+<meta property="og:url" content="https://godleon.github.io/blog/Kubernetes/k8s-debug-and-troubleshooting-Overview/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="本篇文章介紹在使用 Kubernetes 時遇到的各種錯誤狀況時，可用的一些思考 &amp; 處理方式">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2019-02-21T21:30:00.000Z">
+<meta property="article:modified_time" content="2020-08-17T02:22:00.417Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="Kubernetes">
+<meta property="article:tag" content="CKA">
+<meta property="article:tag" content="Kubernetes Troubleshooting">
+<meta property="article:tag" content="CKA Troubleshooting">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/Kubernetes/k8s-debug-and-troubleshooting-Overview/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-tw'
+  };
+</script>
+
+  <title>[Kubernetes] Debug & Troubleshooting 簡介 | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="تشغيل شريط التصفح">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          المحتويات
+        </li>
+        <li class="sidebar-nav-overview">
+          عام
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Application-Introspection-and-Debugging"><span class="nav-number">1.</span> <span class="nav-text">Application Introspection and Debugging</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Auditing"><span class="nav-number">2.</span> <span class="nav-text">Auditing</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Core-metrics-pipeline"><span class="nav-number">3.</span> <span class="nav-text">Core metrics pipeline</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Debug-Init-Containers"><span class="nav-number">4.</span> <span class="nav-text">Debug Init Containers</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Debug-Pods-and-ReplicationControllers"><span class="nav-number">5.</span> <span class="nav-text">Debug Pods and ReplicationControllers</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Pod-%E7%84%A1%E6%B3%95%E6%AD%A3%E5%B8%B8%E5%95%9F%E5%8B%95"><span class="nav-number">5.1.</span> <span class="nav-text">Pod 無法正常啟動</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pod-%E5%95%9F%E5%8B%95%E4%BA%86%EF%BC%8C%E4%BD%86%E8%A1%8C%E7%82%BA%E4%B8%8D%E5%A6%82%E9%A0%90%E6%9C%9F"><span class="nav-number">5.2.</span> <span class="nav-text">Pod 啟動了，但行為不如預期</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Debug-Services"><span class="nav-number">6.</span> <span class="nav-text">Debug Services</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A2%BA%E8%AA%8D-service-%E5%AD%98%E5%9C%A8"><span class="nav-number">6.1.</span> <span class="nav-text">確認 service 存在</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%A8-pod-%E4%B8%AD%E5%9F%B7%E8%A1%8C%E5%91%BD%E4%BB%A4"><span class="nav-number">6.2.</span> <span class="nav-text">在 pod 中執行命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AA%A2%E6%B8%AC-service-%E6%98%AF%E5%90%A6%E6%AD%A3%E5%B8%B8%E9%81%8B%E4%BD%9C"><span class="nav-number">6.3.</span> <span class="nav-text">檢測 service 是否正常運作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A5-IP-based-%E7%9A%84%E6%96%B9%E5%BC%8F%E6%AA%A2%E6%B8%AC-service"><span class="nav-number">6.4.</span> <span class="nav-text">以 IP-based 的方式檢測 service</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Service-%E8%83%8C%E5%BE%8C%E6%9C%89-Endpoints-%E5%97%8E"><span class="nav-number">6.5.</span> <span class="nav-text">Service 背後有 Endpoints 嗎?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#kube-proxy-%E6%9C%89%E6%AD%A3%E5%B8%B8%E9%81%8B%E4%BD%9C%E5%97%8E"><span class="nav-number">6.6.</span> <span class="nav-text">kube-proxy 有正常運作嗎?</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#iptables"><span class="nav-number">6.6.1.</span> <span class="nav-text">iptables</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IPVS"><span class="nav-number">6.6.2.</span> <span class="nav-text">IPVS</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Troubleshoot-Clusters"><span class="nav-number">7.</span> <span class="nav-text">Troubleshoot Clusters</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AA%A2%E8%A6%96-log"><span class="nav-number">7.1.</span> <span class="nav-text">檢視 log</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E8%88%AC%E6%95%85%E9%9A%9C%E7%8B%80%E6%B3%81"><span class="nav-number">7.2.</span> <span class="nav-text">一般故障狀況</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">8.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">124</span>
+          <span class="site-state-item-name">المقالات</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">التصنيفات</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">101</span>
+        <span class="site-state-item-name">الوسوم</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/Kubernetes/k8s-debug-and-troubleshooting-Overview/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [Kubernetes] Debug & Troubleshooting 簡介
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">نُشر في</span>
+
+              <time title="أُنشأ: 2019-02-22 05:30:00" itemprop="dateCreated datePublished" datetime="2019-02-22T05:30:00+08:00">2019-02-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">عُدل في</span>
+                <time title="عُدل: 2020-08-17 10:22:00" itemprop="dateModified" datetime="2020-08-17T10:22:00+08:00">2020-08-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">في</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Kubernetes/" itemprop="url" rel="index"><span itemprop="name">Kubernetes</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/Kubernetes/k8s-debug-and-troubleshooting-Overview/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="Kubernetes/k8s-debug-and-troubleshooting-Overview/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">本篇文章介紹在使用 Kubernetes 時遇到的各種錯誤狀況時，可用的一些思考 & 處理方式</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="Application-Introspection-and-Debugging"><a href="#Application-Introspection-and-Debugging" class="headerlink" title="Application Introspection and Debugging"></a>Application Introspection and Debugging</h1><p><code>kubectl get event</code> 是屬於 namespace level，若要檢視其他 namespace 的 event，就要額外加上 <code>--namespace</code> 參數</p>
+<h1 id="Auditing"><a href="#Auditing" class="headerlink" title="Auditing"></a>Auditing</h1><p>等到之後了解 Elasticsearch + Fluentd + Kibana 之後再來研究這個部份</p>
+<h1 id="Core-metrics-pipeline"><a href="#Core-metrics-pipeline" class="headerlink" title="Core metrics pipeline"></a>Core metrics pipeline</h1><ul>
+<li><p>k8s 從 v1.8 以後提供了 metrics API，可以提供系統使用資源的資訊，但由於 k8s 本身不儲存這些資料，因此若要查詢一段時間內的資源使用率，就必須使用外部服務來達成</p>
+</li>
+<li><p>要使用 metrics API，就必須先在 k8s cluster 中安裝 <a target="_blank" rel="noopener" href="https://github.com/kubernetes-incubator/metrics-server">metrics server</a> 才行</p>
+</li>
+<li><p>每個 node 上佈署的 kubelet 會提供 summary API，而 metrics server 就是透過 summary API 蒐集相關資訊</p>
+</li>
+</ul>
+<h1 id="Debug-Init-Containers"><a href="#Debug-Init-Containers" class="headerlink" title="Debug Init Containers"></a>Debug Init Containers</h1><p>在 Pod 中可以定義 init container，甚至可以定義多個 init container 協助提供正式服務的 container 做一些前置的設定工作，而 init container 工作的方式如下：</p>
+<ul>
+<li><p>init container 總是會執行到結束為止</p>
+</li>
+<li><p>若定義多個 init container，會依序一個一個執行，且必須等到前一個 init container 執行成功後，才會輪到下一個</p>
+</li>
+<li><p>如果任何一個 init container 工作執行失敗，k8s 就會重新啟動 pod 並再度啟動所有的 init container 繼續執行工作，除非 restartPolicy 設定為 <code>Never</code></p>
+</li>
+</ul>
+<p>若是 pod 啟動時因為 init container 發生錯誤，就會出現類似以下訊息：</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NAME         READY     STATUS     RESTARTS   AGE</span><br><span class="line">&lt;pod-name&gt;   0/1       Init:1/2   0          7s</span><br></pre></td></tr></table></figure>
+
+<p>可以透過 <code>kubectl describe pod &lt;pod-name&gt;</code> 檢視更細節的 log 資訊：</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">Init Containers:</span><br><span class="line">  &lt;init-container-1&gt;:</span><br><span class="line">    Container ID:    ...</span><br><span class="line">    ...</span><br><span class="line">    State:           Terminated</span><br><span class="line">      Reason:        Completed</span><br><span class="line">      Exit Code:     0</span><br><span class="line">      Started:       ...</span><br><span class="line">      Finished:      ...</span><br><span class="line">    Ready:           True</span><br><span class="line">    Restart Count:   0</span><br><span class="line">    ...</span><br><span class="line">  &lt;init-container-2&gt;:</span><br><span class="line">    Container ID:    ...</span><br><span class="line">    ...</span><br><span class="line">    State:           Waiting</span><br><span class="line">      Reason:        CrashLoopBackOff</span><br><span class="line">    Last State:      Terminated</span><br><span class="line">      Reason:        Error</span><br><span class="line">      Exit Code:     1</span><br><span class="line">      Started:       ...</span><br><span class="line">      Finished:      ...</span><br><span class="line">    Ready:           False</span><br><span class="line">    Restart Count:   3</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+
+<p>若是 pod status 的開頭為 <code>Init:</code>，就表示目前的狀態(or 問題)與 init container 有關，以下是與 init container 的 pod status 範例列表：</p>
+<ul>
+<li><p><code>Init:N/M</code>：共有 M 的 init container，目前已經完成 N 個</p>
+</li>
+<li><p><code>Init:Error</code>：有一個 init container 無法正確完成指定工作</p>
+</li>
+<li><p><code>Init:CrashLoopBackOff</code>：有一個 init container 一直無法正確完成指定工作</p>
+</li>
+<li><p><code>Pending</code>：尚未啟動任何 init container</p>
+</li>
+<li><p><code>PodInitializing</code> or <code>Running</code>：init container 相關工作都已經正確執行完璧</p>
+</li>
+</ul>
+<h1 id="Debug-Pods-and-ReplicationControllers"><a href="#Debug-Pods-and-ReplicationControllers" class="headerlink" title="Debug Pods and ReplicationControllers"></a>Debug Pods and ReplicationControllers</h1><h2 id="Pod-無法正常啟動"><a href="#Pod-無法正常啟動" class="headerlink" title="Pod 無法正常啟動"></a>Pod 無法正常啟動</h2><p>pod 無法正常啟動，原因大概可以歸為幾類，若是持續處於 <code>pending</code> 狀態，可能的原因是：</p>
+<ul>
+<li><p>資源不足 (可增加更多 node or 移除不必要的 pod)</p>
+</li>
+<li><p>使用了 <code>hostPort</code>，但沒注意到 hostPort 的使用數量是有限的，儘量改用 <code>service</code> 提供外部存取</p>
+</li>
+</ul>
+<p>若是 pod 持續處於 <code>waiting</code> 狀態，可能的原因是：</p>
+<ul>
+<li>無法正確的 pull container image</li>
+</ul>
+<p>若是 pod 會 crash or 一直不是處於很健康的狀態，就可以透過 <code>kubectl logs</code> 來檢視 log 資訊，或是使用 <code>kubectl exec</code> 在 container 中執行特定指令來進行測試。</p>
+<p>因此這個部份會用到的指令大概如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 檢視 pod 相關資訊</span></span><br><span class="line">$ kubectl describe pods <span class="variable">$&#123;POD_NAME&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視 node 的系統資源是否足夠</span></span><br><span class="line">$ kubectl get nodes -o yaml | grep <span class="string">&#x27;\sname\|cpu\|memory&#x27;</span></span><br><span class="line">$ kubectl get nodes -o json | jq <span class="string">&#x27;.items[] | &#123;name: .metadata.name, cap: .status.capacity&#125;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視 pod 中的特定 container log</span></span><br><span class="line">$ kubectl logs <span class="variable">$&#123;POD_NAME&#125;</span> <span class="variable">$&#123;CONTAINER_NAME&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視上一次的 failure log</span></span><br><span class="line">$ kubectl logs --previous <span class="variable">$&#123;POD_NAME&#125;</span> <span class="variable">$&#123;CONTAINER_NAME&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 在 pod 中的特定 container 中執行命令</span></span><br><span class="line"><span class="comment"># 若 pod 中只有一個 container，則 &quot;-c $&#123;CONTAINER_NAME&#125;&quot; 可以省略</span></span><br><span class="line"><span class="comment"># 但 container 必須已經啟動才可以</span></span><br><span class="line">$ kubectl <span class="built_in">exec</span> <span class="variable">$&#123;POD_NAME&#125;</span> -c <span class="variable">$&#123;CONTAINER_NAME&#125;</span> -- <span class="variable">$&#123;CMD&#125;</span> <span class="variable">$&#123;ARG1&#125;</span> <span class="variable">$&#123;ARG2&#125;</span> ... <span class="variable">$&#123;ARGN&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="Pod-啟動了，但行為不如預期"><a href="#Pod-啟動了，但行為不如預期" class="headerlink" title="Pod 啟動了，但行為不如預期"></a>Pod 啟動了，但行為不如預期</h2><p>在 k8s 中建立 application 時，有時候會忽略使用者的輸入錯誤，例如將 <code>command</code> 打成 <code>commnd</code>，這樣會造成 pod 被建立了，但指定的 command 並沒有正確的被執行，導致於 pod 行為不如預期，為了避免這樣的情況，在建立 pod 時可加上 <code>--validate</code> 參數，確保 YAML 語法的 100% 正確性，以下是個簡單範例：</p>
+<blockquote>
+<p>kubectl create –validate -f mypod.yaml</p>
+</blockquote>
+<p>再來可以確認在 API server 中儲存的 pod definition 是否與當初建立的時候一致，可以透過類似 <code>kubectl get pods/mypod -o yaml &gt; mypod-on-apiserver.yaml</code> 的指令輸出 API server 的 pod definition，然後仔細比對原始的 pod definition，有時候兩者的些許不同就是造成 pod 行為不如預期的主要原因。</p>
+<h1 id="Debug-Services"><a href="#Debug-Services" class="headerlink" title="Debug Services"></a>Debug Services</h1><p>由於從 k8s 外面並無法直接存取 pod，因此當 service 出問題時，要利用一些特別的手段來檢查，以下會說明一些常見的方式。</p>
+<h2 id="確認-service-存在"><a href="#確認-service-存在" class="headerlink" title="確認 service 存在"></a>確認 service 存在</h2><p>首先最基本的，就是透過 <code>kubectl get svc svc_name</code> 來判斷 service 是否存在，是否有對應到 pod 對外開放的 port。</p>
+<h2 id="在-pod-中執行命令"><a href="#在-pod-中執行命令" class="headerlink" title="在 pod 中執行命令"></a>在 pod 中執行命令</h2><p>接著要進入到 k8s 內部進行檢查，但首先必須要有一個已經成功啟動的 pod，才可以透過這個 pod 進入到 k8s 內部進行網路相關的檢查，透過以下指令可以在 pod 中執行命令：</p>
+<blockquote>
+<p>kubectl exec <POD-NAME> -c <CONTAINER-NAME> – <COMMAND></p>
+</blockquote>
+<p>但若是沒有現成的 pod 可用怎辦? 那可以自行啟動一個 nettools pod 來使用，裏面已經帶有一些常用網路工具在內：</p>
+<blockquote>
+<p>kubectl run -it –rm –restart=Never nettools –image=godleon/nettools sh</p>
+</blockquote>
+<h2 id="檢測-service-是否正常運作"><a href="#檢測-service-是否正常運作" class="headerlink" title="檢測 service 是否正常運作"></a>檢測 service 是否正常運作</h2><p>再來是檢測從 k8s 內部可否存取到 service &amp; DNS 是否運作正常：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 從 nettools pod 中檢測是否可以存取 service DNS</span></span><br><span class="line">u@nettools_pod$ wget -O- hostnames</span><br><span class="line">wget: bad address <span class="string">&#x27;hostnames&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 從下面的輸出可以看出 service DNS 目前無法正確解析</span></span><br><span class="line">u@nettools_pod$ nslookup hostnames</span><br><span class="line">Server:        10.233.0.3</span><br><span class="line">Address:    10.233.0.3<span class="comment">#53</span></span><br><span class="line"></span><br><span class="line">** server cannot find hostnames: NXDOMAIN</span><br><span class="line"></span><br><span class="line"><span class="comment"># 若是有對應的 service 就會出現以下訊息</span></span><br><span class="line"><span class="comment"># 然後一般也都會可以 ping 的通</span></span><br><span class="line">u@nettools_pod$ nslookup kubernetes</span><br><span class="line">Server:        10.233.0.3</span><br><span class="line">Address:    10.233.0.3<span class="comment">#53</span></span><br><span class="line"></span><br><span class="line">Name:    kubernetes.default.svc.cluster.local</span><br><span class="line">Address: 10.233.0.1</span><br><span class="line"></span><br><span class="line">u@nettools_pod$ nslookup kubernetes.default</span><br><span class="line">Server:        10.233.0.3</span><br><span class="line">Address:    10.233.0.3<span class="comment">#53</span></span><br><span class="line"></span><br><span class="line">Name:    kubernetes.default.svc.cluster.local</span><br><span class="line">Address: 10.233.0.1</span><br><span class="line"></span><br><span class="line">u@nettools_pod$ nslookup coredns</span><br><span class="line">Server:        10.233.0.3</span><br><span class="line">Address:    10.233.0.3<span class="comment">#53</span></span><br><span class="line"></span><br><span class="line">** server cannot find coredns: NXDOMAIN</span><br><span class="line"></span><br><span class="line">u@nettools_pod$ nslookup coredns.kube-system</span><br><span class="line">Server:        10.233.0.3</span><br><span class="line">Address:    10.233.0.3<span class="comment">#53</span></span><br><span class="line"></span><br><span class="line">Name:    coredns.kube-system.svc.cluster.local</span><br><span class="line">Address: 10.233.0.3</span><br><span class="line"></span><br><span class="line">u@nettools_pod$ ping coredns.kube-system</span><br><span class="line">PING coredns.kube-system.svc.cluster.local (10.233.0.3) 56(84) bytes of data.</span><br><span class="line">64 bytes from coredns.kube-system.svc.cluster.local (10.233.0.3): icmp_seq=1 ttl=64 time=0.041 ms</span><br><span class="line">... (略)</span><br></pre></td></tr></table></figure>
+
+<p>比較需要注意的是 service name 的部份需要額外加上 namespace name 才可以，例如上方的範例 <code>coredns</code>，屬於 <code>kube-system</code> namespace，要查找的時候就要用 <code>coredns.kube-system</code> 來查找；但若是上面的 busybox pod 是位於 kube-system namespace 中，就可以不需要加上 namespace name，但一切還是以 <code>/etc/resolv.conf</code> 的設定為準。</p>
+<h2 id="以-IP-based-的方式檢測-service"><a href="#以-IP-based-的方式檢測-service" class="headerlink" title="以 IP-based 的方式檢測 service"></a>以 IP-based 的方式檢測 service</h2><p>假設 DNS 解析並非問題所在，可以考慮往 IP based 的方式檢測 service 是否正常，例如要測試 HTTP 服務，可以透過 <code>curl SERVICE_IP:port</code> 的方式測試是否有回應。</p>
+<h2 id="Service-背後有-Endpoints-嗎"><a href="#Service-背後有-Endpoints-嗎" class="headerlink" title="Service 背後有 Endpoints 嗎?"></a>Service 背後有 Endpoints 嗎?</h2><p>service 要可以正常運作，必須仰賴後方的 endpoint，可透過 <code>kubectl -n NAMESPACE_NAME get endpoints SERVICE_NAME</code> 來找到 service endpoint，再以上一個步驟 IP-based 的方式檢測 endpoint 服務是否正常。</p>
+<h2 id="kube-proxy-有正常運作嗎"><a href="#kube-proxy-有正常運作嗎" class="headerlink" title="kube-proxy 有正常運作嗎?"></a>kube-proxy 有正常運作嗎?</h2><p>當 service 的部份檢查都沒有問題了，從 cluster 內部測試都是正常，但從外面連進來就是不正常，此時的問題可能就是發生在 kube-proxy 上。</p>
+<p>由於每個 node 都會有安裝 <code>kube-proxy</code> 的服務，因此可以透過 <code>ps aux | grep &#39;kube-proxy&#39;</code> 指令檢查 kube-proxy 服務是否有存在。</p>
+<p>當 kube-proxy 服務有存在，可以進一步透過 <a target="_blank" rel="noopener" href="https://www.itread01.com/content/1519304536.html">journalctl</a> 來查詢是否有 kube-proxy 的相關錯誤，若是有出現類似無法連結到 master 的錯誤，那就可能需要再檢查一下 node configuration。</p>
+<h3 id="iptables"><a href="#iptables" class="headerlink" title="iptables"></a>iptables</h3><blockquote>
+<p>以下說明是當 kube-proxy 以 iptables 模式安裝時</p>
+</blockquote>
+<p>如何確認 kube-proxy 有正確寫入 iptables rules?</p>
+<p>由於每個 namespace 都會帶有一個名稱為 <code>kubernetes</code> 的 service，我們可以透過以下指令檢查是否有對應的 iptables rules 存在：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ iptables-save | grep <span class="string">&#x27;default/kubernetes&#x27;</span></span><br><span class="line">-A KUBE-SERVICES ! -s 10.233.64.0/18 -d 10.233.0.1/32 -p tcp -m comment --comment <span class="string">&quot;default/kubernetes:https cluster IP&quot;</span> -m tcp --dport 443 -j KUBE-MARK-MASQ</span><br><span class="line">-A KUBE-SERVICES -d 10.233.0.1/32 -p tcp -m comment --comment <span class="string">&quot;default/kubernetes:https cluster IP&quot;</span> -m tcp --dport 443 -j KUBE-SVC-NPX46M4PTMTKRN6Y</span><br></pre></td></tr></table></figure>
+
+<p>若有出現相關資訊，表示 kube-proxy 有正確寫入 iptables rules。</p>
+<h3 id="IPVS"><a href="#IPVS" class="headerlink" title="IPVS"></a>IPVS</h3><blockquote>
+<p>等下回有安裝 IPVS 模式時再來補這一塊!</p>
+</blockquote>
+<h1 id="Troubleshoot-Clusters"><a href="#Troubleshoot-Clusters" class="headerlink" title="Troubleshoot Clusters"></a>Troubleshoot Clusters</h1><p>這部份要說明的是 cluster level 的 debug，當 k8s cluster 發生問題，運行不如預期或故障時，該怎麼 debug 呢? 以下分成幾個部份來說明。</p>
+<h2 id="檢視-log"><a href="#檢視-log" class="headerlink" title="檢視 log"></a>檢視 log</h2><p>透過 <code>journalctl</code> 指令搭配以下關鍵字，就可以查到各個 component 所對應的 log：</p>
+<ul>
+<li><p>kube-apiserver (@master-node)</p>
+</li>
+<li><p>kube-scheduler (@master-node)</p>
+</li>
+<li><p>kube-controller (@master-node)</p>
+</li>
+<li><p>kube-controller-manager (@master-node)</p>
+</li>
+<li><p>kubelet (@worker-node)</p>
+</li>
+<li><p>kube-proxy (@worker-node)</p>
+</li>
+</ul>
+<h2 id="一般故障狀況"><a href="#一般故障狀況" class="headerlink" title="一般故障狀況"></a>一般故障狀況</h2><p>當某些故障狀況發生時，會對 k8s 中的特定功能造成影響，例如：</p>
+<ul>
+<li><p>API server 關機 or 掛掉時</p>
+<ul>
+<li>對 pod, service, replication controller 等等都無法 start, stop &amp; upgrade</li>
+<li>已經存在的 pod 會繼續工作，除非它們依賴 k8s API</li>
+</ul>
+</li>
+<li><p>當 API server 的 storage 掛掉時</p>
+<ul>
+<li>API server 會無法正常啟動</li>
+<li>其他 node 上的 kubelet 再也無法與 API server 通訊，但會持續保持現存的 pod 的運作 &amp; service proxy 工作</li>
+<li>重新啟動 API server 之前，手動恢復 API server 的狀態是必要的</li>
+</ul>
+</li>
+<li><p>提供 supporting server(node controller, replication controller manager, scheduler, etc) 的 VM 關機 or 掛掉時</p>
+<ul>
+<li>暫時無法與 API server 通訊</li>
+<li>無所謂，因為 persistent state 不在這些 service 上，只要後續有恢復即可</li>
+</ul>
+</li>
+<li><p>worker node 關機</p>
+<ul>
+<li>在該 node 上的 pod 會停止運作，一段時間後會被 reschedule 到其他 node 上</li>
+</ul>
+</li>
+<li><p>kubelet 軟體錯誤</p>
+<ul>
+<li>無法在 node 中啟動新的 pod</li>
+<li>可能會誤刪 pod</li>
+<li>該 kubelet 所在的 node 會被標記為 unhealthy</li>
+<li>replication controller 可能會在其他 node 啟動新的 pod</li>
+</ul>
+</li>
+</ul>
+<p>當然我們也可以做一些預防措施，避免上述情況的發生，例如：</p>
+<ul>
+<li><p>利用 IaaS 平台上，VM 故障自動重新啟動的功能</p>
+</li>
+<li><p>利用 IaaS 平台上所提供的相對可靠的 storage for API server &amp; etcd service</p>
+</li>
+<li><p>將 k8s cluster 佈署成具有 HA 的特性</p>
+</li>
+<li><p>定期對 API server 的 storage 作 snapshot</p>
+</li>
+<li><p>不要直接使用 pod，改用 replication controller + service</p>
+</li>
+<li><p>application 要設計成可以容忍非預期的 restart</p>
+</li>
+<li><p>佈署成多個獨立的 cluster</p>
+</li>
+</ul>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/debug-application-cluster/debug-application-introspection/">Application Introspection and Debugging - Kubernetes</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/debug-application-cluster/core-metrics-pipeline/">Core metrics pipeline - Kubernetes</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/debug-application-cluster/debug-init-containers/">Debug Init Containers - Kubernetes</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/debug-application-cluster/debug-pod-replication-controller/">Debug Pods and ReplicationControllers - Kubernetes</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/cluster-administration/logging/">Logging Architecture - Kubernetes</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/debug-application-cluster/debug-application/">Troubleshoot Applications - Kubernetes</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/debug-application-cluster/debug-cluster/">Troubleshoot Clusters - Kubernetes</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/debug-application-cluster/troubleshooting/">Troubleshooting - Kubernetes</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/Kubernetes/" rel="tag"># Kubernetes</a>
+              <a href="/blog/tags/CKA/" rel="tag"># CKA</a>
+              <a href="/blog/tags/Kubernetes-Troubleshooting/" rel="tag"># Kubernetes Troubleshooting</a>
+              <a href="/blog/tags/CKA-Troubleshooting/" rel="tag"># CKA Troubleshooting</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/Kubernetes/k8s-PersistentVolume-Overview/" rel="prev" title="[Kubernetes] Persistent Volume (Claim) Overview">
+                  <i class="fa fa-chevron-left"></i> [Kubernetes] Persistent Volume (Claim) Overview
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/blog/Prometheus/Prometheus-Basic-Concepts/" rel="next" title="[Prometheus] Basic Concept memo">
+                  [Prometheus] Basic Concept memo <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">تطبيق الموقع <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/Kubernetes/k8s-debug-and-troubleshooting-Overview/";
+    this.page.identifier = "Kubernetes/k8s-debug-and-troubleshooting-Overview/";
+    this.page.title = "[Kubernetes] Debug & Troubleshooting 簡介";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>

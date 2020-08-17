@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="此篇文章從比較 high level 的角度來了解什麼是 Kubernetes Resource Object，以及 Kubernetes 中到底包含了那些 Resource Object &amp; 其用途">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[Kubernetes] Resource Object 概觀">
+<meta property="og:url" content="https://godleon.github.io/blog/Kubernetes/k8s-CoreConcept-ResourceObject-Overview/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章從比較 high level 的角度來了解什麼是 Kubernetes Resource Object，以及 Kubernetes 中到底包含了那些 Resource Object &amp; 其用途">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/k8s-service.svg">
+<meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/k8s_pod-pvc-pv.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/k8s_storageclass.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/dynamic-volume-provision.jpg">
+<meta property="article:published_time" content="2018-08-31T14:55:00.000Z">
+<meta property="article:modified_time" content="2020-08-17T02:22:00.413Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="Kubernetes">
+<meta property="article:tag" content="CKA">
+<meta property="article:tag" content="Kubernetes Core Concept">
+<meta property="article:tag" content="CKA Core Concept">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/kubernetes/k8s-service.svg">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/Kubernetes/k8s-CoreConcept-ResourceObject-Overview/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-tw'
+  };
+</script>
+
+  <title>[Kubernetes] Resource Object 概觀 | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="تشغيل شريط التصفح">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          المحتويات
+        </li>
+        <li class="sidebar-nav-overview">
+          عام
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#What-is-Resource-Object"><span class="nav-number">1.</span> <span class="nav-text">What is Resource Object?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kubernetes-%E6%8F%90%E4%BE%9B%E4%BA%86%E9%82%A3%E4%BA%9B-Resource-Object-Type"><span class="nav-number">2.</span> <span class="nav-text">Kubernetes 提供了那些 Resource Object Type?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Workload-%E9%A1%9E%E5%9E%8B%E7%9A%84-Resource-Object"><span class="nav-number">3.</span> <span class="nav-text">Workload 類型的 Resource Object</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Pod"><span class="nav-number">3.1.</span> <span class="nav-text">Pod</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Controller-%E9%A1%9E%E5%9E%8B%E7%9A%84-Resource-Object"><span class="nav-number">4.</span> <span class="nav-text">Controller 類型的 Resource Object</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ReplicationController"><span class="nav-number">4.1.</span> <span class="nav-text">ReplicationController</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ReplicaSet"><span class="nav-number">4.2.</span> <span class="nav-text">ReplicaSet</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Deployment"><span class="nav-number">4.3.</span> <span class="nav-text">Deployment</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#StatefulSets"><span class="nav-number">4.4.</span> <span class="nav-text">StatefulSets</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DaemonSet"><span class="nav-number">4.5.</span> <span class="nav-text">DaemonSet</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Job"><span class="nav-number">4.6.</span> <span class="nav-text">Job</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CronJob"><span class="nav-number">4.7.</span> <span class="nav-text">CronJob</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TTL-Controller"><span class="nav-number">4.8.</span> <span class="nav-text">TTL Controller</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Service-Discovery-%E9%A1%9E%E5%9E%8B%E7%9A%84-Resource-Object"><span class="nav-number">5.</span> <span class="nav-text">Service Discovery 類型的 Resource Object</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Service"><span class="nav-number">5.1.</span> <span class="nav-text">Service</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Ingress"><span class="nav-number">5.2.</span> <span class="nav-text">Ingress</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%AC%8A%E9%99%90%E7%AE%A1%E7%90%86%E9%A1%9E%E5%9E%8B%E7%9A%84-Resource-Object"><span class="nav-number">6.</span> <span class="nav-text">權限管理類型的 Resource Object</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Service-Account"><span class="nav-number">6.1.</span> <span class="nav-text">Service Account</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RBAC-%E6%A9%9F%E5%88%B6"><span class="nav-number">6.2.</span> <span class="nav-text">RBAC 機制</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Storage-%E7%AE%A1%E7%90%86%E9%A1%9E%E5%9E%8B%E7%9A%84-Resource-Object"><span class="nav-number">7.</span> <span class="nav-text">Storage 管理類型的 Resource Object</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Volume"><span class="nav-number">7.1.</span> <span class="nav-text">Volume</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PersistentVolume-amp-PersistentVolumeClaim"><span class="nav-number">7.2.</span> <span class="nav-text">PersistentVolume &amp; PersistentVolumeClaim</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#StorageClass"><span class="nav-number">7.3.</span> <span class="nav-text">StorageClass</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Secret"><span class="nav-number">7.4.</span> <span class="nav-text">Secret</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ConfigMap"><span class="nav-number">7.5.</span> <span class="nav-text">ConfigMap</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Policy-%E9%A1%9E%E5%9E%8B%E7%9A%84-Resource-Object"><span class="nav-number">8.</span> <span class="nav-text">Policy 類型的 Resource Object</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#NetworkPolicy"><span class="nav-number">8.1.</span> <span class="nav-text">NetworkPolicy</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SecurityContext"><span class="nav-number">8.2.</span> <span class="nav-text">SecurityContext</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ResourceQuota"><span class="nav-number">8.3.</span> <span class="nav-text">ResourceQuota</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LimitRange"><span class="nav-number">8.4.</span> <span class="nav-text">LimitRange</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Extension-%E9%A1%9E%E5%9E%8B%E7%9A%84-Resource-Object"><span class="nav-number">9.</span> <span class="nav-text">Extension 類型的 Resource Object</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#CustomResourceDefinitions"><span class="nav-number">9.1.</span> <span class="nav-text">CustomResourceDefinitions</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">10.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">124</span>
+          <span class="site-state-item-name">المقالات</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">التصنيفات</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">101</span>
+        <span class="site-state-item-name">الوسوم</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/Kubernetes/k8s-CoreConcept-ResourceObject-Overview/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [Kubernetes] Resource Object 概觀
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">نُشر في</span>
+
+              <time title="أُنشأ: 2018-08-31 22:55:00" itemprop="dateCreated datePublished" datetime="2018-08-31T22:55:00+08:00">2018-08-31</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">عُدل في</span>
+                <time title="عُدل: 2020-08-17 10:22:00" itemprop="dateModified" datetime="2020-08-17T10:22:00+08:00">2020-08-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">في</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Kubernetes/" itemprop="url" rel="index"><span itemprop="name">Kubernetes</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/Kubernetes/k8s-CoreConcept-ResourceObject-Overview/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="Kubernetes/k8s-CoreConcept-ResourceObject-Overview/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此篇文章從比較 high level 的角度來了解什麼是 Kubernetes Resource Object，以及 Kubernetes 中到底包含了那些 Resource Object & 其用途</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="What-is-Resource-Object"><a href="#What-is-Resource-Object" class="headerlink" title="What is Resource Object?"></a>What is Resource Object?</h1><p>在 k8s 中，定義了各式各樣的 resource object(or <code>API object</code>)，每個 resource object 都是一個 persistent entity，用來表示目前 cluster 的特定狀態 &amp; 運作行為，例如：</p>
+<ul>
+<li><p>有哪些 containerized application 正在運行?</p>
+</li>
+<li><p>承上，在哪些 worker nodes 上運行?</p>
+</li>
+<li><p>這些 application 可用的 resource 為何?</p>
+</li>
+<li><p>application 運作時的規範，例如：restart policy, fault-tolerance</p>
+</li>
+</ul>
+<p>此外，每個 resource object 都包含了 spec &amp; status 兩個部份，其中 spec 是用來描述 object 要以什麼樣的形式(規格 or 內容)呈現，而 status 則是用來描述這個 object 希望由 K8s 所維持的狀態(desired state)。</p>
+<blockquote>
+<p>關於 spec &amp; status 的細節，可以參考官網的 <a target="_blank" rel="noopener" href="https://github.com/kubernetes/community/blob/master/contributors/devel/api-conventions.md">API Conventions</a></p>
+</blockquote>
+<h1 id="Kubernetes-提供了那些-Resource-Object-Type"><a href="#Kubernetes-提供了那些-Resource-Object-Type" class="headerlink" title="Kubernetes 提供了那些 Resource Object Type?"></a>Kubernetes 提供了那些 Resource Object Type?</h1><p>k8s 提供的 resource object 種類相當多，以下根據運用的類型作成以下四大分類：</p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Resource Object Type Name</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Workload</td>
+<td>Pod, HorizontalPodAutoscaler</td>
+</tr>
+<tr>
+<td>Controller</td>
+<td>ReplicaSet, ReplicationController, Deployment, StatefulSet, DaemonSet, Job, CronJob</td>
+</tr>
+<tr>
+<td>Service Discovery</td>
+<td>Service, Ingress</td>
+</tr>
+<tr>
+<td>Authentication &amp; Authorization</td>
+<td>ServiceAccount, RBAC(Role, ClusterRole, RoleBinding, ClusterRoleBinding)</td>
+</tr>
+<tr>
+<td>Storage</td>
+<td>Volume, PersistentVolume, StorageClass, Secret, ConfigMap</td>
+</tr>
+<tr>
+<td>Policy</td>
+<td>NetworkPolicy, SecurityContext, ResourceQuota, LimitRange</td>
+</tr>
+<tr>
+<td>Extension</td>
+<td>CustomResourceDefinitions</td>
+</tr>
+</tbody></table>
+<p>從上面的分類可以看出，作為一個 multiple node 的 container orchestration platform，k8s 為了將 container 進行有效的管理，將很多管理概念抽象化，儘量隱藏底層複雜的實作細節，讓使用者可以根據自己的需求，專注在特定的 resource object 上，進而有效率的完成工作。</p>
+<h1 id="Workload-類型的-Resource-Object"><a href="#Workload-類型的-Resource-Object" class="headerlink" title="Workload 類型的 Resource Object"></a>Workload 類型的 Resource Object</h1><p>以下針對各種不同的 Resource Object Type 作個簡單介紹：</p>
+<h2 id="Pod"><a href="#Pod" class="headerlink" title="Pod"></a>Pod</h2><p>Pod 是 k8s 中的最小運作單位，要了解 Pod 是什麼，則必須看看官網的定義：</p>
+<blockquote>
+<p>A pod (as in a pod of whales or pea pod) is a group of one or more containers (such as Docker containers), with shared storage/network, and a specification for how to run the containers.</p>
+</blockquote>
+<p>從上述的定義可以知道幾件事情：</p>
+<ol>
+<li><p>一個 pod 中可以有一個或多個 container</p>
+</li>
+<li><p>在同一個 pod 的 container 共享相同的 storage &amp; network(因此在同一個 Pod 裡面的 containers，可以用 local port numbers 來互相溝通)</p>
+</li>
+<li><p>pod 的 spec 宣告中還必須包含 container 要如何運作</p>
+</li>
+</ol>
+<h1 id="Controller-類型的-Resource-Object"><a href="#Controller-類型的-Resource-Object" class="headerlink" title="Controller 類型的 Resource Object"></a>Controller 類型的 Resource Object</h1><h2 id="ReplicationController"><a href="#ReplicationController" class="headerlink" title="ReplicationController"></a>ReplicationController</h2><p>用途是在確保同一時間內，有指定數量的 pod 在運行，可隨時進行 scale out/in。</p>
+<p>在 k8s v1.2 後，就開始由 <strong>Deployment</strong> + <strong>ReplicaSet</strong> 取代，為了就是要準備支援在 v1.3 後出現的 Auto Scaling 的功能。</p>
+<h2 id="ReplicaSet"><a href="#ReplicaSet" class="headerlink" title="ReplicaSet"></a>ReplicaSet</h2><p>可以將 ReplicaSet 視為進化版的 ReplicationController，其中兩者最大的差別在於 ReplicaSet 可以被更多種不同的 label selector 支援。</p>
+<blockquote>
+<p>ReplicationController 僅能支援 <strong>=</strong> 以及 <strong>!=</strong> 兩種，而 ReplicaSet 還支援了 chain &amp; subset 等更複雜的 selector 功能</p>
+</blockquote>
+<p>雖然 ReplicaSet 提供了更強大的 selector 功能，但不建議單獨使用，而是透過與 Deployment 來搭配使用。</p>
+<h2 id="Deployment"><a href="#Deployment" class="headerlink" title="Deployment"></a>Deployment</h2><p>Deployment 其實就是 <a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/workloads/pods/pod/">Pod</a> + <a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/">ReplicaSet</a>，同樣的，使用者對 k8s 宣告 Deployment 的 desired status，接著 Deployment controller 就會在資源允許的範圍內幫你達成。</p>
+<blockquote>
+<p>請不要直接控制包在 Deployment 內部的 ReplicaSet，應該是要透過調整 Deployment 來改變實際 workload 運作的行為</p>
+</blockquote>
+<p>然而 Deployment 可以幫我們達成以下幾件事情：</p>
+<ul>
+<li><p>部署一個應用服務(application)，並確保維持在 desired status</p>
+</li>
+<li><p>將 applications 升級到某個特定版本，同時也可以降級到某個特定版本</p>
+</li>
+<li><p>zero downtime upgrade</p>
+</li>
+<li><p>當問題發生時，可以快速的 rollback</p>
+</li>
+</ul>
+<p>當然 Deployment 的功能不只上面這些，之後有機會會用獨立篇幅來介紹。</p>
+<h2 id="StatefulSets"><a href="#StatefulSets" class="headerlink" title="StatefulSets"></a>StatefulSets</h2><p>StatefulSets 是在 v1.9 後正式釋出的功能，顧名思義，主要功能就是作為 stateful application 的管理，例如：Database。</p>
+<p>與 Deployment Pod 相比較之下，有些相同也有些不同的地方，首先說明相同的地方：</p>
+<ul>
+<li>與 Deployment 相同，都是透過 container spec 來描述 desired status</li>
+</ul>
+<p>而與 Deployment Pod 不同的地方則是：</p>
+<ul>
+<li><p>StatefulSets 會為每一個 pod 維護一個固定的識別資訊，而 Deployment 則不會</p>
+</li>
+<li><p>承上，StatefulSets pod 雖然都是從同樣的 spec 產生出來，但卻不是等價關係，因此無法互相替代對方的任務</p>
+</li>
+<li><p>每個 StatefulSets Pod 都有一個永久性的識別資訊，不會因為被 reschedule 而改變</p>
+</li>
+</ul>
+<p>StatefulSet 的管理是由 k8s 中名稱為 StatefulSet Controller 的元件來負責。</p>
+<h2 id="DaemonSet"><a href="#DaemonSet" class="headerlink" title="DaemonSet"></a>DaemonSet</h2><p>由 daemon controller 管理，確認每個 node 上都會有運行一個指定的 pod，而當有新的 node 加入到 cluster 中時，k8s 也會自動幫新的 node 加上一個 daemonset pod；若是 node 被移除時，當然這些 pod 也都會被刪除掉。</p>
+<p>典型的應用如下：</p>
+<ul>
+<li><p>運行 storage daemon，例如: glusterd, ceph … 等等</p>
+</li>
+<li><p>運行蒐集 log 用的 daemon，例如: fluentd, logstash … 等等</p>
+</li>
+<li><p>運行監控用的 daemon，例如: <a target="_blank" rel="noopener" href="https://github.com/prometheus/node_exporter">Prometheus Node Exporter</a>, collectd … 等等</p>
+</li>
+</ul>
+<h2 id="Job"><a href="#Job" class="headerlink" title="Job"></a>Job</h2><p>Job 很直覺，跟 Linux 中的 <code>at</code> 是類似的概念。</p>
+<p>而在 k8s 中，job 會建立一個 or 多個 pod，並確保有特定數量的 pod 執行成功，條件達成後，job 就會進入完成狀態，此時 job 以及相關的 pod 都會被刪除。</p>
+<h2 id="CronJob"><a href="#CronJob" class="headerlink" title="CronJob"></a>CronJob</h2><p>跟 Linux 相同，CronJob 也是在特定的時間 or 週期性的特定時間運行 job；在使用上，時間格式的定義也是與 Linux 相同。</p>
+<p>典型的運用像是資料庫的備份、發送郵件 … 等等</p>
+<h2 id="TTL-Controller"><a href="#TTL-Controller" class="headerlink" title="TTL Controller"></a>TTL Controller</h2><p>k8s 可以讓使用者執行很多一次性的工作，但執行完成後，即使過程中的 log 或是 resource object 本身都已經不再需要了，它們都還是會一直留在 k8s 上，於是就會看到很多狀態為 Complete(or Failed) 的 resource object，久而久之為了環境不要過度雜亂，可能一段時間就要清理一次，不論是手動 or 寫 script 完成，但其實這是一件挺麻煩的事情。</p>
+<p>而在 v1.12 之後，k8s 新增了 TTL controller 這個新功能，目的就是透過限制已經執行完成的 resource object 的生命周期，藉此來達成自動清理的目的；這個設計其實是針對多種不同的 resource object，但在 v1.12 中，僅支援 Job 而已，未來可能或擴充支援到 Pod or Custom Resource。</p>
+<blockquote>
+<p>TTL 在 v1.12 版本中仍是 alpha 而已，且必須透過啟用 <code>TTLAfterFinished</code> feature gate 才可使用</p>
+</blockquote>
+<h1 id="Service-Discovery-類型的-Resource-Object"><a href="#Service-Discovery-類型的-Resource-Object" class="headerlink" title="Service Discovery 類型的 Resource Object"></a>Service Discovery 類型的 Resource Object</h1><h2 id="Service"><a href="#Service" class="headerlink" title="Service"></a>Service</h2><p>Service 是為了讓<strong>應該要送到 pod 處理的網路流量可以正確的送達</strong>而抽象出來的一個概念，為了達到此目的，需要具備幾個條件：</p>
+<p>DNS 服務 (沒人會想用 IP 存取服務)</p>
+<p>網路服務 (kube-proxy 在 pod 上層提供了一個 Load Balance 的服務)</p>
+<p>以下是一個典型的 service 應用：</p>
+<p><img src="/blog/images/kubernetes/k8s-service.svg" alt="Kubernetes Service Example"></p>
+<ul>
+<li><p>每個 service 會帶有一個 VIP</p>
+</li>
+<li><p>在 cluster 內部可以透過 <strong>&lt;service_name&gt;.&lt;namespace&gt;.cluster.local</strong> 這個 domain name 存取到</p>
+</li>
+<li><p>若要在 cluster 外部存取 service，則必須將 service 的 type 設定為 <strong>NodePort</strong> or <strong>LoadBalancer</strong>(只有在公有雲有效)</p>
+</li>
+<li><p>service 的流量要導到那些 pod，是用 Label 來定義</p>
+</li>
+<li><p>kube-proxy 會主動產生相對應的 iptables rule，讓 traffic 可以平均的分流到指定的 pod</p>
+</li>
+</ul>
+<h2 id="Ingress"><a href="#Ingress" class="headerlink" title="Ingress"></a>Ingress</h2><p>k8s 在沒有 Ingress 之前，要從外部存取 k8s 的 service，僅能透過 <strong>NodePort</strong> 的方式來達成(在公有雲可以使用 <strong>LoadBalancer</strong>)，架構大概如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">  internet</span><br><span class="line">      |</span><br><span class="line">------------</span><br><span class="line">[ Services ]</span><br></pre></td></tr></table></figure>
+
+<p>Ingress 在 v1.1 後出現，目的就是要解決外部存取 k8s service 的問題，因此架構變成如下圖：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"> internet</span><br><span class="line">     |</span><br><span class="line">[ Ingress ]</span><br><span class="line">--|-----|--</span><br><span class="line">[ Services ]</span><br></pre></td></tr></table></figure>
+
+<p>Ingress 負責的事情主要被定義為下面幾項：</p>
+<ul>
+<li><p>give services externally-reachable urls</p>
+</li>
+<li><p>load balance traffic</p>
+</li>
+<li><p>SSL Termination</p>
+</li>
+<li><p>offer name based virtual hosting</p>
+</li>
+</ul>
+<h1 id="權限管理類型的-Resource-Object"><a href="#權限管理類型的-Resource-Object" class="headerlink" title="權限管理類型的 Resource Object"></a>權限管理類型的 Resource Object</h1><h2 id="Service-Account"><a href="#Service-Account" class="headerlink" title="Service Account"></a>Service Account</h2><p>在 k8s 中一個 pod 可以正常開始運作與否，取決於這個 pod 有沒有足夠的權限，在 k8s 中每個 pod 運作時的權限，則是以 service account 這個 resource object 來表示。</p>
+<p>但在 k8s 中，真正決定 pod 可不可以被 schedule 到 worker node 的是 API server，而要跟 API server，必須要有合法的 token，從哪裡來呢?</p>
+<p>首先要知道幾件事情：</p>
+<ul>
+<li><p>每個 pod 都會屬於特定的 namespace</p>
+</li>
+<li><p>每個 namespace 在建立之初，會有一個名稱為 <strong>default</strong> 的 service account 會同時被建立</p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl get serviceaccount</span><br><span class="line">NAME      SECRETS   AGE</span><br><span class="line">default   1         18h</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>每個 service account 會帶有一個 <code>secret</code> resource object</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl describe serviceaccount/default</span><br><span class="line">Name:                default</span><br><span class="line">Namespace:           default</span><br><span class="line">Labels:              &lt;none&gt;</span><br><span class="line">Annotations:         &lt;none&gt;</span><br><span class="line">Image pull secrets:  &lt;none&gt;</span><br><span class="line">Mountable secrets:   default-token-zmx94</span><br><span class="line">Tokens:              default-token-zmx94</span><br><span class="line">Events:              &lt;none&gt;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>上述的 secret 帶有與 API server 認証用的 token 資訊</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl describe secret/default-token-zmx94</span><br><span class="line">Name:         default-token-zmx94</span><br><span class="line">Namespace:    default</span><br><span class="line">Labels:       &lt;none&gt;</span><br><span class="line">Annotations:  kubernetes.io/service-account.name=default</span><br><span class="line">              kubernetes.io/service-account.uid=b9881486-abf6-11e8-9824-66712a0dd587</span><br><span class="line"></span><br><span class="line">Type:  kubernetes.io/service-account-token</span><br><span class="line"></span><br><span class="line">Data</span><br><span class="line">====</span><br><span class="line">ca.crt:     1090 bytes</span><br><span class="line">namespace:  7 bytes</span><br><span class="line">token:      eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6ImRlZmF1bHQtdG9rZW4tem14OTQiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoiZGVmYXVsdCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6ImI5ODgxNDg2LWFiZjYtMTFlOC05ODI0LTY2NzEyYTBkZDU4NyIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpkZWZhdWx0OmRlZmF1bHQifQ.l8xziA1DiH_u2UUSPmbo3Gry5DqjRn9qHG6SAiu83BkHmWNXaY_K1-55Ta_Uq3m1I2LCkMxCmjL_Aoau_efHLMqbT7nCJHuG78r9mVPOuy2OyhFLPniKE3-QteY_53smOFV5p-DathRP1zzbdzsiasigjKOlLn_2TDFMcy9ZvAyOzm20MqiQE31CVrdiMWPOD3pl0AerWnRkEsoxdIJ70RK8pc0Z65FQ3uILCrGSMlwr5FPl_cxw6nj2yTm7UeONPvHskIG2uzedUi9dX7LsnXj__SorWizuFc1G8aN3RyzXUgstXo0h6x_tOwINAk7f9LHPBhQJ7zBpWGNC3hxR8w</span><br></pre></td></tr></table></figure>
+
+<p>因此藉由上面的說明，可以了解 namespace, pod, service account, secret, token, 與 API server 之間的關係</p>
+<h2 id="RBAC-機制"><a href="#RBAC-機制" class="headerlink" title="RBAC 機制"></a>RBAC 機制</h2><p>RBAC 是目前 k8s 預設會啟動的 authorization module。</p>
+<p>在 RBAC API 中定義了 resource target，用來描述使用者以及 resource 之間的權限關係：</p>
+<ul>
+<li><p><strong>Role</strong>：定義在特定 namespace 下的 resource 的存取權限</p>
+</li>
+<li><p><strong>RoleBinding</strong>： 設定哪些使用者(or service account)與 role 綁定而擁有存取權限</p>
+</li>
+<li><p><strong>ClusterRole</strong>：定義在整個 k8s cluster 下的 resource 的存取權限</p>
+</li>
+<li><p><strong>ClusterRoleBinding</strong>：設定哪些使用者(or service account)與 role 綁定而擁有存取權限</p>
+</li>
+</ul>
+<p>了解 RBAC 的運作機制，在使用一些 k8s extension(例如：Helm) 的時候會有幫助，可以了解這些 extension 是如何在 k8s 中取得合法的運作權限。</p>
+<h1 id="Storage-管理類型的-Resource-Object"><a href="#Storage-管理類型的-Resource-Object" class="headerlink" title="Storage 管理類型的 Resource Object"></a>Storage 管理類型的 Resource Object</h1><h2 id="Volume"><a href="#Volume" class="headerlink" title="Volume"></a>Volume</h2><p>由於 container 的生命周期是短暫的，並且可能會隨時被 reschedule 到其他的 node 上面運行，這看似資源有效的被管理的前提下，同時也衍生出了 application 資料儲存的問題，而 <strong>volume</strong> 就是在 k8s 中被提出來的一個抽象概念，要來解決資料儲存的問題，並隱藏底層複雜的 storage 相關細節。</p>
+<p>類似於 Docker 中的 volume 概念，k8s 支援的 volume 有相當多種，例如：hostPath, iSCSI, NFS, GlusterFS, Ceph … 等等，詳細清單可以參考<a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/volumes/#types-of-volumes">官網的列表</a>。</p>
+<h2 id="PersistentVolume-amp-PersistentVolumeClaim"><a href="#PersistentVolume-amp-PersistentVolumeClaim" class="headerlink" title="PersistentVolume &amp; PersistentVolumeClaim"></a>PersistentVolume &amp; PersistentVolumeClaim</h2><p>有了 volume 被設計出來的目的後，接著進入到在 k8s 實作的細節；由於 storage 的管理一直是一個獨立且複雜的課題這個部份，因此k8s 提出了 <strong>PersistentVolume(PV)</strong> &amp; <strong>PersistentVolumeClaim(PVC)</strong> 兩個抽象概念來實現永久性資料的儲存，藉由提供標準的 API，讓 storage 的管理與應用抽象化。</p>
+<p>其中，PersistentVolume(簡稱 <code>PV</code>) resource 在概念上可以視為可讓 pod 掛載的 storage，後面的實作(NFS, iCSCI, RBD … etc)都已經被標準的 API 隱藏，管理者可以透過標準的宣告方式佈署所需要的 storage resource；而 PersistentVolume 的 lifecycle 會跟著使用 PersistentVolume 的 pod 走，當所有 pod 都消失，PersistentVolume resource 也會跟著消失，但儲存在上面的資料依然會存在。</p>
+<p>PersistentVolumeClaim(簡稱 <code>PVC</code>) resource 則是來自於使用者的 request，概念上類似 pod，只是 pod 使用 worker node 上的運算資源，可限定 CPU &amp; Memory；而 PersistentVolumeClaim 使用的則是 PV，可限定 storage 的 size &amp; access mode(read/write or read-only)。</p>
+<p>然而其實 pod, PV, PVC 之間的關係是這樣的：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Pod &lt;---&gt; PersistentVolumeClaim(PVC) &lt;---&gt; PersistentVolume(PV)</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li><p>Pod 中定義要使用哪個 PVC，其中包含了一些 storage requirement</p>
+</li>
+<li><p>PVC 在 k8s cluster 中尋找可用的 PV 並掛載</p>
+</li>
+</ol>
+<p>透過以上的分工，讓 Administrator &amp; Developer 的權責可以劃分的很清楚，而 Developer 也不需要了解底層 storage 設定的細節，就像以下這張圖：</p>
+<p><img src="/blog/images/kubernetes/k8s_pod-pvc-pv.png" alt="Kubernetes - Pod, PVC, PV"></p>
+<h2 id="StorageClass"><a href="#StorageClass" class="headerlink" title="StorageClass"></a>StorageClass</h2><p>PV + PVC 解決了永久性資料儲存的問題，但同時也帶來了以下問題：</p>
+<ul>
+<li><p>如果我常常需要產生 PV，又要刪除它呢 ?</p>
+</li>
+<li><p>可以不要一直去煩 storage manager 嗎? 每次產生新的 PV 都需要請他建立對應的 RBD image</p>
+</li>
+<li><p>產生 PV 的動作可以自動完成嗎 ?</p>
+</li>
+<li><p>每次都要手動建立 RBD image 哪有 cloud native ?</p>
+</li>
+</ul>
+<p>而 Storage Class 就是以上問題的解答，簡單的概念圖如下：</p>
+<p><img src="/blog/images/kubernetes/k8s_storageclass.png" alt="Kubernetes - StorageClass"></p>
+<p>而 Storage Class 的功能就是要<code>動態</code> &amp; <code>自動</code>的把上述的事情給自動化，其詳細的運作流程如下圖：</p>
+<p><img src="/blog/images/kubernetes/dynamic-volume-provision.jpg" alt="Kubernetes Persistent Volume Provisioning"></p>
+<ol>
+<li><p>設定 persistent volume provisioner</p>
+</li>
+<li><p>k8s cluster 管理者建立 Storage Class，並指定要使用的 PV provisioner</p>
+</li>
+<li><p>使用者建立 PVC，指定要使用的 Storage Class</p>
+</li>
+<li><p>Storage Class 使用 provisioner 在實際的 storage 上產生 volume，並建立 PV 與其繫結</p>
+</li>
+<li><p>將 PV 與 使用者 PVC 進行繫結</p>
+</li>
+<li><p>使用者建立 pod，並使用 PVC 取得外部的儲存空間</p>
+</li>
+</ol>
+<blockquote>
+<p><strong>以上的重點在於，管理者再也不用辛苦的手動建立儲存空間，並設定 PV 與其繫結了，這個部份都交給 StorageClass 自動處理</strong></p>
+</blockquote>
+<h2 id="Secret"><a href="#Secret" class="headerlink" title="Secret"></a>Secret</h2><p>Secret 是用來解決在 k8s 中密碼、token，key 或是任何敏感資訊的管理問題，使用者不用把這些敏感資訊定義在 image or pod 的 spec 設定中，而是透過 volume 掛載的方式或是環境變數的方式在 pod 中使用。</p>
+<p>上面提到在 service account 中，就是利用了 secret 來儲存與 API server 溝通用的 token；而一般使用者也可以定義 <strong>Opaque</strong> 類型(以 base64 的方式編碼)的 secret 來儲存需要隱藏的敏感性資料。</p>
+<h2 id="ConfigMap"><a href="#ConfigMap" class="headerlink" title="ConfigMap"></a>ConfigMap</h2><p>所有的 application 在開發上，總是會遇到設定檔(configuration)處理的問題，最典型的就是在不同的環境中(testing, staging, production)需要連結到不同的資料庫，當然也就會有不同的資料庫連線資訊。</p>
+<p>若是將 configuration 打包到 container image 中，那有多少個環境就要打包多少個 image，其實這是相當沒有效益的，因此在 k8s 中，提出了 <strong>ConfigMap</strong> 的概念來解決這個問題。</p>
+<p>ConfigMap 可以包含的資訊其實沒什麼太多限制，可以保存單一屬性，也可以是完整的 configuration 內容，或是一個 json 格式的資料也都可以，儲存的方式是以 key/value 的型式；使用上類似 secret，若是處理非機密資料的話是相當合適的。</p>
+<h1 id="Policy-類型的-Resource-Object"><a href="#Policy-類型的-Resource-Object" class="headerlink" title="Policy 類型的 Resource Object"></a>Policy 類型的 Resource Object</h1><h2 id="NetworkPolicy"><a href="#NetworkPolicy" class="headerlink" title="NetworkPolicy"></a>NetworkPolicy</h2><p>Network Policy 定義了 pod 之間是否可以互相通訊，以及到各個不同的 endpoint 之間是否可以互相通訊。而 policy 的套用同樣也是透過 label selector 來篩選。</p>
+<h2 id="SecurityContext"><a href="#SecurityContext" class="headerlink" title="SecurityContext"></a>SecurityContext</h2><p>當我們要在 k8s 使用可能不受信任的 container image 時，可能會希望限制該 pod or container 可以運作的權限 or 範圍，而在 k8s 中，Security Context 就是用來定義這樣的限制，來確保他容器不受其影響 &amp; 保護系統。</p>
+<p>在 k8s 中提供了三種配置 Security Context 的方法：</p>
+<ul>
+<li><p>Container-level Security Context：僅套用到指定的容器</p>
+</li>
+<li><p>Pod-level Security Context：套用到 Pod 內所有容器以及 Volume</p>
+</li>
+<li><p>Pod Security Policies（PSP）：套用到 k8s cluster 內部所有 Pod 以及 Volume</p>
+</li>
+</ul>
+<h2 id="ResourceQuota"><a href="#ResourceQuota" class="headerlink" title="ResourceQuota"></a>ResourceQuota</h2><p>當一個 k8s cluster 中同時有多個使用者 or 團隊同時使用 &amp; 硬體資源有限時，ResourceQuota 就是管理者可以用來控制資源利用量的工具。</p>
+<p>ResourceQuota 的套用是以 namespace 為單位，預設是沒有任何 quota 的，而每個 namespace 也只能有一個 ResourceQuota 物件來管理資源的使用量，目前可管理的資源類型有以下三種：</p>
+<ul>
+<li><p><strong>Compute Resource</strong>: 這個包含 CPU &amp; Memory</p>
+</li>
+<li><p><strong>Storage</strong>: 可用來限制每個 namespace 可用的儲存空間</p>
+</li>
+<li><p><strong>Object Count</strong>: 在 v1.9 正式釋出的功能，主要用來限制特定 resource object type 的數量，例如：<code>count/persistentvolumeclaims</code>, <code>count/deployments.apps</code></p>
+</li>
+</ul>
+<h2 id="LimitRange"><a href="#LimitRange" class="headerlink" title="LimitRange"></a>LimitRange</h2><p>LimitRange 跟 ResourceQuota 同樣也是用來限制資源使用量，但 LimitRange 主要是用來設定資源申請的上下限範圍限制的預設值。</p>
+<p>兩種資源控制的機制都是以 namespace 為單位，其中 <code>ResourceQuota</code> 是用來設定在 namespace 所有 pod 佔用資源的 request &amp; limit，而 <code>LimitRange</code> 則是用來設定 namespace 中 pod 的預設使用資源的 request &amp; limit。</p>
+<h1 id="Extension-類型的-Resource-Object"><a href="#Extension-類型的-Resource-Object" class="headerlink" title="Extension 類型的 Resource Object"></a>Extension 類型的 Resource Object</h1><h2 id="CustomResourceDefinitions"><a href="#CustomResourceDefinitions" class="headerlink" title="CustomResourceDefinitions"></a>CustomResourceDefinitions</h2><p>k8s 原生的 resource type 有 pod, deployment, daemonset, service … 等等，但若這些 resource type 並不完全符合使用者需求時，使用者可以自行定義所謂的 Custom Resource &amp; 相對應的 controller 來進行進階的 container 應用，而在操作使用上同樣也可以透過 kubectl 來進行管理。</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/workloads/pods/pod-overview/">Pod Overview - Kubernetes</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://ithelp.ithome.com.tw/articles/10193232">[Day 5] 在 Minikube 上跑起你的 Docker Containers - Pod &amp; kubectl 常用指令 - iT 邦幫忙::一起幫忙解決難題，拯救 IT 人的一天</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://ithelp.ithome.com.tw/articles/10194152">[Day 8] 還在用Replication Controller嗎？不妨考慮Deployment - iT 邦幫忙::一起幫忙解決難題，拯救 IT 人的一天</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/">ReplicaSet - Kubernetes</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Deployments - Kubernetes</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/">StatefulSets - Kubernetes</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/">Jobs - Run to Completion - Kubernetes</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/">CronJob - Kubernetes</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/services-networking/service/">Services - Kubernetes</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/services-networking/ingress/">Ingress - Kubernetes</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/">Configure Service Accounts for Pods - Kubernetes</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/">Managing Service Accounts - Kubernetes</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/reference/access-authn-authz/rbac/">Using RBAC Authorization - Kubernetes</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/volumes/">Volumes - Kubernetes</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/">Persistent Volumes - Kubernetes</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/storage-classes/">Storage Classes - Kubernetes</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/configuration/secret/">Secrets - Kubernetes</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/">Configure a Pod to Use a ConfigMap - Kubernetes</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/services-networking/network-policies/">Network Policies - Kubernetes</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/configure-pod-container/security-context/">Configure a Security Context for a Pod or Container - Kubernetes</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://github.com/feiskyer/kubernetes-handbook/blob/master/zh/concepts/security-context.md">Security Context 和 Pod Security Policy· feiskyer/kubernetes-handbook</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/policy/resource-quotas/">Resource Quotas - Kubernetes</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://jimmysong.io/posts/kubernetes-resourcequota-limitrange-management/">Kubernetes中的ResourceQuota和LimitRange配置资源限额 - 宋净超的博客|Cloud Native Developer Advocate|jimmysong.io</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/">Custom Resources - Kubernetes</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/Kubernetes/" rel="tag"># Kubernetes</a>
+              <a href="/blog/tags/CKA/" rel="tag"># CKA</a>
+              <a href="/blog/tags/Kubernetes-Core-Concept/" rel="tag"># Kubernetes Core Concept</a>
+              <a href="/blog/tags/CKA-Core-Concept/" rel="tag"># CKA Core Concept</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/Kubernetes/k8s-CoreConcept-Wokring-with-Objects/" rel="prev" title="[Kubernetes] 如何管理 Resource Object">
+                  <i class="fa fa-chevron-left"></i> [Kubernetes] 如何管理 Resource Object
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/blog/Kubernetes/k8s-Pod-Overview/" rel="next" title="[Kubernetes] Pod 的設計 & 相關運作機制">
+                  [Kubernetes] Pod 的設計 & 相關運作機制 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">تطبيق الموقع <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/Kubernetes/k8s-CoreConcept-ResourceObject-Overview/";
+    this.page.identifier = "Kubernetes/k8s-CoreConcept-ResourceObject-Overview/";
+    this.page.title = "[Kubernetes] Resource Object 概觀";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>

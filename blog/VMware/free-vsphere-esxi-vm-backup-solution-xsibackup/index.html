@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="介紹可用來備份 VMware ESXi 中 virtual machine 的免費備份方案 - xsibackup">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[VMware] 免費的 vSphere ESXi VM 備份方案 - XSIBACKUP">
+<meta property="og:url" content="https://godleon.github.io/blog/VMware/free-vsphere-esxi-vm-backup-solution-xsibackup/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="介紹可用來備份 VMware ESXi 中 virtual machine 的免費備份方案 - xsibackup">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2014-11-14T03:45:00.000Z">
+<meta property="article:modified_time" content="2020-08-17T02:22:00.417Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="VMware">
+<meta property="article:tag" content="Backup">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/VMware/free-vsphere-esxi-vm-backup-solution-xsibackup/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-tw'
+  };
+</script>
+
+  <title>[VMware] 免費的 vSphere ESXi VM 備份方案 - XSIBACKUP | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="تشغيل شريط التصفح">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          المحتويات
+        </li>
+        <li class="sidebar-nav-overview">
+          عام
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%92%B0%E5%A2%83%E8%A8%AD%E5%AE%9A"><span class="nav-number">1.</span> <span class="nav-text">環境設定</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F"><span class="nav-number">2.</span> <span class="nav-text">使用方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E5%8F%83%E6%95%B8"><span class="nav-number">3.</span> <span class="nav-text">其他參數</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%84%E9%80%81-Mail-%E7%9A%84%E5%95%8F%E9%A1%8C"><span class="nav-number">4.</span> <span class="nav-text">寄送 Mail 的問題</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%92%E7%A8%8B%E5%82%99%E4%BB%BD"><span class="nav-number">5.</span> <span class="nav-text">排程備份</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B8%BD%E7%B5%90"><span class="nav-number">6.</span> <span class="nav-text">總結</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%84%AA%E9%BB%9E"><span class="nav-number">6.1.</span> <span class="nav-text">優點</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%BA%E9%BB%9E"><span class="nav-number">6.2.</span> <span class="nav-text">缺點</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%83%E8%80%83%E8%B3%87%E6%96%99"><span class="nav-number">7.</span> <span class="nav-text">參考資料</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">124</span>
+          <span class="site-state-item-name">المقالات</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">التصنيفات</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">101</span>
+        <span class="site-state-item-name">الوسوم</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/VMware/free-vsphere-esxi-vm-backup-solution-xsibackup/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [VMware] 免費的 vSphere ESXi VM 備份方案 - XSIBACKUP
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">نُشر في</span>
+
+              <time title="أُنشأ: 2014-11-14 11:45:00" itemprop="dateCreated datePublished" datetime="2014-11-14T11:45:00+08:00">2014-11-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">عُدل في</span>
+                <time title="عُدل: 2020-08-17 10:22:00" itemprop="dateModified" datetime="2020-08-17T10:22:00+08:00">2020-08-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">في</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/VMware/" itemprop="url" rel="index"><span itemprop="name">VMware</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/VMware/free-vsphere-esxi-vm-backup-solution-xsibackup/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="VMware/free-vsphere-esxi-vm-backup-solution-xsibackup/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">介紹可用來備份 VMware ESXi 中 virtual machine 的免費備份方案 - xsibackup</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>最近公司在找給 VMware vSphere ESXi 用的 shared storage，想當然爾也會考慮到備份的問題</p>
+<p>後來學長提供了 <a target="_blank" rel="noopener" href="http://sourceforge.net/projects/xsibackup/">xsibackup</a> 這個 opensource 的免費軟體，雖然是免費，可是備份功能也不差呢。</p>
+<h2 id="環境設定"><a href="#環境設定" class="headerlink" title="環境設定"></a>環境設定</h2><ul>
+<li>vSphere ESXi <strong>5.5 Update 2</strong></li>
+<li>esxibackup <strong>4.1.6</strong></li>
+</ul>
+<h2 id="使用方式"><a href="#使用方式" class="headerlink" title="使用方式"></a>使用方式</h2><p>1、 首先必須先開啟 ESXi Host 的 SSH servive，並透過 ssh client 登入到 esxi 中</p>
+<p>2、 下載 xsibackup 程式並解壓縮，將 xsibackup 程式設定為可執行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 要將檔案放到 ESXi 重開機後不會回復初始設定的路徑(可以是任何 DataStore 的目錄下，只要是 persistent folder 即可)</span></span><br><span class="line"><span class="comment"># 切換到 datastore1 folder，避免 ESXi 重開機之後將檔案刪除</span></span><br><span class="line">$ <span class="built_in">cd</span> /vmfs/volumes/datastore1</span><br><span class="line">$ wget http://sourceforge.net/projects/xsibackup/files/xsibackup_4.1.6.zip/download -O xsibackup.zip</span><br><span class="line">$ unzip xsibackup.zip</span><br><span class="line">$ chmod 0700 xsibackup*</span><br></pre></td></tr></table></figure>
+
+<p>3、執行備份工作</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 備份檔存放路徑：/vmfs/volumes/backup</span></span><br><span class="line"><span class="comment"># 備份類型：目前運行中的 VM (running)</span></span><br><span class="line"><span class="comment"># mail &amp; smpt 的相關設定都是與寄信相關</span></span><br><span class="line">$ ./xsibackup --backup-point=/vmfs/volumes/backup --backup-type=running </span><br><span class="line">--mail-from=email.sender@yourdomain.com --mail-to=email.recipient@anotherdomain.com </span><br><span class="line">--smtp-srv=smtp.yourdomain.com --smtp-port=25 --smtp-usr=username </span><br><span class="line">--smtp-pwd=password</span><br></pre></td></tr></table></figure>
+<p><code>/vmfs/volumes/backup 目錄也可以是 remote host 所提供的 NFS share folder</code></p>
+<p>其中 <code>--backup-type</code> 有以下三種：</p>
+<ul>
+<li><strong>all</strong> (所有 vm)</li>
+<li><strong>running</strong> (執行中的 vm)</li>
+<li><strong>custom</strong> (指定 vm，需搭配 –backup-vms 參數指令要備份的 vm，多個 vm 可用逗號隔開)</li>
+</ul>
+<p>custom 應用如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 指定備份 WINDOWSVM1 &amp; LINUXVM2 兩台 vm</span></span><br><span class="line">$ ./xsibackup --backup-point=/vmfs/volumes/backup --backup-type=custom --backup-vms=WINDOWSVM1,LINUXVM2</span><br></pre></td></tr></table></figure>
+
+<h2 id="其他參數"><a href="#其他參數" class="headerlink" title="其他參數"></a>其他參數</h2><ul>
+<li><code>--test-mode=true</code> (測試模式，不實際進行備份；但若有設定 EMail 相關參數則會發信)</li>
+<li><code>--backup-how (hot | cold)</code> (hot 會在 vm 開機情況下備份，cold 則會將 vm 關機後再備份)`</li>
+</ul>
+<h2 id="寄送-Mail-的問題"><a href="#寄送-Mail-的問題" class="headerlink" title="寄送 Mail 的問題"></a>寄送 Mail 的問題</h2><p>設定了 EMail 發送相關參數後，實際執行會發現竟然不行，排除方法如下：</p>
+<p>xsibackup 程式會在 <strong>/etc/vmware/firewall/service.xml</strong> 這個檔案補上這一段內容：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">service</span> <span class="attr">id</span>=<span class="string">&#x27;9999&#x27;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">id</span>&gt;</span>SMTPout<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">rule</span> <span class="attr">id</span>=<span class="string">&#x27;0000&#x27;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">direction</span>&gt;</span>outbound<span class="tag">&lt;/<span class="name">direction</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">protocol</span>&gt;</span>tcp<span class="tag">&lt;/<span class="name">protocol</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">porttype</span>&gt;</span>dst<span class="tag">&lt;/<span class="name">porttype</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">port</span>&gt;</span><span class="tag">&lt;/<span class="name">port</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">rule</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">enabled</span>&gt;</span>true<span class="tag">&lt;/<span class="name">enabled</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">required</span>&gt;</span>false<span class="tag">&lt;/<span class="name">required</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">service</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>但其實這是錯誤的，要把 <code>&lt;port&gt;&lt;/port&gt;</code>這個部分改成 <code>&lt;port&gt;25&lt;/port&gt;</code>，並執行以下指令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ esxcli network firewall refresh</span><br></pre></td></tr></table></figure>
+
+<p>如此一來 EMail 的功能就會正常啟動了!</p>
+<h2 id="排程備份"><a href="#排程備份" class="headerlink" title="排程備份"></a>排程備份</h2><p>xsibackup 也支援排程喔! 設定方式如下：</p>
+<ol>
+<li>在 ESXi 主機上執行 <code>xsibackup --install-cron</code> 指令，此時會在 <strong>/vmfs/volumes/datastore1</strong> 目錄中產生 <code>xsibackup-cron</code>這個檔案，可以直接進入編輯：(若是星期一、五晚上 20:00 要備份)</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 加入 --time 參數，格式為 --time=&quot;Day HH:mm&quot;(注意這邊要用 UTC 時間)</span></span><br><span class="line"><span class="comment"># 星期一 20:00 備份</span></span><br><span class="line">/vmfs/volumes/datastore1/xsibackup --time=<span class="string">&quot;Mon 12:00&quot;</span> --backup-point=/vmfs/volumes/backup --backup-type=running --mail-from=email.sender@yourdomain.com --mail-to=email.recipient@anotherdomain.com --smtp-srv=smtp.yourdomain.com --smtp-port=25 --smtp-usr=username --smtp-pwd=password</span><br><span class="line"><span class="comment"># 星期五 20:00 備份</span></span><br><span class="line">/vmfs/volumes/datastore1/xsibackup --time=<span class="string">&quot;Fri 12:00&quot;</span> --backup-point=/vmfs/volumes/backup --backup-type=running --mail-from=email.sender@yourdomain.com --mail-to=email.recipient@anotherdomain.com --smtp-srv=smtp.yourdomain.com --smtp-port=25 --smtp-usr=username --smtp-pwd=password</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>重新啟動 ESXi Host 讓 cron 的功能啟用</li>
+</ol>
+<h2 id="總結"><a href="#總結" class="headerlink" title="總結"></a>總結</h2><p>因此總結一下，優缺點大致如下：</p>
+<h3 id="優點"><a href="#優點" class="headerlink" title="優點"></a>優點</h3><ol>
+<li><p>免費、開放</p>
+</li>
+<li><p>可進行完整備份，非特殊格式，不需要透過其他軟體還原</p>
+</li>
+<li><p>在單純的環境下使用簡單</p>
+</li>
+</ol>
+<h3 id="缺點"><a href="#缺點" class="headerlink" title="缺點"></a>缺點</h3><ol>
+<li><p>無法執行差異備份，自然也就沒有 dedupication 的功能。</p>
+</li>
+<li><p>目前沒有 exclude 的參數，若是有不想備份的 VM(例如：VDP)，只能透過 custom or running(搭配將 vm 關機)的方式來完成 (也可以透過改 source code 的方式來做….)</p>
+</li>
+<li><p>若是 vSphere 授權版本有 DRS(Dynamic Resource Scheduler) 的話，VM 可能會隨著資源耗損不同而跑來跑去，備份工作就很難透過 custom 方式來達成。</p>
+</li>
+</ol>
+<h2 id="參考資料"><a href="#參考資料" class="headerlink" title="參考資料"></a>參考資料</h2><ul>
+<li><p><a target="_blank" rel="noopener" href="http://sourceforge.net/projects/xsibackup/">Free Backup Software for VMware ESXi VMs | SourceForge.net</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="http://blog.depicus.com/add-outbound-port-25-for-smtp-in-vmware-esxi-v5/">Add outbound port 25 for SMTP in VMware ESXi v5 – depicus</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=2008226">VMware KB: Creating custom firewall rules in VMware ESXi 5.x</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/VMware/" rel="tag"># VMware</a>
+              <a href="/blog/tags/Backup/" rel="tag"># Backup</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+            </div>
+            <div class="post-nav-item">
+                <a href="/blog/RHCE/RHCE7-RH124-LearningNotes-CH01_03/" rel="next" title="[RHCE] RH124 Chapter 1~3 學習筆記">
+                  [RHCE] RH124 Chapter 1~3 學習筆記 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">تطبيق الموقع <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/VMware/free-vsphere-esxi-vm-backup-solution-xsibackup/";
+    this.page.identifier = "VMware/free-vsphere-esxi-vm-backup-solution-xsibackup/";
+    this.page.title = "[VMware] 免費的 vSphere ESXi VM 備份方案 - XSIBACKUP";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>

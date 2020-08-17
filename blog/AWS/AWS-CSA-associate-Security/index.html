@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容描述在使用 AWS 服務時，網路安全性 &amp; 資料存取安全性要如何考量 &amp; 設計，藉以確保服務可以安全地運行">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AWS CSA Associate 學習筆記 - Security">
+<meta property="og:url" content="https://godleon.github.io/blog/AWS/AWS-CSA-associate-Security/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容描述在使用 AWS 服務時，網路安全性 &amp; 資料存取安全性要如何考量 &amp; 設計，藉以確保服務可以安全地運行">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Security_NACL-with-host-firewall.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Security_ALB-with-SecurityGroup.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Security_NLB-with-ACL.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Security_WAF-with-ALB.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Security_WAF-with-ALB-and-CloudFront.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/CloudHSM_Example.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/ParameterStore_Example.png">
+<meta property="article:published_time" content="2020-07-30T22:35:00.000Z">
+<meta property="article:modified_time" content="2020-08-17T02:22:00.409Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="AWS">
+<meta property="article:tag" content="CSA">
+<meta property="article:tag" content="Security">
+<meta property="article:tag" content="KMS">
+<meta property="article:tag" content="CloudHSM">
+<meta property="article:tag" content="SSM Parameter Store">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/aws/Security_NACL-with-host-firewall.png">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/AWS/AWS-CSA-associate-Security/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-tw'
+  };
+</script>
+
+  <title>AWS CSA Associate 學習筆記 - Security | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="تشغيل شريط التصفح">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          المحتويات
+        </li>
+        <li class="sidebar-nav-overview">
+          عام
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E6%9C%89%E6%95%88%E6%B8%9B%E5%B0%91%E5%AE%89%E5%85%A8%E5%A8%81%E8%84%85"><span class="nav-number">1.</span> <span class="nav-text">如何有效減少安全威脅?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%AA%E6%9C%89-EC2-Instance"><span class="nav-number">1.1.</span> <span class="nav-text">只有 EC2 Instance</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-ALB"><span class="nav-number">1.2.</span> <span class="nav-text">使用 ALB</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-NLB"><span class="nav-number">1.3.</span> <span class="nav-text">使用 NLB</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-WAF-ALB"><span class="nav-number">1.4.</span> <span class="nav-text">使用 WAF + ALB</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-CDN-CloudFront-WAF-ALB"><span class="nav-number">1.5.</span> <span class="nav-text">使用 CDN(CloudFront) + WAF + ALB</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#KMS-Key-Management-Service"><span class="nav-number">2.</span> <span class="nav-text">KMS(Key Management Service)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC-KMS"><span class="nav-number">2.1.</span> <span class="nav-text">什麼 KMS?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CMK-%E7%9A%84%E9%A1%9E%E5%9E%8B"><span class="nav-number">2.2.</span> <span class="nav-text">CMK 的類型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Symmetric-amp-Asymmetric-CMK-%E7%9A%84%E5%B7%AE%E7%95%B0"><span class="nav-number">2.3.</span> <span class="nav-text">Symmetric &amp; Asymmetric CMK 的差異</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Symmetric-CMK"><span class="nav-number">2.3.1.</span> <span class="nav-text">Symmetric CMK</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Asymmetric-CMK"><span class="nav-number">2.3.2.</span> <span class="nav-text">Asymmetric CMK</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Key-Policy"><span class="nav-number">2.4.</span> <span class="nav-text">Key Policy</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%A6%E4%BD%9C%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A0%85"><span class="nav-number">2.5.</span> <span class="nav-text">實作注意事項</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CloudHSM"><span class="nav-number">3.</span> <span class="nav-text">CloudHSM</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-CloudHSM"><span class="nav-number">3.1.</span> <span class="nav-text">什麼是 CloudHSM ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CloudHSM-%E5%A6%82%E4%BD%95%E6%87%89%E7%94%A8"><span class="nav-number">3.2.</span> <span class="nav-text">CloudHSM 如何應用?</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#System-Manager-Parameter-Store"><span class="nav-number">4.</span> <span class="nav-text">System Manager Parameter Store</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-Paraneter-Store"><span class="nav-number">4.1.</span> <span class="nav-text">什麼是 Paraneter Store?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9A%8E%E5%B1%A4%E5%BC%8F-Hierarchy-%E8%B3%87%E6%96%99%E5%84%B2%E5%AD%98"><span class="nav-number">4.2.</span> <span class="nav-text">階層式(Hierarchy)資料儲存</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E5%AD%98%E6%94%BE%E5%9C%A8-Parameter-Store-%E4%B8%AD%E7%9A%84%E8%B3%87%E6%96%99"><span class="nav-number">4.3.</span> <span class="nav-text">使用存放在 Parameter Store 中的資料</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%88%87-CloudFormation-%E6%95%B4%E5%90%88"><span class="nav-number">4.3.1.</span> <span class="nav-text">與 CloudFormation 整合</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Lambda-Function"><span class="nav-number">4.3.2.</span> <span class="nav-text">Lambda Function</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A8%AD%E5%AE%9A-IAM-%E5%AD%98%E5%8F%96%E6%AC%8A%E9%99%90"><span class="nav-number">4.3.2.1.</span> <span class="nav-text">設定 IAM 存取權限</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A8%AD%E5%AE%9A-KMS"><span class="nav-number">4.3.2.2.</span> <span class="nav-text">設定 KMS</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9C%A8-Parameter-Store-%E4%B8%AD%E6%96%B0%E5%A2%9E%E8%B3%87%E6%96%99"><span class="nav-number">4.3.2.3.</span> <span class="nav-text">在 Parameter Store 中新增資料</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A8%AD%E5%AE%9A-Lambda-Function"><span class="nav-number">4.3.2.4.</span> <span class="nav-text">設定 Lambda Function</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">124</span>
+          <span class="site-state-item-name">المقالات</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">التصنيفات</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">101</span>
+        <span class="site-state-item-name">الوسوم</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/AWS/AWS-CSA-associate-Security/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AWS CSA Associate 學習筆記 - Security
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">نُشر في</span>
+
+              <time title="أُنشأ: 2020-07-31 06:35:00" itemprop="dateCreated datePublished" datetime="2020-07-31T06:35:00+08:00">2020-07-31</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">عُدل في</span>
+                <time title="عُدل: 2020-08-17 10:22:00" itemprop="dateModified" datetime="2020-08-17T10:22:00+08:00">2020-08-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">في</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/AWS/" itemprop="url" rel="index"><span itemprop="name">AWS</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/AWS/AWS-CSA-associate-Security/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="AWS/AWS-CSA-associate-Security/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容描述在使用 AWS 服務時，網路安全性 & 資料存取安全性要如何考量 & 設計，藉以確保服務可以安全地運行</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="如何有效減少安全威脅"><a href="#如何有效減少安全威脅" class="headerlink" title="如何有效減少安全威脅?"></a>如何有效減少安全威脅?</h1><p>要有效的減少安全威脅，其實總結一句話，就是 <strong>拒絕惡意行為的存取</strong>。</p>
+<p>但在在不同的網路 &amp; 系統架構下，作法就會有些不同，以下舉幾個常見範例：</p>
+<h2 id="只有-EC2-Instance"><a href="#只有-EC2-Instance" class="headerlink" title="只有 EC2 Instance"></a>只有 EC2 Instance</h2><p>在這樣的情況下，我們可以從 VPC &amp; EC2 Instance 兩個地方來著手</p>
+<p><img src="/blog/images/aws/Security_NACL-with-host-firewall.png" alt="Network ACL + host-based firewall"></p>
+<ul>
+<li><p>VPC 中提供的 Network ACL &amp; Secirty Group 可以限制存取 EC2 instance 的來源</p>
+</li>
+<li><p>EC2 Instance 本身的防火牆功能也可以限制 (例如：firewalld, iptables, ufw, windows firewall)</p>
+</li>
+<li><p>這樣的設定通常用在 Layer 4 的阻擋，無法有效的處理 Layer 7 的狀況</p>
+</li>
+</ul>
+<h2 id="使用-ALB"><a href="#使用-ALB" class="headerlink" title="使用 ALB"></a>使用 ALB</h2><p>使用了 ALB 之後，有一點必須注意的是，通過 ALB 進入到 EC2 Instance 的流量，EC2 Instance 看到的來源 IP 永遠是 ALB 本身(看不到真實的使用者來源)，因此在安全設定上就需要調整一下：</p>
+<p><img src="/blog/images/aws/Security_ALB-with-SecurityGroup.png" alt="Network ACL + ALB + Security Group"></p>
+<ul>
+<li><p>EC2 Instance 可透過 Security Group 的設定，僅允許來自 ALB 的流量</p>
+</li>
+<li><p>Network ACL 的設定依然要進行，但 target 則是位於 VPC public subnet 中的 ALB，並非 EC2 Instance</p>
+</li>
+<li><p>這樣的模式還是只能用於 Layer 4 的阻擋</p>
+</li>
+</ul>
+<h2 id="使用-NLB"><a href="#使用-NLB" class="headerlink" title="使用 NLB"></a>使用 NLB</h2><p>若改用 NLB，EC2 Instance 就可以看到真實的使用者來源：</p>
+<p><img src="/blog/images/aws/Security_NLB-with-ACL.png" alt="Network ACL + NLB + Security Group"></p>
+<ul>
+<li><p>可以在 NLB 所在的 public subnet 設定 Network ACL</p>
+</li>
+<li><p>也可以在 EC2 Instance 所在的 private subnet 設定 Network ACL</p>
+</li>
+<li><p>EC2 Instance 本身可以設定 Security Group，或是 host-based firewall</p>
+</li>
+<li><p>適用於 Layer 4 的阻擋</p>
+</li>
+</ul>
+<h2 id="使用-WAF-ALB"><a href="#使用-WAF-ALB" class="headerlink" title="使用 WAF + ALB"></a>使用 WAF + ALB</h2><p>若是 EC2 Instance 提供的是 web service，且需要作到 Layer 7 的惡意行為阻擋，那就會需要用到 WAF：</p>
+<p><img src="/blog/images/aws/Security_WAF-with-ALB.png" alt="WAF + ALB"></p>
+<ul>
+<li><p>Layer 4 的部份，可以在 ALB 所在的 public subnet 設定 Network ACL</p>
+</li>
+<li><p>Layer 7 的部份，則是在 WAF 上設定阻擋條件；WAF 可以看到真實的使用者來源</p>
+</li>
+<li><p>EC2 Instance 則是在 Security Group 中設定僅限來自於 ALB 的流量</p>
+</li>
+</ul>
+<h2 id="使用-CDN-CloudFront-WAF-ALB"><a href="#使用-CDN-CloudFront-WAF-ALB" class="headerlink" title="使用 CDN(CloudFront) + WAF + ALB"></a>使用 CDN(CloudFront) + WAF + ALB</h2><p>若是額外還需要做網頁靜態資源的加速，那就需要搭配 CDN(CloudFront)：</p>
+<p><img src="/blog/images/aws/Security_WAF-with-ALB-and-CloudFront.png" alt="WAF + CloudFront + ALB"></p>
+<ul>
+<li><p>CloudFront 是屬於 edge service，因此可以額外提供使用者所在位置的過濾方式</p>
+</li>
+<li><p>其他網路安全設定方式與上面相同</p>
+</li>
+</ul>
+<h1 id="KMS-Key-Management-Service"><a href="#KMS-Key-Management-Service" class="headerlink" title="KMS(Key Management Service)"></a>KMS(Key Management Service)</h1><h2 id="什麼-KMS"><a href="#什麼-KMS" class="headerlink" title="什麼 KMS?"></a>什麼 KMS?</h2><p>首先看一下 AWS 官方對 KMS 的說明：</p>
+<blockquote>
+<p>AWS Key Management Service (KMS) makes it easy for you to create and manage cryptographic keys and control their use across a wide range of AWS services and in your applications. AWS KMS is a secure and resilient service that uses hardware security modules that have been validated under FIPS 140-2, or are in the process of being validated, to protect your keys. AWS KMS is integrated with AWS CloudTrail to provide you with logs of all key usage to help meet your regulatory and compliance needs.</p>
+</blockquote>
+<p>其實簡單來說，就是幫使用者管理金鑰的服務，然後有很高的安全認證….</p>
+<p>而 KMS 有以下特性：</p>
+<ul>
+<li><p>KMS 本身是屬於 Region 範圍的服務，用來協助金鑰的管理 (當然要加解密資料就必須跟這個服務進行整合囉!)</p>
+</li>
+<li><p>協助使用者管理名為 CMK(Customer Master Key) 的金鑰</p>
+</li>
+<li><p>非常適合用來對 S3 object、資料庫密碼、存在 System Manager Parameter Store 的 API key 進行加解密</p>
+</li>
+<li><p>加解密的來源資料，最大限制為 4KB</p>
+</li>
+<li><p>可與 CloudTrail 整合，提供稽核的功能 (相關的 log 資訊會存於 S3 中)</p>
+</li>
+<li><p>通過 FIPS 140-2 Level 2 的認證</p>
+<blockquote>
+<p>CloudHSM 達到 FIPS 140-2 Level 3</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="CMK-的類型"><a href="#CMK-的類型" class="headerlink" title="CMK 的類型"></a>CMK 的類型</h2><p>CMK(Customer Master Key) 有三種，分別是：</p>
+<ul>
+<li><p><code>AWS Managed CMK</code>：免費，由 AWS 負責管理，使用者碰不到，在使用各個 AWS 服務時會預設拿來做加解密用，但也只有 AWS 服務可以直接使用</p>
+</li>
+<li><p><code>Customer Managed CMK</code>：完全可由使用者定義 rotation、key policy(誰可使用? 在什麼情況下可用? … 等等)，也可以開啟 or 關閉</p>
+</li>
+<li><p><code>AWS Owned CMK</code>：這完全由 AWS 負責管理，不會屬於特定使用者帳號下，也看不到，用來在多個帳號之間，確保使用者帳號使用服務時的安全性。</p>
+</li>
+</ul>
+<h2 id="Symmetric-amp-Asymmetric-CMK-的差異"><a href="#Symmetric-amp-Asymmetric-CMK-的差異" class="headerlink" title="Symmetric &amp; Asymmetric CMK 的差異"></a>Symmetric &amp; Asymmetric CMK 的差異</h2><p>在 KMS 中 CMK 有分為 Symmetric &amp; Asymmetric 兩種，使用上有著不小的差異：</p>
+<h3 id="Symmetric-CMK"><a href="#Symmetric-CMK" class="headerlink" title="Symmetric CMK"></a>Symmetric CMK</h3><ul>
+<li><p>使用同樣一把金鑰進行資料加解密</p>
+</li>
+<li><p>使用 AES-256 加密</p>
+</li>
+<li><p>AWS 不會提供沒加密過的金鑰內容</p>
+</li>
+<li><p>必須呼叫 KMS API 才能使用</p>
+</li>
+<li><p>與 KMS 整合的其他 AWS service 都使用 Symmetric CMK</p>
+</li>
+<li><p>可用來產生 data keys, data key pairs, random byte strings</p>
+</li>
+<li><p>可匯入自訂的 key material</p>
+</li>
+</ul>
+<h3 id="Asymmetric-CMK"><a href="#Asymmetric-CMK" class="headerlink" title="Asymmetric CMK"></a>Asymmetric CMK</h3><ul>
+<li><p>public/private key pair</p>
+</li>
+<li><p>使用 RSA &amp; ECC(Elloptic-Curve Crytography)，ECC 比 RSA 優秀</p>
+</li>
+<li><p>AWS 不會提供沒加密過的 private key 內容</p>
+</li>
+<li><p>必須呼叫 KMS API 才能使用 private key</p>
+</li>
+<li><p>public key 可以下載並在 AWS 之外使用</p>
+</li>
+<li><p>通常是提供給外部無法呼叫 KMS API 的使用者使用</p>
+</li>
+<li><p><strong>AWS 其他服務無法與 Asymmetric CMK 整合</strong></p>
+</li>
+<li><p>常用於訊息的簽名 &amp; 驗證簽名之用</p>
+</li>
+</ul>
+<h2 id="Key-Policy"><a href="#Key-Policy" class="headerlink" title="Key Policy"></a>Key Policy</h2><p>當使用程式 or AWS CLI 建立 CMK 時，可以自訂 key policy，但若是沒有指定 policy，AWS 則會預設提供一個 key policy，內容大概像以下：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//允許 AWS account 為 root 的使用者有這個 CMK 的完整權限</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;Sid&quot;</span>: <span class="string">&quot;Enable IAM User Permissions&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;Effect&quot;</span>: <span class="string">&quot;Allow&quot;</span>,  </span><br><span class="line">  <span class="attr">&quot;Principal&quot;</span>: &#123;<span class="attr">&quot;AWS&quot;</span>: <span class="string">&quot;arn:aws:iam::111122223333:root&quot;</span>&#125;,</span><br><span class="line">  <span class="attr">&quot;Action&quot;</span>: <span class="string">&quot;kms:*&quot;</span>, </span><br><span class="line">  <span class="attr">&quot;Resource&quot;</span>: <span class="string">&quot;*&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>比較需要注意的是，若是不小心刪除了 key policy，使用者就無法存取 CMK 了；此時只能找 AWS 原廠協助重新設定 key policy 才能再度使用 CMK</p>
+</blockquote>
+<p>以下是其他範例，用來指定特定的 User or Role 擁有 CMK 的權限：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//提供給 Role &quot;EncryptionApp&quot; 呼叫資料加解密的權限</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;Sid&quot;</span>: <span class="string">&quot;Allow use of the key&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;Effect&quot;</span>: <span class="string">&quot;Allow&quot;</span>,  </span><br><span class="line">  <span class="attr">&quot;Principal&quot;</span>: &#123;<span class="attr">&quot;AWS&quot;</span>: <span class="string">&quot;arn:aws:iam::111122223333:role/EncryptionApp&quot;</span>&#125;,</span><br><span class="line">  <span class="attr">&quot;Action&quot;</span>: [</span><br><span class="line">    <span class="string">&quot;kms:Decrypt&quot;</span>,</span><br><span class="line">    <span class="string">&quot;kms:DescribeKey&quot;</span>,</span><br><span class="line">    <span class="string">&quot;kms:Encrypt&quot;</span>,</span><br><span class="line">    <span class="string">&quot;kms:GenerateDataKey*&quot;</span>,</span><br><span class="line">    <span class="string">&quot;kms:ReEncrypt*&quot;</span></span><br><span class="line">  ],</span><br><span class="line">  <span class="attr">&quot;Resource&quot;</span>: <span class="string">&quot;*&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//提供給 User &quot;CMKUser&quot; 呼叫資料加解密的權限</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;Sid&quot;</span>: <span class="string">&quot;Allow use of the key&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;Effect&quot;</span>: <span class="string">&quot;Allow&quot;</span>,  </span><br><span class="line">  <span class="attr">&quot;Principal&quot;</span>: &#123;<span class="attr">&quot;AWS&quot;</span>: <span class="string">&quot;arn:aws:iam::111122223333:user/CMKUser&quot;</span>&#125;,</span><br><span class="line">  <span class="attr">&quot;Action&quot;</span>: [</span><br><span class="line">    <span class="string">&quot;kms:Decrypt&quot;</span>,</span><br><span class="line">    <span class="string">&quot;kms:DescribeKey&quot;</span>,</span><br><span class="line">    <span class="string">&quot;kms:Encrypt&quot;</span>,</span><br><span class="line">    <span class="string">&quot;kms:GenerateDataKey*&quot;</span>,</span><br><span class="line">    <span class="string">&quot;kms:ReEncrypt*&quot;</span></span><br><span class="line">  ],</span><br><span class="line">  <span class="attr">&quot;Resource&quot;</span>: <span class="string">&quot;*&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="實作注意事項"><a href="#實作注意事項" class="headerlink" title="實作注意事項"></a>實作注意事項</h2><ul>
+<li><p>在 AWS Managed Keys 中，列出了目前已經與 KMS 整合的服務所使用的 key，這些都是由 AWS 管理，只要了解當前 AWS 有管理這些 key 即可</p>
+</li>
+<li><p>在 Customer Managed Keys 畫面中的內容，才是由使用者自行管理的部份</p>
+</li>
+<li><p>若是要將放在 region A S3 已經加密的檔案移動到 region B，那需要進行下列操作：</p>
+<ol>
+<li>先將檔案解密(使用位於 region A 的 key)</li>
+<li>將檔案移動到 region B</li>
+<li>在使用 region B 的 key 加密<blockquote>
+<p>KMS 的 key 有效範圍是 region，這很重要!</p>
+</blockquote>
+</li>
+</ol>
+</li>
+<li><p>每個 CMK(Customer Managed Key) 建立出來後，用來識別只有 <code>KeyId</code>，但這是很難記住的一串亂碼，<strong>可為每個 CMK 設定 alias 藉以方便識別</strong></p>
+<blockquote>
+<p>使用 AWS CLI 的指令關鍵字為 <code>aws kms create-alias</code></p>
+</blockquote>
+</li>
+<li><p>CMK 建立後會預設給一組 key policy，內容就是給 root 這把 key 所有的權限</p>
+</li>
+<li><p>CMK 可設定 rotate policy 為一年(也可以不設定)；AWS Managed Key 的 rotation policy 則是預設為三年</p>
+</li>
+<li><p>加密後的資料還會再額外進行 base64 encode；而將資料解密後，也還是 base64 encode 後的結果，因此還需要額外做 base64 decode 才能看到正確結果</p>
+</li>
+<li><p>加密資料時需要指定 Key ID，但解密時不需要，是因為加密時已經把 Key ID 相關資訊一起包進去了</p>
+</li>
+<li><p>若要加密超過 4KB 以上的資料，可以先產生一個 DEK(Data Encryption Key)，再用 DEK 進行資料加密</p>
+<blockquote>
+<p>使用 AWS CLI 的指令關鍵字為 <code>aws kms generate-data-key</code></p>
+</blockquote>
+</li>
+</ul>
+<h1 id="CloudHSM"><a href="#CloudHSM" class="headerlink" title="CloudHSM"></a>CloudHSM</h1><p>若是希望 key management 可以自己做，或是需要比 KMS 更高的安全性，那 CloudHSM 可能就是唯一選擇了!</p>
+<h2 id="什麼是-CloudHSM"><a href="#什麼是-CloudHSM" class="headerlink" title="什麼是 CloudHSM ?"></a>什麼是 CloudHSM ?</h2><ul>
+<li><p>Dedicated Cloud Security Module (只服務單一使用者)</p>
+<blockquote>
+<p>single tenant, multi-AZ cluster</p>
+</blockquote>
+</li>
+<li><p>安全等級為 FIPS 140-2 Level 3 (KMS 只有 Level 2)</p>
+</li>
+<li><p>使用者透過 CloudHSM 自行管理 key</p>
+</li>
+<li><p>由於所有 key 都是自行管理，因此無法與 AWS managed service 整合</p>
+<blockquote>
+<p>AWS 完全無法存取 CloudHSM 中的 key</p>
+</blockquote>
+</li>
+<li><p>運行於 VPC 中</p>
+</li>
+<li><p>使用 industry-standard APIs (沒有任何 AWS API 可用)</p>
+</li>
+<li><p>若資料需要用以下加密標準進行加密，CloudHSM 是個合適的選擇：</p>
+<ul>
+<li>PKCS#11</li>
+<li>Java Cryptography Extensions (JCE)</li>
+<li>Microsoft CryptoNG (CNG)</li>
+</ul>
+</li>
+<li><p>key 若是遺失了，AWS 是無法協助的</p>
+</li>
+</ul>
+<h2 id="CloudHSM-如何應用"><a href="#CloudHSM-如何應用" class="headerlink" title="CloudHSM 如何應用?"></a>CloudHSM 如何應用?</h2><p>以下是使用 CloudHSM 的一個範例：</p>
+<p><img src="/blog/images/aws/CloudHSM_Example.png" alt="CloudHSM example"></p>
+<ol>
+<li><p>首先，CloudHSM 要位於 VPC 中 (可用現有的，或是新建立)</p>
+</li>
+<li><p>CloudHSM 會建立 ENI interface，而通過該 ENI interface 的流量就等同於將資料傳送到 CloudHSM 處理</p>
+<blockquote>
+<p>使用上很容易，就建立 EC2 instance，把 CloudHSM 產生的 ENI interface 附加上去即可</p>
+</blockquote>
+</li>
+<li><p>CloudHSM 並沒有 native HA，有需要的話就要自己做(例如上圖)</p>
+</li>
+</ol>
+<h1 id="System-Manager-Parameter-Store"><a href="#System-Manager-Parameter-Store" class="headerlink" title="System Manager Parameter Store"></a>System Manager Parameter Store</h1><p>服務在不同的環境運行時，總是會根據環境的不同，有不同的設定檔 &amp; 服務存取密碼 … 等資訊需要保存，而存放 git repository 肯定不是個好選擇，而 <code>Parameter Store</code> 正好可以用來解決這個問題。</p>
+<h2 id="什麼是-Paraneter-Store"><a href="#什麼是-Paraneter-Store" class="headerlink" title="什麼是 Paraneter Store?"></a>什麼是 Paraneter Store?</h2><ul>
+<li><p>屬於 AWS System Manager(SSM) 中的一個元件</p>
+</li>
+<li><p>是種安全的 Serverless storage，適合儲存設定檔、密碼、連線字串 … 等服務運行所必要的資訊</p>
+</li>
+<li><p>存在 paramter store 中的資料可以是明碼純文字，也可以是 KMS 加密後的結果</p>
+</li>
+<li><p>資料可以是以階層式(Hierarchy)的方式儲存</p>
+</li>
+<li><p>提供版本管理的功能</p>
+</li>
+<li><p>可設定每筆資料的 TTL</p>
+</li>
+</ul>
+<p>總而言之，透過 Parameter Store，可以很方便的將程式碼與環境設定分離，進行更好的管理。</p>
+<h2 id="階層式-Hierarchy-資料儲存"><a href="#階層式-Hierarchy-資料儲存" class="headerlink" title="階層式(Hierarchy)資料儲存"></a>階層式(Hierarchy)資料儲存</h2><p>階層式(Hierarchy)資料儲存的樣貌會是類似下圖：</p>
+<p><img src="/blog/images/aws/ParameterStore_Example.png" alt="Parameter Store hierarchy example"></p>
+<p>若透過 AWS client SDK 中的 GetParameterByPath 來取得資料，以下是幾個存取路徑範例：</p>
+<ul>
+<li><p>/dev</p>
+</li>
+<li><p>/dev/db</p>
+</li>
+<li><p>/prod/app</p>
+</li>
+</ul>
+<h2 id="使用存放在-Parameter-Store-中的資料"><a href="#使用存放在-Parameter-Store-中的資料" class="headerlink" title="使用存放在 Parameter Store 中的資料"></a>使用存放在 Parameter Store 中的資料</h2><h3 id="與-CloudFormation-整合"><a href="#與-CloudFormation-整合" class="headerlink" title="與 CloudFormation 整合"></a>與 CloudFormation 整合</h3><p>以下為實際範例：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">Parameters:</span></span><br><span class="line">  <span class="attr">InstanceType :</span></span><br><span class="line">    <span class="attr">Type :</span> <span class="string">&#x27;AWS::SSM::Parameter::Value&lt;String&gt;&#x27;</span></span><br><span class="line">    <span class="attr">Default:</span> <span class="string">myEC2TypeDev</span></span><br><span class="line">  <span class="attr">KeyName :</span></span><br><span class="line">    <span class="attr">Type :</span> <span class="string">&#x27;AWS::SSM::Parameter::Value&lt;AWS::EC2::KeyPair::KeyName&gt;&#x27;</span></span><br><span class="line">    <span class="attr">Default:</span> <span class="string">myEC2Key</span></span><br><span class="line">  <span class="attr">AmiId:</span></span><br><span class="line">    <span class="attr">Type:</span> <span class="string">&#x27;AWS::EC2::Image::Id&#x27;</span></span><br><span class="line">    <span class="attr">Default:</span> <span class="string">&#x27;ami-60b6c60a&#x27;</span></span><br><span class="line">    </span><br><span class="line"><span class="attr">Resources :</span></span><br><span class="line">  <span class="attr">Instance :</span></span><br><span class="line">    <span class="attr">Type :</span> <span class="string">&#x27;AWS::EC2::Instance&#x27;</span></span><br><span class="line">    <span class="attr">Properties :</span></span><br><span class="line">       <span class="attr">Type :</span> <span class="type">!Ref</span> <span class="string">InstanceType</span></span><br><span class="line">       <span class="attr">KeyName :</span> <span class="type">!Ref</span> <span class="string">KeyName</span></span><br><span class="line">       <span class="attr">ImageId :</span> <span class="type">!Ref</span> <span class="string">AmiId</span> </span><br></pre></td></tr></table></figure>
+
+<h3 id="Lambda-Function"><a href="#Lambda-Function" class="headerlink" title="Lambda Function"></a>Lambda Function</h3><p>以下是幾個標準步驟：</p>
+<h4 id="設定-IAM-存取權限"><a href="#設定-IAM-存取權限" class="headerlink" title="設定 IAM 存取權限"></a>設定 IAM 存取權限</h4><p>首先設定 policy，以下是範例：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;Version&quot;</span>: <span class="string">&quot;2012-10-17&quot;</span>, </span><br><span class="line">  <span class="attr">&quot;Statement&quot;</span>: [&#123;</span><br><span class="line">    <span class="attr">&quot;Effect&quot;</span>: <span class="string">&quot;Allow&quot;</span>, </span><br><span class="line">    <span class="attr">&quot;Action&quot;</span>: [</span><br><span class="line">      <span class="string">&quot;logs:CreateLogGroup&quot;</span>, </span><br><span class="line">      <span class="string">&quot;logs:CreateLogStream&quot;</span>, </span><br><span class="line">      <span class="string">&quot;logs:PutLogEvents&quot;</span>, </span><br><span class="line">      <span class="string">&quot;ssm:GetParameter&quot;</span>,</span><br><span class="line">      <span class="string">&quot;ssm:GetParameterByPath&quot;</span></span><br><span class="line">    ], </span><br><span class="line">    <span class="attr">&quot;Resource&quot;</span>: <span class="string">&quot;*&quot;</span></span><br><span class="line">  &#125;]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>接著要建立一個 IAM execution role：</p>
+<ul>
+<li><p>建立 type 為 <code>AWS service</code> 的 trusted entity，並選擇 Lambda</p>
+</li>
+<li><p>將上面的 policy 加入這個 role 中</p>
+</li>
+</ul>
+<h4 id="設定-KMS"><a href="#設定-KMS" class="headerlink" title="設定 KMS"></a>設定 KMS</h4><p>此步驟是為了確保存在 Parameter Store 中的資料是經過加密的：</p>
+<ol>
+<li><p>建立 CMK(Customer Managed Key)，選擇 Symmetric</p>
+</li>
+<li><p>指定 Key Usage Permission 為上一個步驟新增的 IAM role (讓 IAM role 有權限可以使用這把 Key)</p>
+</li>
+</ol>
+<h4 id="在-Parameter-Store-中新增資料"><a href="#在-Parameter-Store-中新增資料" class="headerlink" title="在 Parameter Store 中新增資料"></a>在 Parameter Store 中新增資料</h4><p>這個部份只有以下重點：</p>
+<ol>
+<li><p>指定資料的儲存路徑，例如：<code>/prod/myapp/db/password</code></p>
+</li>
+<li><p>指定 type 為 <code>SecureString</code> (此型態的資料才會以 KMS key 進行加密)</p>
+</li>
+<li><p>指定上述步驟建立的 KMS Key</p>
+</li>
+</ol>
+<h4 id="設定-Lambda-Function"><a href="#設定-Lambda-Function" class="headerlink" title="設定 Lambda Function"></a>設定 Lambda Function</h4><ol>
+<li><p>新增 Lambda function，並<strong>指定上述步驟設定的 IAM role</strong></p>
+</li>
+<li><p>程式中只要指定要存取 Paramter Store 的 data path 即可成功取得解密後的資料</p>
+<blockquote>
+<p>不用額外再指定 KMS key，因為這個部份已經在新增資料到 Parameter Store 就已經指定好</p>
+</blockquote>
+</li>
+</ol>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a target="_blank" rel="noopener" href="https://www.udemy.com/course/aws-certified-solutions-architect-associate/">AWS Certified Solutions Architect: Associate Certification Exam | Udemy</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/kms">Key Management Service - Amazon Web Services (AWS)</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/cloudhsm">AWS CloudHSM</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html">AWS Systems Manager Parameter Store - AWS Systems Manager</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/AWS/" rel="tag"># AWS</a>
+              <a href="/blog/tags/CSA/" rel="tag"># CSA</a>
+              <a href="/blog/tags/Security/" rel="tag"># Security</a>
+              <a href="/blog/tags/KMS/" rel="tag"># KMS</a>
+              <a href="/blog/tags/CloudHSM/" rel="tag"># CloudHSM</a>
+              <a href="/blog/tags/SSM-Parameter-Store/" rel="tag"># SSM Parameter Store</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/AWS/AWS-CSA-associate-Applications/" rel="prev" title="AWS CSA Associate 學習筆記 - Application">
+                  <i class="fa fa-chevron-left"></i> AWS CSA Associate 學習筆記 - Application
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/blog/Architecture_Design/Architecture-Design-Complexity-Source/" rel="next" title="[架構設計] 目的 & 複雜度來源">
+                  [架構設計] 目的 & 複雜度來源 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">تطبيق الموقع <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/AWS/AWS-CSA-associate-Security/";
+    this.page.identifier = "AWS/AWS-CSA-associate-Security/";
+    this.page.title = "AWS CSA Associate 學習筆記 - Security";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>
