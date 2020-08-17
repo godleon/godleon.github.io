@@ -2,8 +2,6 @@
   {%- if not theme.google_analytics.only_pageview %}
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ theme.google_analytics.tracking_id }}"></script>
     <script{{ pjax }}>
-      console.log("CONFIG.hostname = " + CONFIG.hostname);
-      console.log("location.hostname = " + location.hostname);
       if (CONFIG.hostname === location.hostname) {
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
