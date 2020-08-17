@@ -8,9 +8,7 @@ subtitle: ''
 description: 把時間花在哪裡，成就就在哪裡
 keywords:
 author: godleon
-language:
-- en
-- zh-TW
+language: en
 # language: zh-tw
 timezone: Asia/Taipei
 
