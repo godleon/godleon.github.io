@@ -63,22 +63,11 @@ AWS S3 可以為每個 object(最細可以到 object 為單位) 進行資料的�
 
 - 可以與其他資料儲存服務(例如：Glacier)搭配，並設定相關生命週期規則來進行進階的管理
 
-- 可將刪除版本的動作綁定 MFA，強制使用者執行刪除動作前進行認證，進一步提高資料的安全性
-
-## Versioning
-
-- object 的所有版本資訊都會被保留下來，**包含所有的寫入資訊甚至是刪除的資訊**都會被完整保留 (**同樣也要支付多倍的費用來儲存不同的版本**)
-
-- Great backup tool
-
-- Once enabled, Versioning cannot be disabled, only suspended.
-
-- Integrates with Lifecycle rules
-
-- Versioning's MFA Delete capability, which uses multi-factor authentication, can be used to provide an additional layer of security. (**只能由 root 帳號啟用此功能**)
+- 可將刪除版本的動作綁定 MFA，強制使用者執行刪除動作前進行認證，進一步提高資料的安全性(**只能由 root 帳號啟用此功能**)
 > 刪除 object 前必須提供 token or security code 來完成
 
-- Cross Region Replication, requires versioning enabled on the source bucket
+- 若要做 cross region replication，source bucket 的 versioning 功能需要開啟才行
+
 
 
 生命週期管理(Lifecycle Management)
