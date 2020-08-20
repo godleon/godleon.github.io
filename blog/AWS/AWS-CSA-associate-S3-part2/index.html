@@ -30,7 +30,7 @@
 <meta property="og:description" content="此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 S3 服務，共分為四個部份，此為第二個部份">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2020-04-28T21:50:00.000Z">
-<meta property="article:modified_time" content="2020-08-17T21:50:53.417Z">
+<meta property="article:modified_time" content="2020-08-20T04:02:50.011Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -160,7 +160,7 @@
 
       <!--noindex-->
       <section class="post-toc-wrap sidebar-panel">
-          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%89%E5%85%A8%E8%88%87%E5%8A%A0%E5%AF%86"><span class="nav-number">1.</span> <span class="nav-text">安全與加密</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Security"><span class="nav-number">1.1.</span> <span class="nav-text">Security</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Encryption"><span class="nav-number">1.2.</span> <span class="nav-text">Encryption</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E5%82%B3%E8%BC%B8%E4%B8%AD%E9%80%B2%E8%A1%8C%E5%8A%A0%E5%AF%86"><span class="nav-number">1.2.1.</span> <span class="nav-text">在傳輸中進行加密</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E7%B5%82%E7%AB%AF%E9%80%B2%E8%A1%8C%E5%8A%A0%E5%AF%86"><span class="nav-number">1.2.2.</span> <span class="nav-text">在終端進行加密</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6-Version-Control"><span class="nav-number">2.</span> <span class="nav-text">版本控制(Version Control)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Versioning"><span class="nav-number">2.1.</span> <span class="nav-text">Versioning</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%94%9F%E5%91%BD%E9%80%B1%E6%9C%9F%E7%AE%A1%E7%90%86-Lifecycle-Management"><span class="nav-number">3.</span> <span class="nav-text">生命週期管理(Lifecycle Management)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Cross-Region-Replication"><span class="nav-number">4.</span> <span class="nav-text">Cross Region Replication</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Version-Control"><span class="nav-number">5.1.</span> <span class="nav-text">Version Control</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lifecycle-Management"><span class="nav-number">5.2.</span> <span class="nav-text">Lifecycle Management</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cross-Region-Replication-1"><span class="nav-number">5.3.</span> <span class="nav-text">Cross Region Replication</span></a></li></ol></li></ol></div>
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%89%E5%85%A8%E8%88%87%E5%8A%A0%E5%AF%86"><span class="nav-number">1.</span> <span class="nav-text">安全與加密</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Security"><span class="nav-number">1.1.</span> <span class="nav-text">Security</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Encryption"><span class="nav-number">1.2.</span> <span class="nav-text">Encryption</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E5%82%B3%E8%BC%B8%E4%B8%AD%E9%80%B2%E8%A1%8C%E5%8A%A0%E5%AF%86"><span class="nav-number">1.2.1.</span> <span class="nav-text">在傳輸中進行加密</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E7%B5%82%E7%AB%AF%E9%80%B2%E8%A1%8C%E5%8A%A0%E5%AF%86"><span class="nav-number">1.2.2.</span> <span class="nav-text">在終端進行加密</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6-Version-Control"><span class="nav-number">2.</span> <span class="nav-text">版本控制(Version Control)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%94%9F%E5%91%BD%E9%80%B1%E6%9C%9F%E7%AE%A1%E7%90%86-Lifecycle-Management"><span class="nav-number">3.</span> <span class="nav-text">生命週期管理(Lifecycle Management)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Cross-Region-Replication"><span class="nav-number">4.</span> <span class="nav-text">Cross Region Replication</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Version-Control"><span class="nav-number">5.1.</span> <span class="nav-text">Version Control</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lifecycle-Management"><span class="nav-number">5.2.</span> <span class="nav-text">Lifecycle Management</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cross-Region-Replication-1"><span class="nav-number">5.3.</span> <span class="nav-text">Cross Region Replication</span></a></li></ol></li></ol></div>
       </section>
       <!--/noindex-->
 
@@ -253,7 +253,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-08-18 05:50:53" itemprop="dateModified" datetime="2020-08-18T05:50:53+08:00">2020-08-18</time>
+                <time title="Modified: 2020-08-20 12:02:50" itemprop="dateModified" datetime="2020-08-20T12:02:50+08:00">2020-08-20</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -326,24 +326,12 @@
 </li>
 <li><p>可以與其他資料儲存服務(例如：Glacier)搭配，並設定相關生命週期規則來進行進階的管理</p>
 </li>
-<li><p>可將刪除版本的動作綁定 MFA，強制使用者執行刪除動作前進行認證，進一步提高資料的安全性</p>
-</li>
-</ul>
-<h2 id="Versioning"><a href="#Versioning" class="headerlink" title="Versioning"></a>Versioning</h2><ul>
-<li><p>object 的所有版本資訊都會被保留下來，<strong>包含所有的寫入資訊甚至是刪除的資訊</strong>都會被完整保留 (<strong>同樣也要支付多倍的費用來儲存不同的版本</strong>)</p>
-</li>
-<li><p>Great backup tool</p>
-</li>
-<li><p>Once enabled, Versioning cannot be disabled, only suspended.</p>
-</li>
-<li><p>Integrates with Lifecycle rules</p>
-</li>
-<li><p>Versioning’s MFA Delete capability, which uses multi-factor authentication, can be used to provide an additional layer of security. (<strong>只能由 root 帳號啟用此功能</strong>)</p>
+<li><p>可將刪除版本的動作綁定 MFA，強制使用者執行刪除動作前進行認證，進一步提高資料的安全性(<strong>只能由 root 帳號啟用此功能</strong>)</p>
 <blockquote>
 <p>刪除 object 前必須提供 token or security code 來完成</p>
 </blockquote>
 </li>
-<li><p>Cross Region Replication, requires versioning enabled on the source bucket</p>
+<li><p>若要做 cross region replication，source bucket 的 versioning 功能需要開啟才行</p>
 </li>
 </ul>
 <h1 id="生命週期管理-Lifecycle-Management"><a href="#生命週期管理-Lifecycle-Management" class="headerlink" title="生命週期管理(Lifecycle Management)"></a>生命週期管理(Lifecycle Management)</h1><p>AWS S3 生命週期管理功能有以下幾個重點：</p>
