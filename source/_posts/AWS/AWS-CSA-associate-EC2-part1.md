@@ -121,7 +121,7 @@ EC2 簡介
 
 ### 一般選項
 
-- **[Capacity Reservation](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-capacity-reservations.html)**：跟 saving plan 有關係，看起來像是要在省錢 & 確保有特定容量的資源可用所設計的機制，詳細的內容可以參考[官方文件說明](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-capacity-reservations.html)。
+- [**Capacity Reservation**](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-capacity-reservations.html)：跟 saving plan 有關係，看起來像是要在省錢 & 確保有特定容量的資源可用所設計的機制，詳細的內容可以參考[官方文件說明](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-capacity-reservations.html)。
 
 - **IAM Role**：可以指定 EC2 instance 所使用的 IAM 身份為何，若是需要串接其他服務，這個部份需要有正確的設定才行
 

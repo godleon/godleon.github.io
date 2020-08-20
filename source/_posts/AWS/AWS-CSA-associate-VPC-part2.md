@@ -71,7 +71,7 @@ Bastion Host
 
 ## 服務說明
 
-當服務規劃階段，為了安全性考量，把服務 or EC2 instance 都把 private subnet 放以後，就會遇到一個問題：
+當服務規劃階段，為了安全性考量，把服務 or EC2 instance 都往 private subnet 放以後，就會遇到一個問題：
 
 > 要如何存取放在 private subnet 的資源或是進行佈署?
 
@@ -201,7 +201,7 @@ Global Accelerator 是由很多部份設定所組成，因此了解 Global Accel
 
 - 當因為特殊原因導致 IP 無法存取，就可以使用另外一個 IP
 
-- 由此可知，Global Accelerator 所配發的兩個固定 IP，將會有兩個不同的 Network Azone 來提供服務
+- 由此可知，Global Accelerator 所配發的兩個固定 IP，將會有兩個不同的 Network zone 來提供服務
 
 ### Listener
 

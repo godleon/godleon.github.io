@@ -60,11 +60,11 @@ RDBMS 的基本概念(例如：Database、Table、Row、Field )這邊就略過�
     - SQL Server
     - MySQL
     - PostgreSQL
-    - Oravle
+    - Oracle
     - Aurora
     - MariaDB
 
-- Redsshift (for OLAP, 與 Business Intelligence & Data Warehousing 應用搭配使用)
+- Redshift (for OLAP, 與 Business Intelligence & Data Warehousing 應用搭配使用)
 
 - DynamoDB(NoSQL)
 
@@ -136,7 +136,7 @@ RDS 提供兩種備份類型：
 
 ## Multi-AZ
 
-- 架構中會有兩台 RDS instance 分別位於不同的 AZ 中，預設是第一個 AZ 中的 instance 被存去
+- 架構中會有兩台 RDS instance 分別位於不同的 AZ 中，預設是第一個 AZ 中的 instance 被存取
 
 - 資料一旦寫入 RDS instance，就會立刻被同步到位於另外一個 AZ 作為備援用的 RDS instance 中
 
