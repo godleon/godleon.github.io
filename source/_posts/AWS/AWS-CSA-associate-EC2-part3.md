@@ -124,6 +124,8 @@ Placement Group
 
 - 隔離的單位為單一 instance
 
+- 每個 placement group 在每個 AZ 最多只能有 7 個 running instance
+
 ## Partition
 
 - instance 不一定會在同一個 AZ 內
