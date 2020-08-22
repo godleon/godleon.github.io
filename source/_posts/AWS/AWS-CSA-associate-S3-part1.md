@@ -41,7 +41,7 @@ What is S3?
 
 - 檔案一律存在 bucket 中 (Bucket 裏面無法再放一個 bucket，但可以放 folder)
 
-- 單一帳號預設最大上限可存放 100 個 buckets，但可以通知 AWS 協助放大上限
+- **單一帳號預設最大上限可存放 100 個 buckets，但可以通知 AWS 協助放大上限**
 
 - S3 裡面的每個 bucket 都會有一個全球獨一無二的 DNS 名稱(ex: `https://YOUR_UNIQUE_BUCKET_NAME.s3.amazonaws.com`)；若是要指定到特定的 region，則可能會是 `https://YOUR_UNIQUE_BUCKET_NAME.eu-west-1.amazonaws.com`；但無論如何，使用者只要記住 bucket name 即可
 > 因此可以做為 static website hosting 之用
