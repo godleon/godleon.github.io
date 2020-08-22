@@ -30,7 +30,7 @@
 <meta property="og:description" content="此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 EC2 服務，會分成三篇文章來記錄，此為第一部份，包含了簡介、設定、Security Group ... 等內容">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2020-05-27T20:50:00.000Z">
-<meta property="article:modified_time" content="2020-08-22T04:35:13.341Z">
+<meta property="article:modified_time" content="2020-08-22T10:22:59.628Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -254,7 +254,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-08-22 12:35:13" itemprop="dateModified" datetime="2020-08-22T12:35:13+08:00">2020-08-22</time>
+                <time title="Modified: 2020-08-22 18:22:59" itemprop="dateModified" datetime="2020-08-22T18:22:59+08:00">2020-08-22</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -311,6 +311,9 @@
 <li><p><strong>Om Demand</strong>：用多少算多少，不用保證用量，但每個時間單位費用是最高的</p>
 </li>
 <li><p><strong>Reserved</strong>：預先跟 AWS 保留使用量，需要簽約 &amp; 預付一大筆金額，但整體來說可以得到很大的折扣(相較於 on demand 模式)，</p>
+<blockquote>
+<p>使用這類型的 instance 無法做 region 之間的移動(但可以更換 AZ、網路設定、instance size …. 等等)</p>
+</blockquote>
 </li>
 <li><p><strong>Spot</strong>：透過競價模式取得的 EC2 instance，最便宜，但由於價格是浮動的，一旦價格高過原本設定的出現，instance 就會被砍掉；適合用在使用時間彈性的應用上(例如：大數據資料處理)</p>
 </li>
