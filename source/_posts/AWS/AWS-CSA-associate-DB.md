@@ -82,6 +82,8 @@ RDBMS 的基本概念(例如：Database、Table、Row、Field )這邊就略過�
 
 - RDS 並非 serverless (Aurora serverless 則是 serverless)
 
+- **若是需要更高的 storage 性能，RDS 還提供了 provisioned IOPS storage 選項可用；最大可以達到 10,000 IOPS & 16TB 空間**
+
 
 RDS 服務提供的備份/Multi-AZ/Read Replicas 功能
 ===========================================
@@ -187,6 +189,8 @@ RDS 提供兩種備份類型：
 
 - read replica 本身可以將自己提昇為 primary DB，但這樣一來同步複本的功能就會消失
 
+- **data replication 過程中產生的資料傳輸是免費的**
+
 
 Aurora
 ======
@@ -215,7 +219,7 @@ Aurora
 
 - 資料庫開始的容量為 10GB，最大可到 64TB；儲存空間可以自動擴展
 
-- 每個 AZ 會有兩份資料備份，搭配最低三個 AZ 的設定，資料一共會有 6 份的備份
+- **每個 AZ 會有兩份資料備份，搭配最低三個 AZ 的設定，資料一共會有 6 份的備份**
 
 - Aurora 可自動將資料複製為兩份，且不會影響 write availability；最多可將資料複製成三份，且不會影響 read availability
 

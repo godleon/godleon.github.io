@@ -17,6 +17,8 @@ tags:
 DNS 101
 =======
 
+- **Route53 預設有 50 個 domain 的限制，但可以與 AWS support 聯繫取消此限制**
+
 ## 常見的 DNS Resource Record
 
 常見的 DNS Resource Record 有 SOA/NS/A/CNAME/MX/PTR ... 等等，可參考以下文章的說明：

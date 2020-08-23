@@ -117,7 +117,7 @@ Inverted Index(倒排索引)介紹
 通過Analyzer進行分詞
 ==================
 
-- Analysis 是將 document 轉換唯一系列單詞(term/token) 的過程，也叫**分詞**
+- Analysis 是將 document 轉換為一系列單詞(term/token) 的過程，也叫**分詞**
 
 - Analysis 是由 Analyzer 來實現，Analyzer 由 `Character Filter` -> `Tokenizer` -> `Token Filter` 三個部份所組成，每個部份都可以自訂
 
