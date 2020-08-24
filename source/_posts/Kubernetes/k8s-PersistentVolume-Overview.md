@@ -26,7 +26,7 @@ Preface
 
 `Persistent Volume Claim(PVC)` 則是來自使用者的 storage request，就跟 pod 一樣都是要消耗特定的資源，PVC 消耗 PV 資源(pod 消耗 node 資源)，PVC 指定特定 size or access mode 的 PV(pod 可以指定 CPU, memory ... etc)。
 
-由於 PVC 可以允許使用者自行指定所需要 PV 的相關屬性，因此除了 size, access mode 外，可能還會有 performance 的需求。而為了滿足不同的使用目的，cluster administrator 就必須要準備好不同的 PV 來處理不同 PVC 的需求；若是 PVC 數量不多且需求單純，手動產生 PV 可能還可以接受，但若是 PVC 的數量眾多且需求多變，那可能就需要 `[StorageClass][StorageClass]` 的協助了!
+由於 PVC 可以允許使用者自行指定所需要 PV 的相關屬性，因此除了 size, access mode 外，可能還會有 performance 的需求。而為了滿足不同的使用目的，cluster administrator 就必須要準備好不同的 PV 來處理不同 PVC 的需求；若是 PVC 數量不多且需求單純，手動產生 PV 可能還可以接受，但若是 PVC 的數量眾多且需求多變，那可能就需要 `[StorageClass](https://kubernetes.io/docs/concepts/storage/storage-classes/)` 的協助了!
 
 
 
