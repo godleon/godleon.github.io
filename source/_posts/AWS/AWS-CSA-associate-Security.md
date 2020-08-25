@@ -287,7 +287,7 @@ System Manager Parameter Store
 
 服務在不同的環境運行時，總是會根據環境的不同，有不同的設定檔 & 服務存取密碼 ... 等資訊需要保存，而存放 git repository 肯定不是個好選擇，而 `Parameter Store` 正好可以用來解決這個問題。
 
-## 什麼是 Paraneter Store?
+## 什麼是 Parameter Store?
 
 - 屬於 AWS System Manager(SSM) 中的一個元件
 
