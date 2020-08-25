@@ -134,3 +134,5 @@ References
 - [AWS Certified Solutions Architect: Associate Certification Exam | Udemy](https://www.udemy.com/course/aws-certified-solutions-architect-associate/)
 
 - [Amazon Route 53 - Amazon Web Services](https://aws.amazon.com/route53/)
+
+- [AWS route53 multivalue 筆記 - Kakashi's Blog](https://kkc.github.io/2017/07/23/aws-route-53-multivalue/)
