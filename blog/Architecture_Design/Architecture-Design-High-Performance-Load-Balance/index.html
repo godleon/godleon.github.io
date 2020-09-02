@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="此篇文章是極客時間&quot;從 0 開始學架構&quot;課程時所留下的學習筆記，主要內容為負載均衡的架構 &amp; 設計，以及在各種方案評估時需要考慮的部份">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[架構設計] 高性能負載均衡">
+<meta property="og:url" content="https://godleon.github.io/blog/Architecture_Design/Architecture-Design-High-Performance-Load-Balance/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章是極客時間&quot;從 0 開始學架構&quot;課程時所留下的學習筆記，主要內容為負載均衡的架構 &amp; 設計，以及在各種方案評估時需要考慮的部份">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://godleon.github.io/blog/images/architecture-design/load-balance-by-dns.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/architecture-design/load-balance-by-software.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/architecture-design/load-balance-composition.png">
+<meta property="article:published_time" content="2020-09-02T10:00:00.000Z">
+<meta property="article:modified_time" content="2020-09-02T10:34:37.676Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="Architecture Design">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/architecture-design/load-balance-by-dns.png">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/Architecture_Design/Architecture-Design-High-Performance-Load-Balance/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>[架構設計] 高性能負載均衡 | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%AB%98%E6%80%A7%E8%83%BD%E8%B2%A0%E8%BC%89%E5%9D%87%E8%A1%A1%EF%BC%9A%E5%88%86%E9%A1%9E%E5%8F%8A%E6%9E%B6%E6%A7%8B"><span class="nav-number">1.</span> <span class="nav-text">高性能負載均衡：分類及架構</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B2%A0%E8%BC%89%E5%9D%87%E8%A1%A1%E5%88%86%E9%A1%9E"><span class="nav-number">1.1.</span> <span class="nav-text">負載均衡分類</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DNS-%E8%B2%A0%E8%BC%89%E5%9D%87%E8%A1%A1"><span class="nav-number">1.1.1.</span> <span class="nav-text">DNS 負載均衡</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A1%AC%E9%AB%94%E8%B2%A0%E8%BC%89%E5%9D%87%E8%A1%A1"><span class="nav-number">1.1.2.</span> <span class="nav-text">硬體負載均衡</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BB%9F%E9%AB%94%E8%B2%A0%E8%BC%89%E5%9D%87%E8%A1%A1"><span class="nav-number">1.1.3.</span> <span class="nav-text">軟體負載均衡</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B2%A0%E8%BC%89%E5%9D%87%E8%A1%A1%E5%85%B8%E5%9E%8B%E6%9E%B6%E6%A7%8B"><span class="nav-number">1.2.</span> <span class="nav-text">負載均衡典型架構</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A8%8E%E8%AB%96%E6%95%B4%E7%90%86%E7%B2%BE%E8%8F%AF"><span class="nav-number">1.3.</span> <span class="nav-text">討論整理精華</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%AB%98%E6%80%A7%E8%83%BD%E8%B2%A0%E8%BC%89%E5%9D%87%E8%A1%A1%EF%BC%9A%E7%AE%97%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">高性能負載均衡：算法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BC%AA%E8%A9%A2-%E4%BB%BB%E5%8B%99%E5%B9%B3%E5%88%86%E9%A1%9E"><span class="nav-number">2.1.</span> <span class="nav-text">輪詢(任務平分類)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%A0%E6%AC%8A%E8%BC%AA%E8%A9%A2-%E4%BB%BB%E5%8B%99%E5%B9%B3%E5%88%86%E9%A1%9E"><span class="nav-number">2.2.</span> <span class="nav-text">加權輪詢(任務平分類)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B2%A0%E8%BC%89%E6%9C%80%E4%BD%8E%E5%84%AA%E5%85%88-%E8%B2%A0%E8%BC%89%E5%9D%87%E8%A1%A1%E9%A1%9E"><span class="nav-number">2.3.</span> <span class="nav-text">負載最低優先(負載均衡類)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%A7%E8%83%BD%E6%9C%80%E5%84%AA%E9%A1%9E"><span class="nav-number">2.4.</span> <span class="nav-text">性能最優類</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hash-%E9%A1%9E"><span class="nav-number">2.5.</span> <span class="nav-text">Hash 類</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A8%8E%E8%AB%96%E6%95%B4%E7%90%86%E7%B2%BE%E8%8F%AF-1"><span class="nav-number">2.6.</span> <span class="nav-text">討論整理精華</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">3.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">127</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">101</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/Architecture_Design/Architecture-Design-High-Performance-Load-Balance/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [架構設計] 高性能負載均衡
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2020-09-02 18:00:00 / Modified: 18:34:37" itemprop="dateCreated datePublished" datetime="2020-09-02T18:00:00+08:00">2020-09-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Architecture-Design/" itemprop="url" rel="index"><span itemprop="name">Architecture Design</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/Architecture_Design/Architecture-Design-High-Performance-Load-Balance/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="Architecture_Design/Architecture-Design-High-Performance-Load-Balance/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此篇文章是極客時間"從 0 開始學架構"課程時所留下的學習筆記，主要內容為負載均衡的架構 & 設計，以及在各種方案評估時需要考慮的部份</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="高性能負載均衡：分類及架構"><a href="#高性能負載均衡：分類及架構" class="headerlink" title="高性能負載均衡：分類及架構"></a>高性能負載均衡：分類及架構</h1><ul>
+<li><p>single server 無論如何優化，無論採用多好的硬體，總會有一個性能天花板</p>
+</li>
+<li><p>高性能 cluster 的本質很簡單，通過增加更多的 server 來提升系統整體的計算能力</p>
+</li>
+<li><p>計算本身存在一個特點：同樣的輸入資料和邏輯，無論在那台 server 上執行，都應該得到相同的輸出</p>
+</li>
+<li><p>高性能 cluster 設計的複雜度主要體現在<strong>任務分配</strong>這部分</p>
+</li>
+<li><p>高性能 cluster 的複雜性主要體現在<strong>需要增加一個任務分配器</strong>，以及<strong>為任務選擇一個合適的任務分配算法</strong></p>
+</li>
+<li><p>實際上任務分配並不只是考慮計算單元的負載均衡，不同的任務分配算法目標是不一樣的</p>
+<blockquote>
+<p>有的基於負載考慮，有的基於性能（吞吐量、響應時間）考慮，有的基於業務考慮</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="負載均衡分類"><a href="#負載均衡分類" class="headerlink" title="負載均衡分類"></a>負載均衡分類</h2><h3 id="DNS-負載均衡"><a href="#DNS-負載均衡" class="headerlink" title="DNS 負載均衡"></a>DNS 負載均衡</h3><ul>
+<li>DNS 是最簡單也是最常見的負載均衡方式，一般用來實現地理級別的均衡</li>
+</ul>
+<p><img src="/blog/images/architecture-design/load-balance-by-dns.png" alt="Load Balance by DNS"></p>
+<ul>
+<li><p>優點：</p>
+<ul>
+<li>簡單、成本低</li>
+<li>就近訪問，提升訪問速度</li>
+</ul>
+</li>
+<li><p>缺點：</p>
+<ul>
+<li>更新不即時：DNS cache</li>
+<li>擴展性差：DNS 負載均衡的控制權在域名商那裡，無法根據業務特點針對其做更多的定製化功能和擴展特性</li>
+<li>分配策略比較簡單：DNS 負載均衡支持的算法少；不能區分 server 的差異(不能根據系統與服務的狀態來判斷負載)；也無法感知後端 server 的狀態</li>
+</ul>
+</li>
+<li><p>針對 DNS 負載均衡的一些缺點，對於時延和故障敏感的業務，有一些公司自己實現了 HTTP-DNS 的功能</p>
+</li>
+</ul>
+<h3 id="硬體負載均衡"><a href="#硬體負載均衡" class="headerlink" title="硬體負載均衡"></a>硬體負載均衡</h3><ul>
+<li><p>硬體負載均衡是通過單獨的硬體設備來實現負載均衡功能</p>
+</li>
+<li><p>這類設備性能強勁、功能強大，但價格都不便宜</p>
+</li>
+<li><p>優點：</p>
+<ul>
+<li>功能強大：全面支持各層級的負載均衡，支持全面的負載均衡算法，支持全局負載均衡</li>
+<li>性能強大：對比一下，軟體負載均衡支持到 10 萬級並發已經很厲害了，硬體負載均衡可以支持 100 萬以上的並發</li>
+<li>穩定性高：商用硬體負載均衡，經過了良好的嚴格測試，經過大規模使用，穩定性高。</li>
+<li>支持安全防護：硬體均衡設備除具備負載均衡功能外，還具備防火牆、防 DDoS 攻擊等安全功能。</li>
+</ul>
+</li>
+<li><p>缺點：</p>
+<ul>
+<li>價格昂貴</li>
+<li>擴展能力差：硬體設備，可以根據業務進行配置，但無法進行擴展和定製</li>
+</ul>
+</li>
+</ul>
+<h3 id="軟體負載均衡"><a href="#軟體負載均衡" class="headerlink" title="軟體負載均衡"></a>軟體負載均衡</h3><ul>
+<li><p>軟體負載均衡的最大優勢是<strong>便宜</strong></p>
+</li>
+<li><p>常見的有 Nginx 和 LVS，其中 Nginx 是軟體的 7 層負載均衡，LVS 是 Linux 內核的 4 層負載均衡</p>
+</li>
+<li><p>4 層和 7 層的區別就在於協議和靈活性，Nginx 支持 HTTP、E-mail 協議；而 LVS 是 4 層負載均衡，和協議無關，幾乎所有應用都可以做，例如，聊天、資料庫等</p>
+</li>
+<li><p>軟體和硬體的最主要區別就在於<strong>性能</strong>，硬體負載均衡性能遠遠高於軟體負載均衡性能</p>
+</li>
+<li><p>一般的 Linux  server 上裝一個 Nginx 大概能到 50,000/秒；LVS 的性能是十萬級，據說可達到 800,000/秒；而 F5 性能是百萬級，從 2,000,000/秒到 8,000,000/ 秒都有</p>
+</li>
+</ul>
+<p><img src="/blog/images/architecture-design/load-balance-by-software.png" alt="Load Balance by software(Nginx)"></p>
+<ul>
+<li><p>軟體負載均衡的優點：</p>
+<ul>
+<li>簡單：無論是部署還是維護都比較簡單</li>
+<li>便宜：只要買個 Linux  server ，裝上軟體即可</li>
+<li>靈活：4 層和 7 層負載均衡可以根據業務進行選擇；也可以根據業務進行比較方便的擴展，例如，可以通過 Nginx 的 plugin 來實現業務的定製化功能</li>
+</ul>
+</li>
+<li><p>缺點的部份都是和硬體負載均衡相比的，並不是說軟體負載均衡沒法用：</p>
+<ul>
+<li>性能一般：一個 Nginx 大約能支撐 50,000 並發。</li>
+<li>功能沒有硬體負載均衡那麼強大</li>
+<li>一般不具備防火牆和防 DDoS 攻擊等安全功能</li>
+</ul>
+</li>
+</ul>
+<h2 id="負載均衡典型架構"><a href="#負載均衡典型架構" class="headerlink" title="負載均衡典型架構"></a>負載均衡典型架構</h2><ul>
+<li><p>DNS 負載均衡、硬體負載均衡、軟體負載均衡，每種方式都有一些優缺點，但並不意味著在實際應用中只能基於它們的優缺點進行非此即彼的選擇，反而是基於它們的優缺點進行組合使用</p>
+</li>
+<li><p>組合的基本原則為：</p>
+<ul>
+<li>DNS 負載均衡用於實現地理級別的負載均衡</li>
+<li>硬體負載均衡用於實現 cluster 級別的負載均衡</li>
+<li>軟體負載均衡用於實現機器級別的負載均衡</li>
+</ul>
+</li>
+</ul>
+<p><img src="/blog/images/architecture-design/load-balance-composition.png" alt="Load Balance composition"></p>
+<ul>
+<li>整個系統的負載均衡分為三層。<ul>
+<li>地理級別負載均衡：<a target="_blank" rel="noopener" href="http://www.xxx.com/">www.xxx.com</a> 部署在所屬地理區域不同的三個機房</li>
+<li>cluster 級別負載均衡：機房 A 的負載均衡用的是 F5 設備，F5 收到用戶請求後，進行 cluster 級別的負載均衡</li>
+<li>機器級別的負載均衡：cluster 2 的負載均衡用的是 Nginx</li>
+</ul>
+</li>
+</ul>
+<h2 id="討論整理精華"><a href="#討論整理精華" class="headerlink" title="討論整理精華"></a>討論整理精華</h2><ul>
+<li><p>PV（page view）</p>
+</li>
+<li><p>從 DAU(Daily Active User) 出發，結合業務的特點，計算出來總的 QPS(Query Per Second) 和 TPS(Transactions Per Second)，而後再根據通常規律計算出 QPS 和 TPS 的峰值，加上一定的未來發展空間和高可用冗餘，結合單機能夠支撐的 QPS 和 TPS 量，就可以計算出來整個 cluster 的規模，有了這些資料就可以制定出比較合理的負載均衡的策略</p>
+</li>
+<li><p>nginx 做級聯不太合適，因為頂層的 nginx 性能是瓶頸，多級導流一般用在處理能力有差異的系統上，例如一級用 F5，二級用 LVS，三級用 nginx</p>
+</li>
+<li><p>論壇業務其實可以不用 DNS 做地理位置負載均衡，用CDN效果更好</p>
+</li>
+</ul>
+<h1 id="高性能負載均衡：算法"><a href="#高性能負載均衡：算法" class="headerlink" title="高性能負載均衡：算法"></a>高性能負載均衡：算法</h1><p>負載均衡算法數量較多，根據算法期望達到的目的，大體上可以分為下面幾類：</p>
+<ul>
+<li><p><strong>任務平分類</strong>：負載均衡系統將收到的任務平均分配給 server 進行處理，這裡的”平均”可以是絕對數量的平均，也可以是比例或者權重上的平均</p>
+</li>
+<li><p><strong>負載均衡類</strong>：負載均衡系統根據 server 的負載來進行分配，這裡的負載並不一定是通常意義上我們說的”CPU 負載”，而是系統當前的壓力，可以用 CPU 負載來衡量，也可以用連接數、I/O 使用率、網卡吞吐量等來衡量系統的壓力</p>
+</li>
+<li><p><strong>性能最優類</strong>：負載均衡系統根據 server 的響應時間來進行任務分配，優先將新任務分配給響應最快的 server</p>
+</li>
+<li><p><strong>Hash 類</strong>：負載均衡系統根據任務中的某些關鍵訊息進行 Hash 運算，將相同 Hash 值的請求分配到同一台 server 上。常見的有 source IP hash、target IP hash、session ID hash、user ID hash 等</p>
+</li>
+</ul>
+<h2 id="輪詢-任務平分類"><a href="#輪詢-任務平分類" class="headerlink" title="輪詢(任務平分類)"></a>輪詢(任務平分類)</h2><ul>
+<li><p>負載均衡系統收到請求後，按照順序輪流分配到 server 上</p>
+</li>
+<li><p>是最簡單的一個策略，無須關注 server </p>
+</li>
+<li><p>某個 server 當前因為觸發了程序 bug 進入了死循環導致 CPU 負載很高，負載均衡系統是不感知的，還是會繼續將請求源源不斷地發送給它</p>
+</li>
+<li><p>cluster 中有新的機器是 32 核的，舊的機器是 16 核的，負載均衡系統也是不關注的，新舊機器分配的任務數是一樣的</p>
+</li>
+<li><p>只要 server 在運行，運行狀態是不關注的。但如果 server 直接當機了，或者 server 和負載均衡系統斷連了，這時負載均衡系統是能夠感知的，也需要做出相應的處理</p>
+</li>
+<li><p>“簡單”是輪詢算法的優點，也是它的缺點</p>
+</li>
+</ul>
+<h2 id="加權輪詢-任務平分類"><a href="#加權輪詢-任務平分類" class="headerlink" title="加權輪詢(任務平分類)"></a>加權輪詢(任務平分類)</h2><ul>
+<li><p>權重一般是根據硬體配置進行靜態配置的，採用動態的方式計算會更加契合業務，但複雜度也會更高</p>
+</li>
+<li><p>主要目的就是為了解決不同 server 處理能力有差異的問題</p>
+</li>
+<li><p>加權輪詢解決了輪詢算法中無法根據 server 的配置差異進行任務分配的問題，但同樣存在無法根據 server 的狀態差異進行任務分配的問題</p>
+</li>
+</ul>
+<h2 id="負載最低優先-負載均衡類"><a href="#負載最低優先-負載均衡類" class="headerlink" title="負載最低優先(負載均衡類)"></a>負載最低優先(負載均衡類)</h2><ul>
+<li><p>負載均衡系統將任務分配給當前負載最低的 server ，這裡的負載根據不同的任務類型和業務場景，可以用不同的指標來衡量：</p>
+<ul>
+<li>LVS 這種 4 層網路負載均衡設備，可以以”連接數”來判斷 server 的狀態， server 連接數越大，表明 server 壓力越大。</li>
+<li>Nginx 這種 7 層網路負載系統，可以以”HTTP 請求數”來判斷 server 狀態(Nginx 內建的負載均衡算法不支持這種方式，需要進行擴展)</li>
+<li>如果我們自己開發負載均衡系統，可以根據業務特點來選擇指標衡量系統壓力。如果是 CPU 密集型，可以以”CPU 負載”來衡量系統壓力；如果是 I/O 密集型，可以以”I/O 負載”來衡量系統壓力。</li>
+</ul>
+</li>
+<li><p>負載最低優先的算法解決了輪詢算法中無法感知 server 狀態的問題，由此帶來的代價是複雜度要增加很多</p>
+</li>
+<li><p>最少連接數優先的算法要求負載均衡系統統計每個 server 當前建立的連接，其應用場景僅限於負載均衡接收的任何連接請求都會轉發給 server 進行處理，否則如果負載均衡系統和 server 之間是固定的連接池方式，就不適合採取這種算法</p>
+</li>
+<li><p>CPU 負載最低優先的算法要求負載均衡系統以某種方式收集每個 server 的 CPU 負載，不同業務最優的時間間隔(1~15 mins)是不一樣的，時間間隔太短容易造成頻繁波動，時間間隔太長又可能造成峰值來臨時響應緩慢</p>
+</li>
+<li><p>負載最低優先算法雖然效果看起來很美好，但實際上真正應用的場景反而沒有輪詢(包括加權輪詢)那麼多</p>
+</li>
+</ul>
+<h2 id="性能最優類"><a href="#性能最優類" class="headerlink" title="性能最優類"></a>性能最優類</h2><ul>
+<li><p>負載最低優先類算法是站在 server 的角度來進行分配的，而性能最優優先類算法則是站在客戶端的角度來進行分配的</p>
+</li>
+<li><p>優先將任務分配給處理速度最快的 server ，通過這種方式達到最快響應客戶端的目的</p>
+</li>
+<li><p>通過響應時間這個外部標準來衡量 server 狀態</p>
+</li>
+<li><p>複雜度都很高，主要體現在：</p>
+<ul>
+<li>負載均衡系統需要收集和分析每個 server 每個任務的響應時間，在大量任務處理的場景下，這種收集和統計本身也會消耗較多的性能</li>
+<li>為了減少這種統計上的消耗，可以採取採樣的方式來統計，使用抽樣統計部分任務的響應時間來估算整體任務的響應時間</li>
+<li>採樣統計雖然能夠減少性能消耗，但使得複雜度進一步上升，因為要確定合適的採樣率</li>
+<li>無論是全部統計還是採樣統計，都需要選擇合適的週期，需要根據實際業務進行判斷和選擇</li>
+</ul>
+</li>
+</ul>
+<h2 id="Hash-類"><a href="#Hash-類" class="headerlink" title="Hash 類"></a>Hash 類</h2><ul>
+<li><p>根據任務中的某些關鍵訊息進行 Hash 運算，將相同 Hash 值的請求分配到同一台 server 上</p>
+</li>
+<li><p>source IP Hash：將來源於同一個 s ource IP 地址的任務分配給同一個 server 進行處理，適合於存在事務、會話的業務</p>
+</li>
+<li><p>將某個 ID 標識的業務分配到同一個 server 中進行處理，這裡的 ID 一般是臨時性資料的 ID</p>
+</li>
+</ul>
+<h2 id="討論整理精華-1"><a href="#討論整理精華-1" class="headerlink" title="討論整理精華"></a>討論整理精華</h2><ul>
+<li>高並發同步資料代價比較大</li>
+</ul>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a target="_blank" rel="noopener" href="https://time.geekbang.org/column/intro/81">從0開始學架構_架構基礎_架構入門-極客時間</a></p>
+</li>
+<li><p>[百亿级微信红包的高并发资金交易系统设计方案 - InfoQ](百亿级微信红包的高并发资金交易系统设计方案 - InfoQ)</p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/Architecture-Design/" rel="tag"># Architecture Design</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/Architecture_Design/Architecture-Design-High-Performance-single-server/" rel="prev" title="[架構設計] 單一 Server 高效能模式">
+                  <i class="fa fa-chevron-left"></i> [架構設計] 單一 Server 高效能模式
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/blog/Architecture_Design/Architecture-Design-HA-CAP/" rel="next" title="[架構設計] 分散式架構設計中的 CAP 理論">
+                  [架構設計] 分散式架構設計中的 CAP 理論 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/Architecture_Design/Architecture-Design-High-Performance-Load-Balance/";
+    this.page.identifier = "Architecture_Design/Architecture-Design-High-Performance-Load-Balance/";
+    this.page.title = "[架構設計] 高性能負載均衡";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>

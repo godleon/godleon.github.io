@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="此篇文章是極客時間&quot;從 0 開始學架構&quot;課程時所留下的學習筆記，主要內容為分散式架構中有名的 CAP 理論的解釋與探討，以及使用 FMEA 方法論來對架構進行全面性的評估，找出可能的設計隱患">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[架構設計] 分散式架構設計中的 CAP 理論">
+<meta property="og:url" content="https://godleon.github.io/blog/Architecture_Design/Architecture-Design-HA-CAP/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章是極客時間&quot;從 0 開始學架構&quot;課程時所留下的學習筆記，主要內容為分散式架構中有名的 CAP 理論的解釋與探討，以及使用 FMEA 方法論來對架構進行全面性的評估，找出可能的設計隱患">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-09-02T10:30:00.000Z">
+<meta property="article:modified_time" content="2020-09-02T10:34:37.676Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="Architecture Design">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/Architecture_Design/Architecture-Design-HA-CAP/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>[架構設計] 分散式架構設計中的 CAP 理論 | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#CAP-%E7%90%86%E8%AB%96"><span class="nav-number">1.</span> <span class="nav-text">CAP 理論</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#CAP-%E7%90%86%E8%AB%96%E6%BC%94%E9%80%B2"><span class="nav-number">1.1.</span> <span class="nav-text">CAP 理論演進</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#version-1"><span class="nav-number">1.1.1.</span> <span class="nav-text">version 1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#version-2"><span class="nav-number">1.1.2.</span> <span class="nav-text">version 2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B7%AE%E7%95%B0%E4%B9%8B%E8%99%95"><span class="nav-number">1.1.3.</span> <span class="nav-text">差異之處</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CAP-%E5%85%A7%E5%AE%B9"><span class="nav-number">1.2.</span> <span class="nav-text">CAP 內容</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Consistency-%E4%B8%80%E8%87%B4%E6%80%A7"><span class="nav-number">1.2.1.</span> <span class="nav-text">Consistency (一致性)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Availability-%E5%8F%AF%E7%94%A8%E6%80%A7"><span class="nav-number">1.2.2.</span> <span class="nav-text">Availability (可用性)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Partition-Tolerance-%E5%88%86%E5%8D%80%E5%AE%B9%E5%BF%8D%E6%80%A7"><span class="nav-number">1.2.3.</span> <span class="nav-text">Partition Tolerance (分區容忍性)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CAP-%E6%87%89%E7%94%A8"><span class="nav-number">1.3.</span> <span class="nav-text">CAP 應用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A8%8E%E8%AB%96%E6%95%B4%E7%90%86%E7%B2%BE%E8%8F%AF"><span class="nav-number">1.4.</span> <span class="nav-text">討論整理精華</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CAP-%E7%B4%B0%E7%AF%80"><span class="nav-number">2.</span> <span class="nav-text">CAP 細節</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#CAP-%E9%97%9C%E9%8D%B5%E7%B4%B0%E7%AF%80%E9%BB%9E"><span class="nav-number">2.1.</span> <span class="nav-text">CAP 關鍵細節點</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CAP-%E9%97%9C%E6%B3%A8%E7%9A%84%E7%B2%92%E5%BA%A6%E6%98%AF%E8%B3%87%E6%96%99%EF%BC%8C%E8%80%8C%E4%B8%8D%E6%98%AF%E6%95%B4%E5%80%8B%E7%B3%BB%E7%B5%B1"><span class="nav-number">2.1.1.</span> <span class="nav-text">CAP 關注的粒度是資料，而不是整個系統</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CAP-%E6%98%AF%E5%BF%BD%E7%95%A5%E7%B6%B2%E8%B7%AF%E5%BB%B6%E9%81%B2%E7%9A%84"><span class="nav-number">2.1.2.</span> <span class="nav-text">CAP 是忽略網路延遲的</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A3%E5%B8%B8%E9%81%8B%E8%A1%8C%E6%83%85%E6%B3%81%E4%B8%8B%EF%BC%8C%E4%B8%8D%E5%AD%98%E5%9C%A8-CP-%E5%92%8C-AP-%E7%9A%84%E9%81%B8%E6%93%87%EF%BC%8C%E5%8F%AF%E4%BB%A5%E5%90%8C%E6%99%82%E6%BB%BF%E8%B6%B3-CA"><span class="nav-number">2.1.3.</span> <span class="nav-text">正常運行情況下，不存在 CP 和 AP 的選擇，可以同時滿足 CA</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%94%BE%E6%A3%84%E4%B8%A6%E4%B8%8D%E7%AD%89%E6%96%BC%E4%BB%80%E9%BA%BC%E9%83%BD%E4%B8%8D%E5%81%9A%EF%BC%8C%E9%9C%80%E8%A6%81%E7%82%BA%E5%88%86%E5%8D%80%E6%81%A2%E5%BE%A9%E5%BE%8C%E5%81%9A%E6%BA%96%E5%82%99"><span class="nav-number">2.1.4.</span> <span class="nav-text">放棄並不等於什麼都不做，需要為分區恢復後做準備</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ACID"><span class="nav-number">2.2.</span> <span class="nav-text">ACID</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86"><span class="nav-number">2.2.1.</span> <span class="nav-text">基本原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%88%87-CAP-%E7%9A%84%E5%B7%AE%E7%95%B0"><span class="nav-number">2.2.2.</span> <span class="nav-text">與 CAP 的差異</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BASE"><span class="nav-number">2.3.</span> <span class="nav-text">BASE</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E5%8F%AF%E7%94%A8%EF%BC%88Basically-Available%EF%BC%89"><span class="nav-number">2.3.1.</span> <span class="nav-text">基本可用（Basically Available）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BB%9F%E7%8B%80%E6%85%8B%EF%BC%88Soft-State%EF%BC%89"><span class="nav-number">2.3.2.</span> <span class="nav-text">軟狀態（Soft State）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E7%B5%82%E4%B8%80%E8%87%B4%E6%80%A7%EF%BC%88Eventual-Consistency%EF%BC%89"><span class="nav-number">2.3.3.</span> <span class="nav-text">最終一致性（Eventual Consistency）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A8%8E%E8%AB%96%E6%95%B4%E7%90%86%E7%B2%BE%E8%8F%AF-1"><span class="nav-number">2.4.</span> <span class="nav-text">討論整理精華</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E9%BB%9E%E6%95%B4%E7%90%86"><span class="nav-number">2.4.1.</span> <span class="nav-text">重點整理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9B%BB%E5%95%86-CAP-%E5%88%86%E6%9E%90-1"><span class="nav-number">2.4.2.</span> <span class="nav-text">電商 CAP 分析 (1)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9B%BB%E5%95%86-CAP-%E5%88%86%E6%9E%90-2"><span class="nav-number">2.4.3.</span> <span class="nav-text">電商 CAP 分析 (2)</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#FMEA-%E6%96%B9%E6%B3%95%EF%BC%8C%E6%8E%92%E9%99%A4%E6%9E%B6%E6%A7%8B%E5%8F%AF%E7%94%A8%E6%80%A7%E9%9A%B1%E6%82%A3%E7%9A%84%E5%88%A9%E5%99%A8"><span class="nav-number">3.</span> <span class="nav-text">FMEA 方法，排除架構可用性隱患的利器</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#FMEA-%E4%BB%8B%E7%B4%B9"><span class="nav-number">3.1.</span> <span class="nav-text">FMEA 介紹</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FMEA-%E6%96%B9%E6%B3%95"><span class="nav-number">3.2.</span> <span class="nav-text">FMEA 方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD%E9%BB%9E"><span class="nav-number">3.2.1.</span> <span class="nav-text">功能點</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%85%E9%9A%9C%E6%A8%A1%E5%BC%8F"><span class="nav-number">3.2.2.</span> <span class="nav-text">故障模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%85%E9%9A%9C%E5%BD%B1%E9%9F%BF"><span class="nav-number">3.2.3.</span> <span class="nav-text">故障影響</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9A%B4%E9%87%8D%E7%A8%8B%E5%BA%A6"><span class="nav-number">3.2.4.</span> <span class="nav-text">嚴重程度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%85%E9%9A%9C%E5%8E%9F%E5%9B%A0"><span class="nav-number">3.2.5.</span> <span class="nav-text">故障原因</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%85%E9%9A%9C%E6%A6%82%E7%8E%87"><span class="nav-number">3.2.6.</span> <span class="nav-text">故障概率</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%A8%E9%9A%AA%E7%A8%8B%E5%BA%A6"><span class="nav-number">3.2.7.</span> <span class="nav-text">風險程度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B7%B2%E6%9C%89%E6%8E%AA%E6%96%BD"><span class="nav-number">3.2.8.</span> <span class="nav-text">已有措施</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A6%8F%E9%81%BF%E6%8E%AA%E6%96%BD"><span class="nav-number">3.2.9.</span> <span class="nav-text">規避措施</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E6%B1%BA%E6%8E%AA%E6%96%BD"><span class="nav-number">3.2.10.</span> <span class="nav-text">解決措施</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%8C%E7%BA%8C%E8%A6%8F%E5%8A%83"><span class="nav-number">3.2.11.</span> <span class="nav-text">後續規劃</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">4.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">127</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">101</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/Architecture_Design/Architecture-Design-HA-CAP/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [架構設計] 分散式架構設計中的 CAP 理論
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2020-09-02 18:30:00 / Modified: 18:34:37" itemprop="dateCreated datePublished" datetime="2020-09-02T18:30:00+08:00">2020-09-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Architecture-Design/" itemprop="url" rel="index"><span itemprop="name">Architecture Design</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/Architecture_Design/Architecture-Design-HA-CAP/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="Architecture_Design/Architecture-Design-HA-CAP/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此篇文章是極客時間"從 0 開始學架構"課程時所留下的學習筆記，主要內容為分散式架構中有名的 CAP 理論的解釋與探討，以及使用 FMEA 方法論來對架構進行全面性的評估，找出可能的設計隱患</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="CAP-理論"><a href="#CAP-理論" class="headerlink" title="CAP 理論"></a>CAP 理論</h1><h2 id="CAP-理論演進"><a href="#CAP-理論演進" class="headerlink" title="CAP 理論演進"></a>CAP 理論演進</h2><h3 id="version-1"><a href="#version-1" class="headerlink" title="version 1"></a>version 1</h3><p>Robert Greiner 對於 CAP 理論的<a target="_blank" rel="noopener" href="http://robertgreiner.com/2014/06/cap-theorem-explained/">第一版解釋</a>：</p>
+<blockquote>
+<p>Any distributed system cannot guaranty C, A, and P simultaneously.</p>
+</blockquote>
+<p>對於一個分佈式計算系統，不可能同時滿足一致性（Consistence）、可用性（Availability）、分區容錯性（Partition Tolerance）三個設計約束。</p>
+<h3 id="version-2"><a href="#version-2" class="headerlink" title="version 2"></a>version 2</h3><p>Robert Greiner 對於 CAP 理論的<a target="_blank" rel="noopener" href="http://robertgreiner.com/2014/08/cap-theorem-revisited/">第二版解釋</a>：</p>
+<blockquote>
+<p>In a distributed system (a collection of interconnected nodes that share data.), you can only have two out of the following three guarantees across a write/read pair: Consistency, Availability, and Partition Tolerance - one of them must be sacrificed.</p>
+</blockquote>
+<p>在一個分散式系統（指互相連接並共享資料的節點的集合）中，當涉及讀寫操作時，只能保證一致性（Consistence）、可用性（Availability）、分區容錯性（Partition Tolerance）三者中的兩個，另外一個必須被犧牲。</p>
+<h3 id="差異之處"><a href="#差異之處" class="headerlink" title="差異之處"></a>差異之處</h3><ul>
+<li><p>CAP 理論探討的分散式系統，強調了兩點：<strong>interconnected</strong> 和 <strong>share data</strong></p>
+</li>
+<li><p>分散式系統並不一定會互聯和共享資料</p>
+<blockquote>
+<p>Memcache 的集群，相互之間就沒有連接和共享資料，因此 Memcache 集群這類分散式系統就不符合 CAP 理論探討的對象；而 MySQL 集群就是互聯和進行資料複製的，因此是 CAP 理論探討的對象</p>
+</blockquote>
+</li>
+<li><p>CAP 關注的是<strong>對資料的讀寫操作</strong>，而不是分散式系統的所有功能，例如：ZooKeeper 的選舉機制就不是 CAP 探討的對象</p>
+</li>
+</ul>
+<h2 id="CAP-內容"><a href="#CAP-內容" class="headerlink" title="CAP 內容"></a>CAP 內容</h2><h3 id="Consistency-一致性"><a href="#Consistency-一致性" class="headerlink" title="Consistency (一致性)"></a>Consistency (一致性)</h3><ul>
+<li><p>站在 client 的角度來觀察系統的行為和特徵</p>
+</li>
+<li><p>從 client 的讀寫角度來描述資料一致性</p>
+</li>
+<li><p>在事務執行過程中，系統其實處於一個不一致的狀態，不同的節點的資料並不完全一致，<strong>但 client 讀操作能夠獲取最新的寫結果就沒有問題</strong></p>
+</li>
+</ul>
+<h3 id="Availability-可用性"><a href="#Availability-可用性" class="headerlink" title="Availability (可用性)"></a>Availability (可用性)</h3><ul>
+<li><p>只有非故障節點才能滿足可用性要求，如果節點本身就故障了，發給節點的請求不一定能得到一個響應</p>
+</li>
+<li><p>不能超時、不能出錯，結果是合理的(但結果有可能因為資料尚未同步完整，導致資料是不正確的)</p>
+</li>
+</ul>
+<h3 id="Partition-Tolerance-分區容忍性"><a href="#Partition-Tolerance-分區容忍性" class="headerlink" title="Partition Tolerance (分區容忍性)"></a>Partition Tolerance (分區容忍性)</h3><ul>
+<li><p>只有返回 reasonable response 才是 function(可用功能)，而 function 強調”發揮作用” &amp; “履行職責”</p>
+</li>
+<li><p>即發生了分區現象，不管是什麼原因，可能是網路封包遺失，也可能是連接中斷，還可能是擁塞，只要導致了網路分區，就通通算在裡面</p>
+</li>
+</ul>
+<h2 id="CAP-應用"><a href="#CAP-應用" class="headerlink" title="CAP 應用"></a>CAP 應用</h2><ul>
+<li><p>雖然 CAP 理論定義是三個要素中只能取兩個，但放到分佈式環境下來思考，會發現<strong>必須選擇 P(分區容忍)要素，因為網路本身無法做到 100% 可靠</strong></p>
+</li>
+<li><p>分散式系統理論上不可能選擇 CA 架構，<strong>只能選擇 CP 或者 AP 架構</strong></p>
+</li>
+</ul>
+<h2 id="討論整理精華"><a href="#討論整理精華" class="headerlink" title="討論整理精華"></a>討論整理精華</h2><ul>
+<li><p>「一致性」和「可用性」都應該站在 client 側去審視；而「分區容忍性」則是 cluster 在遇到網路分區的問題時，選擇如何去影響 client 感知到的「一致性」和「可用性」</p>
+</li>
+<li><p>P 要求分佈式和資料同步，C 要求資料完全一致，A 要求返回及時</p>
+</li>
+<li><p>CAP 理論是忽略延時的，這就是說理論做了一個假設，<strong>只要網路通資料就會一致</strong>，這也是實際應用CAP時容易踩的坑</p>
+</li>
+<li><p>paxos 協議是為了解決資料一致性而設計的算法，主要是通過投票選舉的方式決定出主節點，之後就以主節點的資料為準，因而屬於 PC 模式</p>
+</li>
+<li><p>不是必然選擇 P，而是說分散式系統必然會出現分區的情況，你要選擇的是要不要”容忍”，<strong>無法容忍分區，那就在出現分區的時候系統不對外提供服務</strong></p>
+</li>
+<li><p>P 是說是否允許網路分區，允許的話可以繼續提供服務，不允許的話，一旦出現分區，系統所有節點停止服務</p>
+</li>
+<li><p>一個分散式系統當P發生時，C 和 A 二者只能選其一</p>
+<ul>
+<li>P：分區容錯性，是站在服務器的角度來講的</li>
+<li>C：資料一致性，是站在 client 的角度來講的</li>
+<li>A：系統可用性，是站在 client 的角度來講的</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>在通過網路構建的分散式系統中，P 是不能 100% 避免的，所以，我們只能考慮，當 P 發生時是要 C 還是要 A</p>
+</blockquote>
+<ul>
+<li><p>區塊鏈不要求所有人同一時刻看到的資料一致，而且某個節點掛掉後其它節點還是可以修改資料，因此是 AP 系統</p>
+</li>
+<li><p>CAP 要求節點間針對同一份資料進行複製和備份</p>
+</li>
+<li><p>網路分區 =&gt; 假設本來5台機器網路都是通的，現在由於交換機故障，其中3台聯通形成小團體A，另外兩台聯通形成小團體B，但是 A 和 B 不聯通</p>
+</li>
+</ul>
+<h1 id="CAP-細節"><a href="#CAP-細節" class="headerlink" title="CAP 細節"></a>CAP 細節</h1><ul>
+<li><p>理論的優點在於清晰簡潔、易於理解，但缺點就是高度抽象化，省略了很多細節，導致在將理論應用到實踐時，由於各種複雜情況，可能出現誤解和偏差</p>
+</li>
+<li><p>談到資料一致性時，CAP、ACID、BASE 難免會被拿出來討論，原因在於這三者都是和資料一致性相關的理論</p>
+</li>
+</ul>
+<h2 id="CAP-關鍵細節點"><a href="#CAP-關鍵細節點" class="headerlink" title="CAP 關鍵細節點"></a>CAP 關鍵細節點</h2><h3 id="CAP-關注的粒度是資料，而不是整個系統"><a href="#CAP-關注的粒度是資料，而不是整個系統" class="headerlink" title="CAP 關注的粒度是資料，而不是整個系統"></a>CAP 關注的粒度是資料，而不是整個系統</h3><ul>
+<li><p>在 CAP 理論落地實踐時，我們<strong>需要將系統內的資料按照不同的應用場景和要求進行分類</strong>，每類資料選擇不同的策略(CP 還是 AP)，而不是直接限定整個系統所有資料都是同一策略</p>
+</li>
+<li><p><strong>實際設計過程中，每個系統不可能只處理一種資料，而是包含多種類型的資料，有的資料必須選擇 CP，有的資料必須選擇 AP</strong></p>
+</li>
+<li><p>如果我們做設計時，從整個系統的角度去選擇 CP 還是 AP，就會發現顧此失彼，無論怎麼做都是有問題的</p>
+</li>
+</ul>
+<blockquote>
+<p>用戶管理系統為例，用戶管理系統包含用戶賬號資料（用戶 ID、密碼）、用戶信息資料（暱稱、興趣、愛好、性別、自我介紹等），前者會選擇 CP，後者會選擇 AP；但所有資料都選擇 CP or AP 都是不合理的</p>
+</blockquote>
+<h3 id="CAP-是忽略網路延遲的"><a href="#CAP-是忽略網路延遲的" class="headerlink" title="CAP 是忽略網路延遲的"></a>CAP 是忽略網路延遲的</h3><ul>
+<li><p>CAP 理論中的 C 在實踐中是不可能完美實現的，在資料複製的過程中，節點 A 和節點 B 的資料並不一致</p>
+</li>
+<li><p>對於某些嚴苛的業務場景，例如和金錢相關的用戶餘額，或者和搶購相關的商品庫存，技術上是無法做到分佈式場景下完美的一致性的</p>
+</li>
+<li><p>這並不意味著這類系統無法應用分佈式架構，只是說”單個用戶餘額、單個商品庫存”無法做分佈式，但系統整體還是可以應用分佈式架構的</p>
+</li>
+</ul>
+<h3 id="正常運行情況下，不存在-CP-和-AP-的選擇，可以同時滿足-CA"><a href="#正常運行情況下，不存在-CP-和-AP-的選擇，可以同時滿足-CA" class="headerlink" title="正常運行情況下，不存在 CP 和 AP 的選擇，可以同時滿足 CA"></a>正常運行情況下，不存在 CP 和 AP 的選擇，可以同時滿足 CA</h3><ul>
+<li><p><strong>架構設計的時候既要考慮分區發生時選擇 CP 還是 AP，也要考慮分區沒有發生時如何保證 CA</strong></p>
+</li>
+<li><p>即使是實現 CA，不同的資料實現方式也可能不一樣 (例如：用戶帳號資料可用 Message Queue 來實現，用戶消息資料可用 DB 同步來實現)</p>
+</li>
+</ul>
+<h3 id="放棄並不等於什麼都不做，需要為分區恢復後做準備"><a href="#放棄並不等於什麼都不做，需要為分區恢復後做準備" class="headerlink" title="放棄並不等於什麼都不做，需要為分區恢復後做準備"></a>放棄並不等於什麼都不做，需要為分區恢復後做準備</h3><ul>
+<li><p>分區期間放棄 C 或者 A，並不意味著永遠放棄 C 和 A，我們可以在分區期間進行一些操作，從而<strong>讓分區故障解決後，系統能夠重新達到 CA 的狀態</strong></p>
+</li>
+<li><p>分區恢復後的資料不一致，可以是軟體 or 工具自動處理，或是人工處理</p>
+</li>
+</ul>
+<h2 id="ACID"><a href="#ACID" class="headerlink" title="ACID"></a>ACID</h2><h3 id="基本原理"><a href="#基本原理" class="headerlink" title="基本原理"></a>基本原理</h3><p>ACID 是資料庫管理系統為了保證事務的正確性而提出來的一個理論，包含四個限制：</p>
+<ul>
+<li><p><code>Atomicity</code>：一個事務中的所有操作，要嘛全部完成，要嘛全部都沒完成</p>
+</li>
+<li><p><code>Consistency</code>：在事務開始之前和事務結束以後，資料庫的完整性沒有被破壞</p>
+</li>
+<li><p><code>Isolation</code>：防止多個事務並發執行時由於交叉執行而導致資料的不一致</p>
+</li>
+<li><p><code>Durability</code>事務處理結束後，對資料的修改就是永久的，即便系統故障也不會丟失</p>
+</li>
+</ul>
+<h3 id="與-CAP-的差異"><a href="#與-CAP-的差異" class="headerlink" title="與 CAP 的差異"></a>與 CAP 的差異</h3><ul>
+<li><p>ACID 中的 A（Atomicity）和 CAP 中的 A（Availability）意義完全不同</p>
+</li>
+<li><p>ACID 中的 C 是指資料庫的資料完整性，而 CAP 中的 C 是指分佈式節點中的資料一致性</p>
+</li>
+<li><p>ACID 的應用場景是資料庫事務，CAP 關注的是分散式系統資料讀寫這個差異點來看</p>
+</li>
+</ul>
+<h2 id="BASE"><a href="#BASE" class="headerlink" title="BASE"></a>BASE</h2><ul>
+<li><p>核心思想是即使無法做到強一致性（CAP 的一致性就是強一致性），但應用可以採用適合的方式達到最終一致性</p>
+</li>
+<li><p>BASE 理論本質上是對 CAP 的延伸和補充</p>
+</li>
+</ul>
+<h3 id="基本可用（Basically-Available）"><a href="#基本可用（Basically-Available）" class="headerlink" title="基本可用（Basically Available）"></a>基本可用（Basically Available）</h3><ul>
+<li><p>分散式系統在出現故障時，允許損失部分可用性，即保證核心可用</p>
+</li>
+<li><p>具體選擇哪些作為可以損失的業務，哪些是必須保證的業務，是一項有挑戰的工作</p>
+<blockquote>
+<p>例如，對於一個用戶管理系統來說，”登錄”是核心功能，而”註冊”可以算作非核心功能</p>
+</blockquote>
+</li>
+</ul>
+<h3 id="軟狀態（Soft-State）"><a href="#軟狀態（Soft-State）" class="headerlink" title="軟狀態（Soft State）"></a>軟狀態（Soft State）</h3><ul>
+<li><p>允許系統存在中間狀態，而該中間狀態不會影響系統整體可用性</p>
+</li>
+<li><p>就是 CAP 理論中的資料不一致</p>
+</li>
+</ul>
+<h3 id="最終一致性（Eventual-Consistency）"><a href="#最終一致性（Eventual-Consistency）" class="headerlink" title="最終一致性（Eventual Consistency）"></a>最終一致性（Eventual Consistency）</h3><ul>
+<li><p>系統中的所有資料副本經過一定時間後，最終能夠達到一致的狀態</p>
+</li>
+<li><p>一定時間”和資料的特性是強關聯的，不同的資料能夠容忍的不一致時間是不同的</p>
+</li>
+</ul>
+<h2 id="討論整理精華-1"><a href="#討論整理精華-1" class="headerlink" title="討論整理精華"></a>討論整理精華</h2><ul>
+<li><p>ACID 是資料庫事務完整性的理論，CAP 是分散式系統設計理論，BASE 是 CAP 理論中 AP 方案的延伸</p>
+</li>
+<li><p>一份資料在多個節點有但不是所有節點都有，這是非對稱集群；例如 Elasticsearch；所有資料在所有節點都有，這是對稱集群，例如 zookeeper</p>
+</li>
+<li><p>任何一個正常運行的分散式系統，起源於 CA 狀態，中間(發生分區時)可能經過 CP 和 AP 狀態，最後回到 CA 狀態；所以一個分散式系統，需要考慮實現三點：</p>
+<ul>
+<li>正常運行時的 CA 狀態。</li>
+<li>發生分區時轉變為 CP 或 AP 狀態</li>
+<li>分區解決時如何恢復為 CA 狀態</li>
+</ul>
+</li>
+</ul>
+<h3 id="重點整理"><a href="#重點整理" class="headerlink" title="重點整理"></a>重點整理</h3><p>設計分散式系統的兩大初衷：橫向擴展（scalability）和高可用性（availability）</p>
+<p>“橫向擴展”是為了解決單點瓶頸問題，進而保證高並發量下的「可用性」；”高可用性”是為了解決單點故障（SPOF）問題，進而保證部分節點故障時的「可用性」。由此可以看出，分散式系統的核心訴求就是「可用性」。這個「可用性」正是 CAP 中的 A：用戶訪問系統時，可以在合理的時間內得到合理的響應。</p>
+<p>為了保證「可用性」，一個分散式系統通常由多個節點組成。這些節點各自維護一份資料，但是不管用戶訪問到哪個節點，原則上都應該讀取到相同的資料。為了達到這個效果，一個節點收到寫入請求更新自己的資料後，必須將資料同步到其他節點，以保證各個節點的資料「一致性」。這個「一致性」正是 CAP 中的 C：用戶訪問系統時，可以讀取到最近寫入的資料。</p>
+<p>需要注意的是：CAP 並沒有考慮資料同步的耗時，所以現實中的分散式系統，理論上無法保證任何時刻的絕對「一致性」；不同業務系統對上述耗時的敏感度不同。</p>
+<p>分散式系統中，節點之間的資料同步是基於網路的。由於網路本身固有的不可靠屬性，極端情況下會出現網路不可用的情況，進而將網路兩端的節點孤立開來，這就是所謂的”網路分區”現象。”網路分區”理論上是無法避免的，雖然實際發生的概率較低、時長較短。沒有發生”網路分區”時，系統可以做到同時保證「一致性」和「可用性」。</p>
+<h3 id="電商-CAP-分析-1"><a href="#電商-CAP-分析-1" class="headerlink" title="電商 CAP 分析 (1)"></a>電商 CAP 分析 (1)</h3><ul>
+<li><p>一個電商網站核心模組有會員，訂單，商品，支付，促銷管理等</p>
+</li>
+<li><p>對於會員模組，包括登錄，個人設置，個人訂單，購物車，收藏夾等，這些模組保證 AP，資料短時間不一致不影響使用</p>
+</li>
+<li><p>訂單模組的下單付款扣減庫存操作是整個系統的核心，CA 都需要保證，但在極端情況下犧牲 P 是可以的</p>
+</li>
+<li><p>商品模組的商品上下架和庫存管理保證 CP,搜索功能因為本身就不是實時性非常高的模組，所以保證 AP 就可以了</p>
+</li>
+<li><p>促銷是短時間的資料不一致，結果就是優惠信息看不到，但是已有的優惠要保證可用，而且優惠可以提前預計算，所以可以保證 AP</p>
+</li>
+<li><p>現在大部分的電商網站對於支付這一塊是獨立的系統，或者使用第三方的支付寶，微信。其實 CAP 是由第三方來保證的，支付系統是一個對 CAP 要求極高的系統，C 是必須要保證的，AP 中 A 相對更重要，不能因為分區，導致所有人都不能支付</p>
+</li>
+</ul>
+<h3 id="電商-CAP-分析-2"><a href="#電商-CAP-分析-2" class="headerlink" title="電商 CAP 分析 (2)"></a>電商 CAP 分析 (2)</h3><ul>
+<li><p>電商網站核心功能有用戶、產品、訂單、支付、庫存，相應的資料有用戶、產品、訂單、支付、庫存</p>
+</li>
+<li><p>對於用戶資料，選擇 CP；因為用戶註冊後，可能幾分鐘後重新登錄，所以需要滿足一致性；在網路出現分區時，因為需要滿足一致性而暫時不能提供寫服務，所以無法滿足可用性；對於分區容錯性，只要能返回一個合理的響應就能滿足，這一點能很好滿足</p>
+</li>
+<li><p>對於產品資料，無需滿足一致性，所以選擇 AP</p>
+</li>
+<li><p>對於訂單資料，業務需要滿足一致性，所以選擇 CP</p>
+</li>
+<li><p>對於支付資料，業務需要滿足一致性，所以選擇 CP</p>
+</li>
+<li><p>對於庫存資料，業務需要滿足一致性，所以選擇 CP</p>
+</li>
+</ul>
+<h1 id="FMEA-方法，排除架構可用性隱患的利器"><a href="#FMEA-方法，排除架構可用性隱患的利器" class="headerlink" title="FMEA 方法，排除架構可用性隱患的利器"></a>FMEA 方法，排除架構可用性隱患的利器</h1><h2 id="FMEA-介紹"><a href="#FMEA-介紹" class="headerlink" title="FMEA 介紹"></a>FMEA 介紹</h2><ul>
+<li><p>FMEA（Failure mode and effects analysis，故障模式與影響分析）通過對系統範圍內潛在的故障模式加以分析，並按照嚴重程度進行分類，以確定失效對於系統的最終影響</p>
+</li>
+<li><p>FMEA 是一套分析和思考的方法，而不是某個領域的技能或者工具</p>
+</li>
+<li><p>在軟體架構設計領域，FMEA 並不能指導我們如何做架構設計，而是當我們設計出一個架構後，再使用 FMEA 對這個架構進行分析，看看架構是否還存在某些可用性的隱患</p>
+</li>
+</ul>
+<h2 id="FMEA-方法"><a href="#FMEA-方法" class="headerlink" title="FMEA 方法"></a>FMEA 方法</h2><p>在架構設計領域，FMEA 的具體分析方法是：</p>
+<ul>
+<li>給出初始的架構設計圖。</li>
+<li>假設架構中某個部件發生故障</li>
+<li>分析此故障對系統功能造成的影響</li>
+<li>根據分析結果，判斷架構是否需要進行優化</li>
+</ul>
+<h3 id="功能點"><a href="#功能點" class="headerlink" title="功能點"></a>功能點</h3><p>指的是從用戶角度來看的，而不是從系統各個模組功能點劃分來看的</p>
+<h3 id="故障模式"><a href="#故障模式" class="headerlink" title="故障模式"></a>故障模式</h3><ul>
+<li><p>指的是系統會出現什麼樣的故障，包括故障點和故障形式</p>
+</li>
+<li><p>不需要給出真正的故障原因，我們只需要假設出現某種故障現象即可，例如 MySQL 響應時間達到 3 秒</p>
+</li>
+<li><p>故障模式的描述要儘量精確，多使用量化描述，避免使用泛化的描述</p>
+</li>
+</ul>
+<h3 id="故障影響"><a href="#故障影響" class="headerlink" title="故障影響"></a>故障影響</h3><ul>
+<li><p>當發生故障模式中描述的故障時，功能點具體會受到什麼影響</p>
+</li>
+<li><p>常見的影響有：功能點偶爾不可用、功能點完全不可用、部分用戶功能點不可用、功能點響應緩慢、功能點出錯等</p>
+</li>
+<li><p>故障影響也需要儘量準確描述，例如，推薦使用”20% 的用戶無法登錄”，而不是”大部分用戶無法登錄”</p>
+</li>
+</ul>
+<h3 id="嚴重程度"><a href="#嚴重程度" class="headerlink" title="嚴重程度"></a>嚴重程度</h3><ul>
+<li><p>指站在業務的角度故障的影響程度，一般分為”致命 / 高 / 中 / 低 / 無”五個檔次</p>
+</li>
+<li><p>按公式進行評估：<strong>嚴重程度 = 功能點重要程度 × 故障影響範圍 × 功能點受損程度</strong></p>
+</li>
+<li><p>對於某個故障的影響到底屬於哪個檔次，有時會出現一些爭議，沒有絕對標準</p>
+</li>
+</ul>
+<h3 id="故障原因"><a href="#故障原因" class="headerlink" title="故障原因"></a>故障原因</h3><p>為何要列出故障原因?</p>
+<ul>
+<li><p>不同的故障原因發生概率不相同</p>
+<blockquote>
+<p>例如：導致 MySQL 查詢響應慢的原因可能是 MySQL bug，也可能是沒有索引</p>
+</blockquote>
+</li>
+<li><p>不同的故障原因檢測手段不一樣</p>
+<blockquote>
+<p>例如：磁盤壞道 &amp; slow query 都會導致 MySQL 響應慢，但檢測方式就不會相同</p>
+</blockquote>
+</li>
+<li><p>不同的故障原因的處理措施不一樣</p>
+<blockquote>
+<p>例如：如果是 MySQL bug，我們的應對措施只能是升級 MySQL 版本；如果是沒有索引，我們的應對措施就是增加索引</p>
+</blockquote>
+</li>
+</ul>
+<h3 id="故障概率"><a href="#故障概率" class="headerlink" title="故障概率"></a>故障概率</h3><ul>
+<li><p>指某個具體故障原因發生的概率，一般分為”高 / 中 / 低”</p>
+</li>
+<li><p>需要關注的重點：</p>
+<ul>
+<li>硬體：隨著使用時間推移，故障概率會越來越高</li>
+<li>開源系統：成熟的開源系統 bug 率低，剛發佈的開源系統 bug 率相比會高一些</li>
+<li>自研系統：成熟的自研系統故障概率會低，而新開發的系統故障概率會高</li>
+</ul>
+</li>
+<li><p>高中低是相對的，只是為了確定優先級以決定後續的資源投入，沒有必要絕對量化</p>
+</li>
+</ul>
+<h3 id="風險程度"><a href="#風險程度" class="headerlink" title="風險程度"></a>風險程度</h3><ul>
+<li><p>風險程度就是綜合嚴重程度和故障概率來一起判斷某個故障的最終等級</p>
+</li>
+<li><p>風險程度 = 嚴重程度 × 故障概率</p>
+</li>
+<li><p>同樣的故障影響，不同的故障原因有不同的概率，最終得到的風險級別就是不同的</p>
+</li>
+</ul>
+<h3 id="已有措施"><a href="#已有措施" class="headerlink" title="已有措施"></a>已有措施</h3><p>針對具體的故障原因，系統現在是否提供了某些措施來應對，包括：</p>
+<ul>
+<li>檢測告警：檢測故障，然後告警，系統自己不針對故障進行處理，需要人工干預</li>
+<li>容錯：檢測到故障後，系統能夠通過備份手段應對</li>
+<li>自恢復：檢測到故障後，系統能夠自己恢復</li>
+</ul>
+<h3 id="規避措施"><a href="#規避措施" class="headerlink" title="規避措施"></a>規避措施</h3><p>為了降低故障發生概率而做的一些事情，可以是技術手段，也可以是管理手段，例如：</p>
+<ul>
+<li><p>技術手段：為了避免新引入的 MongoDB 丟失資料，在 MySQL 中冗餘一份</p>
+</li>
+<li><p>管理手段：為了降低磁盤壞道的概率，強制統一更換服務時間超過 2 年的磁盤</p>
+</li>
+</ul>
+<h3 id="解決措施"><a href="#解決措施" class="headerlink" title="解決措施"></a>解決措施</h3><ul>
+<li><p>為了能夠解決問題而做的一些事情，一般都是技術手段，例如：</p>
+<ul>
+<li>為了解決密碼暴力破解，增加密碼重試次數限制</li>
+<li>為了解決從資料庫中導出資料導致資料洩露，將資料庫中的敏感資料加密保存</li>
+<li>為了解決非法訪問，增加白名單控制</li>
+</ul>
+</li>
+<li><p>如果某個故障既可以採取規避措施，又可以採取解決措施，那麼我們會優先選擇解決措施，畢竟能解決問題當然是最好的</p>
+</li>
+</ul>
+<h3 id="後續規劃"><a href="#後續規劃" class="headerlink" title="後續規劃"></a>後續規劃</h3><ul>
+<li><p>針對這些不足的地方，再結合風險程度進行排序，給出後續的改進規劃</p>
+</li>
+<li><p>這些規劃既可以是技術手段，也可以是管理手段；可以是規避措施，也可以是解決措施。</p>
+</li>
+<li><p>同時需要考慮資源的投入情況，優先將風險程度高的系統隱患解決</p>
+</li>
+</ul>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://time.geekbang.org/column/intro/81">從0開始學架構_架構基礎_架構入門-極客時間</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/Architecture-Design/" rel="tag"># Architecture Design</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/Architecture_Design/Architecture-Design-High-Performance-Load-Balance/" rel="prev" title="[架構設計] 高性能負載均衡">
+                  <i class="fa fa-chevron-left"></i> [架構設計] 高性能負載均衡
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/Architecture_Design/Architecture-Design-HA-CAP/";
+    this.page.identifier = "Architecture_Design/Architecture-Design-HA-CAP/";
+    this.page.title = "[架構設計] 分散式架構設計中的 CAP 理論";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>
