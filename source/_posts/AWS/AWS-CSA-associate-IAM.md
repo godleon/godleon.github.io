@@ -83,6 +83,33 @@ IAM 的核心概念包含以下四項：
 ```
 
 
+IAM Policy
+==========
+
+- 清楚定義的 deny policy 的效果會蓋掉所有清楚定義的 allow policy
+
+- 可以透過下列 policy document 快速封鎖特定的 IAM user 所有權限
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Deny",
+      "Action": "*",
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+- AWS 有三個重要且預先建立好的 policy template：
+  - `Administrator access`：可以存取所有 AWS resource
+  - `Power user access`：有 admin 存取權限，但無法做 user/group 管理
+  - `Read only access`：只能檢視 AWS resource
+
+
+
 實作筆記
 =======
 
@@ -110,6 +137,8 @@ IAM 的核心概念包含以下四項：
 1. 這是用來提供給其他使用者存取 AWS resource 之用，並非 root account，需要注意一下!
 
 2. 網址是動態產生的，可以透過 **Customize** 的 link 設定別名以方便記憶
+
+3. IAM user 的登入入口跟 root account 是不一樣的
 
 
 ## 新增 IAM Users

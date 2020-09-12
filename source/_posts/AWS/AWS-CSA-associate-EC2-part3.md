@@ -161,7 +161,7 @@ WAF(Web Application Firewall)
 
 WAF 若要是在地端實現，要購買的設備可是相當昂貴的；此外，不論是地端 or 雲端，要善用 WAF 的功能，也要清楚 WAF 的原理 & 相關知識，使用起來才可以符合自己所需，以下是 AWS WAF 的特點：
 
-- WAS 主要就是要監控被轉發到 CloudFront、ALB、API Gateway ... 等服務的 HTTP & HTTPS 的請求
+- WAF 主要就是要監控被轉發到 CloudFront、ALB、API Gateway ... 等服務的 HTTP & HTTPS 的請求
 > 這表示 AWS AWF 可以掛在 CloudFront、ALB、API Gateway 這幾個地方前面
 
 - 可以根據以下條件設定讓某些 request 通過 or 被阻擋：

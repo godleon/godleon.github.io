@@ -138,7 +138,7 @@ Overview
 
 - 可以將 VPC 視為在 AWS 中的一個 logical datacenter
 
-- VPC 中包含了 **IGW(Internet Gateway)**、**Virtual Private Gateway**、**Route Table**、**Network ACLs**、**Subnet**、**Security Group** 這幾個重要元素
+- VPC 中包含了 `IGW(Internet Gateway)`、`Virtual Private Gateway`、`Route Table`、`Network ACLs`、`Subnet`、`Security Group` 這幾個重要元素
 
 - 1 subnet = 1 AZ
 > subnet 是無法跨 AZ 的，不同的 AZ 一定是不同的 subnet
