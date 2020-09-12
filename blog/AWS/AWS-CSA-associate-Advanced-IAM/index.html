@@ -25,7 +25,7 @@
   <meta name="description" content="此篇文章是學習 AWS IAM 的進階相關概念時所留下的學習筆記，包含 Directory Service、IAM Policy、Resource Access Manager、Single Sign-On ... 等內容">
 <meta property="og:type" content="article">
 <meta property="og:title" content="AWS CSA Associate 學習筆記 - Advanced IAM">
-<meta property="og:url" content="https://godleon.github.io/blog/AWS/AWS-Learning-Notes-Advanced-IAM/index.html">
+<meta property="og:url" content="https://godleon.github.io/blog/AWS/AWS-CSA-associate-Advanced-IAM/index.html">
 <meta property="og:site_name" content="小信豬的原始部落">
 <meta property="og:description" content="此篇文章是學習 AWS IAM 的進階相關概念時所留下的學習筆記，包含 Directory Service、IAM Policy、Resource Access Manager、Single Sign-On ... 等內容">
 <meta property="og:locale" content="en_US">
@@ -35,7 +35,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/RAM_share-resource-between-accounts.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/SSO_SAML-integration.png">
 <meta property="article:published_time" content="2020-09-02T21:35:00.000Z">
-<meta property="article:modified_time" content="2020-09-05T13:36:00.631Z">
+<meta property="article:modified_time" content="2020-09-12T00:06:01.556Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -44,7 +44,7 @@
 <meta name="twitter:image" content="https://godleon.github.io/blog/images/aws/Managed-Microsoft-AD.png">
 
 
-<link rel="canonical" href="https://godleon.github.io/blog/AWS/AWS-Learning-Notes-Advanced-IAM/">
+<link rel="canonical" href="https://godleon.github.io/blog/AWS/AWS-CSA-associate-Advanced-IAM/">
 
 
 <script data-pjax class="page-configurations">
@@ -226,7 +226,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/AWS/AWS-Learning-Notes-Advanced-IAM/">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/AWS/AWS-CSA-associate-Advanced-IAM/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/blog/images/avatar.gif">
@@ -259,7 +259,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-09-05 21:36:00" itemprop="dateModified" datetime="2020-09-05T21:36:00+08:00">2020-09-05</time>
+                <time title="Modified: 2020-09-12 08:06:01" itemprop="dateModified" datetime="2020-09-12T08:06:01+08:00">2020-09-12</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -280,8 +280,8 @@
       </span>
       <span class="post-meta-item-text">Disqus: </span>
     
-    <a title="disqus" href="/blog/AWS/AWS-Learning-Notes-Advanced-IAM/#disqus_thread" itemprop="discussionUrl">
-      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="AWS/AWS-Learning-Notes-Advanced-IAM/" itemprop="commentCount"></span>
+    <a title="disqus" href="/blog/AWS/AWS-CSA-associate-Advanced-IAM/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="AWS/AWS-CSA-associate-Advanced-IAM/" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -720,8 +720,8 @@ document.addEventListener('pjax:success', () => {
 </script>
 <script>
   var disqus_config = function() {
-    this.page.url = "https://godleon.github.io/blog/AWS/AWS-Learning-Notes-Advanced-IAM/";
-    this.page.identifier = "AWS/AWS-Learning-Notes-Advanced-IAM/";
+    this.page.url = "https://godleon.github.io/blog/AWS/AWS-CSA-associate-Advanced-IAM/";
+    this.page.identifier = "AWS/AWS-CSA-associate-Advanced-IAM/";
     this.page.title = "AWS CSA Associate 學習筆記 - Advanced IAM";
     };
   NexT.utils.loadComments('#disqus_thread', () => {
