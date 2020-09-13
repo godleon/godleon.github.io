@@ -108,6 +108,10 @@ IAM Policy
   - `Power user access`：有 admin 存取權限，但無法做 user/group 管理
   - `Read only access`：只能檢視 AWS resource
 
+- 一個 IAM user 可以同時與多個 IAM policy 綁定
+
+- **IAM policy 是無法與 AWS resource/service 綁定的**，它是用來指定給 IAM user/group 用的
+
 
 
 實作筆記
