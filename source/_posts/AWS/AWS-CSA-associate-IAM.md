@@ -152,6 +152,47 @@ IAM Role
 3. `Role for Identity Provider Access`：若是帳號與外部系統(例如：透過 SAML)整合，就可以使用此種 role type 設定外部帳號權限
 
 
+IAM Security Token Service (STS)
+================================
+
+- 用來取得臨時存取 AWS resource 用的權限(以 token 的形式提供)的服務
+
+- 這個暫存的 credential 是有效期的，可以根據需求設定從幾分鐘到幾個小時，過期了就會自動失效
+
+- credential 只能透過 STS API call 取得(無法從 AWS console 設定取得)
+
+- 取得的 credential 包含 `session token`、`access key ID`、`secret access key` 三個部份
+
+- 可與 Identity Federation 搭配；也可以與用在設定 Cross-Account Access & AWS service 權限時的 IAM Role 搭配
+
+## 使用 STS 的好處
+
+- 對於暫時需要 AWS resource 存取權限的應用程式，不用特定產生 credential
+
+- 不用先建立一個 IAM identity(例如：IAM User/Group)，因為此服務是基於 **IAM Role** & **Identity Federation** 所搭配而成的
+
+- 過期自動廢棄，不需要人工作業
+
+
+
+IAM API Keys
+============
+
+- 若是有透過程式(非 AWS console)存取 AWS resource 的需求，就需要 `API Access Key`，例如：
+  - AWS CLI
+  - Windows PowerShell
+  - AWS SDKs
+  - 直接送到 AWS resource 的 HTTP request
+
+- 產生後只會在一開始顯示一次，後來再也看不到了，沒紀錄到就要重新產生
+
+- 因為 API Access Key 必須與 IAM User 綁定，來取得對應的存取權限(就端看該 user 與什麼 IAM Policy 綁定)
+
+- 要是產生新的 API Access Key，就建議把舊的廢止
+
+- 千萬不要把 API Access Key & Secret Access Key 放到 EC2 instance 中，可能會造成未來安全性上的漏洞(建議改用指定 IAM Role 的方式)
+
+
 
 實作筆記
 =======
