@@ -32,7 +32,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/helm-infra-1.jpg">
 <meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/helm-infra-2.png">
 <meta property="article:published_time" content="2018-12-22T08:40:00.000Z">
-<meta property="article:modified_time" content="2020-09-14T03:19:28.977Z">
+<meta property="article:modified_time" content="2020-09-14T21:44:35.816Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="Kubernetes">
 <meta property="article:tag" content="Helm">
@@ -255,7 +255,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-09-14 11:19:28" itemprop="dateModified" datetime="2020-09-14T11:19:28+08:00">2020-09-14</time>
+                <time title="Modified: 2020-09-15 05:44:35" itemprop="dateModified" datetime="2020-09-15T05:44:35+08:00">2020-09-15</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -402,7 +402,7 @@
 </blockquote>
 <p>詳細的設定可以參考<a target="_blank" rel="noopener" href="https://docs.helm.sh/using_helm/#role-based-access-control">官網的說明</a>。</p>
 <h1 id="開始使用-Kubernetes-Helm"><a href="#開始使用-Kubernetes-Helm" class="headerlink" title="開始使用 Kubernetes Helm"></a>開始使用 Kubernetes Helm</h1><h2 id="新增-namespace"><a href="#新增-namespace" class="headerlink" title="新增 namespace"></a>新增 namespace</h2><p>這邊先建立一個全新的 namespace(<code>helm-lab</code>) 來進行 Helm 的測試，並設定 default namespace：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 建立 namespace</span></span><br><span class="line">$ kubectl create namespace helm-lab</span><br><span class="line">namespace <span class="string">&quot;helm-lab&quot;</span> created</span><br><span class="line"></span><br><span class="line"><span class="comment"># 設定 context 所使用的 namespace</span></span><br><span class="line">$ kubectl config <span class="built_in">set</span>-context <span class="string">&quot;admin-cluster.local&quot;</span> --namespace=helm-lab</span><br><span class="line">Context <span class="string">&quot;admin-cluster.local&quot;</span> modified.</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 建立 namespace</span></span><br><span class="line">$ kubectl create namespace helm-lab</span><br><span class="line">namespace <span class="string">&quot;helm-lab&quot;</span> created</span><br><span class="line"></span><br><span class="line"><span class="comment"># 設定 context 所使用的 namespace</span></span><br><span class="line">$ kubectl config set-context <span class="string">&quot;admin-cluster.local&quot;</span> --namespace=helm-lab</span><br><span class="line">Context <span class="string">&quot;admin-cluster.local&quot;</span> modified.</span><br></pre></td></tr></table></figure>
 
 <h2 id="更新-Helm-Repo"><a href="#更新-Helm-Repo" class="headerlink" title="更新 Helm Repo"></a>更新 Helm Repo</h2><p>接著更新 Helm repository，Helm client 會取得所有 stable 的 charts：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 取得最新的 chart 資訊</span></span><br><span class="line">$ helm repo update</span><br><span class="line">Hang tight <span class="keyword">while</span> we grab the latest from your chart repositories...</span><br><span class="line">...Skip <span class="built_in">local</span> chart repository</span><br><span class="line">...Successfully got an update from the <span class="string">&quot;stable&quot;</span> chart repository</span><br><span class="line">Update Complete. ⎈ Happy Helming!⎈ </span><br><span class="line"></span><br><span class="line"><span class="comment"># 搜尋 helm charts (會出現很多 charts info)</span></span><br><span class="line">$ helm search -l</span><br><span class="line">.... (略)</span><br></pre></td></tr></table></figure>

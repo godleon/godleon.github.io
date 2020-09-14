@@ -31,7 +31,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://godleon.github.io/blog/images/devops/helm_first-chart.png">
 <meta property="article:published_time" content="2020-09-14T03:00:00.000Z">
-<meta property="article:modified_time" content="2020-09-14T03:19:28.973Z">
+<meta property="article:modified_time" content="2020-09-14T21:44:35.816Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="DevOps">
 <meta property="article:tag" content="Kubernetes">
@@ -247,10 +247,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
-              
 
-              <time title="Created: 2020-09-14 11:00:00 / Modified: 11:19:28" itemprop="dateCreated datePublished" datetime="2020-09-14T11:00:00+08:00">2020-09-14</time>
+              <time title="Created: 2020-09-14 11:00:00" itemprop="dateCreated datePublished" datetime="2020-09-14T11:00:00+08:00">2020-09-14</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-09-15 05:44:35" itemprop="dateModified" datetime="2020-09-15T05:44:35+08:00">2020-09-15</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -324,7 +330,7 @@
 </li>
 </ul>
 <h2 id="建立新的-namespace-進行開發測試"><a href="#建立新的-namespace-進行開發測試" class="headerlink" title="建立新的 namespace 進行開發測試"></a>建立新的 namespace 進行開發測試</h2><p>首先建立一個新的 namespace 來進行後續的開發測試：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 顯示目前有哪些 context</span></span><br><span class="line">$ kubectl config get-contexts</span><br><span class="line">CURRENT   NAME                                      CLUSTER                                   AUTHINFO             NAMESPACE</span><br><span class="line">*         my-vsphere-cluster                        my-vsphere-cluster                        my-vsphere-cluster   </span><br><span class="line">          my-vsphere-cluster-rancher-k8s-master-1   my-vsphere-cluster-rancher-k8s-master-1   my-vsphere-cluster   </span><br><span class="line">          my-vsphere-cluster-rancher-k8s-master-2   my-vsphere-cluster-rancher-k8s-master-2   my-vsphere-cluster   </span><br><span class="line">          my-vsphere-cluster-rancher-k8s-master-3   my-vsphere-cluster-rancher-k8s-master-3   my-vsphere-cluster</span><br><span class="line"></span><br><span class="line"><span class="comment"># 建立 namespace</span></span><br><span class="line">$ kubectl create ns/helm-test</span><br><span class="line"></span><br><span class="line"><span class="comment"># 切換目前 context 所使用的 default namespace</span></span><br><span class="line">$ kubectl config <span class="built_in">set</span>-context my-vsphere-cluster --namespace=helm-test</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 顯示目前有哪些 context</span></span><br><span class="line">$ kubectl config get-contexts</span><br><span class="line">CURRENT   NAME                                      CLUSTER                                   AUTHINFO             NAMESPACE</span><br><span class="line">*         my-vsphere-cluster                        my-vsphere-cluster                        my-vsphere-cluster   </span><br><span class="line">          my-vsphere-cluster-rancher-k8s-master-1   my-vsphere-cluster-rancher-k8s-master-1   my-vsphere-cluster   </span><br><span class="line">          my-vsphere-cluster-rancher-k8s-master-2   my-vsphere-cluster-rancher-k8s-master-2   my-vsphere-cluster   </span><br><span class="line">          my-vsphere-cluster-rancher-k8s-master-3   my-vsphere-cluster-rancher-k8s-master-3   my-vsphere-cluster</span><br><span class="line"></span><br><span class="line"><span class="comment"># 建立 namespace</span></span><br><span class="line">$ kubectl create ns/helm-test</span><br><span class="line"></span><br><span class="line"><span class="comment"># 切換目前 context 所使用的 default namespace</span></span><br><span class="line">$ kubectl config set-context my-vsphere-cluster --namespace=helm-test</span><br></pre></td></tr></table></figure>
 
 
 <h2 id="建立第一個-template"><a href="#建立第一個-template" class="headerlink" title="建立第一個 template"></a>建立第一個 template</h2><p>首先為了讓事情簡單點，先移除 <code>templates/</code> 目錄中的所有內容，並建立以下檔案：(<code>templates/configmap.yaml</code>)</p>

@@ -30,7 +30,7 @@
 <meta property="og:description" content="此文章記錄學習 RHCE RH124 Chapter 11 Managing Red Hat Enterprise Linux Networking 留下的內容">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2016-04-26T02:10:00.000Z">
-<meta property="article:modified_time" content="2020-09-14T03:19:28.981Z">
+<meta property="article:modified_time" content="2020-09-14T21:44:35.820Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="Linux">
 <meta property="article:tag" content="RHCE">
@@ -253,7 +253,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-09-14 11:19:28" itemprop="dateModified" datetime="2020-09-14T11:19:28+08:00">2020-09-14</time>
+                <time title="Modified: 2020-09-15 05:44:35" itemprop="dateModified" datetime="2020-09-15T05:44:35+08:00">2020-09-15</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -393,7 +393,7 @@
 
 <h2 id="11-5-1-Changing-the-System-host-name"><a href="#11-5-1-Changing-the-System-host-name" class="headerlink" title="11.5.1 Changing the System host name"></a>11.5.1 Changing the System host name</h2><p>若 <code>/etc/hostname</code> 不存在，則系統在網卡被分配到 ip 後，就會進行一個 DNS 的反向查詢</p>
 <p>hostname 可透過 <code>hostnamectl</code> 命令來設定</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">$ hostname</span><br><span class="line">server5.example.com</span><br><span class="line"></span><br><span class="line">$ sudo hostnamectl <span class="built_in">set</span>-hostname sercerX.example.com</span><br><span class="line"></span><br><span class="line">$ hostnamectl status</span><br><span class="line">   Static hostname: sercerx.example.com</span><br><span class="line">   Pretty hostname: sercerX.example.com</span><br><span class="line">         Icon name: computer-vm</span><br><span class="line">           Chassis: vm</span><br><span class="line">        Machine ID: adf65a29af58497b8bb516fc6d366b8d</span><br><span class="line">           Boot ID: 963e5bc0e26a42e8acf285616ed9c9b6</span><br><span class="line">    Virtualization: kvm</span><br><span class="line">  Operating System: CentOS Linux 7 (Core)</span><br><span class="line">       CPE OS Name: cpe:/o:centos:centos:7</span><br><span class="line">            Kernel: Linux 3.10.0-327.3.1.el7.x86_64</span><br><span class="line">      Architecture: x86-64</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">$ hostname</span><br><span class="line">server5.example.com</span><br><span class="line"></span><br><span class="line">$ sudo hostnamectl set-hostname sercerX.example.com</span><br><span class="line"></span><br><span class="line">$ hostnamectl status</span><br><span class="line">   Static hostname: sercerx.example.com</span><br><span class="line">   Pretty hostname: sercerX.example.com</span><br><span class="line">         Icon name: computer-vm</span><br><span class="line">           Chassis: vm</span><br><span class="line">        Machine ID: adf65a29af58497b8bb516fc6d366b8d</span><br><span class="line">           Boot ID: 963e5bc0e26a42e8acf285616ed9c9b6</span><br><span class="line">    Virtualization: kvm</span><br><span class="line">  Operating System: CentOS Linux 7 (Core)</span><br><span class="line">       CPE OS Name: cpe:/o:centos:centos:7</span><br><span class="line">            Kernel: Linux 3.10.0-327.3.1.el7.x86_64</span><br><span class="line">      Architecture: x86-64</span><br></pre></td></tr></table></figure>
 
 <h2 id="11-5-2-Configuring-name-resolution"><a href="#11-5-2-Configuring-name-resolution" class="headerlink" title="11.5.2 Configuring name resolution"></a>11.5.2 Configuring name resolution</h2><blockquote>
 <p>若查詢簡短名稱，系統會自動戴上 <code>/etc/resolv.conf</code> 中的 <code>domain</code> or <code>search</code> 的值再查詢</p>
