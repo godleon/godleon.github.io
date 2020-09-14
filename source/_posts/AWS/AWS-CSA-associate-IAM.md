@@ -113,6 +113,45 @@ IAM Policy
 - **IAM policy 是無法與 AWS resource/service 綁定的**，它是用來指定給 IAM user/group 用的
 
 
+IAM User/Group
+==============
+
+- 每個 IAM User 都可以給予不同的權限
+
+- IAM Group 可以一次賦予多個使用者相同的權限(`設定權限` -> `指定加入到 Group 的 User`)
+
+
+
+IAM Role
+========
+
+- IAM Role 是為了讓 IAM User/Group、AWS Resource(例如：EC2 instance)、臨時需要存取 AWS 資源的外部帳號 ... 等取得權限用的機制
+
+- IAM Policy 無法直接套用在 AWS service 上 (因此若是要賦予 EC2 instance 權限，那只能使用 IAM Role)
+
+- **以上述範例來說，也可以使用 AWS credential(Access ID & Secret Key) 來達成相同效果，但完全不建議這麼做，會造成管理上很大負擔**
+
+- **每一個 EC2 instance 只能與一個 IAM Role 的設定綁定**；因此在複雜環境下，Role 權限設定要謹慎評估
+
+- 外部帳號(不是 IAM User)需要存取權限，就必須透過整合 SAML provider(例如：AD) 的方式，搭配 IAM Role 來取得所需要的權限
+
+## Role Type
+
+`Role Type` 的概念很重要，這是用來決定要將權限賦予到那一種 entity(實體)上，首先要先有以下概念：
+
+- IAM Role 會與 IAM Policy 綁定，透過此方式來讓 Role 有特定的 AWS resource 存取權限
+
+- IAM Role 使用在特定的 entity 上，並非一般的 IAM User & Group
+
+有了以上概念後，接著繼續介紹 IAM Role Type 有以下三種：
+
+1. `AWS Service Role`：AWS 相關服務，例如：EC2、Lambda、Redshift ... etc
+
+2. `Role for Cross-Account Access`：用來設定跨帳號存取權限用
+
+3. `Role for Identity Provider Access`：若是帳號與外部系統(例如：透過 SAML)整合，就可以使用此種 role type 設定外部帳號權限
+
+
 
 實作筆記
 =======
