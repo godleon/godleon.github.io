@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="此篇文章是極客時間&quot;從 0 開始學架構&quot;課程時所留下的學習筆記，主要內容是如何透過設計 Multi-Site HA 架構，在設計此類架構時需要注意的重點，藉此達到業務高可用的目的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[架構設計] Multi-Site High Avalibility">
+<meta property="og:url" content="https://godleon.github.io/blog/Architecture_Design/Architecture-Design-Multiple-Site-HA/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章是極客時間&quot;從 0 開始學架構&quot;課程時所留下的學習筆記，主要內容是如何透過設計 Multi-Site HA 架構，在設計此類架構時需要注意的重點，藉此達到業務高可用的目的">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://godleon.github.io/blog/images/architecture-design/multiple-sites-sync-data-solutions.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/architecture-design/multiple-sites-data-leveling-example.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/architecture-design/multiple-sites-data-leveling-example.png">
+<meta property="article:published_time" content="2020-09-15T03:40:00.000Z">
+<meta property="article:modified_time" content="2020-09-15T03:41:42.851Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="Architecture Design">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/architecture-design/multiple-sites-sync-data-solutions.png">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/Architecture_Design/Architecture-Design-Multiple-Site-HA/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>[架構設計] Multi-Site High Avalibility | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A5%AD%E5%8B%99%E9%AB%98%E5%8F%AF%E7%94%A8%E7%9A%84%E4%BF%9D%E9%9A%9C%EF%BC%9AMulti-Site-HA-%E7%95%B0%E5%9C%B0%E5%A4%9A%E6%B4%BB"><span class="nav-number">1.</span> <span class="nav-text">業務高可用的保障：Multi-Site HA(異地多活)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%87%89%E7%94%A8%E5%A0%B4%E6%99%AF"><span class="nav-number">1.1.</span> <span class="nav-text">應用場景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9E%B6%E6%A7%8B%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.2.</span> <span class="nav-text">架構模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%8C%E5%9F%8E%E7%95%B0%E5%8D%80"><span class="nav-number">1.2.1.</span> <span class="nav-text">同城異區</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B7%A8%E5%9F%8E%E7%95%B0%E5%9C%B0"><span class="nav-number">1.2.2.</span> <span class="nav-text">跨城異地</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B7%A8%E5%9C%8B%E7%95%B0%E5%9C%B0"><span class="nav-number">1.2.3.</span> <span class="nav-text">跨國異地</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A8%8E%E8%AB%96%E6%95%B4%E7%90%86%E7%B2%BE%E8%8F%AF"><span class="nav-number">1.3.</span> <span class="nav-text">討論整理精華</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Multi-Site-HA-%E8%A8%AD%E8%A8%88-4-%E5%A4%A7%E6%8A%80%E5%B7%A7"><span class="nav-number">2.</span> <span class="nav-text">Multi-Site HA 設計 4 大技巧</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%80%E5%B7%A7-1%EF%BC%9A%E4%BF%9D%E8%AD%89%E6%A0%B8%E5%BF%83%E6%A5%AD%E5%8B%99%E7%9A%84-Multi-Site-HA"><span class="nav-number">2.1.</span> <span class="nav-text">技巧 1：保證核心業務的 Multi-Site HA</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%80%E5%B7%A7-2%EF%BC%9A%E4%BF%9D%E8%AD%89%E6%A0%B8%E5%BF%83%E8%B3%87%E6%96%99%E6%9C%80%E7%B5%82%E4%B8%80%E8%87%B4%E6%80%A7"><span class="nav-number">2.2.</span> <span class="nav-text">技巧 2：保證核心資料最終一致性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%80%E5%B7%A7-3%EF%BC%9A%E6%8E%A1%E7%94%A8%E5%A4%9A%E7%A8%AE%E6%89%8B%E6%AE%B5%E5%90%8C%E6%AD%A5%E8%B3%87%E6%96%99"><span class="nav-number">2.3.</span> <span class="nav-text">技巧 3：採用多種手段同步資料</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%80%E5%B7%A7-4%EF%BC%9A%E5%8F%AA%E4%BF%9D%E8%AD%89%E7%B5%95%E5%A4%A7%E9%83%A8%E5%88%86%E7%94%A8%E6%88%B6%E7%9A%84Multi-Site-HA"><span class="nav-number">2.4.</span> <span class="nav-text">技巧 4：只保證絕大部分用戶的Multi-Site HA</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A8%8E%E8%AB%96%E6%95%B4%E7%90%86%E7%B2%BE%E8%8F%AF-1"><span class="nav-number">2.5.</span> <span class="nav-text">討論整理精華</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Multi-Site-HA-%E8%A8%AD%E8%A8%88-4-%E6%AD%A5%E8%B5%B0"><span class="nav-number">3.</span> <span class="nav-text">Multi-Site HA 設計 4 步走</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Step-1%EF%BC%9A%E6%A5%AD%E5%8B%99%E5%88%86%E7%B4%9A"><span class="nav-number">3.1.</span> <span class="nav-text">Step 1：業務分級</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Step-2%EF%BC%9A%E8%B3%87%E6%96%99%E5%88%86%E9%A1%9E"><span class="nav-number">3.2.</span> <span class="nav-text">Step 2：資料分類</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Step-3%EF%BC%9A%E8%B3%87%E6%96%99%E5%90%8C%E6%AD%A5"><span class="nav-number">3.3.</span> <span class="nav-text">Step 3：資料同步</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%98%E5%84%B2%E7%B3%BB%E7%B5%B1%E5%90%8C%E6%AD%A5"><span class="nav-number">3.3.1.</span> <span class="nav-text">存儲系統同步</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E9%9A%8A%E5%88%97%E5%90%8C%E6%AD%A5"><span class="nav-number">3.3.2.</span> <span class="nav-text">消息隊列同步</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E8%A4%87%E7%94%9F%E6%88%90"><span class="nav-number">3.3.3.</span> <span class="nav-text">重複生成</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Step-4%EF%BC%9A%E7%95%B0%E5%B8%B8%E8%99%95%E7%90%86"><span class="nav-number">3.4.</span> <span class="nav-text">Step 4：異常處理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E9%80%9A%E9%81%93%E5%90%8C%E6%AD%A5"><span class="nav-number">3.4.1.</span> <span class="nav-text">多通道同步</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%8C%E6%AD%A5%E5%92%8C%E8%A8%AA%E5%95%8F%E7%B5%90%E5%90%88"><span class="nav-number">3.4.2.</span> <span class="nav-text">同步和訪問結合</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%A5%E8%AA%8C%E8%A8%98%E9%8C%84"><span class="nav-number">3.4.3.</span> <span class="nav-text">日誌記錄</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E6%88%B6%E8%A3%9C%E5%84%9F"><span class="nav-number">3.4.4.</span> <span class="nav-text">用戶補償</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A8%8E%E8%AB%96%E6%95%B4%E7%90%86%E7%B2%BE%E8%8F%AF-2"><span class="nav-number">3.5.</span> <span class="nav-text">討論整理精華</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Reference"><span class="nav-number">4.</span> <span class="nav-text">Reference</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">132</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">101</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/Architecture_Design/Architecture-Design-Multiple-Site-HA/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [架構設計] Multi-Site High Avalibility
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2020-09-15 11:40:00 / Modified: 11:41:42" itemprop="dateCreated datePublished" datetime="2020-09-15T11:40:00+08:00">2020-09-15</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Architecture-Design/" itemprop="url" rel="index"><span itemprop="name">Architecture Design</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/Architecture_Design/Architecture-Design-Multiple-Site-HA/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="Architecture_Design/Architecture-Design-Multiple-Site-HA/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此篇文章是極客時間"從 0 開始學架構"課程時所留下的學習筆記，主要內容是如何透過設計 Multi-Site HA 架構，在設計此類架構時需要注意的重點，藉此達到業務高可用的目的</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="業務高可用的保障：Multi-Site-HA-異地多活"><a href="#業務高可用的保障：Multi-Site-HA-異地多活" class="headerlink" title="業務高可用的保障：Multi-Site HA(異地多活)"></a>業務高可用的保障：Multi-Site HA(異地多活)</h1><ul>
+<li><p>由於備份系統平時不對外提供服務，可能會存在很多隱藏的問題沒有發現</p>
+</li>
+<li><p>如果業務期望達到即使在災難性故障發生的情況下，業務也不受影響，或是在短時間內很快恢復，那麼就需要設計 Multi-Site HA 架構</p>
+</li>
+</ul>
+<h2 id="應用場景"><a href="#應用場景" class="headerlink" title="應用場景"></a>應用場景</h2><ul>
+<li><p>Multi-Site HA 架構的關鍵點就是<code>Multi-Site</code>(地理位置上不同的地方)、<code>High Availability(HA)</code>(不同地理位置上的系統都能夠提供業務服務)</p>
+</li>
+<li><p>判斷一個系統是否符合 Multi-Site HA ，需要滿足兩個標準：</p>
+<ul>
+<li>正常情況下，用戶無論訪問哪一個地點的業務系統，都能夠得到正確的業務服務</li>
+<li>某個地方業務異常的時候，用戶訪問其他地方正常的業務系統，能夠得到正確的業務服務</li>
+</ul>
+</li>
+<li><p>實現 Multi-Site HA 架構不是沒有代價的，相反其代價很高：</p>
+<ul>
+<li>系統複雜度會發生質的變化</li>
+<li>成本會上升</li>
+</ul>
+</li>
+<li><p>不是每個業務都要上 Multi-Site HA </p>
+<ul>
+<li>如果無法承受 Multi-Site HA 帶來的複雜度和成本，是可以不做 Multi-Site HA 的，只需要做 Multi-Site backup 即可</li>
+<li>某些業務系統即使中斷，對用戶的影響並不會很大(例如：新聞網站、企業內部的 IT 系統)</li>
+</ul>
+</li>
+<li><p>如果業務規模很大，能夠做 Multi-Site HA 的情況下還是儘量完成</p>
+<ul>
+<li>能夠在異常的場景下給用戶提供更好的體驗</li>
+<li>Multi-Site HA 能夠減少異常發生時所帶來的收入損失</li>
+</ul>
+</li>
+</ul>
+<h2 id="架構模式"><a href="#架構模式" class="headerlink" title="架構模式"></a>架構模式</h2><p>根據地理位置上的距離來劃分，可以分成以下三種架構：</p>
+<h3 id="同城異區"><a href="#同城異區" class="headerlink" title="同城異區"></a>同城異區</h3><ul>
+<li><p>同城異區指的是將業務部署在同一個城市不同區的多個機房</p>
+</li>
+<li><p>同城的兩個機房，距離上一般大約就是幾十公里，通過搭建高速的網路，同城異區的兩個機房能夠實現和同一個機房內幾乎一樣的網路傳輸速度(邏輯上可視為同一個機房，類似 AWS AZ)</p>
+</li>
+<li><p>對於極端場景(例如：大地震)無能為力；但對於機房火災、機房停電、機房空調故障這類問題可以很容易解決(兩種狀況都會讓機房出問題造成業務停擺)</p>
+</li>
+<li><p><strong>結合複雜度、成本、故障發生機率來綜合考慮，同城異區是應對機房級別故障的最優架構</strong></p>
+</li>
+</ul>
+<h3 id="跨城異地"><a href="#跨城異地" class="headerlink" title="跨城異地"></a>跨城異地</h3><ul>
+<li><p>跨城異地指的是業務部署在不同城市的多個機房，而且<strong>距離最好要遠一些</strong></p>
+</li>
+<li><p><strong>距離上比較遠，才能有效應對極端災難事件</strong></p>
+</li>
+<li><p>距離增加帶來的最主要問題是<strong>兩個機房的網路傳輸速度會降低</strong></p>
+</li>
+<li><p>除了距離上的限制，中間傳輸各種不可控的因素也非常多(例如：挖掘機把光纖挖斷、中美海底電纜被拖船扯斷、骨幹網故障 … etc)</p>
+</li>
+<li><p>跨城異區距離太遠，搭建或者使用多通道的成本會高不少</p>
+</li>
+<li><p>如果要做到真正意義上的多活，<strong>業務系統需要考慮部署在不同地點的兩個機房，在資料短時間不一致的情況下，還能夠正常提供業務</strong></p>
+</li>
+<li><p>矛盾點：資料不一致業務肯定不會正常，但跨城異地肯定會導致資料不一致</p>
+</li>
+<li><p>支付寶等金融相關的系統，對<strong>餘額</strong>這類資料，一般不會做跨城異地的多活架構，而只能採用同城異區這種架構</p>
+</li>
+<li><p>對資料一致性要求不那麼高，或者資料不怎麼改變，或者即使資料丟失影響也不大的業務，跨城級別的 Multi-Site HA 就能夠很好地應對極端災難的場景</p>
+</li>
+</ul>
+<h3 id="跨國異地"><a href="#跨國異地" class="headerlink" title="跨國異地"></a>跨國異地</h3><ul>
+<li><p>跨國異地指的是業務部署在不同國家的多個機房</p>
+</li>
+<li><p>跨國 Multi-Site HA 的主要應用場景一般有這幾種情況：</p>
+<ul>
+<li>為不同地區用戶提供服務</li>
+<li>為 read-only 類型的業務做 HA</li>
+</ul>
+</li>
+</ul>
+<h2 id="討論整理精華"><a href="#討論整理精華" class="headerlink" title="討論整理精華"></a>討論整理精華</h2><ul>
+<li><p>備份系統平常沒有流量，如果直接上線可能觸發平常測試不到的故障</p>
+</li>
+<li><p>再即時的系統也會有資料延時，如果涉及到金融這種系統，仍然是不敢直接切換的。</p>
+</li>
+<li><p>系統運行過程中會有很多中間資料，緩存資料等。系統不經過預熱直接把流量倒過來，大流量會直接把系統拖垮</p>
+</li>
+<li><p>餘額資料同城異區對比跨城異地在資料一致性上同樣存在時間差，只是時間窗口更小而己，如果兩地都支持寫的話，存在被雙花攻擊的可能，風險還是很大 =&gt; <strong>餘額和庫存一般不做雙寫</strong></p>
+</li>
+<li><p>同城異區也是有延遲的，但是延遲小，故障切換時快，但總是有可能有用戶資料不一致，這種數量小就可以容忍，人工修復和事後補償的代價都可以接受，<strong>不存在所有用戶都沒任何問題的方案</strong></p>
+</li>
+</ul>
+<h1 id="Multi-Site-HA-設計-4-大技巧"><a href="#Multi-Site-HA-設計-4-大技巧" class="headerlink" title="Multi-Site HA 設計 4 大技巧"></a>Multi-Site HA 設計 4 大技巧</h1><ul>
+<li>核心理念：<strong>採用多種手段，保證絕大部分用戶的核心業務 Multi-Site HA</strong></li>
+</ul>
+<h2 id="技巧-1：保證核心業務的-Multi-Site-HA"><a href="#技巧-1：保證核心業務的-Multi-Site-HA" class="headerlink" title="技巧 1：保證核心業務的 Multi-Site HA"></a>技巧 1：保證核心業務的 Multi-Site HA</h2><ul>
+<li><p>很多架構師在考慮”業務”時，會不自覺地陷入一個思維誤區：<code>我要保證所有業務都能 Multi-Site HA</code> (但這是不可能的)</p>
+</li>
+<li><p>修改核心業務規則的代價非常大，幾乎所有的業務都要重新設計，為了架構設計去改變業務規則是得不償失的</p>
+</li>
+<li><p>優先實現核心業務的 Multi-Site HA 架構(例如：業務中的”登錄”功能)</p>
+</li>
+</ul>
+<h2 id="技巧-2：保證核心資料最終一致性"><a href="#技巧-2：保證核心資料最終一致性" class="headerlink" title="技巧 2：保證核心資料最終一致性"></a>技巧 2：保證核心資料最終一致性</h2><ul>
+<li><p><strong>資料同步</strong>是Multi-Site HA 架構設計的核心；但大部分架構師在考慮資料同步方案時，會不知不覺地陷入完美主義誤區：<code>所有資料都即時同步</code></p>
+</li>
+<li><p>業務上要求資料快速同步，物理上正好做不到資料快速同步，因此<strong>所有資料都即時同步，實際上是一個無法達到的目標</strong></p>
+</li>
+<li><p>如何減少資料無法快速同步的影響?</p>
+<ul>
+<li>儘量減少 Multi-Site HA 機房的距離，搭建高速網路</li>
+<li>儘量減少資料同步，只同步核心業務相關的資料</li>
+<li>保證最終一致性(Eventually Consistency)，不保證即時一致性</li>
+</ul>
+</li>
+<li><p>最終一致性在具體實現時，還需要根據不同的資料特徵，進行差異化的處理，以滿足業務需要</p>
+</li>
+</ul>
+<h2 id="技巧-3：採用多種手段同步資料"><a href="#技巧-3：採用多種手段同步資料" class="headerlink" title="技巧 3：採用多種手段同步資料"></a>技巧 3：採用多種手段同步資料</h2><ul>
+<li><p>思維誤區：只使用存儲系統(例如：MySQL, Redis, Elasticsearch … etc)的同步功能</p>
+</li>
+<li><p>在某些比較極端的情況下，存儲系統本身的同步功能可能難以滿足業務需求</p>
+</li>
+<li><p>異地多機房這種部署，各種各樣的異常情況都可能出現，當我們只考慮存儲系統本身的同步功能時，就會發現無法做到真正的 Multi-Site HA </p>
+</li>
+<li><p>避免只使用存儲系統的同步功能，可以將多種手段配合存儲系統的同步來使用，甚至可以不採用存儲系統的同步方案，改用自己的同步方案：</p>
+<ul>
+<li>消息隊列方式</li>
+<li>二次讀取方式</li>
+<li>存儲系統同步方式</li>
+<li>回源讀取方式</li>
+<li>重新產生資料方式</li>
+</ul>
+</li>
+<li><p>以下是資料同步方案架構示意圖：<br><img src="/blog/images/architecture-design/multiple-sites-sync-data-solutions.png" alt="multiple sites - data synchronization solutions"></p>
+</li>
+</ul>
+<h2 id="技巧-4：只保證絕大部分用戶的Multi-Site-HA"><a href="#技巧-4：只保證絕大部分用戶的Multi-Site-HA" class="headerlink" title="技巧 4：只保證絕大部分用戶的Multi-Site HA"></a>技巧 4：只保證絕大部分用戶的Multi-Site HA</h2><ul>
+<li><p>Multi-Site HA 也無法保證 100% 的業務可用，這是由物理規律決定的，光速和網路的傳播速度、硬盤的讀寫速度、極端異常情況的不可控等，都是無法 100% 解決的</p>
+</li>
+<li><p>雖然我們無法做到 100% 可用性，但可以採取一些措施進行安撫或者補償：</p>
+<ul>
+<li>發佈公告</li>
+<li>事後對用戶進行補償</li>
+<li>補充體驗 (例如：轉帳完成後的主動通知)</li>
+</ul>
+</li>
+</ul>
+<h2 id="討論整理精華-1"><a href="#討論整理精華-1" class="headerlink" title="討論整理精華"></a>討論整理精華</h2><ul>
+<li><p>OceanBase 屬於強一致分佈式資料庫，可以使業務不需要考慮持久層的跨地域資料同步問題</p>
+</li>
+<li><p>但付出的代價是 request response time 會變大，可用性也有降低，所以對 response time 要求非常高的業務可能不會選擇，其實還是對業務有影響的</p>
+</li>
+<li><p>如果代價可以承受，業務端還要解決 cache 的一致性問題，流量切到其它可用區的壓力是不是承受的住，可能還是需要部分業務降級</p>
+</li>
+<li><p>所以分佈式資料庫不能完全做到業務無感知的 Multi-Site HA </p>
+</li>
+<li><p>根據經濟能力、所需時間及業務要求有先後地選擇 Multi-Site HA 的業務及業務多活的形式</p>
+</li>
+</ul>
+<h1 id="Multi-Site-HA-設計-4-步走"><a href="#Multi-Site-HA-設計-4-步走" class="headerlink" title="Multi-Site HA 設計 4 步走"></a>Multi-Site HA 設計 4 步走</h1><h2 id="Step-1：業務分級"><a href="#Step-1：業務分級" class="headerlink" title="Step 1：業務分級"></a>Step 1：業務分級</h2><ul>
+<li><p>按照一定的標準將業務進行分級，挑選出核心的業務，只為核心業務設計 Multi-Site HA ，降低方案整體複雜度和實現成本</p>
+</li>
+<li><p>常見的分級標準：</p>
+<ul>
+<li>訪問量大的業務</li>
+<li>核心業務</li>
+<li>產生大量收入的業務</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>以用戶管理系統為例，”登錄”業務符合”訪問量大的業務”和”核心業務”這兩條標準</p>
+</blockquote>
+<h2 id="Step-2：資料分類"><a href="#Step-2：資料分類" class="headerlink" title="Step 2：資料分類"></a>Step 2：資料分類</h2><ul>
+<li><p>核心業務相關的資料進一步分析，目的在於識別所有的資料及資料特徵，這些資料特徵會影響後面的方案設計</p>
+</li>
+<li><p>常見的資料特徵分析維度：</p>
+<ul>
+<li><strong>資料量</strong>：資料量越大，同步延遲的機率越高，同步方案需要考慮相應的解決方案</li>
+<li><strong>唯一性</strong>：是否要求多個異地機房產生的同類資料必須保證唯一(需要設計一個資料唯一生成的算法)</li>
+<li><strong>即時性</strong>：即時性要求越高，對同步的要求越高，方案越複雜</li>
+<li><strong>可丟失性</strong>：資料是否可以丟失</li>
+<li><strong>可恢復性</strong>：資料丟失後，是否可以通過某種手段進行恢復</li>
+</ul>
+</li>
+<li><p>以用戶管理系統的登錄業務為例的分析範例：<br><img src="/blog/images/architecture-design/multiple-sites-data-leveling-example.png" alt="multiple sites - data leveling example"></p>
+</li>
+</ul>
+<h2 id="Step-3：資料同步"><a href="#Step-3：資料同步" class="headerlink" title="Step 3：資料同步"></a>Step 3：資料同步</h2><p>常見的資料同步方案有以下幾種：</p>
+<h3 id="存儲系統同步"><a href="#存儲系統同步" class="headerlink" title="存儲系統同步"></a>存儲系統同步</h3><ul>
+<li><p>優點是使用簡單，因為幾乎主流的存儲系統都會有自己的同步方案</p>
+</li>
+<li><p>缺點是這類同步方案都是通用的，無法針對業務資料特點做定製化的控制</p>
+<blockquote>
+<p>例如：無論需要同步的資料量有多大，MySQL 都只有一個同步通道。因為要保證事務性，一旦資料量比較大，或者網路有延遲，則同步延遲就會比較嚴重</p>
+</blockquote>
+</li>
+</ul>
+<h3 id="消息隊列同步"><a href="#消息隊列同步" class="headerlink" title="消息隊列同步"></a>消息隊列同步</h3><ul>
+<li>適合無事務性或者無時序性要求的資料</li>
+</ul>
+<h3 id="重複生成"><a href="#重複生成" class="headerlink" title="重複生成"></a>重複生成</h3><ul>
+<li><p>資料不同步到異地機房，每個機房都可以生成資料，這個方案適合於可以重複生成的資料</p>
+</li>
+<li><p>登錄產生的 cookie、session 資料、緩存資料適合此方案</p>
+</li>
+<li><p>以用戶管理系統的登錄業務為例的分析範例：<br><img src="/blog/images/architecture-design/multiple-sites-data-leveling-example.png" alt="multiple sites - data leveling example"></p>
+</li>
+</ul>
+<h2 id="Step-4：異常處理"><a href="#Step-4：異常處理" class="headerlink" title="Step 4：異常處理"></a>Step 4：異常處理</h2><ul>
+<li><p>無論資料同步方案如何設計，一旦出現極端異常的情況，總是會有部分資料出現異常的</p>
+</li>
+<li><p>異常處理就是假設在出現這些問題時，系統將採取什麼措施來應對</p>
+</li>
+<li><p>異常處理主要有以下幾個目的：</p>
+<ul>
+<li>問題發生時，避免少量資料異常導致整體業務不可用。</li>
+<li>問題恢復後，將異常的資料進行修正。</li>
+<li>對用戶進行安撫，彌補用戶損失</li>
+</ul>
+</li>
+<li><p>常見的異常處理措施：</p>
+</li>
+</ul>
+<h3 id="多通道同步"><a href="#多通道同步" class="headerlink" title="多通道同步"></a>多通道同步</h3><ul>
+<li><p>採取多種方式來進行資料同步，其中某條通道故障的情況下，系統可以通過其他方式來進行同步</p>
+</li>
+<li><p>設計的方案關鍵點：</p>
+<ul>
+<li>一般情況下，採取兩通道即可，採取更多通道理論上能夠降低風險，但付出的成本也會增加很多</li>
+<li>資料庫同步通道和消息隊列同步通道不能採用相同的網路連接</li>
+<li>需要資料是可以重複覆蓋的，這表示無論那個通道的資料先到，或是那個通道的資料後到，最終結果是一樣的</li>
+</ul>
+</li>
+</ul>
+<h3 id="同步和訪問結合"><a href="#同步和訪問結合" class="headerlink" title="同步和訪問結合"></a>同步和訪問結合</h3><ul>
+<li><p>指異地機房通過系統開放的接口來進行資料訪問</p>
+</li>
+<li><p>設計關鍵點：</p>
+<ul>
+<li>接口訪問通道和資料庫同步通道不能採用相同的網路連接</li>
+<li>資料有路由規則，可以根據資料來推斷應該訪問哪個機房的接口來讀取資料</li>
+<li>由於有同步通道，優先讀取本地資料，本地資料無法讀取到再通過接口去訪問，這樣可以大大降低跨機房的異地接口訪問數量，適合於即時性要求非常高的資料</li>
+</ul>
+</li>
+</ul>
+<h3 id="日誌記錄"><a href="#日誌記錄" class="headerlink" title="日誌記錄"></a>日誌記錄</h3><ul>
+<li><p>用於用戶故障恢復後對資料進行恢復</p>
+</li>
+<li><p>每個關鍵操作前後都記錄相關一條日誌，然後將日誌保存在一個獨立的地方，當故障恢復後，拿出日誌跟資料進行對比，對資料進行修復</p>
+</li>
+<li><p>應對不同級別的故障，日誌保存的要求也不一樣</p>
+</li>
+<li><p>常見的日誌保存方式：</p>
+<ul>
+<li>服務器上保存日誌，資料庫中保存資料</li>
+<li>本地獨立系統保存日誌</li>
+<li>日誌異地保存</li>
+</ul>
+</li>
+</ul>
+<h3 id="用戶補償"><a href="#用戶補償" class="headerlink" title="用戶補償"></a>用戶補償</h3><ul>
+<li><p>無論採用什麼樣的異常處理措施，都只能最大限度地降低受到影響的範圍和程度，無法完全做到沒有任何影響</p>
+</li>
+<li><p>可以採用人工的方式對用戶進行補償，彌補用戶損失，培養用戶的忠誠度</p>
+</li>
+</ul>
+<h2 id="討論整理精華-2"><a href="#討論整理精華-2" class="headerlink" title="討論整理精華"></a>討論整理精華</h2><ul>
+<li><p>可通過預期貨幣價值分析，進行業務分級；大致維度如下：風險發生概率、風險損耗成本、技術改造成本、技術改造時長(月)、改造後成本節省(月)</p>
+</li>
+<li><p>通常來說 to C 的應用，影響用戶使用的應該是比較靠前的，尤其是產品還處於搶市場的階段</p>
+</li>
+<li><p>to B 的應用客戶買的是專業性，相對來說用戶體驗可以往後排，用戶能使用和公司收入還是比較重要的；而客戶相對固定，可以通過客服主動聯繫客戶的方式來做部分挽回</p>
+</li>
+<li><p>不同類型的公司，對於業務重要性分類是不一樣的，公司階段的不同也不一樣(例如：新聞的初創公司，第一步就是積累用戶，體驗第二，最後是收入)</p>
+</li>
+<li><p>公司新推出了一個業務，目的是提高用戶的粘性，這類用戶體驗首先解決，然後投訴，最後收入</p>
+</li>
+<li><p>轉賬收費類業務，那優先保證的就是收入了，其次就是投訴，最後是體驗</p>
+</li>
+</ul>
+<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://time.geekbang.org/column/intro/81">從0開始學架構_架構基礎_架構入門-極客時間</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/Architecture-Design/" rel="tag"># Architecture Design</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/DevOps/Helm-v3-Chart-Template-Guide/" rel="prev" title="[Helm] Helm v3 使用簡介">
+                  <i class="fa fa-chevron-left"></i> [Helm] Helm v3 使用簡介
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/Architecture_Design/Architecture-Design-Multiple-Site-HA/";
+    this.page.identifier = "Architecture_Design/Architecture-Design-Multiple-Site-HA/";
+    this.page.title = "[架構設計] Multi-Site High Avalibility";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>
