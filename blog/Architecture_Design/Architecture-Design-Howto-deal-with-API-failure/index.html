@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="此篇文章是極客時間&quot;從 0 開始學架構&quot;課程時所留下的學習筆記，主要內容是如何透過架構設計與維運技巧，來應對 API 級別的故障">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[架構設計] 如何應對 API 級別故障">
+<meta property="og:url" content="https://godleon.github.io/blog/Architecture_Design/Architecture-Design-Howto-deal-with-API-failure/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章是極客時間&quot;從 0 開始學架構&quot;課程時所留下的學習筆記，主要內容是如何透過架構設計與維運技巧，來應對 API 級別的故障">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://godleon.github.io/blog/images/architecture-design/downgrade-arch.png">
+<meta property="article:published_time" content="2020-09-15T09:35:00.000Z">
+<meta property="article:modified_time" content="2020-09-15T09:38:49.980Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="Architecture Design">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/architecture-design/downgrade-arch.png">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/Architecture_Design/Architecture-Design-Howto-deal-with-API-failure/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>[架構設計] 如何應對 API 級別故障 | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#API-%E6%95%85%E9%9A%9C"><span class="nav-number">1.</span> <span class="nav-text">API 故障</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%A7%A3%E6%B1%BA%E6%96%B9%E5%BC%8F"><span class="nav-number">2.</span> <span class="nav-text">解決方式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%8D%E7%B4%9A"><span class="nav-number">2.1.</span> <span class="nav-text">降級</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B3%BB%E7%B5%B1%E5%BE%8C%E9%96%80%E9%99%8D%E7%B4%9A"><span class="nav-number">2.1.1.</span> <span class="nav-text">系統後門降級</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8D%A8%E7%AB%8B%E9%99%8D%E7%B4%9A%E7%B3%BB%E7%B5%B1"><span class="nav-number">2.1.2.</span> <span class="nav-text">獨立降級系統</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%86%94%E6%96%B7"><span class="nav-number">2.2.</span> <span class="nav-text">熔斷</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%90%E6%B5%81"><span class="nav-number">2.3.</span> <span class="nav-text">限流</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A5%E2%80%9D%E8%AB%8B%E6%B1%82%E2%80%9D%E7%82%BA%E5%9F%BA%E7%A4%8E%E9%99%90%E6%B5%81"><span class="nav-number">2.3.1.</span> <span class="nav-text">以”請求”為基礎限流</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A5%E2%80%9D%E8%B3%87%E6%BA%90%E2%80%9D%E5%9F%BA%E7%A4%8E%E9%99%90%E6%B5%81"><span class="nav-number">2.3.2.</span> <span class="nav-text">以”資源”基礎限流</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%92%E9%9A%8A"><span class="nav-number">2.4.</span> <span class="nav-text">排隊</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%A8%8E%E8%AB%96%E6%95%B4%E7%90%86%E7%B2%BE%E8%8F%AF"><span class="nav-number">3.</span> <span class="nav-text">討論整理精華</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Solution-1"><span class="nav-number">3.1.</span> <span class="nav-text">Solution 1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Solution-2"><span class="nav-number">3.2.</span> <span class="nav-text">Solution 2</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E6%80%9D%E8%80%83"><span class="nav-number">3.3.</span> <span class="nav-text">其他思考</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Reference"><span class="nav-number">4.</span> <span class="nav-text">Reference</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">133</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">101</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/Architecture_Design/Architecture-Design-Howto-deal-with-API-failure/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [架構設計] 如何應對 API 級別故障
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2020-09-15 17:35:00 / Modified: 17:38:49" itemprop="dateCreated datePublished" datetime="2020-09-15T17:35:00+08:00">2020-09-15</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Architecture-Design/" itemprop="url" rel="index"><span itemprop="name">Architecture Design</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/Architecture_Design/Architecture-Design-Howto-deal-with-API-failure/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="Architecture_Design/Architecture-Design-Howto-deal-with-API-failure/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此篇文章是極客時間"從 0 開始學架構"課程時所留下的學習筆記，主要內容是如何透過架構設計與維運技巧，來應對 API 級別的故障</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="API-故障"><a href="#API-故障" class="headerlink" title="API 故障"></a>API 故障</h1><ul>
+<li><p>multi-site HA 主要應對系統級的故障，例如，機器當機、機房故障、網路故障等問題，這些系統級的故障雖然影響很大，但發生機率較小</p>
+</li>
+<li><p>而 API 級別的故障發生機率就相對高了</p>
+</li>
+<li><p>API 級別故障的典型表現就是系統並沒有當機，網路也沒有中斷，但業務卻出現問題了(例如：業務響應緩慢、大量 request timeout、大量訪問出現異常)</p>
+</li>
+<li><p>這類問題的主要原因在於系統壓力太大、負載太高，導致無法快速處理業務請求，由此引發更多的後續問題(例如：DB Slow Query 將資料庫的服務器資源耗盡，導致讀寫超時)</p>
+</li>
+<li><p>導致 API 故障的原因：</p>
+<ul>
+<li>內部原因：程式 bug 導致死循環，某個 API 導致 DB Slow Query，程式邏輯不完善導致耗盡 memory 等</li>
+<li>外部原因：Hacker 攻擊、促銷或者搶購引入了超出平常幾倍甚至幾十倍的使用者，第三方系統大量請求，第三方系統響應緩慢等</li>
+</ul>
+</li>
+</ul>
+<h1 id="解決方式"><a href="#解決方式" class="headerlink" title="解決方式"></a>解決方式</h1><h2 id="降級"><a href="#降級" class="headerlink" title="降級"></a>降級</h2><ul>
+<li><p>系統將某些業務或者 API 的功能降低，可以是只提供部分功能，也可以是完全停掉所有功能</p>
+</li>
+<li><p>降級的核心思想就是棄車保帥，<strong>優先保證核心業務</strong>(例如：對於論壇來說，90% 的流量是看討論串，那我們就優先保證看討論串的功能)</p>
+</li>
+</ul>
+<p>常見的實現降級方式：</p>
+<h3 id="系統後門降級"><a href="#系統後門降級" class="headerlink" title="系統後門降級"></a>系統後門降級</h3><ul>
+<li><p>系統預留了後門用於降級操作(通常以 API 的形式呈現)</p>
+</li>
+<li><p>實作成本低</p>
+</li>
+<li><p>缺點是如果服務器數量多，需要一台一台去操作，效率比較低，在故障處理爭分奪秒的場景下是比較浪費時間的</p>
+</li>
+</ul>
+<h3 id="獨立降級系統"><a href="#獨立降級系統" class="headerlink" title="獨立降級系統"></a>獨立降級系統</h3><p><img src="/blog/images/architecture-design/downgrade-arch.png" alt="downgrade architecture"></p>
+<ul>
+<li>將降級操作獨立到一個單獨的系統中，可以實現複雜的權限管理、批次操作等功能</li>
+</ul>
+<h2 id="熔斷"><a href="#熔斷" class="headerlink" title="熔斷"></a>熔斷</h2><ul>
+<li><p>降級的目的是<strong>應對系統自身的故障</strong>，而熔斷的目的是<strong>應對依賴的外部系統故障的情況</strong></p>
+<blockquote>
+<p>例如：A 服務的 X 功能依賴 B 服務的某個 API，當 B 服務的 API 響應很慢的時候，A 服務的 X 功能響應肯定也會被拖慢，進一步導致 A 服務的 thread 都被卡在 X 功能處理上，此時 A 服務的其他功能都會被卡住或者響應非常慢。這時就需要熔斷機制了，即：A 服務不再請求 B 服務的這個 API ，A 服務內部只要發現是請求 B 服務的這個 API 就立即返回錯誤，從而避免 A 服務整個被拖垮</p>
+</blockquote>
+</li>
+<li><p>熔斷機制實現的關鍵：</p>
+<ul>
+<li><strong>需要有一個統一的 API 調用層，由 API 調用層來進行採樣或者統計</strong>，如果 API 調用散落在程式碼各處就沒法進行統一處理了</li>
+<li><strong>threshold 的設計</strong>：一般都是先根據分析確定 threshold，然後上線觀察效果，再進行調整優化</li>
+</ul>
+</li>
+</ul>
+<h2 id="限流"><a href="#限流" class="headerlink" title="限流"></a>限流</h2><ul>
+<li><p>降級是從<strong>系統功能優先級的角度</strong>考慮如何應對故障，而限流則是從<strong>使用者訪問壓力的角度</strong>來考慮如何應對故障</p>
+</li>
+<li><p>限流指只允許系統能夠承受的訪問量進來，超出系統訪問能力的請求將被丟棄</p>
+</li>
+</ul>
+<p>常見的限流方式可以分為兩類：</p>
+<h3 id="以”請求”為基礎限流"><a href="#以”請求”為基礎限流" class="headerlink" title="以”請求”為基礎限流"></a>以”請求”為基礎限流</h3><ul>
+<li><p>從外部訪問的請求角度考慮限流：限制<strong>總量</strong> &amp; <strong>時間量</strong></p>
+</li>
+<li><p>限制總量的方式是<strong>限制某個指標的累積上限</strong>，常見的是限制當前系統服務的用戶總量(例如：某個直播間限制總用戶數上限為 100 萬)</p>
+</li>
+<li><p>限制時間量指<strong>限制一段時間內某個指標的上限</strong>(例如：1 分鐘內只允許 10000 個用戶訪問)</p>
+</li>
+<li><p>實現簡單，但主要問題是比較難以找到合適的 threshold </p>
+</li>
+<li><p>即使找到了合適的 threshold ，基於請求限流還面臨硬體相關的問題(例如：64 core 的機器比 32 core 的機器，業務處理性能並不是 2 倍的關係，可能是 1.5 倍)</p>
+</li>
+<li><p>為了找到合理的 threshold ，通常情況下可以採用性能壓測來確定 threshold ，但性能壓測也存在覆蓋場景有限的問題</p>
+</li>
+<li><p><strong>逐步優化</strong>算是比較準確的方式，但需要持續觀察 &amp; 調整</p>
+</li>
+</ul>
+<h3 id="以”資源”基礎限流"><a href="#以”資源”基礎限流" class="headerlink" title="以”資源”基礎限流"></a>以”資源”基礎限流</h3><ul>
+<li><p>基於請求限流是從系統外部考慮的，而基於資源限流是從系統內部考慮的</p>
+</li>
+<li><p>找到系統內部影響性能的關鍵資源，對其使用上限進行限制(例如：連接數、file handler、 thread count、請求隊列)</p>
+</li>
+<li><p>基於資源限流相比基於請求限流能夠<strong>更加有效地反映當前系統的壓力</strong></p>
+</li>
+<li><p>實踐中設計也面臨兩個主要的難點：</p>
+<ul>
+<li>如何確定關鍵資源</li>
+<li>如何確定關鍵資源的 threshold </li>
+</ul>
+</li>
+<li><p>同樣也需要<strong>逐步優化</strong>的過程</p>
+</li>
+</ul>
+<h2 id="排隊"><a href="#排隊" class="headerlink" title="排隊"></a>排隊</h2><ul>
+<li><p>排隊實際上是限流的一個變種，限流是直接拒絕用戶，排隊是<strong>讓用戶等待一段時間</strong></p>
+</li>
+<li><p>排隊雖然沒有直接拒絕用戶，但用戶等了很長時間後進入系統，體驗並不一定比限流好</p>
+</li>
+<li><p>排隊需要臨時緩存大量的業務請求，單個系統內部無法緩存這麼多數據，需要用獨立的系統(例如：Kafka)去實現</p>
+</li>
+</ul>
+<h1 id="討論整理精華"><a href="#討論整理精華" class="headerlink" title="討論整理精華"></a>討論整理精華</h1><p>設計一個整點限量秒殺系統，包括登錄、搶購、支付(依賴支付寶)等功能，你會如何設計 API 級別的故障應對手段呢?</p>
+<h2 id="Solution-1"><a href="#Solution-1" class="headerlink" title="Solution 1"></a>Solution 1</h2><ol>
+<li><p>對於用戶服務，在搶購期間可以準備降級策略 =&gt; 壓力過大時保證用戶登入的可用，註冊和修改信息可以做降級處理</p>
+</li>
+<li><p>搶購下單涉及到訂單，庫存，和商品查詢。可通過請求排隊來限流，超出庫存的請求直接返回</p>
+</li>
+<li><p>為了應對庫存和商品服務可能發生的故障，可以提前對商品數據和庫存數據做緩存，如果對端服務故障，本地也可以提供服務</p>
+</li>
+<li><p>支付依賴第三方系統，合理設置熔斷策略，如支付平均時長超過限制可提示用戶稍晚做支付</p>
+</li>
+</ol>
+<h2 id="Solution-2"><a href="#Solution-2" class="headerlink" title="Solution 2"></a>Solution 2</h2><ol>
+<li>訪問的流量在每個環節可能逐步遞減（登入例外）</li>
+<li>引導部分用戶提前登陸</li>
+<li>秒殺價系統獨立部署（感覺和其他系統部署在一起才需要降級）</li>
+<li>搶購使用排隊方式，隊列大小可以預估較大長度，隊列外的拒絕</li>
+<li>如果要求以支付成功為準，通過隊列和熔斷；如果以下單成功為準，使用熔斷。提醒稍後再付</li>
+</ol>
+<h2 id="其他思考"><a href="#其他思考" class="headerlink" title="其他思考"></a>其他思考</h2><ul>
+<li><p>假如降級時優先保證登錄，但是用戶登錄進來後發現搶購不了，其實體驗也不好</p>
+</li>
+<li><p>已經搶購了的用戶可能無法支付，這樣體驗更不好，甚至會引起投訴，因此搶購類降級是優先降登錄會好些</p>
+</li>
+<li><p>保留搶購和支付，保證進來的用戶能夠完成業務流程</p>
+</li>
+<li><p>支付失敗真沒什麼好辦法了，因為這是核心鏈路的核心功能</p>
+</li>
+<li><p>一般不建議對支付做降級，用戶體驗很不好，還不如登錄和搶購階段限流</p>
+<blockquote>
+<p>這是有心理學理論支撐的，用戶沒搶到前，如果搶不到他會認為自己運氣不好，但如果用戶搶到了卻無法支付，他會覺得自己損失了，會觸發”損失厭惡”心理</p>
+</blockquote>
+</li>
+</ul>
+<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://time.geekbang.org/column/intro/81">從0開始學架構_架構基礎_架構入門-極客時間</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/Architecture-Design/" rel="tag"># Architecture Design</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/Architecture_Design/Architecture-Design-Multiple-Site-HA/" rel="prev" title="[架構設計] Multi-Site High Avalibility">
+                  <i class="fa fa-chevron-left"></i> [架構設計] Multi-Site High Avalibility
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/Architecture_Design/Architecture-Design-Howto-deal-with-API-failure/";
+    this.page.identifier = "Architecture_Design/Architecture-Design-Howto-deal-with-API-failure/";
+    this.page.title = "[架構設計] 如何應對 API 級別故障";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>
