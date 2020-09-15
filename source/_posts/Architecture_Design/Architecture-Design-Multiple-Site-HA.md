@@ -1,4 +1,3 @@
-
 ---
 layout: post
 title:  "[架構設計] Multi-Site High Avalibility"
