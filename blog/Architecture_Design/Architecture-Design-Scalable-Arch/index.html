@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="此篇文章是極客時間&quot;從 0 開始學架構&quot;課程時所留下的學習筆記，主要內容為可擴展的架構設計、Microservice 架構設計 &amp; 相關的 Best Practice">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[架構設計] 可擴展架構設計">
+<meta property="og:url" content="https://godleon.github.io/blog/Architecture_Design/Architecture-Design-Scalable-Arch/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章是極客時間&quot;從 0 開始學架構&quot;課程時所留下的學習筆記，主要內容為可擴展的架構設計、Microservice 架構設計 &amp; 相關的 Best Practice">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://godleon.github.io/blog/images/architecture-design/scalable-arch-cs.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/architecture-design/scalable-arch-mvc.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/architecture-design/scalable-arch-logic.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/architecture-design/service-discovery-self.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/architecture-design/service-discovery-proxy.png">
+<meta property="article:published_time" content="2020-09-26T06:20:00.000Z">
+<meta property="article:modified_time" content="2020-09-26T06:22:27.444Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="Architecture Design">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/architecture-design/scalable-arch-cs.png">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/Architecture_Design/Architecture-Design-Scalable-Arch/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>[架構設計] 可擴展架構設計 | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%AF%E6%93%B4%E5%B1%95%E6%9E%B6%E6%A7%8B%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%80%9D%E6%83%B3%E5%92%8C%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.</span> <span class="nav-text">可擴展架構的基本思想和模式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%AF%E6%93%B4%E5%B1%95%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%80%9D%E6%83%B3"><span class="nav-number">1.1.</span> <span class="nav-text">可擴展的基本思想</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%AF%E6%93%B4%E5%B1%95%E6%96%B9%E5%BC%8F"><span class="nav-number">1.2.</span> <span class="nav-text">可擴展方式</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%82%B3%E7%B5%B1%E7%9A%84%E5%8F%AF%E6%93%B4%E5%B1%95%E6%9E%B6%E6%A7%8B%E6%A8%A1%E5%BC%8F%EF%BC%9A%E5%88%86%E5%B1%A4%E6%9E%B6%E6%A7%8B%E5%92%8C-SOA"><span class="nav-number">2.</span> <span class="nav-text">傳統的可擴展架構模式：分層架構和 SOA</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E5%B1%A4%E6%9E%B6%E6%A7%8B"><span class="nav-number">2.1.</span> <span class="nav-text">分層架構</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#C-S-%E6%9E%B6%E6%A7%8B%E3%80%81B-S-%E6%9E%B6%E6%A7%8B"><span class="nav-number">2.1.1.</span> <span class="nav-text">C&#x2F;S 架構、B&#x2F;S 架構</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MVC-%E6%9E%B6%E6%A7%8B%E3%80%81MVP-%E6%9E%B6%E6%A7%8B"><span class="nav-number">2.1.2.</span> <span class="nav-text">MVC 架構、MVP 架構</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%82%8F%E8%BC%AF%E5%88%86%E5%B1%A4%E6%9E%B6%E6%A7%8B"><span class="nav-number">2.1.3.</span> <span class="nav-text">邏輯分層架構</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SOA"><span class="nav-number">2.2.</span> <span class="nav-text">SOA</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%8D%E5%8B%99"><span class="nav-number">2.2.1.</span> <span class="nav-text">服務</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ESB-Enterprise-Service-Bus"><span class="nav-number">2.2.2.</span> <span class="nav-text">ESB (Enterprise Service Bus)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%AC%86%E8%80%A6%E5%90%88-Loose-Coupling"><span class="nav-number">2.2.3.</span> <span class="nav-text">鬆耦合(Loose Coupling)</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-Microservice-%E6%9E%B6%E6%A7%8B%EF%BC%9A%E9%8A%80%E5%BD%88-or-%E7%84%A6%E6%B2%B9%E5%9D%91%EF%BC%9F"><span class="nav-number">3.</span> <span class="nav-text">深入理解 Microservice 架構：銀彈 or 焦油坑？</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#SOA-v-s-Microservice"><span class="nav-number">3.1.</span> <span class="nav-text">SOA v.s. Microservice</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%8D%E5%8B%99%E7%B2%92%E5%BA%A6"><span class="nav-number">3.1.1.</span> <span class="nav-text">服務粒度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%8D%E5%8B%99%E9%80%9A%E4%BF%A1"><span class="nav-number">3.1.2.</span> <span class="nav-text">服務通信</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%8D%E5%8B%99%E4%BA%A4%E4%BB%98"><span class="nav-number">3.1.3.</span> <span class="nav-text">服務交付</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%87%89%E7%94%A8%E5%A0%B4%E6%99%AF"><span class="nav-number">3.1.4.</span> <span class="nav-text">應用場景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Microservice%E7%9A%84%E9%99%B7%E9%98%B1"><span class="nav-number">3.2.</span> <span class="nav-text">Microservice的陷阱</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%8D%E5%8B%99%E5%8A%83%E5%88%86%E9%81%8E%E7%B4%B0%EF%BC%8C%E6%9C%8D%E5%8B%99%E9%96%93%E9%97%9C%E4%BF%82%E8%A4%87%E9%9B%9C"><span class="nav-number">3.2.1.</span> <span class="nav-text">服務劃分過細，服務間關係複雜</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%8D%E5%8B%99%E6%95%B8%E9%87%8F%E5%A4%AA%E5%A4%9A%EF%BC%8C%E5%9C%98%E9%9A%8A%E6%95%88%E7%8E%87%E6%80%A5%E5%8A%87%E4%B8%8B%E9%99%8D"><span class="nav-number">3.2.2.</span> <span class="nav-text">服務數量太多，團隊效率急劇下降</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AA%BF%E7%94%A8%E9%8F%88%E8%B7%AF%E5%A4%AA%E9%95%B7%EF%BC%8C%E6%95%88%E8%83%BD%E4%B8%8B%E9%99%8D"><span class="nav-number">3.2.3.</span> <span class="nav-text">調用鏈路太長，效能下降</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AA%BF%E7%94%A8%E9%8F%88%E5%A4%AA%E9%95%B7%EF%BC%8C%E5%95%8F%E9%A1%8C%E5%AE%9A%E4%BD%8D%E5%9B%B0%E9%9B%A3"><span class="nav-number">3.2.4.</span> <span class="nav-text">調用鏈太長，問題定位困難</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B2%92%E6%9C%89%E8%87%AA%E5%8B%95%E5%8C%96%E6%94%AF%E6%92%90%EF%BC%8C%E7%84%A1%E6%B3%95%E5%BF%AB%E9%80%9F%E4%BA%A4%E4%BB%98"><span class="nav-number">3.2.5.</span> <span class="nav-text">沒有自動化支撐，無法快速交付</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B2%92%E6%9C%89%E6%9C%8D%E5%8B%99%E6%B2%BB%E7%90%86%EF%BC%8CMicroservice-%E6%95%B8%E9%87%8F%E5%A4%9A%E4%BA%86%E5%BE%8C%E7%AE%A1%E7%90%86%E6%B7%B7%E4%BA%82"><span class="nav-number">3.2.6.</span> <span class="nav-text">沒有服務治理，Microservice 數量多了後管理混亂</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A8%8E%E8%AB%96%E6%95%B4%E7%90%86%E7%B2%BE%E8%8F%AF"><span class="nav-number">3.3.</span> <span class="nav-text">討論整理精華</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1"><span class="nav-number">3.3.1.</span> <span class="nav-text">1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2"><span class="nav-number">3.3.2.</span> <span class="nav-text">2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3"><span class="nav-number">3.3.3.</span> <span class="nav-text">3</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Microservice%E6%9E%B6%E6%A7%8B%E6%9C%80%E4%BD%B3%E5%AF%A6%E8%B8%90-%E6%96%B9%E6%B3%95%E7%AF%87"><span class="nav-number">4.</span> <span class="nav-text">Microservice架構最佳實踐 - 方法篇</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%8D%E5%8B%99%E7%B2%92%E5%BA%A6-1"><span class="nav-number">4.1.</span> <span class="nav-text">服務粒度</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8B%86%E5%88%86%E6%96%B9%E6%B3%95"><span class="nav-number">4.2.</span> <span class="nav-text">拆分方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%96%BC%E6%A5%AD%E5%8B%99%E9%82%8F%E8%BC%AF%E6%8B%86%E5%88%86"><span class="nav-number">4.2.1.</span> <span class="nav-text">基於業務邏輯拆分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%96%BC%E5%8F%AF%E6%93%B4%E5%B1%95%E6%8B%86%E5%88%86"><span class="nav-number">4.2.2.</span> <span class="nav-text">基於可擴展拆分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%96%BC%E5%8F%AF%E9%9D%A0%E6%80%A7%E6%8B%86%E5%88%86"><span class="nav-number">4.2.3.</span> <span class="nav-text">基於可靠性拆分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%96%BC%E6%95%88%E8%83%BD%E6%8B%86%E5%88%86"><span class="nav-number">4.2.4.</span> <span class="nav-text">基於效能拆分</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E7%A4%8E%E8%A8%AD%E6%96%BD"><span class="nav-number">4.3.</span> <span class="nav-text">基礎設施</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A8%8E%E8%AB%96%E6%95%B4%E7%90%86%E7%B2%BE%E8%8F%AF-1"><span class="nav-number">4.4.</span> <span class="nav-text">討論整理精華</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Microservice%E6%9E%B6%E6%A7%8B%E6%9C%80%E4%BD%B3%E5%AF%A6%E8%B8%90-%E5%9F%BA%E7%A4%8E%E8%A8%AD%E6%96%BD%E7%AF%87"><span class="nav-number">5.</span> <span class="nav-text">Microservice架構最佳實踐 - 基礎設施篇</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%8B%95%E5%8C%96%E6%B8%AC%E8%A9%A6"><span class="nav-number">5.1.</span> <span class="nav-text">自動化測試</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%8B%95%E5%8C%96%E9%83%A8%E7%BD%B2"><span class="nav-number">5.2.</span> <span class="nav-text">自動化部署</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Configuration-Center"><span class="nav-number">5.3.</span> <span class="nav-text">Configuration Center</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Interface-Framework"><span class="nav-number">5.4.</span> <span class="nav-text">Interface Framework</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#API-Gateway"><span class="nav-number">5.5.</span> <span class="nav-text">API Gateway</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Service-Discovery"><span class="nav-number">5.6.</span> <span class="nav-text">Service Discovery</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Service-Routing"><span class="nav-number">5.7.</span> <span class="nav-text">Service Routing</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Service-Failt-Tolerance"><span class="nav-number">5.8.</span> <span class="nav-text">Service Failt Tolerance</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Service-Monitoring"><span class="nav-number">5.9.</span> <span class="nav-text">Service Monitoring</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Service-Tracking"><span class="nav-number">5.10.</span> <span class="nav-text">Service Tracking</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Service-Security"><span class="nav-number">5.11.</span> <span class="nav-text">Service Security</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">101</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/Architecture_Design/Architecture-Design-Scalable-Arch/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [架構設計] 可擴展架構設計
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2020-09-26 14:20:00 / Modified: 14:22:27" itemprop="dateCreated datePublished" datetime="2020-09-26T14:20:00+08:00">2020-09-26</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Architecture-Design/" itemprop="url" rel="index"><span itemprop="name">Architecture Design</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/Architecture_Design/Architecture-Design-Scalable-Arch/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="Architecture_Design/Architecture-Design-Scalable-Arch/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此篇文章是極客時間"從 0 開始學架構"課程時所留下的學習筆記，主要內容為可擴展的架構設計、Microservice 架構設計 & 相關的 Best Practice</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="可擴展架構的基本思想和模式"><a href="#可擴展架構的基本思想和模式" class="headerlink" title="可擴展架構的基本思想和模式"></a>可擴展架構的基本思想和模式</h1><ul>
+<li><p>軟體系統與硬體和建築系統最大的差異在於軟體是可擴展的；一個硬體生產出來後就不會再進行改變、一個建築完工後也不會再改變其整體結構</p>
+</li>
+<li><p>軟體系統的魅力 &amp; 困難之處：</p>
+<ul>
+<li>魅力：可以通過修改和擴展，不斷地讓軟體系統具備更多的功能和特性，滿足新的需求或者順應技術發展的趨勢</li>
+<li>困難：<strong>如何以最小的代價去擴展系統</strong></li>
+</ul>
+</li>
+<li><p>如何避免擴展時改動範圍太大，是軟體架構可擴展性設計的主要思考點</p>
+</li>
+</ul>
+<h2 id="可擴展的基本思想"><a href="#可擴展的基本思想" class="headerlink" title="可擴展的基本思想"></a>可擴展的基本思想</h2><ul>
+<li><p>所有的可擴展性架構設計，背後的基本思想都可以總結為一個字：<strong>拆！</strong></p>
+</li>
+<li><p>拆，就是將原本大一統的系統拆分成多個規模小的部分，擴展時只修改其中一部分即可，無須整個系統到處都改，通過這種方式來減少改動範圍，降低改動風險</p>
+</li>
+<li><p><strong>軟體系統中的”拆”是建設性的</strong>，因此難度要高得多</p>
+</li>
+<li><p>常見的拆分思路有三種：<code>面向流程拆分</code>、<code>面向服務拆分</code>、<code>面向功能拆分</code></p>
+</li>
+<li><p>從範圍來看，從大到小為：<strong>流程 &gt; 服務 &gt; 功能</strong></p>
+</li>
+</ul>
+<h2 id="可擴展方式"><a href="#可擴展方式" class="headerlink" title="可擴展方式"></a>可擴展方式</h2><ul>
+<li><p>合理的拆分，能夠強制保證即使 developer 出錯，出錯的範圍也不會太廣，影響也不會太大</p>
+</li>
+<li><p>不同拆分方式應對擴展時的優勢：</p>
+<ul>
+<li>面向流程拆分：擴展時大部分情況只需要修改某一層，少部分情況可能修改關聯的兩層，不會出現所有層都同時要修改</li>
+<li>面向服務拆分：對某個服務擴展，或者要增加新的服務時，只需要擴展相關服務即可，無須修改所有的服務</li>
+<li>面向功能拆分：對某個功能擴展，或者要增加新的功能時，只需要擴展相關功能即可，無須修改所有的服務</li>
+</ul>
+</li>
+<li><p>典型的可擴展系統架構有：</p>
+<ul>
+<li>面向流程拆分：<strong>分層架構</strong></li>
+<li>面向服務拆分：<strong>SOA &amp; Microservice</strong></li>
+<li>面向功能拆分：<strong>微內核架構</strong></li>
+</ul>
+</li>
+</ul>
+<h1 id="傳統的可擴展架構模式：分層架構和-SOA"><a href="#傳統的可擴展架構模式：分層架構和-SOA" class="headerlink" title="傳統的可擴展架構模式：分層架構和 SOA"></a>傳統的可擴展架構模式：分層架構和 SOA</h1><h2 id="分層架構"><a href="#分層架構" class="headerlink" title="分層架構"></a>分層架構</h2><ul>
+<li><p>分層(Tier)架構是很常見的架構模式，它也叫 N 層架構，通常情況下，N 至少是 2 層</p>
+</li>
+<li><p>需要保證每個 Tier 之間的差異足夠清晰，邊界足夠明顯，讓人看到架構圖後就能看懂整個架構</p>
+</li>
+<li><p>分層架構之所以能夠較好地支撐系統擴展，本質在於**隔離關注點(separation of concerns)**，每個層中的組件只會處理本層的邏輯</p>
+</li>
+<li><p>分層時要保證每層之間的依賴是穩定的，才能真正支撐快速擴展</p>
+</li>
+<li><p>對於 OS 這類複雜的系統，interface 本身也可以成為獨立的一層</p>
+</li>
+<li><p>特點是層層傳遞，一旦分層確定，<strong>整個業務流程是按照層進行依次傳遞的，不能在層之間進行跳躍</strong></p>
+</li>
+<li><p>分層結構的這種約束，好處在於強制將分層依賴限定為兩兩依賴，降低了整體系統複雜度</p>
+</li>
+</ul>
+<h3 id="C-S-架構、B-S-架構"><a href="#C-S-架構、B-S-架構" class="headerlink" title="C/S 架構、B/S 架構"></a>C/S 架構、B/S 架構</h3><p><img src="/blog/images/architecture-design/scalable-arch-cs.png" alt="Client/Server architecture"></p>
+<ul>
+<li><p>劃分的對象是<strong>整個業務系統</strong>，劃分的維度是<strong>用戶交互</strong></p>
+</li>
+<li><p>將和用戶交互的部分獨立為一層，支撐用戶交互的後台作為另外一層</p>
+</li>
+</ul>
+<h3 id="MVC-架構、MVP-架構"><a href="#MVC-架構、MVP-架構" class="headerlink" title="MVC 架構、MVP 架構"></a>MVC 架構、MVP 架構</h3><p><img src="/blog/images/architecture-design/scalable-arch-mvc.png" alt="MVC/MVP architecture"></p>
+<ul>
+<li><p>劃分的對象是<strong>單個業務子系統</strong>，劃分的維度是<strong>職責</strong></p>
+</li>
+<li><p>將不同的職責劃分到獨立層，但各層的依賴關係比較靈活</p>
+</li>
+</ul>
+<h3 id="邏輯分層架構"><a href="#邏輯分層架構" class="headerlink" title="邏輯分層架構"></a>邏輯分層架構</h3><p>以 Android OS 為例：<br><img src="/blog/images/architecture-design/scalable-arch-logic.png" alt="Business Logic architecture"></p>
+<ul>
+<li><p>劃分的對象可以是單個業務子系統，也可以是整個業務系統，劃分的維度也是<strong>職責</strong></p>
+</li>
+<li><p>邏輯分層架構中的層是自最上層向下依賴的</p>
+</li>
+<li><p>典型的有 OS kernel 架構、TCP/IP 架構</p>
+</li>
+</ul>
+<h2 id="SOA"><a href="#SOA" class="headerlink" title="SOA"></a>SOA</h2><ul>
+<li><p>SOA 解決了傳統 IT 系統重複建設和擴展效率低的問題，但其本身也引入了更多的複雜性</p>
+</li>
+<li><p>ESB(Enterprise Service Bus) 要完成這麼多協議和資料格式的互相轉換，工作量和複雜度都很大，而且這種轉換是需要耗費大量計算效能的</p>
+</li>
+<li><p>當 ESB 承載的消息太多時，ESB 本身會成為整個系統的效能瓶頸</p>
+</li>
+</ul>
+<p>為了應對傳統 IT 系統存在的問題，SOA 提出了 3 個關鍵概念：</p>
+<h3 id="服務"><a href="#服務" class="headerlink" title="服務"></a>服務</h3><ul>
+<li><p>所有業務功能都是一項<strong>服務</strong></p>
+</li>
+<li><p>服務就意味著要對外提供開放的能力，當其他系統需要使用這項功能時，無須定製化開發</p>
+</li>
+<li><p>服務可大可小，可簡單也可複雜</p>
+</li>
+</ul>
+<h3 id="ESB-Enterprise-Service-Bus"><a href="#ESB-Enterprise-Service-Bus" class="headerlink" title="ESB (Enterprise Service Bus)"></a>ESB (Enterprise Service Bus)</h3><ul>
+<li><p>ESB 用途是將企業中各個不同的服務連接在一起</p>
+</li>
+<li><p>SOA 使用 ESB 來隱藏異質系統對外提供各種不同 interface 的方式，以此來達到服務間高效率的互連互通</p>
+</li>
+</ul>
+<h3 id="鬆耦合-Loose-Coupling"><a href="#鬆耦合-Loose-Coupling" class="headerlink" title="鬆耦合(Loose Coupling)"></a>鬆耦合(Loose Coupling)</h3><ul>
+<li><p>目的是減少各個服務間的依賴和互相影響</p>
+</li>
+<li><p>要做到完全後向兼容，是一項複雜的任務</p>
+</li>
+</ul>
+<h1 id="深入理解-Microservice-架構：銀彈-or-焦油坑？"><a href="#深入理解-Microservice-架構：銀彈-or-焦油坑？" class="headerlink" title="深入理解 Microservice 架構：銀彈 or 焦油坑？"></a>深入理解 Microservice 架構：銀彈 or 焦油坑？</h1><h2 id="SOA-v-s-Microservice"><a href="#SOA-v-s-Microservice" class="headerlink" title="SOA v.s. Microservice"></a>SOA v.s. Microservice</h2><ul>
+<li><p>SOA 和 Microservice 本質上是兩種不同的架構設計理念，只是在**”服務”**這個點上有交集而已</p>
+</li>
+<li><p>SOA 和 Microservice 是兩種不同理念的架構模式，只是應用場景不同而已，並沒有使用哪種架構一定會比較好的問題</p>
+</li>
+<li><p><strong>Small</strong>、<strong>Lightweight</strong>、<strong>Automated</strong>，基本上濃縮了 Microservice 的精華，也是 Microservice 與 SOA 的本質區別所在</p>
+</li>
+</ul>
+<p>具體做法比較：</p>
+<h3 id="服務粒度"><a href="#服務粒度" class="headerlink" title="服務粒度"></a>服務粒度</h3><ul>
+<li>SOA 的服務粒度要粗一些，而 Microservice 的服務粒度要細一些</li>
+</ul>
+<h3 id="服務通信"><a href="#服務通信" class="headerlink" title="服務通信"></a>服務通信</h3><ul>
+<li><p>SOA 採用了 ESB 作為服務間通信的關鍵元件，負責服務定義、Service Routing、消息轉換、消息傳遞，總體上是重量級的實現</p>
+</li>
+<li><p>Microservice 推薦使用統一的協議和格式，例如，RESTful、RPC，無須 ESB 這樣的重量級實現</p>
+</li>
+</ul>
+<h3 id="服務交付"><a href="#服務交付" class="headerlink" title="服務交付"></a>服務交付</h3><ul>
+<li><p>SOA 對服務的交付並沒有特殊要求，因為 SOA 更多考慮的是兼容已有的系統</p>
+</li>
+<li><p>Microservice 的架構理念要求”快速交付”，相應地要求採取自動化測試、持續集成、自動化部署等敏捷開發相關的最佳實踐</p>
+</li>
+</ul>
+<h3 id="應用場景"><a href="#應用場景" class="headerlink" title="應用場景"></a>應用場景</h3><ul>
+<li><p>SOA 更加適合於龐大、複雜、異質的企業級系統</p>
+</li>
+<li><p>Microservice 更加適合於快速、輕量級、基於 Web 的網際網路系統，這類的系統業務變化快，需要快速嘗試、快速交付</p>
+</li>
+<li><p>整體系統的複雜度是隨著 Microservice 數量的增加，同時也呈現指數級的增加</p>
+</li>
+</ul>
+<h2 id="Microservice的陷阱"><a href="#Microservice的陷阱" class="headerlink" title="Microservice的陷阱"></a>Microservice的陷阱</h2><ul>
+<li>實施 Microservice 需要避免踩的陷阱，簡單來說：<ul>
+<li>Microservice 拆分過細，過分強調 <strong>“Small”</strong></li>
+<li>Microservice 基礎設施不健全，忽略了 <strong>“Automated”</strong></li>
+<li>Microservice 並不輕量級，規模大了後，**”Lightweight”** 不再適應</li>
+</ul>
+</li>
+</ul>
+<h3 id="服務劃分過細，服務間關係複雜"><a href="#服務劃分過細，服務間關係複雜" class="headerlink" title="服務劃分過細，服務間關係複雜"></a>服務劃分過細，服務間關係複雜</h3><ul>
+<li><p>服務劃分過細，單一服務的複雜度確實下降了，但整個系統的複雜度卻上升</p>
+</li>
+<li><p>Microservice 將系統內的複雜度轉移為系統間的複雜度</p>
+</li>
+</ul>
+<h3 id="服務數量太多，團隊效率急劇下降"><a href="#服務數量太多，團隊效率急劇下降" class="headerlink" title="服務數量太多，團隊效率急劇下降"></a>服務數量太多，團隊效率急劇下降</h3><ul>
+<li>很多團隊看到 “micro” 後，就覺得必須將服務拆分得很細</li>
+</ul>
+<h3 id="調用鏈路太長，效能下降"><a href="#調用鏈路太長，效能下降" class="headerlink" title="調用鏈路太長，效能下降"></a>調用鏈路太長，效能下降</h3><ul>
+<li><p>由於 Microservice 之間都是通過 HTTP 或者 RPC 調用的，每次調用必須經過網路</p>
+</li>
+<li><p>為了支撐業務請求，可能需要大幅增加硬體，這就導致了硬體成本的大幅上升</p>
+</li>
+</ul>
+<h3 id="調用鏈太長，問題定位困難"><a href="#調用鏈太長，問題定位困難" class="headerlink" title="調用鏈太長，問題定位困難"></a>調用鏈太長，問題定位困難</h3><ul>
+<li>由於 Microservice 數量較多，且故障存在擴散現象，要快速定位到底是哪個 Microservice 故障是一件複雜的事情</li>
+</ul>
+<h3 id="沒有自動化支撐，無法快速交付"><a href="#沒有自動化支撐，無法快速交付" class="headerlink" title="沒有自動化支撐，無法快速交付"></a>沒有自動化支撐，無法快速交付</h3><ul>
+<li>如果沒有相應的自動化系統進行支撐，都是靠人工去操作，那麼 Microservice 不但達不到快速交付的目的，甚至還不如一個大而全的系統效率高</li>
+</ul>
+<h3 id="沒有服務治理，Microservice-數量多了後管理混亂"><a href="#沒有服務治理，Microservice-數量多了後管理混亂" class="headerlink" title="沒有服務治理，Microservice 數量多了後管理混亂"></a>沒有服務治理，Microservice 數量多了後管理混亂</h3><ul>
+<li><p>隨著 Microservice 種類和數量越來越多，如果沒有服務治理系統進行支撐，Microservice 提倡的 lightweight 就會變成問題</p>
+</li>
+<li><p>主要問題類型：</p>
+<ul>
+<li>Service Routing</li>
+<li>服務故障隔離</li>
+<li>服務註冊和發現</li>
+</ul>
+</li>
+</ul>
+<h2 id="討論整理精華"><a href="#討論整理精華" class="headerlink" title="討論整理精華"></a>討論整理精華</h2><h3 id="1"><a href="#1" class="headerlink" title="1"></a>1</h3><p>Microservice 架構其實相當複雜，可以分成好幾個階段理解：</p>
+<ol>
+<li><p>第一階段，Microservice 架構就是去掉了 ESB 的 SOA 架構，只不過是通信的方式和結構變了</p>
+</li>
+<li><p>第二階段，沒有了 ESB，原本很多由 ESB 完成的事情，轉到服務的提供者和調用者這裡了；此時就需要考慮服務的拆分粒度</p>
+</li>
+<li><p>第三階段，隨著服務的數量大幅增加，服務的管理越來越困難，此時 DevOps 出現了，為此階段的 Microservice 架構帶入大量的自動化，已經是跟 SOA 架構是完全不同的東西</p>
+</li>
+</ol>
+<h3 id="2"><a href="#2" class="headerlink" title="2"></a>2</h3><p>大型企業從傳統架構，轉向 Microservice 架構的過程：</p>
+<ol>
+<li><p>建設好基礎設施，RPC、服務治理、日誌、監控、持續集成、持續部署、維運自動化是基本的，其它包括 Service Orchestration、Distributed Tracking … 等等</p>
+</li>
+<li><p>要逐步演進和迭代，不要過於激進，更不要拆分過細，拆分的粒度，要與團隊的架構相互匹配(這裡可參考<strong>康威定律</strong>)</p>
+</li>
+<li><p>Microservice 與 DB 方面，是個很大的困難點，可以深入瞭解下領域驅動設計，做好領域建模，特別是 DB 要隨著服務一起拆分</p>
+</li>
+</ol>
+<h3 id="3"><a href="#3" class="headerlink" title="3"></a>3</h3><ul>
+<li><p>做服務化改造首先問以下問題：</p>
+<ul>
+<li>業務真的需要 Microservice 來解決嗎？</li>
+<li>真的所有 module 的問題都要 Microservice 來解決嗎？</li>
+<li>技術人員的配置和水平達到要求了嗎？</li>
+</ul>
+</li>
+<li><p>個人比較認同康威定律，Microservice 的拆分粒度一定要和組織結構匹配起來，組織結構和開發管理模式是 Microservice 粒度的最重要參考指標之一</p>
+</li>
+<li><p>採用 Microservice 架構確實解決了 monolithic 應用的一些問題，如資源問題(但消耗資源是比以前多的)、耦合問題、快速迭代問題，服務與服務的職責更加清晰，不同的服務粒度設計的系統是天差地別的</p>
+</li>
+<li><p>istio 就是想隱藏 Microservice 的基礎設施，讓業務系統本身不需要感知基礎設施(服務之間的關係、自動化測試部署、服務可視化差錯、容錯、熔斷)</p>
+</li>
+</ul>
+<h1 id="Microservice架構最佳實踐-方法篇"><a href="#Microservice架構最佳實踐-方法篇" class="headerlink" title="Microservice架構最佳實踐 - 方法篇"></a>Microservice架構最佳實踐 - 方法篇</h1><h2 id="服務粒度-1"><a href="#服務粒度-1" class="headerlink" title="服務粒度"></a>服務粒度</h2><ul>
+<li><p>針對 Microservice 拆分過細導致的問題，建議基於團隊規模進行拆分(例如：<strong>2 pizza team</strong> or <strong>三個火槍手</strong>)</p>
+</li>
+<li><p>從系統規模來講，3 個人負責開發一個系統，系統的複雜度剛好達到每個人都能全面理解整個系統，又能夠進行分工的粒度</p>
+</li>
+<li><p>從團隊管理來說，3 個人可以形成一個穩定的備份</p>
+</li>
+<li><p>從技術提升的角度來講，3 個人的技術小組既能夠形成有效的討論，又能夠快速達成一致意見</p>
+</li>
+<li><p>“三個火槍手”的原則主要應用於 Microservice 設計和開發階段，如果經過一段時間發展後已經比較穩定，處於維護期了，無須太多的開發，那麼平均 1 個人維護 1 個 Microservice 甚至幾個 Microservice 都是可以的</p>
+</li>
+</ul>
+<h2 id="拆分方法"><a href="#拆分方法" class="headerlink" title="拆分方法"></a>拆分方法</h2><p>以下拆分方式不是多選一，而是可以根據實際情況自由排列組合：</p>
+<h3 id="基於業務邏輯拆分"><a href="#基於業務邏輯拆分" class="headerlink" title="基於業務邏輯拆分"></a>基於業務邏輯拆分</h3><ul>
+<li><p>雖然看起來很直觀，但在實踐過程中最常見的一個問題就是<strong>團隊成員對於”職責範圍”的理解差異很大</strong>，經常會出現爭論，難以達成一致意見</p>
+</li>
+<li><p>要判斷拆分粒度，不能從業務邏輯角度，而要計算一下大概的服務數量範圍，然後再確定合適的”職責範圍”</p>
+</li>
+</ul>
+<h3 id="基於可擴展拆分"><a href="#基於可擴展拆分" class="headerlink" title="基於可擴展拆分"></a>基於可擴展拆分</h3><ul>
+<li><p>將系統中的業務模組按照穩定性排序，將已經成熟和改動不大的服務拆分為<strong>穩定服務</strong>，將經常變化和迭代的服務拆分為<strong>變動服務</strong></p>
+</li>
+<li><p>不穩定的服務粒度可以細一些，但也不要太細，始終記住要控制服務的總數量</p>
+</li>
+<li><p>主要是為了提升項目快速迭代的效率，避免在開發的時候，不小心影響了已有的成熟功能導致線上問題</p>
+</li>
+</ul>
+<h3 id="基於可靠性拆分"><a href="#基於可靠性拆分" class="headerlink" title="基於可靠性拆分"></a>基於可靠性拆分</h3><ul>
+<li><p>將系統中的業務模組按照優先級排序，將可靠性要求高的核心服務和可靠性要求低的非核心服務拆分開來</p>
+</li>
+<li><p>重點<strong>保證核心服務的高可用</strong></p>
+</li>
+<li><p>優點：</p>
+<ul>
+<li>避免非核心服務故障影響核心服務</li>
+<li>核心服務高可用方案可以更簡單</li>
+<li>能夠降低高可用成本：只針對核心服務做高可用方案，機器、頻寬等成本比不拆分要節省較多</li>
+</ul>
+</li>
+</ul>
+<h3 id="基於效能拆分"><a href="#基於效能拆分" class="headerlink" title="基於效能拆分"></a>基於效能拆分</h3><ul>
+<li><p>將效能要求高或者效能壓力大的模組拆分出來，避免效能壓力大的服務影響其他服務</p>
+</li>
+<li><p>常見的拆分方式和具體的效能瓶頸有關，可以拆分 Web 服務、資料庫、緩存等</p>
+</li>
+</ul>
+<h2 id="基礎設施"><a href="#基礎設施" class="headerlink" title="基礎設施"></a>基礎設施</h2><ul>
+<li><p>大部分人主要關注的是 Microservice 的 <code>Small</code> 和 <code>Lightweight</code> 特性，但實際上真正決定 Microservice 成敗的，都是那個被大部分人都忽略的 <code>Automated</code></p>
+</li>
+<li><p>Microservice 並沒有減少複雜度，而只是將複雜度從 ESB 轉移到了基礎設施</p>
+</li>
+<li><p>建議按照下面優先級來搭建基礎設施：</p>
+<ol>
+<li>Service Discovery、Service Routing、Service Failt Tolerance：這是最基本的 Microservice 基礎設施。</li>
+<li>Interface Framework、API Gateway：主要是為了提升開發效率，Interface Framework 是提升內部服務的開發效率，API Gateway 是為了提升與外部服務對接的效率。</li>
+<li>自動化部署、自動化測試、Configuration Center：主要是為了提升測試和維運效率</li>
+<li>Service Monitoring/Tracking/Security：主要是為了進一步提昇維運效率</li>
+</ol>
+</li>
+</ul>
+<h2 id="討論整理精華-1"><a href="#討論整理精華-1" class="headerlink" title="討論整理精華"></a>討論整理精華</h2><ul>
+<li>現在很火的 Service Mesh 本質上就是借鑑了通信領域的控制面資料面分離思想做出的去中心化的 ESB</li>
+</ul>
+<h1 id="Microservice架構最佳實踐-基礎設施篇"><a href="#Microservice架構最佳實踐-基礎設施篇" class="headerlink" title="Microservice架構最佳實踐 - 基礎設施篇"></a>Microservice架構最佳實踐 - 基礎設施篇</h1><p>為了讓 Microservice 可以順利的運行，完善的 infra 是不能少的，而為了有效管理數量龐大的 Microservice，會需要有以下幾項基礎服務：</p>
+<h2 id="自動化測試"><a href="#自動化測試" class="headerlink" title="自動化測試"></a>自動化測試</h2><ul>
+<li><p>Microservice 提倡快速交付，版本週期短，版本更新頻繁，必須通過自動化測試系統來完成絕大部分測試回歸的工作</p>
+</li>
+<li><p>自動化測試涵蓋的範圍包括程式級別的 unit test、單個系統級別的 integration test、系統間的 interface test(優先)，理想情況是每類測試都自動化</p>
+</li>
+</ul>
+<h2 id="自動化部署"><a href="#自動化部署" class="headerlink" title="自動化部署"></a>自動化部署</h2><ul>
+<li><p>Microservice 部署的次數是大一統系統部署次數的幾十倍，採用人工手工處理，需要投入大量的人力，且容易出錯</p>
+</li>
+<li><p>自動化部署系統包括 version control、資源管理（例如，機器管理、虛擬機管理）、部署操作、回退操作等功能</p>
+</li>
+<li><p>Configuration Center 包括配置 version control、增刪改查配置、節點管理、配置同步、配置推送等功能</p>
+</li>
+</ul>
+<h2 id="Configuration-Center"><a href="#Configuration-Center" class="headerlink" title="Configuration Center"></a>Configuration Center</h2><ul>
+<li><p>Microservice 的節點數量非常多，通過人工登錄每台機器手工修改，效率低，容易出錯</p>
+</li>
+<li><p>有的運行期配置需要動態修改並且所有節點即時生效，人工操作是無法做到的</p>
+</li>
+<li><p>Configuration Center 包括 configuration version control、增刪改查配置、節點管理、配置同步、配置推送等功能</p>
+</li>
+</ul>
+<h2 id="Interface-Framework"><a href="#Interface-Framework" class="headerlink" title="Interface Framework"></a>Interface Framework</h2><ul>
+<li><p>Microservice 提倡輕量級的通信方式，一般採用 HTTP/REST or RPC 方式統一 interface 協議</p>
+</li>
+<li><p>還需要統一 interface 傳遞的資料格式</p>
+</li>
+<li><p>可以由不同的程式語言實現(但基本上還是建議使用統一的 technique stack)</p>
+</li>
+</ul>
+<h2 id="API-Gateway"><a href="#API-Gateway" class="headerlink" title="API Gateway"></a>API Gateway</h2><ul>
+<li><p>在外部系統看來，它不需要也沒辦法理解這麼多 Microservice 的職責分工和邊界，它只會關注它需要的能力，而不會關注這個能力應該由哪個Microservice 提供</p>
+</li>
+<li><p>如果外部系統直接訪問某個 Microservice，則意味著每個 Microservice 都要自己實現安全和權限的功能，這樣做不但工作量大，而且都是重複工作</p>
+</li>
+<li><p>需要一個統一的 API Gateway，<strong>負責外部系統的訪問操作</strong></p>
+</li>
+<li><p>API Gateway 是外部系統訪問的 interface ，所有的外部系統接⼊系統都需要通過 API Gateway，主要包括接入認證(是否允許接入)、權限控制(可以訪問哪些功能)、傳輸加密、請求路由、流量控制 … 等功能</p>
+</li>
+<li><p>API Gateway 不要有業務邏輯</p>
+</li>
+</ul>
+<h2 id="Service-Discovery"><a href="#Service-Discovery" class="headerlink" title="Service Discovery"></a>Service Discovery</h2><ul>
+<li><p>Microservice 節點經常變化</p>
+</li>
+<li><p>希望節點的變化能夠及時同步到所有其他依賴的 Microservice；如果採用手工配置，是不可能做到即時更改生效的</p>
+</li>
+<li><p>實現方式：</p>
+<ul>
+<li>自理式：每個 Microservice 自己完成 Service Discovery</li>
+<li>代理式：Microservice 之間有一個負載均衡系統(圖中的 Load Balancer 節點)，由負載均衡系統來完成 Microservice 之間的 Service Discovery</li>
+</ul>
+</li>
+<li><p>代理式的方式看起來更加清晰，Microservice 本身的實現也簡單了很多</p>
+</li>
+<li><p>使用代理式的缺點：</p>
+<ul>
+<li>可用性風險：Load Balancwe 系統故障，就會影響所有 Microservice 之間的調用</li>
+<li>效能風險：所有的 Microservice 之間的調用流量都要經過 Load Balancer 系統，效能壓力會隨著 Microservice 數量和流量增加而不斷增加，最後成為效能瓶頸</li>
+</ul>
+</li>
+<li><p>自理式示意圖：<br><img src="/blog/images/architecture-design/service-discovery-self.png" alt="Service Discovery - self"></p>
+</li>
+<li><p>代理式示意圖：<br><img src="/blog/images/architecture-design/service-discovery-proxy.png" alt="Service Discovery - proxy"></p>
+</li>
+</ul>
+<h2 id="Service-Routing"><a href="#Service-Routing" class="headerlink" title="Service Routing"></a>Service Routing</h2><ul>
+<li><p>Service Routing 核心的功能就是<code>路由算法</code></p>
+</li>
+<li><p>常見的路由算法有：隨機路由、輪詢路由、最小壓力路由、最小連接數路由等</p>
+</li>
+</ul>
+<h2 id="Service-Failt-Tolerance"><a href="#Service-Failt-Tolerance" class="headerlink" title="Service Failt Tolerance"></a>Service Failt Tolerance</h2><ul>
+<li><p>系統拆分為 Microservice 後，單個 Microservice 故障的機率變小，故障影響範圍也減少，但是 Microservice 的節點數量大大增加</p>
+</li>
+<li><p>從整體上來看，系統中某個 Microservice 出故障的機率會大大增加</p>
+</li>
+<li><p>需要 Microservice 能夠自動應對這種出錯場景，及時進行處理</p>
+</li>
+<li><p>常見的 Service Failt Tolerance 包括請求重試、流控和服務隔離</p>
+</li>
+</ul>
+<h2 id="Service-Monitoring"><a href="#Service-Monitoring" class="headerlink" title="Service Monitoring"></a>Service Monitoring</h2><ul>
+<li><p>系統拆分為 Microservice 後，節點數量大大增加，導致需要監控的機器、網路、進程、interface 調用數等監控對象的數量大大增加</p>
+</li>
+<li><p>一旦發生故障，我們需要快速根據各類信息來定位故障</p>
+</li>
+<li><p>主要用途：</p>
+<ul>
+<li>實時蒐集信息並進行分析，避免故障後再來分析，減少了處理時間</li>
+<li>Service Monitoring 可以在實時分析的基礎上進行預警，在問題萌芽的階段發覺並預警，降低了問題影響的範圍和時間</li>
+</ul>
+</li>
+<li><p>需要蒐集並分析大量的資料，因此建議做成獨立的系統</p>
+</li>
+</ul>
+<h2 id="Service-Tracking"><a href="#Service-Tracking" class="headerlink" title="Service Tracking"></a>Service Tracking</h2><ul>
+<li><p>如果需要跟蹤某一個請求在 Microservice 中的完整路徑，Service Monitoring 是難以實現的</p>
+</li>
+<li><p>Service Monitoring 會記錄請求次數、響應時間平均值、響應時間最高值、錯誤碼分佈這些信息</p>
+</li>
+<li><p>Service Tracking 會記錄其中某次請求的發起時間、響應時間、響應錯誤碼、請求參數、返回的 JSON 對象等信息</p>
+</li>
+</ul>
+<h2 id="Service-Security"><a href="#Service-Security" class="headerlink" title="Service Security"></a>Service Security</h2><ul>
+<li><p>從業務的角度來說，部分敏感資料或者操作，只能部分 Microservice 可以訪問，而不是所有的 Microservice 都可以訪問</p>
+</li>
+<li><p>需要設計Service Security機制來保證業務和資料的安全性</p>
+</li>
+<li><p>Service Security 主要分為三部分：接入安全、資料安全、傳輸安全</p>
+</li>
+<li><p>Service Security 可以集成到 Configuration Center 系統中進行實現：</p>
+<ul>
+<li>Configuration Center 配置 Microservice 的接入安全策略和資料安全策略</li>
+<li>Microservice 節點從 Configuration Center 獲取這些配置信息</li>
+<li>在處理具體的 Microservice 調用請求時根據安全策略進行處理</li>
+</ul>
+</li>
+</ul>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a target="_blank" rel="noopener" href="https://time.geekbang.org/column/intro/81">從0開始學架構_架構基礎_架構入門-極客時間</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E5%BA%B7%E5%A8%81%E5%AE%9A%E5%BE%8B">康威定律 - 維基百科，自由的百科全書</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://kknews.cc/zh-tw/news/6q2l2rm.html">Microservice架構的理論基礎-康威定律 - 每日頭條</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/Architecture-Design/" rel="tag"># Architecture Design</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/Architecture_Design/Architecture-Design-Howto-deal-with-API-failure/" rel="prev" title="[架構設計] 如何應對 API 級別故障">
+                  <i class="fa fa-chevron-left"></i> [架構設計] 如何應對 API 級別故障
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/Architecture_Design/Architecture-Design-Scalable-Arch/";
+    this.page.identifier = "Architecture_Design/Architecture-Design-Scalable-Arch/";
+    this.page.title = "[架構設計] 可擴展架構設計";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>
