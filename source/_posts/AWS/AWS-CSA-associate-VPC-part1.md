@@ -36,6 +36,16 @@ Overview
 - 甚至可以將地端環境 & AWS VPC 建立一個 VPN 連線，成為一個 Hybrid cloud 的架構
 
 
+## VPC 網路示意
+
+![VPC Example 2](/blog/images/aws/VPC_Example-2.png)
+
+以下是幾個 VPC 網路的特點：
+
+- 在 Region 中
+
+- 可以跨 AZ (因為 AZ 是屬於 datacenter 等級，因此也表示跨 datacenter)
+
 
 ## VPC 標準範例介紹
 
@@ -97,6 +107,12 @@ Overview
 
 > 若需要正確的計算 IP 範圍，可以使用 [CIDR.xyz](https://cidr.xyz/) 網站。
 
+### 補充示意圖
+
+了解上面的概念後，接著看下面這張 VPC 網路示意圖，就不會覺得很突兀了：
+
+![VPC Example 1](/blog/images/aws/VPC_Example-3.png)
+
 
 ## 深入認識 VPC
 
@@ -118,7 +134,9 @@ Overview
 
 - default VPC 是很簡單好用的，可以讓使用者直接佈署 instance 在裡面 
 
-- 在 default VPC 中的所有 subnet 都預設具備連網的能力
+- 在 default VPC 中，每個 subnet 都有一組可以連外的 routing 設定，因此所有 subnet 都預設具備連網的能力
+
+- 每個 subnet 都會有一個 Internet Gateway 的設定，因此都是 public
 
 - 每個 EC2 instance 都會同時有 public/private IP
 
@@ -208,9 +226,13 @@ Overview
 1. 建立 Internet Gateway (只需要指定 name)
 
 2. 指定 VPC 並進行 attach
-> 一個 VPC 只可以 attach 到一個 Internet Gateway，但 AWS 會確保 Internet Gateway 的 HA
+  - 一個 VPC 只可以 attach 到一個 Internet Gateway，但 AWS 會確保 Internet Gateway 的 HA
+  - 當有 resource 在 VPC 上運作時，是無法將 Internet Gateway 從 VPC 上 deattach
+
 
 ### Route Table
+
+> 用來決定網路流量被導向何處
 
 1. 新增 route table，指定所綁定的 VPC
 
