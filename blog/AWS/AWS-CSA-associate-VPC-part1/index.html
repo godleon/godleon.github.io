@@ -38,7 +38,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/VPC_NAT-gateway.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/VPC_Creation-3.png">
 <meta property="article:published_time" content="2020-05-20T21:45:00.000Z">
-<meta property="article:modified_time" content="2020-09-29T01:54:37.929Z">
+<meta property="article:modified_time" content="2020-10-04T22:44:59.011Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -169,7 +169,7 @@
 
       <!--noindex-->
       <section class="post-toc-wrap sidebar-panel">
-          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Overview"><span class="nav-number">1.</span> <span class="nav-text">Overview</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#What-is-VPC"><span class="nav-number">1.1.</span> <span class="nav-text">What is VPC?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VPC-%E7%B6%B2%E8%B7%AF%E7%A4%BA%E6%84%8F"><span class="nav-number">1.2.</span> <span class="nav-text">VPC 網路示意</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VPC-%E6%A8%99%E6%BA%96%E7%AF%84%E4%BE%8B%E4%BB%8B%E7%B4%B9"><span class="nav-number">1.3.</span> <span class="nav-text">VPC 標準範例介紹</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#General"><span class="nav-number">1.3.1.</span> <span class="nav-text">General</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Gateway-amp-Router-amp-Route-Table"><span class="nav-number">1.3.2.</span> <span class="nav-text">Gateway &amp; Router &amp; Route Table</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Network-ACL"><span class="nav-number">1.3.3.</span> <span class="nav-text">Network ACL</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Security-Group"><span class="nav-number">1.3.4.</span> <span class="nav-text">Security Group</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#public-private-subnet"><span class="nav-number">1.3.5.</span> <span class="nav-text">public&#x2F;private subnet</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IP-%E7%AF%84%E5%9C%8D%E7%9A%84%E8%A8%AD%E5%AE%9A"><span class="nav-number">1.3.6.</span> <span class="nav-text">IP 範圍的設定</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A3%9C%E5%85%85%E7%A4%BA%E6%84%8F%E5%9C%96"><span class="nav-number">1.3.7.</span> <span class="nav-text">補充示意圖</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%B1%E5%85%A5%E8%AA%8D%E8%AD%98-VPC"><span class="nav-number">1.4.</span> <span class="nav-text">深入認識 VPC</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E8%80%85%E5%8F%AF%E4%BB%A5%E7%94%A8-VPC-%E4%BD%9C%E5%88%B0%E5%93%AA%E4%BA%9B%E4%BA%8B%E6%83%85"><span class="nav-number">1.4.1.</span> <span class="nav-text">使用者可以用 VPC 作到哪些事情?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Default-VPC-%E7%9A%84%E7%89%B9%E6%80%A7"><span class="nav-number">1.4.2.</span> <span class="nav-text">Default VPC 的特性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VPC-Peering"><span class="nav-number">1.4.3.</span> <span class="nav-text">VPC Peering</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%87%89%E8%80%83%E9%87%8D%E9%BB%9E%E6%95%B4%E7%90%86"><span class="nav-number">1.5.</span> <span class="nav-text">應考重點整理</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AF%A6%E4%BD%9C%E9%87%8D%E9%BB%9E"><span class="nav-number">2.</span> <span class="nav-text">實作重點</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%86%E8%A7%A3-Default-VPC"><span class="nav-number">2.1.</span> <span class="nav-text">了解 Default VPC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B-VPC"><span class="nav-number">2.2.</span> <span class="nav-text">建立 VPC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B-Subnet"><span class="nav-number">2.3.</span> <span class="nav-text">建立 Subnet</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%82%BA-Subnet-%E6%8F%90%E4%BE%9B%E9%80%A3%E7%B6%B2%E8%83%BD%E5%8A%9B"><span class="nav-number">2.4.</span> <span class="nav-text">為 Subnet 提供連網能力</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Internet-Gateway"><span class="nav-number">2.4.1.</span> <span class="nav-text">Internet Gateway</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Route-Table"><span class="nav-number">2.4.2.</span> <span class="nav-text">Route Table</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A0%85"><span class="nav-number">2.4.3.</span> <span class="nav-text">注意事項</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Public-Private-%E4%B9%8B%E9%96%93%E5%A6%82%E4%BD%95%E4%BA%92%E9%80%A3"><span class="nav-number">2.5.</span> <span class="nav-text">Public&#x2F;Private 之間如何互連?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%87%89%E8%80%83%E9%87%8D%E9%BB%9E"><span class="nav-number">2.6.</span> <span class="nav-text">應考重點</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#NAT-Network-Address-Translation"><span class="nav-number">3.</span> <span class="nav-text">NAT(Network Address Translation)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#NAT-instance"><span class="nav-number">3.1.</span> <span class="nav-text">NAT instance</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NAT-Gateway"><span class="nav-number">3.2.</span> <span class="nav-text">NAT Gateway</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Network-ACLs"><span class="nav-number">4.</span> <span class="nav-text">Network ACLs</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a></li></ol></div>
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Overview"><span class="nav-number">1.</span> <span class="nav-text">Overview</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#What-is-VPC"><span class="nav-number">1.1.</span> <span class="nav-text">What is VPC?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VPC-%E7%B6%B2%E8%B7%AF%E7%A4%BA%E6%84%8F"><span class="nav-number">1.2.</span> <span class="nav-text">VPC 網路示意</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VPC-%E6%A8%99%E6%BA%96%E7%AF%84%E4%BE%8B%E4%BB%8B%E7%B4%B9"><span class="nav-number">1.3.</span> <span class="nav-text">VPC 標準範例介紹</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#General"><span class="nav-number">1.3.1.</span> <span class="nav-text">General</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Gateway-amp-Router-amp-Route-Table"><span class="nav-number">1.3.2.</span> <span class="nav-text">Gateway &amp; Router &amp; Route Table</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Network-ACL"><span class="nav-number">1.3.3.</span> <span class="nav-text">Network ACL</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Security-Group"><span class="nav-number">1.3.4.</span> <span class="nav-text">Security Group</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#public-private-subnet"><span class="nav-number">1.3.5.</span> <span class="nav-text">public&#x2F;private subnet</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IP-%E7%AF%84%E5%9C%8D%E7%9A%84%E8%A8%AD%E5%AE%9A"><span class="nav-number">1.3.6.</span> <span class="nav-text">IP 範圍的設定</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A3%9C%E5%85%85%E7%A4%BA%E6%84%8F%E5%9C%96"><span class="nav-number">1.3.7.</span> <span class="nav-text">補充示意圖</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%B1%E5%85%A5%E8%AA%8D%E8%AD%98-VPC"><span class="nav-number">1.4.</span> <span class="nav-text">深入認識 VPC</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E8%80%85%E5%8F%AF%E4%BB%A5%E7%94%A8-VPC-%E4%BD%9C%E5%88%B0%E5%93%AA%E4%BA%9B%E4%BA%8B%E6%83%85"><span class="nav-number">1.4.1.</span> <span class="nav-text">使用者可以用 VPC 作到哪些事情?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Default-VPC-%E7%9A%84%E7%89%B9%E6%80%A7"><span class="nav-number">1.4.2.</span> <span class="nav-text">Default VPC 的特性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Internet-Gateway"><span class="nav-number">1.4.3.</span> <span class="nav-text">Internet Gateway</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Route-Table"><span class="nav-number">1.4.4.</span> <span class="nav-text">Route Table</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VPC-Peering"><span class="nav-number">1.4.5.</span> <span class="nav-text">VPC Peering</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%87%89%E8%80%83%E9%87%8D%E9%BB%9E%E6%95%B4%E7%90%86"><span class="nav-number">1.5.</span> <span class="nav-text">應考重點整理</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AF%A6%E4%BD%9C%E9%87%8D%E9%BB%9E"><span class="nav-number">2.</span> <span class="nav-text">實作重點</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%86%E8%A7%A3-Default-VPC"><span class="nav-number">2.1.</span> <span class="nav-text">了解 Default VPC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B-VPC"><span class="nav-number">2.2.</span> <span class="nav-text">建立 VPC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B-Subnet"><span class="nav-number">2.3.</span> <span class="nav-text">建立 Subnet</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%82%BA-Subnet-%E6%8F%90%E4%BE%9B%E9%80%A3%E7%B6%B2%E8%83%BD%E5%8A%9B"><span class="nav-number">2.4.</span> <span class="nav-text">為 Subnet 提供連網能力</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Internet-Gateway-1"><span class="nav-number">2.4.1.</span> <span class="nav-text">Internet Gateway</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Route-Table-1"><span class="nav-number">2.4.2.</span> <span class="nav-text">Route Table</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A0%85"><span class="nav-number">2.4.3.</span> <span class="nav-text">注意事項</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Public-Private-%E4%B9%8B%E9%96%93%E5%A6%82%E4%BD%95%E4%BA%92%E9%80%A3"><span class="nav-number">2.5.</span> <span class="nav-text">Public&#x2F;Private 之間如何互連?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%87%89%E8%80%83%E9%87%8D%E9%BB%9E"><span class="nav-number">2.6.</span> <span class="nav-text">應考重點</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#NAT-Network-Address-Translation"><span class="nav-number">3.</span> <span class="nav-text">NAT(Network Address Translation)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#NAT-instance"><span class="nav-number">3.1.</span> <span class="nav-text">NAT instance</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NAT-Gateway"><span class="nav-number">3.2.</span> <span class="nav-text">NAT Gateway</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Network-ACLs"><span class="nav-number">4.</span> <span class="nav-text">Network ACLs</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a></li></ol></div>
       </section>
       <!--/noindex-->
 
@@ -262,7 +262,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-09-29 09:54:37" itemprop="dateModified" datetime="2020-09-29T09:54:37+08:00">2020-09-29</time>
+                <time title="Modified: 2020-10-05 06:44:59" itemprop="dateModified" datetime="2020-10-05T06:44:59+08:00">2020-10-05</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -324,6 +324,29 @@
 <li><p>可以跨 AZ (因為 AZ 是屬於 datacenter 等級，因此也表示跨 datacenter)</p>
 </li>
 </ul>
+<p>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</p>
+<ul>
+<li>AWS 會在 VPC 中提供一個 DNS server，因此在 VPC 內部的 instance 都可以透過 hostname 互連<blockquote>
+<p>可透過修改 VPC 的 DNS 選項來調整，也可以運行自己的 DNS server</p>
+</blockquote>
+</li>
+</ul>
+<p>=======</p>
+<blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>dd9dbbcb92fff619300d052ff9fcf7a31e975fea</p>
+</blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
 <h2 id="VPC-標準範例介紹"><a href="#VPC-標準範例介紹" class="headerlink" title="VPC 標準範例介紹"></a>VPC 標準範例介紹</h2><p>以下介紹一個標準的 VPC 架構的規劃：</p>
 <p><img src="/blog/images/aws/VPC_Example-1.png" alt="VPC Example 1"></p>
 <h3 id="General"><a href="#General" class="headerlink" title="General"></a>General</h3><ul>
@@ -360,9 +383,14 @@
 </li>
 </ul>
 <h3 id="public-private-subnet"><a href="#public-private-subnet" class="headerlink" title="public/private subnet"></a>public/private subnet</h3><ul>
-<li><p>外部進來的流量可以存取 public subnet 中的 Instance</p>
+<li><p>外部進來的流量可以存取 public subnet 中的 Instance (因為有與 Internet Gateway 繫結)</p>
 </li>
 <li><p>private subnet 中的 Instance 是無法被外界存取，對外連線也是禁止的</p>
+<blockquote>
+<p>因為 private subnet 預設的 route table 僅有 local route</p>
+</blockquote>
+</li>
+<li><p>private subnet 若是需要連到 internet，則必須仰賴 NAT gateway(or instance) 來達成</p>
 </li>
 <li><p>public subnet 中的 Instance 是唯一有能力存取 private subnet 中 Instance 的地方</p>
 <blockquote>
@@ -395,6 +423,8 @@
 </li>
 <li><p>建立 Internet Gateway 並與 VPC 相連，提供 VPC 連網的能力</p>
 </li>
+<li><p>可以透過 VPN 將地端 &amp; 雲端的網路環境連接起來</p>
+</li>
 <li><p>對 AWS resource 提供更多安全相關的管理 &amp; 控制</p>
 </li>
 <li><p>設定 Security Group(for <strong>Instance</strong>) &amp; Network ACLs(for <strong>Subnet</strong>)</p>
@@ -405,9 +435,37 @@
 </li>
 <li><p>在 default VPC 中，每個 subnet 都有一組可以連外的 routing 設定，因此所有 subnet 都預設具備連網的能力</p>
 </li>
-<li><p>每個 subnet 都會有一個 Internet Gateway 的設定，因此都是 public</p>
+<li><p>每個 subnet 都會有一個 Internet Gateway 存在並與其相連，因此都是屬於 public subnet</p>
 </li>
 <li><p>每個 EC2 instance 都會同時有 public/private IP</p>
+</li>
+</ul>
+<h3 id="Internet-Gateway"><a href="#Internet-Gateway" class="headerlink" title="Internet Gateway"></a>Internet Gateway</h3><ul>
+<li><p>讓 VPC 中的 instance 與外面的 Internet 通訊的橋樑</p>
+</li>
+<li><p>有自動水平擴展、並帶有 redundant &amp; HA 特性，總之 AWS 會確保 Internet Gateway 穩定的運行</p>
+</li>
+<li><p>沒有對外頻寬的限制</p>
+</li>
+<li><p>會自動幫你的 instance 作 NAT，mapping 到一個 public ip address(From Elastic IP)</p>
+</li>
+<li><p><strong>每個 default VPC 都已經有連接一個 Internet Gateway</strong></p>
+</li>
+<li><p>每個 VPC 一次只能跟一個 Internet Gateway 繫結</p>
+</li>
+<li><p>若是 VPC 中已經有任何 AWS resource(例如：EC2/RDS instance)，就無法移除 Internet Gateway 的繫結</p>
+</li>
+<li><p>若是 VPC 中的 AWS resource 需要對外連網的能力，一定要有 Internet Gateway 才辦得到</p>
+</li>
+</ul>
+<h3 id="Route-Table"><a href="#Route-Table" class="headerlink" title="Route Table"></a>Route Table</h3><ul>
+<li><p>預設情況下，VPC 內部的 traffic 在不同的 subnet 之間是會通的，依靠的就是所謂的 <code>local route</code></p>
+</li>
+<li><p>local route 是預設就會存在，且無法修改的</p>
+</li>
+<li><p>VPC 中可以設定多組 route table，但已經與任何的 subnet 繫結就無法被刪除</p>
+</li>
+<li><p>若要調整 VPC 中的 routing 設定，建議作法是保留 default route table，然後新增其他的 route table 設定</p>
 </li>
 </ul>
 <h3 id="VPC-Peering"><a href="#VPC-Peering" class="headerlink" title="VPC Peering"></a>VPC Peering</h3><ul>
@@ -485,7 +543,7 @@
 <li><p>Route Table</p>
 </li>
 </ul>
-<h3 id="Internet-Gateway"><a href="#Internet-Gateway" class="headerlink" title="Internet Gateway"></a>Internet Gateway</h3><ol>
+<h3 id="Internet-Gateway-1"><a href="#Internet-Gateway-1" class="headerlink" title="Internet Gateway"></a>Internet Gateway</h3><ol>
 <li><p>建立 Internet Gateway (只需要指定 name)</p>
 </li>
 <li><p>指定 VPC 並進行 attach</p>
@@ -495,7 +553,7 @@
 </ul>
 </li>
 </ol>
-<h3 id="Route-Table"><a href="#Route-Table" class="headerlink" title="Route Table"></a>Route Table</h3><blockquote>
+<h3 id="Route-Table-1"><a href="#Route-Table-1" class="headerlink" title="Route Table"></a>Route Table</h3><blockquote>
 <p>用來決定網路流量被導向何處</p>
 </blockquote>
 <ol>

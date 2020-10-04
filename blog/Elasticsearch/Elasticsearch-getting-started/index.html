@@ -34,6 +34,10 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/Elasticsearch/es_cat-search-2.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/Elasticsearch/es_cat-search-3.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/Elasticsearch/es_cat-search-4.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/Elasticsearch/es_cat-search-2.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/Elasticsearch/es_cat-search-3.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/Elasticsearch/es_cat-search-4.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/Elasticsearch/es_document-crud-get-example.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/Elasticsearch/es_invert-index-1.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/Elasticsearch/es_posting-list-example.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/Elasticsearch/es_analyzer-1.png">
@@ -50,7 +54,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/Elasticsearch/es_search-example-10.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/Elasticsearch/es_aggregation-01.png">
 <meta property="article:published_time" content="2019-10-25T22:25:00.000Z">
-<meta property="article:modified_time" content="2020-09-29T01:54:37.933Z">
+<meta property="article:modified_time" content="2020-10-04T22:44:59.015Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="Elasticsearch">
 <meta name="twitter:card" content="summary">
@@ -179,7 +183,7 @@
 
       <!--noindex-->
       <section class="post-toc-wrap sidebar-panel">
-          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5%EF%BC%9AIndex%E3%80%81Document-%E5%92%8C-REST-API"><span class="nav-number">1.</span> <span class="nav-text">基本概念：Index、Document 和 REST API</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Document"><span class="nav-number">1.1.</span> <span class="nav-text">Document</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#JSON-document"><span class="nav-number">1.1.1.</span> <span class="nav-text">JSON document</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Metadata"><span class="nav-number">1.1.2.</span> <span class="nav-text">Metadata</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Index"><span class="nav-number">1.2.</span> <span class="nav-text">Index</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Elasticsearch-%E8%88%87-RDBMS-%E7%9A%84%E6%AF%94%E8%BC%83-amp-%E5%8F%96%E6%8D%A8"><span class="nav-number">1.3.</span> <span class="nav-text">Elasticsearch 與 RDBMS 的比較 &amp; 取捨</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E6%90%9C%E5%B0%8B"><span class="nav-number">1.4.</span> <span class="nav-text">常用搜尋</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E8%A9%A2-index"><span class="nav-number">1.4.1.</span> <span class="nav-text">查詢 index</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%90%AD%E9%85%8D-cat-%E5%81%9A%E6%90%9C%E5%B0%8B"><span class="nav-number">1.4.2.</span> <span class="nav-text">搭配 _cat 做搜尋</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5%EF%BC%9ANode%E3%80%81Cluster%E3%80%81Shard-%E5%8F%8A-Replication"><span class="nav-number">2.</span> <span class="nav-text">基本概念：Node、Cluster、Shard 及 Replication</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Document-%E7%9A%84%E5%9F%BA%E6%9C%AC-CRUD-%E8%88%87%E6%89%B9%E6%AC%A1%E6%93%8D%E4%BD%9C"><span class="nav-number">3.</span> <span class="nav-text">Document 的基本 CRUD 與批次操作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#API-%E8%A1%8C%E7%82%BA%E5%8D%80%E5%88%86"><span class="nav-number">3.1.</span> <span class="nav-text">API 行為區分</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Inverted-Index-%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95-%E4%BB%8B%E7%B4%B9"><span class="nav-number">4.</span> <span class="nav-text">Inverted Index(倒排索引)介紹</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Inverted-Index-%E7%B5%84%E6%88%90"><span class="nav-number">4.1.</span> <span class="nav-text">Inverted Index 組成</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Posting-List"><span class="nav-number">4.2.</span> <span class="nav-text">Posting List</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#References"><span class="nav-number">4.3.</span> <span class="nav-text">References</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%80%9A%E9%81%8EAnalyzer%E9%80%B2%E8%A1%8C%E5%88%86%E8%A9%9E"><span class="nav-number">5.</span> <span class="nav-text">通過Analyzer進行分詞</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Analyzer-%E7%9A%84%E7%B5%84%E6%88%90"><span class="nav-number">5.1.</span> <span class="nav-text">Analyzer 的組成</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Elasticsearch-%E5%85%A7%E5%BB%BA%E7%9A%84-Analyzer"><span class="nav-number">5.2.</span> <span class="nav-text">Elasticsearch 內建的 Analyzer</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Search-API-%E6%A6%82%E8%A6%BD"><span class="nav-number">6.</span> <span class="nav-text">Search API 概覽</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#URI-%E6%9F%A5%E8%A9%A2"><span class="nav-number">6.1.</span> <span class="nav-text">URI 查詢</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A1%A1%E9%87%8F%E7%9B%B8%E9%97%9C%E6%80%A7"><span class="nav-number">6.2.</span> <span class="nav-text">衡量相關性</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#URI-Search%E8%A9%B3%E8%A7%A3"><span class="nav-number">7.</span> <span class="nav-text">URI Search詳解</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%90%9C%E5%B0%8B%E7%AF%84%E4%BE%8B"><span class="nav-number">7.1.</span> <span class="nav-text">搜尋範例</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Request-Body-%E8%88%87-Query-DSL-%E7%B0%A1%E4%BB%8B"><span class="nav-number">8.</span> <span class="nav-text">Request Body 與 Query DSL 簡介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E8%88%AC%E6%9F%A5%E8%A9%A2%E7%AF%84%E4%BE%8B"><span class="nav-number">8.1.</span> <span class="nav-text">一般查詢範例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Scripted-Field-%E8%85%B3%E6%9C%AC%E5%AD%97%E6%AE%B5-Query"><span class="nav-number">8.2.</span> <span class="nav-text">Scripted Field(腳本字段) Query</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%9F%A5%E8%A9%A2%E8%A1%A8%E9%81%94%E5%BC%8F-Match"><span class="nav-number">8.3.</span> <span class="nav-text">使用查詢表達式 - Match</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%9F%A5%E8%A9%A2%E8%A1%A8%E9%81%94%E5%BC%8F-Match-Phrase"><span class="nav-number">8.4.</span> <span class="nav-text">使用查詢表達式 - Match Phrase</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Query-String-amp-Simple-Query-String-%E6%9F%A5%E8%A9%A2"><span class="nav-number">9.</span> <span class="nav-text">Query String &amp; Simple Query String 查詢</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Query-String-Query"><span class="nav-number">9.1.</span> <span class="nav-text">Query String Query</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Simple-Query-String-Query"><span class="nav-number">9.2.</span> <span class="nav-text">Simple Query String Query</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Dynamic-Mapping-%E5%92%8C%E5%B8%B8%E8%A6%8B%E5%AD%97%E6%AE%B5%E9%A1%9E%E5%9E%8B"><span class="nav-number">10.</span> <span class="nav-text">Dynamic Mapping 和常見字段類型</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#What-is-Mapping"><span class="nav-number">10.1.</span> <span class="nav-text">What is Mapping ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Term-Data-Type"><span class="nav-number">10.2.</span> <span class="nav-text">Term Data Type</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B0%A1%E5%96%AE%E9%A1%9E%E5%9E%8B"><span class="nav-number">10.2.1.</span> <span class="nav-text">簡單類型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A4%87%E9%9B%9C%E9%A1%9E%E5%9E%8B"><span class="nav-number">10.2.2.</span> <span class="nav-text">複雜類型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E6%AE%8A%E9%A1%9E%E5%9E%8B"><span class="nav-number">10.2.3.</span> <span class="nav-text">特殊類型</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#What-is-Dynamic-Mapping"><span class="nav-number">10.3.</span> <span class="nav-text">What is Dynamic Mapping ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AF%84%E4%BE%8B"><span class="nav-number">10.4.</span> <span class="nav-text">範例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9-Mapping-%E4%B8%AD%E7%9A%84%E5%AD%97%E6%AE%B5%E9%A1%9E%E5%9E%8B"><span class="nav-number">10.5.</span> <span class="nav-text">修改 Mapping 中的字段類型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9-Mapping-%E7%AF%84%E4%BE%8B"><span class="nav-number">10.6.</span> <span class="nav-text">修改 Mapping 範例</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%A1%AF%E5%BC%8F-Mapping-%E8%A8%AD%E7%BD%AE%E8%88%87%E5%B8%B8%E8%A6%8B%E5%8F%83%E6%95%B8%E4%BB%8B%E7%B4%B9"><span class="nav-number">11.</span> <span class="nav-text">顯式 Mapping 設置與常見參數介紹</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E7%BE%A9-mapping"><span class="nav-number">11.1.</span> <span class="nav-text">自定義 mapping</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Index-Options"><span class="nav-number">11.2.</span> <span class="nav-text">Index Options</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%81%B8%E6%93%87%E6%80%A7%E7%9A%84%E8%AE%93%E7%89%B9%E5%AE%9A-Field-%E4%B8%8D%E8%A2%AB%E7%B4%A2%E5%BC%95"><span class="nav-number">11.3.</span> <span class="nav-text">選擇性的讓特定 Field 不被索引</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NULL-value-%E7%9A%84%E8%99%95%E7%90%86"><span class="nav-number">11.4.</span> <span class="nav-text">NULL value 的處理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#copy-to-%E8%A8%AD%E5%AE%9A"><span class="nav-number">11.5.</span> <span class="nav-text">copy_to 設定</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Aray-Type"><span class="nav-number">11.6.</span> <span class="nav-text">Aray Type</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Multiple-Field-%E7%89%B9%E6%80%A7%E5%8F%8A-Mapping-%E4%B8%AD%E9%85%8D%E7%BD%AE%E8%87%AA%E5%AE%9A%E7%BE%A9-Analyzer"><span class="nav-number">12.</span> <span class="nav-text">Multiple Field 特性及 Mapping 中配置自定義 Analyzer</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Exact-Values-v-s-Full-Text"><span class="nav-number">12.1.</span> <span class="nav-text">Exact Values v.s. Full Text</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E8%A8%82%E5%88%86%E8%A9%9E%E5%99%A8-Analyzer"><span class="nav-number">12.2.</span> <span class="nav-text">自訂分詞器(Analyzer)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Character-Filter"><span class="nav-number">12.2.1.</span> <span class="nav-text">Character Filter</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Tokenizer"><span class="nav-number">12.2.2.</span> <span class="nav-text">Tokenizer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Token-Filter"><span class="nav-number">12.2.3.</span> <span class="nav-text">Token Filter</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AF%84%E4%BE%8B-1"><span class="nav-number">12.3.</span> <span class="nav-text">範例</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Index-Template-%E5%92%8C-Dynamic-Template"><span class="nav-number">13.</span> <span class="nav-text">Index Template 和 Dynamic Template</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Index-Template"><span class="nav-number">13.1.</span> <span class="nav-text">Index Template</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Dynamic-Template"><span class="nav-number">13.2.</span> <span class="nav-text">Dynamic Template</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Elasticsearch-%E8%81%9A%E5%90%88%E5%88%86%E6%9E%90%E7%B0%A1%E4%BB%8B"><span class="nav-number">14.</span> <span class="nav-text">Elasticsearch 聚合分析簡介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Aggregation"><span class="nav-number">14.1.</span> <span class="nav-text">Aggregation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Aggregation-Family-%E8%81%9A%E5%90%88%E7%B8%BD%E9%A1%9E"><span class="nav-number">14.2.</span> <span class="nav-text">Aggregation Family (聚合總類)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AF%84%E4%BE%8B%EF%BC%9ABucketing-%E5%88%86%E6%A1%B6"><span class="nav-number">14.3.</span> <span class="nav-text">範例：Bucketing (分桶)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AF%84%E4%BE%8B%EF%BC%9ABucketing-Metric"><span class="nav-number">14.4.</span> <span class="nav-text">範例：Bucketing + Metric</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AF%84%E4%BE%8B%EF%BC%9ABucketing-Metric-Matrix"><span class="nav-number">14.5.</span> <span class="nav-text">範例：Bucketing + Metric + Matrix</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References-1"><span class="nav-number">15.</span> <span class="nav-text">References</span></a></li></ol></div>
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5%EF%BC%9AIndex%E3%80%81Document-%E5%92%8C-REST-API"><span class="nav-number">1.</span> <span class="nav-text">基本概念：Index、Document 和 REST API</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Document"><span class="nav-number">1.1.</span> <span class="nav-text">Document</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#JSON-document"><span class="nav-number">1.1.1.</span> <span class="nav-text">JSON document</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Metadata"><span class="nav-number">1.1.2.</span> <span class="nav-text">Metadata</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Index"><span class="nav-number">1.2.</span> <span class="nav-text">Index</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Elasticsearch-%E8%88%87-RDBMS-%E7%9A%84%E6%AF%94%E8%BC%83-amp-%E5%8F%96%E6%8D%A8"><span class="nav-number">1.3.</span> <span class="nav-text">Elasticsearch 與 RDBMS 的比較 &amp; 取捨</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E6%90%9C%E5%B0%8B"><span class="nav-number">1.4.</span> <span class="nav-text">常用搜尋</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E8%A9%A2-index"><span class="nav-number">1.4.1.</span> <span class="nav-text">查詢 index</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%90%AD%E9%85%8D-cat-%E5%81%9A%E6%90%9C%E5%B0%8B"><span class="nav-number">1.4.2.</span> <span class="nav-text">搭配 _cat 做搜尋</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">2.</span> <span class="nav-text"></span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Document-%E7%9A%84%E5%9F%BA%E6%9C%AC-CRUD-%E8%88%87%E6%89%B9%E6%AC%A1%E6%93%8D%E4%BD%9C"><span class="nav-number">3.</span> <span class="nav-text">Document 的基本 CRUD 與批次操作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Document-CRUD"><span class="nav-number">3.1.</span> <span class="nav-text">Document CRUD</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%89%B9%E6%AC%A1%E6%93%8D%E4%BD%9C"><span class="nav-number">3.2.</span> <span class="nav-text">批次操作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#bulk"><span class="nav-number">3.2.1.</span> <span class="nav-text">_bulk</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mget"><span class="nav-number">3.2.2.</span> <span class="nav-text">_mget</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#msearch"><span class="nav-number">3.2.3.</span> <span class="nav-text">_msearch</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#API-%E8%A1%8C%E7%82%BA%E5%8D%80%E5%88%86"><span class="nav-number">3.3.</span> <span class="nav-text">API 行為區分</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Inverted-Index-%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95-%E4%BB%8B%E7%B4%B9"><span class="nav-number">4.</span> <span class="nav-text">Inverted Index(倒排索引)介紹</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Inverted-Index-%E7%B5%84%E6%88%90"><span class="nav-number">4.1.</span> <span class="nav-text">Inverted Index 組成</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#References"><span class="nav-number">4.2.</span> <span class="nav-text">References</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%80%9A%E9%81%8E-Analyzer-%E9%80%B2%E8%A1%8C%E5%88%86%E8%A9%9E"><span class="nav-number">5.</span> <span class="nav-text">通過 Analyzer 進行分詞</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Analyzer-%E7%9A%84%E7%B5%84%E6%88%90"><span class="nav-number">5.1.</span> <span class="nav-text">Analyzer 的組成</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Elasticsearch-%E5%85%A7%E5%BB%BA%E7%9A%84-Analyzer"><span class="nav-number">5.2.</span> <span class="nav-text">Elasticsearch 內建的 Analyzer</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Search-API-%E6%A6%82%E8%A6%BD"><span class="nav-number">6.</span> <span class="nav-text">Search API 概覽</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#URI-%E6%9F%A5%E8%A9%A2"><span class="nav-number">6.1.</span> <span class="nav-text">URI 查詢</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A1%A1%E9%87%8F%E7%9B%B8%E9%97%9C%E6%80%A7"><span class="nav-number">6.2.</span> <span class="nav-text">衡量相關性</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#URI-Search%E8%A9%B3%E8%A7%A3"><span class="nav-number">7.</span> <span class="nav-text">URI Search詳解</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%90%9C%E5%B0%8B%E7%AF%84%E4%BE%8B"><span class="nav-number">7.1.</span> <span class="nav-text">搜尋範例</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Request-Body-%E8%88%87-Query-DSL-%E7%B0%A1%E4%BB%8B"><span class="nav-number">8.</span> <span class="nav-text">Request Body 與 Query DSL 簡介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E8%88%AC%E6%9F%A5%E8%A9%A2%E7%AF%84%E4%BE%8B"><span class="nav-number">8.1.</span> <span class="nav-text">一般查詢範例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Scripted-Field-%E8%85%B3%E6%9C%AC%E5%AD%97%E6%AE%B5-Query"><span class="nav-number">8.2.</span> <span class="nav-text">Scripted Field(腳本字段) Query</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%9F%A5%E8%A9%A2%E8%A1%A8%E9%81%94%E5%BC%8F-Match"><span class="nav-number">8.3.</span> <span class="nav-text">使用查詢表達式 - Match</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%9F%A5%E8%A9%A2%E8%A1%A8%E9%81%94%E5%BC%8F-Match-Phrase"><span class="nav-number">8.4.</span> <span class="nav-text">使用查詢表達式 - Match Phrase</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Query-String-amp-Simple-Query-String-%E6%9F%A5%E8%A9%A2"><span class="nav-number">9.</span> <span class="nav-text">Query String &amp; Simple Query String 查詢</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Query-String-Query"><span class="nav-number">9.1.</span> <span class="nav-text">Query String Query</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Simple-Query-String-Query"><span class="nav-number">9.2.</span> <span class="nav-text">Simple Query String Query</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Dynamic-Mapping-%E5%92%8C%E5%B8%B8%E8%A6%8B%E5%AD%97%E6%AE%B5%E9%A1%9E%E5%9E%8B"><span class="nav-number">10.</span> <span class="nav-text">Dynamic Mapping 和常見字段類型</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#What-is-Mapping"><span class="nav-number">10.1.</span> <span class="nav-text">What is Mapping ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Term-Data-Type"><span class="nav-number">10.2.</span> <span class="nav-text">Term Data Type</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B0%A1%E5%96%AE%E9%A1%9E%E5%9E%8B"><span class="nav-number">10.2.1.</span> <span class="nav-text">簡單類型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A4%87%E9%9B%9C%E9%A1%9E%E5%9E%8B"><span class="nav-number">10.2.2.</span> <span class="nav-text">複雜類型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E6%AE%8A%E9%A1%9E%E5%9E%8B"><span class="nav-number">10.2.3.</span> <span class="nav-text">特殊類型</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#What-is-Dynamic-Mapping"><span class="nav-number">10.3.</span> <span class="nav-text">What is Dynamic Mapping ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AF%84%E4%BE%8B"><span class="nav-number">10.4.</span> <span class="nav-text">範例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9-Mapping-%E4%B8%AD%E7%9A%84%E5%AD%97%E6%AE%B5%E9%A1%9E%E5%9E%8B"><span class="nav-number">10.5.</span> <span class="nav-text">修改 Mapping 中的字段類型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9-Mapping-%E7%AF%84%E4%BE%8B"><span class="nav-number">10.6.</span> <span class="nav-text">修改 Mapping 範例</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%A1%AF%E5%BC%8F-Mapping-%E8%A8%AD%E7%BD%AE%E8%88%87%E5%B8%B8%E8%A6%8B%E5%8F%83%E6%95%B8%E4%BB%8B%E7%B4%B9"><span class="nav-number">11.</span> <span class="nav-text">顯式 Mapping 設置與常見參數介紹</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E7%BE%A9-mapping"><span class="nav-number">11.1.</span> <span class="nav-text">自定義 mapping</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Index-Options"><span class="nav-number">11.2.</span> <span class="nav-text">Index Options</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%81%B8%E6%93%87%E6%80%A7%E7%9A%84%E8%AE%93%E7%89%B9%E5%AE%9A-Field-%E4%B8%8D%E8%A2%AB%E7%B4%A2%E5%BC%95"><span class="nav-number">11.3.</span> <span class="nav-text">選擇性的讓特定 Field 不被索引</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NULL-value-%E7%9A%84%E8%99%95%E7%90%86"><span class="nav-number">11.4.</span> <span class="nav-text">NULL value 的處理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#copy-to-%E8%A8%AD%E5%AE%9A"><span class="nav-number">11.5.</span> <span class="nav-text">copy_to 設定</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Aray-Type"><span class="nav-number">11.6.</span> <span class="nav-text">Aray Type</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Multiple-Field-%E7%89%B9%E6%80%A7%E5%8F%8A-Mapping-%E4%B8%AD%E9%85%8D%E7%BD%AE%E8%87%AA%E5%AE%9A%E7%BE%A9-Analyzer"><span class="nav-number">12.</span> <span class="nav-text">Multiple Field 特性及 Mapping 中配置自定義 Analyzer</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Exact-Values-v-s-Full-Text"><span class="nav-number">12.1.</span> <span class="nav-text">Exact Values v.s. Full Text</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E8%A8%82%E5%88%86%E8%A9%9E%E5%99%A8-Analyzer"><span class="nav-number">12.2.</span> <span class="nav-text">自訂分詞器(Analyzer)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Character-Filter"><span class="nav-number">12.2.1.</span> <span class="nav-text">Character Filter</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Tokenizer"><span class="nav-number">12.2.2.</span> <span class="nav-text">Tokenizer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Token-Filter"><span class="nav-number">12.2.3.</span> <span class="nav-text">Token Filter</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AF%84%E4%BE%8B-1"><span class="nav-number">12.3.</span> <span class="nav-text">範例</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Index-Template-%E5%92%8C-Dynamic-Template"><span class="nav-number">13.</span> <span class="nav-text">Index Template 和 Dynamic Template</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Index-Template"><span class="nav-number">13.1.</span> <span class="nav-text">Index Template</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Dynamic-Template"><span class="nav-number">13.2.</span> <span class="nav-text">Dynamic Template</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Elasticsearch-%E8%81%9A%E5%90%88%E5%88%86%E6%9E%90%E7%B0%A1%E4%BB%8B"><span class="nav-number">14.</span> <span class="nav-text">Elasticsearch 聚合分析簡介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Aggregation"><span class="nav-number">14.1.</span> <span class="nav-text">Aggregation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Aggregation-Family-%E8%81%9A%E5%90%88%E7%B8%BD%E9%A1%9E"><span class="nav-number">14.2.</span> <span class="nav-text">Aggregation Family (聚合總類)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AF%84%E4%BE%8B%EF%BC%9ABucketing-%E5%88%86%E6%A1%B6"><span class="nav-number">14.3.</span> <span class="nav-text">範例：Bucketing (分桶)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AF%84%E4%BE%8B%EF%BC%9ABucketing-Metric"><span class="nav-number">14.4.</span> <span class="nav-text">範例：Bucketing + Metric</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AF%84%E4%BE%8B%EF%BC%9ABucketing-Metric-Matrix"><span class="nav-number">14.5.</span> <span class="nav-text">範例：Bucketing + Metric + Matrix</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References-1"><span class="nav-number">15.</span> <span class="nav-text">References</span></a></li></ol></div>
       </section>
       <!--/noindex-->
 
@@ -272,7 +276,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-09-29 09:54:37" itemprop="dateModified" datetime="2020-09-29T09:54:37+08:00">2020-09-29</time>
+                <time title="Modified: 2020-10-05 06:44:59" itemprop="dateModified" datetime="2020-10-05T06:44:59+08:00">2020-10-05</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -308,7 +312,12 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <h1 id="基本概念：Index、Document-和-REST-API"><a href="#基本概念：Index、Document-和-REST-API" class="headerlink" title="基本概念：Index、Document 和 REST API"></a>基本概念：Index、Document 和 REST API</h1><p>Index &amp; Document 是比較偏向開發人員視角，是種邏輯概念</p>
+        <h1 id="基本概念：Index、Document-和-REST-API"><a href="#基本概念：Index、Document-和-REST-API" class="headerlink" title="基本概念：Index、Document 和 REST API"></a>基本概念：Index、Document 和 REST API</h1><ul>
+<li><p>Index &amp; Document 是比較偏向開發人員視角，是種邏輯概念</p>
+</li>
+<li><p>Node &amp; Shard 是比較偏向維運人員的視角，是種物理概念</p>
+</li>
+</ul>
 <h2 id="Document"><a href="#Document" class="headerlink" title="Document"></a>Document</h2><ul>
 <li><p>Document 是可以被搜尋數據的最小單位(可能是 log 文件中的一筆紀錄 / 一部電影或唱片的相關訊息 / RDBMS 中的一筆 record)：</p>
 </li>
@@ -396,21 +405,104 @@
 <h3 id="查詢-index"><a href="#查詢-index" class="headerlink" title="查詢 index"></a>查詢 index</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 取得指定 index 資訊，包含 mapping &amp; setting ... 等資訊</span></span><br><span class="line">GET kibana_sample_data_ecommerce</span><br><span class="line"></span><br><span class="line"><span class="comment"># 取得此 index 中的 document 數量</span></span><br><span class="line">GET kibana_sample_data_ecommerce/_count</span><br></pre></td></tr></table></figure>
 
 <h3 id="搭配-cat-做搜尋"><a href="#搭配-cat-做搜尋" class="headerlink" title="搭配 _cat 做搜尋"></a>搭配 _cat 做搜尋</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 透過 _cat 查詢 index 相關資訊，搭配正規表示式 </span></span><br><span class="line">GET /_cat/indices/kibana*?v</span><br></pre></td></tr></table></figure>
-<p><img src="/blog/images/Elasticsearch/es_cat-search-1.png" alt="Elasticsearch - _cat search 1"></p>
+<p><img src="/blog/images/Elasticsearch/es_cat-search-1.png" alt="Elasticsearch - _cat search 1"><br>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD<br>=======</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 加上過濾條件</span></span><br><span class="line">GET /_cat/indices/kibana*?health=green</span><br></pre></td></tr></table></figure>
 <p><img src="/blog/images/Elasticsearch/es_cat-search-2.png" alt="Elasticsearch - _cat search 2"></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用排序</span></span><br><span class="line">GET /_cat/indices?v&amp;s=docs.count:desc</span><br></pre></td></tr></table></figure>
 <p><img src="/blog/images/Elasticsearch/es_cat-search-3.png" alt="Elasticsearch - _cat search 3"></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查詢每個 index 所消耗的 memory 為多少，搭配排序</span></span><br><span class="line">GET /_cat/indices?v&amp;h=i,tm&amp;s=tm:desc</span><br></pre></td></tr></table></figure>
 <p><img src="/blog/images/Elasticsearch/es_cat-search-4.png" alt="Elasticsearch - _cat search 4"></p>
-<h1 id="基本概念：Node、Cluster、Shard-及-Replication"><a href="#基本概念：Node、Cluster、Shard-及-Replication" class="headerlink" title="基本概念：Node、Cluster、Shard 及 Replication"></a>基本概念：Node、Cluster、Shard 及 Replication</h1><ul>
-<li>Node &amp; Shard 是比較偏向維運人員的視角，是種物理概念</li>
+<blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>dd9dbbcb92fff619300d052ff9fcf7a31e975fea</p>
+</blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 加上過濾條件</span></span><br><span class="line">GET /_cat/indices/kibana*?health=green</span><br></pre></td></tr></table></figure>
+<p><img src="/blog/images/Elasticsearch/es_cat-search-2.png" alt="Elasticsearch - _cat search 2"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用排序</span></span><br><span class="line">GET /_cat/indices?v&amp;s=docs.count:desc</span><br></pre></td></tr></table></figure>
+<p><img src="/blog/images/Elasticsearch/es_cat-search-3.png" alt="Elasticsearch - _cat search 3"></p>
+<p>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查詢每個 index 所消耗的 memory 為多少，搭配排序</span></span><br><span class="line">GET /_cat/indices?v&amp;h=i,tm&amp;s=tm:desc</span><br></pre></td></tr></table></figure>
+<h1 id=""><a href="#" class="headerlink" title=""></a><img src="/blog/images/Elasticsearch/es_cat-search-4.png" alt="Elasticsearch - _cat search 4"></h1><ul>
+<li>Node &amp; Shard 是比較偏向維運人員的視角，是種物理概念<blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>dd9dbbcb92fff619300d052ff9fcf7a31e975fea</p>
+</blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
+</li>
 </ul>
-<h1 id="Document-的基本-CRUD-與批次操作"><a href="#Document-的基本-CRUD-與批次操作" class="headerlink" title="Document 的基本 CRUD 與批次操作"></a>Document 的基本 CRUD 與批次操作</h1><ul>
-<li><p>Index(刪除再建立), Create(建立新的 document，如果已經存在會發生錯誤), Update(對 document 做增量更新)</p>
+<h1 id="Document-的基本-CRUD-與批次操作"><a href="#Document-的基本-CRUD-與批次操作" class="headerlink" title="Document 的基本 CRUD 與批次操作"></a>Document 的基本 CRUD 與批次操作</h1><h2 id="Document-CRUD"><a href="#Document-CRUD" class="headerlink" title="Document CRUD"></a>Document CRUD</h2><ul>
+<li><code>GET</code>：取得 document<ul>
+<li>語法為 <code>GET _index/_type/Id</code>，例如 <strong>GET users/_doc/1</strong></li>
+<li>document 會有 version control 的功能，因此即使被刪除，version 欄位的值也會不斷增加</li>
+<li><code>_source</code> 欄位包含了 document 的原始訊息</li>
+</ul>
+</li>
+</ul>
+<p><img src="/blog/images/Elasticsearch/es_document-crud-get-example.png" alt="Elasticsearch - document CRUD GET example"></p>
+<ul>
+<li><p><code>Create</code>(<strong>PUT</strong>)：</p>
+<ul>
+<li>建立新的 document，如果 ID 已經存在會發生錯誤</li>
+<li>語法為 <code>PUT _index/_create/[ID]</code> or <code>PUT _index/_doc/[ID]?op_type=create</code>，例如：<strong>PUT users/_create/1</strong> (也可以不帶 ID，就會自動生成)</li>
+</ul>
+</li>
+<li><p><code>Index</code>(<strong>PUT</strong>)：</p>
+<ul>
+<li>如果 ID 不存在，則建立新的 document；若 ID 已經存在，則刪除現存的 document 再建立新的，<strong>version</strong> 的部份會增加</li>
+<li>語法為 <code>PUT _index/_doc/[ID]</code>，例如：<strong>PUT users/_doc/1</strong></li>
+</ul>
+</li>
+<li><p><code>Update</code>(<strong>POST</strong>)：</p>
+<ul>
+<li>document 必須已經存在，更新時只會對 document 中相對應的欄位作增量更新</li>
+<li>語法為 <code>POST _index/_update/[ID]</code>，例如：<strong>POST users/_update/1</strong></li>
+<li>POST 也可以拿來作為新增 document 用</li>
+</ul>
 </li>
 <li><p>呼叫 API 時傳輸的數據不宜過大(預設單一個 document 大小不能超過 100MB)，過大的 document 建議拆成 5~15MB 分次匯入</p>
 </li>
+</ul>
+<h2 id="批次操作"><a href="#批次操作" class="headerlink" title="批次操作"></a>批次操作</h2><p>Elasticsearch 中支援幾種批次操作 API，常用的有以下幾個：</p>
+<h3 id="bulk"><a href="#bulk" class="headerlink" title="_bulk"></a>_bulk</h3><ul>
+<li><p><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html">官方文件說明</a></p>
+</li>
+<li><p>讓使用者可以在同一個 API request 中送出多個操作，支援 <strong>Index/Create/Update/Delete</strong>，提昇效率</p>
+</li>
+</ul>
+<h3 id="mget"><a href="#mget" class="headerlink" title="_mget"></a>_mget</h3><ul>
+<li><p><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-multi-get.html">官方文件說明</a></p>
+</li>
+<li><p>一次讀取多個不同 index 中特定 ID 的 document</p>
+</li>
+</ul>
+<h3 id="msearch"><a href="#msearch" class="headerlink" title="_msearch"></a>_msearch</h3><ul>
+<li><p><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-multi-search.html">官方文件說明</a></p>
+</li>
+<li><p>一次作多個大範圍的搜尋</p>
+</li>
+</ul>
+<ul>
 <li><p>大版本的升級，document 必須重建 index</p>
 </li>
 <li><p>Elasticsearch 預設會提供 dynamic mapping 的功能，因此不用預先設定好 index 結構；但在生產環境中，建議先做好 mapping 的設定後再寫入資料</p>
@@ -437,43 +529,38 @@
 <p><img src="/blog/images/Elasticsearch/es_invert-index-1.png" alt="Elasticsearch - Inverted Index"></p>
 <h2 id="Inverted-Index-組成"><a href="#Inverted-Index-組成" class="headerlink" title="Inverted Index 組成"></a>Inverted Index 組成</h2><ul>
 <li><p>Term Dictionary (單詞辭典)</p>
-<blockquote>
-<p>記錄 Document 中所有的單詞，記錄單詞到 posting list 的關聯關係</p>
-</blockquote>
-</li>
-<li><p>Posting List (倒排列表)</p>
-<blockquote>
-<p>由 posting(倒排索引項組合)</p>
-</blockquote>
-</li>
-<li><p>Elasticsearch 的 JSON document 中的單詞都會有自己的倒排索引</p>
-</li>
-<li><p>可以對某些 term(字段)不作索引：</p>
 <ul>
-<li>優點：節省儲存空間</li>
-<li>缺點：字段無法被搜索</li>
+<li>為了滿足快速的插入 &amp; 查詢，因此通過 B+ tree or Open Hashing 的方式實現</li>
+<li>記錄 Document 中所有的單詞，記錄單詞到 posting list(倒排列表) 的關聯關係</li>
 </ul>
 </li>
-</ul>
-<h2 id="Posting-List"><a href="#Posting-List" class="headerlink" title="Posting List"></a>Posting List</h2><ul>
-<li>posting(倒排索引項) 包含以下內容：<ul>
-<li>Document ID</li>
+<li><p>Posting List (倒排列表)：由 posting(倒排索引項組合) 組成，包含以下內容：</p>
+<ul>
+<li>Document ID<ul>
 <li>詞頻 (Term Frequency)：單詞在 document 中出現的次數，用在相關性評分</li>
 <li>位置 (Position)：單詞在 document 的位置，用在搜尋</li>
 <li>偏移 (Offset)：記錄單詞開始 &amp; 結束位置，用於高亮顯示</li>
 </ul>
 </li>
 </ul>
+</li>
+</ul>
 <p><img src="/blog/images/Elasticsearch/es_posting-list-example.png" alt="Elasticsearch - Posting List"></p>
-<p>索引號對應索引穩定的內容，比如：書的第一頁有啥內容?第二頁有啥內容?</p>
 <ul>
-<li>Inverted Index</li>
+<li><p>Elasticsearch 的 JSON document 中的單詞都會有自己的倒排索引</p>
+</li>
+<li><p>可以對某些欄位不作索引：</p>
+<ul>
+<li>優點：節省儲存空間</li>
+<li>缺點：該欄位無法被搜尋</li>
+</ul>
+</li>
 </ul>
 <h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><ul>
 <li><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/cn/elasticsearch/guide/current/inverted-index.html">倒排索引 | Elasticsearch: 權威指南 | Elastic</a></li>
 </ul>
-<h1 id="通過Analyzer進行分詞"><a href="#通過Analyzer進行分詞" class="headerlink" title="通過Analyzer進行分詞"></a>通過Analyzer進行分詞</h1><ul>
-<li><p>Analysis 是將 document 轉換為一系列單詞(term/token) 的過程，也叫<strong>分詞</strong></p>
+<h1 id="通過-Analyzer-進行分詞"><a href="#通過-Analyzer-進行分詞" class="headerlink" title="通過 Analyzer 進行分詞"></a>通過 Analyzer 進行分詞</h1><ul>
+<li><p>Analysis 是將 document 的內容轉換為一系列單詞(term/token) 的過程，也叫<strong>分詞</strong></p>
 </li>
 <li><p>Analysis 是由 Analyzer 來實現，Analyzer 由 <code>Character Filter</code> -&gt; <code>Tokenizer</code> -&gt; <code>Token Filter</code> 三個部份所組成，每個部份都可以自訂</p>
 </li>
@@ -937,7 +1024,7 @@
 <h1 id="References-1"><a href="#References-1" class="headerlink" title="References"></a>References</h1><ul>
 <li><p><a target="_blank" rel="noopener" href="https://time.geekbang.org/course/intro/100030501">Elasticsearch核心技術與實戰 | 極客時間</a></p>
 </li>
-<li><p><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html">Elasticsearch Reference [7.4] | Elastic</a></p>
+<li><p><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html">Elasticsearch Reference [7.9] | Elastic</a></p>
 </li>
 </ul>
 
