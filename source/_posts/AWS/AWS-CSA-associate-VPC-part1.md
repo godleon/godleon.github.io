@@ -36,6 +36,19 @@ Overview
 - 甚至可以將地端環境 & AWS VPC 建立一個 VPN 連線，成為一個 Hybrid cloud 的架構
 
 
+## VPC 網路示意
+
+![VPC Example 2](/blog/images/aws/VPC_Example-2.png)
+
+以下是幾個 VPC 網路的特點：
+
+- 在 Region 中
+
+- 可以跨 AZ (因為 AZ 是屬於 datacenter 等級，因此也表示跨 datacenter)
+
+- AWS 會在 VPC 中提供一個 DNS server，因此在 VPC 內部的 instance 都可以透過 hostname 互連
+> 可透過修改 VPC 的 DNS 選項來調整，也可以運行自己的 DNS server
+
 
 ## VPC 標準範例介紹
 
@@ -76,9 +89,12 @@ Overview
 
 ### public/private subnet
 
-- 外部進來的流量可以存取 public subnet 中的 Instance
+- 外部進來的流量可以存取 public subnet 中的 Instance (因為有與 Internet Gateway 繫結)
 
 - private subnet 中的 Instance 是無法被外界存取，對外連線也是禁止的
+> 因為 private subnet 預設的 route table 僅有 local route
+
+- private subnet 若是需要連到 internet，則必須仰賴 NAT gateway(or instance) 來達成
 
 - public subnet 中的 Instance 是唯一有能力存取 private subnet 中 Instance 的地方
 > private subnet 通常是存放 DB、backend servivce ... 等後端服務的地方
@@ -97,6 +113,12 @@ Overview
 
 > 若需要正確的計算 IP 範圍，可以使用 [CIDR.xyz](https://cidr.xyz/) 網站。
 
+### 補充示意圖
+
+了解上面的概念後，接著看下面這張 VPC 網路示意圖，就不會覺得很突兀了：
+
+![VPC Example 1](/blog/images/aws/VPC_Example-3.png)
+
 
 ## 深入認識 VPC
 
@@ -110,6 +132,8 @@ Overview
 
 - 建立 Internet Gateway 並與 VPC 相連，提供 VPC 連網的能力
 
+- 可以透過 VPN 將地端 & 雲端的網路環境連接起來
+
 - 對 AWS resource 提供更多安全相關的管理 & 控制
 
 - 設定 Security Group(for **Instance**) & Network ACLs(for **Subnet**)
@@ -118,9 +142,39 @@ Overview
 
 - default VPC 是很簡單好用的，可以讓使用者直接佈署 instance 在裡面 
 
-- 在 default VPC 中的所有 subnet 都預設具備連網的能力
+- 在 default VPC 中，每個 subnet 都有一組可以連外的 routing 設定，因此所有 subnet 都預設具備連網的能力
+
+- 每個 subnet 都會有一個 Internet Gateway 存在並與其相連，因此都是屬於 public subnet
 
 - 每個 EC2 instance 都會同時有 public/private IP
+
+### Internet Gateway
+
+- 讓 VPC 中的 instance 與外面的 Internet 通訊的橋樑
+
+- 有自動水平擴展、並帶有 redundant & HA 特性，總之 AWS 會確保 Internet Gateway 穩定的運行
+
+- 沒有對外頻寬的限制
+
+- 會自動幫你的 instance 作 NAT，mapping 到一個 public ip address(From Elastic IP)
+
+- **每個 default VPC 都已經有連接一個 Internet Gateway**
+
+- 每個 VPC 一次只能跟一個 Internet Gateway 繫結
+
+- 若是 VPC 中已經有任何 AWS resource(例如：EC2/RDS instance)，就無法移除 Internet Gateway 的繫結
+
+- 若是 VPC 中的 AWS resource 需要對外連網的能力，一定要有 Internet Gateway 才辦得到
+
+### Route Table
+
+- 預設情況下，VPC 內部的 traffic 在不同的 subnet 之間是會通的，依靠的就是所謂的 `local route`
+
+- local route 是預設就會存在，且無法修改的
+
+- VPC 中可以設定多組 route table，但已經與任何的 subnet 繫結就無法被刪除
+
+- 若要調整 VPC 中的 routing 設定，建議作法是保留 default route table，然後新增其他的 route table 設定
 
 ### VPC Peering
 
@@ -208,9 +262,13 @@ Overview
 1. 建立 Internet Gateway (只需要指定 name)
 
 2. 指定 VPC 並進行 attach
-> 一個 VPC 只可以 attach 到一個 Internet Gateway，但 AWS 會確保 Internet Gateway 的 HA
+  - 一個 VPC 只可以 attach 到一個 Internet Gateway，但 AWS 會確保 Internet Gateway 的 HA
+  - 當有 resource 在 VPC 上運作時，是無法將 Internet Gateway 從 VPC 上 deattach
+
 
 ### Route Table
+
+> 用來決定網路流量被導向何處
 
 1. 新增 route table，指定所綁定的 VPC
 

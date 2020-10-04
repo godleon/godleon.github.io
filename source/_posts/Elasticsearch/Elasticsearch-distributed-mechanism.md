@@ -19,9 +19,12 @@ tags:
 
 Elasticsearch 的分散式架構帶來以下優點：
 
-- 可以水平擴展儲存空間，支援 PB 等級的數據儲存
+- 可以水平擴展儲存空間，支援 PB 等級的資料儲存
+> 可以根據 request & data 增加的需求進行 scale out；資料分散儲存，因此在 storage 的部份同樣也是可以 scale out 的
 
-- 提高系統的可用性，當某些節點停止服務時，整個 cluster 的服務不會受影響
+- 提供系統高可用性(HA)，當某些節點停止服務時，整個 cluster 的服務不會受影響
+  - Service HA：若有 node 停止服務，整個 cluster 還是可以提供服務
+  - Data HA：若有 node 掛掉，資料不會遺失
 
 關於設定 Elasticsearch cluster：
 
@@ -36,7 +39,7 @@ Elasticsearch 的分散式架構帶來以下優點：
 
 - 每個 node 都有名稱，可透過設定檔配置，也可以在啟動時透過 `-E node.name=[NODE_NAME]` 進行設定
 
-- 每個 node 啟動之後都會分配一個 UID，並儲存在 `/data` 目錄下
+- 每個 node 啟動之後都會分配一個 UID，並儲存在 `/usr/share/elasticsearch/data` 目錄下
 
 
 ## Coordinating Node
@@ -50,11 +53,11 @@ Elasticsearch 的分散式架構帶來以下優點：
 
 ## Data Node
 
-- 可以保存數據資料的 node，每個 node 啟動後都會預設是 data node，可以透過設定 `node.data: false` 停用 data node 功能
+- 可以保存資料的 node，每個 node 啟動後都會預設是 data node，可以透過設定 `node.data: false` 停用 data node 功能
 
-- 用來保存分片數據資料，實現數據資料的 scalibility (由 master node 決定如何把分片分發到不同的 data node 上)
+- 用來保存分片資料，實現資料的 scalibility (由 master node 決定如何把分片分發到不同的 data node 上)
 
-- 透過增加 data node 可以解決數據水平擴展 & 解決單點故障導致數據資料遺失的問題
+- 透過增加 data node 可以解決資料水平擴展 & 解決單點故障導致資料遺失的問題
 
 
 ## Master Node
@@ -115,37 +118,73 @@ Elasticsearch 的分散式架構帶來以下優點：
 Shard & Cluster 的故障轉移
 ========================
 
+![Elasticsearch - shard allocation status](/blog/images/Elasticsearch/es_shard-allocation.png)
+
 ## Primary Shard (提昇系統儲存容量)
 
 - shard 是 Elasticsearch 分散式儲存的基礎，包含 primary shard & replica shard
 
-- primary shard 功能是將一份被索引的數據，分散到多個 data node 上存放，實現儲存方面的水平擴展
+- primary shard 功能是將一份被索引後的資料，分散到多個 data node 上存放，實現儲存方面的水平擴展
 
-- primary shard 在建立索引時就會指定，後續是無法修改的，若要修改就必須要進行 reindex
+- primary shard 的數量在建立 index 時就會指定，後續是無法修改的，若要修改就必須要進行 reindex
 
 
-## Replica Shard (提高數據資料可用性)
+## Replica Shard (提高資料可用性)
 
-- replica shard 用來提供數據資料可用性，當 primary shard 遺失時，replica shard 就可以被 promote 成 primary shard 來保持資料完整性
+- replica shard 用來提供資料可用性，當 primary shard 遺失時，replica shard 就可以被 promote 成 primary shard 來保持資料完整性
 
-- replica shard 數量可以動態調整，讓每個 data node 上都有完整的數據資料
+- replica shard 數量可以動態調整，讓每個 data node 上都有完整的資料
 
-- replica shard 可以一定程度的提高讀取的效能
+- replica shard 可以一定程度的提高讀取(查詢)的效能
 
-> 若不設定 replica shard，一旦有 data node 故障導致 primary shard 遺失，數據資料可能就無法恢復了
+> 若不設定 replica shard，一旦有 data node 故障導致 primary shard 遺失，資料可能就無法恢復了
 
 > ES 7.0 開始，primary shard 預設為 `1`，replica shard 預設為 `0`
 
 
 ## Shard 的規劃 & 設定
 
-- 若是 primary shard 數量設定太小，且遇到 index 資料增加很快時，cluster 無法通過增加 ndoe 數量對 index 進行數據擴展
+- primary shard 數量設定太小會遇到以下問題：
+  - 若 index 資料增加很快時，cluster 無法通過增加 node 數量對 index 進行資料擴展
+  - 單一 shard 資料太大，導致資料重新分配耗時
 
-- 若 primary shard 數量設定太大，可能導致每個 shard 容量很小，讓一個 data node 上有過多 shard 而影響效能
+- primary shard 數量設定太大會遇到以下問題：
+  - 導致每個 shard 容量很小，讓一個 data node 上有過多 shard 而影響效能
+  - 影響搜尋時的相關性算分，會讓統計結果失準
 
 - replica shard 若設定過多，會降低 cluster 整體的寫入效能
 
 > replica shard 必須和 primary shard 被分配在不同的 data node 上；但所有的 primary shard 可以在同一個 data node 上
+
+
+## 如何判斷 Cluster 目前的健康狀態?
+
+### cluster status
+
+透過 `[GET _cluster/health](https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-health.html)` 可以取得目前 cluster 的健康狀態：
+
+![Elasticsearch - cluster health status](/blog/images/Elasticsearch/es_cluster-health-statue.png)
+
+- `Green`：表示 primary & replica shard 都可以正常分配
+
+- `Yellow`：表示 primary shard 可以正常分配，但 replica shard 分配有問題
+
+- `Red`：有 primary shard 無法正常分配
+> 例如：當 data node 磁碟空間已經超過 85% 時，此時建立 index 就會出現無法分配 primary shard 的問題
+
+### shard status
+
+透過 `[GET _cat/shards](https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-shards.html)` 可以取得目前的 shard 狀態：
+
+![Elasticsearch - shard status](/blog/images/Elasticsearch/es_cat-shard-api.png)
+
+從上圖可以看到以下訊息：
+
+- 那些 shard 是 primary(`p`)，那些是 replica(`r`) 
+
+- shard 的分佈情況 (位於那一個 ndoe 上)
+
+- 每個 shard 包含的 document 數量 & 佔用的空間
 
 
 ## cluster & shard 設定情境 & 範例
@@ -207,11 +246,11 @@ Shard & Cluster 的故障轉移
 2：故障轉移期間可能會出現問題的場景？
 > 故障轉移期間，如果只是黃色變綠，應該不影響讀寫，因為副本會提升為主分片。集群變紅，代表有主分片丟失，這個時候會影響讀寫。
 
-3： 故障轉移，數據重新分配，消耗性能的避免方式？
-> 例如一個主分片不可用了。只要設置了副本分片，其中一個副本分片立即會將自己提升為主分片。同時會將自己的數據分配到一個新的replica上，有時候，我們只是重啟一台機器，可以讓這個reallocation的動作延遲一段時間再做，從而避免無謂的數據拷貝。
+3： 故障轉移，資料重新分配，消耗性能的避免方式？
+> 例如一個主分片不可用了。只要設置了副本分片，其中一個副本分片立即會將自己提升為主分片。同時會將自己的資料分配到一個新的replica上，有時候，我們只是重啟一台機器，可以讓這個reallocation的動作延遲一段時間再做，從而避免無謂的資料拷貝。
 
-4：故障轉移可能存在數據丟失的場景嘛？
-> node如果丟失，如果沒有落盤。就有丟失的可能。如果節點重新回來，會從translog中恢覆沒有寫入的數據
+4：故障轉移可能存在資料丟失的場景嘛？
+> node如果丟失，如果沒有落盤。就有丟失的可能。如果節點重新回來，會從translog中恢覆沒有寫入的資料
 
 
 
@@ -306,7 +345,7 @@ Shard & Life cycle
 
 - Elasticsearch 的搜尋是如何作到接近即時的 ?
 
-- Elasticsearch 如何確保臨時的停電不會造成數據資料遺失 ?
+- Elasticsearch 如何確保臨時的停電不會造成資料遺失 ?
 
 - 為什麼刪除 document 後，不會馬上釋放空間 ?
 
@@ -323,7 +362,7 @@ Shard & Life cycle
   
   - cache 容易產生 & 維護
 
-  - 數據資料可以被壓縮
+  - 資料可以被壓縮
 
 - 不可變動的特性帶來的缺點 => 若需要讓一個新的 document 可以被搜尋，需要重建 index
 
@@ -339,7 +378,7 @@ Shard & Life cycle
 
 - 當 document 被 refresh 進入到 segment 之後，就可以被搜尋到了
 
-- 若系統有大量的數據資料寫入，就會產生很多 segment
+- 若系統有大量的資料寫入，就會產生很多 segment
 
 - 當 Index Buffer 被佔滿時，也會觸發 refresh 動作，預設值是 JVM 的 10%
 
@@ -350,7 +389,7 @@ Shard & Life cycle
 
 - segment 寫入磁碟的過程相對耗時，因此藉由 cache，在進行 refresh 時先將 segment 寫入 cache 以開放查詢
 
-- 但使用 cache 可能就會有數據資料遺失的問題，因此為了保證資料不會遺失，就有了 transaction log 的設計
+- 但使用 cache 可能就會有資料遺失的問題，因此為了保證資料不會遺失，就有了 transaction log 的設計
 
 - 將 document 進行索引時，同時也會寫入 transaction log，且預設都會寫入磁碟中
 > 每個 shard 都會有對應的 transaction log
@@ -383,36 +422,36 @@ Shard & Life cycle
 
 ## 值得一看的 Q&A 資料
 
-1. 客戶端發起數據寫入請求，對你寫的這條數據根據_routing規則選擇發給哪個Shard。
+1. 客戶端發起資料寫入請求，對你寫的這條資料根據_routing規則選擇發給哪個Shard。
   - 確認Index Request中是否設置了使用哪個Filed的值作為路由參數，
   - 如果沒有設置，則使用Mapping中的配置，
   - 如果mapping中也沒有配置，則使用_id作為路由參數，然後通過_routing的Hash值選擇出Shard，最後從集群的Meta中找出出該Shard的Primary節點。
 
-2. 寫入請求到達Shard後，先把數據寫入到內存（buffer）中，同時會寫入一條日誌到translog日誌文件中去。
+2. 寫入請求到達Shard後，先把資料寫入到內存（buffer）中，同時會寫入一條日誌到translog日誌文件中去。
   - 當寫入請求到shard後，首先是寫Lucene，其實就是創建索引。
-  - 索引創建好後並不是馬上生成segment，這個時候索引數據還在緩存中，這裡的緩存是lucene的緩存，並非Elasticsearch緩存，lucene緩存中的數據是不可被查詢的。
+  - 索引創建好後並不是馬上生成segment，這個時候索引資料還在緩存中，這裡的緩存是lucene的緩存，並非Elasticsearch緩存，lucene緩存中的資料是不可被查詢的。
 
-3. 執行refresh操作：從內存buffer中將數據寫入os cache(操作系統的內存)，產生一個segment file文件，buffer清空。
-  - 寫入os cache的同時，建立倒排索引，這時數據就可以供客戶端進行訪問了。
-  - 默認是每隔1秒refresh一次的，所以es是准實時的，因為寫入的數據1秒之後才能被看到。
+3. 執行refresh操作：從內存buffer中將資料寫入os cache(操作系統的內存)，產生一個segment file文件，buffer清空。
+  - 寫入os cache的同時，建立倒排索引，這時資料就可以供客戶端進行訪問了。
+  - 默認是每隔1秒refresh一次的，所以es是准實時的，因為寫入的資料1秒之後才能被看到。
   - buffer內存佔滿的時候也會執行refresh操作，buffer默認值是JVM內存的10%。
-  - 通過es的restful api或者java api，手動執行一次refresh操作，就是手動將buffer中的數據刷入os cache中，讓數據立馬就可以被搜索到。
+  - 通過es的restful api或者java api，手動執行一次refresh操作，就是手動將buffer中的資料刷入os cache中，讓資料立馬就可以被搜索到。
   - 若要優化索引速度, 而不注重實時性, 可以降低刷新頻率。
 
 4. translog會每隔5秒或者在一個變更請求完成之後，將translog從緩存刷入磁盤。
-  - translog是存儲在os cache中，每個分片有一個，如果節點宕機會有5秒數據丟失，但是性能比較好，最多丟5秒的數據。。
+  - translog是存儲在os cache中，每個分片有一個，如果節點宕機會有5秒資料丟失，但是性能比較好，最多丟5秒的資料。。
   - 可以將translog設置成每次寫操作必須是直接fsync到磁盤，但是性能會差很多。
-  - 可以通過配置增加transLog刷磁盤的頻率來增加數據可靠性，最小可配置100ms，但不建議這麼做，因為這會對性能有非常大的影響。
+  - 可以通過配置增加transLog刷磁盤的頻率來增加資料可靠性，最小可配置100ms，但不建議這麼做，因為這會對性能有非常大的影響。
 
-5. 每30分鐘或者當tanslog的大小達到512M時候，就會執行commit操作（flush操作），將os cache中所有的數據全以segment file的形式，持久到磁盤上去。
-  - 第一步，就是將buffer中現有數據refresh到os cache中去。
-  - 清空buffer 然後強行將os cache中所有的數據全都一個一個的通過segmentfile的形式，持久到磁盤上去。
+5. 每30分鐘或者當tanslog的大小達到512M時候，就會執行commit操作（flush操作），將os cache中所有的資料全以segment file的形式，持久到磁盤上去。
+  - 第一步，就是將buffer中現有資料refresh到os cache中去。
+  - 清空buffer 然後強行將os cache中所有的資料全都一個一個的通過segmentfile的形式，持久到磁盤上去。
   - 將commit point這個文件更新到磁盤中，每個Shard都有一個提交點(commit point), 其中保存了當前Shard成功寫入磁盤的所有segment。
   - 把translog文件刪掉清空，再開一個空的translog文件。
   - flush參數設置：
   - index.translog.flush_threshold_period:
   - index.translog.flush_threshold_size:
-  - #控制每收到多少條數據後flush一次
+  - #控制每收到多少條資料後flush一次
   - index.translog.flush_threshold_ops:
 
 6. Segment的merge操作：
@@ -420,7 +459,7 @@ Shard & Life cycle
   - Es和Lucene 會自動進行merge操作，合併segment和刪除已經刪除的文檔。
   - 我們可以手動進行merge：POST index/_forcemerge。一般不需要，這是一個比較消耗資源的操作
 
-> 當數據從hot移動到warm，官方建議手工執行一下_forcemerge
+> 當資料從hot移動到warm，官方建議手工執行一下_forcemerge
 
 ![Elasticsearch - Q&A Chap40 - 1](/blog/images/Elasticsearch/es_qa_chap40-1.png)
 
@@ -468,12 +507,12 @@ Shard & Life cycle
 
 相關性算分：
 
-- 每個 shard 都基於自己 shard 上的數據進行相關度計算；若是在數據量少，shard 數量越大會導致算分越不準確
+- 每個 shard 都基於自己 shard 上的資料進行相關度計算；若是在資料量少，shard 數量越大會導致算分越不準確
 
 
 ## 如何解決算分不準的問題 ?
 
-- 數據資料量不大時，可以將 primary shard 數量設定為 1
+- 資料量不大時，可以將 primary shard 數量設定為 1
 > 但若資料足夠大時，只要 document 可以平均分散在多個 shard 上，結果就不會有太大偏差
 
 - 使用 CFS Query Then Fetch
@@ -681,7 +720,7 @@ POST users/_search
 
 Scroll API 也是為了解決深度搜尋的另外一種方式，實踐的方法類似 `search_after`，作法如下：
 
-- 搜尋時建立一個快照，作為後續繼續快速搜尋之用，但如果有新的數據資料寫入後，就沒辦法被查詢到了
+- 搜尋時建立一個快照，作為後續繼續快速搜尋之用，但如果有新的資料寫入後，就沒辦法被查詢到了
 
 - 每次查詢時，要將上次查詢結果中的 scroll id 拿來使用，才可以正確的繼續往下搜尋
 
@@ -690,7 +729,7 @@ Scroll API 也是為了解決深度搜尋的另外一種方式，實踐的方法
 
 - **一般搜尋**：需要接近即時的取得最新的部份資料，例如：查詢最新訂單
 
-- **Scroll**：需要全部 document，但過程中的分頁速度要快，例如：導出全部數據資料
+- **Scroll**：需要全部 document，但過程中的分頁速度要快，例如：導出全部資料
 
 - **Pagination**：使用 `from` & `size`，如果要處理 deep pagination 的問題，則使用 `search_after`
 
@@ -713,7 +752,7 @@ Scroll API 也是為了解決深度搜尋的另外一種方式，實踐的方法
   
   - 假設更新衝突不會發生，因此不會阻止正在嘗試更新的操作
 
-  - 但如果數據資料在讀寫中被修改，更新會失敗
+  - 但如果資料在讀寫中被修改，更新會失敗
 
   - 通常由應用程式端來解決這樣的衝突，例如：重新嘗試更新、使用新資料、或是回應錯誤訊息給使用者
 

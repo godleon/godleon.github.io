@@ -16,41 +16,175 @@ tags:
 基本概念：Index、Document 和 REST API
 ===================================
 
-- Index & Document 是比較偏向開發人員視角
+- Index & Document 是比較偏向開發人員視角，是種邏輯概念
+
+- Node & Shard 是比較偏向維運人員的視角，是種物理概念
 
 ## Document
 
-- Document 是可以被搜尋數據的最小單位(可能是 log 文件中的一筆紀錄 or 一部電影或唱片的相關訊息)：
+- Document 是可以被搜尋數據的最小單位(可能是 log 文件中的一筆紀錄 / 一部電影或唱片的相關訊息 / RDBMS 中的一筆 record)：
 
 - Document 會被序列化成 JSON(由一堆 Key/Value 的資料組成，並有其資料格式) 格式，保存在 Elasticsearch 中
 
 - 每個 Document 都有一個 UID(Unique ID)，可自己指定或交由 Elasticsearch 自動產生
 
-
-## JSON document
+### JSON document
 
 - 包含多個 Key/Value 組合，就像是資料庫中的一筆資料
 
 - 但跟資料庫不一樣的是，JSON 格式靈活不受限，不須預先定義格式
 
-- 每個 Key/Value 的類型(string, number, boolean ... etc)) 可以自己指定或是由 Elasticsearch 幫忙推算
+- 每個 Key/Value 的類型(string, number, boolean ... etc) 可以自己指定或是由 Elasticsearch 幫忙推算
 
 
+### Metadata
+
+document metadata 就是描述 document 本身屬性用的資料，通常會包含以下內容：
+
+- `_index`：document 所屬的 index 名稱
+
+- `_type`：document 類型 (例如：**_doc**)
+
+- `_id`：document ID
+
+- `_source`：document 的原始 JSON 資料樣貌
+
+- `_version`：版本訊息 (有這欄位就表示 ES 具有版本控管的能力)
+
+- `_score`：查詢時的算分結果 (每次的搜尋都會根據 document 對於搜尋內容的相關度進行算分)
 
 
-基本概念：Node、Cluster、Shard 及 Replication
-===========================================
+## Index
 
-- Node & Shard 是比較偏向維運人員的視角
+- `index` 在 ES 中是個邏輯空間的概念，用來儲存 document 的容器 (跟其他領域的 index 用法不太一樣)
+
+- `shard` 在 ES 中則是個物理空間的的概念，**index 中的資料會分散放在不同的 shard 中**
+
+- index 由以下幾個部份組成：
+  - `data`：由 document + metadata 所組成
+  - `mapping`：用來定義每個欄位名稱 & 類型
+  - `setting`：定義資料是如何存放(例如：replication 數量, 使用的 shard 數量)
+
+- 下圖是 `setting` 的設定範例：
+![Elasticsearch - Index Settings](/blog/images/Elasticsearch/es_index-settings.png)
+
+- 在 ES 7.0 的版本後，index 在 `type` 部份只能設定為 `_doc` (在以前的版本是可以設定不同的 type)
+
+
+## Elasticsearch 與 RDBMS 的比較 & 取捨
+
+以下表格是 Elasticsearch & RDBMS 的對比：(不是完全符合，但概念上是很接近的)
+
+| **RDBMS** | **Elasticsearch** |
+|-----------|-------------------|
+| Table | Index |
+| Row | Document |
+| Column | Field |
+| Schema | Mapping |
+| SQL | DSL |
+
+- ES 是 schemaless 的，資料格式可以隨意定，非常適合用來做全文檢索
+
+- RDBMS 的強項在於處理對於資料事務性(交易)要求特別高的任務
+
+
+## 常用搜尋
+
+在 Kibana Dev Tools 頁面中，可以直接下查詢語法，以下舉幾個與 index 相關的搜尋：
+
+### 查詢 index
+
+```bash
+# 取得指定 index 資訊，包含 mapping & setting ... 等資訊
+GET kibana_sample_data_ecommerce
+
+# 取得此 index 中的 document 數量
+GET kibana_sample_data_ecommerce/_count
+```
+
+### 搭配 _cat 做搜尋
+
+```bash
+# 透過 _cat 查詢 index 相關資訊，搭配正規表示式 
+GET /_cat/indices/kibana*?v
+```
+![Elasticsearch - _cat search 1](/blog/images/Elasticsearch/es_cat-search-1.png)
+
+```bash
+# 加上過濾條件
+GET /_cat/indices/kibana*?health=green
+```
+![Elasticsearch - _cat search 2](/blog/images/Elasticsearch/es_cat-search-2.png)
+
+
+```bash
+# 使用排序
+GET /_cat/indices?v&s=docs.count:desc
+```
+![Elasticsearch - _cat search 3](/blog/images/Elasticsearch/es_cat-search-3.png)
+
+
+```bash
+# 查詢每個 index 所消耗的 memory 為多少，搭配排序
+GET /_cat/indices?v&h=i,tm&s=tm:desc
+```
+![Elasticsearch - _cat search 4](/blog/images/Elasticsearch/es_cat-search-4.png)
 
 
 
 Document 的基本 CRUD 與批次操作
 =============================
 
-- Index(刪除再建立), Create(建立新的 document，如果已經存在會發生錯誤), Update(對 document 做增量更新)
+## Document CRUD
+
+- `GET`：取得 document
+  - 語法為 `GET _index/_type/Id`，例如 **GET users/_doc/1**
+  - document 會有 version control 的功能，因此即使被刪除，version 欄位的值也會不斷增加
+  - `_source` 欄位包含了 document 的原始訊息
+
+![Elasticsearch - document CRUD GET example](/blog/images/Elasticsearch/es_document-crud-get-example.png)
+
+- `Create`(**PUT**)：
+  - 建立新的 document，如果 ID 已經存在會發生錯誤
+  - 語法為 `PUT _index/_create/[ID]` or `PUT _index/_doc/[ID]?op_type=create`，例如：**PUT users/_create/1** (也可以不帶 ID，就會自動生成)
+
+- `Index`(**PUT**)：
+  - 如果 ID 不存在，則建立新的 document；若 ID 已經存在，則刪除現存的 document 再建立新的，**version** 的部份會增加
+  - 語法為 `PUT _index/_doc/[ID]`，例如：**PUT users/_doc/1**
+
+- `Update`(**POST**)：
+  - document 必須已經存在，更新時只會對 document 中相對應的欄位作增量更新
+  - 語法為 `POST _index/_update/[ID]`，例如：**POST users/_update/1**
+  - POST 也可以拿來作為新增 document 用
 
 - 呼叫 API 時傳輸的數據不宜過大(預設單一個 document 大小不能超過 100MB)，過大的 document 建議拆成 5~15MB 分次匯入
+
+
+## 批次操作
+
+Elasticsearch 中支援幾種批次操作 API，常用的有以下幾個：
+
+### _bulk
+
+- [官方文件說明](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html)
+
+- 讓使用者可以在同一個 API request 中送出多個操作，支援 **Index/Create/Update/Delete**，提昇效率
+
+### _mget
+
+- [官方文件說明](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-multi-get.html)
+
+- 一次讀取多個不同 index 中特定 ID 的 document
+
+### _msearch
+
+- [官方文件說明](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-multi-search.html)
+
+- 一次作多個大範圍的搜尋
+
+
+
+
 
 - 大版本的升級，document 必須重建 index
 
@@ -83,30 +217,23 @@ Inverted Index(倒排索引)介紹
 ## Inverted Index 組成
 
 - Term Dictionary (單詞辭典)
-> 記錄 Document 中所有的單詞，記錄單詞到 posting list 的關聯關係
+  - 為了滿足快速的插入 & 查詢，因此通過 B+ tree or Open Hashing 的方式實現
+  - 記錄 Document 中所有的單詞，記錄單詞到 posting list(倒排列表) 的關聯關係
 
-- Posting List (倒排列表)
-> 由 posting(倒排索引項組合)
-
-- Elasticsearch 的 JSON document 中的單詞都會有自己的倒排索引
-
-- 可以對某些 term(字段)不作索引：
-    - 優點：節省儲存空間
-    - 缺點：字段無法被搜索
-
-## Posting List
-
-- posting(倒排索引項) 包含以下內容：
-    - Document ID
+- Posting List (倒排列表)：由 posting(倒排索引項組合) 組成，包含以下內容：
+  - Document ID
     - 詞頻 (Term Frequency)：單詞在 document 中出現的次數，用在相關性評分
     - 位置 (Position)：單詞在 document 的位置，用在搜尋
     - 偏移 (Offset)：記錄單詞開始 & 結束位置，用於高亮顯示
 
 ![Elasticsearch - Posting List](/blog/images/Elasticsearch/es_posting-list-example.png)
 
-索引號對應索引穩定的內容，比如：書的第一頁有啥內容?第二頁有啥內容?
+- Elasticsearch 的 JSON document 中的單詞都會有自己的倒排索引
 
-- Inverted Index
+- 可以對某些欄位不作索引：
+    - 優點：節省儲存空間
+    - 缺點：該欄位無法被搜尋
+
 
 ## References
 
@@ -114,10 +241,10 @@ Inverted Index(倒排索引)介紹
 
 
 
-通過Analyzer進行分詞
+通過 Analyzer 進行分詞
 ==================
 
-- Analysis 是將 document 轉換為一系列單詞(term/token) 的過程，也叫**分詞**
+- Analysis 是將 document 的內容轉換為一系列單詞(term/token) 的過程，也叫**分詞**
 
 - Analysis 是由 Analyzer 來實現，Analyzer 由 `Character Filter` -> `Tokenizer` -> `Token Filter` 三個部份所組成，每個部份都可以自訂
 
@@ -1525,4 +1652,4 @@ References
 
 - [Elasticsearch核心技術與實戰 | 極客時間](https://time.geekbang.org/course/intro/100030501)
 
-- [Elasticsearch Reference [7.4] | Elastic](https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html)
+- [Elasticsearch Reference [7.9] | Elastic](https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html)
