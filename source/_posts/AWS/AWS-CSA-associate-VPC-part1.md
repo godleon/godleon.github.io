@@ -46,9 +46,12 @@ Overview
 
 - 可以跨 AZ (因為 AZ 是屬於 datacenter 等級，因此也表示跨 datacenter)
 
+<<<<<<< HEAD
 - AWS 會在 VPC 中提供一個 DNS server，因此在 VPC 內部的 instance 都可以透過 hostname 互連
 > 可透過修改 VPC 的 DNS 選項來調整，也可以運行自己的 DNS server
 
+=======
+>>>>>>> dd9dbbcb92fff619300d052ff9fcf7a31e975fea
 
 ## VPC 標準範例介紹
 
