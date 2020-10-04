@@ -109,8 +109,6 @@ GET kibana_sample_data_ecommerce/_count
 GET /_cat/indices/kibana*?v
 ```
 ![Elasticsearch - _cat search 1](/blog/images/Elasticsearch/es_cat-search-1.png)
-<<<<<<< HEAD
-=======
 
 ```bash
 # 加上過濾條件
@@ -131,7 +129,6 @@ GET /_cat/indices?v&s=docs.count:desc
 GET /_cat/indices?v&h=i,tm&s=tm:desc
 ```
 ![Elasticsearch - _cat search 4](/blog/images/Elasticsearch/es_cat-search-4.png)
->>>>>>> dd9dbbcb92fff619300d052ff9fcf7a31e975fea
 
 ```bash
 # 加上過濾條件
@@ -147,15 +144,11 @@ GET /_cat/indices?v&s=docs.count:desc
 ![Elasticsearch - _cat search 3](/blog/images/Elasticsearch/es_cat-search-3.png)
 
 
-<<<<<<< HEAD
 ```bash
 # 查詢每個 index 所消耗的 memory 為多少，搭配排序
 GET /_cat/indices?v&h=i,tm&s=tm:desc
 ```
 ![Elasticsearch - _cat search 4](/blog/images/Elasticsearch/es_cat-search-4.png)
-=======
-- Node & Shard 是比較偏向維運人員的視角，是種物理概念
->>>>>>> dd9dbbcb92fff619300d052ff9fcf7a31e975fea
 
 
 
