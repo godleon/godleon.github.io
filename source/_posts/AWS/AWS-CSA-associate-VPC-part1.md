@@ -359,8 +359,10 @@ NAT 在這裡的目的很簡單，就是為了讓 private subnet 具備連網的
 
 
 
-Network ACLs
-============
+Network Security
+================
+
+## Network ACLs
 
 ![VPC arch 3](/blog/images/aws/VPC_Creation-3.png)
 
@@ -370,7 +372,7 @@ Network ACLs
 
 - 自訂的 network ACL，預設是拒絕所有 inbound & outbound 流量
 
-- 每個 subnet 都必須與一個 network ACL 進行關聯，若是沒有設定，就會自動與 default(main) network ACL 關聯
+- 每個 subnet 都必須與一個 network ACL 進行關聯(**也只能一個**)，若是沒有設定，就會自動與 default(main) network ACL 關聯
 
 - 要進行黑名單的管制(例如：阻擋特定來源 ip 流量)，只能用 network ACL，無法使用 security group(只能開白名單)
 
@@ -383,6 +385,28 @@ Network ACLs
 - Network ACL 是 stateless => 允許 inbound 的流量，並不會自動產生對應的 outbound rule
 
 > 重點!! **Network ACLs 是用來管理進出 subnet 的流量；而 Security Group 則是用來管理進出 instance 的流量**
+
+
+## Security Group
+
+- 屬於 instance level 的設定
+
+- stateful，因此設定了 inbound allow 後，就會自帶 outbound allow
+
+- 只能設定 allow rules
+
+
+## 網路無法連外?
+
+這部份很有可能是 Network ACL 中 outbound 的設定有缺少造成的，可按照以下方式設定：
+
+![VPC Network ACL outbound rule - 1](/blog/images/aws/VPC_NetworkACL-outbound-1.png)
+
+- outbound 要允許 TCP port 1024~65535 的 traffic，否則 VM 會無法連網
+
+![VPC Network ACL outbound rule - 2](/blog/images/aws/VPC_NetworkACL-outbound-1.png)
+
+- 也可以直接允許所有 outbound 的 TCP traffic 
 
 
 

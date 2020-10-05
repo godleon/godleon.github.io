@@ -94,6 +94,17 @@ EC2 簡介
 - `U`：Bare Metal
 
 
+## AMI Virtualization Type
+
+目前有以下兩種：
+
+- HVM(Hardware Virtual Machine)：可利用到特殊的硬體所提供的效能
+
+- PV(Paravirtual, 全虛擬化)：可以在不確定可以支援虛擬化的硬體上運作，若要模擬很特殊的作業系統，這個選項可能會用到
+
+基本上，如果不是很特殊的應用，為了要得到相對較好的效能，直接選擇 `HVM` 就對了。
+
+
 
 關於 EC2 設定的選項
 =================
