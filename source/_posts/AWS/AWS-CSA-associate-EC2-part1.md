@@ -166,7 +166,8 @@ EC2 簡介
 
 - General Purpose SSD 能提供的 IOPS 是根據磁碟容量而定的，另外有一個 burst 的上限
 
-- Provisioned IOPS SSD 則是可以提供固定 IOPS 能力的磁碟
+- Provisioned IOPS SSD 則是可以提供固定 IOPS 能力的磁碟 (**可能效能無法達到預期**)
+> 若使用 Provisioned IOPS SSD 也無法達到預期的效能，那 instance type 可以改選 `EBS optimized instance type`，這類型的 instance 在網路傳輸上，EBS traffic 會優先處理，因此可以確保達到 provisioned IOPS 的效能
 
 - 原本 Root volume 是無法加密的，但現在已經可以進行加密了
 

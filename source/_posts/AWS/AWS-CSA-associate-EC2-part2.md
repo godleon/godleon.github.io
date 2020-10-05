@@ -66,6 +66,15 @@ EBS volume type 有四種(官方宣稱)，直接使用下表來進行比較：
 
 - 當 EC2 instance 被移除時，root disk 會跟著被移除，只有額外新增的 volume 保留下來
 
+### 從 snapshot 產生的 EBS volume 的效能問題
+
+- 透過 snapshot 產生的 EBS volume 建議先做 initialization
+
+- initialization 這個操作會在 storage block 第一次被讀取時發生，而這個效能可能只有原本的 50%
+
+- 承上兩點，不建議將透過 snapshot 產生出來的 EBS volume，尚未進行完整 initialization 之前就放到生產環境
+
+
 
 ## 如何將 EC2 instance 或 EBS volume 移到不同的 AZ 中?
 
@@ -140,6 +149,7 @@ AMI 是產生 EC2 instance 的基礎，使用者在選擇 AMI 時，可基於以
 - Instance Store Volume 所建立的 instance 無法停止，因此一旦 instance 出問題，資料就會遺失了；但透過 EBS backed instance 是可以停止的
 
 - 兩種類型的 instance 重新啟動都不會遺失資料
+> 但若是對 instance 進行 `stop` 或是 `shutdown`，會造成 instance store 中的資料遺失
 
 - 預設情況下，兩種類型的 instance 被移除後，root device 都會一併移除
 
