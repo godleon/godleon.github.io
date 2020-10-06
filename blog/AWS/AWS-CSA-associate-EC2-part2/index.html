@@ -31,7 +31,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/EBS_Storage-Type-Comparison.png">
 <meta property="article:published_time" content="2020-05-30T01:10:00.000Z">
-<meta property="article:modified_time" content="2020-10-05T22:31:21.673Z">
+<meta property="article:modified_time" content="2020-10-06T04:18:41.825Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -260,7 +260,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-10-06 06:31:21" itemprop="dateModified" datetime="2020-10-06T06:31:21+08:00">2020-10-06</time>
+                <time title="Modified: 2020-10-06 12:18:41" itemprop="dateModified" datetime="2020-10-06T12:18:41+08:00">2020-10-06</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -325,7 +325,10 @@
 </li>
 <li><p>snapshot 是 volume 在特定時間點的複本</p>
 </li>
-<li><p>snapshot 的特性是 incremental，因此對 volume 進行 snapshot 只會針對有變動的 block 進行處理</p>
+<li><p>snapshot 的特性是 incremental，因此對 volume 進行 snapshot 只會針對有變動的 block 進行處理(也只有增加的部份容量會被收費)</p>
+<blockquote>
+<p>假設同一個 EBS volume 的 snapshot 有兩個，若是第一個完整的 snapshot 被刪除，還是可以從第二個 snapshot 還原所有資料</p>
+</blockquote>
 </li>
 <li><p>第一次的 snapshot 需要花費較長的時間完成</p>
 </li>
