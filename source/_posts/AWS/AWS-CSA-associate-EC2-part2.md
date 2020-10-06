@@ -213,13 +213,15 @@ CloudWatch & CloudTrail 都是很大的主題，這邊暫時以 CSA 的考試需
 
 - 除了 AWS 服務之外，也可以同時用來監控自行開發的應用程式
 
+- CloudWatch Alarm 可以用來觸發某些特定事件，例如：auto scaling
+
 - CloudWatch 預設每五分鐘會對 EC2 進行監控資訊的蒐集；但若是希望可以監控到更細節的資訊，可以設定成每一分鐘(在啟用 instance 時勾選 `Enable CloudWatch detailed monitoring`)
 
 - CloudWatch 有幾個重要的組成部分：
 
     - `Dashboard`：以圖形展現的方式呈現監控數據，可以是 region level or global level
 
-    - `Alarm`：設定某個 thrshold 到達時，觸發告警
+    - `Alarm`：設定某個 thrshold 到達時，觸發告警(可與 SNS 服務進行整合)
 
     - `Event`：可指定當某個 AWS resource 變更時，執行預先指定的工作
 
@@ -231,6 +233,8 @@ CloudWatch & CloudTrail 都是很大的主題，這邊暫時以 CSA 的考試需
 - 用來檢視使用者對於 AWS 各項資源的使用記錄 & 狀況，**主要用來提供稽核用**
 
 - 記錄內容包含 console 的操作 & API call，以及來源 IP ... 等資訊
+
+- 不論操作的來源是 CLI, SDK 或是 console 都會被紀錄
 
 
 

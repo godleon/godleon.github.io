@@ -58,6 +58,14 @@ AWS 提供三種 Load Balancer 類型，分別是：
 
 ## 其他
 
+- **ELB 應該與 Auto Scaling Group 搭配使用**，藉此達到 HA、fault tolerance、automatic scale out/in ... 等目的
+
+- ELB 也可以作為內部流量(private subnet)的 load balancer 之用
+
+- 若有設定好 health check，ELB 就不會將 traffic 導向當下狀態是故障的 instance
+
+- 若希望服務可以掛上 TLS(HTTPS)，ELB 可以協助做 SSL offloading 的工作，可以節省 EC2 instance 的計算資源
+
 - 若是 Load Balancer 回應 504 Error(Gateway Timeout)，就是源端的服務出問題，超過 idle timeout 的設定
 > 此時就需要去檢查 web server or DB service ... 等等
 
@@ -66,6 +74,8 @@ AWS 提供三種 Load Balancer 類型，分別是：
 - Load Balancer 都會提供一個 DNS name，不會給 IP address
 
 - **考試前請認真讀一下 [Elastic Load Balancing FAQs](https://aws.amazon.com/elasticloadbalancing/faqs)，會出不少關於三種不同 LB 差異的考題**
+
+- 當要考慮到 `HA` & `fault tolerance`，就必須至少要有 **ELB + ASG(cross AZ + 最少兩個 instance)** 這樣的組合 
 
 
 ### Health Check
@@ -188,7 +198,7 @@ Auto Scaling 共分為三個部份，分別是：
 > 用來指示 Auto Scaling 機制，要自動生成的服務的樣貌，以 EC2 為例，就會有 AMI ID、instance type、key pair、security group、storage ... 等資訊
 
 - Scaling Options
-> 這是進行 Auto Scaling 的依據，可能根據負載、或是特定時間；以及可以進行 Auto Scaling 的資源上下限
+> 這是進行 Auto Scaling 的依據(or 規則)，可能根據負載、或是特定時間；以及可以進行 Auto Scaling 的資源上下限；甚至包含當 auto scaling 發生時所要進行通知操作的 SNS 設定
 
 
 ## 有哪些 Scaling Option 可用?
