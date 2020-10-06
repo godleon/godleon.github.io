@@ -35,7 +35,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/ELB_Cross-Zone-Load-Balancing-common-scenario.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/ELB_Path-Patterns.png">
 <meta property="article:published_time" content="2020-06-09T22:35:00.000Z">
-<meta property="article:modified_time" content="2020-10-06T04:18:41.825Z">
+<meta property="article:modified_time" content="2020-10-06T22:18:54.717Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -261,7 +261,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-10-06 12:18:41" itemprop="dateModified" datetime="2020-10-06T12:18:41+08:00">2020-10-06</time>
+                <time title="Modified: 2020-10-07 06:18:54" itemprop="dateModified" datetime="2020-10-07T06:18:54+08:00">2020-10-07</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -333,6 +333,14 @@
 </li>
 </ul>
 <h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><ul>
+<li><p><strong>ELB 應該與 Auto Scaling Group 搭配使用</strong>，藉此達到 HA、fault tolerance、automatic scale out/in … 等目的</p>
+</li>
+<li><p>ELB 也可以作為內部流量(private subnet)的 load balancer 之用</p>
+</li>
+<li><p>若有設定好 health check，ELB 就不會將 traffic 導向當下狀態是故障的 instance</p>
+</li>
+<li><p>若希望服務可以掛上 TLS(HTTPS)，ELB 可以協助做 SSL offloading 的工作，可以節省 EC2 instance 的計算資源</p>
+</li>
 <li><p>若是 Load Balancer 回應 504 Error(Gateway Timeout)，就是源端的服務出問題，超過 idle timeout 的設定</p>
 <blockquote>
 <p>此時就需要去檢查 web server or DB service … 等等</p>
@@ -343,6 +351,8 @@
 <li><p>Load Balancer 都會提供一個 DNS name，不會給 IP address</p>
 </li>
 <li><p><strong>考試前請認真讀一下 <a target="_blank" rel="noopener" href="https://aws.amazon.com/elasticloadbalancing/faqs">Elastic Load Balancing FAQs</a>，會出不少關於三種不同 LB 差異的考題</strong></p>
+</li>
+<li><p>當要考慮到 <code>HA</code> &amp; <code>fault tolerance</code>，就必須至少要有 <strong>ELB + ASG(cross AZ + 最少兩個 instance)</strong> 這樣的組合 </p>
 </li>
 </ul>
 <h3 id="Health-Check"><a href="#Health-Check" class="headerlink" title="Health Check"></a>Health Check</h3><ul>
@@ -447,7 +457,7 @@
 </li>
 <li><p>Scaling Options</p>
 <blockquote>
-<p>這是進行 Auto Scaling 的依據，可能根據負載、或是特定時間；以及可以進行 Auto Scaling 的資源上下限</p>
+<p>這是進行 Auto Scaling 的依據(or 規則)，可能根據負載、或是特定時間；以及可以進行 Auto Scaling 的資源上下限；甚至包含當 auto scaling 發生時所要進行通知操作的 SNS 設定</p>
 </blockquote>
 </li>
 </ul>

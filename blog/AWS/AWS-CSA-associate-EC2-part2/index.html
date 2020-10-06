@@ -31,7 +31,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/EBS_Storage-Type-Comparison.png">
 <meta property="article:published_time" content="2020-05-30T01:10:00.000Z">
-<meta property="article:modified_time" content="2020-10-06T04:18:41.825Z">
+<meta property="article:modified_time" content="2020-10-06T22:18:54.717Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -260,7 +260,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-10-06 12:18:41" itemprop="dateModified" datetime="2020-10-06T12:18:41+08:00">2020-10-06</time>
+                <time title="Modified: 2020-10-07 06:18:54" itemprop="dateModified" datetime="2020-10-07T06:18:54+08:00">2020-10-07</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -476,13 +476,15 @@
 </li>
 <li><p>除了 AWS 服務之外，也可以同時用來監控自行開發的應用程式</p>
 </li>
+<li><p>CloudWatch Alarm 可以用來觸發某些特定事件，例如：auto scaling</p>
+</li>
 <li><p>CloudWatch 預設每五分鐘會對 EC2 進行監控資訊的蒐集；但若是希望可以監控到更細節的資訊，可以設定成每一分鐘(在啟用 instance 時勾選 <code>Enable CloudWatch detailed monitoring</code>)</p>
 </li>
 <li><p>CloudWatch 有幾個重要的組成部分：</p>
 <ul>
 <li><p><code>Dashboard</code>：以圖形展現的方式呈現監控數據，可以是 region level or global level</p>
 </li>
-<li><p><code>Alarm</code>：設定某個 thrshold 到達時，觸發告警</p>
+<li><p><code>Alarm</code>：設定某個 thrshold 到達時，觸發告警(可與 SNS 服務進行整合)</p>
 </li>
 <li><p><code>Event</code>：可指定當某個 AWS resource 變更時，執行預先指定的工作</p>
 </li>
@@ -495,6 +497,8 @@
 <li><p>用來檢視使用者對於 AWS 各項資源的使用記錄 &amp; 狀況，<strong>主要用來提供稽核用</strong></p>
 </li>
 <li><p>記錄內容包含 console 的操作 &amp; API call，以及來源 IP … 等資訊</p>
+</li>
+<li><p>不論操作的來源是 CLI, SDK 或是 console 都會被紀錄</p>
 </li>
 </ul>
 <h1 id="與-IAM-Role-的搭配使用"><a href="#與-IAM-Role-的搭配使用" class="headerlink" title="與 IAM Role 的搭配使用"></a>與 IAM Role 的搭配使用</h1><p>不論要存取任何 AWS resource，都必須要有合法且足夠的權限才有辦法進行；在一般情況下，要取得權限，可以到 IAM 中新增 user，指定需要的權限，並取得 Access Key ID &amp; Secret Access Key 來使用。</p>
