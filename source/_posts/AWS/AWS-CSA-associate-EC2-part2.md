@@ -54,7 +54,8 @@ EBS volume type 有四種(官方宣稱)，直接使用下表來進行比較：
 
 - snapshot 是 volume 在特定時間點的複本
 
-- snapshot 的特性是 incremental，因此對 volume 進行 snapshot 只會針對有變動的 block 進行處理
+- snapshot 的特性是 incremental，因此對 volume 進行 snapshot 只會針對有變動的 block 進行處理(也只有增加的部份容量會被收費)
+> 假設同一個 EBS volume 的 snapshot 有兩個，若是第一個完整的 snapshot 被刪除，還是可以從第二個 snapshot 還原所有資料
 
 - 第一次的 snapshot 需要花費較長的時間完成
 

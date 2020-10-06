@@ -114,6 +114,8 @@ Placement Group
 
 - 可以提供 instance 之間的網路有更低的延遲 & 更高的吞吐量
 
+- 承上三點，所以選擇 instance type 時，至少要選擇有 10Gb 以上網路的 instance type 才能享受到 placement group 的所帶來的優勢
+
 ## Spread
 
 - instance 不一定會在同一個 AZ 內
@@ -144,11 +146,13 @@ Placement Group
 
 - 只有某些類型的 instance 才可以放到 placement group 中(例如：compute optimized / GPU / memory optimized / storage optimizted ... 等等)
 
-- 若要將 instance 放到 cluster placement group 中，建議是同質性的 instance
+- 若要將 instance 放到 cluster placement group 中，建議是同質性的 instance (若是同樣的 instance type 更好)
 
 - 不同的 placement group 無法進行合併
 
 - 若是將 instance 移到 placement group 中，必須先切到 `stopped` 狀態；而且這件事情目前僅能透過 AWS CLI or SDK 完成，無法在 console 完成這件事情
+
+- 若是遇到 `insufficient capacity error`，解決方法是停止所有在 placement group 中的 instance，再重新啟動
 
 
 
