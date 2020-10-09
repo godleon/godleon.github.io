@@ -35,37 +35,6 @@ S3 transfer acceleration 是利用 AWS 佈署在全世界的 edge server 來達�
 
 
 
-CloudFront
-==========
-
-CloudFront 就是 AWS 透過佈建在全世界各地的 edge server 所提供的 CDN 服務，有以下幾個重點知識需要了解：
-
-- AWS 在全世界各地建立了 edge server，確保大多數的使用者都有一個相對源頭教近的地方可以取得資料
-
-- **Edge Location**：實際就是快取靜態資源的地方(edge server)，跟 Region & AZ 兩個是不同的概念
-
-- **Origin**：這就是靜態資源的原始儲存位置，當使用者對 edge server 要求檔案，但 edge server 沒有時，edge server 就會回源到此處取得所需的檔案
-> Edge server 會將回源取到的資料進行 cache，下一位使用者來存取時，就不需要再度回源了
-![S3 CloudFront](/blog/images/aws/S3_CloudFront.png)
-
-- **Distribution**：這其實就是 CDN 服務本身所提供的 endpoint，搭配其智慧化的 DNS 解析能力，可以讓使用者取得離自己最近的 edge server 紀行存取，因此可以視為 edge location collection；而 AWS CloudFront 目前支援兩種資源的發佈
-  
-  - **Web Distribution**: 通常是一般網站使用的靜態資源，像是 image, css, javascript, music ... 都屬於此類；也包含透過 HTTP 協議傳輸的視訊協定，例如：HTTP Live Streaming(HLS), Dynamic Adaptive Streaming over HTTP (DASH), Microsoft Smooth Streaming (MSS), or HTTP Dynamic Streaming (HDS) .... 等等。
-  
-  - **RTMP**: 用於視訊串流類的服務中(但這通常會根據服務型態不同，還需要額外考慮視訊延遲的問題)
-  > CloudFront 將會在 2020 年底停止 RTMP 的支援
-
-- Edge Locations 並非只是用來拉取資料，也會有寫入資料的應用場景(例如：**S3 Transger Acceleration**)
-
-- 快取在 edge location 的靜態資源，會有 TTL(Time to Live) 的屬性，不會永久存在
-
-- 為了讓使用者可以很快取得最新的資料，可以執行 CDN 清理的工作或是讓快取失效(invalidate)，但因為需要重新回源，因此會有額外費用產生
-
-## 進階設定
-
-- `Restrict Viewer Access(Use Signed URLs or Signed Cookies)`：開啟此功能，可以限定使用者必須要登入後取得特定域名的 cookie 才可以存取 CDN 上的快取資源
-
-
 Snowball 系列服務
 ================
 
@@ -208,12 +177,6 @@ References
 - [Amazon S3 Transfer Acceleration - Amazon Simple Storage Service](https://docs.aws.amazon.com/zh_tw/AmazonS3/latest/dev/transfer-acceleration.html)
 
 - [Amazon Simple Storage Service (S3) FAQs](https://aws.amazon.com/s3/faqs/) [(中文)](https://aws.amazon.com/tw/s3/faqs/)
-
-## CloudFront
-
-- [以 Amazon CloudFront 加速您的網站 - Amazon Simple Storage Service](https://docs.aws.amazon.com/zh_tw/AmazonS3/latest/dev/website-hosting-cloudfront-walkthrough.html)
-
-- [FAQs | CDN, Zone Apex, Edge Cache | Amazon CloudFront](https://aws.amazon.com/cloudfront/faqs/?nc=sn&loc=6)
 
 ## Snowball
 
