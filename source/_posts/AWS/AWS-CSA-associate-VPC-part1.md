@@ -64,6 +64,7 @@ Overview
 ### Gateway & Router & Route Table
 
 - 要存取 VPC 的方式，可透過 `Internet Gateway`(來自網際網路) 或是 `Virtual Private Gateway`(可能來自地端的 VPN 連線)
+> **VPC 可以同時與 IG & VPG 綁定，但各自都只能有一個**
 
 - 透過兩個 gateway 進來的 traffic 第一個位置都是 `Router`
 

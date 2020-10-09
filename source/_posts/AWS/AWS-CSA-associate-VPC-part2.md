@@ -96,6 +96,25 @@ Bastion Host
 - 在 private subnet 中的服務 or instance 就可以暫時先不用花心力處理安全性的部份
 
 
+VPN (Virtual Private Network)
+=============================
+
+![Bastion Host](/blog/images/aws/VPC_VPN-arch.png)
+
+- VPN 是用來連接地端 & AWS VPC 用，目的是讓兩地的連線可以透過 private IP 進行
+
+- 兩端之間互傳的的流量都是加密過的
+
+- 每個 VPN 連線會同時使用兩個 IPSec tunnel 作為 redundancy
+
+- 兩端都要有對應的 routing rule 才能將 traffic 導向正確的位置
+> 在 VPC 端有正確的 Route Table 設定；地端則是透過 DHCP 應該可以處理這個部份
+
+- 地端需要設定好 `Customer Gateway`(可能是實體裝置 or 軟體，必須要有 public IP)，AWS VPC 端則是需要設定 `Virtual Private Gateway`，而 VPN 連線就是將兩個 Gateway 連起來
+
+- VPC 可以同時與 Virtual Private Gateway & Internet Gateway 綁定，但都只能各有一個
+
+
 
 Direct Connect
 ==============
@@ -106,7 +125,7 @@ Direct Connect 服務是讓使用者可以從地端資料中心建立一條私�
 
 ![Direct Connect](/blog/images/aws/VPC_Direct-Connect.png)
 
-- AWS 在各地提供許多 **Direct Connect Location**，讓使用者可以就近選擇合適的點接入
+- AWS 在各地提供許多 **Direct Connect Location**，讓使用者可以就近選擇合適的點接入(透過 `cross-network connection`)
 
 - 在 Direct Connect Location 中有許多 AWS Cage，裡面有 Direct Connect Router；使用者也會放置自己的 Router，然後透過 cross line 進行實體對接
 
@@ -116,13 +135,18 @@ Direct Connect 服務是讓使用者可以從地端資料中心建立一條私�
 
 - 藉由此專線，可以使用專線，同時存取 AWS 公用資源(例如：S3)，也可以直接存取位於 VPC private subnet 中的服務
 
+- 一個 Direct Connect Location 只能是一個 region，無法存取 cross region resource
+
 ## 總結
 
 - 連接地端資料中心 & AWS
 
+- 可以節省網路費用、降低延遲
+
 - 若是地端到 AWS 的流量很大，很適合使用 Direct Connect 來處理
 
 - Direct Connect 可提供一條安全的私有專線
+
 
 ## 建立 Direct Connect 的步驟
 

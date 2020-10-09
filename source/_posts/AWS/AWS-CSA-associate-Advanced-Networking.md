@@ -183,6 +183,15 @@ CloudFront 就是 AWS 透過佈建在全世界各地的 edge server 所提供的
 - `Restrict Viewer Access(Use Signed URLs or Signed Cookies)`：開啟此功能，可以限定使用者必須要登入後取得特定域名的 cookie 才可以存取 CDN 上的快取資源；或是讓資源在特定時間(例如：60 mins)過後就失效
 
 
+## 可能發生的效能問題
+
+- CDN 的運作基礎在於提供使用者一個最近的 edge server 進行存取，但要提供出這樣的資訊，就必須要進行完整的 DNS 查詢流程，因此是 DNS 查詢很慢，也是會影響到使用 CDN 的效能的
+
+- 若是在 url 帶上 query string，那 edge server 就不會回應了，而這樣的 request 就會回到 origin server，當然效能自然就會差很多
+
+- 若要要提昇 CDN 效能，比較直接的作法就是拉長 cache 的過期時間
+
+
 
 
 References
