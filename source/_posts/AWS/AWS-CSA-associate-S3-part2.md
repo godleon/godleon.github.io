@@ -62,9 +62,11 @@ tags:
 
 - S3 ACL 是屬於傳統的安全管控機制，AWS 官方是建議盡量使用 IAM or S3 Bucket Policy
 
-- 可管控哪些 AWS 帳號可以存取指定的 S3 resource
-
 - S3 ACL 的規則可以細到 object level，但同樣也可以設定為 bucket level
+
+- 可管控哪些 AWS 帳號可以存取指定的 S3 resource，或是直接對 public 開放
+
+- object ACL 可以讓使用者產生提供所有人存取 object 用的 public URL link
 
 
 ## Encryption
@@ -101,9 +103,9 @@ AWS S3 可以為每個 object(最細可以到 object 為單位) 進行資料的�
 
 - 可以作為一個強大的備份手段使用
 
-- 一旦版本控制啟用，就無法關閉，僅能暫停而已
+- 一旦版本控制啟用，就無法關閉，僅能暫停而已(已經因為 versioning 功能產生出來的舊版本資料都會依然保留著)
 
-- 可以與其他資料儲存服務(例如：Glacier)搭配，並設定相關生命週期規則來進行進階的管理
+- 可以與其他資料儲存服務(例如：Glacier)搭配，並設定相關生命週期規則(Lifecycle policy)來進行進階的管理
 
 - 可將刪除版本的動作綁定 MFA，強制使用者執行刪除動作前進行認證，進一步提高資料的安全性(**只能由 root 帳號啟用此功能**)
 > 刪除 object 前必須提供 token or security code 來完成
@@ -117,13 +119,18 @@ AWS S3 可以為每個 object(最細可以到 object 為單位) 進行資料的�
 
 AWS S3 生命週期管理功能有以下幾個重點：
 
-- 可以根據預先定義好的規則，自動協助使用者將存放在 S3 的 object 在不同的 storage tier 中移動，讓檔案儲存的方式以更自動化且節省成本的方式進行，
+- 可以根據預先定義好的規則(時間週期)，自動協助使用者將存放在 S3 的 object 在不同的 storage tier 中移動，讓檔案儲存的方式以更自動化且節省成本的方式進行，
 > 類似地端儲存中，是將資料從 `hot`(frequently	accessed) -> `warm`(less	frequently	accessed) -> `cold`(long-term	backup	or	archive) 的概念)
 
 - 可與版本控管(version control)的機制結合
 
-- 結合了版本控管的機制後，就可以針對現有版本(current version)與先前所有版本(previous versions)進行更細粒度的管理
+- 結合了版本控管的機制後，就可以針對現有版本(current version)與先前所有版本(previous versions)進行更細粒度的管理，甚至對資料儲存成本有更進一步的優化
 
+- 若要自動移除資料，也可以設定 `expiration` 相關的 policy 來達成
+
+- 預設這個功能是關閉的
+
+![S3 resource access authorization process](/blog/images/aws/S3_Lifecycle-Policy-example.png)
 
 以下是幾種常見的生命週期規則設定：
 
@@ -135,6 +142,22 @@ AWS S3 生命週期管理功能有以下幾個重點：
 > 若資料有移到 Glacier，要把刪除的日期設為 90 天以上，因為 Glacier 費用低消是 90 days
 
 比較需要注意的地方是，上述的規則是以`檔案建立時間`為基準計算，但有可能檔案建立了很久，依然有大量的存取；因此或許應該考量的是`檔案存取時間`可能相對的較為合理點，但目前 AWS 並沒有提供這功能，因此這邊先列入後續追蹤。
+
+
+
+Event Notification
+==================
+
+![S3 Event Notification](/blog/images/aws/S3_Event-Notification.png)
+
+- Event Notification 是當 S3 bucket 有事件(event)發生時，主動往外送出通知
+
+- 常見的事件有：(上圖可以看到目前支援的完整事件項目)
+  - object 相關操作 (PUT/POST/COPT/CompleteMultiPartUpload)
+  - RRSObject Lost
+
+- 通知目前可以送到 `SNS`、`SQS`、`Lambda` 三個服務做後續進一步的處理
+
 
 
 Cross Region Replication

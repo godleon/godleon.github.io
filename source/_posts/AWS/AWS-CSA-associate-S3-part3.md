@@ -138,7 +138,7 @@ Volume Gateway 提供了 `iSCSI` 的方式，讓資料可透過**單一磁碟(vo
 
 #### Stored Volume
 
-![Storage Gateway - File Gateway](/blog/images/aws/S3_StorageGateway-VolumeGateway-StoredVolume.png)
+![Storage Gateway - Stored Volume](/blog/images/aws/S3_StorageGateway-VolumeGateway-StoredVolume.png)
 
 - 資料主要儲存在本地端(對本地端的應用程式相對延遲低)，非同步備份到 AWS
 
@@ -150,7 +150,7 @@ Volume Gateway 提供了 `iSCSI` 的方式，讓資料可透過**單一磁碟(vo
 
 #### Cached Volume
 
-![Storage Gateway - File Gateway](/blog/images/aws/S3_StorageGateway-VolumeGateway-CachedVolume.png)
+![Storage Gateway - Cached Volume](/blog/images/aws/S3_StorageGateway-VolumeGateway-CachedVolume.png)
 
 - 資料其實是存放在 S3 中
 

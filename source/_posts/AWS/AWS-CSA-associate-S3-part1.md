@@ -46,7 +46,9 @@ What is S3?
 - **單一帳號預設最大上限可存放 100 個 buckets，但可以通知 AWS 協助放大上限**
 
 - S3 裡面的每個 bucket 都會有一個全球獨一無二的 DNS 名稱(ex: `https://YOUR_UNIQUE_BUCKET_NAME.s3.amazonaws.com`)；若是要指定到特定的 region，則可能會是 `https://YOUR_UNIQUE_BUCKET_NAME.eu-west-1.amazonaws.com`；但無論如何，使用者只要記住 bucket name 即可
-> 因此可以做為 static website hosting 之用
+> 因此可以做為 static website hosting 之用 (Everyone-read 的權限必須有設定好)
+
+-  若希望 S3 resource 可以在不同的 domain 之間互相分享，要把 `CORS` 設定開啟，允許其他 domain 來的 request
 
 - 成功上傳檔案到 S3 後，會收到 `HTTP 200` 的回應
 
@@ -180,7 +182,9 @@ S3 根據使用者存取的頻率與需求，提供不同的 storage class 供�
 
 ## Glacier
 
-- 存取時間會需要數分鐘到數小時不等
+- 設計用來封存資料用(例如：稽核用的 log)，但**不應該拿來備份用的**
+
+- 存取時間會需要數分鐘到數小時不等，因此分成 `Expedited`(1~5 mins)、`Standard`(3~5 hours)、`Bulk`(5~12 hours) 三個等級，單位收費也不同
 
 - 提供跨 AZ 的 11 個 9 個可靠度
 
