@@ -30,12 +30,11 @@
 <meta property="og:description" content="此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 S3 服務，共分為四個部份，此為第三個部份">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_Transfer-Acceleration.png">
-<meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_CloudFront.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_StorageGateway-FileGateway.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_StorageGateway-VolumeGateway-StoredVolume.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_StorageGateway-VolumeGateway-CachedVolume.png">
 <meta property="article:published_time" content="2020-05-10T02:00:00.000Z">
-<meta property="article:modified_time" content="2020-10-09T05:50:49.305Z">
+<meta property="article:modified_time" content="2020-10-09T06:59:02.764Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -166,7 +165,7 @@
 
       <!--noindex-->
       <section class="post-toc-wrap sidebar-panel">
-          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Transfer-Acceleration"><span class="nav-number">1.</span> <span class="nav-text">Transfer Acceleration</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CloudFront"><span class="nav-number">2.</span> <span class="nav-text">CloudFront</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%B2%E9%9A%8E%E8%A8%AD%E5%AE%9A"><span class="nav-number">2.1.</span> <span class="nav-text">進階設定</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Snowball-%E7%B3%BB%E5%88%97%E6%9C%8D%E5%8B%99"><span class="nav-number">3.</span> <span class="nav-text">Snowball 系列服務</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Snowball-Edge"><span class="nav-number">3.1.</span> <span class="nav-text">Snowball Edge</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Snowmobile"><span class="nav-number">3.2.</span> <span class="nav-text">Snowmobile</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Storage-Gateway"><span class="nav-number">4.</span> <span class="nav-text">Storage Gateway</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-Storage-Gateway"><span class="nav-number">4.1.</span> <span class="nav-text">什麼是 Storage Gateway ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Storage-Gateway-%E5%A6%82%E4%BD%95%E8%99%95%E7%90%86%E4%B8%8D%E5%90%8C%E9%A1%9E%E5%9E%8B%E7%9A%84%E8%B3%87%E6%96%99"><span class="nav-number">4.2.</span> <span class="nav-text">Storage Gateway 如何處理不同類型的資料 ?</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#File-Gateway"><span class="nav-number">4.2.1.</span> <span class="nav-text">File Gateway</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Volume-Gateway"><span class="nav-number">4.2.2.</span> <span class="nav-text">Volume Gateway</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Stored-Volume"><span class="nav-number">4.2.2.1.</span> <span class="nav-text">Stored Volume</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Cached-Volume"><span class="nav-number">4.2.2.2.</span> <span class="nav-text">Cached Volume</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Tape-Gateway"><span class="nav-number">4.2.3.</span> <span class="nav-text">Tape Gateway</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Athena-vs-Macie"><span class="nav-number">5.</span> <span class="nav-text">Athena vs Macie</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Athena"><span class="nav-number">5.1.</span> <span class="nav-text">Athena</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Macie"><span class="nav-number">5.2.</span> <span class="nav-text">Macie</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text">References</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#S3"><span class="nav-number">6.1.</span> <span class="nav-text">S3</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CloudFront-1"><span class="nav-number">6.2.</span> <span class="nav-text">CloudFront</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Snowball"><span class="nav-number">6.3.</span> <span class="nav-text">Snowball</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Snowmobile-1"><span class="nav-number">6.4.</span> <span class="nav-text">Snowmobile</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Storage-Gateway-1"><span class="nav-number">6.5.</span> <span class="nav-text">Storage Gateway</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Athena-amp-Macie"><span class="nav-number">6.6.</span> <span class="nav-text">Athena &amp; Macie</span></a></li></ol></li></ol></div>
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Transfer-Acceleration"><span class="nav-number">1.</span> <span class="nav-text">Transfer Acceleration</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Snowball-%E7%B3%BB%E5%88%97%E6%9C%8D%E5%8B%99"><span class="nav-number">2.</span> <span class="nav-text">Snowball 系列服務</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Snowball-Edge"><span class="nav-number">2.1.</span> <span class="nav-text">Snowball Edge</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Snowmobile"><span class="nav-number">2.2.</span> <span class="nav-text">Snowmobile</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Storage-Gateway"><span class="nav-number">3.</span> <span class="nav-text">Storage Gateway</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-Storage-Gateway"><span class="nav-number">3.1.</span> <span class="nav-text">什麼是 Storage Gateway ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Storage-Gateway-%E5%A6%82%E4%BD%95%E8%99%95%E7%90%86%E4%B8%8D%E5%90%8C%E9%A1%9E%E5%9E%8B%E7%9A%84%E8%B3%87%E6%96%99"><span class="nav-number">3.2.</span> <span class="nav-text">Storage Gateway 如何處理不同類型的資料 ?</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#File-Gateway"><span class="nav-number">3.2.1.</span> <span class="nav-text">File Gateway</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Volume-Gateway"><span class="nav-number">3.2.2.</span> <span class="nav-text">Volume Gateway</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Stored-Volume"><span class="nav-number">3.2.2.1.</span> <span class="nav-text">Stored Volume</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Cached-Volume"><span class="nav-number">3.2.2.2.</span> <span class="nav-text">Cached Volume</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Tape-Gateway"><span class="nav-number">3.2.3.</span> <span class="nav-text">Tape Gateway</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Athena-vs-Macie"><span class="nav-number">4.</span> <span class="nav-text">Athena vs Macie</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Athena"><span class="nav-number">4.1.</span> <span class="nav-text">Athena</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Macie"><span class="nav-number">4.2.</span> <span class="nav-text">Macie</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#S3"><span class="nav-number">5.1.</span> <span class="nav-text">S3</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Snowball"><span class="nav-number">5.2.</span> <span class="nav-text">Snowball</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Snowmobile-1"><span class="nav-number">5.3.</span> <span class="nav-text">Snowmobile</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Storage-Gateway-1"><span class="nav-number">5.4.</span> <span class="nav-text">Storage Gateway</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Athena-amp-Macie"><span class="nav-number">5.5.</span> <span class="nav-text">Athena &amp; Macie</span></a></li></ol></li></ol></div>
       </section>
       <!--/noindex-->
 
@@ -190,7 +189,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/blog/tags/">
-        <span class="site-state-item-count">101</span>
+        <span class="site-state-item-count">102</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -259,7 +258,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-10-09 13:50:49" itemprop="dateModified" datetime="2020-10-09T13:50:49+08:00">2020-10-09</time>
+                <time title="Modified: 2020-10-09 14:59:02" itemprop="dateModified" datetime="2020-10-09T14:59:02+08:00">2020-10-09</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -311,38 +310,6 @@
 </ul>
 <p><img src="/blog/images/aws/S3_Transfer-Acceleration.png" alt="S3 Transfer Acceleration"></p>
 <p>此外，AWS 也提供了一個<a target="_blank" rel="noopener" href="https://s3-accelerate-speedtest.s3-accelerate.amazonaws.com/en/accelerate-speed-comparsion.html">測速的網頁</a>，使用者可以自行評估須不需要開啟 S3 Transfer Acceleration 功能。</p>
-<h1 id="CloudFront"><a href="#CloudFront" class="headerlink" title="CloudFront"></a>CloudFront</h1><p>CloudFront 就是 AWS 透過佈建在全世界各地的 edge server 所提供的 CDN 服務，有以下幾個重點知識需要了解：</p>
-<ul>
-<li><p>AWS 在全世界各地建立了 edge server，確保大多數的使用者都有一個相對源頭教近的地方可以取得資料</p>
-</li>
-<li><p><strong>Edge Location</strong>：實際就是快取靜態資源的地方(edge server)，跟 Region &amp; AZ 兩個是不同的概念</p>
-</li>
-<li><p><strong>Origin</strong>：這就是靜態資源的原始儲存位置，當使用者對 edge server 要求檔案，但 edge server 沒有時，edge server 就會回源到此處取得所需的檔案</p>
-<blockquote>
-<p>Edge server 會將回源取到的資料進行 cache，下一位使用者來存取時，就不需要再度回源了<br><img src="/blog/images/aws/S3_CloudFront.png" alt="S3 CloudFront"></p>
-</blockquote>
-</li>
-<li><p><strong>Distribution</strong>：這其實就是 CDN 服務本身所提供的 endpoint，搭配其智慧化的 DNS 解析能力，可以讓使用者取得離自己最近的 edge server 紀行存取，因此可以視為 edge location collection；而 AWS CloudFront 目前支援兩種資源的發佈</p>
-<ul>
-<li><p><strong>Web Distribution</strong>: 通常是一般網站使用的靜態資源，像是 image, css, javascript, music … 都屬於此類；也包含透過 HTTP 協議傳輸的視訊協定，例如：HTTP Live Streaming(HLS), Dynamic Adaptive Streaming over HTTP (DASH), Microsoft Smooth Streaming (MSS), or HTTP Dynamic Streaming (HDS) …. 等等。</p>
-</li>
-<li><p><strong>RTMP</strong>: 用於視訊串流類的服務中(但這通常會根據服務型態不同，還需要額外考慮視訊延遲的問題)</p>
-<blockquote>
-<p>CloudFront 將會在 2020 年底停止 RTMP 的支援</p>
-</blockquote>
-</li>
-</ul>
-</li>
-<li><p>Edge Locations 並非只是用來拉取資料，也會有寫入資料的應用場景(例如：<strong>S3 Transger Acceleration</strong>)</p>
-</li>
-<li><p>快取在 edge location 的靜態資源，會有 TTL(Time to Live) 的屬性，不會永久存在</p>
-</li>
-<li><p>為了讓使用者可以很快取得最新的資料，可以執行 CDN 清理的工作或是讓快取失效(invalidate)，但因為需要重新回源，因此會有額外費用產生</p>
-</li>
-</ul>
-<h2 id="進階設定"><a href="#進階設定" class="headerlink" title="進階設定"></a>進階設定</h2><ul>
-<li><code>Restrict Viewer Access(Use Signed URLs or Signed Cookies)</code>：開啟此功能，可以限定使用者必須要登入後取得特定域名的 cookie 才可以存取 CDN 上的快取資源</li>
-</ul>
 <h1 id="Snowball-系列服務"><a href="#Snowball-系列服務" class="headerlink" title="Snowball 系列服務"></a>Snowball 系列服務</h1><p>Snowball 是設計用來協助使用者移動大量資料用，不論是從本地端到 AWS，或是從 AWS 回到本地端，都可以利用此服務。</p>
 <h2 id="Snowball-Edge"><a href="#Snowball-Edge" class="headerlink" title="Snowball Edge"></a>Snowball Edge</h2><ul>
 <li><p>Snowball 是個安全且兼顧的硬體裝置，被設計用來移動大量資料，不論是從本地端到 AWS，或是 AWS 到本地端都可；簡單來說，就是被設計用來做資料遷移和邊緣運算裝置，可簡單稱為 <code>Snowball Edge</code></p>
@@ -458,12 +425,6 @@
 <li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/zh_tw/AmazonS3/latest/dev/transfer-acceleration.html">Amazon S3 Transfer Acceleration - Amazon Simple Storage Service</a></p>
 </li>
 <li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/s3/faqs/">Amazon Simple Storage Service (S3) FAQs</a> <a target="_blank" rel="noopener" href="https://aws.amazon.com/tw/s3/faqs/">(中文)</a></p>
-</li>
-</ul>
-<h2 id="CloudFront-1"><a href="#CloudFront-1" class="headerlink" title="CloudFront"></a>CloudFront</h2><ul>
-<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/zh_tw/AmazonS3/latest/dev/website-hosting-cloudfront-walkthrough.html">以 Amazon CloudFront 加速您的網站 - Amazon Simple Storage Service</a></p>
-</li>
-<li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/cloudfront/faqs/?nc=sn&loc=6">FAQs | CDN, Zone Apex, Edge Cache | Amazon CloudFront</a></p>
 </li>
 </ul>
 <h2 id="Snowball"><a href="#Snowball" class="headerlink" title="Snowball"></a>Snowball</h2><ul>
