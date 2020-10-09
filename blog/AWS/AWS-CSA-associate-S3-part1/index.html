@@ -31,7 +31,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_Storage-Classes-comparision.png">
 <meta property="article:published_time" content="2020-04-26T04:00:00.000Z">
-<meta property="article:modified_time" content="2020-10-09T01:36:12.191Z">
+<meta property="article:modified_time" content="2020-10-09T05:50:49.305Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -255,7 +255,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-10-09 09:36:12" itemprop="dateModified" datetime="2020-10-09T09:36:12+08:00">2020-10-09</time>
+                <time title="Modified: 2020-10-09 13:50:49" itemprop="dateModified" datetime="2020-10-09T13:50:49+08:00">2020-10-09</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -317,8 +317,10 @@
 </li>
 <li><p>S3 裡面的每個 bucket 都會有一個全球獨一無二的 DNS 名稱(ex: <code>https://YOUR_UNIQUE_BUCKET_NAME.s3.amazonaws.com</code>)；若是要指定到特定的 region，則可能會是 <code>https://YOUR_UNIQUE_BUCKET_NAME.eu-west-1.amazonaws.com</code>；但無論如何，使用者只要記住 bucket name 即可</p>
 <blockquote>
-<p>因此可以做為 static website hosting 之用</p>
+<p>因此可以做為 static website hosting 之用 (Everyone-read 的權限必須有設定好)</p>
 </blockquote>
+</li>
+<li><p>若希望 S3 resource 可以在不同的 domain 之間互相分享，要把 <code>CORS</code> 設定開啟，允許其他 domain 來的 request</p>
 </li>
 <li><p>成功上傳檔案到 S3 後，會收到 <code>HTTP 200</code> 的回應</p>
 </li>
@@ -453,7 +455,9 @@
 <li><a target="_blank" rel="noopener" href="https://aws.amazon.com/tw/s3/storage-classes/#Unknown_or_changing_access">物件儲存類別 – Amazon S3 Storage Class(Intelligent Tiering)</a></li>
 </ul>
 <h2 id="Glacier"><a href="#Glacier" class="headerlink" title="Glacier"></a>Glacier</h2><ul>
-<li><p>存取時間會需要數分鐘到數小時不等</p>
+<li><p>設計用來封存資料用(例如：稽核用的 log)，但<strong>不應該拿來備份用的</strong></p>
+</li>
+<li><p>存取時間會需要數分鐘到數小時不等，因此分成 <code>Expedited</code>(1<del>5 mins)、<code>Standard</code>(3</del>5 hours)、<code>Bulk</code>(5~12 hours) 三個等級，單位收費也不同</p>
 </li>
 <li><p>提供跨 AZ 的 11 個 9 個可靠度</p>
 </li>

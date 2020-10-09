@@ -35,7 +35,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_StorageGateway-VolumeGateway-StoredVolume.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_StorageGateway-VolumeGateway-CachedVolume.png">
 <meta property="article:published_time" content="2020-05-10T02:00:00.000Z">
-<meta property="article:modified_time" content="2020-10-09T01:36:12.191Z">
+<meta property="article:modified_time" content="2020-10-09T05:50:49.305Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -259,7 +259,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-10-09 09:36:12" itemprop="dateModified" datetime="2020-10-09T09:36:12+08:00">2020-10-09</time>
+                <time title="Modified: 2020-10-09 13:50:49" itemprop="dateModified" datetime="2020-10-09T13:50:49+08:00">2020-10-09</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -395,7 +395,7 @@
 </ul>
 <h3 id="Volume-Gateway"><a href="#Volume-Gateway" class="headerlink" title="Volume Gateway"></a>Volume Gateway</h3><p>Volume Gateway 提供了 <code>iSCSI</code> 的方式，讓資料可透過**單一磁碟(volume)**為單位的角度來進行資料的儲存與管理；寫入 volume 的資料會以非同步的方式透過 volume snapshot 的方式進行儲存，也因為是 block device 的關係，因此每次的變更備份都是只有處理變更的 block 部份而已。</p>
 <p>而根據 volume 使用情境的不同，Volume Gateway 還可以分成以下兩種：</p>
-<h4 id="Stored-Volume"><a href="#Stored-Volume" class="headerlink" title="Stored Volume"></a>Stored Volume</h4><p><img src="/blog/images/aws/S3_StorageGateway-VolumeGateway-StoredVolume.png" alt="Storage Gateway - File Gateway"></p>
+<h4 id="Stored-Volume"><a href="#Stored-Volume" class="headerlink" title="Stored Volume"></a>Stored Volume</h4><p><img src="/blog/images/aws/S3_StorageGateway-VolumeGateway-StoredVolume.png" alt="Storage Gateway - Stored Volume"></p>
 <ul>
 <li><p>資料主要儲存在本地端(對本地端的應用程式相對延遲低)，非同步備份到 AWS</p>
 </li>
@@ -406,7 +406,7 @@
 <li><p>目前支援的 volume 大小範圍為 1GB ~ 16 TB</p>
 </li>
 </ul>
-<h4 id="Cached-Volume"><a href="#Cached-Volume" class="headerlink" title="Cached Volume"></a>Cached Volume</h4><p><img src="/blog/images/aws/S3_StorageGateway-VolumeGateway-CachedVolume.png" alt="Storage Gateway - File Gateway"></p>
+<h4 id="Cached-Volume"><a href="#Cached-Volume" class="headerlink" title="Cached Volume"></a>Cached Volume</h4><p><img src="/blog/images/aws/S3_StorageGateway-VolumeGateway-CachedVolume.png" alt="Storage Gateway - Cached Volume"></p>
 <ul>
 <li><p>資料其實是存放在 S3 中</p>
 </li>

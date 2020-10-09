@@ -30,8 +30,10 @@
 <meta property="og:description" content="此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 S3 服務，共分為四個部份，此為第二個部份">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_Access-Authorization-Process.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_Lifecycle-Policy-example.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_Event-Notification.png">
 <meta property="article:published_time" content="2020-04-28T21:50:00.000Z">
-<meta property="article:modified_time" content="2020-10-09T01:36:12.191Z">
+<meta property="article:modified_time" content="2020-10-09T05:50:49.305Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -162,7 +164,7 @@
 
       <!--noindex-->
       <section class="post-toc-wrap sidebar-panel">
-          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%89%E5%85%A8%E8%88%87%E5%8A%A0%E5%AF%86"><span class="nav-number">1.</span> <span class="nav-text">安全與加密</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Security"><span class="nav-number">1.1.</span> <span class="nav-text">Security</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#IAM-Policy"><span class="nav-number">1.1.1.</span> <span class="nav-text">IAM Policy</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#S3-Bucket-Policy"><span class="nav-number">1.1.2.</span> <span class="nav-text">S3 Bucket Policy</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#S3-ACL"><span class="nav-number">1.1.3.</span> <span class="nav-text">S3 ACL</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Encryption"><span class="nav-number">1.2.</span> <span class="nav-text">Encryption</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E5%82%B3%E8%BC%B8%E4%B8%AD%E9%80%B2%E8%A1%8C%E5%8A%A0%E5%AF%86"><span class="nav-number">1.2.1.</span> <span class="nav-text">在傳輸中進行加密</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E7%B5%82%E7%AB%AF%E9%80%B2%E8%A1%8C%E5%8A%A0%E5%AF%86"><span class="nav-number">1.2.2.</span> <span class="nav-text">在終端進行加密</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6-Version-Control"><span class="nav-number">2.</span> <span class="nav-text">版本控制(Version Control)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%94%9F%E5%91%BD%E9%80%B1%E6%9C%9F%E7%AE%A1%E7%90%86-Lifecycle-Management"><span class="nav-number">3.</span> <span class="nav-text">生命週期管理(Lifecycle Management)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Cross-Region-Replication"><span class="nav-number">4.</span> <span class="nav-text">Cross Region Replication</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Version-Control"><span class="nav-number">5.1.</span> <span class="nav-text">Version Control</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lifecycle-Management"><span class="nav-number">5.2.</span> <span class="nav-text">Lifecycle Management</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cross-Region-Replication-1"><span class="nav-number">5.3.</span> <span class="nav-text">Cross Region Replication</span></a></li></ol></li></ol></div>
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%89%E5%85%A8%E8%88%87%E5%8A%A0%E5%AF%86"><span class="nav-number">1.</span> <span class="nav-text">安全與加密</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Security"><span class="nav-number">1.1.</span> <span class="nav-text">Security</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#IAM-Policy"><span class="nav-number">1.1.1.</span> <span class="nav-text">IAM Policy</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#S3-Bucket-Policy"><span class="nav-number">1.1.2.</span> <span class="nav-text">S3 Bucket Policy</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#S3-ACL"><span class="nav-number">1.1.3.</span> <span class="nav-text">S3 ACL</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Encryption"><span class="nav-number">1.2.</span> <span class="nav-text">Encryption</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E5%82%B3%E8%BC%B8%E4%B8%AD%E9%80%B2%E8%A1%8C%E5%8A%A0%E5%AF%86"><span class="nav-number">1.2.1.</span> <span class="nav-text">在傳輸中進行加密</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E7%B5%82%E7%AB%AF%E9%80%B2%E8%A1%8C%E5%8A%A0%E5%AF%86"><span class="nav-number">1.2.2.</span> <span class="nav-text">在終端進行加密</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6-Version-Control"><span class="nav-number">2.</span> <span class="nav-text">版本控制(Version Control)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%94%9F%E5%91%BD%E9%80%B1%E6%9C%9F%E7%AE%A1%E7%90%86-Lifecycle-Management"><span class="nav-number">3.</span> <span class="nav-text">生命週期管理(Lifecycle Management)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Event-Notification"><span class="nav-number">4.</span> <span class="nav-text">Event Notification</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Cross-Region-Replication"><span class="nav-number">5.</span> <span class="nav-text">Cross Region Replication</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text">References</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Version-Control"><span class="nav-number">6.1.</span> <span class="nav-text">Version Control</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lifecycle-Management"><span class="nav-number">6.2.</span> <span class="nav-text">Lifecycle Management</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cross-Region-Replication-1"><span class="nav-number">6.3.</span> <span class="nav-text">Cross Region Replication</span></a></li></ol></li></ol></div>
       </section>
       <!--/noindex-->
 
@@ -255,7 +257,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-10-09 09:36:12" itemprop="dateModified" datetime="2020-10-09T09:36:12+08:00">2020-10-09</time>
+                <time title="Modified: 2020-10-09 13:50:49" itemprop="dateModified" datetime="2020-10-09T13:50:49+08:00">2020-10-09</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -341,9 +343,11 @@
 <h3 id="S3-ACL"><a href="#S3-ACL" class="headerlink" title="S3 ACL"></a>S3 ACL</h3><ul>
 <li><p>S3 ACL 是屬於傳統的安全管控機制，AWS 官方是建議盡量使用 IAM or S3 Bucket Policy</p>
 </li>
-<li><p>可管控哪些 AWS 帳號可以存取指定的 S3 resource</p>
-</li>
 <li><p>S3 ACL 的規則可以細到 object level，但同樣也可以設定為 bucket level</p>
+</li>
+<li><p>可管控哪些 AWS 帳號可以存取指定的 S3 resource，或是直接對 public 開放</p>
+</li>
+<li><p>object ACL 可以讓使用者產生提供所有人存取 object 用的 public URL link</p>
 </li>
 </ul>
 <h2 id="Encryption"><a href="#Encryption" class="headerlink" title="Encryption"></a>Encryption</h2><p>AWS S3 可以為每個 object(最細可以到 object 為單位) 進行資料的加密，這對於非常注重資料安全性的使用者是個很有用的功能；一旦加密功能開啟後，資料被加密，即使有人進入了 AWS 資料中心將帶有資料的硬碟取走，也沒辦法取得正確的檔案內容。</p>
@@ -371,9 +375,9 @@
 </li>
 <li><p>可以作為一個強大的備份手段使用</p>
 </li>
-<li><p>一旦版本控制啟用，就無法關閉，僅能暫停而已</p>
+<li><p>一旦版本控制啟用，就無法關閉，僅能暫停而已(已經因為 versioning 功能產生出來的舊版本資料都會依然保留著)</p>
 </li>
-<li><p>可以與其他資料儲存服務(例如：Glacier)搭配，並設定相關生命週期規則來進行進階的管理</p>
+<li><p>可以與其他資料儲存服務(例如：Glacier)搭配，並設定相關生命週期規則(Lifecycle policy)來進行進階的管理</p>
 </li>
 <li><p>可將刪除版本的動作綁定 MFA，強制使用者執行刪除動作前進行認證，進一步提高資料的安全性(<strong>只能由 root 帳號啟用此功能</strong>)</p>
 <blockquote>
@@ -385,16 +389,21 @@
 </ul>
 <h1 id="生命週期管理-Lifecycle-Management"><a href="#生命週期管理-Lifecycle-Management" class="headerlink" title="生命週期管理(Lifecycle Management)"></a>生命週期管理(Lifecycle Management)</h1><p>AWS S3 生命週期管理功能有以下幾個重點：</p>
 <ul>
-<li><p>可以根據預先定義好的規則，自動協助使用者將存放在 S3 的 object 在不同的 storage tier 中移動，讓檔案儲存的方式以更自動化且節省成本的方式進行，</p>
+<li><p>可以根據預先定義好的規則(時間週期)，自動協助使用者將存放在 S3 的 object 在不同的 storage tier 中移動，讓檔案儲存的方式以更自動化且節省成本的方式進行，</p>
 <blockquote>
 <p>類似地端儲存中，是將資料從 <code>hot</code>(frequently    accessed) -&gt; <code>warm</code>(less    frequently    accessed) -&gt; <code>cold</code>(long-term    backup    or    archive) 的概念)</p>
 </blockquote>
 </li>
 <li><p>可與版本控管(version control)的機制結合</p>
 </li>
-<li><p>結合了版本控管的機制後，就可以針對現有版本(current version)與先前所有版本(previous versions)進行更細粒度的管理</p>
+<li><p>結合了版本控管的機制後，就可以針對現有版本(current version)與先前所有版本(previous versions)進行更細粒度的管理，甚至對資料儲存成本有更進一步的優化</p>
+</li>
+<li><p>若要自動移除資料，也可以設定 <code>expiration</code> 相關的 policy 來達成</p>
+</li>
+<li><p>預設這個功能是關閉的</p>
 </li>
 </ul>
+<p><img src="/blog/images/aws/S3_Lifecycle-Policy-example.png" alt="S3 resource access authorization process"></p>
 <p>以下是幾種常見的生命週期規則設定：</p>
 <ul>
 <li><p>建立日期超過 30 天的檔案，自動移動到 <code>Standard - IA</code> tier 中</p>
@@ -408,6 +417,19 @@
 </li>
 </ul>
 <p>比較需要注意的地方是，上述的規則是以<code>檔案建立時間</code>為基準計算，但有可能檔案建立了很久，依然有大量的存取；因此或許應該考量的是<code>檔案存取時間</code>可能相對的較為合理點，但目前 AWS 並沒有提供這功能，因此這邊先列入後續追蹤。</p>
+<h1 id="Event-Notification"><a href="#Event-Notification" class="headerlink" title="Event Notification"></a>Event Notification</h1><p><img src="/blog/images/aws/S3_Event-Notification.png" alt="S3 Event Notification"></p>
+<ul>
+<li><p>Event Notification 是當 S3 bucket 有事件(event)發生時，主動往外送出通知</p>
+</li>
+<li><p>常見的事件有：(上圖可以看到目前支援的完整事件項目)</p>
+<ul>
+<li>object 相關操作 (PUT/POST/COPT/CompleteMultiPartUpload)</li>
+<li>RRSObject Lost</li>
+</ul>
+</li>
+<li><p>通知目前可以送到 <code>SNS</code>、<code>SQS</code>、<code>Lambda</code> 三個服務做後續進一步的處理</p>
+</li>
+</ul>
 <h1 id="Cross-Region-Replication"><a href="#Cross-Region-Replication" class="headerlink" title="Cross Region Replication"></a>Cross Region Replication</h1><ul>
 <li><p>要啟用 cross region replication 的功能，source &amp; destination bucket 都必須要啟用 versioning 才可以</p>
 </li>
