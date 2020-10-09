@@ -121,11 +121,11 @@ Direct Connect
 
 ## 服務說明
 
-Direct Connect 服務是讓使用者可以從地端資料中心建立一條私有的專線到 AWS 環境中存取資源用，此服務的架構圖 & 說明如下：
+Direct Connect 服務是讓使用者可以從地端資料中心建立一條私有的專線到 AWS 環境中存取資源用(這一段專線通常都是當地的 ISP 與 AWS 合作所佈建的)，此服務的架構圖 & 說明如下：
 
-![Direct Connect](/blog/images/aws/VPC_Direct-Connect.png)
+![AWS Direct Connect](/blog/images/aws/VPC_Direct-Connect.png)
 
-- AWS 在各地提供許多 **Direct Connect Location**，讓使用者可以就近選擇合適的點接入(透過 `cross-network connection`)
+- AWS 在各地提供許多 **Direct Connect Location**(通常會與當地的 ISP 合作，而這樣的合作夥伴稱為 `Direct Connect Authorized Provider`)，讓使用者可以就近選擇合適的點接入(透過 `cross-network connection`)
 
 - 在 Direct Connect Location 中有許多 AWS Cage，裡面有 Direct Connect Router；使用者也會放置自己的 Router，然後透過 cross line 進行實體對接
 
@@ -133,9 +133,20 @@ Direct Connect 服務是讓使用者可以從地端資料中心建立一條私�
 
 - Direct Connect Router 則會有 AWS 自己佈建的專線網路回到 AWS 中
 
+- 一個 Direct Connect Location 只能是一個 region，無法存取 cross region resource
+
+![AWS Direct Connect 2](/blog/images/aws/VPC_Direct-Connect-2.png)
+
+- AWS 在各地提供許多 **Direct Connect Location**(通常會與當地的 ISP 合作，而這樣的合作夥伴稱為 `Direct Connect Authorized Provider`)，讓使用者可以就近選擇合適的點接入(透過 `cross-network connection`)
+
 - 藉由此專線，可以使用專線，同時存取 AWS 公用資源(例如：S3)，也可以直接存取位於 VPC private subnet 中的服務
 
-- 一個 Direct Connect Location 只能是一個 region，無法存取 cross region resource
+- 若要存取 VPC 中資源，必須透過 `Private Virtual Interface` 來達成，存取時都是使用 private IP(就跟 VPN 是類似的模式)
+
+- 若要存取 VPC 之外在 public 的其他 AWS resource，則是可以透過 `Public Virtual Interface` 來達成
+
+> 透過這樣架構的好處在於，**只要是存取 AWS resource，透過 Direct Connect，可以得到穩定、快速、低延遲的連線品質**
+
 
 ## 總結
 
@@ -146,6 +157,17 @@ Direct Connect 服務是讓使用者可以從地端資料中心建立一條私�
 - 若是地端到 AWS 的流量很大，很適合使用 Direct Connect 來處理
 
 - Direct Connect 可提供一條安全的私有專線
+
+
+## HA & Failover 的考量
+
+使用 Direct Connnect 時，在考慮 HA & Failover 的前提下，可以有以下幾個方向：
+
+- 使用 2 個 Direct Connect connection 作為 active-active 或是 active-failover 的設計 (這是最佳方案，但成本最高)
+
+- 使用 VPN 作為 Direct Connnect 斷線時的備援(這個方案應當要選擇與 Direct Connect Authorized Provider 不同的 ISP)
+
+- 可以建立多個 private virtual interface，連到不同 region 的 VPC
 
 
 ## 建立 Direct Connect 的步驟

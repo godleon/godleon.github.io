@@ -180,12 +180,16 @@ Overview
 
 - 可以使用 private IP 將兩個 VPC 連接起來，使用上就像是在同一個 private network 中
 
+- 不同的 VPC 的 CIDR 範圍設定不能重疊
+
 - VPC 的連結不限定要同一個帳號下的 VPC，也可以跟其他帳號的 VPC 對接
 
 - VPC peering 是可以跨 region 的
 
 - peering 是種星狀的連結設定，無法進行 **Transitive Peering**
 > A 與 B 相連，B 與 C 相連 => 但 A 無法與 C 通訊 (需要額外進行 A & C 的相連設定)
+
+- 可以設定與整個 VPC 進行 peering，也可以只與 VPC 中特定的 subnet 進行 peering
 
 
 ## 應考重點整理
