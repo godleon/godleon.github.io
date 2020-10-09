@@ -318,7 +318,7 @@ NAT(Network Address Translation)
 
 NAT 在這裡的目的很簡單，就是為了讓 private subnet 具備連網的能力，但又不想將其暴露出來，希望維持在 private 環境中。
 
-因此在環境中可以加入 `NAT gateway`，於是架構變成如下所示：
+因此在環境中(**必須位於 public subnet 中**)可以加入 `NAT gateway`，於是架構變成如下所示：
 
 ![VPC NAT gateway](/blog/images/aws/VPC_NAT-gateway.png)
 
@@ -351,7 +351,7 @@ NAT 在這裡的目的很簡單，就是為了讓 private subnet 具備連網的
 
 - 會自動被派發 public IP
 
-- 若要使用 NAT gateway，還是要設定 route table 將要對外的流量導向 NAT gateway
+- **若要使用 NAT gateway，還是要設定 route table 將要對外的流量導向 NAT gateway (基本上 NAT Gateway 只會接收來自 private subnet 的流量)**
 
 - 不需要做 Source/Destination Check
 

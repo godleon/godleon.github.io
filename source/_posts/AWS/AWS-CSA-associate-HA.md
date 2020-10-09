@@ -35,6 +35,10 @@ AWS 提供三種 Load Balancer 類型，分別是：
 
 - 可以根據使用者資訊 & 條件設定 request routing policy，將流量導向特定的服務
 
+- 可以透過設定 `target group`，讓 traffic 根據不同的規則進到不同 target group 中的 instance
+
+- 支援很多進階功能，例如：ECS、HTTPS、HTTP2、WebSockets、Access Logs、Sticky Sessions、AWS WAF(Web Application Firewall) ... 等功能
+
 
 ## Network Load Balancer
 
@@ -54,6 +58,8 @@ AWS 提供三種 Load Balancer 類型，分別是：
 - 但其他更進階的設定則是沒有支援，必須改用 ALB or NLB
 
 - 源端服務若是有問題，會回應 504 Error(Gateway Timeout)
+
+- 只能將 traffic 平均分散在後方所有的 EC2 instance 上
 
 
 ## 其他
@@ -183,6 +189,8 @@ Auto Scaling 是在公有雲上必用的功能之一，可以根據系統負載�
 - Auto Scaling 提供了一些特性讓整體設定變得簡單(例如：Launch Template、Scaling Option ... 等等)
 
 - 透過 Auto Scaling 可以協助優化資源使用率、降低成本
+
+- **若要達成最小程度的 HA & Fault Tolerance，就必須使用 ELB + Auto Scaling Group(使用兩個 instance，設定為 cross AZ)**
 
 這功能看起來相當好用，誰不希望系統可以自動幫忙些什麼事情呢?
 

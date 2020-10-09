@@ -21,11 +21,51 @@ tags:
 
 - 預設所有的 Bucket 建立時，都是 **PRIVATE** 無法被公開存取的
 
-- 要調整 Bucket 存取的安全性有兩種方式，分別是：
-  - **Bucket Policies** (用來控制 Bucket 與其他 AWS 互相存取的權限)
-  - **Access Control Lists** (可用來調整個別 object 的權限)
-
 - 可以開啟將所有對 S3 Bucket 存取的行為全部 log 下來的功能，而這些存取的 log 可以存到另一個 S3 Bucket(可以是同一個帳號 or 不同帳號)  
+
+- 要管理 S3 bucket 的安全，可透過 `IAM Policy`、`S3 Bucket Policy`、`S3 ACL` 三種方式來達成
+
+- 只要上面三個管控機制中，有任何一個設定了 deny，就無法存取；若是什麼也沒設定，也同樣無法存取
+> 只有明確的有允許存取的定義，且沒有任何 deny 的設定，才可以正確的存取指定的 S3 resource
+![S3 resource access authorization process](/blog/images/aws/S3_Access-Authorization-Process.png)
+
+### IAM Policy
+
+- IAM policy 用來**指定哪些操作(PUT/DELETE/UPDATE...etc)可以被使用在哪些 AWS resource 上**
+
+- IAM policy 可以與 IAM user/group/role 綁定，而這些被綁定的對象，則稱為 `principal`
+
+> 簡單來說，**IAM policy 就是用來定義 principal 可以在你的 AWS 環境上做哪些事情**
+
+- 可以沿用管控其他 AWS resource 的經驗同樣的套用到 S3 bucket 的管理上
+
+- 從稽核(audit)的角度，希望可以回答**特定使用者可以在 AWS 環境中做什麼事情**這類的問題，適合使用 IAM policy
+
+### S3 Bucket Policy
+
+- 顧名思義，S3 Bucket Policy 就是用來設計只與 S3 bucket 綁定用的(為了更細膩的安全管控需求)，bucket 中的所有 object 都會套用相同的 policy 設定
+
+- 與 IAM 相同，**S3 Bucket Policy 就是用來定義 principal 可以對你的 S3 bucket 做哪些事情**
+
+- 這裡的 principal 指的是 user, account, service 或是其他 entity ([參考文件](https://docs.aws.amazon.com/AmazonS3/latest/dev/s3-bucket-user-policy-specifying-principal-intro.html))
+
+- S3 Bucket Policy 中同時包含了權限範圍 & principal 的資訊
+> IAM policy 中沒有 principal 的設定，因為在 IAM 中，principle 是以一種 entity 的形式與 IAM policy 綁定後來發揮效用 
+
+- principal 以外的特殊情況限定，則是透過 `Condition` 欄位進行設定(例如：限制來源 IP、限制 HTTP referer)
+
+- 適合想要簡單管控 cross account 存取的場景
+
+- 從稽核(audit)的角度，希望可以回答**誰可以存取特定的 S3 bucket**這類的問題，適合使用 S3 Bucket Policy
+
+### S3 ACL
+
+- S3 ACL 是屬於傳統的安全管控機制，AWS 官方是建議盡量使用 IAM or S3 Bucket Policy
+
+- 可管控哪些 AWS 帳號可以存取指定的 S3 resource
+
+- S3 ACL 的規則可以細到 object level，但同樣也可以設定為 bucket level
+
 
 ## Encryption
 
@@ -46,7 +86,9 @@ AWS S3 可以為每個 object(最細可以到 object 為單位) 進行資料的�
   - 透過 AWS Key Management Service 來管理金鑰 (`SSE-KMS`)
   - Server Side Encryption with Customer Provided Keys (`SSE-C`)
 
-- **Client Side Encryption**：則是由使用者自行加密後，再將加密後的資料傳到 S3 上
+- **Client Side Encryption**：
+  - 由使用者自行加密後，再將加密後的資料傳到 S3 上
+  - 在檔案下載的場景下，使用者也還是必須自行解密
 
 
 
@@ -121,6 +163,7 @@ References
 
 - [AWS Certified Solutions Architect: Associate Certification Exam | Udemy](https://www.udemy.com/course/aws-certified-solutions-architect-associate/)
 
+- [IAM Policies and Bucket Policies and ACLs! Oh, My! (Controlling Access to S3 Resources) | AWS Security Blog](https://aws.amazon.com/blogs/security/iam-policies-and-bucket-policies-and-acls-oh-my-controlling-access-to-s3-resources/)
 
 ## Version Control
 

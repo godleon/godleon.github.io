@@ -35,6 +35,8 @@ What is S3?
 
 ## General
 
+- S3 bucket 雖然是屬於特定 region，但在 AWS console 會以 global 的方式顯示(表示 console 中會顯示所有 region 的 bucket)
+
 - S3 是 object storage，儲存在上面就是一般的檔案
 
 - 單一檔案大小的限制為 `0 bytes` ~ `5 TB`，整體的儲存空間無限制
@@ -94,6 +96,16 @@ S3 is object based. 每個 object 都包含以下資訊：
 - **Subresources**
   - Access Control Lists (用來做細部的存取控管)
   - Torrent (S3 支援 bittorrent protocol)
+
+
+## 不是真的 folder 的 S3 folder
+
+- S3 本身的設計是種 flat 結構，並不是以 hierarchy 的方式組織 & 存放資料
+
+- 為了讓使用者方便使用S3，S3 支援了 `folder` 的概念，但這其實只是一種 group 的概念
+
+- S3 是透過為 object 加上 key-name prefix 的方式達成的(此部份使用者不可見)
+
 
 
 在 S3 上的檔案一致性如何呈現?

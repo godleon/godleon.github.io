@@ -67,7 +67,7 @@ IAM 的核心概念包含以下四項：
 
 - **Roles**：這個概念就是用來與實際的權限綁定所設計出來的，例如：`UpdateApp`，並指定 RDS & S3 的讀寫權限
 
-- **Policies**：實際將權限綁定到 User/Group/Role 的關鍵就是 Policy 了，這是一個使用 JSON 格式所定義的文件，裡面會清楚描述可使用哪些 AWS resource & 可使用的權限，以下是一個例子：
+- **Policies**：實際將權限綁定到 User/Group/Role(統稱為 `principal`) 的關鍵就是 Policy 了(**指定哪些操作(PUT/DELETE/UPDATE...etc)可以被使用在哪些 AWS resource 上**)，這是一個使用 JSON 格式所定義的文件，裡面會清楚描述可使用哪些 AWS resource & 可使用的權限，以下是一個例子：
 
 ```json
 {
