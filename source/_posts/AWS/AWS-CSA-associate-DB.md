@@ -85,10 +85,40 @@ RDBMS 的基本概念(例如：Database、Table、Row、Field )這邊就略過�
 - **若是需要更高的 storage 性能，RDS 還提供了 provisioned IOPS storage 選項可用；最大可以達到 10,000 IOPS & 16TB 空間**
 
 
-RDS 服務提供的備份/Multi-AZ/Read Replicas 功能
-===========================================
+RDS
+===
 
-## 備份
+## 核心概念
+
+- RDS 是個全託管的資料庫服務
+
+- 使用者無法存取底層的 OS，完全由 AWS 負責管理
+  
+- 使用者可以用連到原本資料庫(例如：MySQL)的方式連到 RDS
+  
+- 可以隨時根據需求調整 RDS instance 的大小
+  
+- 可以佈署為 Multi-AZ，藉此達成備份 & HA 的目的
+
+- 搭配 read replica，可以有效降低 primary DB 的讀取負載
+
+
+## 優點
+
+- minor 版本的自動更新
+
+- 透過 point-in-time snapshot 的方式，進行自動備份 (因此可以還原到指定的時間點)
+
+- 使用者完全不用擔心底層的 OS
+
+- Multi-AZ 的佈署只需要非常簡單的步驟就可以完成
+
+- Automatic AZ-failover 可以在 RDS instance 出問題時，自動恢復
+
+
+## RDS 服務提供的備份/Multi-AZ/Read Replicas 功能
+
+### 備份
 
 RDS 提供兩種備份類型：
 
@@ -96,7 +126,7 @@ RDS 提供兩種備份類型：
 
 - DB snapshot
 
-### Automatic Backup
+#### Automatic Backup
 
 - Automatic Backup 每天會執行一個完整的 full snapshot，資料保存週期可以設定 1~35 天，這個週期稱為 `retention period`
 
@@ -110,22 +140,24 @@ RDS 提供兩種備份類型：
 
 - 備份工作進行時，會需要耗費一定量的 storage I/O，因此資料當下在存取時會稍微有延遲
 
-- 當 RDS instance 被移除後，相對應的備份資料也會一併被移除
+- 當 RDS instance 被移除後，相對應的備份資料也會一併被移除(但刪除前可以先做 snapshot 來保留資料)
 
-### DB snapshot
+- 若使用的是 MySQL，建議 DB engine 選用 InnoDB 來確保備份的可靠性
+
+#### DB snapshot
 
 - 需要使用者手動執行
 
 - 即使 RDS instance 被移除，snapshot 依然會繼續存在
 
-### 還原
+#### 還原
 
 不論是透過 Automatic Backup 或是 snapshot 還原，原本的 RDS instance 都會消失，會產生一個全新的 RDS instance & DNS endpoint
 
 ![RDS restore from backup](/blog/images/aws/RDS_restore.png)
 
 
-## 加密
+### 加密
 
 - 加密功能目前支援 MySQL, Oracle, SQL Server, PostgreSQL, MariaDB, Aurora
 
@@ -136,7 +168,7 @@ RDS 提供兩種備份類型：
 - 連同 automatic backup, read replicas, snapshot ... 這幾個部份都是以加密的方式存在
 
 
-## Multi-AZ
+### Multi-AZ
 
 - 架構中會有兩台 RDS instance 分別位於不同的 AZ 中，預設是第一個 AZ 中的 instance 被存取
 
@@ -155,9 +187,12 @@ RDS 提供兩種備份類型：
 
 - 目前支援 Multi-AZ 的資料庫類型有 SQL server、Oracle、MySQL、PostgreSQL、MariaDB
 
-## Read Replicas
+- 建議在 production 環境，`Multi-AZ Failover` 的功能一定要開啟
 
-- Read Replicas 可以讓生產環境中的 DB，產生出 read-only 的複本用的功能
+
+### Read Replicas
+
+- Read Replicas 可以讓生產環境中的 DB，產生出 read-only 的複本用的功能(但只能接收 read connection)
 
 - 在有設定 read replicas 的 RDS 架構中，所有的 write 會集中在某一台 DB 上，資料則會以**非同步**的方式複製到其他 replica DB 中
 
@@ -190,6 +225,7 @@ RDS 提供兩種備份類型：
 - read replica 本身可以將自己提昇為 primary DB，但這樣一來同步複本的功能就會消失
 
 - **data replication 過程中產生的資料傳輸是免費的**
+
 
 
 Aurora
@@ -271,6 +307,7 @@ RDS 提供三種複本(replica)類型：
 - 所使用的 VPC 網路
 
 
+
 DynamoDB
 ========
 
@@ -302,6 +339,7 @@ DynamoDB
 - 若資料寫入 DynamoDB 不需要在一秒內存取到最新的資料，那可以選擇 `Eventually Consistent Read`
 
 - 若資料寫入 DynamoDB 後需要在一秒內可以存取到最新的資料，則選擇 `Strongly Consistent Read`
+
 
 
 Redshift
@@ -344,6 +382,7 @@ Redshift 是 AWS 提供的資料倉儲服務，可以用來儲存大量的傳統
 - Redshift 會將存入的資料保存三份(原本的、在另外一台 compute node 的複本、在 S3 的備份)
 
 - Redshift 可以非同步的將 snapshot 傳到 S3 中進行儲存
+
 
 
 Elasticache
@@ -391,6 +430,7 @@ Elasticache 提供兩種 Engine Type，分別是 `Redis` & `Memcached`，以下�
 - Redis 支援 Multi-AZ
 
 - Redis 可使用 Backup & Restore 功能
+
 
 
 References
