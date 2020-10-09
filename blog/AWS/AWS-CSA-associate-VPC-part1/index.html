@@ -40,7 +40,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/VPC_NetworkACL-outbound-1.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/VPC_NetworkACL-outbound-1.png">
 <meta property="article:published_time" content="2020-05-20T21:45:00.000Z">
-<meta property="article:modified_time" content="2020-10-06T22:18:54.717Z">
+<meta property="article:modified_time" content="2020-10-09T01:36:12.191Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -264,7 +264,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-10-07 06:18:54" itemprop="dateModified" datetime="2020-10-07T06:18:54+08:00">2020-10-07</time>
+                <time title="Modified: 2020-10-09 09:36:12" itemprop="dateModified" datetime="2020-10-09T09:36:12+08:00">2020-10-09</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -581,7 +581,7 @@
 </li>
 </ul>
 <h1 id="NAT-Network-Address-Translation"><a href="#NAT-Network-Address-Translation" class="headerlink" title="NAT(Network Address Translation)"></a>NAT(Network Address Translation)</h1><p>NAT 在這裡的目的很簡單，就是為了讓 private subnet 具備連網的能力，但又不想將其暴露出來，希望維持在 private 環境中。</p>
-<p>因此在環境中可以加入 <code>NAT gateway</code>，於是架構變成如下所示：</p>
+<p>因此在環境中(<strong>必須位於 public subnet 中</strong>)可以加入 <code>NAT gateway</code>，於是架構變成如下所示：</p>
 <p><img src="/blog/images/aws/VPC_NAT-gateway.png" alt="VPC NAT gateway"></p>
 <p>但其實你也可以自己建立一個 NAT 服務來提供連網能力，這樣的作法叫做 <code>NAT instance</code>，以下是兩個不同方式的簡單介紹。</p>
 <h2 id="NAT-instance"><a href="#NAT-instance" class="headerlink" title="NAT instance"></a>NAT instance</h2><p>這是一個完全自己動手建立 NAT 的概念，在使用上有一些事項需要注意：</p>
@@ -611,7 +611,7 @@
 </li>
 <li><p>會自動被派發 public IP</p>
 </li>
-<li><p>若要使用 NAT gateway，還是要設定 route table 將要對外的流量導向 NAT gateway</p>
+<li><p><strong>若要使用 NAT gateway，還是要設定 route table 將要對外的流量導向 NAT gateway (基本上 NAT Gateway 只會接收來自 private subnet 的流量)</strong></p>
 </li>
 <li><p>不需要做 Source/Destination Check</p>
 </li>

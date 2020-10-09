@@ -35,7 +35,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/IAM_CreateGroup_AWS-managed-policy.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/IAM_CreateGroup_permission-json.png">
 <meta property="article:published_time" content="2020-04-23T21:35:00.000Z">
-<meta property="article:modified_time" content="2020-10-06T22:18:54.717Z">
+<meta property="article:modified_time" content="2020-10-09T01:36:12.191Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -259,7 +259,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-10-07 06:18:54" itemprop="dateModified" datetime="2020-10-07T06:18:54+08:00">2020-10-07</time>
+                <time title="Modified: 2020-10-09 09:36:12" itemprop="dateModified" datetime="2020-10-09T09:36:12+08:00">2020-10-09</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -343,7 +343,7 @@
 </li>
 <li><p><strong>Roles</strong>：這個概念就是用來與實際的權限綁定所設計出來的，例如：<code>UpdateApp</code>，並指定 RDS &amp; S3 的讀寫權限</p>
 </li>
-<li><p><strong>Policies</strong>：實際將權限綁定到 User/Group/Role 的關鍵就是 Policy 了，這是一個使用 JSON 格式所定義的文件，裡面會清楚描述可使用哪些 AWS resource &amp; 可使用的權限，以下是一個例子：</p>
+<li><p><strong>Policies</strong>：實際將權限綁定到 User/Group/Role(統稱為 <code>principal</code>) 的關鍵就是 Policy 了(<strong>指定哪些操作(PUT/DELETE/UPDATE…etc)可以被使用在哪些 AWS resource 上</strong>)，這是一個使用 JSON 格式所定義的文件，裡面會清楚描述可使用哪些 AWS resource &amp; 可使用的權限，以下是一個例子：</p>
 </li>
 </ul>
 <figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;Version&quot;</span>: <span class="string">&quot;2012-10-17&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;Statement&quot;</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">&quot;Effect&quot;</span>: <span class="string">&quot;Allow&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;Action&quot;</span>: <span class="string">&quot;s3:*&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;Resource&quot;</span>: <span class="string">&quot;*&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>

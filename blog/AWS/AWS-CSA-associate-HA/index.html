@@ -35,7 +35,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/ELB_Cross-Zone-Load-Balancing-common-scenario.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/ELB_Path-Patterns.png">
 <meta property="article:published_time" content="2020-06-09T22:35:00.000Z">
-<meta property="article:modified_time" content="2020-10-06T22:18:54.717Z">
+<meta property="article:modified_time" content="2020-10-09T01:36:12.191Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -261,7 +261,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-10-07 06:18:54" itemprop="dateModified" datetime="2020-10-07T06:18:54+08:00">2020-10-07</time>
+                <time title="Modified: 2020-10-09 09:36:12" itemprop="dateModified" datetime="2020-10-09T09:36:12+08:00">2020-10-09</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -313,6 +313,10 @@
 </li>
 <li><p>可以根據使用者資訊 &amp; 條件設定 request routing policy，將流量導向特定的服務</p>
 </li>
+<li><p>可以透過設定 <code>target group</code>，讓 traffic 根據不同的規則進到不同 target group 中的 instance</p>
+</li>
+<li><p>支援很多進階功能，例如：ECS、HTTPS、HTTP2、WebSockets、Access Logs、Sticky Sessions、AWS WAF(Web Application Firewall) … 等功能</p>
+</li>
 </ul>
 <h2 id="Network-Load-Balancer"><a href="#Network-Load-Balancer" class="headerlink" title="Network Load Balancer"></a>Network Load Balancer</h2><ul>
 <li><p>分流 TCP traffic(Layer 4) 的最佳選擇</p>
@@ -330,6 +334,8 @@
 <li><p>但其他更進階的設定則是沒有支援，必須改用 ALB or NLB</p>
 </li>
 <li><p>源端服務若是有問題，會回應 504 Error(Gateway Timeout)</p>
+</li>
+<li><p>只能將 traffic 平均分散在後方所有的 EC2 instance 上</p>
 </li>
 </ul>
 <h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><ul>
@@ -440,6 +446,8 @@
 <li><p>Auto Scaling 提供了一些特性讓整體設定變得簡單(例如：Launch Template、Scaling Option … 等等)</p>
 </li>
 <li><p>透過 Auto Scaling 可以協助優化資源使用率、降低成本</p>
+</li>
+<li><p><strong>若要達成最小程度的 HA &amp; Fault Tolerance，就必須使用 ELB + Auto Scaling Group(使用兩個 instance，設定為 cross AZ)</strong></p>
 </li>
 </ul>
 <p>這功能看起來相當好用，誰不希望系統可以自動幫忙些什麼事情呢?</p>

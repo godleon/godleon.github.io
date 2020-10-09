@@ -29,13 +29,15 @@
 <meta property="og:site_name" content="小信豬的原始部落">
 <meta property="og:description" content="此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 S3 服務，共分為四個部份，此為第二個部份">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_Access-Authorization-Process.png">
 <meta property="article:published_time" content="2020-04-28T21:50:00.000Z">
-<meta property="article:modified_time" content="2020-10-06T22:18:54.717Z">
+<meta property="article:modified_time" content="2020-10-09T01:36:12.191Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
 <meta property="article:tag" content="S3">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/aws/S3_Access-Authorization-Process.png">
 
 
 <link rel="canonical" href="https://godleon.github.io/blog/AWS/AWS-CSA-associate-S3-part2/">
@@ -160,7 +162,7 @@
 
       <!--noindex-->
       <section class="post-toc-wrap sidebar-panel">
-          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%89%E5%85%A8%E8%88%87%E5%8A%A0%E5%AF%86"><span class="nav-number">1.</span> <span class="nav-text">安全與加密</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Security"><span class="nav-number">1.1.</span> <span class="nav-text">Security</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Encryption"><span class="nav-number">1.2.</span> <span class="nav-text">Encryption</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E5%82%B3%E8%BC%B8%E4%B8%AD%E9%80%B2%E8%A1%8C%E5%8A%A0%E5%AF%86"><span class="nav-number">1.2.1.</span> <span class="nav-text">在傳輸中進行加密</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E7%B5%82%E7%AB%AF%E9%80%B2%E8%A1%8C%E5%8A%A0%E5%AF%86"><span class="nav-number">1.2.2.</span> <span class="nav-text">在終端進行加密</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6-Version-Control"><span class="nav-number">2.</span> <span class="nav-text">版本控制(Version Control)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%94%9F%E5%91%BD%E9%80%B1%E6%9C%9F%E7%AE%A1%E7%90%86-Lifecycle-Management"><span class="nav-number">3.</span> <span class="nav-text">生命週期管理(Lifecycle Management)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Cross-Region-Replication"><span class="nav-number">4.</span> <span class="nav-text">Cross Region Replication</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Version-Control"><span class="nav-number">5.1.</span> <span class="nav-text">Version Control</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lifecycle-Management"><span class="nav-number">5.2.</span> <span class="nav-text">Lifecycle Management</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cross-Region-Replication-1"><span class="nav-number">5.3.</span> <span class="nav-text">Cross Region Replication</span></a></li></ol></li></ol></div>
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%89%E5%85%A8%E8%88%87%E5%8A%A0%E5%AF%86"><span class="nav-number">1.</span> <span class="nav-text">安全與加密</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Security"><span class="nav-number">1.1.</span> <span class="nav-text">Security</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#IAM-Policy"><span class="nav-number">1.1.1.</span> <span class="nav-text">IAM Policy</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#S3-Bucket-Policy"><span class="nav-number">1.1.2.</span> <span class="nav-text">S3 Bucket Policy</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#S3-ACL"><span class="nav-number">1.1.3.</span> <span class="nav-text">S3 ACL</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Encryption"><span class="nav-number">1.2.</span> <span class="nav-text">Encryption</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E5%82%B3%E8%BC%B8%E4%B8%AD%E9%80%B2%E8%A1%8C%E5%8A%A0%E5%AF%86"><span class="nav-number">1.2.1.</span> <span class="nav-text">在傳輸中進行加密</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E7%B5%82%E7%AB%AF%E9%80%B2%E8%A1%8C%E5%8A%A0%E5%AF%86"><span class="nav-number">1.2.2.</span> <span class="nav-text">在終端進行加密</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6-Version-Control"><span class="nav-number">2.</span> <span class="nav-text">版本控制(Version Control)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%94%9F%E5%91%BD%E9%80%B1%E6%9C%9F%E7%AE%A1%E7%90%86-Lifecycle-Management"><span class="nav-number">3.</span> <span class="nav-text">生命週期管理(Lifecycle Management)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Cross-Region-Replication"><span class="nav-number">4.</span> <span class="nav-text">Cross Region Replication</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Version-Control"><span class="nav-number">5.1.</span> <span class="nav-text">Version Control</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lifecycle-Management"><span class="nav-number">5.2.</span> <span class="nav-text">Lifecycle Management</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cross-Region-Replication-1"><span class="nav-number">5.3.</span> <span class="nav-text">Cross Region Replication</span></a></li></ol></li></ol></div>
       </section>
       <!--/noindex-->
 
@@ -253,7 +255,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-10-07 06:18:54" itemprop="dateModified" datetime="2020-10-07T06:18:54+08:00">2020-10-07</time>
+                <time title="Modified: 2020-10-09 09:36:12" itemprop="dateModified" datetime="2020-10-09T09:36:12+08:00">2020-10-09</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -292,13 +294,56 @@
         <h1 id="安全與加密"><a href="#安全與加密" class="headerlink" title="安全與加密"></a>安全與加密</h1><h2 id="Security"><a href="#Security" class="headerlink" title="Security"></a>Security</h2><ul>
 <li><p>預設所有的 Bucket 建立時，都是 <strong>PRIVATE</strong> 無法被公開存取的</p>
 </li>
-<li><p>要調整 Bucket 存取的安全性有兩種方式，分別是：</p>
-<ul>
-<li><strong>Bucket Policies</strong> (用來控制 Bucket 與其他 AWS 互相存取的權限)</li>
-<li><strong>Access Control Lists</strong> (可用來調整個別 object 的權限)</li>
-</ul>
-</li>
 <li><p>可以開啟將所有對 S3 Bucket 存取的行為全部 log 下來的功能，而這些存取的 log 可以存到另一個 S3 Bucket(可以是同一個帳號 or 不同帳號)  </p>
+</li>
+<li><p>要管理 S3 bucket 的安全，可透過 <code>IAM Policy</code>、<code>S3 Bucket Policy</code>、<code>S3 ACL</code> 三種方式來達成</p>
+</li>
+<li><p>只要上面三個管控機制中，有任何一個設定了 deny，就無法存取；若是什麼也沒設定，也同樣無法存取</p>
+<blockquote>
+<p>只有明確的有允許存取的定義，且沒有任何 deny 的設定，才可以正確的存取指定的 S3 resource<br><img src="/blog/images/aws/S3_Access-Authorization-Process.png" alt="S3 resource access authorization process"></p>
+</blockquote>
+</li>
+</ul>
+<h3 id="IAM-Policy"><a href="#IAM-Policy" class="headerlink" title="IAM Policy"></a>IAM Policy</h3><ul>
+<li><p>IAM policy 用來<strong>指定哪些操作(PUT/DELETE/UPDATE…etc)可以被使用在哪些 AWS resource 上</strong></p>
+</li>
+<li><p>IAM policy 可以與 IAM user/group/role 綁定，而這些被綁定的對象，則稱為 <code>principal</code></p>
+</li>
+</ul>
+<blockquote>
+<p>簡單來說，<strong>IAM policy 就是用來定義 principal 可以在你的 AWS 環境上做哪些事情</strong></p>
+</blockquote>
+<ul>
+<li><p>可以沿用管控其他 AWS resource 的經驗同樣的套用到 S3 bucket 的管理上</p>
+</li>
+<li><p>從稽核(audit)的角度，希望可以回答<strong>特定使用者可以在 AWS 環境中做什麼事情</strong>這類的問題，適合使用 IAM policy</p>
+</li>
+</ul>
+<h3 id="S3-Bucket-Policy"><a href="#S3-Bucket-Policy" class="headerlink" title="S3 Bucket Policy"></a>S3 Bucket Policy</h3><ul>
+<li><p>顧名思義，S3 Bucket Policy 就是用來設計只與 S3 bucket 綁定用的(為了更細膩的安全管控需求)，bucket 中的所有 object 都會套用相同的 policy 設定</p>
+</li>
+<li><p>與 IAM 相同，<strong>S3 Bucket Policy 就是用來定義 principal 可以對你的 S3 bucket 做哪些事情</strong></p>
+</li>
+<li><p>這裡的 principal 指的是 user, account, service 或是其他 entity (<a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AmazonS3/latest/dev/s3-bucket-user-policy-specifying-principal-intro.html">參考文件</a>)</p>
+</li>
+<li><p>S3 Bucket Policy 中同時包含了權限範圍 &amp; principal 的資訊</p>
+<blockquote>
+<p>IAM policy 中沒有 principal 的設定，因為在 IAM 中，principle 是以一種 entity 的形式與 IAM policy 綁定後來發揮效用 </p>
+</blockquote>
+</li>
+<li><p>principal 以外的特殊情況限定，則是透過 <code>Condition</code> 欄位進行設定(例如：限制來源 IP、限制 HTTP referer)</p>
+</li>
+<li><p>適合想要簡單管控 cross account 存取的場景</p>
+</li>
+<li><p>從稽核(audit)的角度，希望可以回答<strong>誰可以存取特定的 S3 bucket</strong>這類的問題，適合使用 S3 Bucket Policy</p>
+</li>
+</ul>
+<h3 id="S3-ACL"><a href="#S3-ACL" class="headerlink" title="S3 ACL"></a>S3 ACL</h3><ul>
+<li><p>S3 ACL 是屬於傳統的安全管控機制，AWS 官方是建議盡量使用 IAM or S3 Bucket Policy</p>
+</li>
+<li><p>可管控哪些 AWS 帳號可以存取指定的 S3 resource</p>
+</li>
+<li><p>S3 ACL 的規則可以細到 object level，但同樣也可以設定為 bucket level</p>
 </li>
 </ul>
 <h2 id="Encryption"><a href="#Encryption" class="headerlink" title="Encryption"></a>Encryption</h2><p>AWS S3 可以為每個 object(最細可以到 object 為單位) 進行資料的加密，這對於非常注重資料安全性的使用者是個很有用的功能；一旦加密功能開啟後，資料被加密，即使有人進入了 AWS 資料中心將帶有資料的硬碟取走，也沒辦法取得正確的檔案內容。</p>
@@ -313,7 +358,11 @@
 <li>Server Side Encryption with Customer Provided Keys (<code>SSE-C</code>)</li>
 </ul>
 </li>
-<li><p><strong>Client Side Encryption</strong>：則是由使用者自行加密後，再將加密後的資料傳到 S3 上</p>
+<li><p><strong>Client Side Encryption</strong>：</p>
+<ul>
+<li>由使用者自行加密後，再將加密後的資料傳到 S3 上</li>
+<li>在檔案下載的場景下，使用者也還是必須自行解密</li>
+</ul>
 </li>
 </ul>
 <h1 id="版本控制-Version-Control"><a href="#版本控制-Version-Control" class="headerlink" title="版本控制(Version Control)"></a>版本控制(Version Control)</h1><p>版本控制(version control)同樣也是 S3 增加資料安全性的一種方式，而 S3 版本控制有以下幾個特性需要了解：</p>
@@ -378,7 +427,10 @@
 </li>
 </ul>
 <h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
-<li><a target="_blank" rel="noopener" href="https://www.udemy.com/course/aws-certified-solutions-architect-associate/">AWS Certified Solutions Architect: Associate Certification Exam | Udemy</a></li>
+<li><p><a target="_blank" rel="noopener" href="https://www.udemy.com/course/aws-certified-solutions-architect-associate/">AWS Certified Solutions Architect: Associate Certification Exam | Udemy</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/blogs/security/iam-policies-and-bucket-policies-and-acls-oh-my-controlling-access-to-s3-resources/">IAM Policies and Bucket Policies and ACLs! Oh, My! (Controlling Access to S3 Resources) | AWS Security Blog</a></p>
+</li>
 </ul>
 <h2 id="Version-Control"><a href="#Version-Control" class="headerlink" title="Version Control"></a>Version Control</h2><ul>
 <li><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/zh_tw/AmazonS3/latest/dev/Versioning.html">使用版本控制 - Amazon Simple Storage Service</a></li>
