@@ -319,7 +319,7 @@ DynamoDB
 
 從上面的敘述可以看出 DynamoDB 服務的特性：
 
-- 儲存 key/value & document 類型的資料庫
+- 儲存 key/value & document 類型的資料庫 (schemaless)
 
 - 即使資料量很大，也不太會影響到存取的速度
 
@@ -330,9 +330,13 @@ DynamoDB
 
 ## DynamoDB 基礎知識
 
+- 是由 AWS 自行開發的全託管 NoSQL DB，類似於 MongoDB；使用者只要只要需要多少容量，其他就通通由 AWS 負責
+
 - 資料儲存在 SSD 中
 
-- 會將資料分佈在不同的 AZ 中
+- 會自動將存入 DynamoDB 的資料分散同一個 region 中的多個不同的 AZ 中，且會根據使用需求自動進行 scale
+
+- 可以輕易的與其他 AWS 資料處理服務進行整合，例如：Elastic MapReducee
 
 - 由於資料寫入後需要同步在 cluster 中的不同機器上，因此需要一點時間，才可以取得最新的資料
 
@@ -341,11 +345,20 @@ DynamoDB
 - 若資料寫入 DynamoDB 後需要在一秒內可以存取到最新的資料，則選擇 `Strongly Consistent Read`
 
 
+## 常見的適用場景
+
+- IOT：儲存 meta
+
+- Gaming：儲存 session, leaderboard
+
+- Mobile：儲存 user profile，個人化資訊
+
+
 
 Redshift
 ========
 
-Redshift 是 AWS 提供的資料倉儲服務，可以用來儲存大量的傳統資料，進行 OLAP 相關工作，作為 business intelligence 之用。
+Redshift 是 AWS 提供的資料倉儲服務，可以用來儲存大量的傳統資料，進行 OLAP or big-data analytics 相關工作，作為 business intelligence 之用。
 
 而服務本身包含以下幾點特色：
 
@@ -356,6 +369,8 @@ Redshift 是 AWS 提供的資料倉儲服務，可以用來儲存大量的傳統
 - 若是設定為 multi node，則包含 `Leader node` & `Compute node`
     - `Leader node`：管理 client 連線 & 接收 request
     - `Compute node`：儲存資料，執行查詢 & 相關計算，最多可以有 128 個 compute node
+
+- 可以很容易與其他工具整合，例如：Jaspersoft、Microstrategy、Pentaho、Tableau、Business Objects、Cognos ... 等等
 
 ## 進階功能 
 
@@ -427,9 +442,13 @@ Elasticache 提供兩種 Engine Type，分別是 `Redis` & `Memcached`，以下�
 
 - Elasicache 主要用來增加 DB & web application 的效能
 
+- 搭配 Elasticache，可以避免查詢行為一直打進 DB，直接透過 cache 回應，可以大幅降低 request response time，同時也可以降低 DB 的負載
+
 - Redis 支援 Multi-AZ
 
 - Redis 可使用 Backup & Restore 功能
+
+- 若使用 MySQL DB，甚至可以搭配 Memcached plugin，讓 application 在查詢 DB 時，享受到 cache(Elasticache) 的優勢
 
 
 
