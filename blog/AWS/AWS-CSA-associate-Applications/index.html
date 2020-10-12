@@ -34,6 +34,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/SQS_FIFO-Queue.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/ElasticTranscoder_Example.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/APIGateway_Example.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/APIGateway_Arch.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/KinesisVideoStreams_Example.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/KinesisDataStreams_Example.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/KinesisDataFirehose_Example.png">
@@ -42,7 +43,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/Cognito_Example3.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/Cognito_Example2.png">
 <meta property="article:published_time" content="2020-07-20T22:00:00.000Z">
-<meta property="article:modified_time" content="2020-10-10T23:06:22.541Z">
+<meta property="article:modified_time" content="2020-10-12T10:37:13.449Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -179,7 +180,7 @@
 
       <!--noindex-->
       <section class="post-toc-wrap sidebar-panel">
-          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#SQS-Simple-Queue-Service"><span class="nav-number">1.</span> <span class="nav-text">SQS(Simple Queue Service)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-Message-Queue"><span class="nav-number">1.1.</span> <span class="nav-text">什麼是 Message Queue ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-SQS"><span class="nav-number">1.2.</span> <span class="nav-text">什麼是 SQS ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SQS-%E7%9A%84%E7%89%B9%E6%80%A7"><span class="nav-number">1.3.</span> <span class="nav-text">SQS 的特性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Standard-Queue-default"><span class="nav-number">1.3.1.</span> <span class="nav-text">Standard Queue (default)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FIFO-Queue"><span class="nav-number">1.3.2.</span> <span class="nav-text">FIFO Queue</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%80%83%E8%A9%A6%E9%87%8D%E9%BB%9E"><span class="nav-number">1.4.</span> <span class="nav-text">考試重點</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SWF-Simple-Workflow-Service"><span class="nav-number">2.</span> <span class="nav-text">SWF(Simple Workflow Service)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#SWF-Actor-%E9%87%8D%E8%A6%81%E7%B5%84%E6%88%90%E5%85%83%E7%B4%A0"><span class="nav-number">2.1.</span> <span class="nav-text">SWF Actor (重要組成元素)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SWF-%E8%88%87-SQS-%E6%AF%94%E8%BC%83"><span class="nav-number">2.2.</span> <span class="nav-text">SWF 與 SQS 比較</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SNS-Simple-Notification-Service"><span class="nav-number">3.</span> <span class="nav-text">SNS(Simple Notification Service)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-SNS"><span class="nav-number">3.1.</span> <span class="nav-text">什麼是 SNS ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SNS-%E7%9A%84%E5%84%AA%E9%BB%9E"><span class="nav-number">3.2.</span> <span class="nav-text">SNS 的優點</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SNS-%E8%88%87-SQS-%E6%AF%94%E8%BC%83"><span class="nav-number">3.3.</span> <span class="nav-text">SNS 與 SQS 比較</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Elastic-Transcoder"><span class="nav-number">4.</span> <span class="nav-text">Elastic Transcoder</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#API-Gateway"><span class="nav-number">5.</span> <span class="nav-text">API Gateway</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-API-Gateway"><span class="nav-number">5.1.</span> <span class="nav-text">什麼是 API Gateway ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#API-Gateway-%E7%9A%84%E7%B4%B0%E9%83%A8%E5%8A%9F%E8%83%BD"><span class="nav-number">5.2.</span> <span class="nav-text">API Gateway 的細部功能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%A8%AD%E5%AE%9A-amp-%E4%BD%88%E7%BD%B2-API-Gateway"><span class="nav-number">5.3.</span> <span class="nav-text">如何設定 &amp; 佈署 API Gateway</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A8%AD%E5%AE%9A-API-Gateway"><span class="nav-number">5.3.1.</span> <span class="nav-text">設定 API Gateway</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%88%E7%BD%B2-API-Gateway"><span class="nav-number">5.3.2.</span> <span class="nav-text">佈署 API Gateway</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cache-%E5%BF%AB%E5%8F%96-%E5%8A%9F%E8%83%BD"><span class="nav-number">5.4.</span> <span class="nav-text">Cache(快取)功能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%80%83%E8%A9%A6%E9%87%8D%E9%BB%9E-1"><span class="nav-number">5.5.</span> <span class="nav-text">考試重點</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kinesis"><span class="nav-number">6.</span> <span class="nav-text">Kinesis</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-Kinesis"><span class="nav-number">6.1.</span> <span class="nav-text">什麼是 Kinesis?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kinesis-%E5%8F%AF%E4%BB%A5%E6%8F%90%E4%BE%9B%E5%93%AA%E4%BA%9B%E9%A1%9E%E5%9E%8B%E7%9A%84%E6%9C%8D%E5%8B%99"><span class="nav-number">6.2.</span> <span class="nav-text">Kinesis 可以提供哪些類型的服務?</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Kinesis-Video-Streams"><span class="nav-number">6.2.1.</span> <span class="nav-text">Kinesis Video Streams</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kinesis-Data-Streams"><span class="nav-number">6.2.2.</span> <span class="nav-text">Kinesis Data Streams</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kinesis-Data-Firehose"><span class="nav-number">6.2.3.</span> <span class="nav-text">Kinesis Data Firehose</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kinesis-Data-Analytics"><span class="nav-number">6.2.4.</span> <span class="nav-text">Kinesis Data Analytics</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%80%83%E8%A9%A6%E9%87%8D%E9%BB%9E-2"><span class="nav-number">6.3.</span> <span class="nav-text">考試重點</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Cognito"><span class="nav-number">7.</span> <span class="nav-text">Cognito</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-Cognito"><span class="nav-number">7.1.</span> <span class="nav-text">什麼是 Cognito?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%8D%E5%8B%99%E7%89%B9%E8%89%B2"><span class="nav-number">7.2.</span> <span class="nav-text">服務特色</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#User-Pool-amp-Identity-Pool"><span class="nav-number">7.3.</span> <span class="nav-text">User Pool &amp; Identity Pool</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#User-Pool"><span class="nav-number">7.3.1.</span> <span class="nav-text">User Pool</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Identity-Pool"><span class="nav-number">7.3.2.</span> <span class="nav-text">Identity Pool</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%90%AD%E9%85%8D%E4%BD%BF%E7%94%A8%E7%9A%84%E5%A0%B4%E6%99%AF"><span class="nav-number">7.3.3.</span> <span class="nav-text">搭配使用的場景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%80%83%E8%A9%A6%E9%87%8D%E9%BB%9E-3"><span class="nav-number">7.4.</span> <span class="nav-text">考試重點</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">8.</span> <span class="nav-text">References</span></a></li></ol></div>
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#SQS-Simple-Queue-Service"><span class="nav-number">1.</span> <span class="nav-text">SQS(Simple Queue Service)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-Message-Queue"><span class="nav-number">1.1.</span> <span class="nav-text">什麼是 Message Queue ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-SQS"><span class="nav-number">1.2.</span> <span class="nav-text">什麼是 SQS ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SQS-%E7%9A%84%E7%89%B9%E6%80%A7"><span class="nav-number">1.3.</span> <span class="nav-text">SQS 的特性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Queue-Type"><span class="nav-number">1.3.1.</span> <span class="nav-text">Queue Type</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Standard-Queue-default"><span class="nav-number">1.3.1.1.</span> <span class="nav-text">Standard Queue (default)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#FIFO-Queue"><span class="nav-number">1.3.1.2.</span> <span class="nav-text">FIFO Queue</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Polling-Type"><span class="nav-number">1.3.2.</span> <span class="nav-text">Polling Type</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Long-Polling-1-20-%E7%A7%92"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">Long Polling (1~20 秒)</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%80%83%E8%A9%A6%E9%87%8D%E9%BB%9E"><span class="nav-number">1.4.</span> <span class="nav-text">考試重點</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SWF-Simple-Workflow-Service"><span class="nav-number">2.</span> <span class="nav-text">SWF(Simple Workflow Service)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#SWF-Actor-%E9%87%8D%E8%A6%81%E7%B5%84%E6%88%90%E5%85%83%E7%B4%A0"><span class="nav-number">2.1.</span> <span class="nav-text">SWF Actor (重要組成元素)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SWF-%E8%88%87-SQS-%E6%AF%94%E8%BC%83"><span class="nav-number">2.2.</span> <span class="nav-text">SWF 與 SQS 比較</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SNS-Simple-Notification-Service"><span class="nav-number">3.</span> <span class="nav-text">SNS(Simple Notification Service)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-SNS"><span class="nav-number">3.1.</span> <span class="nav-text">什麼是 SNS ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SNS-%E7%9A%84%E5%84%AA%E9%BB%9E"><span class="nav-number">3.2.</span> <span class="nav-text">SNS 的優點</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SNS-%E8%88%87-SQS-%E6%AF%94%E8%BC%83"><span class="nav-number">3.3.</span> <span class="nav-text">SNS 與 SQS 比較</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Elastic-Transcoder"><span class="nav-number">4.</span> <span class="nav-text">Elastic Transcoder</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#API-Gateway"><span class="nav-number">5.</span> <span class="nav-text">API Gateway</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-API-Gateway"><span class="nav-number">5.1.</span> <span class="nav-text">什麼是 API Gateway ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#API-Gateway-%E7%9A%84%E7%B4%B0%E9%83%A8%E5%8A%9F%E8%83%BD"><span class="nav-number">5.2.</span> <span class="nav-text">API Gateway 的細部功能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%A8%AD%E5%AE%9A-amp-%E4%BD%88%E7%BD%B2-API-Gateway"><span class="nav-number">5.3.</span> <span class="nav-text">如何設定 &amp; 佈署 API Gateway</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A8%AD%E5%AE%9A-API-Gateway"><span class="nav-number">5.3.1.</span> <span class="nav-text">設定 API Gateway</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%88%E7%BD%B2-API-Gateway"><span class="nav-number">5.3.2.</span> <span class="nav-text">佈署 API Gateway</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cache-%E5%BF%AB%E5%8F%96-%E5%8A%9F%E8%83%BD"><span class="nav-number">5.4.</span> <span class="nav-text">Cache(快取)功能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%80%83%E8%A9%A6%E9%87%8D%E9%BB%9E-1"><span class="nav-number">5.5.</span> <span class="nav-text">考試重點</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kinesis"><span class="nav-number">6.</span> <span class="nav-text">Kinesis</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-Kinesis"><span class="nav-number">6.1.</span> <span class="nav-text">什麼是 Kinesis?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kinesis-%E5%8F%AF%E4%BB%A5%E6%8F%90%E4%BE%9B%E5%93%AA%E4%BA%9B%E9%A1%9E%E5%9E%8B%E7%9A%84%E6%9C%8D%E5%8B%99"><span class="nav-number">6.2.</span> <span class="nav-text">Kinesis 可以提供哪些類型的服務?</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Kinesis-Video-Streams"><span class="nav-number">6.2.1.</span> <span class="nav-text">Kinesis Video Streams</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kinesis-Data-Streams"><span class="nav-number">6.2.2.</span> <span class="nav-text">Kinesis Data Streams</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kinesis-Data-Firehose"><span class="nav-number">6.2.3.</span> <span class="nav-text">Kinesis Data Firehose</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kinesis-Data-Analytics"><span class="nav-number">6.2.4.</span> <span class="nav-text">Kinesis Data Analytics</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%80%83%E8%A9%A6%E9%87%8D%E9%BB%9E-2"><span class="nav-number">6.3.</span> <span class="nav-text">考試重點</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Cognito"><span class="nav-number">7.</span> <span class="nav-text">Cognito</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-Cognito"><span class="nav-number">7.1.</span> <span class="nav-text">什麼是 Cognito?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%8D%E5%8B%99%E7%89%B9%E8%89%B2"><span class="nav-number">7.2.</span> <span class="nav-text">服務特色</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#User-Pool-amp-Identity-Pool"><span class="nav-number">7.3.</span> <span class="nav-text">User Pool &amp; Identity Pool</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#User-Pool"><span class="nav-number">7.3.1.</span> <span class="nav-text">User Pool</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Identity-Pool"><span class="nav-number">7.3.2.</span> <span class="nav-text">Identity Pool</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%90%AD%E9%85%8D%E4%BD%BF%E7%94%A8%E7%9A%84%E5%A0%B4%E6%99%AF"><span class="nav-number">7.3.3.</span> <span class="nav-text">搭配使用的場景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%80%83%E8%A9%A6%E9%87%8D%E9%BB%9E-3"><span class="nav-number">7.4.</span> <span class="nav-text">考試重點</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">8.</span> <span class="nav-text">References</span></a></li></ol></div>
       </section>
       <!--/noindex-->
 
@@ -272,7 +273,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-10-11 07:06:22" itemprop="dateModified" datetime="2020-10-11T07:06:22+08:00">2020-10-11</time>
+                <time title="Modified: 2020-10-12 18:37:13" itemprop="dateModified" datetime="2020-10-12T18:37:13+08:00">2020-10-12</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -313,7 +314,7 @@
 <ol>
 <li><p>將不同服務之間的通訊進行封裝</p>
 </li>
-<li><p>將各個服務進行解耦(decouple)</p>
+<li><p>將各個服務進行解耦(decouple)，這常用於分散式架構中</p>
 </li>
 </ol>
 <p>將服務之間的通訊進行封裝，並帶入了 producer &amp; consumer 的概念，讓原本複雜的訊息傳遞，變成了相對容易的概念，大幅減少程式設計師在處理訊息通訊這件事情所花費的精力，可以把時間花在真正重要的事情上。</p>
@@ -329,14 +330,14 @@
 </li>
 <li><p>message queue 的用途是在微服務、分散式、Serverless 架構中，將多個功能進行解耦(decouple)與擴展(scale)</p>
 </li>
-<li><p>大幅降低了處理訊息傳遞工作的複雜度，讓開發者可以專住在業務相關的開發上</p>
+<li><p>大幅降低了處理訊息傳遞工作的複雜度，讓開發者可以專注在業務相關的開發上</p>
 </li>
 <li><p>可同時承受極大量的訊息，並確保訊息不會遺失</p>
 </li>
 </ul>
 <h2 id="SQS-的特性"><a href="#SQS-的特性" class="headerlink" title="SQS 的特性"></a>SQS 的特性</h2><p>要使用 SQS 之前，要先搞清楚它本身的特性，才不會犯下沒有必要發生的錯誤……</p>
-<p>AWS SQS 提供了兩種 Queue Type，分別是：</p>
-<h3 id="Standard-Queue-default"><a href="#Standard-Queue-default" class="headerlink" title="Standard Queue (default)"></a>Standard Queue (default)</h3><p><img src="/blog/images/aws/SQS_Standard-Queue.png" alt="SQS"></p>
+<h3 id="Queue-Type"><a href="#Queue-Type" class="headerlink" title="Queue Type"></a>Queue Type</h3><p>AWS SQS 提供了兩種 Queue Type，分別是：</p>
+<h4 id="Standard-Queue-default"><a href="#Standard-Queue-default" class="headerlink" title="Standard Queue (default)"></a>Standard Queue (default)</h4><p><img src="/blog/images/aws/SQS_Standard-Queue.png" alt="SQS"></p>
 <ul>
 <li><p>這是預設的 Queue Type</p>
 </li>
@@ -348,7 +349,7 @@
 </li>
 </ul>
 <p>因此可以看出 standard queue 偶而會發生失誤，如果 application level 可以 cover 這個問題，或是服務本身性質對這個問題無感，那 standard queue 絕對是最好的選擇。</p>
-<h3 id="FIFO-Queue"><a href="#FIFO-Queue" class="headerlink" title="FIFO Queue"></a>FIFO Queue</h3><p><img src="/blog/images/aws/SQS_FIFO-Queue.png" alt="SQS"></p>
+<h4 id="FIFO-Queue"><a href="#FIFO-Queue" class="headerlink" title="FIFO Queue"></a>FIFO Queue</h4><p><img src="/blog/images/aws/SQS_FIFO-Queue.png" alt="SQS"></p>
 <ul>
 <li><p>基本上就是改良 standard 版本的缺點，包含了以下的改良：</p>
 <ul>
@@ -361,6 +362,20 @@
 <li><p>TPS(Transaction Per Second) 最大只有 300</p>
 </li>
 <li><p>包含 standard queue 中所有的功能</p>
+</li>
+</ul>
+<h3 id="Polling-Type"><a href="#Polling-Type" class="headerlink" title="Polling Type"></a>Polling Type</h3><h4 id="Long-Polling-1-20-秒"><a href="#Long-Polling-1-20-秒" class="headerlink" title="Long Polling (1~20 秒)"></a>Long Polling (1~20 秒)</h4><ul>
+<li><p>等待中當 Queue 中有訊息時，SQS 才會回應並帶上訊息(或者是等待到 timeout)</p>
+</li>
+<li><p>當訊息到達 SQS queue 時，就會馬上被送出</p>
+</li>
+<li><p>使用 long polling 相對成本較低，因為 worker 對 SQS 送出的 request 相對少了</p>
+</li>
+</ul>
+<ul>
+<li><code>Short Polling</code>：worker 會持續向 SQS 送出 request，即使 SQS 中沒有任何訊息，也會回應 empty<blockquote>
+<p>成本較高，因為這樣的模式所產生的 request 會比較多</p>
+</blockquote>
 </li>
 </ul>
 <h2 id="考試重點"><a href="#考試重點" class="headerlink" title="考試重點"></a>考試重點</h2><ul>
@@ -437,13 +452,19 @@
 </li>
 <li><p><strong>訂閱機制</strong>：SNS 本身就是個 pub/sub 的設計，搭配 <code>topic</code>，可以讓使用者(or 服務)進行訂閱，當有訊息傳到 topic 後，SNS 就會主動將訊息傳送給訂閱者</p>
 </li>
-<li><p><strong>支援各式 endpoint</strong>：訊息不僅可以傳給一般的使用者，也可以傳給其他服務；此外，傳遞的方式也有多種，可以是 SMS, email，甚至是直接呼叫 Lambda function 或是將資料再丟進 SQS 中都可以</p>
+<li><p><strong>支援各式 endpoint</strong>：(endpoint 就是 subscription) 訊息不僅可以傳給一般的使用者，也可以傳給其他服務；此外，傳遞的方式也有多種，可以是 SMS, email，甚至是直接呼叫 Lambda function 或是將資料再丟進 SQS 中都可以</p>
 <blockquote>
 <p>藉由 SNS 支援的多種 endpoint type，開發者就可以很輕易的根據需求將訊息傳遞到不同的使用者、device，甚至是 service 了</p>
 </blockquote>
 </li>
 </ul>
 <h2 id="SNS-的優點"><a href="#SNS-的優點" class="headerlink" title="SNS 的優點"></a>SNS 的優點</h2><ul>
+<li><p>可以跟很多 AWS 服務整合，因此可以根據 AWS 服務所產生的 event 發送訊息到不同的 endpoint(subscription)</p>
+</li>
+<li><p>與 CloudWatch 整合，就可以設計出不同的告警規則(alert、capacity issue、downtime、 environment change)，在問題發生時送出通知</p>
+</li>
+<li><p>也可以發送 IOS/Android app 通知</p>
+</li>
 <li><p>push based，因此在費用上就會相對比 pull-based 省不少</p>
 </li>
 <li><p>提供簡單的 API，並容易與其他的應用進行整合</p>
@@ -552,19 +573,30 @@
 </li>
 <li><p>可透過設定 cache TTL，決定 cache 要存活的時間長短 (在設定的 TTL 時限內，API Gateway 就會直接使用 cache 回應，不會將 API call 轉到內部服務去)</p>
 </li>
+<li><p>可將 cache 設定在 API level 或是 stage level</p>
+</li>
 </ul>
-<h2 id="考試重點-1"><a href="#考試重點-1" class="headerlink" title="考試重點"></a>考試重點</h2><ul>
+<h2 id="考試重點-1"><a href="#考試重點-1" class="headerlink" title="考試重點"></a>考試重點</h2><p><img src="/blog/images/aws/APIGateway_Arch.png" alt="API Gateway architecture"></p>
+<ul>
 <li><p>API Gateway 運作的類似像 load balancer，但是個全託管服務</p>
 </li>
 <li><p>對外提供 HTTPS endpoint，對內可指向多種內部服務</p>
 </li>
-<li><p>提供 cache 機制來提昇服務效能</p>
+<li><p>所有要經過 API Gateway 的 request 都必須要先經過 CloudFront</p>
+<blockquote>
+<p>CloudFront 又自帶 DDoS 防禦的效果；還可協助優化 API 存取路徑，降低延遲</p>
+</blockquote>
+</li>
+<li><p>提供 cache 機制來提昇後端服務效能</p>
 </li>
 <li><p>低成本高效能，可自動擴展</p>
 </li>
 <li><p>可透過限流的方式來阻止攻擊行為</p>
 </li>
 <li><p>可搭配 CloudWatch 服務，存放 log 相關資訊</p>
+<blockquote>
+<p>同時可用來收集 &amp; 監控 Caching/Latency/Error … 等 metrics，並根據需求發出 alarm</p>
+</blockquote>
 </li>
 <li><p>若使用類似 AJAX 的功能存取位於不同 domain 的 API gateway，則需要開啟 CORS 的功能</p>
 <blockquote>
@@ -708,6 +740,8 @@
 <li><p><a target="_blank" rel="noopener" href="https://columns.chicken-house.net/2019/01/01/microservice12-mqrpc/">高可靠度的微服務通訊 - Message Queue — 安德魯的部落格</a></p>
 </li>
 <li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/sqs/">Amazon Simple Queue Service (SQS) | Message Queuing for Messaging Applications | AWS</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/sqs/faqs/">Amazon SQS FAQs | Message Queuing Service | AWS</a></p>
 </li>
 <li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/swf/">Amazon Simple Workflow Service - Cloud Workflow Development - AWS</a></p>
 </li>
