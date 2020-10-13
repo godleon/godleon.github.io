@@ -31,7 +31,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/EBS_Storage-Type-Comparison.png">
 <meta property="article:published_time" content="2020-05-30T01:10:00.000Z">
-<meta property="article:modified_time" content="2020-10-12T10:37:13.449Z">
+<meta property="article:modified_time" content="2020-10-13T10:26:41.384Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -167,7 +167,7 @@
 
       <!--noindex-->
       <section class="post-toc-wrap sidebar-panel">
-          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#EBS-Elastic-Block-Store"><span class="nav-number">1.</span> <span class="nav-text">EBS(Elastic Block Store)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#EBS-%E6%98%AF%E4%BB%80%E9%BA%BC"><span class="nav-number">1.1.</span> <span class="nav-text">EBS 是什麼?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EBS-Volume-Type"><span class="nav-number">1.2.</span> <span class="nav-text">EBS Volume Type</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Volumes-amp-Snapshots"><span class="nav-number">1.3.</span> <span class="nav-text">Volumes &amp; Snapshots</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%9E-snapshot-%E7%94%A2%E7%94%9F%E7%9A%84-EBS-volume-%E7%9A%84%E6%95%88%E8%83%BD%E5%95%8F%E9%A1%8C"><span class="nav-number">1.3.1.</span> <span class="nav-text">從 snapshot 產生的 EBS volume 的效能問題</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%B0%87-EC2-instance-%E6%88%96-EBS-volume-%E7%A7%BB%E5%88%B0%E4%B8%8D%E5%90%8C%E7%9A%84-AZ-%E4%B8%AD"><span class="nav-number">1.4.</span> <span class="nav-text">如何將 EC2 instance 或 EBS volume 移到不同的 AZ 中?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A3%81%E7%A2%9F%E5%8A%A0%E5%AF%86-Encrypt-%E5%8A%9F%E8%83%BD"><span class="nav-number">1.5.</span> <span class="nav-text">磁碟加密(Encrypt)功能</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%87-EC2-Instance-%E6%9C%AA%E5%8A%A0%E5%AF%86%E7%9A%84-root-device-%E9%80%B2%E8%A1%8C%E5%8A%A0%E5%AF%86%E7%9A%84%E6%B5%81%E7%A8%8B"><span class="nav-number">1.5.1.</span> <span class="nav-text">將 EC2 Instance 未加密的 root device 進行加密的流程</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#AMI-Type"><span class="nav-number">2.</span> <span class="nav-text">AMI Type</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#AMI-%E9%A1%9E%E5%9E%8B"><span class="nav-number">2.1.</span> <span class="nav-text">AMI 類型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%80%83%E8%A9%A6%E9%87%8D%E9%BB%9E"><span class="nav-number">2.2.</span> <span class="nav-text">考試重點</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ENI-ENA-EFA-%E7%9A%84%E6%AF%94%E8%BC%83"><span class="nav-number">3.</span> <span class="nav-text">ENI, ENA, EFA 的比較</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ENI-Elastic-Network-Interface"><span class="nav-number">3.1.</span> <span class="nav-text">ENI (Elastic Network Interface)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ENA-Elastic-Network-Adapter"><span class="nav-number">3.2.</span> <span class="nav-text">ENA (Elastic Network Adapter)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EFA-Elastic-Fabric-Adapter"><span class="nav-number">3.3.</span> <span class="nav-text">EFA (Elastic Fabric Adapter)</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CloudWatch-amp-CloudTrail"><span class="nav-number">4.</span> <span class="nav-text">CloudWatch &amp; CloudTrail</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#CloudWatch"><span class="nav-number">4.1.</span> <span class="nav-text">CloudWatch</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CloudTrail"><span class="nav-number">4.2.</span> <span class="nav-text">CloudTrail</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%88%87-IAM-Role-%E7%9A%84%E6%90%AD%E9%85%8D%E4%BD%BF%E7%94%A8"><span class="nav-number">5.</span> <span class="nav-text">與 IAM Role 的搭配使用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%80%83%E8%A9%A6%E9%87%8D%E9%BB%9E-1"><span class="nav-number">5.1.</span> <span class="nav-text">考試重點</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text">References</span></a></li></ol></div>
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#EBS-Elastic-Block-Store"><span class="nav-number">1.</span> <span class="nav-text">EBS(Elastic Block Store)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#EBS-%E6%98%AF%E4%BB%80%E9%BA%BC"><span class="nav-number">1.1.</span> <span class="nav-text">EBS 是什麼?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EBS-Volume-Type"><span class="nav-number">1.2.</span> <span class="nav-text">EBS Volume Type</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Volumes-amp-Snapshots"><span class="nav-number">1.3.</span> <span class="nav-text">Volumes &amp; Snapshots</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%9E-snapshot-%E7%94%A2%E7%94%9F%E7%9A%84-EBS-volume-%E7%9A%84%E6%95%88%E8%83%BD%E5%95%8F%E9%A1%8C"><span class="nav-number">1.3.1.</span> <span class="nav-text">從 snapshot 產生的 EBS volume 的效能問題</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%B0%87-EC2-instance-%E6%88%96-EBS-volume-%E7%A7%BB%E5%88%B0%E4%B8%8D%E5%90%8C%E7%9A%84-AZ-%E4%B8%AD"><span class="nav-number">1.4.</span> <span class="nav-text">如何將 EC2 instance 或 EBS volume 移到不同的 AZ 中?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A3%81%E7%A2%9F%E5%8A%A0%E5%AF%86-Encrypt-%E5%8A%9F%E8%83%BD"><span class="nav-number">1.5.</span> <span class="nav-text">磁碟加密(Encrypt)功能</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%87-EC2-Instance-%E6%9C%AA%E5%8A%A0%E5%AF%86%E7%9A%84-root-device-%E9%80%B2%E8%A1%8C%E5%8A%A0%E5%AF%86%E7%9A%84%E6%B5%81%E7%A8%8B"><span class="nav-number">1.5.1.</span> <span class="nav-text">將 EC2 Instance 未加密的 root device 進行加密的流程</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#AMI-Type"><span class="nav-number">2.</span> <span class="nav-text">AMI Type</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#AMI-%E9%A1%9E%E5%9E%8B"><span class="nav-number">2.1.</span> <span class="nav-text">AMI 類型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%80%83%E8%A9%A6%E9%87%8D%E9%BB%9E"><span class="nav-number">2.2.</span> <span class="nav-text">考試重點</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ENI-ENA-EFA-%E7%9A%84%E6%AF%94%E8%BC%83"><span class="nav-number">3.</span> <span class="nav-text">ENI, ENA, EFA 的比較</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ENI-Elastic-Network-Interface"><span class="nav-number">3.1.</span> <span class="nav-text">ENI (Elastic Network Interface)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ENA-Elastic-Network-Adapter"><span class="nav-number">3.2.</span> <span class="nav-text">ENA (Elastic Network Adapter)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EFA-Elastic-Fabric-Adapter"><span class="nav-number">3.3.</span> <span class="nav-text">EFA (Elastic Fabric Adapter)</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CloudWatch-amp-CloudTrail"><span class="nav-number">4.</span> <span class="nav-text">CloudWatch &amp; CloudTrail</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#CloudWatch"><span class="nav-number">4.1.</span> <span class="nav-text">CloudWatch</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%9C%E6%96%BC-EC2-Monitoring"><span class="nav-number">4.1.1.</span> <span class="nav-text">關於 EC2 Monitoring</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#System-Status-Check-amp-Instance-Status-Check"><span class="nav-number">4.1.1.1.</span> <span class="nav-text">System Status Check &amp; Instance Status Check</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Host-OS-Level-metrics"><span class="nav-number">4.1.1.2.</span> <span class="nav-text">Host&#x2F;OS Level metrics</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CloudTrail"><span class="nav-number">4.2.</span> <span class="nav-text">CloudTrail</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%88%87-IAM-Role-%E7%9A%84%E6%90%AD%E9%85%8D%E4%BD%BF%E7%94%A8"><span class="nav-number">5.</span> <span class="nav-text">與 IAM Role 的搭配使用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%80%83%E8%A9%A6%E9%87%8D%E9%BB%9E-1"><span class="nav-number">5.1.</span> <span class="nav-text">考試重點</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text">References</span></a></li></ol></div>
       </section>
       <!--/noindex-->
 
@@ -260,7 +260,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-10-12 18:37:13" itemprop="dateModified" datetime="2020-10-12T18:37:13+08:00">2020-10-12</time>
+                <time title="Modified: 2020-10-13 18:26:41" itemprop="dateModified" datetime="2020-10-13T18:26:41+08:00">2020-10-13</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -470,21 +470,24 @@
 </blockquote>
 <h1 id="CloudWatch-amp-CloudTrail"><a href="#CloudWatch-amp-CloudTrail" class="headerlink" title="CloudWatch &amp; CloudTrail"></a>CloudWatch &amp; CloudTrail</h1><p>CloudWatch &amp; CloudTrail 都是很大的主題，這邊暫時以 CSA 的考試需求為主，因此了解一下兩個服務的功能特性 &amp; 比較即可。</p>
 <h2 id="CloudWatch"><a href="#CloudWatch" class="headerlink" title="CloudWatch"></a>CloudWatch</h2><ul>
-<li><p><strong>主要作為監控效能用</strong>，是 AWS 重要服務之一</p>
+<li><p><strong>主要作為監控用途</strong>(效能、使用量 … etc)，是 AWS 重要服務之一</p>
 </li>
 <li><p>同時與其他 AWS 服務都有高度整合(例如：EC2, ASG, ELB, Route53, EBS, CloudFront … 等等)，方便進行監控的設定</p>
 </li>
+<li></li>
 <li><p>除了 AWS 服務之外，也可以同時用來監控自行開發的應用程式</p>
 </li>
 <li><p>CloudWatch Alarm 可以用來觸發某些特定事件，例如：auto scaling</p>
 </li>
-<li><p>CloudWatch 預設每五分鐘會對 EC2 進行監控資訊的蒐集；但若是希望可以監控到更細節的資訊，可以設定成每一分鐘(在啟用 instance 時勾選 <code>Enable CloudWatch detailed monitoring</code>)</p>
+<li><p>CloudWatch 預設<strong>每五分鐘(Basic Level)**會對 EC2 進行監控資訊的蒐集；但若是希望可以監控到更細節的資訊，可以設定成</strong>每一分鐘(Detailed Level**，在啟用 instance 時勾選 <code>Enable CloudWatch detailed monitoring</code>)</p>
+</li>
+<li><p>EC2 中的 auto scaling 功能需要依賴在 CloudWatch 中設定 threashold 來決定在什麼樣的條件下，要自動調整 instance 的數量</p>
 </li>
 <li><p>CloudWatch 有幾個重要的組成部分：</p>
 <ul>
 <li><p><code>Dashboard</code>：以圖形展現的方式呈現監控數據，可以是 region level or global level</p>
 </li>
-<li><p><code>Alarm</code>：設定某個 thrshold 到達時，觸發告警(可與 SNS 服務進行整合)</p>
+<li><p><code>Alarm</code>：設定某個 thrshold 到達時，觸發告警(可與 SNS 服務進行整合，或是與 Auto Scaling 搭配進行計算資源的調整)</p>
 </li>
 <li><p><code>Event</code>：可指定當某個 AWS resource 變更時，執行預先指定的工作</p>
 </li>
@@ -493,8 +496,53 @@
 </ul>
 </li>
 </ul>
+<h3 id="關於-EC2-Monitoring"><a href="#關於-EC2-Monitoring" class="headerlink" title="關於 EC2 Monitoring"></a>關於 EC2 Monitoring</h3><p>在此部份有以下兩個重點需要了解：</p>
+<ul>
+<li><p>System Status Check &amp; Instance Status check</p>
+</li>
+<li><p>Host/OS Level metrics</p>
+</li>
+</ul>
+<h4 id="System-Status-Check-amp-Instance-Status-Check"><a href="#System-Status-Check-amp-Instance-Status-Check" class="headerlink" title="System Status Check &amp; Instance Status Check"></a>System Status Check &amp; Instance Status Check</h4><p><code>System Status Check</code> 是屬於 AWS 需要確保的範圍，並不屬於使用者管轄的範圍，有以下項目：</p>
+<ul>
+<li><p>網路連線異常</p>
+</li>
+<li><p>電力異常</p>
+</li>
+<li><p>實體機器上的軟體(or 硬體)所造成的問題</p>
+</li>
+</ul>
+<blockquote>
+<p>解決方法就是<strong>將 instance 停止後重啟</strong>，instance 就會被分派到其他的實體機器上，一般來說就會正常了</p>
+</blockquote>
+<p><code>Instance Status Check</code> 則是使用者需要確保的範圍，大概就是 instance 被弄壞了，可能會是以下原因造成的：</p>
+<ul>
+<li><p>系統檢測異常(這個由 AWS 負責檢查，由底層的 Hypervisor 感知)</p>
+</li>
+<li><p>網路或 startup 設定錯誤</p>
+</li>
+<li><p>記憶體耗盡</p>
+</li>
+<li><p>檔案系統損毀</p>
+</li>
+<li><p>kernel 問題</p>
+</li>
+</ul>
+<blockquote>
+<p>解決方法就是端看遇到的狀況是什麼，詢著一般 Linux or Windows 的系統障礙排除流程進行處理</p>
+</blockquote>
+<h4 id="Host-OS-Level-metrics"><a href="#Host-OS-Level-metrics" class="headerlink" title="Host/OS Level metrics"></a>Host/OS Level metrics</h4><ul>
+<li><p>預設 CloudWatch 可以看到 Host Level 的 metric，例如：CPUUtilization、Network in/out、CPUCreditBalance、CPUCreditUsage</p>
+</li>
+<li><p>但若要讓 CloudWatch 也可以取到 OS Level 的 metric(例如：記憶體使用狀況、Disk 使用狀況)，則需要安裝 AWS 提供的 perl script 才有辦法將 OS Level metric 送到 CloudWatch</p>
+</li>
+</ul>
 <h2 id="CloudTrail"><a href="#CloudTrail" class="headerlink" title="CloudTrail"></a>CloudTrail</h2><ul>
-<li><p>用來檢視使用者對於 AWS 各項資源的使用記錄 &amp; 狀況，<strong>主要用來提供稽核用</strong></p>
+<li><p>用來紀錄所有對 AWS 資源相關的 API call</p>
+</li>
+<li><p>資料會存放在 S3 中(自帶 HA)</p>
+</li>
+<li><p>可使用 CloudTrail 中的紀錄，檢視使用者對於 AWS 各項資源的使用記錄 &amp; 狀況，<strong>主要用來提供稽核用</strong></p>
 </li>
 <li><p>記錄內容包含 console 的操作 &amp; API call，以及來源 IP … 等資訊</p>
 </li>
