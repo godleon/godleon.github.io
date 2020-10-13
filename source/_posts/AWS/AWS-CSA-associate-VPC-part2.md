@@ -39,9 +39,13 @@ VPC Flow Logs
 
 - Flow Logs 可建立在三個不同層級上，分別是 `VPC` / `Subnet` / `Network Interface`
 
-- 若是選擇要將 log 存入 CloudWatch，必須先在 CloudWatch 設定好對應的 log group，並且在 IAM 中設定好對應的 role
+- 每個 network interface 都會有自己獨立的 log stream
+
+- 若是選擇要將 log 存入 CloudWatch，必須先在 CloudWatch 設定好對應的 **log group**，並且在 IAM 中設定好對應的 role
 
 - 可以選擇記錄 Accept/Reject/All 三種不同的條件
+
+- log capture window 大約是 10~15 分鐘，因此流量產生後，最多需要等待 10~15 分鐘後，才可以在 VPC 的 flow log 頁籤中看到相關資訊
 
 ## 考試重點
 
@@ -58,7 +62,7 @@ VPC Flow Logs
 
   - 啟用 Amazon Windows license 所產生的網路流量
 
-  - 與 IP `169.254.169.254` 往來的流量
+  - 與 IP `169.254.169.254`(instance metadata) 往來的流量
 
   - DHCP 相關流量
 

@@ -207,30 +207,78 @@ CloudWatch & CloudTrail 都是很大的主題，這邊暫時以 CSA 的考試需
 
 ## CloudWatch
 
-- **主要作為監控效能用**，是 AWS 重要服務之一
+- **主要作為監控用途**(效能、使用量 ... etc)，是 AWS 重要服務之一
 
 - 同時與其他 AWS 服務都有高度整合(例如：EC2, ASG, ELB, Route53, EBS, CloudFront ... 等等)，方便進行監控的設定
+
+- 
 
 - 除了 AWS 服務之外，也可以同時用來監控自行開發的應用程式
 
 - CloudWatch Alarm 可以用來觸發某些特定事件，例如：auto scaling
 
-- CloudWatch 預設每五分鐘會對 EC2 進行監控資訊的蒐集；但若是希望可以監控到更細節的資訊，可以設定成每一分鐘(在啟用 instance 時勾選 `Enable CloudWatch detailed monitoring`)
+- CloudWatch 預設**每五分鐘(Basic Level)**會對 EC2 進行監控資訊的蒐集；但若是希望可以監控到更細節的資訊，可以設定成**每一分鐘(Detailed Level**，在啟用 instance 時勾選 `Enable CloudWatch detailed monitoring`)
+
+- EC2 中的 auto scaling 功能需要依賴在 CloudWatch 中設定 threashold 來決定在什麼樣的條件下，要自動調整 instance 的數量
 
 - CloudWatch 有幾個重要的組成部分：
 
     - `Dashboard`：以圖形展現的方式呈現監控數據，可以是 region level or global level
 
-    - `Alarm`：設定某個 thrshold 到達時，觸發告警(可與 SNS 服務進行整合)
+    - `Alarm`：設定某個 thrshold 到達時，觸發告警(可與 SNS 服務進行整合，或是與 Auto Scaling 搭配進行計算資源的調整)
 
     - `Event`：可指定當某個 AWS resource 變更時，執行預先指定的工作
 
     - `Logs`：CloudWatch 也可以協助蒐集 & 監控、儲存文字型態的 log 資訊
 
+### 關於 EC2 Monitoring
+
+在此部份有以下兩個重點需要了解：
+
+- System Status Check & Instance Status check
+
+- Host/OS Level metrics
+
+#### System Status Check & Instance Status Check
+
+`System Status Check` 是屬於 AWS 需要確保的範圍，並不屬於使用者管轄的範圍，有以下項目：
+
+- 網路連線異常
+
+- 電力異常
+
+- 實體機器上的軟體(or 硬體)所造成的問題
+
+> 解決方法就是**將 instance 停止後重啟**，instance 就會被分派到其他的實體機器上，一般來說就會正常了
+
+`Instance Status Check` 則是使用者需要確保的範圍，大概就是 instance 被弄壞了，可能會是以下原因造成的：
+
+- 系統檢測異常(這個由 AWS 負責檢查，由底層的 Hypervisor 感知)
+
+- 網路或 startup 設定錯誤
+
+- 記憶體耗盡
+
+- 檔案系統損毀
+
+- kernel 問題
+
+> 解決方法就是端看遇到的狀況是什麼，詢著一般 Linux or Windows 的系統障礙排除流程進行處理
+
+#### Host/OS Level metrics
+
+- 預設 CloudWatch 可以看到 Host Level 的 metric，例如：CPUUtilization、Network in/out、CPUCreditBalance、CPUCreditUsage
+
+- 但若要讓 CloudWatch 也可以取到 OS Level 的 metric(例如：記憶體使用狀況、Disk 使用狀況)，則需要安裝 AWS 提供的 perl script 才有辦法將 OS Level metric 送到 CloudWatch
+
 
 ## CloudTrail
 
-- 用來檢視使用者對於 AWS 各項資源的使用記錄 & 狀況，**主要用來提供稽核用**
+- 用來紀錄所有對 AWS 資源相關的 API call
+
+- 資料會存放在 S3 中(自帶 HA)
+
+- 可使用 CloudTrail 中的紀錄，檢視使用者對於 AWS 各項資源的使用記錄 & 狀況，**主要用來提供稽核用**
 
 - 記錄內容包含 console 的操作 & API call，以及來源 IP ... 等資訊
 
