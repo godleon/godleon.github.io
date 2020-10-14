@@ -22,12 +22,12 @@
     var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
   </script>
 
-  <meta name="description" content="此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 Application 相關服務，包含 SQS、SNS、SWF、Elastic Transcoder、API Gateway、Kinesis、Cognito ... 等等內容">
+  <meta name="description" content="此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 Application 相關服務，包含 SQS、SNS、SWF、Elastic Transcoder、API Gateway、Cognito ... 等等內容">
 <meta property="og:type" content="article">
 <meta property="og:title" content="AWS CSA Associate 學習筆記 - Application">
 <meta property="og:url" content="https://godleon.github.io/blog/AWS/AWS-CSA-associate-Applications/index.html">
 <meta property="og:site_name" content="小信豬的原始部落">
-<meta property="og:description" content="此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 Application 相關服務，包含 SQS、SNS、SWF、Elastic Transcoder、API Gateway、Kinesis、Cognito ... 等等內容">
+<meta property="og:description" content="此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 Application 相關服務，包含 SQS、SNS、SWF、Elastic Transcoder、API Gateway、Cognito ... 等等內容">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/SQS_Message-Queue.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/SQS_Standard-Queue.png">
@@ -35,19 +35,14 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/ElasticTranscoder_Example.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/APIGateway_Example.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/APIGateway_Arch.png">
-<meta property="og:image" content="https://godleon.github.io/blog/images/aws/KinesisVideoStreams_Example.png">
-<meta property="og:image" content="https://godleon.github.io/blog/images/aws/KinesisDataStreams_Example.png">
-<meta property="og:image" content="https://godleon.github.io/blog/images/aws/KinesisDataFirehose_Example.png">
-<meta property="og:image" content="https://godleon.github.io/blog/images/aws/KinesisDataAnalytics_Example.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/Cognito_Example.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/Cognito_Example3.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/Cognito_Example2.png">
 <meta property="article:published_time" content="2020-07-20T22:00:00.000Z">
-<meta property="article:modified_time" content="2020-10-14T09:58:25.315Z">
+<meta property="article:modified_time" content="2020-10-14T10:02:31.308Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
-<meta property="article:tag" content="Kinesis">
 <meta property="article:tag" content="SQS">
 <meta property="article:tag" content="SNS">
 <meta property="article:tag" content="SWF">
@@ -180,7 +175,7 @@
 
       <!--noindex-->
       <section class="post-toc-wrap sidebar-panel">
-          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#SQS-Simple-Queue-Service"><span class="nav-number">1.</span> <span class="nav-text">SQS(Simple Queue Service)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-Message-Queue"><span class="nav-number">1.1.</span> <span class="nav-text">什麼是 Message Queue ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-SQS"><span class="nav-number">1.2.</span> <span class="nav-text">什麼是 SQS ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SQS-%E7%9A%84%E7%89%B9%E6%80%A7"><span class="nav-number">1.3.</span> <span class="nav-text">SQS 的特性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Queue-Type"><span class="nav-number">1.3.1.</span> <span class="nav-text">Queue Type</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Standard-Queue-default"><span class="nav-number">1.3.1.1.</span> <span class="nav-text">Standard Queue (default)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#FIFO-Queue"><span class="nav-number">1.3.1.2.</span> <span class="nav-text">FIFO Queue</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Polling-Type"><span class="nav-number">1.3.2.</span> <span class="nav-text">Polling Type</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Long-Polling-1-20-%E7%A7%92"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">Long Polling (1~20 秒)</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%80%83%E8%A9%A6%E9%87%8D%E9%BB%9E"><span class="nav-number">1.4.</span> <span class="nav-text">考試重點</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SWF-Simple-Workflow-Service"><span class="nav-number">2.</span> <span class="nav-text">SWF(Simple Workflow Service)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#SWF-Actor-%E9%87%8D%E8%A6%81%E7%B5%84%E6%88%90%E5%85%83%E7%B4%A0"><span class="nav-number">2.1.</span> <span class="nav-text">SWF Actor (重要組成元素)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SWF-%E8%88%87-SQS-%E6%AF%94%E8%BC%83"><span class="nav-number">2.2.</span> <span class="nav-text">SWF 與 SQS 比較</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SNS-Simple-Notification-Service"><span class="nav-number">3.</span> <span class="nav-text">SNS(Simple Notification Service)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-SNS"><span class="nav-number">3.1.</span> <span class="nav-text">什麼是 SNS ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SNS-%E7%9A%84%E5%84%AA%E9%BB%9E"><span class="nav-number">3.2.</span> <span class="nav-text">SNS 的優點</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SNS-%E8%88%87-SQS-%E6%AF%94%E8%BC%83"><span class="nav-number">3.3.</span> <span class="nav-text">SNS 與 SQS 比較</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Elastic-Transcoder"><span class="nav-number">4.</span> <span class="nav-text">Elastic Transcoder</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#API-Gateway"><span class="nav-number">5.</span> <span class="nav-text">API Gateway</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-API-Gateway"><span class="nav-number">5.1.</span> <span class="nav-text">什麼是 API Gateway ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#API-Gateway-%E7%9A%84%E7%B4%B0%E9%83%A8%E5%8A%9F%E8%83%BD"><span class="nav-number">5.2.</span> <span class="nav-text">API Gateway 的細部功能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%A8%AD%E5%AE%9A-amp-%E4%BD%88%E7%BD%B2-API-Gateway"><span class="nav-number">5.3.</span> <span class="nav-text">如何設定 &amp; 佈署 API Gateway</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A8%AD%E5%AE%9A-API-Gateway"><span class="nav-number">5.3.1.</span> <span class="nav-text">設定 API Gateway</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%88%E7%BD%B2-API-Gateway"><span class="nav-number">5.3.2.</span> <span class="nav-text">佈署 API Gateway</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cache-%E5%BF%AB%E5%8F%96-%E5%8A%9F%E8%83%BD"><span class="nav-number">5.4.</span> <span class="nav-text">Cache(快取)功能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%80%83%E8%A9%A6%E9%87%8D%E9%BB%9E-1"><span class="nav-number">5.5.</span> <span class="nav-text">考試重點</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kinesis"><span class="nav-number">6.</span> <span class="nav-text">Kinesis</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-Kinesis"><span class="nav-number">6.1.</span> <span class="nav-text">什麼是 Kinesis?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kinesis-%E5%8F%AF%E4%BB%A5%E6%8F%90%E4%BE%9B%E5%93%AA%E4%BA%9B%E9%A1%9E%E5%9E%8B%E7%9A%84%E6%9C%8D%E5%8B%99"><span class="nav-number">6.2.</span> <span class="nav-text">Kinesis 可以提供哪些類型的服務?</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Kinesis-Video-Streams"><span class="nav-number">6.2.1.</span> <span class="nav-text">Kinesis Video Streams</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kinesis-Data-Streams"><span class="nav-number">6.2.2.</span> <span class="nav-text">Kinesis Data Streams</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kinesis-Data-Firehose"><span class="nav-number">6.2.3.</span> <span class="nav-text">Kinesis Data Firehose</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kinesis-Data-Analytics"><span class="nav-number">6.2.4.</span> <span class="nav-text">Kinesis Data Analytics</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%80%83%E8%A9%A6%E9%87%8D%E9%BB%9E-2"><span class="nav-number">6.3.</span> <span class="nav-text">考試重點</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Cognito"><span class="nav-number">7.</span> <span class="nav-text">Cognito</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-Cognito"><span class="nav-number">7.1.</span> <span class="nav-text">什麼是 Cognito?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%8D%E5%8B%99%E7%89%B9%E8%89%B2"><span class="nav-number">7.2.</span> <span class="nav-text">服務特色</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#User-Pool-amp-Identity-Pool"><span class="nav-number">7.3.</span> <span class="nav-text">User Pool &amp; Identity Pool</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#User-Pool"><span class="nav-number">7.3.1.</span> <span class="nav-text">User Pool</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Identity-Pool"><span class="nav-number">7.3.2.</span> <span class="nav-text">Identity Pool</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%90%AD%E9%85%8D%E4%BD%BF%E7%94%A8%E7%9A%84%E5%A0%B4%E6%99%AF"><span class="nav-number">7.3.3.</span> <span class="nav-text">搭配使用的場景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%80%83%E8%A9%A6%E9%87%8D%E9%BB%9E-3"><span class="nav-number">7.4.</span> <span class="nav-text">考試重點</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">8.</span> <span class="nav-text">References</span></a></li></ol></div>
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#SQS-Simple-Queue-Service"><span class="nav-number">1.</span> <span class="nav-text">SQS(Simple Queue Service)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-Message-Queue"><span class="nav-number">1.1.</span> <span class="nav-text">什麼是 Message Queue ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-SQS"><span class="nav-number">1.2.</span> <span class="nav-text">什麼是 SQS ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SQS-%E7%9A%84%E7%89%B9%E6%80%A7"><span class="nav-number">1.3.</span> <span class="nav-text">SQS 的特性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Queue-Type"><span class="nav-number">1.3.1.</span> <span class="nav-text">Queue Type</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Standard-Queue-default"><span class="nav-number">1.3.1.1.</span> <span class="nav-text">Standard Queue (default)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#FIFO-Queue"><span class="nav-number">1.3.1.2.</span> <span class="nav-text">FIFO Queue</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Polling-Type"><span class="nav-number">1.3.2.</span> <span class="nav-text">Polling Type</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Long-Polling-1-20-%E7%A7%92"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">Long Polling (1~20 秒)</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%80%83%E8%A9%A6%E9%87%8D%E9%BB%9E"><span class="nav-number">1.4.</span> <span class="nav-text">考試重點</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SWF-Simple-Workflow-Service"><span class="nav-number">2.</span> <span class="nav-text">SWF(Simple Workflow Service)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#SWF-Actor-%E9%87%8D%E8%A6%81%E7%B5%84%E6%88%90%E5%85%83%E7%B4%A0"><span class="nav-number">2.1.</span> <span class="nav-text">SWF Actor (重要組成元素)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SWF-%E8%88%87-SQS-%E6%AF%94%E8%BC%83"><span class="nav-number">2.2.</span> <span class="nav-text">SWF 與 SQS 比較</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SNS-Simple-Notification-Service"><span class="nav-number">3.</span> <span class="nav-text">SNS(Simple Notification Service)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-SNS"><span class="nav-number">3.1.</span> <span class="nav-text">什麼是 SNS ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SNS-%E7%9A%84%E5%84%AA%E9%BB%9E"><span class="nav-number">3.2.</span> <span class="nav-text">SNS 的優點</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SNS-%E8%88%87-SQS-%E6%AF%94%E8%BC%83"><span class="nav-number">3.3.</span> <span class="nav-text">SNS 與 SQS 比較</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Elastic-Transcoder"><span class="nav-number">4.</span> <span class="nav-text">Elastic Transcoder</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#API-Gateway"><span class="nav-number">5.</span> <span class="nav-text">API Gateway</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-API-Gateway"><span class="nav-number">5.1.</span> <span class="nav-text">什麼是 API Gateway ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#API-Gateway-%E7%9A%84%E7%B4%B0%E9%83%A8%E5%8A%9F%E8%83%BD"><span class="nav-number">5.2.</span> <span class="nav-text">API Gateway 的細部功能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%A8%AD%E5%AE%9A-amp-%E4%BD%88%E7%BD%B2-API-Gateway"><span class="nav-number">5.3.</span> <span class="nav-text">如何設定 &amp; 佈署 API Gateway</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A8%AD%E5%AE%9A-API-Gateway"><span class="nav-number">5.3.1.</span> <span class="nav-text">設定 API Gateway</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%88%E7%BD%B2-API-Gateway"><span class="nav-number">5.3.2.</span> <span class="nav-text">佈署 API Gateway</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cache-%E5%BF%AB%E5%8F%96-%E5%8A%9F%E8%83%BD"><span class="nav-number">5.4.</span> <span class="nav-text">Cache(快取)功能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%80%83%E8%A9%A6%E9%87%8D%E9%BB%9E-1"><span class="nav-number">5.5.</span> <span class="nav-text">考試重點</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Cognito"><span class="nav-number">6.</span> <span class="nav-text">Cognito</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-Cognito"><span class="nav-number">6.1.</span> <span class="nav-text">什麼是 Cognito?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%8D%E5%8B%99%E7%89%B9%E8%89%B2"><span class="nav-number">6.2.</span> <span class="nav-text">服務特色</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#User-Pool-amp-Identity-Pool"><span class="nav-number">6.3.</span> <span class="nav-text">User Pool &amp; Identity Pool</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#User-Pool"><span class="nav-number">6.3.1.</span> <span class="nav-text">User Pool</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Identity-Pool"><span class="nav-number">6.3.2.</span> <span class="nav-text">Identity Pool</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%90%AD%E9%85%8D%E4%BD%BF%E7%94%A8%E7%9A%84%E5%A0%B4%E6%99%AF"><span class="nav-number">6.3.3.</span> <span class="nav-text">搭配使用的場景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%80%83%E8%A9%A6%E9%87%8D%E9%BB%9E-2"><span class="nav-number">6.4.</span> <span class="nav-text">考試重點</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">7.</span> <span class="nav-text">References</span></a></li></ol></div>
       </section>
       <!--/noindex-->
 
@@ -273,7 +268,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-10-14 17:58:25" itemprop="dateModified" datetime="2020-10-14T17:58:25+08:00">2020-10-14</time>
+                <time title="Modified: 2020-10-14 18:02:31" itemprop="dateModified" datetime="2020-10-14T18:02:31+08:00">2020-10-14</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -300,7 +295,7 @@
   </span>
   
   
-            <div class="post-description">此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 Application 相關服務，包含 SQS、SNS、SWF、Elastic Transcoder、API Gateway、Kinesis、Cognito ... 等等內容</div>
+            <div class="post-description">此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 Application 相關服務，包含 SQS、SNS、SWF、Elastic Transcoder、API Gateway、Cognito ... 等等內容</div>
 
         </div>
       </header>
@@ -604,65 +599,6 @@
 </blockquote>
 </li>
 </ul>
-<h1 id="Kinesis"><a href="#Kinesis" class="headerlink" title="Kinesis"></a>Kinesis</h1><h2 id="什麼是-Kinesis"><a href="#什麼是-Kinesis" class="headerlink" title="什麼是 Kinesis?"></a>什麼是 Kinesis?</h2><p>以下是 AWS 官網對 Kinesis 的介紹：</p>
-<blockquote>
-<p>Amazon Kinesis makes it easy to collect, process, and analyze real-time, streaming data so you can get timely insights and react quickly to new information. Amazon Kinesis offers key capabilities to cost-effectively process streaming data at any scale, along with the flexibility to choose the tools that best suit the requirements of your application. With Amazon Kinesis, you can ingest real-time data such as video, audio, application logs, website clickstreams, and IoT telemetry data for machine learning, analytics, and other applications. Amazon Kinesis enables you to process and analyze data as it arrives and respond instantly instead of having to wait until all your data is collected before the processing can begin.</p>
-</blockquote>
-<p>從上面的官方介紹可以整理出幾個 Kinesis 的服務重點：</p>
-<ul>
-<li><p>處理 streaming data 用</p>
-</li>
-<li><p>可針對資料進行即時分析處理，不需要等待資料全部到齊</p>
-</li>
-<li><p>資料來源可以從 video, audio, application log, 網站點擊所產生的資料、IoT 遙測資料 … 等等</p>
-</li>
-<li><p>可針對資料進行分析，甚至可以搭配其他服務進行 machine learning 相關的工作</p>
-</li>
-</ul>
-<h2 id="Kinesis-可以提供哪些類型的服務"><a href="#Kinesis-可以提供哪些類型的服務" class="headerlink" title="Kinesis 可以提供哪些類型的服務?"></a>Kinesis 可以提供哪些類型的服務?</h2><p>Kinesis 根據功能共分為以下四類：</p>
-<ul>
-<li><p>Kinesis Video Streams</p>
-</li>
-<li><p>Kinesis Data Streams</p>
-</li>
-<li><p>Kinesis Data Firehose</p>
-</li>
-<li><p>Kinesis Data Analytics</p>
-</li>
-</ul>
-<h3 id="Kinesis-Video-Streams"><a href="#Kinesis-Video-Streams" class="headerlink" title="Kinesis Video Streams"></a>Kinesis Video Streams</h3><p><img src="/blog/images/aws/KinesisVideoStreams_Example.png" alt="Kinesis Video Streams Example"></p>
-<p>可針對視訊的串流資料進行回放、安全監控、臉部辨識、機器學習，或是其他分析….等工作。</p>
-<h3 id="Kinesis-Data-Streams"><a href="#Kinesis-Data-Streams" class="headerlink" title="Kinesis Data Streams"></a>Kinesis Data Streams</h3><p><img src="/blog/images/aws/KinesisDataStreams_Example.png" alt="Kinesis Data Streams Example"></p>
-<ul>
-<li><p>資料在 Kinesis 中會以 shard 的形式存在，保留在 persistent storage 中</p>
-</li>
-<li><p>搭配後方的服務(例如：EC2, Lambda, Kinesis Data Analytics) 進行後續的分析處理工作</p>
-</li>
-<li><p>處理完的資料可以存到 S3, EMR, Redshift, DynamoDB …. 等地方做後續運用</p>
-</li>
-</ul>
-<h3 id="Kinesis-Data-Firehose"><a href="#Kinesis-Data-Firehose" class="headerlink" title="Kinesis Data Firehose"></a>Kinesis Data Firehose</h3><p><img src="/blog/images/aws/KinesisDataFirehose_Example.png" alt="Kinesis Data Firehose Example"></p>
-<ul>
-<li><p>沒有 persistent storage，資料進入 Kinesis 後要立即處理</p>
-</li>
-<li><p>可選擇搭配 Lambda or Kinesis Data Analytics 來進行資料處理</p>
-</li>
-<li><p>處理完後的資料可以轉存入 S3 or Elasticsearch 服務中</p>
-</li>
-</ul>
-<h3 id="Kinesis-Data-Analytics"><a href="#Kinesis-Data-Analytics" class="headerlink" title="Kinesis Data Analytics"></a>Kinesis Data Analytics</h3><p><img src="/blog/images/aws/KinesisDataAnalytics_Example.png" alt="Kinesis Data Analytics Example"></p>
-<ul>
-<li><p>此類型的 Kinesis 則是將查詢和分析直接設定在 Kinesis 服務本身</p>
-</li>
-<li><p>輸出的結果可以存到 S3, Redshift, Elasticsearch … 等服務</p>
-</li>
-</ul>
-<h2 id="考試重點-2"><a href="#考試重點-2" class="headerlink" title="考試重點"></a>考試重點</h2><ul>
-<li><p>了解 <code>Kinesis Data Streams</code> &amp; <code>Kinesis Data Firehose</code> 的差異</p>
-</li>
-<li><p>了解 Kinesis Data Analytics 可以如何被使用</p>
-</li>
-</ul>
 <h1 id="Cognito"><a href="#Cognito" class="headerlink" title="Cognito"></a>Cognito</h1><h2 id="什麼是-Cognito"><a href="#什麼是-Cognito" class="headerlink" title="什麼是 Cognito?"></a>什麼是 Cognito?</h2><p>AWS Cognito 是個用來解決”使用者認證”這件事情的服務。</p>
 <p>在網路上提供服務，使用者認證這件事情總是讓人覺得很麻煩，但不做又不行，到底是要自己建立帳號管理系統，還是直接去接 Google or FB 的認證就好，開發也其實並非很簡單，因此 AWS Cognito 這項服務就是要讓這件事情變得容易。</p>
 <p>先看看 AWS 官網對 Cognito 的說明：</p>
@@ -720,7 +656,7 @@
 <li><p>使用者有了 AWS credential 後就可以存取特定的 AWS 資源或服務</p>
 </li>
 </ul>
-<h2 id="考試重點-3"><a href="#考試重點-3" class="headerlink" title="考試重點"></a>考試重點</h2><ul>
+<h2 id="考試重點-2"><a href="#考試重點-2" class="headerlink" title="考試重點"></a>考試重點</h2><ul>
 <li><p>Cognito 可與 Google, FB, Amazon 等 social identity provider 進行認證</p>
 </li>
 <li><p>Cognito 只扮演 broker 的角色，協助向不同 provider 進行認證</p>
@@ -751,8 +687,6 @@
 </li>
 <li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/api-gateway">Amazon API Gateway - Amazon Web Services</a></p>
 </li>
-<li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/kinesis">Amazon Kinesis - Process &amp; Analyze Streaming Data - Amazon Web Services</a></p>
-</li>
 <li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/cognito">Amazon Cognito - Simple and Secure User Sign Up &amp; Sign In | Amazon Web Services (AWS)</a></p>
 </li>
 </ul>
@@ -767,7 +701,6 @@
           <div class="post-tags">
               <a href="/blog/tags/AWS/" rel="tag"># AWS</a>
               <a href="/blog/tags/CSA/" rel="tag"># CSA</a>
-              <a href="/blog/tags/Kinesis/" rel="tag"># Kinesis</a>
               <a href="/blog/tags/SQS/" rel="tag"># SQS</a>
               <a href="/blog/tags/SNS/" rel="tag"># SNS</a>
               <a href="/blog/tags/SWF/" rel="tag"># SWF</a>
