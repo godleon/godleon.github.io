@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "AWS CSA Associate 學習筆記 - Application"
-description: "此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 Application 相關服務，包含 SQS、SNS、SWF、Elastic Transcoder、API Gateway、Kinesis、Cognito ... 等等內容"
+description: "此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 Application 相關服務，包含 SQS、SNS、SWF、Elastic Transcoder、API Gateway、Cognito ... 等等內容"
 date: 2020-07-21 06:00:00
 published: true
 comments: true
@@ -15,7 +15,6 @@ tags:
   - SWF
   - Elastic Transcoder
   - API Gateway
-  - Kinesis
   - Cognito
 ---
 
@@ -354,77 +353,6 @@ API Gateway 還提供了一個很重要的 cache 功能，說明如下：
 > CORS 本身在 browser 中是預設啟用的
 
 
-Kinesis
-=======
-
-## 什麼是 Kinesis?
-
-以下是 AWS 官網對 Kinesis 的介紹：
-
-> Amazon Kinesis makes it easy to collect, process, and analyze real-time, streaming data so you can get timely insights and react quickly to new information. Amazon Kinesis offers key capabilities to cost-effectively process streaming data at any scale, along with the flexibility to choose the tools that best suit the requirements of your application. With Amazon Kinesis, you can ingest real-time data such as video, audio, application logs, website clickstreams, and IoT telemetry data for machine learning, analytics, and other applications. Amazon Kinesis enables you to process and analyze data as it arrives and respond instantly instead of having to wait until all your data is collected before the processing can begin.
-
-從上面的官方介紹可以整理出幾個 Kinesis 的服務重點：
-
-- 處理 streaming data 用
-
-- 可針對資料進行即時分析處理，不需要等待資料全部到齊
-
-- 資料來源可以從 video, audio, application log, 網站點擊所產生的資料、IoT 遙測資料 ... 等等
-
-- 可針對資料進行分析，甚至可以搭配其他服務進行 machine learning 相關的工作
-
-## Kinesis 可以提供哪些類型的服務?
-
-Kinesis 根據功能共分為以下四類：
-
-- Kinesis Video Streams
-
-- Kinesis Data Streams
-
-- Kinesis Data Firehose
-
-- Kinesis Data Analytics
-
-### Kinesis Video Streams
-
-![Kinesis Video Streams Example](/blog/images/aws/KinesisVideoStreams_Example.png)
-
-可針對視訊的串流資料進行回放、安全監控、臉部辨識、機器學習，或是其他分析....等工作。
-
-### Kinesis Data Streams
-
-![Kinesis Data Streams Example](/blog/images/aws/KinesisDataStreams_Example.png)
-
-- 資料在 Kinesis 中會以 shard 的形式存在，保留在 persistent storage 中
-
-- 搭配後方的服務(例如：EC2, Lambda, Kinesis Data Analytics) 進行後續的分析處理工作
-
-- 處理完的資料可以存到 S3, EMR, Redshift, DynamoDB .... 等地方做後續運用
-
-### Kinesis Data Firehose
-
-![Kinesis Data Firehose Example](/blog/images/aws/KinesisDataFirehose_Example.png)
-
-- 沒有 persistent storage，資料進入 Kinesis 後要立即處理
-
-- 可選擇搭配 Lambda or Kinesis Data Analytics 來進行資料處理
-
-- 處理完後的資料可以轉存入 S3 or Elasticsearch 服務中
-
-### Kinesis Data Analytics
-
-![Kinesis Data Analytics Example](/blog/images/aws/KinesisDataAnalytics_Example.png)
-
-- 此類型的 Kinesis 則是將查詢和分析直接設定在 Kinesis 服務本身
-
-- 輸出的結果可以存到 S3, Redshift, Elasticsearch ... 等服務
-
-## 考試重點
-
-- 了解 `Kinesis Data Streams` & `Kinesis Data Firehose` 的差異
-
-- 了解 Kinesis Data Analytics 可以如何被使用
-
 
 Cognito
 =======
@@ -530,7 +458,5 @@ References
 - [AWS | Amazon Elastic Transcoder - Media & Video Transcoding in the Cloud](https://aws.amazon.com/elastictranscoder)
 
 - [Amazon API Gateway - Amazon Web Services](https://aws.amazon.com/api-gateway)
-
-- [Amazon Kinesis - Process & Analyze Streaming Data - Amazon Web Services](https://aws.amazon.com/kinesis)
 
 - [Amazon Cognito - Simple and Secure User Sign Up & Sign In | Amazon Web Services (AWS)](https://aws.amazon.com/cognito)
