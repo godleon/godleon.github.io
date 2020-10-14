@@ -35,7 +35,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/KinesisDataAnalytics_Example.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/EMR_arch.png">
 <meta property="article:published_time" content="2020-10-14T10:00:00.000Z">
-<meta property="article:modified_time" content="2020-10-14T10:02:31.308Z">
+<meta property="article:modified_time" content="2020-10-14T10:12:20.473Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -254,7 +254,7 @@
               <span class="post-meta-item-text">Posted on</span>
               
 
-              <time title="Created: 2020-10-14 18:00:00 / Modified: 18:02:31" itemprop="dateCreated datePublished" datetime="2020-10-14T18:00:00+08:00">2020-10-14</time>
+              <time title="Created: 2020-10-14 18:00:00 / Modified: 18:12:20" itemprop="dateCreated datePublished" datetime="2020-10-14T18:00:00+08:00">2020-10-14</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -386,6 +386,9 @@
 <li><p>首先，資料必須存放在 AWS S3、DynamoDB or Redshift 上，資料可以從幾個地方送到 EMR 中處理</p>
 </li>
 <li><p>資料會經過一個 <code>map</code> 的過程，並分散到不同的 cluster 進行處理，每個 cluster 中有 master &amp; slave node (這個 cluster size 可以隨時調整，也可以佈署多個 cluster)</p>
+<blockquote>
+<p>使用者還可以進入到 cluster node 中的 OS 進行客製化的調整</p>
+</blockquote>
 </li>
 <li><p>slave node 會負責資料的處理 &amp; 計算 (<strong>平行處理</strong>)</p>
 </li>
