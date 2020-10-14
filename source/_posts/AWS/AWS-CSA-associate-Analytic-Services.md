@@ -131,6 +131,7 @@ EMR (Elastic MapReduce)
 - 首先，資料必須存放在 AWS S3、DynamoDB or Redshift 上，資料可以從幾個地方送到 EMR 中處理
 
 - 資料會經過一個 `map` 的過程，並分散到不同的 cluster 進行處理，每個 cluster 中有 master & slave node (這個 cluster size 可以隨時調整，也可以佈署多個 cluster)
+> 使用者還可以進入到 cluster node 中的 OS 進行客製化的調整
 
 - slave node 會負責資料的處理 & 計算 (**平行處理**)
 
