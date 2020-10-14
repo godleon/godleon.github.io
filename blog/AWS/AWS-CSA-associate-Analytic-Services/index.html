@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為資料分析相關服務的特性介紹">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AWS CSA Associate 學習筆記 - Analytic Services">
+<meta property="og:url" content="https://godleon.github.io/blog/AWS/AWS-CSA-associate-Analytic-Services/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為資料分析相關服務的特性介紹">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/KinesisVideoStreams_Example.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/KinesisDataStreams_Example.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/KinesisDataFirehose_Example.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/KinesisDataAnalytics_Example.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/EMR_arch.png">
+<meta property="article:published_time" content="2020-10-14T10:00:00.000Z">
+<meta property="article:modified_time" content="2020-10-14T09:58:25.315Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="AWS">
+<meta property="article:tag" content="CSA">
+<meta property="article:tag" content="Kinesis">
+<meta property="article:tag" content="EMR">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/aws/KinesisVideoStreams_Example.png">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/AWS/AWS-CSA-associate-Analytic-Services/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>AWS CSA Associate 學習筆記 - Analytic Services | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Kinesis"><span class="nav-number">1.</span> <span class="nav-text">Kinesis</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-Kinesis"><span class="nav-number">1.1.</span> <span class="nav-text">什麼是 Kinesis?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E7%89%B9%E6%80%A7"><span class="nav-number">1.2.</span> <span class="nav-text">其他特性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kinesis-%E5%8F%AF%E4%BB%A5%E6%8F%90%E4%BE%9B%E5%93%AA%E4%BA%9B%E9%A1%9E%E5%9E%8B%E7%9A%84%E6%9C%8D%E5%8B%99"><span class="nav-number">1.3.</span> <span class="nav-text">Kinesis 可以提供哪些類型的服務?</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Kinesis-Video-Streams"><span class="nav-number">1.3.1.</span> <span class="nav-text">Kinesis Video Streams</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kinesis-Data-Streams"><span class="nav-number">1.3.2.</span> <span class="nav-text">Kinesis Data Streams</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kinesis-Data-Firehose"><span class="nav-number">1.3.3.</span> <span class="nav-text">Kinesis Data Firehose</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kinesis-Data-Analytics"><span class="nav-number">1.3.4.</span> <span class="nav-text">Kinesis Data Analytics</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%80%83%E8%A9%A6%E9%87%8D%E9%BB%9E"><span class="nav-number">1.4.</span> <span class="nav-text">考試重點</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EMR-Elastic-MapReduce"><span class="nav-number">2.</span> <span class="nav-text">EMR (Elastic MapReduce)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#EMR-%E6%A6%82%E8%A7%80"><span class="nav-number">2.1.</span> <span class="nav-text">EMR 概觀</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A8%99%E6%BA%96%E7%9A%84-workflow"><span class="nav-number">2.2.</span> <span class="nav-text">標準的 workflow</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Map-amp-Reduce"><span class="nav-number">2.3.</span> <span class="nav-text">Map &amp; Reduce</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Map"><span class="nav-number">2.3.1.</span> <span class="nav-text">Map</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Reduce"><span class="nav-number">2.3.2.</span> <span class="nav-text">Reduce</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EMR-master-slave-node"><span class="nav-number">2.4.</span> <span class="nav-text">EMR master&#x2F;slave node</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">3.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">103</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/AWS/AWS-CSA-associate-Analytic-Services/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AWS CSA Associate 學習筆記 - Analytic Services
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2020-10-14 18:00:00 / Modified: 17:58:25" itemprop="dateCreated datePublished" datetime="2020-10-14T18:00:00+08:00">2020-10-14</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/AWS/" itemprop="url" rel="index"><span itemprop="name">AWS</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/AWS/AWS-CSA-associate-Analytic-Services/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="AWS/AWS-CSA-associate-Analytic-Services/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為資料分析相關服務的特性介紹</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="Kinesis"><a href="#Kinesis" class="headerlink" title="Kinesis"></a>Kinesis</h1><h2 id="什麼是-Kinesis"><a href="#什麼是-Kinesis" class="headerlink" title="什麼是 Kinesis?"></a>什麼是 Kinesis?</h2><p>以下是 AWS 官網對 Kinesis 的介紹：</p>
+<blockquote>
+<p>Amazon Kinesis makes it easy to collect, process, and analyze real-time, streaming data so you can get timely insights and react quickly to new information. Amazon Kinesis offers key capabilities to cost-effectively process streaming data at any scale, along with the flexibility to choose the tools that best suit the requirements of your application. With Amazon Kinesis, you can ingest real-time data such as video, audio, application logs, website clickstreams, and IoT telemetry data for machine learning, analytics, and other applications. Amazon Kinesis enables you to process and analyze data as it arrives and respond instantly instead of having to wait until all your data is collected before the processing can begin.</p>
+</blockquote>
+<p>從上面的官方介紹可以整理出幾個 Kinesis 的服務重點：</p>
+<ul>
+<li><p>處理 streaming data 用</p>
+</li>
+<li><p>可針對串流資料進行即時分析處理，不需要等待資料全部到齊</p>
+</li>
+<li><p>資料來源可以從 video, audio, application log, 網站點擊所產生的資料、IoT 遙測資料 … 等等</p>
+</li>
+<li><p>可針對資料進行分析，甚至可以搭配其他服務進行 machine learning 相關的工作</p>
+</li>
+</ul>
+<h2 id="其他特性"><a href="#其他特性" class="headerlink" title="其他特性"></a>其他特性</h2><ul>
+<li><p>可將 Kinesis 的資料 export 到多種不同的 AWS 服務，例如：</p>
+<ul>
+<li>EMR (分析)</li>
+<li>S3 / DynamoDB (儲存)</li>
+<li>Redshift (大資料分析儲存)</li>
+<li>Lambda (事件驅動)</li>
+</ul>
+</li>
+<li><p>主要的組成元件包含：<code>Stream</code>(資料本身)、<code>Producer</code>(資料來源)、<code>Consumer</code>(資料使用者)、<code>Shard</code>(關係到資料處理能力)</p>
+</li>
+<li><p>Producer 會持續不斷的送資料到 Kinesis stream 中進行處理 (相關的資料處理程式要預先設定好)</p>
+</li>
+<li><p>越多資料要處理，就需要增加越多個 shard 到 Kinesis sream 中 (每個 shard 的處理能理是每秒 2MB read &amp; 1MB write)</p>
+</li>
+<li><p>Consumer 可以取用 Kinesis stream 的資料(可以同時被多個 consumer 存取資料)</p>
+</li>
+<li><p>Consumer 可能是 real-time dashboard、DynamoDB、S3、Redshift、EMR … 等等，也可以自行開發程式來取得 stream 資料</p>
+</li>
+<li><p>Kinesis 預設存放 24 小時的資料，最長可以設定為 7 天</p>
+</li>
+</ul>
+<h2 id="Kinesis-可以提供哪些類型的服務"><a href="#Kinesis-可以提供哪些類型的服務" class="headerlink" title="Kinesis 可以提供哪些類型的服務?"></a>Kinesis 可以提供哪些類型的服務?</h2><p>Kinesis 根據功能共分為以下四類：</p>
+<ul>
+<li><p>Kinesis Video Streams</p>
+</li>
+<li><p>Kinesis Data Streams</p>
+</li>
+<li><p>Kinesis Data Firehose</p>
+</li>
+<li><p>Kinesis Data Analytics</p>
+</li>
+</ul>
+<h3 id="Kinesis-Video-Streams"><a href="#Kinesis-Video-Streams" class="headerlink" title="Kinesis Video Streams"></a>Kinesis Video Streams</h3><p><img src="/blog/images/aws/KinesisVideoStreams_Example.png" alt="Kinesis Video Streams Example"></p>
+<p>可針對視訊的串流資料進行回放、安全監控、臉部辨識、機器學習，或是其他分析….等工作。</p>
+<h3 id="Kinesis-Data-Streams"><a href="#Kinesis-Data-Streams" class="headerlink" title="Kinesis Data Streams"></a>Kinesis Data Streams</h3><p><img src="/blog/images/aws/KinesisDataStreams_Example.png" alt="Kinesis Data Streams Example"></p>
+<ul>
+<li><p>資料在 Kinesis 中會以 shard 的形式存在，保留在 persistent storage 中</p>
+</li>
+<li><p>搭配後方的服務(例如：EC2, Lambda, Kinesis Data Analytics) 進行後續的分析處理工作</p>
+</li>
+<li><p>處理完的資料可以存到 S3, EMR, Redshift, DynamoDB …. 等地方做後續運用</p>
+</li>
+</ul>
+<h3 id="Kinesis-Data-Firehose"><a href="#Kinesis-Data-Firehose" class="headerlink" title="Kinesis Data Firehose"></a>Kinesis Data Firehose</h3><p><img src="/blog/images/aws/KinesisDataFirehose_Example.png" alt="Kinesis Data Firehose Example"></p>
+<ul>
+<li><p>沒有 persistent storage，資料進入 Kinesis 後要立即處理</p>
+</li>
+<li><p>可選擇搭配 Lambda or Kinesis Data Analytics 來進行資料處理</p>
+</li>
+<li><p>處理完後的資料可以轉存入 S3 or Elasticsearch 服務中</p>
+</li>
+</ul>
+<h3 id="Kinesis-Data-Analytics"><a href="#Kinesis-Data-Analytics" class="headerlink" title="Kinesis Data Analytics"></a>Kinesis Data Analytics</h3><p><img src="/blog/images/aws/KinesisDataAnalytics_Example.png" alt="Kinesis Data Analytics Example"></p>
+<ul>
+<li><p>此類型的 Kinesis 則是將查詢和分析直接設定在 Kinesis 服務本身</p>
+</li>
+<li><p>輸出的結果可以存到 S3, Redshift, Elasticsearch … 等服務</p>
+</li>
+</ul>
+<h2 id="考試重點"><a href="#考試重點" class="headerlink" title="考試重點"></a>考試重點</h2><ul>
+<li><p>了解 <code>Kinesis Data Streams</code> &amp; <code>Kinesis Data Firehose</code> 的差異</p>
+</li>
+<li><p>了解 Kinesis Data Analytics 可以如何被使用</p>
+</li>
+</ul>
+<h1 id="EMR-Elastic-MapReduce"><a href="#EMR-Elastic-MapReduce" class="headerlink" title="EMR (Elastic MapReduce)"></a>EMR (Elastic MapReduce)</h1><h2 id="EMR-概觀"><a href="#EMR-概觀" class="headerlink" title="EMR 概觀"></a>EMR 概觀</h2><ul>
+<li><p>EMR 是 AWS 一個全託管的 big data 處理服務</p>
+</li>
+<li><p>EMR 本身的功能是由許多開源工具(例如：<a target="_blank" rel="noopener" href="https://spark.apache.org/">Spark</a>、<a target="_blank" rel="noopener" href="https://hive.apache.org/">Hive</a>, <a target="_blank" rel="noopener" href="https://hbase.apache.org/">HBase</a>, <a target="_blank" rel="noopener" href="https://flink.apache.org/">Flink</a>、<a target="_blank" rel="noopener" href="https://hudi.apache.org/">Hudi</a>、<a target="_blank" rel="noopener" href="https://prestodb.io/">Presto</a>)所組成</p>
+</li>
+<li><p>底層的 framework 除了可以選擇 Hadoop 之外，也可以選擇 HBase、Presto、Spark … 等等</p>
+</li>
+<li><p>基本上就是啟動多台 EC2 instance，並安裝相關軟體之後，協助做 big data 的處理</p>
+</li>
+</ul>
+<h2 id="標準的-workflow"><a href="#標準的-workflow" class="headerlink" title="標準的 workflow"></a>標準的 workflow</h2><p><img src="/blog/images/aws/EMR_arch.png" alt="EMR architecture"></p>
+<ul>
+<li><p>首先，資料必須存放在 AWS S3、DynamoDB or Redshift 上，資料可以從幾個地方送到 EMR 中處理</p>
+</li>
+<li><p>資料會經過一個 <code>map</code> 的過程，並分散到不同的 cluster 進行處理，每個 cluster 中有 master &amp; slave node (這個 cluster size 可以隨時調整，也可以佈署多個 cluster)</p>
+</li>
+<li><p>slave node 會負責資料的處理 &amp; 計算 (<strong>平行處理</strong>)</p>
+</li>
+<li><p>處理完的結果，會再度經過一個 <code>reduce</code> 的過程，整合成一個輸出後回傳</p>
+</li>
+<li><p>處理完的資料同樣也可以回到 S3、DynamoDB or Redshift …. 等服務</p>
+</li>
+</ul>
+<h2 id="Map-amp-Reduce"><a href="#Map-amp-Reduce" class="headerlink" title="Map &amp; Reduce"></a>Map &amp; Reduce</h2><h3 id="Map"><a href="#Map" class="headerlink" title="Map"></a>Map</h3><ul>
+<li><p>map 是個用來將大容量的資料檔案切分成多個適合處理的小檔案的一個 function</p>
+</li>
+<li><p>在 map 過程中，檔案會被切分成大小為 128MB 的 chunk</p>
+</li>
+<li><p>若是 chunk 數量多過 node 的數量，就會被 queue 起來</p>
+</li>
+</ul>
+<h3 id="Reduce"><a href="#Reduce" class="headerlink" title="Reduce"></a>Reduce</h3><ul>
+<li><p>reduce 是用來將多個資料處理後的結果整合成單一結果的 function</p>
+</li>
+<li><p>整合後的結果需要存放在其他地方(例如：S3、DynamoDB、Redshift)，EMR 本身不會存放經過 reduce function 整合後的資料</p>
+</li>
+</ul>
+<h2 id="EMR-master-slave-node"><a href="#EMR-master-slave-node" class="headerlink" title="EMR master/slave node"></a>EMR master/slave node</h2><ul>
+<li><p>master node 是用來作為 coordinator，用來分派資料 &amp; 任務給 slave node</p>
+</li>
+<li><p>master node 會負責追蹤 &amp; 監控每個任務的處理狀況</p>
+</li>
+<li><p>slave node 有兩種，分別是 <code>core node</code> &amp; <code>task node</code></p>
+</li>
+<li><p>slave core node 可以執行任務，也可以儲存資料(存放於 HDFS 中，而這個分散式 file system 是使用 slave core nore 的硬碟所建置而成的)</p>
+</li>
+<li><p>slave task node 僅執行任務，不屬於 HDFS 的一部分，因此在佈署上不一定要有</p>
+</li>
+</ul>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://www.udemy.com/course/aws-certified-solutions-architect-associate/">AWS Certified Solutions Architect: Associate Certification Exam | Udemy</a></li>
+</ul>
+<ul>
+<li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/kinesis">Amazon Kinesis - Process &amp; Analyze Streaming Data - Amazon Web Services</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/emr">Amazon EMR - Big Data Platform - Amazon Web Services</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/AWS/" rel="tag"># AWS</a>
+              <a href="/blog/tags/CSA/" rel="tag"># CSA</a>
+              <a href="/blog/tags/Kinesis/" rel="tag"># Kinesis</a>
+              <a href="/blog/tags/EMR/" rel="tag"># EMR</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/Architecture_Design/Architecture-Design-Scalable-Arch/" rel="prev" title="[架構設計] 可擴展架構設計">
+                  <i class="fa fa-chevron-left"></i> [架構設計] 可擴展架構設計
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/AWS/AWS-CSA-associate-Analytic-Services/";
+    this.page.identifier = "AWS/AWS-CSA-associate-Analytic-Services/";
+    this.page.title = "AWS CSA Associate 學習筆記 - Analytic Services";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>

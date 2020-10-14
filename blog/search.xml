@@ -4,6 +4,37 @@
   
     
     <entry>
+      <title>AWS CSA Associate 學習筆記 - Analytic Services</title>
+      <link href="/blog/AWS/AWS-CSA-associate-Analytic-Services/"/>
+      <url>/blog/AWS/AWS-CSA-associate-Analytic-Services/</url>
+      
+        <content type="html"><![CDATA[<h1 id="Kinesis"><a href="#Kinesis" class="headerlink" title="Kinesis"></a>Kinesis</h1><h2 id="什麼是-Kinesis"><a href="#什麼是-Kinesis" class="headerlink" title="什麼是 Kinesis?"></a>什麼是 Kinesis?</h2><p>以下是 AWS 官網對 Kinesis 的介紹：</p><blockquote><p>Amazon Kinesis makes it easy to collect, process, and analyze real-time, streaming data so you can get timely insights and react quickly to new information. Amazon Kinesis offers key capabilities to cost-effectively process streaming data at any scale, along with the flexibility to choose the tools that best suit the requirements of your application. With Amazon Kinesis, you can ingest real-time data such as video, audio, application logs, website clickstreams, and IoT telemetry data for machine learning, analytics, and other applications. Amazon Kinesis enables you to process and analyze data as it arrives and respond instantly instead of having to wait until all your data is collected before the processing can begin.</p></blockquote><p>從上面的官方介紹可以整理出幾個 Kinesis 的服務重點：</p><ul><li><p>處理 streaming data 用</p></li><li><p>可針對串流資料進行即時分析處理，不需要等待資料全部到齊</p></li><li><p>資料來源可以從 video, audio, application log, 網站點擊所產生的資料、IoT 遙測資料 … 等等</p></li><li><p>可針對資料進行分析，甚至可以搭配其他服務進行 machine learning 相關的工作</p></li></ul><h2 id="其他特性"><a href="#其他特性" class="headerlink" title="其他特性"></a>其他特性</h2><ul><li><p>可將 Kinesis 的資料 export 到多種不同的 AWS 服務，例如：</p><ul><li>EMR (分析)</li><li>S3 / DynamoDB (儲存)</li><li>Redshift (大資料分析儲存)</li><li>Lambda (事件驅動)</li></ul></li><li><p>主要的組成元件包含：<code>Stream</code>(資料本身)、<code>Producer</code>(資料來源)、<code>Consumer</code>(資料使用者)、<code>Shard</code>(關係到資料處理能力)</p></li><li><p>Producer 會持續不斷的送資料到 Kinesis stream 中進行處理 (相關的資料處理程式要預先設定好)</p></li><li><p>越多資料要處理，就需要增加越多個 shard 到 Kinesis sream 中 (每個 shard 的處理能理是每秒 2MB read &amp; 1MB write)</p></li><li><p>Consumer 可以取用 Kinesis stream 的資料(可以同時被多個 consumer 存取資料)</p></li><li><p>Consumer 可能是 real-time dashboard、DynamoDB、S3、Redshift、EMR … 等等，也可以自行開發程式來取得 stream 資料</p></li><li><p>Kinesis 預設存放 24 小時的資料，最長可以設定為 7 天</p></li></ul><h2 id="Kinesis-可以提供哪些類型的服務"><a href="#Kinesis-可以提供哪些類型的服務" class="headerlink" title="Kinesis 可以提供哪些類型的服務?"></a>Kinesis 可以提供哪些類型的服務?</h2><p>Kinesis 根據功能共分為以下四類：</p><ul><li><p>Kinesis Video Streams</p></li><li><p>Kinesis Data Streams</p></li><li><p>Kinesis Data Firehose</p></li><li><p>Kinesis Data Analytics</p></li></ul><h3 id="Kinesis-Video-Streams"><a href="#Kinesis-Video-Streams" class="headerlink" title="Kinesis Video Streams"></a>Kinesis Video Streams</h3><p><img src="/blog/images/aws/KinesisVideoStreams_Example.png" alt="Kinesis Video Streams Example"></p><p>可針對視訊的串流資料進行回放、安全監控、臉部辨識、機器學習，或是其他分析….等工作。</p><h3 id="Kinesis-Data-Streams"><a href="#Kinesis-Data-Streams" class="headerlink" title="Kinesis Data Streams"></a>Kinesis Data Streams</h3><p><img src="/blog/images/aws/KinesisDataStreams_Example.png" alt="Kinesis Data Streams Example"></p><ul><li><p>資料在 Kinesis 中會以 shard 的形式存在，保留在 persistent storage 中</p></li><li><p>搭配後方的服務(例如：EC2, Lambda, Kinesis Data Analytics) 進行後續的分析處理工作</p></li><li><p>處理完的資料可以存到 S3, EMR, Redshift, DynamoDB …. 等地方做後續運用</p></li></ul><h3 id="Kinesis-Data-Firehose"><a href="#Kinesis-Data-Firehose" class="headerlink" title="Kinesis Data Firehose"></a>Kinesis Data Firehose</h3><p><img src="/blog/images/aws/KinesisDataFirehose_Example.png" alt="Kinesis Data Firehose Example"></p><ul><li><p>沒有 persistent storage，資料進入 Kinesis 後要立即處理</p></li><li><p>可選擇搭配 Lambda or Kinesis Data Analytics 來進行資料處理</p></li><li><p>處理完後的資料可以轉存入 S3 or Elasticsearch 服務中</p></li></ul><h3 id="Kinesis-Data-Analytics"><a href="#Kinesis-Data-Analytics" class="headerlink" title="Kinesis Data Analytics"></a>Kinesis Data Analytics</h3><p><img src="/blog/images/aws/KinesisDataAnalytics_Example.png" alt="Kinesis Data Analytics Example"></p><ul><li><p>此類型的 Kinesis 則是將查詢和分析直接設定在 Kinesis 服務本身</p></li><li><p>輸出的結果可以存到 S3, Redshift, Elasticsearch … 等服務</p></li></ul><h2 id="考試重點"><a href="#考試重點" class="headerlink" title="考試重點"></a>考試重點</h2><ul><li><p>了解 <code>Kinesis Data Streams</code> &amp; <code>Kinesis Data Firehose</code> 的差異</p></li><li><p>了解 Kinesis Data Analytics 可以如何被使用</p></li></ul><h1 id="EMR-Elastic-MapReduce"><a href="#EMR-Elastic-MapReduce" class="headerlink" title="EMR (Elastic MapReduce)"></a>EMR (Elastic MapReduce)</h1><h2 id="EMR-概觀"><a href="#EMR-概觀" class="headerlink" title="EMR 概觀"></a>EMR 概觀</h2><ul><li><p>EMR 是 AWS 一個全託管的 big data 處理服務</p></li><li><p>EMR 本身的功能是由許多開源工具(例如：<a href="https://spark.apache.org/">Spark</a>、<a href="https://hive.apache.org/">Hive</a>, <a href="https://hbase.apache.org/">HBase</a>, <a href="https://flink.apache.org/">Flink</a>、<a href="https://hudi.apache.org/">Hudi</a>、<a href="https://prestodb.io/">Presto</a>)所組成</p></li><li><p>底層的 framework 除了可以選擇 Hadoop 之外，也可以選擇 HBase、Presto、Spark … 等等</p></li><li><p>基本上就是啟動多台 EC2 instance，並安裝相關軟體之後，協助做 big data 的處理</p></li></ul><h2 id="標準的-workflow"><a href="#標準的-workflow" class="headerlink" title="標準的 workflow"></a>標準的 workflow</h2><p><img src="/blog/images/aws/EMR_arch.png" alt="EMR architecture"></p><ul><li><p>首先，資料必須存放在 AWS S3、DynamoDB or Redshift 上，資料可以從幾個地方送到 EMR 中處理</p></li><li><p>資料會經過一個 <code>map</code> 的過程，並分散到不同的 cluster 進行處理，每個 cluster 中有 master &amp; slave node (這個 cluster size 可以隨時調整，也可以佈署多個 cluster)</p></li><li><p>slave node 會負責資料的處理 &amp; 計算 (<strong>平行處理</strong>)</p></li><li><p>處理完的結果，會再度經過一個 <code>reduce</code> 的過程，整合成一個輸出後回傳</p></li><li><p>處理完的資料同樣也可以回到 S3、DynamoDB or Redshift …. 等服務</p></li></ul><h2 id="Map-amp-Reduce"><a href="#Map-amp-Reduce" class="headerlink" title="Map &amp; Reduce"></a>Map &amp; Reduce</h2><h3 id="Map"><a href="#Map" class="headerlink" title="Map"></a>Map</h3><ul><li><p>map 是個用來將大容量的資料檔案切分成多個適合處理的小檔案的一個 function</p></li><li><p>在 map 過程中，檔案會被切分成大小為 128MB 的 chunk</p></li><li><p>若是 chunk 數量多過 node 的數量，就會被 queue 起來</p></li></ul><h3 id="Reduce"><a href="#Reduce" class="headerlink" title="Reduce"></a>Reduce</h3><ul><li><p>reduce 是用來將多個資料處理後的結果整合成單一結果的 function</p></li><li><p>整合後的結果需要存放在其他地方(例如：S3、DynamoDB、Redshift)，EMR 本身不會存放經過 reduce function 整合後的資料</p></li></ul><h2 id="EMR-master-slave-node"><a href="#EMR-master-slave-node" class="headerlink" title="EMR master/slave node"></a>EMR master/slave node</h2><ul><li><p>master node 是用來作為 coordinator，用來分派資料 &amp; 任務給 slave node</p></li><li><p>master node 會負責追蹤 &amp; 監控每個任務的處理狀況</p></li><li><p>slave node 有兩種，分別是 <code>core node</code> &amp; <code>task node</code></p></li><li><p>slave core node 可以執行任務，也可以儲存資料(存放於 HDFS 中，而這個分散式 file system 是使用 slave core nore 的硬碟所建置而成的)</p></li><li><p>slave task node 僅執行任務，不屬於 HDFS 的一部分，因此在佈署上不一定要有</p></li></ul><h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul><li><a href="https://www.udemy.com/course/aws-certified-solutions-architect-associate/">AWS Certified Solutions Architect: Associate Certification Exam | Udemy</a></li></ul><ul><li><p><a href="https://aws.amazon.com/kinesis">Amazon Kinesis - Process &amp; Analyze Streaming Data - Amazon Web Services</a></p></li><li><p><a href="https://aws.amazon.com/emr">Amazon EMR - Big Data Platform - Amazon Web Services</a></p></li></ul>]]></content>
+      
+      
+      <categories>
+          
+          <category> AWS </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> AWS </tag>
+            
+            <tag> CSA </tag>
+            
+            <tag> Kinesis </tag>
+            
+            <tag> EMR </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>[架構設計] 可擴展架構設計</title>
       <link href="/blog/Architecture_Design/Architecture-Design-Scalable-Arch/"/>
       <url>/blog/Architecture_Design/Architecture-Design-Scalable-Arch/</url>
@@ -437,6 +468,8 @@
             
             <tag> CSA </tag>
             
+            <tag> Kinesis </tag>
+            
             <tag> SQS </tag>
             
             <tag> SNS </tag>
@@ -446,8 +479,6 @@
             <tag> Elastic Transcoder </tag>
             
             <tag> API Gateway </tag>
-            
-            <tag> Kinesis </tag>
             
             <tag> Cognito </tag>
             
