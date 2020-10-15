@@ -34,7 +34,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/ECS_Introduction.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/ECS_Security.png">
 <meta property="article:published_time" content="2020-08-06T21:55:00.000Z">
-<meta property="article:modified_time" content="2020-10-14T10:12:20.473Z">
+<meta property="article:modified_time" content="2020-10-15T10:44:07.980Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -180,7 +180,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/blog/archives">
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">137</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -260,7 +260,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-10-14 18:12:20" itemprop="dateModified" datetime="2020-10-14T18:12:20+08:00">2020-10-14</time>
+                <time title="Modified: 2020-10-15 18:44:07" itemprop="dateModified" datetime="2020-10-15T18:44:07+08:00">2020-10-15</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -427,6 +427,13 @@
 <li><p><code>Service</code>：用來作為 scaling 的設定，可定義 minimum &amp; maximum 的值</p>
 </li>
 <li><p><code>Registry</code>：用來儲存 container image 的服務，例如：ECR or Docker Hub</p>
+</li>
+<li><p><code>ECS Agent</code></p>
+<ul>
+<li>運行在 ECS cluster 中的每一個 EC2 instance 中</li>
+<li>協助互相傳遞 instance 的相關訊息，例如：正在運行的 task、資源使用狀況…等等</li>
+<li>負責啟動 &amp; 停止 task</li>
+</ul>
 </li>
 </ul>
 <h2 id="AWS-Fargate-的特色"><a href="#AWS-Fargate-的特色" class="headerlink" title="AWS Fargate 的特色"></a>AWS Fargate 的特色</h2><p>AWS Fargate 是 AWS 的新服務，其實目的很簡單，就是要減輕使用者管理的負擔，有以下幾個特點：</p>
