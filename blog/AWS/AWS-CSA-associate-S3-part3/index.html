@@ -34,7 +34,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_StorageGateway-VolumeGateway-StoredVolume.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_StorageGateway-VolumeGateway-CachedVolume.png">
 <meta property="article:published_time" content="2020-05-10T02:00:00.000Z">
-<meta property="article:modified_time" content="2020-10-15T10:44:07.980Z">
+<meta property="article:modified_time" content="2020-10-17T03:03:02.301Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -258,7 +258,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-10-15 18:44:07" itemprop="dateModified" datetime="2020-10-15T18:44:07+08:00">2020-10-15</time>
+                <time title="Modified: 2020-10-17 11:03:02" itemprop="dateModified" datetime="2020-10-17T11:03:02+08:00">2020-10-17</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -360,7 +360,7 @@
 <li><p>一旦將資料移動到 S3 後，就可以使用 S3 提供的 versioning, lifecycle management, cross-region replication … 等功能</p>
 </li>
 </ul>
-<h3 id="Volume-Gateway"><a href="#Volume-Gateway" class="headerlink" title="Volume Gateway"></a>Volume Gateway</h3><p>Volume Gateway 提供了 <code>iSCSI</code> 的方式，讓資料可透過**單一磁碟(volume)**為單位的角度來進行資料的儲存與管理；寫入 volume 的資料會以非同步的方式透過 volume snapshot 的方式進行儲存，也因為是 block device 的關係，因此每次的變更備份都是只有處理變更的 block 部份而已。</p>
+<h3 id="Volume-Gateway"><a href="#Volume-Gateway" class="headerlink" title="Volume Gateway"></a>Volume Gateway</h3><p>Volume Gateway 提供了 <code>iSCSI</code> 的方式，讓資料可透過 <strong>單一磁碟(volume)</strong> 為單位的角度來進行資料的儲存與管理；寫入 volume 的資料會以非同步的方式透過 volume snapshot 的方式進行儲存，也因為是 block device 的關係，因此每次的變更備份都是只有處理變更的 block 部份而已。</p>
 <p>而根據 volume 使用情境的不同，Volume Gateway 還可以分成以下兩種：</p>
 <h4 id="Stored-Volume"><a href="#Stored-Volume" class="headerlink" title="Stored Volume"></a>Stored Volume</h4><p><img src="/blog/images/aws/S3_StorageGateway-VolumeGateway-StoredVolume.png" alt="Storage Gateway - Stored Volume"></p>
 <ul>
@@ -397,11 +397,11 @@
 </ul>
 <h1 id="Athena-vs-Macie"><a href="#Athena-vs-Macie" class="headerlink" title="Athena vs Macie"></a>Athena vs Macie</h1><p>這兩個服務提供了使用者直接對儲存在 S3 的資料進行查詢 &amp; 分析的能力。</p>
 <h2 id="Athena"><a href="#Athena" class="headerlink" title="Athena"></a>Athena</h2><ul>
-<li><p>Athena 是種互動是的查詢服務，以 serverless 的方式運行</p>
+<li><p>Athena 是種互動式的查詢服務，以 serverless 的方式運行</p>
 </li>
 <li><p>可透過標準的 SQL 對 S3 中的資料進行查詢，不需要設置複雜的 ETL(Extract/Transform/Load) 程序</p>
 </li>
-<li><p>實際查詢行為發生時才需要付費</p>
+<li><p>實際的查詢行為發生時才需要付費</p>
 </li>
 <li><p>通常用來查詢 Log(例如：ELB log, S3 access log)、產生報表</p>
 </li>
