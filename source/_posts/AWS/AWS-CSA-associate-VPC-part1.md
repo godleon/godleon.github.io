@@ -68,7 +68,7 @@ Overview
 
 - 透過兩個 gateway 進來的 traffic 第一個位置都是 `Router`
 
-- Router 會根據 traffic source 不同，並套用不同的 routing table rules
+- Router 會根據 traffic source/destination 不同，並套用不同的 routing table rules
 
 - 接著 traffic 會根據 routing rules 被導向不同的 Network ACL 進行流量的過濾
 
@@ -196,7 +196,7 @@ Overview
 
 - 可以將 VPC 視為在 AWS 中的一個 logical datacenter
 
-- VPC 中包含了 `IGW(Internet Gateway)`、`Virtual Private Gateway`、`Route Table`、`Network ACLs`、`Subnet`、`Security Group` 這幾個重要元素
+- VPC 中包含了 `IGW(Internet Gateway)`、`Virtual Private Gateway`、`Route Table`、`Network ACLs`、`Subnet`、`Security Group`、`NAT Gateway` 這幾個重要元素
 
 - 1 subnet = 1 AZ
 > subnet 是無法跨 AZ 的，不同的 AZ 一定是不同的 subnet
@@ -409,7 +409,7 @@ Network Security
 
 - outbound 要允許 TCP port 1024~65535 的 traffic，否則 VM 會無法連網
 
-![VPC Network ACL outbound rule - 2](/blog/images/aws/VPC_NetworkACL-outbound-1.png)
+![VPC Network ACL outbound rule - 2](/blog/images/aws/VPC_NetworkACL-outbound-2.png)
 
 - 也可以直接允許所有 outbound 的 TCP traffic 
 

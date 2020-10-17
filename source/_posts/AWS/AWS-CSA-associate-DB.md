@@ -57,20 +57,20 @@ RDBMS 的基本概念(例如：Database、Table、Row、Field )這邊就略過�
 ## 各類 DB 服務與合適的應用
 
 - RDS (for OLTP)
-    - SQL Server
-    - MySQL
-    - PostgreSQL
-    - Oracle
-    - Aurora
-    - MariaDB
+  - SQL Server
+  - MySQL
+  - PostgreSQL
+  - Oracle
+  - Aurora
+  - MariaDB
 
 - Redshift (for OLAP, 與 Business Intelligence & Data Warehousing 應用搭配使用)
 
-- DynamoDB(NoSQL)
+- DynamoDB (NoSQL, 類似 MongoDB)
 
 - Elasticacahe (memory cache，用來加速存取)
-    - Memcached
-    - Redis
+  - Memcached
+  - Redis
 
 ## 考試重點
 
@@ -100,7 +100,7 @@ RDS
   
 - 可以佈署為 Multi-AZ，藉此達成備份 & HA 的目的
 
-- 搭配 read replica，可以有效降低 primary DB 的讀取負載
+- 搭配 read replica，讓 application 的 read workload 轉到 read replica，可以有效降低 primary DB 的讀取負載
 
 
 ## 優點
@@ -116,7 +116,7 @@ RDS
 - Automatic AZ-failover 可以在 RDS instance 出問題時，自動恢復
 
 
-## RDS 服務提供的備份/Multi-AZ/Read Replicas 功能
+## RDS 服務提供的備份 / Multi-AZ / Read Replicas 功能
 
 ### 備份
 
@@ -138,7 +138,7 @@ RDS 提供兩種備份類型：
 
 - 備份工作會在使用者預先定義好的 backup window 進行
 
-- 備份工作進行時，會需要耗費一定量的 storage I/O，因此資料當下在存取時會稍微有延遲
+- 備份工作進行時，會需要耗費一定量的 storage I/O，因此備份工作當下存取資料會稍微有延遲
 
 - 當 RDS instance 被移除後，相對應的備份資料也會一併被移除(但刪除前可以先做 snapshot 來保留資料)
 
@@ -330,7 +330,7 @@ DynamoDB
 
 ## DynamoDB 基礎知識
 
-- 是由 AWS 自行開發的全託管 NoSQL DB，類似於 MongoDB；使用者只要只要需要多少容量，其他就通通由 AWS 負責
+- 是由 AWS 自行開發的全託管 NoSQL DB，類似於 MongoDB；使用者只要確認需要多少容量，其他就通通由 AWS 負責
 
 - 資料儲存在 SSD 中
 

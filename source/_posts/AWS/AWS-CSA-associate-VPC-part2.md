@@ -45,7 +45,7 @@ VPC Flow Logs
 
 - 可以選擇記錄 Accept/Reject/All 三種不同的條件
 
-- log capture window 大約是 10~15 分鐘，因此流量產生後，最多需要等待 10~15 分鐘後，才可以在 VPC 的 flow log 頁籤中看到相關資訊
+- log capture window 大約是 10\~15 分鐘，因此流量產生後，最多需要等待 10\~15 分鐘後，才可以在 VPC 的 flow log 頁籤中看到相關資訊
 
 ## 考試重點
 

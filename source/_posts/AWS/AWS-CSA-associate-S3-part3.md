@@ -101,7 +101,7 @@ AWS Storage Gateway 是一種混合雲端儲存服務，有以下兩個特性：
 
 ### Volume Gateway
 
-Volume Gateway 提供了 `iSCSI` 的方式，讓資料可透過**單一磁碟(volume)**為單位的角度來進行資料的儲存與管理；寫入 volume 的資料會以非同步的方式透過 volume snapshot 的方式進行儲存，也因為是 block device 的關係，因此每次的變更備份都是只有處理變更的 block 部份而已。
+Volume Gateway 提供了 `iSCSI` 的方式，讓資料可透過 **單一磁碟(volume)** 為單位的角度來進行資料的儲存與管理；寫入 volume 的資料會以非同步的方式透過 volume snapshot 的方式進行儲存，也因為是 block device 的關係，因此每次的變更備份都是只有處理變更的 block 部份而已。
 
 而根據 volume 使用情境的不同，Volume Gateway 還可以分成以下兩種：
 
@@ -146,11 +146,11 @@ Athena vs Macie
 
 ## Athena
 
-- Athena 是種互動是的查詢服務，以 serverless 的方式運行
+- Athena 是種互動式的查詢服務，以 serverless 的方式運行
 
 - 可透過標準的 SQL 對 S3 中的資料進行查詢，不需要設置複雜的 ETL(Extract/Transform/Load) 程序
 
-- 實際查詢行為發生時才需要付費
+- 實際的查詢行為發生時才需要付費
 
 - 通常用來查詢 Log(例如：ELB log, S3 access log)、產生報表
 
