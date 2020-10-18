@@ -158,7 +158,7 @@ CloudFront 就是 AWS 透過佈建在全世界各地的 edge server 所提供的
 > Edge server 會將回源取到的資料進行 cache，下一位使用者來存取時，就不需要再度回源了
 ![S3 CloudFront](/blog/images/aws/S3_CloudFront.png)
 
-- **Distribution**：這其實就是 CDN 服務本身所提供的 endpoint，搭配其智慧化的 DNS 解析能力，可以讓使用者取得離自己最近的 edge server 紀行存取，因此可以視為 edge location collection；而 AWS CloudFront 目前支援兩種資源的發佈
+- **Distribution**：這其實就是 CDN 服務本身所提供的 endpoint，搭配其智慧化的 DNS 解析能力，可以讓使用者取得離自己最近的 edge server 進行存取，因此可以視為 edge location collection；而 AWS CloudFront 目前支援兩種資源的發佈
   
   - **Web Distribution**: 通常是一般網站使用的靜態資源，像是 image, css, javascript, music ... 都屬於此類；也包含透過 HTTP 協議傳輸的視訊協定，例如：HTTP Live Streaming(HLS), Dynamic Adaptive Streaming over HTTP (DASH), Microsoft Smooth Streaming (MSS), or HTTP Dynamic Streaming (HDS) .... 等等。
   

@@ -49,7 +49,7 @@ EC2 簡介
 
 - **Dedicated Host**：整台實體機器都給你用了，如果軟體必須跟實體機器綁定時 or 想要先把地端的運用完全不動的先移植到雲端時，才會用到的選項。
 
-- **Saving Plan**：這是新一代的省錢方式，對使用者來說，運用彈性變大的(例如：可改變 instance type)，詳情可參考[官網說明](https://aws.amazon.com/tw/savingsplans/)，但同樣會需要使用者預付一筆費用
+- **Saving Plan**：這是新一代的省錢方式，對使用者來說，運用彈性變大了(例如：可改變 instance type)，詳情可參考[官網說明](https://aws.amazon.com/tw/savingsplans/)，但同樣會需要使用者預付一筆費用
 
 
 ## Spot Instance 計費

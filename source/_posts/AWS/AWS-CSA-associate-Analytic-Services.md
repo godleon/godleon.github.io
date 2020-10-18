@@ -47,7 +47,7 @@ Kinesis
 
 - Producer 會持續不斷的送資料到 Kinesis stream 中進行處理 (相關的資料處理程式要預先設定好)
 
-- 越多資料要處理，就需要增加越多個 shard 到 Kinesis sream 中 (每個 shard 的處理能理是每秒 2MB read & 1MB write)
+- 越多資料要處理，就需要增加越多個 shard 到 Kinesis sream 中 (每個 shard 的資料處理能力是每秒 2MB read & 1MB write)
 
 - Consumer 可以取用 Kinesis stream 的資料(可以同時被多個 consumer 存取資料)
 

@@ -267,7 +267,7 @@ Auto Scaling 實作須知
 
 - Group size 若是與 subnet 數量一致，佈署的時候就會被平均分散放置
 
-- 作為自動 scale group size 的 metric type 有四種，分別是：
+- 可作為自動 scale group size 的 metric type 有四種，分別是：
 
     - Application Load Balancer Request Per Target
 
@@ -291,7 +291,7 @@ HA Architechture
 
 ## 重點觀念
 
-- 硬體一定會故障，基礎設施一定會有問題，因此必須 always design for failure
+- 硬體一定會故障，基礎設施一定會有問題，因此必須 **always design for failure**
 
 - multiple AZ 的設計是必須的；如果是非常關鍵的應用，multiple region 的設計也可以考慮進來
 
@@ -333,7 +333,7 @@ CloudFormation 跟之前研究 OpenStack 時學到的 HEAT 看起來幾乎是一
 - AWS 已經預先定義好非常多 template 了，甚至還有很多廠商也提供了不少現成的 template 可以直接套用
 > 如果你的環境很固定是要跑特定的應用，那倒是可以試試看
 
-基本上這套工具並不吸引我，我個人是會選擇泛用性更高的工具，例如：[Terraform](https://www.terraform.io/) or [pulumi](https://www.pulumi.com/) 來做一樣的事情，避免被特定平台綁死
+基本上這套工具並不吸引我，我個人是會選擇泛用性更高的工具，例如：[Terraform](https://www.terraform.io/) or [pulumi](https://www.pulumi.com/) 來做一樣的事情，避免被特定平台綁死。
 
 
 ## Elastic Beanstalk

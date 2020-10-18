@@ -112,7 +112,7 @@ stop 再 start 在 placement group 中的所有 instance，應該就可以解決
 
 確認新增 ELB 時，`Cross-zone Load Balancing` 的設定有開啟
 
-### instance 健康，但註冊到 ELB 後卻是 OurOfService
+### instance 健康，但註冊到 ELB 後卻是 OutOfService
 
 要把 ELB 上對 instance 的 health check 的規則(ping protocol/port/path)設定正確
 > 假設 ping TCP port 1234，但卻在 security group 沒有開放，那就是有問題的
@@ -134,7 +134,7 @@ ELB 設定時需要指定可作 load balanece 的 AZ，應該是 instance 所在
 
 ## Auto Scaling
 
-### ASG 中的 instance 在短時機內反覆的 start & stop(or create/terminate)
+### ASG 中的 instance 在短時間內反覆的 start & stop(or create/terminate)
 
 scale up/down 的 threshold 可能設定的太靠近了，導致三不五時就觸發 scale up/down 的條件
 

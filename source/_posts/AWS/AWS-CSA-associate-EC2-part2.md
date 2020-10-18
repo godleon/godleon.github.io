@@ -48,13 +48,13 @@ EBS volume type 有四種(官方宣稱)，直接使用下表來進行比較：
 
 ## Volumes & Snapshots
 
-- EBS volume 與 EC2 instance 會在同一個 AZ 中
+- EBS volume 與 EC2 instance 必須在同一個 AZ 中
 
 - volume 存在於 EBS 中；snapshot 則是存在於 S3 中
 
 - snapshot 是 volume 在特定時間點的複本
 
-- snapshot 的特性是 incremental，因此對 volume 進行 snapshot 只會針對有變動的 block 進行處理(也只有增加的部份容量會被收費)
+- snapshot 的特性是**遞增(incremental)**，因此對 volume 進行 snapshot 只會針對有變動的 block 進行處理(也只有增加的部份容量會被收費)
 > 假設同一個 EBS volume 的 snapshot 有兩個，若是第一個完整的 snapshot 被刪除，還是可以從第二個 snapshot 還原所有資料
 
 - 第一次的 snapshot 需要花費較長的時間完成
@@ -217,7 +217,7 @@ CloudWatch & CloudTrail 都是很大的主題，這邊暫時以 CSA 的考試需
 
 - CloudWatch Alarm 可以用來觸發某些特定事件，例如：auto scaling
 
-- CloudWatch 預設**每五分鐘(Basic Level)**會對 EC2 進行監控資訊的蒐集；但若是希望可以監控到更細節的資訊，可以設定成**每一分鐘(Detailed Level**，在啟用 instance 時勾選 `Enable CloudWatch detailed monitoring`)
+- CloudWatch 預設 **每五分鐘(Basic Level)** 會對 EC2 進行監控資訊的蒐集；但若是希望可以監控到更細節的資訊，可以設定成 **每一分鐘(Detailed Level**，在啟用 instance 時勾選 `Enable CloudWatch detailed monitoring`)
 
 - EC2 中的 auto scaling 功能需要依賴在 CloudWatch 中設定 threashold 來決定在什麼樣的條件下，要自動調整 instance 的數量
 
