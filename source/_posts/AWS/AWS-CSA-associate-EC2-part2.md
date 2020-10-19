@@ -34,6 +34,8 @@ EBS 是 AWS 提供的 block storage 服務，可提供以下服務：
 
 - 可使用 EBS snapshot 將資料備份到 S3，並搭配 S3 lifecycle 管理機制來提高資料的安全性
 
+- 是種 block device 服務，但可以同時掛載到多個 EC2 instance 中(有限定 instance type，[AWS 文件說明](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volumes-multi.html))
+
 
 ## EBS Volume Type
 

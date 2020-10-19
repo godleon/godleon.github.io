@@ -126,7 +126,7 @@ Placement Group
 
 - 隔離的單位為單一 instance
 
-- 每個 placement group 在每個 AZ 最多只能有 7 個 running instance
+- 每個 spread placement group 在每個 AZ 最多只能有 7 個 running instance (**只有 spread 有此限制**)
 
 ## Partition
 
