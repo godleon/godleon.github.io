@@ -344,6 +344,8 @@ DynamoDB
 
 - 若資料寫入 DynamoDB 後需要在一秒內可以存取到最新的資料，則選擇 `Strongly Consistent Read`
 
+- 可以儲存較大的 text & binary 物件，但上限是 400KB
+
 
 ## 常見的適用場景
 

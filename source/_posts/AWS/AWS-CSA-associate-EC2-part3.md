@@ -198,11 +198,11 @@ AWS WAS 在過濾流量上提供三種模式供使用者選擇：
 
 ## 考試重點
 
-若要需要阻止惡意的來源 IP 位址，可以從哪些服務著手：
+- WAF 可以阻擋 Layer 7 的攻擊，例如：`SQL Injection`、`Cross Site Scripting`；而 AWS Shield 則是阻擋 Layer 3 & 4 的攻擊，例如：DDoS
 
-- Network ACLs
-
-- AWS WAF
+- 若要需要阻止惡意的來源 IP 位址，可以從哪些服務著手：
+  - Network ACLs
+  - AWS WAF
 
 
 

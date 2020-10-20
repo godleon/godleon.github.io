@@ -162,6 +162,8 @@ Direct Connect 服務是讓使用者可以從地端資料中心建立一條私�
 
 - Direct Connect 可提供一條安全的私有專線
 
+- 地端需要設定 routing rule 到 VPC；同時 VPC 也要設定 route table 回地端，並在 VPG(Virtual Private Gateway) 上開啟 route propagation 功能
+
 
 ## HA & Failover 的考量
 

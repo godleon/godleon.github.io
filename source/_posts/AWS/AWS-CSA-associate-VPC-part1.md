@@ -248,6 +248,7 @@ Overview
 - `Auto-assign public IP` 是預設關閉的
 
 - 一個 class C 的 subnet 中只有 251 個 IP 可用 (AWS 保留了幾個 IP，詳細規劃可參考[官網文件](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html))
+> **每個 subnet 中的前四個 IP & 最後一個 IP 都會被 AWS 佔用**
 
 當 subnet 建立完成後，VPC 架構圖就會變成如下：
 
