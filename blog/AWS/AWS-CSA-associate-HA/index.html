@@ -35,7 +35,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/ELB_Cross-Zone-Load-Balancing-common-scenario.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/ELB_Path-Patterns.png">
 <meta property="article:published_time" content="2020-06-09T22:35:00.000Z">
-<meta property="article:modified_time" content="2020-10-20T10:43:05.756Z">
+<meta property="article:modified_time" content="2020-11-01T13:34:04.684Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -261,7 +261,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-10-20 18:43:05" itemprop="dateModified" datetime="2020-10-20T18:43:05+08:00">2020-10-20</time>
+                <time title="Modified: 2020-11-01 21:34:04" itemprop="dateModified" datetime="2020-11-01T21:34:04+08:00">2020-11-01</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -514,7 +514,10 @@
 </li>
 </ul>
 <h1 id="Auto-Scaling-實作須知"><a href="#Auto-Scaling-實作須知" class="headerlink" title="Auto Scaling 實作須知"></a>Auto Scaling 實作須知</h1><ul>
-<li><p>設定 Auto Scaling Group 之前，必須先設定 <code>Launch Configurations</code></p>
+<li><p>設定 Auto Scaling Group 之前，必須先設定 <code>Launch Configurations</code> or <code>Launch Template</code></p>
+<blockquote>
+<p>Launch Configurations 只能有一組設定；而 <strong>Launch Template 可以設定不同 instance type(on-demand &amp; spot) 的混搭</strong> </p>
+</blockquote>
 </li>
 <li><p>Group size 若是與 subnet 數量一致，佈署的時候就會被平均分散放置</p>
 </li>
@@ -534,6 +537,8 @@
 <blockquote>
 <p>若是設定 300 秒，那該 instance 有五分鐘可以 warm up 的時間(根據需求自行處理此部份)，然後前端的 ELB 才會將流量送過來</p>
 </blockquote>
+</li>
+<li><p>可以搭配 Auto Scaling Group Lifecycle hook，在 instance 啟動或中止時，預先執行指定的 custom script(例如：安裝特定軟體、將特定的 log 複製到 S3 留存 … etc)，此時 instance 會處於 wait 狀態，若是前方有 ELB，ELB 也還不會將 traffic 分流過來</p>
 </li>
 <li><p>當 ASG 設定被移除，與其相關的 instance 也會一併被移除</p>
 </li>

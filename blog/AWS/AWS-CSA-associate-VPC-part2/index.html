@@ -39,7 +39,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/VPC_Endpoint-1.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/VPC_Endpoint-2.png">
 <meta property="article:published_time" content="2020-05-27T20:10:00.000Z">
-<meta property="article:modified_time" content="2020-10-20T10:43:05.760Z">
+<meta property="article:modified_time" content="2020-11-01T13:34:04.684Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -263,7 +263,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-10-20 18:43:05" itemprop="dateModified" datetime="2020-10-20T18:43:05+08:00">2020-10-20</time>
+                <time title="Modified: 2020-11-01 21:34:04" itemprop="dateModified" datetime="2020-11-01T21:34:04+08:00">2020-11-01</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -550,7 +550,10 @@
 </li>
 <li><p>VPC endpoint 類型有兩種，分別是 <code>Interface Endpoint</code> &amp; <code>Gateway Endpoint</code></p>
 </li>
-<li><p>目前支援 Gateway Endpoint 的服務有 <code>S3</code> &amp; <code>DynamoDB</code> </p>
+<li><p>目前支援 Gateway Endpoint 的服務有 <code>S3</code> &amp; <code>DynamoDB</code></p>
+<blockquote>
+<p>因此若要連線的服務是 S3 or DynamoDB，就要建立 VPC endpoint gateway，而非 VPC endpoint interface</p>
+</blockquote>
 </li>
 </ul>
 <h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>

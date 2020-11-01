@@ -36,7 +36,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/DNS_Geolocation-Routing.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_CloudFront.png">
 <meta property="article:published_time" content="2020-06-02T22:10:00.000Z">
-<meta property="article:modified_time" content="2020-10-20T10:43:05.756Z">
+<meta property="article:modified_time" content="2020-11-01T13:34:04.684Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -261,7 +261,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-10-20 18:43:05" itemprop="dateModified" datetime="2020-10-20T18:43:05+08:00">2020-10-20</time>
+                <time title="Modified: 2020-11-01 21:34:04" itemprop="dateModified" datetime="2020-11-01T21:34:04+08:00">2020-11-01</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -322,7 +322,10 @@
 <li><p>zone 有分為 <code>public</code> &amp; <code>private</code> 兩種：</p>
 <ul>
 <li><strong>pulbic hosted zone</strong>：面向 Internet 的，別人只要有使用正確的 DNS server 設定就可以查詢的到</li>
-<li><strong>private hosted zone</strong>：只有在 VPC 中有效(跨 VPC 也可以)，在 VPC 中的 instance 可以正確的查詢到 DNS record 設定</li>
+<li><strong>private hosted zone</strong>：只有在 VPC 中有效(跨 VPC 也可以)，在 VPC 中的 instance 可以正確的查詢到 DNS record 設定<blockquote>
+<p><strong>private hosted zone 不會回應來自 VPC 之外的 DNS 查詢</strong></p>
+</blockquote>
+</li>
 </ul>
 </li>
 <li><p>每個 zone 建立後都會預帶 <code>NS(name server)</code> &amp; <code>SOA(start of authority)</code> 的設定</p>
