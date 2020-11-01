@@ -314,7 +314,8 @@ VPC Endpoint
 
 - VPC endpoint 類型有兩種，分別是 `Interface Endpoint` & `Gateway Endpoint`
 
-- 目前支援 Gateway Endpoint 的服務有 `S3` & `DynamoDB` 
+- 目前支援 Gateway Endpoint 的服務有 `S3` & `DynamoDB`
+> 因此若要連線的服務是 S3 or DynamoDB，就要建立 VPC endpoint gateway，而非 VPC endpoint interface
 
 
 

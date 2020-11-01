@@ -263,7 +263,8 @@ Group & Configuration Template 都是相對容易理解的部份，這裡需要�
 Auto Scaling 實作須知
 ====================
 
-- 設定 Auto Scaling Group 之前，必須先設定 `Launch Configurations`
+- 設定 Auto Scaling Group 之前，必須先設定 `Launch Configurations` or `Launch Template`
+> Launch Configurations 只能有一組設定；而 **Launch Template 可以設定不同 instance type(on-demand & spot) 的混搭** 
 
 - Group size 若是與 subnet 數量一致，佈署的時候就會被平均分散放置
 
@@ -280,8 +281,9 @@ Auto Scaling 實作須知
 - 可設定新增的 instance 開始提供服務時間之前的 warm up 週期
 > 若是設定 300 秒，那該 instance 有五分鐘可以 warm up 的時間(根據需求自行處理此部份)，然後前端的 ELB 才會將流量送過來
 
-- 當 ASG 設定被移除，與其相關的 instance 也會一併被移除
+- 可以搭配 Auto Scaling Group Lifecycle hook，在 instance 啟動或中止時，預先執行指定的 custom script(例如：安裝特定軟體、將特定的 log 複製到 S3 留存 ... etc)，此時 instance 會處於 wait 狀態，若是前方有 ELB，ELB 也還不會將 traffic 分流過來
 
+- 當 ASG 設定被移除，與其相關的 instance 也會一併被移除
 
 
 HA Architechture

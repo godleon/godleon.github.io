@@ -49,6 +49,7 @@ Route 53
 - zone 有分為 `public` & `private` 兩種：
   - **pulbic hosted zone**：面向 Internet 的，別人只要有使用正確的 DNS server 設定就可以查詢的到
   - **private hosted zone**：只有在 VPC 中有效(跨 VPC 也可以)，在 VPC 中的 instance 可以正確的查詢到 DNS record 設定
+> **private hosted zone 不會回應來自 VPC 之外的 DNS 查詢**
 
 - 每個 zone 建立後都會預帶 `NS(name server)` & `SOA(start of authority)` 的設定
 

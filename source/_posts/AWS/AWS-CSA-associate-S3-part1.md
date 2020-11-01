@@ -134,6 +134,8 @@ S3 根據使用者存取的頻率與需求，提供不同的 storage class 供�
 
 - 會自動將資料儲存在多個 AZ 中，會同時有三個備份，因此在兩個實體設施損毀的情況下，還是可以取得資料
 
+- 沒有低消問題，資料儲存多久就算多久的費用
+
 ### 參考資料
 
 > [物件儲存類別 – Amazon S3 Storage Class(Standard)](https://aws.amazon.com/tw/s3/storage-classes/#General_purpose)
@@ -150,6 +152,8 @@ S3 根據使用者存取的頻率與需求，提供不同的 storage class 供�
 
 - 存取速度比 standard 慢
 
+- 低消為 30 天的收費 (短時間的儲存不划算)
+
 ### 參考資料
 
 > [物件儲存類別 – Amazon S3 Storage Class(IA)](https://aws.amazon.com/tw/s3/storage-classes/#Infrequent_access)
@@ -161,6 +165,8 @@ S3 根據使用者存取的頻率與需求，提供不同的 storage class 供�
 - 沒有提供 multiple AZ 的資料保護
 
 - 價格比 IA 更為便宜
+
+- 低消為 30 天的收費 (短時間的儲存不划算)
 
 ### 參考資料
 
@@ -175,6 +181,8 @@ S3 根據使用者存取的頻率與需求，提供不同的 storage class 供�
 - 透過人工智慧分析，自動將使用成本最佳化，且不會造成效能的影響，也可以減輕管理上的負擔
 
 > 但最多幫使用者將資料移動到 IA tier 的費率，無法更低了(例如：**One Zone-IA** or **Glacier**)
+
+- 低消為 30 天的收費 (短時間的儲存不划算)
 
 ### 參考資料
 
@@ -191,6 +199,8 @@ S3 根據使用者存取的頻率與需求，提供不同的 storage class 供�
 - 一個 AZ 全毀的情況下還是可以取得資料 
 
 - 儲存費用很低
+
+- 低消為 90 天的收費 (短時間的儲存不划算)
 
 ### 參考資料
 

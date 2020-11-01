@@ -111,10 +111,6 @@ AWS SQS 提供了兩種 Queue Type，分別是：
 > 成本較高，因為這樣的模式所產生的 request 會比較多
 
 
-
-
-
-
 ## 考試重點
 
 - SQS 是種 message queue 服務，這類服務被設計出來的很重要的其中一個目的，就是要 **decouple** service，讓不同的 service 可以各自專心處理與自己相關的細節
@@ -136,6 +132,8 @@ AWS SQS 提供了兩種 Queue Type，分別是：
 
 - SQS 支援 long polling 的連接方式，因此即使是 pull-based，還是可以藉此減少建立連線的成本
 > 持續的向 SQS 建立連線是需要額外花費的，使用 long polling 可以省下不少費用
+
+- S3 event 也可以作為 SQS 的資料來源，但僅支援 standard queue，不支援 FIFO queue
 
 
 
