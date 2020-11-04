@@ -202,6 +202,8 @@ S3 根據使用者存取的頻率與需求，提供不同的 storage class 供�
 
 - 低消為 90 天的收費 (短時間的儲存不划算)
 
+- **會自動將存進來的資料進行 AES 256-bits 的加密**
+
 ### 參考資料
 
 - [物件儲存類別 – Amazon S3 Storage Class(Glacier)](https://aws.amazon.com/tw/s3/storage-classes/#Archive)

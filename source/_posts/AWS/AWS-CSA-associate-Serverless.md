@@ -68,6 +68,8 @@ Lambda
 
 - 搞清楚 Lambda function trigger 可以有哪些
 
+- 若要定期呼叫 Lambda function 來執行特定工作，可以搭配 **CloudWatch event cron expression**
+
 
 
 實作課程重點節錄

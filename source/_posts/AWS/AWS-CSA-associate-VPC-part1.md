@@ -239,7 +239,7 @@ Overview
 - **VPC CIDRs**：此區域會顯示當初建立 VPC 時所指定的 IP range
 
 - **Availability Zone**：指定 subnet 所在的 AZ；但需要注意的是，**不同使用者看到的相同名稱 AZ，不一定是同一個 AZ**
-> 這是 AWS 為了確保資源設定可以平均分散在不同 AZ 的設計
+> 這是 AWS 為了確保資源設定可以平均分散在不同 AZ 的設計；**但還是可以透過 AZ ID 來識別 AZ 實際上是不是相同**
 
 **IPv4(IPv6) CIDR block**：subnet 所要使用的 IP 範圍 (IPv6 可以不指定)
 
