@@ -30,7 +30,7 @@
 <meta property="og:description" content="此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為與 EC2 相關的服務，會分成三篇文章來記錄，此為第三部份，包含了 Bootstrap Scripts、Instance Metadata、Placement Group、WAF、EFS、FSx、FSx for Lustre ... 等內容">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2020-06-01T21:20:00.000Z">
-<meta property="article:modified_time" content="2020-11-04T10:59:28.092Z">
+<meta property="article:modified_time" content="2020-11-07T02:50:39.661Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -164,7 +164,7 @@
 
       <!--noindex-->
       <section class="post-toc-wrap sidebar-panel">
-          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Bootstrap-Scripts"><span class="nav-number">1.</span> <span class="nav-text">Bootstrap Scripts</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Instance-Meta-Data"><span class="nav-number">2.</span> <span class="nav-text">Instance Meta Data</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EFS-Elastic-File-System"><span class="nav-number">3.</span> <span class="nav-text">EFS(Elastic File System)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#FSX-amp-FSx-for-Lustre"><span class="nav-number">4.</span> <span class="nav-text">FSX &amp; FSx for Lustre</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#FSx"><span class="nav-number">4.1.</span> <span class="nav-text">FSx</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FSx-for-Lustre"><span class="nav-number">4.2.</span> <span class="nav-text">FSx for Lustre</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Placement-Group"><span class="nav-number">5.</span> <span class="nav-text">Placement Group</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Cluster"><span class="nav-number">5.1.</span> <span class="nav-text">Cluster</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spread"><span class="nav-number">5.2.</span> <span class="nav-text">Spread</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Partition"><span class="nav-number">5.3.</span> <span class="nav-text">Partition</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96"><span class="nav-number">5.4.</span> <span class="nav-text">其他</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#WAF-Web-Application-Firewall"><span class="nav-number">6.</span> <span class="nav-text">WAF(Web Application Firewall)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%80%83%E8%A9%A6%E9%87%8D%E9%BB%9E"><span class="nav-number">6.1.</span> <span class="nav-text">考試重點</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">7.</span> <span class="nav-text">References</span></a></li></ol></div>
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Bootstrap-Scripts"><span class="nav-number">1.</span> <span class="nav-text">Bootstrap Scripts</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Instance-Meta-Data"><span class="nav-number">2.</span> <span class="nav-text">Instance Meta Data</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EFS-Elastic-File-System"><span class="nav-number">3.</span> <span class="nav-text">EFS(Elastic File System)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#FSX-amp-FSx-for-Lustre"><span class="nav-number">4.</span> <span class="nav-text">FSX &amp; FSx for Lustre</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#FSx-for-Windows-File-Server"><span class="nav-number">4.1.</span> <span class="nav-text">FSx (for Windows File Server)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FSx-for-Lustre"><span class="nav-number">4.2.</span> <span class="nav-text">FSx for Lustre</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Placement-Group"><span class="nav-number">5.</span> <span class="nav-text">Placement Group</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Cluster"><span class="nav-number">5.1.</span> <span class="nav-text">Cluster</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spread"><span class="nav-number">5.2.</span> <span class="nav-text">Spread</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Partition"><span class="nav-number">5.3.</span> <span class="nav-text">Partition</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96"><span class="nav-number">5.4.</span> <span class="nav-text">其他</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#WAF-Web-Application-Firewall"><span class="nav-number">6.</span> <span class="nav-text">WAF(Web Application Firewall)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%80%83%E8%A9%A6%E9%87%8D%E9%BB%9E"><span class="nav-number">6.1.</span> <span class="nav-text">考試重點</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">7.</span> <span class="nav-text">References</span></a></li></ol></div>
       </section>
       <!--/noindex-->
 
@@ -257,7 +257,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-11-04 18:59:28" itemprop="dateModified" datetime="2020-11-04T18:59:28+08:00">2020-11-04</time>
+                <time title="Modified: 2020-11-07 10:50:39" itemprop="dateModified" datetime="2020-11-07T10:50:39+08:00">2020-11-07</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -344,10 +344,12 @@
 </li>
 </ul>
 <h1 id="FSX-amp-FSx-for-Lustre"><a href="#FSX-amp-FSx-for-Lustre" class="headerlink" title="FSX &amp; FSx for Lustre"></a>FSX &amp; FSx for Lustre</h1><p>因為對 Windows 不是很有興趣，這邊就重點整理一下吧!</p>
-<h2 id="FSx"><a href="#FSx" class="headerlink" title="FSx"></a>FSx</h2><ul>
+<h2 id="FSx-for-Windows-File-Server"><a href="#FSx-for-Windows-File-Server" class="headerlink" title="FSx (for Windows File Server)"></a>FSx (for Windows File Server)</h2><ul>
 <li><p>FSx 可以想像一下就是 Windows 中的 SMB 協定提供出來的檔案系統，所以其實跟 EFS 之於 Linux 是差不多相同意思</p>
 </li>
 <li><p>FSx 同樣也是全託管(fully managed)服務，資料的 HA 也會自動保證(同 region 跨 AZ，也可以選擇 single AZ)</p>
+</li>
+<li><p><strong>支援 Microsoft Distributed File System (DFS)</strong></p>
 </li>
 </ul>
 <h2 id="FSx-for-Lustre"><a href="#FSx-for-Lustre" class="headerlink" title="FSx for Lustre"></a>FSx for Lustre</h2><ul>
@@ -356,6 +358,8 @@
 <li><p>可以提供 low latency、high throughtput/IOPS 等特性，用在像是機器學習、HPC …. 這類資料存取繁重的應用是很合適的</p>
 </li>
 <li><p>可與 S3 進行整合，資料處理完就可以直接存放到 S3</p>
+</li>
+<li><p><strong>不支援 Microsoft Distributed File System (DFS)</strong></p>
 </li>
 </ul>
 <h1 id="Placement-Group"><a href="#Placement-Group" class="headerlink" title="Placement Group"></a>Placement Group</h1><p>試想一下，如果有些應用需要 VM 之間網路延遲很低，在地端的 data center 會怎麼做?</p>

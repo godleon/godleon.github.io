@@ -37,7 +37,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/CloudHSM_Example.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/ParameterStore_Example.png">
 <meta property="article:published_time" content="2020-07-30T22:35:00.000Z">
-<meta property="article:modified_time" content="2020-11-04T10:59:28.092Z">
+<meta property="article:modified_time" content="2020-11-07T02:50:39.661Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -264,7 +264,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-11-04 18:59:28" itemprop="dateModified" datetime="2020-11-04T18:59:28+08:00">2020-11-04</time>
+                <time title="Modified: 2020-11-07 10:50:39" itemprop="dateModified" datetime="2020-11-07T10:50:39+08:00">2020-11-07</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -380,6 +380,9 @@
 <li><p><code>AWS Managed CMK</code>：免費，由 AWS 負責管理，使用者碰不到，在使用各個 AWS 服務時會預設拿來做加解密用，但也只有 AWS 服務可以直接使用</p>
 </li>
 <li><p><code>Customer Managed CMK</code>：完全可由使用者定義 rotation、key policy(誰可使用? 在什麼情況下可用? … 等等)，也可以開啟 or 關閉</p>
+<blockquote>
+<p><strong>若是不小心刪除 key，也不會馬上消失，key 會處於 <code>pending deletion</code> 的狀態 7~30 天，讓使用者有機會救回誤刪除的 key</strong></p>
+</blockquote>
 </li>
 <li><p><code>AWS Owned CMK</code>：這完全由 AWS 負責管理，不會屬於特定使用者帳號下，也看不到，用來在多個帳號之間，確保使用者帳號使用服務時的安全性。</p>
 </li>

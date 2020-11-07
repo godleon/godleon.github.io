@@ -31,7 +31,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/EBS_Storage-Type-Comparison.png">
 <meta property="article:published_time" content="2020-05-30T01:10:00.000Z">
-<meta property="article:modified_time" content="2020-11-04T10:59:28.092Z">
+<meta property="article:modified_time" content="2020-11-07T02:50:39.657Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -260,7 +260,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-11-04 18:59:28" itemprop="dateModified" datetime="2020-11-04T18:59:28+08:00">2020-11-04</time>
+                <time title="Modified: 2020-11-07 10:50:39" itemprop="dateModified" datetime="2020-11-07T10:50:39+08:00">2020-11-07</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -429,6 +429,8 @@
 <li><p>預設情況下，兩種類型的 instance 被移除後，root device 都會一併移除</p>
 </li>
 <li><p>可以設定當 instance 被移除後不移除 EBS backed volume，不過 instance store volume 無法做這樣的設定</p>
+</li>
+<li><p><strong>instance store 的空間實際上是在 EC2 instance 所在的實體機，並非靠網路連接取得，因此存取 instance store 就是存取本機磁碟，I/O 效能是很好的；適合需要 I/O 效能但不需要持久化儲存的資料處理用</strong></p>
 </li>
 </ul>
 <h1 id="ENI-ENA-EFA-的比較"><a href="#ENI-ENA-EFA-的比較" class="headerlink" title="ENI, ENA, EFA 的比較"></a>ENI, ENA, EFA 的比較</h1><p>這個部份可能會需要曾經有硬體相關的背景可能會看比較懂….</p>
