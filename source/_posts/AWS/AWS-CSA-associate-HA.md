@@ -116,6 +116,8 @@ Advanced Load Balancer 須知
 
 3. 預設情況下，Route 53 會引導各 50% 的流量到不同 AZ 上的 Load Balancer
 
+> **Cross Zone Load Balancing 在 ALB 預設是開啟的，但在 NLB 預設是關閉的**
+
 ###  未開啟 Cross Zone Load Balancing
 
 首先是一般情況下沒有開啟 Cross Zone Load Balancing 功能的情況下：
@@ -284,6 +286,9 @@ Auto Scaling 實作須知
 - 可以搭配 Auto Scaling Group Lifecycle hook，在 instance 啟動或中止時，預先執行指定的 custom script(例如：安裝特定軟體、將特定的 log 複製到 S3 留存 ... etc)，此時 instance 會處於 wait 狀態，若是前方有 ELB，ELB 也還不會將 traffic 分流過來
 
 - 當 ASG 設定被移除，與其相關的 instance 也會一併被移除
+
+- **若要針對 scale out 所新產生的做進行客製化的驗證，可以搭配 ASG lifecycle hook 將 instance 先設定為 wait state，並執行客製化的驗證**
+
 
 
 HA Architechture

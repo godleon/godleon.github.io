@@ -84,6 +84,8 @@ Kinesis 根據功能共分為以下四類：
 
 - 處理完的資料可以存到 S3, EMR, Redshift, DynamoDB .... 等地方做後續運用
 
+- **Kinesis 處理資料的能力會因為 shard 的數量不同而不同，而 shard 的數量需要手動指定，無法自動擴展**
+
 ### Kinesis Data Firehose
 
 ![Kinesis Data Firehose Example](/blog/images/aws/KinesisDataFirehose_Example.png)

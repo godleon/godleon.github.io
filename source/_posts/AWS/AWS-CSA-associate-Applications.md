@@ -90,6 +90,8 @@ AWS SQS 提供了兩種 Queue Type，分別是：
 
 - TPS(Transaction Per Second) 最大只有 300
 
+- **搭配 batch mode(最多一次處理 10 筆 message, 範圍為 1~10)，就可以將每秒處理能力從 300 提升到 3000 筆 message**
+
 - 包含 standard queue 中所有的功能
 
 

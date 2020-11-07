@@ -77,11 +77,13 @@ FSX & FSx for Lustre
 
 因為對 Windows 不是很有興趣，這邊就重點整理一下吧!
 
-## FSx
+## FSx (for Windows File Server)
 
 - FSx 可以想像一下就是 Windows 中的 SMB 協定提供出來的檔案系統，所以其實跟 EFS 之於 Linux 是差不多相同意思
 
 - FSx 同樣也是全託管(fully managed)服務，資料的 HA 也會自動保證(同 region 跨 AZ，也可以選擇 single AZ)
+
+- **支援 Microsoft Distributed File System (DFS)**
 
 ## FSx for Lustre
 
@@ -90,6 +92,8 @@ FSX & FSx for Lustre
 - 可以提供 low latency、high throughtput/IOPS 等特性，用在像是機器學習、HPC .... 這類資料存取繁重的應用是很合適的
 
 - 可與 S3 進行整合，資料處理完就可以直接存放到 S3
+
+- **不支援 Microsoft Distributed File System (DFS)**
 
 
 

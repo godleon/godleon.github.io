@@ -158,6 +158,8 @@ AMI 是產生 EC2 instance 的基礎，使用者在選擇 AMI 時，可基於以
 
 - 可以設定當 instance 被移除後不移除 EBS backed volume，不過 instance store volume 無法做這樣的設定
 
+- **instance store 的空間實際上是在 EC2 instance 所在的實體機，並非靠網路連接取得，因此存取 instance store 就是存取本機磁碟，I/O 效能是很好的；適合需要 I/O 效能但不需要持久化儲存的資料處理用**
+
 
 
 ENI, ENA, EFA 的比較

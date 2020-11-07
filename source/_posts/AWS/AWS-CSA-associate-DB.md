@@ -226,6 +226,9 @@ RDS 提供兩種備份類型：
 
 - **data replication 過程中產生的資料傳輸是免費的**
 
+## 其他考試重點
+
+- 任何 DB engine 的升級，primary & standny DB 會同時升級(若是 multi-AZ)，此時就會有 downtime 的發生
 
 
 Aurora
@@ -306,6 +309,12 @@ RDS 提供三種複本(replica)類型：
 
 - 所使用的 VPC 網路
 
+## 其他考試重點
+
+- 如果 Aurora primary DB 掛了，若有多個 read replica，那優先選擇的條件會是以 `priority` + `容量` 來評估；舉例來說：priority **tier-1 > tier-10 > tier-15**，容量 **32TB > 16TB**
+
+- 以上面的例子來說，若有五個 read replica 分別是 **tier-1(16TB)****tier-1(32TB)**、**tier-10(16TB)**、**tier-15(16TB)**、**tier-15(32TB)**，那會被優先選中提昇為 primary DB 的就會是 `**tier-1(32TB)**`
+
 
 
 DynamoDB
@@ -354,6 +363,11 @@ DynamoDB
 - Gaming：儲存 session, leaderboard
 
 - Mobile：儲存 user profile，個人化資訊
+
+
+## 其他考試重點
+
+- DynamoDB Accelerator(DAX) 除了可以提供 DynamoDB 的優點外，還增加了 in-memory cache 的功能，可以大幅提昇外部讀取的能力
 
 
 

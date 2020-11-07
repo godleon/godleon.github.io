@@ -256,6 +256,8 @@ Security Group
 
 - 額外加入的 volume 也可以加密
 
+- **EC2 instance tenancy 可以從 host 轉為 dedicated，也可以從 dadicated 轉為 host；但無法轉成 default or 從 default 轉為其他種(host or dedicated)**
+
 ## Security Group
 
 - 所有 inbound traffic 預設都會被擋住

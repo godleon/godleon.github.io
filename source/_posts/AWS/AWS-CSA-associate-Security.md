@@ -119,6 +119,7 @@ CMK(Customer Master Key) 有三種，分別是：
 - `AWS Managed CMK`：免費，由 AWS 負責管理，使用者碰不到，在使用各個 AWS 服務時會預設拿來做加解密用，但也只有 AWS 服務可以直接使用
 
 - `Customer Managed CMK`：完全可由使用者定義 rotation、key policy(誰可使用? 在什麼情況下可用? ... 等等)，也可以開啟 or 關閉
+> **若是不小心刪除 key，也不會馬上消失，key 會處於 `pending deletion` 的狀態 7~30 天，讓使用者有機會救回誤刪除的 key**
 
 - `AWS Owned CMK`：這完全由 AWS 負責管理，不會屬於特定使用者帳號下，也看不到，用來在多個帳號之間，確保使用者帳號使用服務時的安全性。
 
