@@ -31,7 +31,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/EBS_Storage-Type-Comparison.png">
 <meta property="article:published_time" content="2020-05-30T01:10:00.000Z">
-<meta property="article:modified_time" content="2020-11-07T02:50:39.657Z">
+<meta property="article:modified_time" content="2020-11-08T12:38:39.451Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -260,7 +260,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-11-07 10:50:39" itemprop="dateModified" datetime="2020-11-07T10:50:39+08:00">2020-11-07</time>
+                <time title="Modified: 2020-11-08 20:38:39" itemprop="dateModified" datetime="2020-11-08T20:38:39+08:00">2020-11-08</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -331,6 +331,8 @@
 <blockquote>
 <p>假設同一個 EBS volume 的 snapshot 有兩個，若是第一個完整的 snapshot 被刪除，還是可以從第二個 snapshot 還原所有資料</p>
 </blockquote>
+</li>
+<li><p><strong>可以搭配 Data Lifecycle Manager(DLM) 來設定複雜的 EBS snapshot 管理規則(包含：creation、retention、deletion … 等等)</strong></p>
 </li>
 <li><p>第一次的 snapshot 需要花費較長的時間完成</p>
 </li>

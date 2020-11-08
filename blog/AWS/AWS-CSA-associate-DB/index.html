@@ -35,7 +35,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/RDS_Read-Replicas-1.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/RDS_Read-Replicas-2.png">
 <meta property="article:published_time" content="2020-05-24T22:20:00.000Z">
-<meta property="article:modified_time" content="2020-11-07T02:50:39.657Z">
+<meta property="article:modified_time" content="2020-11-08T12:38:39.451Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -263,7 +263,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-11-07 10:50:39" itemprop="dateModified" datetime="2020-11-07T10:50:39+08:00">2020-11-07</time>
+                <time title="Modified: 2020-11-08 20:38:39" itemprop="dateModified" datetime="2020-11-08T20:38:39+08:00">2020-11-08</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -497,7 +497,10 @@
 </li>
 </ul>
 <h2 id="其他考試重點"><a href="#其他考試重點" class="headerlink" title="其他考試重點"></a>其他考試重點</h2><ul>
-<li>任何 DB engine 的升級，primary &amp; standny DB 會同時升級(若是 multi-AZ)，此時就會有 downtime 的發生</li>
+<li><p>任何 DB engine 的升級，primary &amp; standny DB 會同時升級(若是 multi-AZ)，此時就會有 downtime 的發生</p>
+</li>
+<li><p>若要增加安全性，不要使用帳號密碼連接 RDS，可以啟用 <code>IAM DB authentication</code>，如此一來就會改成用 authentication token 來進行身份驗證；而 RDS 存取權限也可以完全透過 IAM 來管理</p>
+</li>
 </ul>
 <h1 id="Aurora"><a href="#Aurora" class="headerlink" title="Aurora"></a>Aurora</h1><h2 id="Aurora-是什麼"><a href="#Aurora-是什麼" class="headerlink" title="Aurora 是什麼?"></a>Aurora 是什麼?</h2><p>首先來看看 AWS 對 Aurora 的定義：</p>
 <blockquote>
@@ -615,6 +618,8 @@
 <li><p>如果 Aurora primary DB 掛了，若有多個 read replica，那優先選擇的條件會是以 <code>priority</code> + <code>容量</code> 來評估；舉例來說：priority <strong>tier-1 &gt; tier-10 &gt; tier-15</strong>，容量 <strong>32TB &gt; 16TB</strong></p>
 </li>
 <li><p>以上面的例子來說，若有五個 read replica 分別是 <strong>tier-1(16TB)**</strong>tier-1(32TB)<strong>、</strong>tier-10(16TB)<strong>、</strong>tier-15(16TB)<strong>、</strong>tier-15(32TB)**，那會被優先選中提昇為 primary DB 的就會是 <code>**tier-1(32TB)**</code></p>
+</li>
+<li><p>可透過 <code>custom endpoint</code> 的機制，可以設計專門處理 DDL &amp; DML 的 endpoint，或是僅用來做查詢的 endpoint</p>
 </li>
 </ul>
 <h1 id="DynamoDB"><a href="#DynamoDB" class="headerlink" title="DynamoDB"></a>DynamoDB</h1><h2 id="DynamoDB-是什麼"><a href="#DynamoDB-是什麼" class="headerlink" title="DynamoDB 是什麼?"></a>DynamoDB 是什麼?</h2><p>首先來看看 AWS 對 DynamoDB 的定義：</p>
@@ -781,6 +786,8 @@
 <li><p>Redis 可使用 Backup &amp; Restore 功能</p>
 </li>
 <li><p>若使用 MySQL DB，甚至可以搭配 Memcached plugin，讓 application 在查詢 DB 時，享受到 cache(Elasticache) 的優勢</p>
+</li>
+<li><p><strong>Elasticache Redis 是 <a target="_blank" rel="noopener" href="https://aws.amazon.com/compliance/hipaa-eligible-services-reference/">HIPAA eligible service</a>，因此可以用來與醫療相關需求進行配合</strong></p>
 </li>
 </ul>
 <h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>

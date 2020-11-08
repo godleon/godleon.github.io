@@ -39,7 +39,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/Cognito_Example3.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/Cognito_Example2.png">
 <meta property="article:published_time" content="2020-07-20T22:00:00.000Z">
-<meta property="article:modified_time" content="2020-11-07T02:50:39.657Z">
+<meta property="article:modified_time" content="2020-11-08T12:38:39.451Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -268,7 +268,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-11-07 10:50:39" itemprop="dateModified" datetime="2020-11-07T10:50:39+08:00">2020-11-07</time>
+                <time title="Modified: 2020-11-08 20:38:39" itemprop="dateModified" datetime="2020-11-08T20:38:39+08:00">2020-11-08</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -340,7 +340,7 @@
 </li>
 <li><p>可以確保每個訊息都至少被傳送一次 (<strong>有可能會超過一次….</strong>)</p>
 </li>
-<li><p>若是訊息量真的太大，會有偶發性訊息發送順序跟原有傳送順序不一致的情況發生 (但會盡可能的達到順序一致)</p>
+<li><p>若是訊息量真的太大，會有偶發性訊息發送順序跟原有傳送順序不一致的情況發生 (但會盡可能的達到順序一致) </p>
 </li>
 </ul>
 <p>因此可以看出 standard queue 偶而會發生失誤，如果 application level 可以 cover 這個問題，或是服務本身性質對這個問題無感，那 standard queue 絕對是最好的選擇。</p>
@@ -405,6 +405,14 @@
 </blockquote>
 </li>
 <li><p>S3 event 也可以作為 SQS 的資料來源，但僅支援 standard queue，不支援 FIFO queue</p>
+</li>
+<li><p><strong>FIFO queue 的名稱必須以 <code>.fifo</code> 作為結尾</strong></p>
+</li>
+<li><p><strong>FIFO queue &amp; standard queue</strong> 是不能互轉的，要換只能砍掉重建</p>
+</li>
+<li><p><strong>若是要故意讓進到 queue 中的 message 晚一點才能被 consumer 看見(initial invisibility)，可以透過設定 message timer 的方式來達成</strong></p>
+</li>
+<li><p><strong>Delay queue 是用來設定 message 實際進入到 queue 中的延遲，超過設定時間後 message 才會真正進入到 queue 中</strong></p>
 </li>
 </ul>
 <h1 id="SWF-Simple-Workflow-Service"><a href="#SWF-Simple-Workflow-Service" class="headerlink" title="SWF(Simple Workflow Service)"></a>SWF(Simple Workflow Service)</h1><blockquote>

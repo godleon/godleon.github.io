@@ -33,7 +33,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_Lifecycle-Policy-example.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_Event-Notification.png">
 <meta property="article:published_time" content="2020-04-28T21:50:00.000Z">
-<meta property="article:modified_time" content="2020-11-07T02:50:39.661Z">
+<meta property="article:modified_time" content="2020-11-08T12:38:39.451Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -257,7 +257,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-11-07 10:50:39" itemprop="dateModified" datetime="2020-11-07T10:50:39+08:00">2020-11-07</time>
+                <time title="Modified: 2020-11-08 20:38:39" itemprop="dateModified" datetime="2020-11-08T20:38:39+08:00">2020-11-08</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -401,6 +401,11 @@
 <li><p>若要自動移除資料，也可以設定 <code>expiration</code> 相關的 policy 來達成</p>
 </li>
 <li><p>預設這個功能是關閉的</p>
+</li>
+<li><p><strong>資料無法直接存進 S3 Glacier，必須先存進 S3 standard 後，設定 lifecycle policy 為 immediate 來達成馬上進入 Glacier 的目的</strong></p>
+<blockquote>
+<p>透過 <code>AWS Storage Tape Gateway</code> 或是 <code>AWS DataSync</code> 就可以例外，直接將資料存入 Glacier(or Deep Archive) </p>
+</blockquote>
 </li>
 </ul>
 <p><img src="/blog/images/aws/S3_Lifecycle-Policy-example.png" alt="S3 resource access authorization process"></p>
