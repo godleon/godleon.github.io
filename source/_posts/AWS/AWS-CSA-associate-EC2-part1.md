@@ -131,6 +131,7 @@ EC2 簡介
 
 - 若希望可以取得更細節的資訊(例如：每一分鐘)，那可以勾選 **Monitoring** 選項中的 `Enable CloudWatch detailed monitoring`
 
+
 ### 一般選項
 
 - [**Capacity Reservation**](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-capacity-reservations.html)：跟 saving plan 有關係，看起來像是要在省錢 & 確保有特定容量的資源可用所設計的機制，詳細的內容可以參考[官方文件說明](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-capacity-reservations.html)。
@@ -271,6 +272,21 @@ Security Group
 - security group 是 stateful，在 inbound 設定的規則會同時在 outbound 中自動開放
 
 - security group 無法設定黑名單，若需要黑名單功能，則需要使用 Network ACL 來做 (只可以設定 allow rules，無法設定 deny rules)
+
+## Spot Instance
+
+- 若是取消目前啟用中的 spot request，並不會中止相關的 EC2 instance
+
+- 若是 spot request 一直為持續啟用，當 spot instance 被中斷後，之後會在重新開啟
+
+![spot lifecycle](/blog/images/aws/EC2_spot-lifecycle.png)
+
+- spot block 的設計是用來不要被中斷的
+
+
+## 監控
+
+- **透過 AWS console 所建立的 launch configuration，預設是 basic monitoring；若是透過 AWS CLI 所建立的 launch configuration，預設則是 detailed monitoring**
 
 
 

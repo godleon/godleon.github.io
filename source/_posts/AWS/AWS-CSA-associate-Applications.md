@@ -74,7 +74,7 @@ AWS SQS 提供了兩種 Queue Type，分別是：
 
 - 可以確保每個訊息都至少被傳送一次 (**有可能會超過一次....**)
 
-- 若是訊息量真的太大，會有偶發性訊息發送順序跟原有傳送順序不一致的情況發生 (但會盡可能的達到順序一致)
+- 若是訊息量真的太大，會有偶發性訊息發送順序跟原有傳送順序不一致的情況發生 (但會盡可能的達到順序一致) 
 
 因此可以看出 standard queue 偶而會發生失誤，如果 application level 可以 cover 這個問題，或是服務本身性質對這個問題無感，那 standard queue 絕對是最好的選擇。
 
@@ -136,6 +136,14 @@ AWS SQS 提供了兩種 Queue Type，分別是：
 > 持續的向 SQS 建立連線是需要額外花費的，使用 long polling 可以省下不少費用
 
 - S3 event 也可以作為 SQS 的資料來源，但僅支援 standard queue，不支援 FIFO queue
+
+- **FIFO queue 的名稱必須以 `.fifo` 作為結尾**
+
+- **FIFO queue & standard queue** 是不能互轉的，要換只能砍掉重建
+
+- **若是要故意讓進到 queue 中的 message 晚一點才能被 consumer 看見(initial invisibility)，可以透過設定 message timer 的方式來達成**
+
+- **Delay queue 是用來設定 message 實際進入到 queue 中的延遲，超過設定時間後 message 才會真正進入到 queue 中**
 
 
 

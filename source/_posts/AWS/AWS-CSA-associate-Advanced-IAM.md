@@ -66,6 +66,8 @@ AWS Directory Service
 
 - 可以透過 [AD Trust](https://docs.aws.amazon.com/directoryservice/latest/admin-guide/ms_ad_connect_existing_infrastructure.html) 連線到地端已經存在的 AD
 
+- **可與 directory-awared workload 進行整合，例如：SQL server 相關應用**
+
 ### AD 管理權責劃分
 
 AWS Directory Service 服務看似美好，但其實不少事情是使用者自己要完成的，把這些事情搞清楚，就不會覺得服務好像少了些什麼方便性之類的：

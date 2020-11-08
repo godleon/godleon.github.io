@@ -60,7 +60,9 @@ Route 53
 
 - 設定中包含了多個選項：`Record Type`(例如：A/AAAA/CNAME/MX ... etc)、`Standard/Alias`、`Routing Policy`、`Evaluate target health`(可用來監控 application 的健康狀況，並指定觸發特定動作)
 
-- **Alias Record Set** 所設定的並非 IP address，而是指向特定 AWS resource 的 alias 設定
+- **Alias Record Set** 所設定的並非 IP address，而是指向特定 AWS resource 的 alias 設定 (**record set type 為 A(for IPv4) 或是 AAAA(for IPv6)**)
+
+- **CNAME 無法用在 zone apex 上(就是 root domain)**
 
 
 ## Route53 Routing Policy
@@ -128,7 +130,7 @@ Route 53
 
 ![Route53 - Geolocation Routing](/blog/images/aws/DNS_Geolocation-Routing.png)
 
-- 可以根據使用者所在的位置回應指定的 record
+- **可以根據使用者所在的位置(其實根據的是 DNS query 的來源，一般就會是使用者所使用的 DNS server 所在的位置)回應指定的 record**
 
 - 設定時可以指定使用者所在的五大洲 or 國家
 

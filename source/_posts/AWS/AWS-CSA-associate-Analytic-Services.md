@@ -90,11 +90,13 @@ Kinesis 根據功能共分為以下四類：
 
 ![Kinesis Data Firehose Example](/blog/images/aws/KinesisDataFirehose_Example.png)
 
+- 是個全託管的服務，會根據 request & throughput 自動 scale out/in
+
 - 沒有 persistent storage，資料進入 Kinesis 後要立即處理
 
-- 可選擇搭配 Lambda or Kinesis Data Analytics 來進行資料處理
+- 可選擇搭配 Lambda function or Kinesis Data Analytics 來進行資料處理
 
-- 處理完後的資料可以轉存入 S3 or Elasticsearch 服務中
+- 處理完後的資料可以轉存入 S3、RedShift、Elasticsearch 服務中並進行後續的即時分析之用
 
 ### Kinesis Data Analytics
 

@@ -130,6 +130,10 @@ AWS S3 生命週期管理功能有以下幾個重點：
 
 - 預設這個功能是關閉的
 
+- **資料無法直接存進 S3 Glacier，必須先存進 S3 standard 後，設定 lifecycle policy 為 immediate 來達成馬上進入 Glacier 的目的**
+> 透過 `AWS Storage Tape Gateway` 或是 `AWS DataSync` 就可以例外，直接將資料存入 Glacier(or Deep Archive) 
+
+
 ![S3 resource access authorization process](/blog/images/aws/S3_Lifecycle-Policy-example.png)
 
 以下是幾種常見的生命週期規則設定：

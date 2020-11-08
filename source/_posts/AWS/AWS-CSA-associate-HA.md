@@ -83,6 +83,8 @@ AWS 提供三種 Load Balancer 類型，分別是：
 
 - 當要考慮到 `HA` & `fault tolerance`，就必須至少要有 **ELB + ASG(cross AZ + 最少兩個 instance)** 這樣的組合 
 
+- **Classic Load Balancer 不支援 `Server Name Indication(SNI)`(可在同一個 load balancer 上設定支援多個 HTTPS domain)，必須改用 ALB**
+
 
 ### Health Check
 
@@ -289,6 +291,7 @@ Auto Scaling 實作須知
 
 - **若要針對 scale out 所新產生的做進行客製化的驗證，可以搭配 ASG lifecycle hook 將 instance 先設定為 wait state，並執行客製化的驗證**
 
+- **ASG 中 cooldown 階段的時間預設為 300 秒**
 
 
 HA Architechture

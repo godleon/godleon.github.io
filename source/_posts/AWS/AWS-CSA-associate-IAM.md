@@ -251,6 +251,13 @@ IAM API Keys
 其他的部份可以參考[官網文件(IAM Roles - AWS Identity and Access Management)](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html)，有非常詳細的說明。
 
 
+其他考試重點
+==========
+
+- 若是使用者權限給到 AdministratorAccess，卻想要限制該使用者權限只能在特定範圍內，可透過設定 `IAM permission boundary` 來達成，**但此功能只能套用在 IAM role/user 上，無法用在 IAM group 上**
+
+
+
 Summary
 =======
 

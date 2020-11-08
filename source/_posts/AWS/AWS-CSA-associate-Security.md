@@ -239,6 +239,11 @@ CMK(Customer Master Key) 有三種，分別是：
 - 若要加密超過 4KB 以上的資料，可以先產生一個 DEK(Data Encryption Key)，再用 DEK 進行資料加密
 > 使用 AWS CLI 的指令關鍵字為 `aws kms generate-data-key`
 
+## 其他考試重點
+
+- 若要存放類似資料庫密碼的服務，KMS 無法滿足，而是應該用 `Secrets Manager` 這樣的服務來完成
+
+
 
 CloudHSM
 ========
@@ -302,7 +307,10 @@ System Manager Parameter Store
 
 - 可設定每筆資料的 TTL
 
+- **若儲存的是機敏資料(例如：資料庫密碼)，是無法設定 rotation policy 的(需要使用 AWS Secrets Manager 來達成此功能)**
+
 總而言之，透過 Parameter Store，可以很方便的將程式碼與環境設定分離，進行更好的管理。
+
 
 ## 階層式(Hierarchy)資料儲存
 

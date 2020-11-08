@@ -230,6 +230,8 @@ RDS 提供兩種備份類型：
 
 - 任何 DB engine 的升級，primary & standny DB 會同時升級(若是 multi-AZ)，此時就會有 downtime 的發生
 
+- 若要增加安全性，不要使用帳號密碼連接 RDS，可以啟用 `IAM DB authentication`，如此一來就會改成用 authentication token 來進行身份驗證；而 RDS 存取權限也可以完全透過 IAM 來管理
+
 
 Aurora
 ======
@@ -314,6 +316,8 @@ RDS 提供三種複本(replica)類型：
 - 如果 Aurora primary DB 掛了，若有多個 read replica，那優先選擇的條件會是以 `priority` + `容量` 來評估；舉例來說：priority **tier-1 > tier-10 > tier-15**，容量 **32TB > 16TB**
 
 - 以上面的例子來說，若有五個 read replica 分別是 **tier-1(16TB)****tier-1(32TB)**、**tier-10(16TB)**、**tier-15(16TB)**、**tier-15(32TB)**，那會被優先選中提昇為 primary DB 的就會是 `**tier-1(32TB)**`
+
+- 可透過 `custom endpoint` 的機制，可以設計專門處理 DDL & DML 的 endpoint，或是僅用來做查詢的 endpoint
 
 
 
@@ -466,6 +470,7 @@ Elasticache 提供兩種 Engine Type，分別是 `Redis` & `Memcached`，以下�
 
 - 若使用 MySQL DB，甚至可以搭配 Memcached plugin，讓 application 在查詢 DB 時，享受到 cache(Elasticache) 的優勢
 
+- **Elasticache Redis 是 [HIPAA eligible service](https://aws.amazon.com/compliance/hipaa-eligible-services-reference/)，因此可以用來與醫療相關需求進行配合**
 
 
 References

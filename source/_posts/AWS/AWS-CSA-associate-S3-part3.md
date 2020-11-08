@@ -72,6 +72,8 @@ AWS Storage Gateway 是一種混合雲端儲存服務，有以下兩個特性：
 
 - 提供非常簡易且安全的方式，協助使用者將資料移到 AWS 儲存服務(S3, EBS ... etc)中
 
+- **適合用在 Hybrid 的環境，希望可以繼續存取地端儲存空間並同步到 AWS 為前提(如果資料上傳後要改成直接存取雲端，直接用 AWS DataSync 把資料快速送上 AWS 即可)**
+
 其實最終的目的就是為了讓使用者可以大幅簡化資料移到 AWS 進行儲存的工作。
 
 
@@ -139,6 +141,8 @@ Volume Gateway 提供了 `iSCSI` 的方式，讓資料可透過 **單一磁碟(v
 - 需要與現有的磁帶備份軟體(例如：NetBackup, Backup Exec, Veeam ... 等)搭配使用
 
 - 會將資料非同步的回傳至 S3，並搭配 Glacier 將成本降低
+
+- **支援將資料直接存入 S3 Glacier & S3 Glacier Deep Archive**
 
 
 Athena vs Macie

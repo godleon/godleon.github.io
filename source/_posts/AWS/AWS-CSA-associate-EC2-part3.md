@@ -71,6 +71,9 @@ EFS(Elastic File System)
 
 - 提供 read-after-write consistent，表示寫入後馬上可以讀取到
 
+- **EFS 也有提供 EFS-IA 用來存放不常存取的資料，藉此降低資料儲存成本(但 lifecycle policy 最長僅能設定為 90 天)**
+
+
 
 FSX & FSx for Lustre
 ====================
@@ -130,7 +133,7 @@ Placement Group
 
 - 隔離的單位為單一 instance
 
-- 每個 spread placement group 在每個 AZ 最多只能有 7 個 running instance (**只有 spread 有此限制**)
+- **每個 spread placement group 在每個 AZ 最多只能有 7 個 running instance** (**只有 spread 有此限制**)
 
 ## Partition
 
@@ -202,11 +205,13 @@ AWS WAS 在過濾流量上提供三種模式供使用者選擇：
 
 ## 考試重點
 
-- WAF 可以阻擋 Layer 7 的攻擊，例如：`SQL Injection`、`Cross Site Scripting`；而 AWS Shield 則是阻擋 Layer 3 & 4 的攻擊，例如：DDoS
+- WAF 可以阻擋 Layer 7 的攻擊，例如：`SQL Injection`、`Cross Site Scripting`(**可以設定 rate-based rule**)；而 AWS Shield 則是阻擋 Layer 3 & 4 的攻擊，例如：DDoS
 
 - 若要需要阻止惡意的來源 IP 位址，可以從哪些服務著手：
   - Network ACLs
   - AWS WAF
+
+- AWS Shield 是個預設會啟用的服務，有 Standard & Advanced 兩種等級
 
 
 

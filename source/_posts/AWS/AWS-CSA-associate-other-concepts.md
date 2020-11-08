@@ -34,6 +34,14 @@ tags:
 - `Multi-Site Solution`：跟 on-premise 環境完全相同，而 traffic 要如何導向就由管理者決定，一般都會在 DNS 層級設定成 latency based 或是 failover
 
 
+Security
+========
+
+- AWS Config 可以用來自動評估、稽核 AWS resource 相關的設定，確保設定都有通過預先定義的規則檢查過 (可以想像成是 Lint for AWS resource configuration)
+
+- 透過 AWS Config 也可以用來檢視 resource configuration 的變更以及 resource 之間的關係，甚至是 configuration 變動的歷史紀錄
+
+
 
 常見問題
 =======

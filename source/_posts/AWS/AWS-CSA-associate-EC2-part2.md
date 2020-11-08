@@ -48,6 +48,7 @@ EBS volume type 有四種(官方宣稱)，直接使用下表來進行比較：
 
 - 每個 volume type 對應的 API Name 需要稍微記一下
 
+
 ## Volumes & Snapshots
 
 - EBS volume 與 EC2 instance 必須在同一個 AZ 中
@@ -58,6 +59,8 @@ EBS volume type 有四種(官方宣稱)，直接使用下表來進行比較：
 
 - snapshot 的特性是**遞增(incremental)**，因此對 volume 進行 snapshot 只會針對有變動的 block 進行處理(也只有增加的部份容量會被收費)
 > 假設同一個 EBS volume 的 snapshot 有兩個，若是第一個完整的 snapshot 被刪除，還是可以從第二個 snapshot 還原所有資料
+
+- **可以搭配 Data Lifecycle Manager(DLM) 來設定複雜的 EBS snapshot 管理規則(包含：creation、retention、deletion ... 等等)**
 
 - 第一次的 snapshot 需要花費較長的時間完成
 
@@ -76,7 +79,6 @@ EBS volume type 有四種(官方宣稱)，直接使用下表來進行比較：
 - initialization 這個操作會在 storage block 第一次被讀取時發生，而這個效能可能只有原本的 50%
 
 - 承上兩點，不建議將透過 snapshot 產生出來的 EBS volume，尚未進行完整 initialization 之前就放到生產環境
-
 
 
 ## 如何將 EC2 instance 或 EBS volume 移到不同的 AZ 中?

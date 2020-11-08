@@ -205,6 +205,10 @@ Overview
 
 - VPC 無法做 transitive peering，VPC 之間若有通訊的需求，都必須做好連結的設定
 
+- 若是要快速的讓多個 VPC 可以互相溝通，並可以從地端連到多個 VPC，使用 **Transit Gateway** 是個快速可以達到目的的功能
+
+![VPC Transit Gateway](/blog/images/aws/VPC_TransitGateway.png)
+
 
 
 實作重點
