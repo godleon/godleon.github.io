@@ -319,6 +319,8 @@ RDS 提供三種複本(replica)類型：
 
 - 可透過 `custom endpoint` 的機制，可以設計專門處理 DDL & DML 的 endpoint，或是僅用來做查詢的 endpoint
 
+- 若是有多個 read replica，將資料查詢的流量送往 Aurora read endpoint，就會被自動分散到不同的 read replica 去，使用者不需要自己去處理 load balancing 的部份 
+
 
 
 DynamoDB
@@ -371,8 +373,11 @@ DynamoDB
 
 ## 其他考試重點
 
-- DynamoDB Accelerator(DAX) 除了可以提供 DynamoDB 的優點外，還增加了 in-memory cache 的功能，可以大幅提昇外部讀取的能力
+- DynamoDB Accelerator(DAX) 除了可以提供 DynamoDB 的優點外，還增加了 in-memory cache 的功能，可以大幅提昇外部讀取的能力(號稱可以提昇 10 被的效能，並將延遲從 ms 降低到 µs 等級)
 
+- 透過 AWS CLI 產生的 DynamoDB table，預設是沒有啟用 Auto Scaling 的功能的
+
+- 若是流量很大，希望可以進一步提高 DynamoDB throughput capacity，可以開啟 DynamoDB Auto Scaling
 
 
 Redshift

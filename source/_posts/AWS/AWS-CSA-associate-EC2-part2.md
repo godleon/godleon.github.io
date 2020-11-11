@@ -121,6 +121,13 @@ EBS volume type 有四種(官方宣稱)，直接使用下表來進行比較：
 4. 透過新建立的 AMI 產生一個新的 EC2 instance (此時 root device 已經加密)
 
 
+## 其他考試重點
+
+- 使用 `io1` volume 通常是為了取得最高的 IOPS 能力，但**每 GB 的空間最多只能提供 50 IOPS(比例為 50:1)**，因此一個 10GB 的 io1 volume 最多只能提供 500 IOPS/s
+
+- 若要達到 64,000 IOPS(上限，現在好像可以更高了)，則需要至少 1280GB(64000/50) 大小的 io1 volume，並搭配 [Nitro System](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html#ec2-nitro-instances) 的 EC2 instance 才可以達到
+
+
 
 AMI Type
 ========

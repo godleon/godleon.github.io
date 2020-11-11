@@ -209,6 +209,10 @@ Overview
 
 ![VPC Transit Gateway](/blog/images/aws/VPC_TransitGateway.png)
 
+- [VPC Peering 無法作到的事情](https://docs.aws.amazon.com/vpc/latest/peering/invalid-peering-configurations.html)：
+  - Overlapping CIDR Blocks
+  - Transitive Peering
+  - Edge to Edge Routing Through a Gateway or Private Connection
 
 
 實作重點

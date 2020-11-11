@@ -147,6 +147,11 @@ Route 53
 其實就是 Simple Routing，只是可以加上 health check 的功能
 
 
+## 其他考試重點
+
+- 若使用 Active-Active Failover，就沒有 primary/secondary resource 的差別，因為全部 resource 都會被拿來服務
+
+
 
 CloudFront
 ==========
