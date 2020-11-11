@@ -232,6 +232,8 @@ RDS 提供兩種備份類型：
 
 - 若要增加安全性，不要使用帳號密碼連接 RDS，可以啟用 `IAM DB authentication`，如此一來就會改成用 authentication token 來進行身份驗證；而 RDS 存取權限也可以完全透過 IAM 來管理
 
+- RDS 的基本監控可以提供 `CPU Utilization`、`Database Connections`、`Freeable Memory` ... 等資訊，如開啟 **enhanced monitoring metrics**，就可以額外看到 `OS process` & `RDS child process` ... 等資訊
+
 
 Aurora
 ======

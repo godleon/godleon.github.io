@@ -182,6 +182,13 @@ SWF Actor 共有以下三類：
 
 - SWF 會追蹤應用程式中所有的 task & event；但 SQS 不支援 application-level tracking，必須得自己實作(如果使用多個 queue 時)
 
+## 其他考試重點
+
+- SWF 是個全託管的 state tracker & task coordinator 的服務，無法以 serverless 的方式將多個 AWS resource 編排執行
+
+- `AWS Step Function` 可以針對 application 提供 serverless 的編排，並設計 workflow(內含多個 step)
+> AWS Step Functions provides serverless orchestration for modern applications. Orchestration centrally manages a workflow by breaking it into multiple steps, adding flow logic, and tracking the inputs and outputs between the steps. As your applications execute, Step Functions maintains application state, tracking exactly which workflow step your application is in, and stores an event log of data that is passed between application components.
+
 
 
 SNS(Simple Notification Service)

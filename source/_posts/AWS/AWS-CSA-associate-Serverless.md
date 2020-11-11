@@ -63,6 +63,7 @@ Lambda
 - Lambda function 可以觸發另一個 Lambda function (可以一個串一個)
 
 - 使用 Lambda 的架構變得複雜時，AWS X-ray 可以協助 debug
+> 可以 end-to-end 的方式檢視所有經過 API Gateway 的 request，是個分析 API rquest 處理狀況的好工具
 
 - Lambda 的運行範圍可以是 global，不會被特定的 region 侷限
 

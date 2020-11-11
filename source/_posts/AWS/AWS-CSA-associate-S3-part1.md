@@ -298,6 +298,10 @@ S3 的收費標準
 
 - 舉例來說，若是 S3 object path 為 `S3://your_bucket_name/folder1/sub_folder_1/f1`，那 `/folder1/sub_folder_1` 就是 prefix
 
+## 安全性
+
+- 若覺得 CloudTrail 所提供 S3 的 log 資訊不足，可以透過開啟 S3 的 `Server access logging` 的功能，可以提供更細緻到 bucket level 的 API 呼叫資訊
+
 
 
 References

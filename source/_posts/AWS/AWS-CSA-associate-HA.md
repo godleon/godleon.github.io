@@ -293,6 +293,10 @@ Auto Scaling 實作須知
 
 - **ASG 中 cooldown 階段的時間預設為 300 秒**
 
+- **預設可以拿來與 CloudWatch 搭配作為 ASG scale up/down 依據的 metric 包含有 `CPU utilization`, `Network utilization`, `Disk performance`、`Disk Reads/Writes` (注意!! 沒有 `memory utilization` & `disk siapce utilization` !!)**
+
+- **若是希望以 `memory utilization` or `disk siapce utilization` 作為 ASG scale up/down 的依據，那需要將 CloudWatch monitoring script 或是 ClouwWatch agent 放進 EC2 instance 來達成**
+
 
 HA Architechture
 ================
