@@ -35,7 +35,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/RDS_Read-Replicas-1.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/RDS_Read-Replicas-2.png">
 <meta property="article:published_time" content="2020-05-24T22:20:00.000Z">
-<meta property="article:modified_time" content="2020-11-08T12:38:39.451Z">
+<meta property="article:modified_time" content="2020-11-11T08:39:05.736Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -263,7 +263,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-11-08 20:38:39" itemprop="dateModified" datetime="2020-11-08T20:38:39+08:00">2020-11-08</time>
+                <time title="Modified: 2020-11-11 16:39:05" itemprop="dateModified" datetime="2020-11-11T16:39:05+08:00">2020-11-11</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -621,6 +621,8 @@
 </li>
 <li><p>可透過 <code>custom endpoint</code> 的機制，可以設計專門處理 DDL &amp; DML 的 endpoint，或是僅用來做查詢的 endpoint</p>
 </li>
+<li><p>若是有多個 read replica，將資料查詢的流量送往 Aurora read endpoint，就會被自動分散到不同的 read replica 去，使用者不需要自己去處理 load balancing 的部份 </p>
+</li>
 </ul>
 <h1 id="DynamoDB"><a href="#DynamoDB" class="headerlink" title="DynamoDB"></a>DynamoDB</h1><h2 id="DynamoDB-是什麼"><a href="#DynamoDB-是什麼" class="headerlink" title="DynamoDB 是什麼?"></a>DynamoDB 是什麼?</h2><p>首先來看看 AWS 對 DynamoDB 的定義：</p>
 <blockquote>
@@ -664,7 +666,12 @@
 </li>
 </ul>
 <h2 id="其他考試重點-2"><a href="#其他考試重點-2" class="headerlink" title="其他考試重點"></a>其他考試重點</h2><ul>
-<li>DynamoDB Accelerator(DAX) 除了可以提供 DynamoDB 的優點外，還增加了 in-memory cache 的功能，可以大幅提昇外部讀取的能力</li>
+<li><p>DynamoDB Accelerator(DAX) 除了可以提供 DynamoDB 的優點外，還增加了 in-memory cache 的功能，可以大幅提昇外部讀取的能力(號稱可以提昇 10 被的效能，並將延遲從 ms 降低到 µs 等級)</p>
+</li>
+<li><p>透過 AWS CLI 產生的 DynamoDB table，預設是沒有啟用 Auto Scaling 的功能的</p>
+</li>
+<li><p>若是流量很大，希望可以進一步提高 DynamoDB throughput capacity，可以開啟 DynamoDB Auto Scaling</p>
+</li>
 </ul>
 <h1 id="Redshift"><a href="#Redshift" class="headerlink" title="Redshift"></a>Redshift</h1><p>Redshift 是 AWS 提供的資料倉儲服務，可以用來儲存大量的傳統資料，進行 OLAP or big-data analytics 相關工作，作為 business intelligence 之用。</p>
 <p>而服務本身包含以下幾點特色：</p>

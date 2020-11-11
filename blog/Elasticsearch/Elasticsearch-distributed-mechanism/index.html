@@ -49,7 +49,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/Elasticsearch/es_concurrent-1.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/Elasticsearch/es_optimistic-locking-1.png">
 <meta property="article:published_time" content="2019-11-18T13:10:00.000Z">
-<meta property="article:modified_time" content="2020-11-08T12:38:39.455Z">
+<meta property="article:modified_time" content="2020-11-11T08:39:05.740Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="Elasticsearch">
 <meta name="twitter:card" content="summary">
@@ -271,7 +271,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-11-08 20:38:39" itemprop="dateModified" datetime="2020-11-08T20:38:39+08:00">2020-11-08</time>
+                <time title="Modified: 2020-11-11 16:39:05" itemprop="dateModified" datetime="2020-11-11T16:39:05+08:00">2020-11-11</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -719,20 +719,23 @@
 </li>
 </ul>
 <h2 id="值得一看的-Q-amp-A-資料-2"><a href="#值得一看的-Q-amp-A-資料-2" class="headerlink" title="值得一看的 Q&amp;A 資料"></a>值得一看的 Q&amp;A 資料</h2><ol>
-<li><p>客戶端發起資料寫入請求，對你寫的這條資料根據_routing規則選擇發給哪個Shard。</p>
+<li>客戶端發起資料寫入請求，對你寫的這條資料根據_routing規則選擇發給哪個Shard。</li>
+</ol>
 <ul>
 <li>確認Index Request中是否設置了使用哪個Filed的值作為路由參數，</li>
 <li>如果沒有設置，則使用Mapping中的配置，</li>
 <li>如果mapping中也沒有配置，則使用_id作為路由參數，然後通過_routing的Hash值選擇出Shard，最後從集群的Meta中找出出該Shard的Primary節點。</li>
 </ul>
-</li>
-<li><p>寫入請求到達Shard後，先把資料寫入到內存（buffer）中，同時會寫入一條日誌到translog日誌文件中去。</p>
+<ol start="2">
+<li>寫入請求到達Shard後，先把資料寫入到內存（buffer）中，同時會寫入一條日誌到translog日誌文件中去。</li>
+</ol>
 <ul>
 <li>當寫入請求到shard後，首先是寫Lucene，其實就是創建索引。</li>
 <li>索引創建好後並不是馬上生成segment，這個時候索引資料還在緩存中，這裡的緩存是lucene的緩存，並非Elasticsearch緩存，lucene緩存中的資料是不可被查詢的。</li>
 </ul>
-</li>
-<li><p>執行refresh操作：從內存buffer中將資料寫入os cache(操作系統的內存)，產生一個segment file文件，buffer清空。</p>
+<ol start="3">
+<li>執行refresh操作：從內存buffer中將資料寫入os cache(操作系統的內存)，產生一個segment file文件，buffer清空。</li>
+</ol>
 <ul>
 <li>寫入os cache的同時，建立倒排索引，這時資料就可以供客戶端進行訪問了。</li>
 <li>默認是每隔1秒refresh一次的，所以es是准實時的，因為寫入的資料1秒之後才能被看到。</li>
@@ -740,15 +743,17 @@
 <li>通過es的restful api或者java api，手動執行一次refresh操作，就是手動將buffer中的資料刷入os cache中，讓資料立馬就可以被搜索到。</li>
 <li>若要優化索引速度, 而不注重實時性, 可以降低刷新頻率。</li>
 </ul>
-</li>
-<li><p>translog會每隔5秒或者在一個變更請求完成之後，將translog從緩存刷入磁盤。</p>
+<ol start="4">
+<li>translog會每隔5秒或者在一個變更請求完成之後，將translog從緩存刷入磁盤。</li>
+</ol>
 <ul>
 <li>translog是存儲在os cache中，每個分片有一個，如果節點宕機會有5秒資料丟失，但是性能比較好，最多丟5秒的資料。。</li>
 <li>可以將translog設置成每次寫操作必須是直接fsync到磁盤，但是性能會差很多。</li>
 <li>可以通過配置增加transLog刷磁盤的頻率來增加資料可靠性，最小可配置100ms，但不建議這麼做，因為這會對性能有非常大的影響。</li>
 </ul>
-</li>
-<li><p>每30分鐘或者當tanslog的大小達到512M時候，就會執行commit操作（flush操作），將os cache中所有的資料全以segment file的形式，持久到磁盤上去。</p>
+<ol start="5">
+<li>每30分鐘或者當tanslog的大小達到512M時候，就會執行commit操作（flush操作），將os cache中所有的資料全以segment file的形式，持久到磁盤上去。</li>
+</ol>
 <ul>
 <li>第一步，就是將buffer中現有資料refresh到os cache中去。</li>
 <li>清空buffer 然後強行將os cache中所有的資料全都一個一個的通過segmentfile的形式，持久到磁盤上去。</li>
@@ -760,15 +765,14 @@
 <li>#控制每收到多少條資料後flush一次</li>
 <li>index.translog.flush_threshold_ops:</li>
 </ul>
-</li>
-<li><p>Segment的merge操作：</p>
+<ol start="6">
+<li>Segment的merge操作：</li>
+</ol>
 <ul>
 <li>隨著時間，磁盤上的segment越來越多，需要定期進行合併。</li>
 <li>Es和Lucene 會自動進行merge操作，合併segment和刪除已經刪除的文檔。</li>
 <li>我們可以手動進行merge：POST index/_forcemerge。一般不需要，這是一個比較消耗資源的操作</li>
 </ul>
-</li>
-</ol>
 <blockquote>
 <p>當資料從hot移動到warm，官方建議手工執行一下_forcemerge</p>
 </blockquote>

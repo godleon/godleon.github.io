@@ -40,7 +40,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/architecture-design/storage-ha-replication-strategy-viceversa.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/architecture-design/storage-ha-replication-strategy-standalone.png">
 <meta property="article:published_time" content="2020-09-05T13:30:00.000Z">
-<meta property="article:modified_time" content="2020-11-08T12:38:39.451Z">
+<meta property="article:modified_time" content="2020-11-11T08:39:05.736Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="Architecture Design">
 <meta name="twitter:card" content="summary">
@@ -262,7 +262,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-11-08 20:38:39" itemprop="dateModified" datetime="2020-11-08T20:38:39+08:00">2020-11-08</time>
+                <time title="Modified: 2020-11-11 16:39:05" itemprop="dateModified" datetime="2020-11-11T16:39:05+08:00">2020-11-11</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -346,7 +346,7 @@
 </li>
 <li><p>缺點：</p>
 <ul>
-<li>client 需要感知主從關係，並將不同的操作發給不同的機器進行處理，複雜度比主備複製要高</li>
+<li> client 需要感知主從關係，並將不同的操作發給不同的機器進行處理，複雜度比主備複製要高</li>
 <li>從機提供讀業務，如果主從複製延遲比較大，業務會因為數據不一致出現問題</li>
 <li>故障時需要人工干預</li>
 </ul>

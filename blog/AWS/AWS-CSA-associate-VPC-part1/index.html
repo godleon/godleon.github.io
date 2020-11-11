@@ -41,7 +41,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/VPC_NetworkACL-outbound-1.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/VPC_NetworkACL-outbound-2.png">
 <meta property="article:published_time" content="2020-05-20T21:45:00.000Z">
-<meta property="article:modified_time" content="2020-11-08T12:38:39.451Z">
+<meta property="article:modified_time" content="2020-11-11T08:39:05.736Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -265,7 +265,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-11-08 20:38:39" itemprop="dateModified" datetime="2020-11-08T20:38:39+08:00">2020-11-08</time>
+                <time title="Modified: 2020-11-11 16:39:05" itemprop="dateModified" datetime="2020-11-11T16:39:05+08:00">2020-11-11</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -491,6 +491,14 @@
 </li>
 </ul>
 <p><img src="/blog/images/aws/VPC_TransitGateway.png" alt="VPC Transit Gateway"></p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/vpc/latest/peering/invalid-peering-configurations.html">VPC Peering 無法作到的事情</a>：<ul>
+<li>Overlapping CIDR Blocks</li>
+<li>Transitive Peering</li>
+<li>Edge to Edge Routing Through a Gateway or Private Connection</li>
+</ul>
+</li>
+</ul>
 <h1 id="實作重點"><a href="#實作重點" class="headerlink" title="實作重點"></a>實作重點</h1><h2 id="了解-Default-VPC"><a href="#了解-Default-VPC" class="headerlink" title="了解 Default VPC"></a>了解 Default VPC</h2><ul>
 <li><p>AWS 會為每個使用者在每一個 region 中建立一個預設的 VPC，並在每個 region 中的 AZ 都建立一個 subnet(不同 AZ，IP 範圍肯定不一樣)</p>
 </li>
@@ -545,12 +553,12 @@
 <li><p>建立 Internet Gateway (只需要指定 name)</p>
 </li>
 <li><p>指定 VPC 並進行 attach</p>
+</li>
+</ol>
 <ul>
 <li>一個 VPC 只可以 attach 到一個 Internet Gateway，但 AWS 會確保 Internet Gateway 的 HA</li>
 <li>當有 resource 在 VPC 上運作時，是無法將 Internet Gateway 從 VPC 上 deattach</li>
 </ul>
-</li>
-</ol>
 <h3 id="Route-Table-1"><a href="#Route-Table-1" class="headerlink" title="Route Table"></a>Route Table</h3><blockquote>
 <p>用來決定網路流量被導向何處</p>
 </blockquote>

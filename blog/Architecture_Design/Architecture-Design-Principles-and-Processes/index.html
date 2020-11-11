@@ -30,7 +30,7 @@
 <meta property="og:description" content="此篇文章是極客時間&quot;從 0 開始學架構&quot;課程時所留下的學習筆記，主要內容為架構設計原則 &amp; 設計流程(識別複雜度、設計備選方案、評估和選擇備選方案、詳細方案設計)">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2020-08-03T01:30:00.000Z">
-<meta property="article:modified_time" content="2020-11-08T12:38:39.451Z">
+<meta property="article:modified_time" content="2020-11-11T08:39:05.740Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="Architecture Design">
 <meta name="twitter:card" content="summary">
@@ -251,7 +251,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-11-08 20:38:39" itemprop="dateModified" datetime="2020-11-08T20:38:39+08:00">2020-11-08</time>
+                <time title="Modified: 2020-11-11 16:39:05" itemprop="dateModified" datetime="2020-11-11T16:39:05+08:00">2020-11-11</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -388,12 +388,14 @@
 <li><p>架構設計由需求所驅動，本質目的是<strong>為了解決軟件系統的複雜性</strong>；為此，我們在進行架構設計時，需要以理解需求為前提，首要進行系統複雜性的分析。具體做法是：</p>
 <ol>
 <li>構建複雜度的來源清單 - 高性能、可用性、擴展性、安全、低成本、規模 … 等等</li>
-<li>結合需求、技術、團隊、資源等對上述複雜度逐一分析是否需要？是否關鍵？<ul>
+<li>結合需求、技術、團隊、資源等對上述複雜度逐一分析是否需要？是否關鍵？</li>
+</ol>
+<ul>
 <li>“高性能”主要從軟件系統未來的TPS、響應時間、server 資源利用率等客觀指標，也可以從用戶的主觀感受方面去考慮</li>
 <li>“可用性”主要從服務不中斷等質量屬性，符合行業政策、國家法規等方面去考慮</li>
 <li>“擴展性”則主要從功能需求的未來變更幅度等方面去考慮</li>
 </ul>
-</li>
+<ol start="3">
 <li>按照上述的分析結論，得到複雜度按照優先級的排序清單，越是排在前面的複雜度，就越關鍵，就越優先解決；不建議一下子同時出來過多的複雜性來源，例如同時處理高性能、高可用和可擴展是不合理的</li>
 </ol>
 </li>
