@@ -35,7 +35,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/RDS_Read-Replicas-1.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/RDS_Read-Replicas-2.png">
 <meta property="article:published_time" content="2020-05-24T22:20:00.000Z">
-<meta property="article:modified_time" content="2020-11-11T08:39:05.736Z">
+<meta property="article:modified_time" content="2020-11-11T23:16:02.940Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -263,7 +263,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-11-11 16:39:05" itemprop="dateModified" datetime="2020-11-11T16:39:05+08:00">2020-11-11</time>
+                <time title="Modified: 2020-11-12 07:16:02" itemprop="dateModified" datetime="2020-11-12T07:16:02+08:00">2020-11-12</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -500,6 +500,8 @@
 <li><p>任何 DB engine 的升級，primary &amp; standny DB 會同時升級(若是 multi-AZ)，此時就會有 downtime 的發生</p>
 </li>
 <li><p>若要增加安全性，不要使用帳號密碼連接 RDS，可以啟用 <code>IAM DB authentication</code>，如此一來就會改成用 authentication token 來進行身份驗證；而 RDS 存取權限也可以完全透過 IAM 來管理</p>
+</li>
+<li><p>RDS 的基本監控可以提供 <code>CPU Utilization</code>、<code>Database Connections</code>、<code>Freeable Memory</code> … 等資訊，如開啟 <strong>enhanced monitoring metrics</strong>，就可以額外看到 <code>OS process</code> &amp; <code>RDS child process</code> … 等資訊</p>
 </li>
 </ul>
 <h1 id="Aurora"><a href="#Aurora" class="headerlink" title="Aurora"></a>Aurora</h1><h2 id="Aurora-是什麼"><a href="#Aurora-是什麼" class="headerlink" title="Aurora 是什麼?"></a>Aurora 是什麼?</h2><p>首先來看看 AWS 對 Aurora 的定義：</p>
