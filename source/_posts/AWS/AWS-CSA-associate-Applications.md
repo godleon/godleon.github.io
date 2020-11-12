@@ -455,6 +455,7 @@ Identity Pool 則是提供臨時的權限，用來存取 AWS 資源 or 服務
 - Identity Pool 則是用來賦予 AWS 資源與服務的存取權限
 
 
+
 References
 ==========
 

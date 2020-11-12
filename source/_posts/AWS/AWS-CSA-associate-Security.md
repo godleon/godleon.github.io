@@ -257,7 +257,7 @@ CloudHSM
 
 - 安全等級為 FIPS 140-2 Level 3 (KMS 只有 Level 2)
 
-- 使用者透過 CloudHSM 自行管理 key
+- 使用者透過 CloudHSM 自行管理 key (**將 key 存於經過第三方認證過的硬體安全模組，擁有完全的控制權**)
 
 - 由於所有 key 都是自行管理，因此無法與 AWS managed service 整合
 > AWS 完全無法存取 CloudHSM 中的 key
@@ -271,7 +271,7 @@ CloudHSM
   - Java Cryptography Extensions (JCE)
   - Microsoft CryptoNG (CNG)
 
-- key 若是遺失了，AWS 是無法協助的
+- **key 若是遺失了，AWS 是無法協助的**
 
 ## CloudHSM 如何應用?
 

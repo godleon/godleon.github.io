@@ -123,6 +123,8 @@ Placement Group
 
 - 承上三點，所以選擇 instance type 時，至少要選擇有 10Gb 以上網路的 instance type 才能享受到 placement group 的所帶來的優勢
 
+- **增加新的 EC2 intance 到 cluster placement group，可能會因為當下 VM 所在的硬體已經資源不足，出現 `insufficient capacity error`；此時的解決方法就是停止並重新啟動 VM，讓 VM 移動到不同的硬體上啟動，就可以解決此問題(新的 VM 就可以順利增加了)**
+
 ## Spread
 
 - instance 不一定會在同一個 AZ 內

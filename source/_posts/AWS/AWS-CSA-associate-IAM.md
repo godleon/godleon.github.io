@@ -256,6 +256,8 @@ IAM API Keys
 
 - 若是使用者權限給到 AdministratorAccess，卻想要限制該使用者權限只能在特定範圍內，可透過設定 `IAM permission boundary` 來達成，**但此功能只能套用在 IAM role/user 上，無法用在 IAM group 上**
 
+-  **透過 Web Identity Federation，使用者可以透過相容於 OpenID Connect(OIDC) 的帳號提供者(Google, Facebook, Amazon ... etc)進行認證，取得臨時的 token 作為存取 AWS resource 之用**
+
 
 
 Summary
