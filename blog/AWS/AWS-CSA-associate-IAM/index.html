@@ -35,7 +35,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/IAM_CreateGroup_AWS-managed-policy.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/IAM_CreateGroup_permission-json.png">
 <meta property="article:published_time" content="2020-04-23T21:35:00.000Z">
-<meta property="article:modified_time" content="2020-11-12T07:08:42.593Z">
+<meta property="article:modified_time" content="2020-11-12T13:38:29.575Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -259,7 +259,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-11-12 15:08:42" itemprop="dateModified" datetime="2020-11-12T15:08:42+08:00">2020-11-12</time>
+                <time title="Modified: 2020-11-12 21:38:29" itemprop="dateModified" datetime="2020-11-12T21:38:29+08:00">2020-11-12</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -487,7 +487,10 @@
 </ul>
 <p>其他的部份可以參考<a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html">官網文件(IAM Roles - AWS Identity and Access Management)</a>，有非常詳細的說明。</p>
 <h1 id="其他考試重點"><a href="#其他考試重點" class="headerlink" title="其他考試重點"></a>其他考試重點</h1><ul>
-<li>若是使用者權限給到 AdministratorAccess，卻想要限制該使用者權限只能在特定範圍內，可透過設定 <code>IAM permission boundary</code> 來達成，<strong>但此功能只能套用在 IAM role/user 上，無法用在 IAM group 上</strong></li>
+<li><p>若是使用者權限給到 AdministratorAccess，卻想要限制該使用者權限只能在特定範圍內，可透過設定 <code>IAM permission boundary</code> 來達成，<strong>但此功能只能套用在 IAM role/user 上，無法用在 IAM group 上</strong></p>
+</li>
+<li><p> <strong>透過 Web Identity Federation，使用者可以透過相容於 OpenID Connect(OIDC) 的帳號提供者(Google, Facebook, Amazon … etc)進行認證，取得臨時的 token 作為存取 AWS resource 之用</strong></p>
+</li>
 </ul>
 <h1 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h1><ul>
 <li><p>IAM 有效範圍是 Global，目前還不支援 for 特定的 Region</p>
