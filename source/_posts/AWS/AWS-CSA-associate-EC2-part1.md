@@ -259,6 +259,8 @@ Security Group
 
 - **EC2 instance tenancy 可以從 host 轉為 dedicated，也可以從 dadicated 轉為 host；但無法轉成 default or 從 default 轉為其他種(host or dedicated)**
 
+- 若是希望可以不透過 RDP or SSH 的方式在 EC2 instance 內執行指令，可以從 AWS console 中選擇 `Run Command` 來達成此目的
+
 ## Security Group
 
 - 所有 inbound traffic 預設都會被擋住

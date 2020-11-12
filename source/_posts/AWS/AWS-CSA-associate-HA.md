@@ -297,6 +297,8 @@ Auto Scaling 實作須知
 
 - **若是希望以 `memory utilization` or `disk siapce utilization` 作為 ASG scale up/down 的依據，那需要將 CloudWatch monitoring script 或是 ClouwWatch agent 放進 EC2 instance 來達成**
 
+- 透過 `step scaling`，可以設定好幾個階層的 threshold，並指定到達哪個 threashold 會對應增加 or 減少多少 EC2 instance
+
 
 HA Architechture
 ================

@@ -127,6 +127,12 @@ EBS volume type 有四種(官方宣稱)，直接使用下表來進行比較：
 
 - 若要達到 64,000 IOPS(上限，現在好像可以更高了)，則需要至少 1280GB(64000/50) 大小的 io1 volume，並搭配 [Nitro System](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html#ec2-nitro-instances) 的 EC2 instance 才可以達到
 
+- 使用加密的 EBS volume 時，在以下幾個情況，資料是會被加密處理的：
+  - Data at rest inside the volume
+  - All data moving between the volume and the instance
+  - All snapshots created from the volume
+  - All volumes created from those snapshots
+
 
 
 AMI Type
@@ -207,7 +213,7 @@ ENI, ENA, EFA 的比較
 
 - 讓 instance 中的應用可以 bypass Linux kernel(OS-bypass)，直接與硬體通訊，藉此大幅提高速度並降低延遲
 
-- 目前此功能僅支援 Linux 平台
+- **目前此功能僅支援 Linux OS**
 
 > 特殊與 HPC 相關的應用(例如：機器學習)，就可以考慮此選項
 
@@ -289,7 +295,7 @@ CloudWatch & CloudTrail 都是很大的主題，這邊暫時以 CSA 的考試需
 
 - 用來紀錄所有對 AWS 資源相關的 API call
 
-- 資料會存放在 S3 中(自帶 HA)
+- **資料會存放在 S3 中(自帶 HA)，預設會以加密後的形式存放(使用 AWS KMS key)**
 
 - 可使用 CloudTrail 中的紀錄，檢視使用者對於 AWS 各項資源的使用記錄 & 狀況，**主要用來提供稽核用**
 

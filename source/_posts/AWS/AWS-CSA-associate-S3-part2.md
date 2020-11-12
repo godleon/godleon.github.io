@@ -133,6 +133,10 @@ AWS S3 生命週期管理功能有以下幾個重點：
 - **資料無法直接存進 S3 Glacier，必須先存進 S3 standard 後，設定 lifecycle policy 為 immediate 來達成馬上進入 Glacier 的目的**
 > 透過 `AWS Storage Tape Gateway` 或是 `AWS DataSync` 就可以例外，直接將資料存入 Glacier(or Deep Archive) 
 
+- **小於 128KB 的檔案無法透過 lifecycle policy 轉移 storage class (因為容量小也不會有太多費用....)**
+
+- **要從 STANDARD 轉到 STANDARD_IA or ONEZONE_IA，資料至少需要存放於 STANDARD 超過 30 天(除非設定的對象是 versioned bucket)；若是轉移的目標是 INTELLIGENT_TIERING/GLACIER/DEEP_ARCHIVE 就沒有至少要在 STANDARD 存放 30 天的限制** 
+
 
 ![S3 resource access authorization process](/blog/images/aws/S3_Lifecycle-Policy-example.png)
 
