@@ -35,7 +35,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/ELB_Cross-Zone-Load-Balancing-common-scenario.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/ELB_Path-Patterns.png">
 <meta property="article:published_time" content="2020-06-09T22:35:00.000Z">
-<meta property="article:modified_time" content="2020-11-11T23:16:02.940Z">
+<meta property="article:modified_time" content="2020-11-12T07:08:42.593Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -261,7 +261,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-11-12 07:16:02" itemprop="dateModified" datetime="2020-11-12T07:16:02+08:00">2020-11-12</time>
+                <time title="Modified: 2020-11-12 15:08:42" itemprop="dateModified" datetime="2020-11-12T15:08:42+08:00">2020-11-12</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -554,6 +554,8 @@
 <li><p><strong>預設可以拿來與 CloudWatch 搭配作為 ASG scale up/down 依據的 metric 包含有 <code>CPU utilization</code>, <code>Network utilization</code>, <code>Disk performance</code>、<code>Disk Reads/Writes</code> (注意!! 沒有 <code>memory utilization</code> &amp; <code>disk siapce utilization</code> !!)</strong></p>
 </li>
 <li><p><strong>若是希望以 <code>memory utilization</code> or <code>disk siapce utilization</code> 作為 ASG scale up/down 的依據，那需要將 CloudWatch monitoring script 或是 ClouwWatch agent 放進 EC2 instance 來達成</strong></p>
+</li>
+<li><p>透過 <code>step scaling</code>，可以設定好幾個階層的 threshold，並指定到達哪個 threashold 會對應增加 or 減少多少 EC2 instance</p>
 </li>
 </ul>
 <h1 id="HA-Architechture"><a href="#HA-Architechture" class="headerlink" title="HA Architechture"></a>HA Architechture</h1><p>此部份是記錄設計 HA(高可用) 架構時需要注意的重點</p>

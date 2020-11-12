@@ -33,7 +33,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_Lifecycle-Policy-example.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_Event-Notification.png">
 <meta property="article:published_time" content="2020-04-28T21:50:00.000Z">
-<meta property="article:modified_time" content="2020-11-11T23:16:02.940Z">
+<meta property="article:modified_time" content="2020-11-12T07:08:42.593Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -257,7 +257,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-11-12 07:16:02" itemprop="dateModified" datetime="2020-11-12T07:16:02+08:00">2020-11-12</time>
+                <time title="Modified: 2020-11-12 15:08:42" itemprop="dateModified" datetime="2020-11-12T15:08:42+08:00">2020-11-12</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -406,6 +406,10 @@
 <blockquote>
 <p>透過 <code>AWS Storage Tape Gateway</code> 或是 <code>AWS DataSync</code> 就可以例外，直接將資料存入 Glacier(or Deep Archive) </p>
 </blockquote>
+</li>
+<li><p><strong>小於 128KB 的檔案無法透過 lifecycle policy 轉移 storage class (因為容量小也不會有太多費用….)</strong></p>
+</li>
+<li><p><strong>要從 STANDARD 轉到 STANDARD_IA or ONEZONE_IA，資料至少需要存放於 STANDARD 超過 30 天(除非設定的對象是 versioned bucket)；若是轉移的目標是 INTELLIGENT_TIERING/GLACIER/DEEP_ARCHIVE 就沒有至少要在 STANDARD 存放 30 天的限制</strong> </p>
 </li>
 </ul>
 <p><img src="/blog/images/aws/S3_Lifecycle-Policy-example.png" alt="S3 resource access authorization process"></p>
