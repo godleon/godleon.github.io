@@ -57,7 +57,7 @@ EBS volume type 有四種(官方宣稱)，直接使用下表來進行比較：
 
 - snapshot 是 volume 在特定時間點的複本
 
-- snapshot 的特性是**遞增(incremental)**，因此對 volume 進行 snapshot 只會針對有變動的 block 進行處理(也只有增加的部份容量會被收費)
+- snapshot 的特性是**`遞增(incremental)`**，因此對 volume 進行 snapshot 只會針對有變動的 block 進行處理(也只有增加的部份容量會被收費)
 > 假設同一個 EBS volume 的 snapshot 有兩個，若是第一個完整的 snapshot 被刪除，還是可以從第二個 snapshot 還原所有資料
 
 - **可以搭配 Data Lifecycle Manager(DLM) 來設定複雜的 EBS snapshot 管理規則(包含：creation、retention、deletion ... 等等)**
@@ -123,7 +123,7 @@ EBS volume type 有四種(官方宣稱)，直接使用下表來進行比較：
 
 ## 其他考試重點
 
-- 使用 `io1` volume 通常是為了取得最高的 IOPS 能力，但**每 GB 的空間最多只能提供 50 IOPS(比例為 50:1)**，因此一個 10GB 的 io1 volume 最多只能提供 500 IOPS/s
+- 使用 `io1` volume 通常是為了取得最高的 IOPS 能力，但 **每 GB 的空間最多只能提供 50 IOPS(比例為 50:1)**，因此一個 10GB 的 io1 volume 最多只能提供 500 IOPS/s
 
 - 若要達到 64,000 IOPS(上限，現在好像可以更高了)，則需要至少 1280GB(64000/50) 大小的 io1 volume，並搭配 [Nitro System](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html#ec2-nitro-instances) 的 EC2 instance 才可以達到
 
@@ -229,8 +229,6 @@ CloudWatch & CloudTrail 都是很大的主題，這邊暫時以 CSA 的考試需
 - **主要作為監控用途**(效能、使用量 ... etc)，是 AWS 重要服務之一
 
 - 同時與其他 AWS 服務都有高度整合(例如：EC2, ASG, ELB, Route53, EBS, CloudFront ... 等等)，方便進行監控的設定
-
-- 
 
 - 除了 AWS 服務之外，也可以同時用來監控自行開發的應用程式
 

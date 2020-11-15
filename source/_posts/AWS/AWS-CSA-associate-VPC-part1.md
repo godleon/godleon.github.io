@@ -371,7 +371,7 @@ NAT 在這裡的目的很簡單，就是為了讓 private subnet 具備連網的
 
 - 建議若是 resource 橫跨 AZ，就不要使用單一 AZ 的 NAT gateway，這樣就會造成 single point of faliure；比較好的作法是讓每個 AZ 都有一個 NAT gateway，而該 AZ 中的 resource 就使用該 AZ 中的 NAT gateway
 
-- **處理的對外流量是 IPv4 的；若要處理 IPv6 對外流量，則需要改用 [egress-only internet gateway](https://docs.aws.amazon.com/vpc/latest/userguide/egress-only-internet-gateway.html)**
+- **NAT Gateway 是用來處理 IPv4 的對外流量；若要處理 IPv6 的對外流量，則需要改用 [egress-only internet gateway](https://docs.aws.amazon.com/vpc/latest/userguide/egress-only-internet-gateway.html)**
 
 
 

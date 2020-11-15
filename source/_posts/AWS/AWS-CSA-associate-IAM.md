@@ -129,7 +129,7 @@ IAM Role
 
 - IAM Policy 無法直接套用在 AWS service 上 (因此若是要賦予 EC2 instance 權限，那只能使用 IAM Role)
 
-- **以上述範例來說，也可以使用 AWS credential(Access ID & Secret Key) 來達成相同效果，但完全不建議這麼做，會造成管理上很大負擔**
+- **以上述範例來說，也可以使用 AWS credential(Access ID & Secret Key) 來達成相同效果，但完全不建議這麼做，會造成管理上很大負擔 & 安全性的隱憂**
 
 - **每一個 EC2 instance 只能與一個 IAM Role 的設定綁定**；因此在複雜環境下，Role 權限設定要謹慎評估
 
@@ -232,7 +232,7 @@ IAM API Keys
 - 建立 IAM user 時，可以根據需求建立；若是透過程式(API/SDK/CLI)存取 AWS，勾選 `Programmaric access`(需要 "**access key ID**" & "**secret access key**")；如果是要透過 AWS console 存取 AWS，勾選 `AWS Management Console access`(需要密碼)
 ![IAM User access types](/blog/images/aws/IAM_User-access-types.png)
 
-- 在建立 Group 頁面中，指定權限的部份，若是看到有橘色方塊的項目，就表示此權限為 AWS 預先定義好的權限(AWS managed policy)；而 **Type** 為 `Job Function` 的部份，其實就是 AWS 預先為各種不同的管理職能，整理好的 AWS managed policy 的集合(減輕管理者設定全線上的負擔)，因此可將 Job Function 視為 AWS managed policy colleciton
+- 在建立 Group 頁面中，指定權限的部份，若是看到有橘色方塊的項目，就表示此權限為 AWS 預先定義好的權限(AWS managed policy)；而 **Type** 為 `Job Function` 的部份，其實就是 AWS 預先為各種不同的管理職能，整理好的 AWS managed policy 的集合(減輕管理者設定權限上的負擔)，因此可將 Job Function 視為 AWS managed policy colleciton
 ![IAM Create Group - AWS Managed policy](/blog/images/aws/IAM_CreateGroup_AWS-managed-policy.png)
 
 - policy 並非 group 專屬，也可以 attach 到單一 user

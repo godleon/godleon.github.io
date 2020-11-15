@@ -21,7 +21,7 @@ tags:
 
 - 預設所有的 Bucket 建立時，都是 **PRIVATE** 無法被公開存取的
 
-- 可以開啟將所有對 S3 Bucket 存取的行為全部 log 下來的功能，而這些存取的 log 可以存到另一個 S3 Bucket(可以是同一個帳號 or 不同帳號)  
+- 可以開啟將所有對 S3 Bucket 存取的行為全部 log 下來的功能(**Server access logging**)，而這些存取的 log 可以存到另一個 S3 Bucket(可以是同一個帳號 or 不同帳號)  
 
 - 要管理 S3 bucket 的安全，可透過 `IAM Policy`、`S3 Bucket Policy`、`S3 ACL` 三種方式來達成
 
@@ -83,7 +83,7 @@ AWS S3 可以為每個 object(最細可以到 object 為單位) 進行資料的�
 
 終端可分為兩個部份，分別是 `server side` & `client side`：
 
-- **Server Side Encryption(SSE)**：加密金鑰會由 AWS 管理，而加密金鑰可透過以下幾種方式取得：
+- **Server Side Encryption**(SSE)：加密金鑰會由 AWS 管理，而加密金鑰可透過以下幾種方式取得：
   - 由 S3 管理的 key (`SSE-S3`)
   - 透過 AWS Key Management Service 來管理金鑰 (`SSE-KMS`)
   - Server Side Encryption with Customer Provided Keys (`SSE-C`)
@@ -135,7 +135,7 @@ AWS S3 生命週期管理功能有以下幾個重點：
 
 - **小於 128KB 的檔案無法透過 lifecycle policy 轉移 storage class (因為容量小也不會有太多費用....)**
 
-- **要從 STANDARD 轉到 STANDARD_IA or ONEZONE_IA，資料至少需要存放於 STANDARD 超過 30 天(除非設定的對象是 versioned bucket)；若是轉移的目標是 INTELLIGENT_TIERING/GLACIER/DEEP_ARCHIVE 就沒有至少要在 STANDARD 存放 30 天的限制** 
+- **要從 STANDARD 轉到 STANDARD_IA or ONEZONE_IA，資料至少需要存放於 STANDARD 超過 30 天(除非設定的對象是 versioned bucket)；若是轉移的目標是 INTELLIGENT_TIERING or GLACIER or DEEP_ARCHIVE 就沒有至少要在 STANDARD 存放 30 天的限制** 
 
 
 ![S3 resource access authorization process](/blog/images/aws/S3_Lifecycle-Policy-example.png)

@@ -97,7 +97,7 @@ AWS Storage Gateway 是一種混合雲端儲存服務，有以下兩個特性：
 
 - **存取會以 local 為主，File Gateway 會協助慢慢將資料同步到 S3 中**
 
-- 本地端可透過 NFS 的方式進行儲存
+- 本地端可透過 NFS 的方式進行儲存 (POSIX compitable)
 
 - 與檔案相關的 ownership, permission, timestamp 等資訊，則會存放在 S3 object user-metadata 中
 

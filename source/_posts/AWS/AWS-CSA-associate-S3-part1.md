@@ -41,7 +41,7 @@ What is S3?
 
 - 單一檔案大小的限制為 `0 bytes` ~ `5 TB`，整體的儲存空間無限制
 
-- 檔案一律存在 bucket 中 (Bucket 裏面無法再放一個 bucket，但可以放 folder)
+- 檔案一律存在 bucket 中 (Bucket 裏面無法再放一個 bucket，但可以放 folder；但其實不是真的 folder，實際上是透過 `key-name prefix` 所模擬出來的)
 
 - **單一帳號預設最大上限可存放 100 個 buckets，但可以通知 AWS 協助放大上限**
 
@@ -78,7 +78,7 @@ What is S3?
 - MFA Delete
 > 重要檔案可以加上 MFA(多因素認證) 的流程進行確認，才能實際刪除檔案 (**只有 root account 可以開啟此功能**)
 
-- 可透過 **Access Control Lists** & **Bucket Policies** 來提升存取檔案的安全性
+- 可透過 **Access Control List** & **Bucket Policy** 來提升存取檔案的安全性
 > 剛建立好的 bucket or 上傳的 object 所預設的權限僅限於自己可以存取(private & inaccessible)，完全沒有預設對外開放的規則
 
 
@@ -122,7 +122,7 @@ S3 Storage Class
 ================
 
 S3 根據使用者存取的頻率與需求，提供不同的 storage class 供使用者選擇：
-> 調整單位可以細到 object level，而非 bucket level
+> **調整單位可以細到 object level，而非僅僅是 bucket level**
 
 ## Standard
 
@@ -192,7 +192,7 @@ S3 根據使用者存取的頻率與需求，提供不同的 storage class 供�
 
 - 設計用來封存資料用(例如：稽核用的 log)，但**不應該拿來備份用的**
 
-- 存取時間會需要數分鐘到數小時不等，因此分成 `Expedited`(1~5 mins)、`Standard`(3~5 hours)、`Bulk`(5~12 hours) 三個等級，單位收費也不同
+- 存取時間會需要數分鐘到數小時不等，因此分成 `Expedited`(1\~5 mins)、`Standard`(3\~5 hours)、`Bulk`(5\~12 hours) 三個等級，單位收費也不同
 > **若是要確保可以在一定時間內取得資料，並有一定資料下載的 throughput，那就要購買 `Provisioned capacity`**
 
 - 提供跨 AZ 的 11 個 9 個可靠度
