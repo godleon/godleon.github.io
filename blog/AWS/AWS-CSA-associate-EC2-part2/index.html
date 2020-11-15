@@ -31,7 +31,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/EBS_Storage-Type-Comparison.png">
 <meta property="article:published_time" content="2020-05-30T01:10:00.000Z">
-<meta property="article:modified_time" content="2020-11-12T13:38:29.575Z">
+<meta property="article:modified_time" content="2020-11-15T22:18:40.124Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -260,7 +260,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-11-12 21:38:29" itemprop="dateModified" datetime="2020-11-12T21:38:29+08:00">2020-11-12</time>
+                <time title="Modified: 2020-11-16 06:18:40" itemprop="dateModified" datetime="2020-11-16T06:18:40+08:00">2020-11-16</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -327,7 +327,7 @@
 </li>
 <li><p>snapshot 是 volume 在特定時間點的複本</p>
 </li>
-<li><p>snapshot 的特性是**遞增(incremental)**，因此對 volume 進行 snapshot 只會針對有變動的 block 進行處理(也只有增加的部份容量會被收費)</p>
+<li><p>snapshot 的特性是**<code>遞增(incremental)</code>**，因此對 volume 進行 snapshot 只會針對有變動的 block 進行處理(也只有增加的部份容量會被收費)</p>
 <blockquote>
 <p>假設同一個 EBS volume 的 snapshot 有兩個，若是第一個完整的 snapshot 被刪除，還是可以從第二個 snapshot 還原所有資料</p>
 </blockquote>
@@ -396,7 +396,7 @@
 </li>
 </ol>
 <h2 id="其他考試重點"><a href="#其他考試重點" class="headerlink" title="其他考試重點"></a>其他考試重點</h2><ul>
-<li><p>使用 <code>io1</code> volume 通常是為了取得最高的 IOPS 能力，但**每 GB 的空間最多只能提供 50 IOPS(比例為 50:1)**，因此一個 10GB 的 io1 volume 最多只能提供 500 IOPS/s</p>
+<li><p>使用 <code>io1</code> volume 通常是為了取得最高的 IOPS 能力，但 **每 GB 的空間最多只能提供 50 IOPS(比例為 50:1)**，因此一個 10GB 的 io1 volume 最多只能提供 500 IOPS/s</p>
 </li>
 <li><p>若要達到 64,000 IOPS(上限，現在好像可以更高了)，則需要至少 1280GB(64000/50) 大小的 io1 volume，並搭配 <a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html#ec2-nitro-instances">Nitro System</a> 的 EC2 instance 才可以達到</p>
 </li>
@@ -494,7 +494,6 @@
 </li>
 <li><p>同時與其他 AWS 服務都有高度整合(例如：EC2, ASG, ELB, Route53, EBS, CloudFront … 等等)，方便進行監控的設定</p>
 </li>
-<li></li>
 <li><p>除了 AWS 服務之外，也可以同時用來監控自行開發的應用程式</p>
 </li>
 <li><p>CloudWatch Alarm 可以用來觸發某些特定事件，例如：auto scaling</p>

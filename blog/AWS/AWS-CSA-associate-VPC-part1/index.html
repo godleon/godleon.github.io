@@ -41,7 +41,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/VPC_NetworkACL-outbound-1.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/VPC_NetworkACL-outbound-2.png">
 <meta property="article:published_time" content="2020-05-20T21:45:00.000Z">
-<meta property="article:modified_time" content="2020-11-12T13:38:29.575Z">
+<meta property="article:modified_time" content="2020-11-15T22:18:40.128Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -265,7 +265,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-11-12 21:38:29" itemprop="dateModified" datetime="2020-11-12T21:38:29+08:00">2020-11-12</time>
+                <time title="Modified: 2020-11-16 06:18:40" itemprop="dateModified" datetime="2020-11-16T06:18:40+08:00">2020-11-16</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -639,7 +639,7 @@
 </li>
 <li><p>建議若是 resource 橫跨 AZ，就不要使用單一 AZ 的 NAT gateway，這樣就會造成 single point of faliure；比較好的作法是讓每個 AZ 都有一個 NAT gateway，而該 AZ 中的 resource 就使用該 AZ 中的 NAT gateway</p>
 </li>
-<li><p><strong>處理的對外流量是 IPv4 的；若要處理 IPv6 對外流量，則需要改用 <a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/vpc/latest/userguide/egress-only-internet-gateway.html">egress-only internet gateway</a></strong></p>
+<li><p><strong>NAT Gateway 是用來處理 IPv4 的對外流量；若要處理 IPv6 的對外流量，則需要改用 <a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/vpc/latest/userguide/egress-only-internet-gateway.html">egress-only internet gateway</a></strong></p>
 </li>
 </ul>
 <h1 id="Network-Security"><a href="#Network-Security" class="headerlink" title="Network Security"></a>Network Security</h1><h2 id="Network-ACLs"><a href="#Network-ACLs" class="headerlink" title="Network ACLs"></a>Network ACLs</h2><p><img src="/blog/images/aws/VPC_Creation-3.png" alt="VPC arch 3"></p>

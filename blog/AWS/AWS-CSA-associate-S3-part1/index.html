@@ -31,7 +31,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_Storage-Classes-comparision.png">
 <meta property="article:published_time" content="2020-04-26T04:00:00.000Z">
-<meta property="article:modified_time" content="2020-11-12T13:38:29.575Z">
+<meta property="article:modified_time" content="2020-11-15T22:18:40.124Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -255,7 +255,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-11-12 21:38:29" itemprop="dateModified" datetime="2020-11-12T21:38:29+08:00">2020-11-12</time>
+                <time title="Modified: 2020-11-16 06:18:40" itemprop="dateModified" datetime="2020-11-16T06:18:40+08:00">2020-11-16</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -311,7 +311,7 @@
 </li>
 <li><p>單一檔案大小的限制為 <code>0 bytes</code> ~ <code>5 TB</code>，整體的儲存空間無限制</p>
 </li>
-<li><p>檔案一律存在 bucket 中 (Bucket 裏面無法再放一個 bucket，但可以放 folder)</p>
+<li><p>檔案一律存在 bucket 中 (Bucket 裏面無法再放一個 bucket，但可以放 folder；但其實不是真的 folder，實際上是透過 <code>key-name prefix</code> 所模擬出來的)</p>
 </li>
 <li><p><strong>單一帳號預設最大上限可存放 100 個 buckets，但可以通知 AWS 協助放大上限</strong></p>
 </li>
@@ -356,7 +356,7 @@
 <p>重要檔案可以加上 MFA(多因素認證) 的流程進行確認，才能實際刪除檔案 (<strong>只有 root account 可以開啟此功能</strong>)</p>
 </blockquote>
 </li>
-<li><p>可透過 <strong>Access Control Lists</strong> &amp; <strong>Bucket Policies</strong> 來提升存取檔案的安全性</p>
+<li><p>可透過 <strong>Access Control List</strong> &amp; <strong>Bucket Policy</strong> 來提升存取檔案的安全性</p>
 <blockquote>
 <p>剛建立好的 bucket or 上傳的 object 所預設的權限僅限於自己可以存取(private &amp; inaccessible)，完全沒有預設對外開放的規則</p>
 </blockquote>
@@ -398,7 +398,7 @@
 </ul>
 <h1 id="S3-Storage-Class"><a href="#S3-Storage-Class" class="headerlink" title="S3 Storage Class"></a>S3 Storage Class</h1><p>S3 根據使用者存取的頻率與需求，提供不同的 storage class 供使用者選擇：</p>
 <blockquote>
-<p>調整單位可以細到 object level，而非 bucket level</p>
+<p><strong>調整單位可以細到 object level，而非僅僅是 bucket level</strong></p>
 </blockquote>
 <h2 id="Standard"><a href="#Standard" class="headerlink" title="Standard"></a>Standard</h2><ul>
 <li><p>存取速度最快</p>
@@ -466,7 +466,7 @@
 <h2 id="Glacier"><a href="#Glacier" class="headerlink" title="Glacier"></a>Glacier</h2><ul>
 <li><p>設計用來封存資料用(例如：稽核用的 log)，但<strong>不應該拿來備份用的</strong></p>
 </li>
-<li><p>存取時間會需要數分鐘到數小時不等，因此分成 <code>Expedited</code>(1<del>5 mins)、<code>Standard</code>(3</del>5 hours)、<code>Bulk</code>(5~12 hours) 三個等級，單位收費也不同</p>
+<li><p>存取時間會需要數分鐘到數小時不等，因此分成 <code>Expedited</code>(1~5 mins)、<code>Standard</code>(3~5 hours)、<code>Bulk</code>(5~12 hours) 三個等級，單位收費也不同</p>
 <blockquote>
 <p><strong>若是要確保可以在一定時間內取得資料，並有一定資料下載的 throughput，那就要購買 <code>Provisioned capacity</code></strong></p>
 </blockquote>

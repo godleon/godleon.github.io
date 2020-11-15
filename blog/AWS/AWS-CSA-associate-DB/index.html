@@ -35,7 +35,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/RDS_Read-Replicas-1.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/RDS_Read-Replicas-2.png">
 <meta property="article:published_time" content="2020-05-24T22:20:00.000Z">
-<meta property="article:modified_time" content="2020-11-12T13:38:29.575Z">
+<meta property="article:modified_time" content="2020-11-15T22:18:40.124Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -263,7 +263,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-11-12 21:38:29" itemprop="dateModified" datetime="2020-11-12T21:38:29+08:00">2020-11-12</time>
+                <time title="Modified: 2020-11-16 06:18:40" itemprop="dateModified" datetime="2020-11-16T06:18:40+08:00">2020-11-16</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -424,7 +424,7 @@
 <h3 id="加密"><a href="#加密" class="headerlink" title="加密"></a>加密</h3><ul>
 <li><p>加密功能目前支援 MySQL, Oracle, SQL Server, PostgreSQL, MariaDB, Aurora</p>
 </li>
-<li><p>需要搭配 AWS KMS(Key MAnagement Service) 使用</p>
+<li><p>需要搭配 AWS KMS(Key Management Service) 使用</p>
 </li>
 <li><p>DB 資料進資料庫後會以加密後的形式存在</p>
 </li>
@@ -497,7 +497,7 @@
 </li>
 </ul>
 <h2 id="其他考試重點"><a href="#其他考試重點" class="headerlink" title="其他考試重點"></a>其他考試重點</h2><ul>
-<li><p>任何 DB engine 的升級，primary &amp; standny DB 會同時升級(若是 multi-AZ)，此時就會有 downtime 的發生</p>
+<li><p>任何 DB engine 的升級，primary &amp; standy DB 會同時升級(若是 multi-AZ)，此時就會有 downtime 的發生</p>
 </li>
 <li><p>若要增加安全性，不要使用帳號密碼連接 RDS，可以啟用 <code>IAM DB authentication</code>，如此一來就會改成用 authentication token 來進行身份驗證；而 RDS 存取權限也可以完全透過 IAM 來管理</p>
 </li>
@@ -619,7 +619,7 @@
 <h2 id="其他考試重點-1"><a href="#其他考試重點-1" class="headerlink" title="其他考試重點"></a>其他考試重點</h2><ul>
 <li><p>如果 Aurora primary DB 掛了，若有多個 read replica，那優先選擇的條件會是以 <code>priority</code> + <code>容量</code> 來評估；舉例來說：priority <strong>tier-1 &gt; tier-10 &gt; tier-15</strong>，容量 <strong>32TB &gt; 16TB</strong></p>
 </li>
-<li><p>以上面的例子來說，若有五個 read replica 分別是 <strong>tier-1(16TB)**</strong>tier-1(32TB)<strong>、</strong>tier-10(16TB)<strong>、</strong>tier-15(16TB)<strong>、</strong>tier-15(32TB)**，那會被優先選中提昇為 primary DB 的就會是 <code>**tier-1(32TB)**</code></p>
+<li><p>以上面的例子來說，若有五個 read replica 分別是 <strong>tier-1(16TB)**、</strong>tier-1(32TB)<strong>、</strong>tier-10(16TB)<strong>、</strong>tier-15(16TB)<strong>、</strong>tier-15(32TB)**，那會被優先選中提昇為 primary DB 的就會是 <code>tier-1(32TB)</code></p>
 </li>
 <li><p>可透過 <code>custom endpoint</code> 的機制，可以設計專門處理 DDL &amp; DML 的 endpoint，或是僅用來做查詢的 endpoint</p>
 </li>
@@ -668,7 +668,7 @@
 </li>
 </ul>
 <h2 id="其他考試重點-2"><a href="#其他考試重點-2" class="headerlink" title="其他考試重點"></a>其他考試重點</h2><ul>
-<li><p>DynamoDB Accelerator(DAX) 除了可以提供 DynamoDB 的優點外，還增加了 in-memory cache 的功能，可以大幅提昇外部讀取的能力(號稱可以提昇 10 被的效能，並將延遲從 ms 降低到 µs 等級)</p>
+<li><p>DynamoDB Accelerator(DAX) 除了可以提供 DynamoDB 的優點外，還增加了 in-memory cache 的功能，可以大幅提昇外部讀取的能力(號稱可以提昇 10 倍的效能，並將延遲從 ms 降低到 µs 等級)</p>
 </li>
 <li><p>透過 AWS CLI 產生的 DynamoDB table，預設是沒有啟用 Auto Scaling 的功能的</p>
 </li>
