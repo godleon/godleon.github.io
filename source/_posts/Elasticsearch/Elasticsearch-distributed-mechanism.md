@@ -41,26 +41,11 @@ Elasticsearch 的分散式架構帶來以下優點：
 
 - 每個 node 啟動之後都會分配一個 UID，並儲存在 `/usr/share/elasticsearch/data` 目錄下
 
+- 若是要查詢 cluster 中的 node 狀態，可以使用 [GET /_cat/nodes](https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-nodes.html) API
 
-## Coordinating Node
+## Node Types
 
-- 處理 request 的 node 稱為 **Coordinating Node**，其功能是將 request 轉發到正確的 node 上(例如：建立 index 的 request 要轉發給 master node)
-
-- 所有的 node 都預設是 Coordinating Node
-
-- 可以透過將其他 node type 都設定為 `false`，這樣就可以讓特定的 node 變成 dedicated coordinating node
-
-
-## Data Node
-
-- 可以保存資料的 node，每個 node 啟動後都會預設是 data node，可以透過設定 `node.data: false` 停用 data node 功能
-
-- 用來保存分片資料，實現資料的 scalibility (由 master node 決定如何把分片分發到不同的 data node 上)
-
-- 透過增加 data node 可以解決資料水平擴展 & 解決單點故障導致資料遺失的問題
-
-
-## Master Node
+### Master Node
 
 - master node 用來處理以下工作：
 
@@ -84,6 +69,28 @@ Elasticsearch 的分散式架構帶來以下優點：
   - 每個 node 啟動時就預設是一個 master eligible node，可以透過設定 `node.master: false` 取消此預設設定
 
   - 當 cluster 中的第一個 master eligible node 啟動時，就會把自己選舉為 master node
+
+### Coordinating Node
+
+- 處理 request 的 node 稱為 **Coordinating Node**，其功能是將 request 轉發到合適的 node 上(例如：建立 index 的 request 要轉發給 master node) & 最後進行結果的匯總
+
+- 所有的 node 都預設是 Coordinating Node
+
+- 可以透過將其他 node type 都設定為 `false`，這樣就可以讓特定的 node 變成 dedicated coordinating node
+
+### Data Node
+
+- 可以保存資料的 node，每個 node 啟動後都會預設是 data node，可以透過設定 `node.data: false` 停用 data node 功能
+
+- 用來保存分片資料，實現資料的 scalibility (由 master node 決定如何把分片分發到不同的 data node 上)
+
+- 透過增加 data node 可以解決資料水平擴展 & 解決單點故障導致資料遺失的問題
+
+### 其他類型的 Node Type
+
+- `Hot & Warm Node`：通常 Hot node 會儲存比較新、比較常用的資料，因此通常硬體規格也會比較好；而 Warm Node 則會儲存比較舊 & 較不常用的資料，因此可以用比較低規格的硬體；藉此優化硬體相關的成本開銷
+
+- `Machine Learning Node`：專門用來跑 machine learning 的相關工作，可用來搭配異常自動偵測之用
 
 
 ## Cluster State
@@ -124,6 +131,8 @@ Shard & Cluster 的故障轉移
 
 - shard 是 Elasticsearch 分散式儲存的基礎，包含 primary shard & replica shard
 
+- 每一個 shard 就是一個 Lucene instance
+
 - primary shard 功能是將一份被索引後的資料，分散到多個 data node 上存放，實現儲存方面的水平擴展
 
 - primary shard 的數量在建立 index 時就會指定，後續是無法修改的，若要修改就必須要進行 reindex
@@ -131,15 +140,18 @@ Shard & Cluster 的故障轉移
 
 ## Replica Shard (提高資料可用性)
 
-- replica shard 用來提供資料可用性，當 primary shard 遺失時，replica shard 就可以被 promote 成 primary shard 來保持資料完整性
+- replica shard 用來提供資料高可用性，當 primary shard 遺失時，replica shard 就可以被 promote 成 primary shard 來保持資料完整性
 
 - replica shard 數量可以動態調整，讓每個 data node 上都有完整的資料
 
 - replica shard 可以一定程度的提高讀取(查詢)的效能
 
-> 若不設定 replica shard，一旦有 data node 故障導致 primary shard 遺失，資料可能就無法恢復了
+- 若不設定 replica shard，一旦有 data node 故障導致 primary shard 遺失，資料可能就無法恢復了
 
-> ES 7.0 開始，primary shard 預設為 `1`，replica shard 預設為 `0`
+- ES 7.0 開始，primary shard 預設為 `1`，replica shard 預設為 `0`
+
+以下是一個 `primary shard=3 + replica shard=1` 所會發生的實際資料分佈狀況：
+![Elasticsearch - shard setting example](/blog/images/Elasticsearch/es_shard-setting-example.png)
 
 
 ## Shard 的規劃 & 設定
@@ -161,7 +173,7 @@ Shard & Cluster 的故障轉移
 
 ### cluster status
 
-透過 `[GET _cluster/health](https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-health.html)` 可以取得目前 cluster 的健康狀態：
+透過 `[GET _cluster/health/<target>](https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-health.html)` 可以取得目前 cluster 的健康狀態：
 
 ![Elasticsearch - cluster health status](/blog/images/Elasticsearch/es_cluster-health-statue.png)
 
@@ -174,7 +186,7 @@ Shard & Cluster 的故障轉移
 
 ### shard status
 
-透過 `[GET _cat/shards](https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-shards.html)` 可以取得目前的 shard 狀態：
+透過 `[GET /_cat/shards/<target>](https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-shards.html)` 可以取得目前的 shard 狀態：
 
 ![Elasticsearch - shard status](/blog/images/Elasticsearch/es_cat-shard-api.png)
 

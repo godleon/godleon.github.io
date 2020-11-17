@@ -22,7 +22,7 @@ tags:
 
 ## Document
 
-- Document 是可以被搜尋數據的最小單位(可能是 log 文件中的一筆紀錄 / 一部電影或唱片的相關訊息 / RDBMS 中的一筆 record)：
+- Document 是可以被搜尋數據的最小單位(可能是 log 文件中的一筆紀錄 / 一部電影或唱片的相關訊息 / RDBMS 中的一筆 record)
 
 - Document 會被序列化成 JSON(由一堆 Key/Value 的資料組成，並有其資料格式) 格式，保存在 Elasticsearch 中
 
@@ -38,6 +38,8 @@ tags:
 
 
 ### Metadata
+
+![Elasticsearch - document metadata example](/blog/images/Elasticsearch/es_document-metadata.png)
 
 document metadata 就是描述 document 本身屬性用的資料，通常會包含以下內容：
 
@@ -56,7 +58,7 @@ document metadata 就是描述 document 本身屬性用的資料，通常會包�
 
 ## Index
 
-- `index` 在 ES 中是個邏輯空間的概念，用來儲存 document 的容器 (跟其他領域的 index 用法不太一樣)
+- `index` 在 ES 中是個邏輯空間的概念，用來儲存 document 的容器，而這些 document 內容都是相似的 (跟其他領域的 index 用法不太一樣)
 
 - `shard` 在 ES 中則是個物理空間的的概念，**index 中的資料會分散放在不同的 shard 中**
 
@@ -83,7 +85,7 @@ document metadata 就是描述 document 本身屬性用的資料，通常會包�
 | Schema | Mapping |
 | SQL | DSL |
 
-- ES 是 schemaless 的，資料格式可以隨意定，非常適合用來做全文檢索
+- ES 是 schemaless 的，資料格式可以隨意定，非常適合用來做全文檢索 or 查詢與資料的相關性
 
 - RDBMS 的強項在於處理對於資料事務性(交易)要求特別高的任務
 
@@ -158,7 +160,7 @@ Document 的基本 CRUD 與批次操作
 ## Document CRUD
 
 - `GET`：取得 document
-  - 語法為 `GET _index/_type/Id`，例如 **GET users/_doc/1**
+  - 語法為 [`GET _index/_type/[ID]`](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-get.html)，例如 **GET users/_doc/1**
   - document 會有 version control 的功能，因此即使被刪除，version 欄位的值也會不斷增加
   - `_source` 欄位包含了 document 的原始訊息
 
@@ -167,14 +169,20 @@ Document 的基本 CRUD 與批次操作
 - `Create`(**PUT**)：
   - 建立新的 document，如果 ID 已經存在會發生錯誤
   - 語法為 `PUT _index/_create/[ID]` or `PUT _index/_doc/[ID]?op_type=create`，例如：**PUT users/_create/1** (也可以不帶 ID，就會自動生成)
+  - **較不建議指定 ID 的作法，可能會撞到效能不彰的問題**
+
+- `Create`(**POST**)
+  - 系統會自動產生 document ID (**這是比較建議的方式**)
+  - 語法為 `POST _index/_doc`
 
 - `Index`(**PUT**)：
   - 如果 ID 不存在，則建立新的 document；若 ID 已經存在，則刪除現存的 document 再建立新的，**version** 的部份會增加
-  - 語法為 `PUT _index/_doc/[ID]`，例如：**PUT users/_doc/1**
+  - 語法為 [`PUT _index/_doc/[ID]`](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html)，例如：**PUT users/_doc/1**
 
 - `Update`(**POST**)：
-  - document 必須已經存在，更新時只會對 document 中相對應的欄位作增量更新
-  - 語法為 `POST _index/_update/[ID]`，例如：**POST users/_update/1**
+  - document 必須已經存在，更新時只會對 document 中相對應的欄位作增量更新 or 對應欄位的修改
+  - json payload 需要包含在 `doc` 欄位中 (可參考[官網文件](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update.html)) 
+  - 語法為 [`POST _index/_update/[ID]`](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update.html)，例如：**POST users/_update/1**
   - POST 也可以拿來作為新增 document 用
 
 - 呼叫 API 時傳輸的數據不宜過大(預設單一個 document 大小不能超過 100MB)，過大的 document 建議拆成 5~15MB 分次匯入
@@ -182,29 +190,87 @@ Document 的基本 CRUD 與批次操作
 
 ## 批次操作
 
+- 批次操作基本上是用來提昇 API 呼叫時的效能
+
+- 但每次的 API request 不要發送過多的資料，因為過多的資料可能會造成 ES cluster 過大的壓力導致效能下降(必須記得 ES cluster 每秒都需要服務相當多的 API request)
+
 Elasticsearch 中支援幾種批次操作 API，常用的有以下幾個：
 
-### _bulk
+### [/_bulk](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html)
 
-- [官方文件說明](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html)
+```bash
+POST /_bulk
+
+POST /<target>/_bulk
+```
 
 - 讓使用者可以在同一個 API request 中送出多個操作，支援 **Index/Create/Update/Delete**，提昇效率
 
-### _mget
+- request 中的每一筆資料都會有對應的 return code，其中的任何一個操作失敗不會影響其他操作
 
-- [官方文件說明](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-multi-get.html)
+範例如下：
+
+```bash
+POST _bulk
+{ "index" : { "_index" : "test", "_id" : "1" } }
+{ "field1" : "value1" }
+{ "delete" : { "_index" : "test", "_id" : "2" } }
+{ "create" : { "_index" : "test", "_id" : "3" } }
+{ "field1" : "value3" }
+{ "update" : {"_id" : "1", "_index" : "test"} }
+{ "doc" : {"field2" : "value2"} }
+```
+
+### [/_mget](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-multi-get.html)
+
+```bash
+GET /_mget
+
+GET /<index>/_mget
+```
 
 - 一次讀取多個不同 index 中特定 ID 的 document
 
-### _msearch
+使用範例：
+
+```bash
+GET /_mget
+{
+  "docs": [
+    {
+      "_index": "my-index-000001",
+      "_id": "1"
+    },
+    {
+      "_index": "my-index-000001",
+      "_id": "2"
+    }
+  ]
+}
+```
+
+### [/_msearch]
+
+```bash
+GET /<target>/_msearch
+```
 
 - [官方文件說明](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-multi-search.html)
 
 - 一次作多個大範圍的搜尋
 
+使用範例：
+
+```bash
+GET my-index-000001/_msearch
+{ }
+{"query" : {"match" : { "message": "this is a test"}}}
+{"index": "my-index-000002"}
+{"query" : {"match_all" : {}}}
+```
 
 
-
+## 其他注意事項
 
 - 大版本的升級，document 必須重建 index
 
@@ -237,18 +303,18 @@ Inverted Index(倒排索引)介紹
 ## Inverted Index 組成
 
 - Term Dictionary (單詞辭典)
-  - 為了滿足快速的插入 & 查詢，因此通過 B+ tree or Open Hashing 的方式實現
+  - 為了滿足快速的插入 & 查詢，且因為 term 的數量龐大，因此通過 **B+ tree** or **Open Hashing** 的方式實現
   - 記錄 Document 中所有的單詞，記錄單詞到 posting list(倒排列表) 的關聯關係
 
 - Posting List (倒排列表)：由 posting(倒排索引項組合) 組成，包含以下內容：
   - Document ID
-    - 詞頻 (Term Frequency)：單詞在 document 中出現的次數，用在相關性評分
-    - 位置 (Position)：單詞在 document 的位置，用在搜尋
-    - 偏移 (Offset)：記錄單詞開始 & 結束位置，用於高亮顯示
+  - 詞頻 (Term Frequency)：term 在 document 中出現的次數，用在相關性評分
+  - 位置 (Position)：term 在 document 的位置，用在搜尋
+  - 偏移 (Offset)：記錄 trem 開始 & 結束位置，用於高亮顯示
 
 ![Elasticsearch - Posting List](/blog/images/Elasticsearch/es_posting-list-example.png)
 
-- Elasticsearch 的 JSON document 中的單詞都會有自己的倒排索引
+- Elasticsearch 的 JSON document 中的 term 都會有自己的倒排索引
 
 - 可以對某些欄位不作索引：
     - 優點：節省儲存空間
@@ -367,7 +433,16 @@ Search API 概覽
 | `/index1,index2/_search` | index1 + index2 |
 | `/index*/_search` | 以 **index** 開頭的 index |
 
-## URI 查詢
+
+## 搜尋與相關性
+
+- 搜尋行為是客戶對於搜尋引擎的操作 & 互動
+
+- 客戶關心的是**搜尋結果的相關性**：
+  - 是否可以找到相關的內容?
+  - 搜尋結果中包含了多少不相關的內容?
+  - 搜尋結果的算分是否合力
+  - 結合實際業務需求，平衡搜尋結果的排名
 
 
 ## 衡量相關性
@@ -417,6 +492,7 @@ GET /movies/_search?q=2012&df=title&sort=year:desc&from=0&size=10&timeout=1s
   "profile": "true"
 }
 ```
+> `GET /movies/_search?q=2012&df=title` == `GET /movies/_search?q=title:2012`
 
 ![Elasticsearch - Search Example 1](/blog/images/Elasticsearch/es_search-example-01.png)
 
@@ -623,7 +699,7 @@ POST movies/_search
     "match": {
       "title": {
         "query": "last christmas",
-        "operator": "and"
+        "operator": "AND"
       }
     }
   }
