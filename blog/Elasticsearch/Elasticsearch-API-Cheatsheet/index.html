@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="Elasticsearch 常用 API 的整理，方便未來操作 Elasticsearch 時的查詢用途">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[Elasticsearch] API CheatSheet">
+<meta property="og:url" content="https://godleon.github.io/blog/Elasticsearch/Elasticsearch-API-Cheatsheet/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="Elasticsearch 常用 API 的整理，方便未來操作 Elasticsearch 時的查詢用途">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-11-17T10:40:00.000Z">
+<meta property="article:modified_time" content="2020-11-17T10:58:34.132Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="Elasticsearch">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/Elasticsearch/Elasticsearch-API-Cheatsheet/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>[Elasticsearch] API CheatSheet | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#cluster-%E7%8B%80%E6%85%8B%E6%9F%A5%E8%A9%A2"><span class="nav-number">1.</span> <span class="nav-text">cluster 狀態查詢</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Document-CRUD"><span class="nav-number">2.</span> <span class="nav-text">Document CRUD</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%90%9C%E5%B0%8B-Search-Query"><span class="nav-number">3.</span> <span class="nav-text">搜尋(Search&#x2F;Query)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#URI-Query-%E6%9F%A5%E8%A9%A2%E8%AA%9E%E6%B3%95"><span class="nav-number">3.1.</span> <span class="nav-text">URI Query 查詢語法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%87%E5%AE%9A%E6%AC%84%E4%BD%8D-v-s-%E6%B3%9B%E6%9F%A5%E8%A9%A2"><span class="nav-number">3.1.1.</span> <span class="nav-text">指定欄位 v.s. 泛查詢</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Term-Query-v-s-Phrase-Query"><span class="nav-number">3.1.2.</span> <span class="nav-text">Term Query v.s. Phrase Query</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E7%B5%84-amp-%E5%BC%95%E8%99%9F"><span class="nav-number">3.1.3.</span> <span class="nav-text">分組 &amp; 引號</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Boolean-%E6%9F%A5%E8%A9%A2"><span class="nav-number">3.1.4.</span> <span class="nav-text">Boolean 查詢</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E7%B5%84"><span class="nav-number">3.1.5.</span> <span class="nav-text">分組</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AF%84%E5%9C%8D%E6%9F%A5%E8%A9%A2"><span class="nav-number">3.1.6.</span> <span class="nav-text">範圍查詢</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%97%E8%A1%93%E7%AC%A6%E8%99%9F"><span class="nav-number">3.1.7.</span> <span class="nav-text">算術符號</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%90%AC%E7%94%A8%E5%AD%97%E5%85%83-%E6%AD%A3%E8%A6%8F%E8%A1%A8%E7%A4%BA%E5%BC%8F-%E6%A8%A1%E7%B3%8A%E6%9F%A5%E8%A9%A2-amp-%E8%BF%91%E4%BC%BC%E6%9F%A5%E8%A9%A2"><span class="nav-number">3.1.8.</span> <span class="nav-text">萬用字元&#x2F;正規表示式&#x2F;模糊查詢 &amp; 近似查詢</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Request-Body-%E6%9F%A5%E8%A9%A2%E8%AA%9E%E6%B3%95"><span class="nav-number">3.2.</span> <span class="nav-text">Request Body 查詢語法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E8%88%AC%E6%9F%A5%E8%A9%A2%E7%AF%84%E4%BE%8B"><span class="nav-number">3.2.1.</span> <span class="nav-text">一般查詢範例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Scripted-Field-%E8%85%B3%E6%9C%AC%E5%AD%97%E6%AE%B5-Query"><span class="nav-number">3.2.2.</span> <span class="nav-text">Scripted Field(腳本字段) Query</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%9F%A5%E8%A9%A2%E8%A1%A8%E9%81%94%E5%BC%8F-Match"><span class="nav-number">3.2.3.</span> <span class="nav-text">使用查詢表達式 - Match</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%9F%A5%E8%A9%A2%E8%A1%A8%E9%81%94%E5%BC%8F-Match-Phrase"><span class="nav-number">3.2.4.</span> <span class="nav-text">使用查詢表達式 - Match Phrase</span></a></li></ol></li></ol></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">138</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">103</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/Elasticsearch/Elasticsearch-API-Cheatsheet/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [Elasticsearch] API CheatSheet
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2020-11-17 18:40:00 / Modified: 18:58:34" itemprop="dateCreated datePublished" datetime="2020-11-17T18:40:00+08:00">2020-11-17</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Elasticsearch/" itemprop="url" rel="index"><span itemprop="name">Elasticsearch</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/Elasticsearch/Elasticsearch-API-Cheatsheet/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="Elasticsearch/Elasticsearch-API-Cheatsheet/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">Elasticsearch 常用 API 的整理，方便未來操作 Elasticsearch 時的查詢用途</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="cluster-狀態查詢"><a href="#cluster-狀態查詢" class="headerlink" title="cluster 狀態查詢"></a>cluster 狀態查詢</h1><ul>
+<li><p><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-health.html">GET _cluster/health/<target></a>：查詢 cluster 健康狀況</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-nodes.html">GET /_cat/nodes</a>：回傳 cluster node 相關資訊</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-shards.html">GET /_cat/shards/<target></a>(<code>GET /_cat/shards</code>)：顯示 shard 詳細資訊，包含哪些是 primary/replica，儲存多少 document，花費多少空間，位於哪個 data node 上</p>
+</li>
+</ul>
+<h1 id="Document-CRUD"><a href="#Document-CRUD" class="headerlink" title="Document CRUD"></a>Document CRUD</h1><ul>
+<li><p><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html">Index API</a>：將 document 新增置 index 使其變成可被搜尋，若是資料已經存在，則 document 會刪除，並重新進行索引的過程，且版本號碼(version)的值會增加</p>
+<ul>
+<li><code>PUT /&lt;target&gt;/_doc/&lt;_id&gt;</code></li>
+<li><code>POST /&lt;target&gt;/_doc/</code></li>
+<li><code>PUT /&lt;target&gt;/_create/&lt;_id&gt;</code></li>
+<li><code>POST /&lt;target&gt;/_create/&lt;_id&gt;</code></li>
+</ul>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-get.html">Get API</a>：從 index 中取得指定資料</p>
+<ul>
+<li><code>GET &lt;index&gt;/_doc/&lt;_id&gt;</code></li>
+<li><code>HEAD &lt;index&gt;/_doc/&lt;_id&gt;</code></li>
+<li><code>GET &lt;index&gt;/_source/&lt;_id&gt;</code> (只取得 document 本身內容)</li>
+<li><code>HEAD &lt;index&gt;/_source/&lt;_id&gt;</code> </li>
+</ul>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update.html">Update API</a>：更新指定的 document (不會刪除原本的 document，可以更新部份屬性的值) <strong>[使用方法須詳閱官網文件]</strong></p>
+<ul>
+<li><code>POST /&lt;index&gt;/_update/&lt;_id&gt;</code></li>
+</ul>
+</li>
+</ul>
+<h1 id="搜尋-Search-Query"><a href="#搜尋-Search-Query" class="headerlink" title="搜尋(Search/Query)"></a>搜尋(Search/Query)</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-search.html">Search API</a>：查詢資料<ul>
+<li><code>GET /&lt;target&gt;/_search</code></li>
+<li><code>GET /_search</code></li>
+<li><code>POST /&lt;target&gt;/_search</code></li>
+<li><code>POST /_search</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="URI-Query-查詢語法"><a href="#URI-Query-查詢語法" class="headerlink" title="URI Query 查詢語法"></a>URI Query 查詢語法</h2><h3 id="指定欄位-v-s-泛查詢"><a href="#指定欄位-v-s-泛查詢" class="headerlink" title="指定欄位 v.s. 泛查詢"></a>指定欄位 v.s. 泛查詢</h3><ul>
+<li><p>指定欄位：<code>q=title:2012</code></p>
+</li>
+<li><p>泛查詢：<code>q=2012</code></p>
+</li>
+</ul>
+<h3 id="Term-Query-v-s-Phrase-Query"><a href="#Term-Query-v-s-Phrase-Query" class="headerlink" title="Term Query v.s. Phrase Query"></a>Term Query v.s. Phrase Query</h3><ul>
+<li><p><code>Beautiful Mind</code> == <code>Beautiful OR Mind</code> (term query)</p>
+</li>
+<li><p><code>&quot;Beautiful Mind&quot;</code> == <code>Beautiful AND Mind</code> (phrase query)</p>
+</li>
+</ul>
+<h3 id="分組-amp-引號"><a href="#分組-amp-引號" class="headerlink" title="分組 &amp; 引號"></a>分組 &amp; 引號</h3><ul>
+<li><code>title:(Beautiful AND Mind)</code> == <code>title=&quot;Beautiful Mind&quot;</code></li>
+</ul>
+<h3 id="Boolean-查詢"><a href="#Boolean-查詢" class="headerlink" title="Boolean 查詢"></a>Boolean 查詢</h3><p>使用 <code>AND</code>/<code>OR</code>/<code>NOT</code> 或是 <code>&amp;&amp;</code>/<code>||</code>/<code>!</code></p>
+<ul>
+<li><p>必須是大寫</p>
+</li>
+<li><p>範例：<code>title:(matrix NOT reloaded)</code></p>
+</li>
+</ul>
+<h3 id="分組"><a href="#分組" class="headerlink" title="分組"></a>分組</h3><ul>
+<li><p><code>+</code> 表示 <strong>must</strong></p>
+</li>
+<li><p><code>-</code> 表示 <strong>must_not</strong></p>
+</li>
+<li><p>範例：<code>title:(+matrix -reloaded)</code></p>
+</li>
+</ul>
+<h3 id="範圍查詢"><a href="#範圍查詢" class="headerlink" title="範圍查詢"></a>範圍查詢</h3><ul>
+<li><p><code>year:&#123;2019 TO 2018&#125;</code></p>
+</li>
+<li><p><code>year:[* TO 2018]</code></p>
+</li>
+</ul>
+<h3 id="算術符號"><a href="#算術符號" class="headerlink" title="算術符號"></a>算術符號</h3><ul>
+<li><p><code>year:&gt;2010</code></p>
+</li>
+<li><p><code>year:(&gt;2010 &amp;&amp; &lt;=2018)</code></p>
+</li>
+<li><p><code>year:(+&gt;2010 +&lt;=2018)</code></p>
+</li>
+</ul>
+<h3 id="萬用字元-正規表示式-模糊查詢-amp-近似查詢"><a href="#萬用字元-正規表示式-模糊查詢-amp-近似查詢" class="headerlink" title="萬用字元/正規表示式/模糊查詢 &amp; 近似查詢"></a>萬用字元/正規表示式/模糊查詢 &amp; 近似查詢</h3><ul>
+<li><p>萬用字元：<code>title:mi?d</code>、<code>title:be*</code></p>
+</li>
+<li><p>正規表示式：<code>title:[bt]oy</code></p>
+</li>
+<li><p>模糊查詢 &amp; 近似查詢：<code>title:beautifl~1</code>(輸入一個錯誤字母還是可以找到)、<code>title:&quot;lord rings&quot;~2</code>(可以找到 <strong>load of the rings</strong>)</p>
+</li>
+</ul>
+<h2 id="Request-Body-查詢語法"><a href="#Request-Body-查詢語法" class="headerlink" title="Request Body 查詢語法"></a>Request Body 查詢語法</h2><h3 id="一般查詢範例"><a href="#一般查詢範例" class="headerlink" title="一般查詢範例"></a>一般查詢範例</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ignore_unavailable=true，可以忽略嘗試訪問不存在的 index “404_idx” 導致的錯誤</span></span><br><span class="line"><span class="comment"># 查詢 movies index</span></span><br><span class="line"><span class="comment"># 開啟 profile</span></span><br><span class="line">POST /movies,404_idx/_search?ignore_unavailable=<span class="literal">true</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;profile&quot;</span>: <span class="literal">true</span>,</span><br><span class="line">    <span class="string">&quot;query&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;match_all&quot;</span>: &#123;&#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 透過 from &amp; size 達到分頁效果</span></span><br><span class="line">POST /kibana_sample_data_ecommerce/_search</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;from&quot;</span>:10,</span><br><span class="line">  <span class="string">&quot;size&quot;</span>:20,</span><br><span class="line">  <span class="string">&quot;query&quot;</span>:&#123;</span><br><span class="line">    <span class="string">&quot;match_all&quot;</span>: &#123;&#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 對資料排序，使用 sort 參數</span></span><br><span class="line">POST kibana_sample_data_ecommerce/_search</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;sort&quot;</span>:[&#123;<span class="string">&quot;order_date&quot;</span>:<span class="string">&quot;desc&quot;</span>&#125;],</span><br><span class="line">  <span class="string">&quot;query&quot;</span>:&#123;</span><br><span class="line">    <span class="string">&quot;match_all&quot;</span>: &#123;&#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># source filtering</span></span><br><span class="line"><span class="comment"># 當某些 document 很大時，僅針對特定的幾個 term 做查詢</span></span><br><span class="line">POST kibana_sample_data_ecommerce/_search</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;_source&quot;</span>:[<span class="string">&quot;order_date&quot;</span>, <span class="string">&quot;category.keyword&quot;</span>],</span><br><span class="line">  <span class="string">&quot;from&quot;</span>: 10,</span><br><span class="line">  <span class="string">&quot;size&quot;</span>: 5, </span><br><span class="line">  <span class="string">&quot;query&quot;</span>:&#123;</span><br><span class="line">    <span class="string">&quot;match_all&quot;</span>: &#123;&#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Scripted-Field-腳本字段-Query"><a href="#Scripted-Field-腳本字段-Query" class="headerlink" title="Scripted Field(腳本字段) Query"></a>Scripted Field(腳本字段) Query</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 透過 ES 中 painless script 算出新的 field value</span></span><br><span class="line"><span class="comment"># 搜尋結果中都會加上 hello 作為結尾</span></span><br><span class="line">GET kibana_sample_data_ecommerce/_search</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;script_fields&quot;</span>: &#123;</span><br><span class="line">    <span class="string">&quot;new_field&quot;</span>: &#123;</span><br><span class="line">      <span class="string">&quot;script&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;lang&quot;</span>: <span class="string">&quot;painless&quot;</span>,</span><br><span class="line">        <span class="string">&quot;source&quot;</span>: <span class="string">&quot;doc[&#x27;order_date&#x27;].value+&#x27;hello&#x27;&quot;</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="string">&quot;from&quot;</span>: 10, </span><br><span class="line">  <span class="string">&quot;size&quot;</span>: 5,</span><br><span class="line">  <span class="string">&quot;query&quot;</span>: &#123;</span><br><span class="line">    <span class="string">&quot;match_all&quot;</span>: &#123;&#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="使用查詢表達式-Match"><a href="#使用查詢表達式-Match" class="headerlink" title="使用查詢表達式 - Match"></a>使用查詢表達式 - Match</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 預設為 &quot;last OR christmas&quot;</span></span><br><span class="line">POST movies/_search</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;query&quot;</span>: &#123;</span><br><span class="line">    <span class="string">&quot;match&quot;</span>: &#123;</span><br><span class="line">      <span class="string">&quot;title&quot;</span>: <span class="string">&quot;last christmas&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 可透過 operator 改為 &quot;last AND christmas&quot;</span></span><br><span class="line">POST movies/_search</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;query&quot;</span>: &#123;</span><br><span class="line">    <span class="string">&quot;match&quot;</span>: &#123;</span><br><span class="line">      <span class="string">&quot;title&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;query&quot;</span>: <span class="string">&quot;last christmas&quot;</span>,</span><br><span class="line">        <span class="string">&quot;operator&quot;</span>: <span class="string">&quot;AND&quot;</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="使用查詢表達式-Match-Phrase"><a href="#使用查詢表達式-Match-Phrase" class="headerlink" title="使用查詢表達式 - Match Phrase"></a>使用查詢表達式 - Match Phrase</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 必須按照順序出現</span></span><br><span class="line">POST movies/_search</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;query&quot;</span>: &#123;</span><br><span class="line">    <span class="string">&quot;match_phrase&quot;</span>: &#123;</span><br><span class="line">      <span class="string">&quot;title&quot;</span>:&#123;</span><br><span class="line">        <span class="string">&quot;query&quot;</span>: <span class="string">&quot;one love&quot;</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 加上 slop，中間可以有一個其他的 term 插入</span></span><br><span class="line">POST movies/_search</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;query&quot;</span>: &#123;</span><br><span class="line">    <span class="string">&quot;match_phrase&quot;</span>: &#123;</span><br><span class="line">      <span class="string">&quot;title&quot;</span>:&#123;</span><br><span class="line">        <span class="string">&quot;query&quot;</span>: <span class="string">&quot;one love&quot;</span>,</span><br><span class="line">        <span class="string">&quot;slop&quot;</span>: 1</span><br><span class="line"></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/Elasticsearch/" rel="tag"># Elasticsearch</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/AWS/AWS-CSA-associate-supplement/" rel="prev" title="AWS 認證考試學習筆記 - 其他補充資料">
+                  <i class="fa fa-chevron-left"></i> AWS 認證考試學習筆記 - 其他補充資料
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/Elasticsearch/Elasticsearch-API-Cheatsheet/";
+    this.page.identifier = "Elasticsearch/Elasticsearch-API-Cheatsheet/";
+    this.page.title = "[Elasticsearch] API CheatSheet";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>
