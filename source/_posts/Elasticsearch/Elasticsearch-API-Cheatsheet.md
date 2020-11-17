@@ -15,11 +15,30 @@ tags:
 cluster 狀態查詢
 ===============
 
-- [GET _cluster/health/<target>](https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-health.html)：查詢 cluster 健康狀況
+## Cluster APIs
 
-- [GET /_cat/nodes](https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-nodes.html)：回傳 cluster node 相關資訊
+cluster API 處理的部份當然就屬於 cluster level 部份的查詢 & 操作，Elasticsearch 提供了相當多的 cluster API，列表如下：
+![Elasticsearch - cluster API list](/blog/images/Elasticsearch/es_cluster-API-list.png)
 
-- [GET /_cat/shards/<target>](https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-shards.html)(`GET /_cat/shards`)：顯示 shard 詳細資訊，包含哪些是 primary/replica，儲存多少 document，花費多少空間，位於哪個 data node 上
+以下列出常用的 cluster API：
+
+- [`GET /_cluster/health/<target>`](https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-health.html)：查詢 cluster 健康狀況
+
+
+
+資源使用狀況查詢
+=============
+
+## cat APIs
+
+cat APIs 是以 human readable 形式提供出來，方便使用者閱讀，主要是用來查詢 cluster 中各個元件的狀態、資源使用...等資訊用，目前 Elasticsearch 支援的 cat API 有相當多種：
+![Elasticsearch - cat API list](/blog/images/Elasticsearch/es_cat-API-list.png)
+
+以下列出常用的 cat API：
+
+- [`GET /_cat/nodes`](https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-nodes.html)：回傳 cluster node 相關資訊
+
+- [`GET /_cat/shards/<target>`](https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-shards.html)(`GET /_cat/shards`)：顯示 shard 詳細資訊，包含哪些是 primary/replica，儲存多少 document，花費多少空間，位於哪個 data node 上
 
 
 
@@ -158,7 +177,7 @@ POST kibana_sample_data_ecommerce/_search
 }
 ```
 
-### Scripted Field(腳本字段) Query
+### Scripted Field(腳本欄位) Query
 
 ```bash
 # 透過 ES 中 painless script 算出新的 field value

@@ -656,7 +656,7 @@ POST kibana_sample_data_ecommerce/_search
 }
 ```
 
-## Scripted Field(腳本字段) Query
+## Scripted Field(腳本欄位) Query
 
 ```bash
 # 透過 ES 中 painless script 算出新的 field value
