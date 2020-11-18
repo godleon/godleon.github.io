@@ -160,7 +160,7 @@ Document 的基本 CRUD 與批次操作
 ## Document CRUD
 
 - `GET`：取得 document
-  - 語法為 [`GET _index/_type/[ID]`](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-get.html)，例如 **GET users/_doc/1**
+  - 語法為 [`GET _index/_type/[ID]`](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-get.html)，例如 **GET /users/_doc/1**
   - document 會有 version control 的功能，因此即使被刪除，version 欄位的值也會不斷增加
   - `_source` 欄位包含了 document 的原始訊息
 
@@ -168,7 +168,7 @@ Document 的基本 CRUD 與批次操作
 
 - `Create`(**PUT**)：
   - 建立新的 document，如果 ID 已經存在會發生錯誤
-  - 語法為 `PUT _index/_create/[ID]` or `PUT _index/_doc/[ID]?op_type=create`，例如：**PUT users/_create/1** (也可以不帶 ID，就會自動生成)
+  - 語法為 `PUT _index/_create/[ID]` or `PUT _index/_doc/[ID]?op_type=create`，例如：**PUT /users/_create/1** (也可以不帶 ID，就會自動生成)
   - **較不建議指定 ID 的作法，可能會撞到效能不彰的問題**
 
 - `Create`(**POST**)
@@ -177,12 +177,12 @@ Document 的基本 CRUD 與批次操作
 
 - `Index`(**PUT**)：
   - 如果 ID 不存在，則建立新的 document；若 ID 已經存在，則刪除現存的 document 再建立新的，**version** 的部份會增加
-  - 語法為 [`PUT _index/_doc/[ID]`](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html)，例如：**PUT users/_doc/1**
+  - 語法為 [`PUT _index/_doc/[ID]`](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html)，例如：**PUT /users/_doc/1**
 
 - `Update`(**POST**)：
   - document 必須已經存在，更新時只會對 document 中相對應的欄位作增量更新 or 對應欄位的修改
   - json payload 需要包含在 `doc` 欄位中 (可參考[官網文件](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update.html)) 
-  - 語法為 [`POST _index/_update/[ID]`](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update.html)，例如：**POST users/_update/1**
+  - 語法為 [`POST _index/_update/[ID]`](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update.html)，例如：**POST /users/_update/1**
   - POST 也可以拿來作為新增 document 用
 
 - 呼叫 API 時傳輸的數據不宜過大(預設單一個 document 大小不能超過 100MB)，過大的 document 建議拆成 5~15MB 分次匯入
@@ -748,7 +748,7 @@ Query String & Simple Query String 查詢
 ```bash
 # 可指定 default field(DF)
 # 可指定 operrator
-POST users/_search
+POST /users/_search
 {
   "query": {
     "query_string": {
@@ -759,7 +759,7 @@ POST users/_search
 }
 
 # 可指定多個 field
-POST users/_search
+POST /users/_search
 {
   "query": {
     "query_string": {
@@ -782,7 +782,7 @@ POST users/_search
 - 支援使用 `+` 取代 `AND`，`|` 取代 `OR`，`-` 取代 `NOT`
 
 ```bash
-POST users/_search
+POST /users/_search
 {
   "query": {
     "simple_query_string": {
@@ -795,7 +795,7 @@ POST users/_search
 ```
 
 
-Dynamic Mapping 和常見字段類型
+Dynamic Mapping 和常見欄位類型
 ============================
 
 ## What is Mapping ?
@@ -901,25 +901,25 @@ PUT mapping_test/_doc/1
 GET mapping_test/_mapping
 ```
 
-## 修改 Mapping 中的字段類型
+## 修改 Mapping 中的欄位類型
 
-在新增加字段的情況下：
+在新增加欄位的情況下：
 
-- 若 dynamic = true，一旦有新增字段的 document 寫入時，mapping 資訊也會同時被更新
+- 若 dynamic = true，一旦有新增欄位的 document 寫入時，mapping 資訊也會同時被更新
 
-- 若 dynamic = false，mapping 不會被更新，新增字段的資料無法被索引，但是資料會出現在 `_source` 中
+- 若 dynamic = false，mapping 不會被更新，新增欄位的資料無法被索引，但是資料會出現在 `_source` 中
 
 - 若 dynamic = strict，寫入 document 的操作會發生錯誤
 
-若是針對已經存在的字段，使用其他字段類型的資料進行寫入操作，是無法變更 mapping 設定的，因為一旦當 reverted index 已經生成後，就無法修改；而若是真的要改變字段類型，則是需要透過 `Reindex API` 來重建索引。
+若是針對已經存在的欄位，使用其他欄位類型的資料進行寫入操作，是無法變更 mapping 設定的，因為一旦當 reverted index 已經生成後，就無法修改；而若是真的要改變欄位類型，則是需要透過 `Reindex API` 來重建索引。
 
-> 若是原有字段的數據類型可以隨意修改，這樣會讓原本已經被索引的資料無法被搜尋
+> 若是原有欄位的數據類型可以隨意修改，這樣會讓原本已經被索引的資料無法被搜尋
 
 | Dynamic Mapping 設定 | "true" | "false" | "strict" |
 |----------------------|--------| ------- | -------- |
 | document 可索引 | Yes | Yes | No (資料寫入會錯誤)) |
-| 字段可索引 | Yes | No | No |
-| Mapping 被更新 | Yes | No (新增字段被丟棄) | No |
+| 欄位可索引 | Yes | No | No |
+| Mapping 被更新 | Yes | No (新增欄位被丟棄) | No |
 
 ## 修改 Mapping 範例
 
@@ -1024,7 +1024,7 @@ Inverted Index 根據要記錄的內容，有四種 index options 可以設定�
 預設情況下每個 field 都會被索引，但若是確定特定的 field 資料不需要被查詢，也可以不被索引：
 
 ```json
-PUT users
+PUT /users
 {
     "mappings" : {
       "properties" : {
@@ -1044,7 +1044,7 @@ PUT users
 }
 
 // 新增資料
-PUT users/_doc/1
+PUT /users/_doc/1
 {
   "firstName":"Leon",
   "lastName": "Tseng",
@@ -1066,7 +1066,7 @@ POST /users/_search
 ## NULL value 的處理
 
 ```json
-PUT users
+PUT /users
 {
     "mappings" : {
       "properties" : {
@@ -1088,7 +1088,7 @@ PUT users
 }
 
 //新增資料1
-PUT users/_doc/1
+PUT /users/_doc/1
 {
   "firstName":"Leon",
   "lastName": "Tseng",
@@ -1096,7 +1096,7 @@ PUT users/_doc/1
 }
 
 //新增資料2
-PUT users/_doc/2
+PUT /users/_doc/2
 {
   "firstName":"Leon2",
   "lastName": "Tseng2"
@@ -1104,7 +1104,7 @@ PUT users/_doc/2
 
 //只會找到資料1
 //而且實際存在於 ES 中的是 null 值而非字串 
-GET users/_search
+GET /users/_search
 {
   "query": {
     "match": {
@@ -1120,7 +1120,7 @@ GET users/_search
 透過 `copy_to` 的設定可以新增一個 field，實現類似 `_all` 的效果：
 
 ```json
-PUT users
+PUT /users
 {
   "mappings": {
     "properties": {
@@ -1137,6 +1137,16 @@ PUT users
     }
   }
 }
+
+//新增資料
+PUT users/_doc/1
+{
+  "firstName":"Leon1",
+  "lastName": "Tseng1"
+}
+
+//對新欄位查詢資料
+GET /users/_search?q=fullName=(Leon1)
 ```
 
 - `_all` 在 ES 7 後被 `copy_to` 取代
@@ -1152,22 +1162,22 @@ PUT users
 
 ```json
 //新增一個帶有 string array 的資料
-PUT users/_doc/1
+PUT /users/_doc/1
 {
   "name":"twobirds",
   "interests":["reading","music"]
 }
 
 //可以正確被搜尋
-POST users/_search
+POST /users/_search
 {
   "query": {
 		"match_all": {}
 	}
 }
 
-//而 name 的 data type 被設定為 text
-GET users/_mapping
+//而 name & interests 的 data type 都同樣被設定為 text
+GET /users/_mapping
 ```
 
 > 表示 `text` type 其實是可以記錄 array type 的資料 (其實其他 type 也是可以記錄 array type 資料，例如：`long`))
@@ -1177,7 +1187,7 @@ GET users/_mapping
 Multiple Field 特性及 Mapping 中配置自定義 Analyzer
 ================================================
 
-- 多個 field 資料中，可透過 `keyword` field 作精確搜尋
+- multiple field 資料中，可透過 `keyword` field 作精確搜尋
 
 - 若是要做全文搜尋，則是使用 `text` field 並搭配不同的 **analyzer** & **search analyzer**
 
@@ -1199,6 +1209,7 @@ PUT products
       "comment": {
         "type": "text", 
         "fields": {
+          //可以在 field 中增加 sub-field，並指定不同的 analyer & search analyzer
           //針對需要進行全文檢索的欄位，設定不同的 analyzer & search analyzer
           "english_comment": {
             "type": "text",
@@ -1227,19 +1238,21 @@ Analyzer 是專門處理分詞的組件，由三個部份組成：
 
 - Character Filter (針對原始文件進行處理，例如：去除 HTML tag)
 
-- Tokenizer (根據規則切分 term or token)
+- Tokenizer (根據規則將資料切分 term or token)
 
 - Token Filter (將分割後的 term 進行加工，例如：轉小寫、刪除 [stopwords](https://zh.wikipedia.org/wiki/%E5%81%9C%E7%94%A8%E8%AF%8D)、增加同義詞)
 
 ### Character Filter
 
-- 可同時設定多的 Character Filter
+- **可同時設定多個 Character Filter**
 
 - 會影響 Tokenizer 的 position & offset 的資訊
 
 - 目前 Elasticsearch 內建提供的 Character Filter 有 HTML strip、Mapping、Patter replace ...等等
 
 ### Tokenizer
+
+- **只能設定一個 tokenizer**
 
 - 將 Character Filter 處理過後的資料，按照一定的規則，切分為詞(term or token)
 
@@ -1249,9 +1262,11 @@ Analyzer 是專門處理分詞的組件，由三個部份組成：
 
 ### Token Filter 
 
+- **可同時設定多個 Token Filter**
+
 - 將 Tokenizer 輸出的 term(or token) 進行增加、修改、刪除
 
-- 目前 目前 Elasticsearch 內建提供的 Token Filter 有 `lowercase`/`stop`/`synonym` ...  等等
+- 目前 Elasticsearch 內建提供的 Token Filter 有 `lowercase`/`stop`/`synonym` ...  等等
 
 
 ## 範例
@@ -1417,7 +1432,7 @@ Index Template 使用來協助使用者設定 mappings & settings 的相關規�
 
 - 也可以透過指定 `order`，來調整 index template 合併的過程
 
-而 index template 是如何在 index 被新增時運作的呢?
+那 index template 是如何在 index 被新增時運作的呢?
 
 1. 先選用 Elasticsearch 中預設的 settings & mappings
 

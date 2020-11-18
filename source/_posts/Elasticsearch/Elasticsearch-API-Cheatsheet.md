@@ -155,7 +155,7 @@ POST /kibana_sample_data_ecommerce/_search
 }
 
 # 對資料排序，使用 sort 參數
-POST kibana_sample_data_ecommerce/_search
+POST /kibana_sample_data_ecommerce/_search
 {
   "sort":[{"order_date":"desc"}],
   "query":{
@@ -166,7 +166,7 @@ POST kibana_sample_data_ecommerce/_search
 
 # source filtering
 # 當某些 document 很大時，僅針對特定的幾個 term 做查詢
-POST kibana_sample_data_ecommerce/_search
+POST /kibana_sample_data_ecommerce/_search
 {
   "_source":["order_date", "category.keyword"],
   "from": 10,
@@ -182,7 +182,7 @@ POST kibana_sample_data_ecommerce/_search
 ```bash
 # 透過 ES 中 painless script 算出新的 field value
 # 搜尋結果中都會加上 hello 作為結尾
-GET kibana_sample_data_ecommerce/_search
+GET /kibana_sample_data_ecommerce/_search
 {
   "script_fields": {
     "new_field": {
@@ -204,7 +204,7 @@ GET kibana_sample_data_ecommerce/_search
 
 ```bash
 # 預設為 "last OR christmas"
-POST movies/_search
+POST /movies/_search
 {
   "query": {
     "match": {
@@ -214,7 +214,7 @@ POST movies/_search
 }
 
 # 可透過 operator 改為 "last AND christmas"
-POST movies/_search
+POST /movies/_search
 {
   "query": {
     "match": {
@@ -231,7 +231,7 @@ POST movies/_search
 
 ```bash
 # 必須按照順序出現
-POST movies/_search
+POST /movies/_search
 {
   "query": {
     "match_phrase": {
@@ -243,7 +243,7 @@ POST movies/_search
 }
 
 # 加上 slop，中間可以有一個其他的 term 插入
-POST movies/_search
+POST /movies/_search
 {
   "query": {
     "match_phrase": {
@@ -256,3 +256,48 @@ POST movies/_search
   }
 }
 ```
+
+## Query String Query 
+
+```bash
+# 可指定 default field(DF)
+# 可指定 operrator
+POST users/_search
+{
+  "query": {
+    "query_string": {
+      "default_field": "tool",
+      "query": "Docker AND Kubernetes"
+    }
+  }
+}
+
+# 可指定多個 field
+# 搭配 AND/OR/NOT 可以有非常多的條件組合
+POST users/_search
+{
+  "query": {
+    "query_string": {
+      "fields":["tool","about"],
+      "query": "(Docker AND Kubernetes) OR (Java AND Elasticsearch)"
+    }
+  }
+}
+```
+
+
+## Simple Query String Query
+
+```bash
+# 在 query 欄位中所有 AND/OR/NOT，會被視為搜尋內容
+# operator 若需要指定，則必須透過 "default_operator" 欄位
+POST users/_search
+{
+  "query": {
+    "simple_query_string": {
+      "query": "Docker Kubernetes",
+      "fields": ["tool"],
+      "default_operator": "AND"
+    }
+  }
+}
