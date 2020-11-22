@@ -1494,7 +1494,7 @@ PUT testtemplate/_doc/1
 //日期不會被偵測，而被當作一般的 text，而數字則是會偵測為 long
 GET testtemplate/_mapping
 //shard = 1, replica = 2
-get testtemplate/_setting
+GET testtemplate/_setting
 
 //新增一個 index，並自行指定 settings
 //自行指定 settings 就會覆蓋 index template 中的所有設定
@@ -1625,6 +1625,7 @@ PUT my_index/_doc/1
 //full_name 不會出現在 _source 中
 GET my_index/_search?q=full_name:John
 ```
+
 
 
 Elasticsearch 聚合分析簡介

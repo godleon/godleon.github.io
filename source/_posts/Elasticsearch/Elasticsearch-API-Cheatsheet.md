@@ -132,10 +132,10 @@ Document CRUD
 
 ### 一般查詢範例
 
-```bash
-# ignore_unavailable=true，可以忽略嘗試訪問不存在的 index “404_idx” 導致的錯誤
-# 查詢 movies index
-# 開啟 profile
+```json
+//ignore_unavailable=true，可以忽略嘗試訪問不存在的 index “404_idx” 導致的錯誤
+//查詢 movies index
+//開啟 profile
 POST /movies,404_idx/_search?ignore_unavailable=true
 {
   "profile": true,
@@ -144,7 +144,7 @@ POST /movies,404_idx/_search?ignore_unavailable=true
 	}
 }
 
-# 透過 from & size 達到分頁效果
+//透過 from & size 達到分頁效果
 POST /kibana_sample_data_ecommerce/_search
 {
   "from":10,
@@ -154,7 +154,7 @@ POST /kibana_sample_data_ecommerce/_search
   }
 }
 
-# 對資料排序，使用 sort 參數
+//對資料排序，使用 sort 參數
 POST /kibana_sample_data_ecommerce/_search
 {
   "sort":[{"order_date":"desc"}],
@@ -164,8 +164,8 @@ POST /kibana_sample_data_ecommerce/_search
 
 }
 
-# source filtering
-# 當某些 document 很大時，僅針對特定的幾個 term 做查詢
+//source filtering
+//當某些 document 很大時，僅針對特定的幾個 term 做查詢
 POST /kibana_sample_data_ecommerce/_search
 {
   "_source":["order_date", "category.keyword"],
@@ -179,16 +179,16 @@ POST /kibana_sample_data_ecommerce/_search
 
 ### Scripted Field(腳本欄位) Query
 
-```bash
-# 透過 ES 中 painless script 算出新的 field value
-# 搜尋結果中都會加上 hello 作為結尾
+```json
+//透過 ES 中 painless script 算出新的 field value
+//搜尋結果中都會加上 hello 作為結尾
 GET /kibana_sample_data_ecommerce/_search
 {
   "script_fields": {
     "new_field": {
       "script": {
         "lang": "painless",
-        "source": "doc['order_date'].value+'hello'"
+        "source": "doc['order_date'].value+'_hello'"
       }
     }
   },
@@ -202,8 +202,8 @@ GET /kibana_sample_data_ecommerce/_search
 
 ### 使用查詢表達式 - Match
 
-```bash
-# 預設為 "last OR christmas"
+```json
+//預設為 "last OR christmas"
 POST /movies/_search
 {
   "query": {
@@ -213,7 +213,7 @@ POST /movies/_search
   }
 }
 
-# 可透過 operator 改為 "last AND christmas"
+//可透過 operator 改為 "last AND christmas"
 POST /movies/_search
 {
   "query": {
@@ -229,8 +229,8 @@ POST /movies/_search
 
 ### 使用查詢表達式 - Match Phrase
 
-```bash
-# 必須按照順序出現
+```json
+//必須按照順序出現
 POST /movies/_search
 {
   "query": {
@@ -242,7 +242,7 @@ POST /movies/_search
   }
 }
 
-# 加上 slop，中間可以有一個其他的 term 插入
+//加上 slop，中間可以有一個其他的 term 插入
 POST /movies/_search
 {
   "query": {
@@ -259,9 +259,9 @@ POST /movies/_search
 
 ## Query String Query 
 
-```bash
-# 可指定 default field(DF)
-# 可指定 operrator
+```json
+//可指定 default field(DF)
+//可指定 operrator
 POST users/_search
 {
   "query": {
@@ -272,8 +272,8 @@ POST users/_search
   }
 }
 
-# 可指定多個 field
-# 搭配 AND/OR/NOT 可以有非常多的條件組合
+//可指定多個 field
+//搭配 AND/OR/NOT 可以有非常多的條件組合
 POST users/_search
 {
   "query": {
@@ -288,9 +288,9 @@ POST users/_search
 
 ## Simple Query String Query
 
-```bash
-# 在 query 欄位中所有 AND/OR/NOT，會被視為搜尋內容
-# operator 若需要指定，則必須透過 "default_operator" 欄位
+```json
+//在 query 欄位中所有 AND/OR/NOT，會被視為搜尋內容
+//operator 若需要指定，則必須透過 "default_operator" 欄位
 POST users/_search
 {
   "query": {
@@ -301,3 +301,182 @@ POST users/_search
     }
   }
 }
+```
+
+
+## 單字符串多字段查詢
+
+### Bool Query & Disjunction Max Query
+
+```json
+//新增多筆資料
+POST /blogs/_bulk
+{ "index": { "_id": 1 } }
+{ "title": "Quick brown rabbits", "body":  "Brown rabbits are commonly seen." }
+{ "index": { "_id": 2 } }
+{ "title": "Keeping pets healthy", "body":  "My quick brown fox eats rabbits on a regular basis." }
+
+//預期應該會是 id=2 的 document 相關性比較高
+//但結果卻是 id=1 的相關度較高
+//因為 id=1 的 document 在 title & body 都有 brown
+POST /blogs/_search
+{
+  "query": {
+    "bool": {
+      "should": [
+        { "match": { "title": "Brown fox" }},
+        { "match": { "body":  "Brown fox" }}
+      ]
+    }
+  }
+}
+
+//若是欄位屬於競爭關係
+//透過 Disjunction Max Query 就可以讓單一欄位最匹配的得到最高分數
+POST /blogs/_search
+{
+  "query": {
+    "dis_max": {
+      "queries": [
+        { "match": { "title": "Brown fox" }},
+        { "match": { "body":  "Brown fox" }}
+      ]
+    }
+  }
+}
+
+//透過加上 tie_breaker 的方式，改變計算分數的方法
+//讓實際出現較多查詢條件的 document 取得較高的算分
+POST /blogs/_search
+{
+  "query": {
+    "dis_max": {
+      "queries": [
+        { "match": { "title": "Quick pets" }},
+        { "match": { "body":  "Quick pets" }}
+      ],
+      "tie_breaker": 0.2
+    }
+  }
+}
+```
+
+### Multi Match Query
+
+#### Best Field
+
+```json
+//新增多筆資料
+POST /blogs/_bulk
+{ "index": { "_id": 1 } }
+{ "title": "Quick brown rabbits", "body":  "Brown rabbits are commonly seen." }
+{ "index": { "_id": 2 } }
+{ "title": "Keeping pets healthy", "body":  "My quick brown fox eats rabbits on a regular basis." }
+
+//Disjunction Max Query 搜尋的盲點
+//兩個 document 都會取得相同的分數
+POST /blogs/_search
+{
+  "query": {
+    "dis_max": {
+      //"tie_breaker": 0.2,
+      "queries": [
+        { "match": { "title": "Quick pets" }},
+        { "match": { "body":  "Quick pets" }}
+      ]
+    }
+  }
+}
+
+//multi_match 卻沒搭配 tie_break or minimum_should_match
+//效果跟 dis_max 是相同的
+//但適時的加上 tie_break or minimum_should_match 可以提高搜尋的準確度
+POST /blogs/_search
+{
+  "query": {
+    "multi_match": {
+      "tie_breaker": 0.2,
+      "minimum_should_match": "20%", 
+      "type": "best_fields",
+      "query": "Quick pets",
+      "fields": ["title","body"]
+    }
+  }
+}
+```
+
+#### Most Field
+
+```json
+//額外增加一個 "std" field，並使用 standard analyzer
+PUT /titles
+{
+  "mappings": {
+    "properties": {
+      "title": {
+        "type": "text",
+        "analyzer": "english",
+        "fields": {"std": {"type": "text","analyzer": "standard"}}
+      }
+    }
+  }
+}
+
+//新增資料
+POST titles/_bulk
+{ "index": { "_id": 1 }}
+{ "title": "My dog barks" }
+{ "index": { "_id": 2 }}
+{ "title": "I see a lot of barking dogs on the road " }
+
+//將 query.multi_match.type 改成 "most_fields"
+GET /titles/_search
+{
+  "query": {
+    "multi_match": {
+      "query":  "barking dogs",
+      "type":   "most_fields",
+      "fields": [ "title", "title.std" ]
+    }
+  }
+}
+
+//也可以根據需要加入 boosting 的設定(範例中的 ^10 就是)
+GET /titles/_search
+{
+  "query": {
+    "multi_match": {
+      "query":  "barking dogs",
+      "type":   "most_fields",
+      "fields": [ "title^10", "title.std" ]
+    }
+  }
+}
+```
+
+#### Cross Field
+
+```json
+//新增一筆地址資料
+PUT address/_doc/1
+{
+  "street": "5 Poland Street", 
+  "city": "London", 
+  "country": "United Kingdom", 
+  "postcode": "W1V 3DG"
+}
+
+//透過 cross_field" 進行 multi field 資料搜尋
+//若是 type 改為 "most_fields" 搭配 AND operator 就會找不到資料
+POST address/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "Poland Kingdom W1V",
+      "type": "cross_fields", 
+      "operator": "and",
+      "fields": ["street", "city", "country", "postcode"]
+    }
+  }
+}
+```

@@ -31,13 +31,25 @@ Conclusion
 Term Query & Full Text Query
 ============================
 
+## 重點整理
+
+- Term Query 不會做分詞處理，而 Full Text Query 會做分詞處理
+
+- 要做精準搜尋，使用 `[FIELD_NAME].keyword` 欄位
+
+- 透過 Constant Score query(將關鍵字 `term` 改成 `constant_score` + `filter` + `term`)，可以將查詢轉換為 filter，跳過算分(scoring)步驟並可利用 cache 來加速查詢效能
+> **若是要快速將不需要的資料過濾掉，constant score query 是很好的一個方式**
+
+
 ## [Term Query](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-term-query.html)
 
 - Term 是表達語意的最小單位，搜尋或是利用自然語言進行處理時都需要處理 term
 
+- 查詢的語法中，只要指定 `term`(**query >> term**) 關鍵字，就表示使用 term query
+
 - Term Level Query 包含 **Term Query** / **Range Query** / **Exists Query** / **Prefix Query** / **Wildcard Query**
 
-- 當 ES 接收到 term query 時，對輸入不會做分詞，並將輸入當作一個整體在 inverted index 中找到精確的詞項，並使用相關度算分的機制來計算分數
+- 當 ES 接收到 term query 時，對輸入不會進行分詞，而是將輸入當作一個整體在 inverted index 中找到精確的詞項，並使用相關度算分的機制來計算分數
 
 - 若是不需要算分，則可以利用 `constant score` 將查詢轉換成 `filter`，並利用 cache 來提高效能
 
@@ -64,7 +76,8 @@ POST /products/_bulk
 //檢視 index 的 setting & mapping 資訊
 GET /products
 
-//搜尋 "iPhone" => 找不到資料，因為預設的 index analyzer 分詞後會將每個單字轉小寫
+//搜尋 "iPhone" => 找不到資料，因為預設的 index analyzer 分詞後會將每個單字轉小寫；
+//但 term query 不會經過 analyzer，因此查詢時沒有轉小寫
 //搜尋 "iphone" => 改成小寫，順利找到資料
 POST /products/_search
 {
@@ -94,7 +107,7 @@ POST /products/_search
 }
 
 //跟上面的範例相同，大寫的搜尋條件無法找到資料
-//因為預設的 analyzer 會作小寫處理
+//因為預設的 analyzer 會將內容根據 `-` 切開後再作小寫處理
 POST /products/_search
 {
   "query": {
@@ -149,7 +162,7 @@ POST /products/_search
 ```json
 //若只有 query，預設的 operator 是 or，因此會找到多筆資料
 //搭配 operator or minimum_should_match，可以讓查詢結果更準確
-POST movies/_search
+POST /movies/_search
 {
   "query": {
     "match": {
@@ -163,7 +176,7 @@ POST movies/_search
 }
 
 //也可以使用 "match_phrase" 搭配 "slop" 讓搜尋結果更準確
-POST movies/_search
+POST /movies/_search
 {
   "query": {
     "match_phrase": {
@@ -175,6 +188,17 @@ POST movies/_search
   }
 }
 ```
+
+
+## Match Query 的查詢過程
+
+- 屬於 Full Text Qeury：包含了 `Match Query`、`Match Phrase Query`、`Query String Query`
+
+- Document 被索引 & 搜尋時都會經過分詞處理，然後產生提供查詢的詞項列表
+
+- 查詢時會根據詞項列表逐一查詢，再將結果合併後，為每一個 document 進行算分(scoring)
+
+![Elasticsearch - Match Query progress](/blog/images/Elasticsearch/es_match-query-progress.png)
 
 
 
@@ -267,7 +291,7 @@ POST products/_search
       "filter" : {
         "range" : {
           "date" : {
-            "gte" : "now-1y"
+            "gte" : "now-2y"
           }
         }
       }
@@ -287,7 +311,8 @@ POST /movies/_bulk
 
 //由於 genere 為 multi-value field
 //因此以下搜尋會將 genre 中有包涵 Comedy 的資料全部顯示出來
-POST movies/_search
+//若希望有完全精準的比對，則必須額外加上一個 count 欄位，搭配 boolean query 來完成
+POST /movies/_search
 {
   "query": {
     "constant_score": {
@@ -300,6 +325,7 @@ POST movies/_search
   }
 }
 ```
+
 
 
 搜索的相關性算分
@@ -342,13 +368,42 @@ POST movies/_search
 
 - boosting 是可以用來控制相關度的一種方式，可用在 index, field, 或是查詢子條件中
 
-- 當 `boost > 1` 可提昇相關度，`0 < boost < 1` 計算分數的權重相對降低, boost < 0，貢獻為負分
+- 當 `boost > 1` 可提昇相關度，`0 < boost < 1` 計算分數的權重相對降低, `boost < 0`，貢獻為負分
 
 以下是一個簡單的範例：
 
 ```json
+//新增資料
+PUT /testscore/_bulk
+{ "index": { "_id": 1 }}
+{ "content":"we use Elasticsearch to power the search" }
+{ "index": { "_id": 2 }}
+{ "content":"we like elasticsearch" }
+{ "index": { "_id": 3 }}
+{ "content":"The scoring of documents is caculated by the scoring formula" }
+{ "index": { "_id": 4 }}
+{ "content":"you know, for search" }
+
+//使用 match query 並檢視實際算分過程
+//會計算 tf, idf ... 等值
+POST /testscore/_search
+{
+  "explain": true,
+  "query": {
+    "match": {
+      //"content":"you"
+      "content": "elasticsearch"
+      //"content":"the"
+      //"content": "the elasticsearch"
+    }
+  }
+}
+
+//加上 boosting 後的算分方式
+//可自訂 boosting 來對搜尋結果進行優化
 POST testscore/_search
 {
+  "explain": true,
   "query": {
     "boosting" : {
       "positive" : {
@@ -382,7 +437,7 @@ Query & Filtering 與多字符串多字段查詢
 
 ## Bool Query
 
-- 一個 bool query 是一個 or 多個查詢子句所組成
+- 一個 bool query 是一個 or 多個查詢子句所組成 (可組合成複合查詢)
 
 | 子句 | 效果 |
 |-----|------|
@@ -449,6 +504,8 @@ POST /products/_search
 ```
 
 ### 複雜的 Bool Query
+
+在 bool query 中再放入一個 bool query：(多層 bool query 的概念)
 
 ```json
 POST /products/_search
@@ -535,7 +592,7 @@ POST /news/_bulk
 
 //若是想要搜尋的是與 apple computer 相關的資訊
 //最後一筆與食物相關的訊息會變成搜尋結果第一筆，因為 apple 出現次數最多
-POST news/_search
+POST /news/_search
 {
   "query": {
     "bool": {
@@ -547,7 +604,7 @@ POST news/_search
 }
 
 //限制食物相關訊息不能出現
-POST news/_search
+POST /news/_search
 {
   "query": {
     "bool": {
@@ -563,7 +620,8 @@ POST news/_search
 
 //希望 apple 關鍵字的訊息都出現
 //但透過 boosting 的設定讓食物相關訊息分數較低
-POST news/_search
+//只要有 match 'pie' 的搜尋結果，算分會變更低
+POST /news/_search
 {
   "query": {
     "boosting": {
@@ -636,7 +694,7 @@ POST /blogs/_search
 
 ```json
 //使用 Disjunction Max Query，會讓以下搜尋結果的分數都相同
-POST blogs/_search
+POST /blogs/_search
 {
   "query": {
     "dis_max": {
@@ -650,7 +708,7 @@ POST blogs/_search
 
 //透過加上 tie_breaker 的方式，改變計算分數的方法
 //讓實際出現較多查詢條件的 document 取得較高的算分
-POST blogs/_search
+POST /blogs/_search
 {
   "query": {
     "dis_max": {
@@ -700,7 +758,7 @@ POST /blogs/_bulk
 
 //Disjunction Max Query 搜尋的盲點
 //兩個 document 都會取得相同的分數
-POST blogs/_search
+POST /blogs/_search
 {
   "query": {
     "dis_max": {
@@ -716,7 +774,7 @@ POST blogs/_search
 //multi_match 卻沒搭配 tie_break or minimum_should_match
 //效果跟 dis_max 是相同的
 //但適時的加上 tie_break or minimum_should_match 可以提高搜尋的準確度
-POST blogs/_search
+POST /blogs/_search
 {
   "query": {
     "multi_match": {
@@ -813,13 +871,13 @@ GET /titles/_search
 //也可以根據需要加入 boosting 的設定(範例中的 ^10 就是)
 GET /titles/_search
 {
-   "query": {
-        "multi_match": {
-            "query":  "barking dogs",
-            "type":   "most_fields",
-            "fields": [ "title^10", "title.std" ]
-        }
+  "query": {
+    "multi_match": {
+      "query":  "barking dogs",
+      "type":   "most_fields",
+      "fields": [ "title^10", "title.std" ]
     }
+  }
 }
 ```
 
@@ -849,6 +907,7 @@ POST address/_search
   }
 }
 ```
+> 若使用 `copy_to` 的方式解決，就需要額外的儲存空間
 
 
 
@@ -888,7 +947,7 @@ POST address/_search
 使用 Search Template 和 Index Alias 查詢
 =======================================
 
-## Search Template
+## [Search Template](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-template.html)
 
 - 主要的功能在於 de-couple `程式`與`查詢用的 DSL` 兩者之間的關係，讓專業的工程師可以各司其職的完成工作(開發人員/查詢工程師/效能調校工程師)
 
@@ -899,7 +958,7 @@ POST address/_search
 以下是一個簡單範例：
 
 ```json
-//新增 search template
+//新增 search template，id = 'tmdb'
 POST _scripts/tmdb
 {
   "script": {
@@ -935,22 +994,24 @@ POST tmdb/_search/template
 DELETE _scripts/tmdb
 ```
 
-## Index Alias
+## [Index Alias](https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-aliases.html)
 
-`index alias` 就跟 Linux 中的 `alias` 指令一樣，是作為設定別名的用途。
+- `index alias` 就跟 Linux 中的 `alias` 指令一樣，是作為設定別名的用途。
 
-而通常為 index 設定別名是有其需要的，例如每天建立一個新的 index，但在程式中每天都根據日期去產生一個字串來作為 index 來查詢，其實挺麻煩的；此時透過設定一個名稱為 **latest_index** 並指到每天最新的 index 的方式，問題就迎刃而解了。
+- 而通常為 index 設定別名是有其需要的，例如每天建立一個新的 index，但在程式中每天都根據日期去產生一個字串來作為 index 來查詢，其實挺麻煩的；此時透過設定一個名稱為 **latest_index** 並指到每天最新的 index 的方式，問題就迎刃而解了。
+
+- 除了別名之外，甚至可以額外加入 filter 條件，先針對 index 資料內容進行 filter 後再查詢
 
 以下是一個簡單範例：
 
 ```json
-PUT movies-2019/_doc/1
+PUT /movies-2019/_doc/1
 {
   "name":"the matrix",
   "rating":5
 }
 
-PUT movies-2019/_doc/2
+PUT /movies-2019/_doc/2
 {
   "name":"Speed",
   "rating":3
@@ -970,7 +1031,7 @@ POST _aliases
 }
 
 //對 index alias 進行查詢
-POST movies-latest/_search
+POST /movies-latest/_search
 {
   "query": {
     "match_all": {}
@@ -978,6 +1039,7 @@ POST movies-latest/_search
 }
 
 //另外建立一個 index alias
+//並額外增加 filter 條件對資料先進一步過濾
 POST _aliases
 {
   "actions": [
@@ -999,7 +1061,7 @@ POST _aliases
 }
 
 //對 index alias 進行查詢
-POST movies-lastest-highrate/_search
+POST /movies-lastest-highrate/_search
 {
   "query": {
     "match_all": {}
@@ -1020,7 +1082,7 @@ POST movies-lastest-highrate/_search
 - 但預設情況下，無法對相關度 or 排序進行更多細部的控制調整
 
 
-## Function Score Query
+## [Function Score Query](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-function-score-query.html)
 
 可以在查詢結束後，對每一個符合的 document 進行重新算分，並根據新的分數來進行排序。
 
@@ -1081,7 +1143,13 @@ POST /blogs/_search
     }
   }
 }
+```
 
+由於上面只根據 `votes` 欄位作為重新計算分數的依據，因此投票數超高的 document 得到了超高的分數。
+
+但若是希望算分不要差距這麼大，希望做個平滑處理，那可以搭配 `modifier` & `factor` 兩個參數來完成，以下是示範範例：
+
+```json
 //因此除了 field_value_factor 之外
 //可以額外設定 modifier = log1p 來進行平滑曲線設定
 //new score = old score * log(1 + votes)
@@ -1125,8 +1193,7 @@ POST /blogs/_search
 }
 ```
 
-
-## Boost Mode & Max Boost
+### Boost Mode & Max Boost
 
 在 function score query 中同樣也可以加入 boost 的設定，並可以搭配多種不同的 boost mode 來調整計算分數時的基礎：
 
@@ -1163,14 +1230,14 @@ POST /blogs/_search
       },
       //還可以額外設定 boost mode & max_boost 來進行搜尋的調校
       "boost_mode": "sum",
+      //最高就是 3 分了
       "max_boost": 3
     }
   }
 }
 ```
 
-
-## 一致性的隨機函數
+### 一致性的隨機函數
 
 - 當網站上的廣告需要提高曝光率，又不想要亂槍打鳥時 (希望每個使用者進來看到的廣告是相同的)
 
@@ -1180,6 +1247,7 @@ POST /blogs/_search
 
 ```json
 //以隨機但一致的方式進行算分(透過 seed 參數控制)
+//因此 seed 可以給入像是 user id 這一類的資訊
 POST /blogs/_search
 {
   "query": {
@@ -1191,6 +1259,12 @@ POST /blogs/_search
   }
 }
 ```
+
+### 其他參考資料
+
+- [通過Function Score Query優化Elasticsearch搜尋結果 - IT閱讀](https://www.itread01.com/content/1549644662.html)
+
+- [ElasticSearch - function_score 簡介](https://kucw.github.io/blog/2018/7/elasticsearch-function_score/)
 
 
 
@@ -1206,15 +1280,15 @@ Term & Phrase Suggester
 - 用途是在幫助使用者在輸入搜尋內容的過程中，協助補完搜尋內容，或是進行錯誤的偵測，當然也可以推薦用戶符合更多搜尋條件的建議，因此這樣的作法同樣也可以提高搜尋時找到合適結果的機率
 
 
-## Elasticsearch Suggester API
+## [Elasticsearch Suggester API](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-suggesters.html)
 
 - 搜尋建議的功能在 Elasticsearch 中是透過 Suggester API 來實現的
 
-- 而運作的原理在於將輸入的內容分解為 token，接著在索引的字典裡面尋找相似的 term 並回傳
+- 以 term suggester 為例，其運作原理在於將輸入的內容分解為 token，接著在索引的字典裡面尋找相似的 term 並回傳
 
-- 目前 Elasticsearch 一共支援四種 suggester，分別是 `Term`, `Phrase`, `Complete`, `Context` 四種
+- 目前 Elasticsearch 一共支援四種 suggester，分別是 [`Term`](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-suggesters.html#term-suggester), [`Phrase`](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-suggesters.html#phrase-suggester), [`Completion`](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-suggesters.html#completion-suggester), [`Context`](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-suggesters.html#context-suggester) 四種
 
-- 每個 sueggester 中還可以額外設定好幾個 suggestion mode，分別是：
+- Term suggester 中還可以額外設定好幾個 suggestion mode，分別是：
 
   - `Missing`: 如果索引中已經存在，就不提供建議 (表示使用者已經輸入正確的內容)
 
@@ -1340,8 +1414,10 @@ POST /articles/_search
 Completion & Context Suggester
 ==============================
 
+這個是搜尋體驗優化的另一個重要功能；這功能可以協助使用者在輸入每一個字元時，系統可以快速到後端查詢到與目前輸入字元相關的結果並給出查詢字串補全的功能。
 
-## Completion Suggester
+
+## [Completion Suggester](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-suggesters.html#completion-suggester)
 
 - Completion Suggester 提供 auto complete 的功能，因此使用者每輸入一個字，就需要即時發送一個查詢到後端來搜尋符合項目
 
@@ -1388,9 +1464,9 @@ POST articles/_search?pretty
   "size": 0,
   "suggest": {
     "article-suggester": {
-      "prefix": "e ",
+      "prefix": "e",
       //也可以試試看
-      //"prefix": "elk ",
+      //"prefix": "elk",
       "completion": {
         "field": "title_completion"
       }
@@ -1400,15 +1476,15 @@ POST articles/_search?pretty
 ```
 
 
-## Context Suggester
+## [Context Suggester](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-suggesters.html#context-suggester)
 
-- Context Suggester 是由 ccompletion suggester 擴充而成的
+- Context Suggester 是由 completion suggester 擴充而成的
 
-- 可以在搜尋中加入更多上下文的訊息，例如輸入 "**star**"：
+- 可以在搜尋中加入更多上下文的訊息，例如輸入 `star`：
 
-  - 若與咖啡相關：建議 "**starbucks**"
+  - 若與咖啡相關：建議 `starbucks`
  
-  - 與電影相關：建議 "**star wars**"
+  - 與電影相關：建議 `star wars`
 
 ## 如何實作 Context Suggester ?
 
@@ -1422,7 +1498,7 @@ POST articles/_search?pretty
 
   - 設定 mapping
 
-  - 將數據進行索引，並且為每個 document 加入 context 訊息
+  - 將數據進行索引，並且為每個 document 加入 context 訊息(這樣就可以知道每個 document 跟什麼樣的 context 有關係)
 
   - 結合 context 進行 suggestion 查詢
 
@@ -1450,7 +1526,7 @@ PUT comments/_mapping
 //新增 movie category 相關的 document
 POST comments/_doc
 {
-  "comment":"I love the star war movies",
+  "comment":"I love the star war /movies",
   "comment_autocomplete":{
     "input":["star wars"],
     "contexts":{
@@ -1481,7 +1557,7 @@ POST comments/_search
         "field":"comment_autocomplete",
         "contexts":{
           "comment_category":"coffee"
-          //可以嘗試把 category 改成 movies 再試試看
+          //可以嘗試把 category 改成 /movies 再試試看
           //"comment_category":"movies"
         }
       }
@@ -1509,6 +1585,8 @@ POST comments/_search
 
 Cross Cluster Search
 ====================
+
+- [官方參考文件](https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-cross-cluster-search.html)
 
 ## 水平擴展的問題
 

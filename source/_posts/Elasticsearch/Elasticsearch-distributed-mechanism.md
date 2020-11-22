@@ -61,10 +61,13 @@ Elasticsearch 的分散式架構帶來以下優點：
 
   - 為 cluster 設置多個 master node，且必須是 dedicated master node
 
-
 - Master Eligible Node & 選舉流程
 
-  - cluster 中可以設定多個 master eligible node，當 master node 發生問題時，這些 master eligible node 就會開始選舉流程，選出下一個 msater node
+  - cluster 中可以設定多個 master eligible node，當 master node 發生問題時，這些 master eligible node 就會開始選舉流程，選出下一個 master node
+
+  - 這些 node 會互相 ping 對方，而 Node Id 低的會成為被選舉的 node
+
+  - 一旦發現被選中的 master node 出現問題，就會選出新的 master node
 
   - 每個 node 啟動時就預設是一個 master eligible node，可以透過設定 `node.master: false` 取消此預設設定
 
@@ -78,6 +81,8 @@ Elasticsearch 的分散式架構帶來以下優點：
 
 - 可以透過將其他 node type 都設定為 `false`，這樣就可以讓特定的 node 變成 dedicated coordinating node
 
+- coordinating node 可以直接接收 search request 並處理，不需要透過 master node 轉過來
+
 ### Data Node
 
 - 可以保存資料的 node，每個 node 啟動後都會預設是 data node，可以透過設定 `node.data: false` 停用 data node 功能
@@ -86,6 +91,8 @@ Elasticsearch 的分散式架構帶來以下優點：
 
 - 透過增加 data node 可以解決資料水平擴展 & 解決單點故障導致資料遺失的問題
 
+- 同一個 index 的 primary shard & secondary shard 不能放在同一個 data node 上 (增加 data node 就可以解決此問題)
+
 ### 其他類型的 Node Type
 
 - `Hot & Warm Node`：通常 Hot node 會儲存比較新、比較常用的資料，因此通常硬體規格也會比較好；而 Warm Node 則會儲存比較舊 & 較不常用的資料，因此可以用比較低規格的硬體；藉此優化硬體相關的成本開銷
@@ -93,7 +100,7 @@ Elasticsearch 的分散式架構帶來以下優點：
 - `Machine Learning Node`：專門用來跑 machine learning 的相關工作，可用來搭配異常自動偵測之用
 
 
-## Cluster State
+## Cluster State (集群狀態)
 
 - cluster state 維護了一個 cluster 中必要的訊息，包含以下內容：
 
@@ -119,6 +126,15 @@ Elasticsearch 的分散式架構帶來以下優點：
 | Ingest | `node.ingest` | true |
 | Dedicated Coordinating | `無` | 設置上面三個參數皆為 false |
 | Machine Learning | `node.ml` | true (需要 enable x-pack) |
+
+
+## 關於腦裂問題(split brain)
+
+- 在 ES 7.0 後，已經不需要關心 `minimum_master_nodes` 參數，ES cluster 會自行處理 master 選舉仲裁(quorum)的過程
+
+- cluster scale out/in 變得更安全 & 容易，資料遺失的機會減少很多
+
+- 每個 node 都會詳細紀錄本身的狀態資訊，當 cluster 出現問題時有助於協助診斷 & 排除
 
 
 
@@ -173,7 +189,7 @@ Shard & Cluster 的故障轉移
 
 ### cluster status
 
-透過 `[GET _cluster/health/<target>](https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-health.html)` 可以取得目前 cluster 的健康狀態：
+透過 [`GET _cluster/health/<target>`](https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-health.html) 可以取得目前 cluster 的健康狀態：
 
 ![Elasticsearch - cluster health status](/blog/images/Elasticsearch/es_cluster-health-statue.png)
 
@@ -186,7 +202,7 @@ Shard & Cluster 的故障轉移
 
 ### shard status
 
-透過 `[GET /_cat/shards/<target>](https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-shards.html)` 可以取得目前的 shard 狀態：
+透過 [`GET /_cat/shards/<target>`](https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-shards.html) 可以取得目前的 shard 狀態：
 
 ![Elasticsearch - shard status](/blog/images/Elasticsearch/es_cat-shard-api.png)
 
@@ -247,22 +263,22 @@ Shard & Cluster 的故障轉移
 
 - cluster 狀態重新變成綠色
 
-> 若是擔心 reboot 機器造成 failover 動作開始執行，可以設定將 replication 延遲一段時間後再執行，避免無謂的 data copy 動作
+> 若是擔心 reboot 機器造成 failover 動作開始執行，可以設定將 replication 延遲一段時間後再執行([透過調整 settings 中的 `index.unassigned.node_left.delayed_timeout` 參數](https://www.elastic.co/guide/en/elasticsearch/reference/current/delayed-allocation.html))，避免無謂的 data copy 動作 (此功能稱為 **delay allocation**)
 
 
 ## 值得一看的 Q&A 資料
 
-1：選主的過程中可能存在問題的場景？
-> 選主的過程應該很短，這個期間，如果有創建index或者分片reallocation有可能會出錯。
+1、選舉 master node 的過程中可能存在問題的場景？
+> 選舉 master node 的過程應該很短，這個期間，如果有創建 index 或者分片 reallocation 有可能會出錯。
 
-2：故障轉移期間可能會出現問題的場景？
-> 故障轉移期間，如果只是黃色變綠，應該不影響讀寫，因為副本會提升為主分片。集群變紅，代表有主分片丟失，這個時候會影響讀寫。
+2、故障轉移期間可能會出現問題的場景？
+> 故障轉移期間，如果只是黃色變綠，應該不影響讀寫，因為副本會提升為 primary shard 。集群變紅，代表有 primary shard 丟失，這個時候會影響讀寫。
 
-3： 故障轉移，資料重新分配，消耗性能的避免方式？
-> 例如一個主分片不可用了。只要設置了副本分片，其中一個副本分片立即會將自己提升為主分片。同時會將自己的資料分配到一個新的replica上，有時候，我們只是重啟一台機器，可以讓這個reallocation的動作延遲一段時間再做，從而避免無謂的資料拷貝。
+3、故障轉移，資料重新分配，避免消耗性能的方式？
+> 例如一個 primary shard 不可用了。只要設置了 secondary shard ，其中一個 secondary shard 立即會將自己提升為 primary shard；同時會將自己的資料分配到一個新的 replica 上，有時候，我們只是重啟一台機器，可以讓這個 reallocation 的動作延遲一段時間再做，從而避免無謂的資料拷貝。
 
-4：故障轉移可能存在資料丟失的場景嘛？
-> node如果丟失，如果沒有落盤。就有丟失的可能。如果節點重新回來，會從translog中恢覆沒有寫入的資料
+4、故障轉移可能存在資料遺失的場景嘛？
+> node 如果故障且資料沒有寫入硬碟。就有資料遺失的可能。如果 node 重新回來，會從 translog 中恢復沒有寫入的資料
 
 
 
@@ -292,7 +308,7 @@ Document 分散式儲存
 
 - 可以自行指定 routing value，藉此讓 document 都分配到特定的 shard 上
 
-- 也是因為上述路由設計機制的原因，導致於設定 index settings 之後，primary shard 數量無法隨意變更
+- **也是因為上述路由設計機制的原因，導致於設定 index settings 之後，primary shard 數量無法隨意變更**
 
 
 ## 更新 document 流程 
@@ -337,10 +353,9 @@ Document 分散式儲存
 
 - 請問，視頻中更新和刪除文檔的請求，首先會發送到master節點嗎，還是通過前置的負載均衡工具分發到某一個節點？
 
-> 視頻中發送到9200，我也沒在開發環境中指定dedicated的節點。所以這個節點既是master也是data，當然肯定也是coordinating節點。
+> 視頻中發送到 9200，我也沒在開發環境中指定 dedicated 的節點。所以這個節點既是 master 也是 data，當然肯定也是 coordinating 節點。
 
-> 在生產環境，你可以設置dedicate的 coordinate節點，發查詢到這些節點。不建議直接發送請求到master節點，雖然也會工作，但是大量請求發送到master，會有潛在的性能問題
-
+> 在生產環境，你可以設置 dedicate 的 coordinate 節點，發查詢到這些節點。不建議直接發送請求到master節點，雖然也會工作，但是大量請求發送到 master，會有潛在的性能問題
 
 
 
@@ -370,7 +385,7 @@ Shard & Life cycle
 
   - 不需要考慮同時多個 document 寫入的問題，因此避免了 lock 機制所帶來的效能問題
 
-  - 一旦資料進入到 cache，就會留在裡面；只要 cache 夠大，大部分 request 就不會有 dick access，藉此大幅提昇讀取性能
+  - 一旦資料進入到 file system cache，就會留在裡面；只要 cache 夠大，大部分 request 就不會有 disk access，藉此大幅提昇讀取性能
   
   - cache 容易產生 & 維護
 
@@ -385,7 +400,7 @@ Shard & Life cycle
 
 - Elasticsearch 寫入 document 時，會先寫入稱為 `Index Buffer` 的儲存空間
 
-- 到特定時間點(or 滿足特定條件)時，就會將 Index Buffer 中的內容寫入 `Segment`，而這寫入的動作就稱為 `Refresh`，但預設不會執行 **fsync** 操作
+- 到特定時間點(or 滿足特定條件)時，就會將 Index Buffer 中的內容寫入 `Segment`，而這寫入的過程就稱為 `Refresh`，但預設不會執行 **fsync** 操作
 > 預設一秒一次，可以透過設定 `index.refresh_interval` 進行調整
 
 - 當 document 被 refresh 進入到 segment 之後，就可以被搜尋到了
@@ -408,6 +423,8 @@ Shard & Life cycle
 
 - Elasticsearch 進行 refresh 時，index buffer 會被清空，但 transaction log 則不會
 
+- 由於 transaction log 都會寫入磁碟中，因此當 node 從故障中恢復時，就會優先讀取 transaction log 來恢復資料
+
 
 ## Flush
 
@@ -426,52 +443,54 @@ Shard & Life cycle
 
 ## Merge
 
-- 當 flush 工作陸陸續續完成後，segment 上的資料會寫入磁碟中，因此就會造成很多空的 segment，而 merge 就可以協助定期將 segment 合併
-> 可以減少 segment 數量 & 將被刪除的 document 從磁碟中真正的移除掉
+- 當 flush 工作陸陸續續完成後，segment 上的資料會寫入磁碟中，因此磁碟中就會累積越來越多的 segment 檔案，而 merge 就可以協助定期將多個 segment 檔案合併成一個
+> 可以減少 segment 數量 & 將被刪除的 document(寫在 `.del` 中的資訊) 從磁碟中真正的移除掉
 
-- Elasticsearch 會定期自動執行 merge 工作，但若是要強制執行，可以呼叫 `POST [INDEX_NAME]/_forcemerge` 執行
+- Elasticsearch 會定期自動執行 merge 工作
+
+- 若是要強制執行 merge 操作，可以呼叫 `POST [INDEX_NAME]/_forcemerge` 執行
 
 
 ## 值得一看的 Q&A 資料
 
-1. 客戶端發起資料寫入請求，對你寫的這條資料根據_routing規則選擇發給哪個Shard。
-  - 確認Index Request中是否設置了使用哪個Filed的值作為路由參數，
-  - 如果沒有設置，則使用Mapping中的配置，
-  - 如果mapping中也沒有配置，則使用_id作為路由參數，然後通過_routing的Hash值選擇出Shard，最後從集群的Meta中找出出該Shard的Primary節點。
+1. 客戶端發起資料寫入請求，對你寫的這條資料根據 _routing 規則選擇發給哪個 shard
+  - 確認 Index Request 中是否設置了使用哪個 Filed 的值作為路由參數，
+  - 如果沒有設置，則使用 mapping 中的配置，
+  - 如果 mapping 中也沒有配置，則使用 `_id` 作為路由參數，然後通過 _routing 的 Hash 值選擇出 shard，最後從集群的 Meta 中找出出該 shard 的 primary節點。
 
-2. 寫入請求到達Shard後，先把資料寫入到內存（buffer）中，同時會寫入一條日誌到translog日誌文件中去。
-  - 當寫入請求到shard後，首先是寫Lucene，其實就是創建索引。
-  - 索引創建好後並不是馬上生成segment，這個時候索引資料還在緩存中，這裡的緩存是lucene的緩存，並非Elasticsearch緩存，lucene緩存中的資料是不可被查詢的。
+2. 寫入請求到達 shard 後，先把資料寫入到內存（buffer）中，同時會寫入一條日誌到 translog 日誌文件中去
+  - 當寫入請求到 shard 後，首先是寫 Lucene，其實就是創建索引。
+  - 索引創建好後並不是馬上生成 segment，這個時候索引資料還在緩存中，這裡的緩存是 lucene 的緩存，並非 Elasticsearch 緩存，lucene 緩存中的資料是不可被查詢的
 
-3. 執行refresh操作：從內存buffer中將資料寫入os cache(操作系統的內存)，產生一個segment file文件，buffer清空。
-  - 寫入os cache的同時，建立倒排索引，這時資料就可以供客戶端進行訪問了。
-  - 默認是每隔1秒refresh一次的，所以es是准實時的，因為寫入的資料1秒之後才能被看到。
-  - buffer內存佔滿的時候也會執行refresh操作，buffer默認值是JVM內存的10%。
-  - 通過es的restful api或者java api，手動執行一次refresh操作，就是手動將buffer中的資料刷入os cache中，讓資料立馬就可以被搜索到。
-  - 若要優化索引速度, 而不注重實時性, 可以降低刷新頻率。
+3. 執行refresh操作：從內存 buffer 中將資料寫入 os cache(操作系統的內存)，產生一個 segment file 文件，buffer 清空
+  - 寫入 os cache 的同時，建立倒排索引，這時資料就可以供客戶端進行訪問了。
+  - 默認是每隔1秒 refresh 一次的，所以 ES 是準即時的，因為寫入的資料 1 秒之後才能被看到
+  - buffer 記憶體佔滿的時候也會執行 refresh 操作，buffer 預設值是 JVM內存的 10%
+  - 通過 ES 的 restful api 或者 java api，手動執行一次 refresh 操作，就是手動將 buffer 中的資料刷入 os cache中，讓資料立刻就可以被搜尋到
+  - 若要優化索引速度, 而不注重即時性, 可以降低刷新頻率。
 
-4. translog會每隔5秒或者在一個變更請求完成之後，將translog從緩存刷入磁盤。
-  - translog是存儲在os cache中，每個分片有一個，如果節點宕機會有5秒資料丟失，但是性能比較好，最多丟5秒的資料。。
-  - 可以將translog設置成每次寫操作必須是直接fsync到磁盤，但是性能會差很多。
-  - 可以通過配置增加transLog刷磁盤的頻率來增加資料可靠性，最小可配置100ms，但不建議這麼做，因為這會對性能有非常大的影響。
+4. translog會每隔 5 秒或者在一個變更請求完成之後，將 translog 從緩存刷入磁碟。
+  - translog 是存儲在 os cache 中，每個分片有一個，如果節點當機會有 5 秒資料丟失，但是性能比較好，最多丟 5 秒的資料。
+  - 可以將 translog 設置成每次寫操作必須是直接 fsync 到磁碟，但是性能會差很多。
+  - 可以通過配置增加 transLog 刷磁碟的頻率來增加資料可靠性，最小可配置 100ms，但不建議這麼做，因為這會對性能有非常大的影響。
 
-5. 每30分鐘或者當tanslog的大小達到512M時候，就會執行commit操作（flush操作），將os cache中所有的資料全以segment file的形式，持久到磁盤上去。
-  - 第一步，就是將buffer中現有資料refresh到os cache中去。
-  - 清空buffer 然後強行將os cache中所有的資料全都一個一個的通過segmentfile的形式，持久到磁盤上去。
-  - 將commit point這個文件更新到磁盤中，每個Shard都有一個提交點(commit point), 其中保存了當前Shard成功寫入磁盤的所有segment。
-  - 把translog文件刪掉清空，再開一個空的translog文件。
-  - flush參數設置：
+5. 每 30 分鐘或者當 tanslog 的大小達到512M時候，就會執行 commit操作（flush操作），將 os cache 中所有的資料全以 segment file 的形式，持久到磁碟上去。
+  - 第一步，就是將 buffer 中現有資料 refresh 到 os cache 中去。
+  - 清空 buffer 然後強行將 os cache 中所有的資料全都一個一個的通過 segment file 的形式，持久到磁碟上去。
+  - 將 commit point 這個文件更新到磁碟中，每個 Shard 都有一個提交點(commit point), 其中保存了當前 Shard 成功寫入磁碟的所有 segment。
+  - 把 translog 文件刪掉清空，再開一個空的 translog 文件。
+  - flush 參數設置：
   - index.translog.flush_threshold_period:
   - index.translog.flush_threshold_size:
   - #控制每收到多少條資料後flush一次
   - index.translog.flush_threshold_ops:
 
-6. Segment的merge操作：
-  - 隨著時間，磁盤上的segment越來越多，需要定期進行合併。
-  - Es和Lucene 會自動進行merge操作，合併segment和刪除已經刪除的文檔。
-  - 我們可以手動進行merge：POST index/_forcemerge。一般不需要，這是一個比較消耗資源的操作
+6. segment 的 merge 操作：
+  - 隨著時間，磁碟上的 segment 越來越多，需要定期進行合併。
+  - ES 和 Lucene 會自動進行 merge 操作，合併 segment 和刪除已經刪除的文檔。
+  - 我們可以手動進行 merge：POST index/_forcemerge。一般不需要，這是一個比較消耗資源的操作
 
-> 當資料從hot移動到warm，官方建議手工執行一下_forcemerge
+> 當資料從 hot 移動到 warm，官方建議手動執行一下 _forcemerge
 
 ![Elasticsearch - Q&A Chap40 - 1](/blog/images/Elasticsearch/es_qa_chap40-1.png)
 
@@ -525,9 +544,9 @@ Shard & Life cycle
 ## 如何解決算分不準的問題 ?
 
 - 資料量不大時，可以將 primary shard 數量設定為 1
-> 但若資料足夠大時，只要 document 可以平均分散在多個 shard 上，結果就不會有太大偏差
+> 但若資料足夠大時，只要確保 document 可以平均分散在多個 shard 上，結果就不會有太大偏差
 
-- 使用 CFS Query Then Fetch
+- 使用 DFS Query Then Fetch
 
 - 在搜尋的 URL 中指定參數 `_search?search_type=dfs_query_then_fetch`
 
@@ -671,7 +690,7 @@ PUT test_keyword/_mapping
 
 - 如果要重新打開，需要重建 index
 
-- 若是對於不需要進行 sorting or aggregation 的欄位，可以關閉該欄位的 Doc Values
+- 若是對於不需要進行 sorting or aggregation 的欄位，就可以關閉該欄位的 Doc Values
 
 
 
@@ -693,7 +712,7 @@ PUT test_keyword/_mapping
 
   - 在每個 shard 中取得 1000 個 document，然後 coordinating node 會整合所有結果，最後透過排序選取前 1000 個 document
 
-  - 頁數越深，佔用的 memory 越多，而 Elasticsearch 預設限制到 10000 個 document(可透過修改 `index.max_result_window` 來調整)
+  - 頁數越深，佔用的 memory 越多；而為了避免記憶體耗用過大，Elasticsearch 預設限制到 10,000 個 document(可透過修改 `index.max_result_window` 來調整)
 
 
 ## 使用 search_after 避免 Deep Pagination(深度分頁)問題
@@ -732,7 +751,7 @@ POST users/_search
 
 Scroll API 也是為了解決深度搜尋的另外一種方式，實踐的方法類似 `search_after`，作法如下：
 
-- 搜尋時建立一個快照，作為後續繼續快速搜尋之用，但如果有新的資料寫入後，就沒辦法被查詢到了
+- 搜尋時建立一個快照(`POST /[INDEX_NAME]/_search?scroll=5m`, 5m 表示快照有效時間為 5 mins)，作為後續繼續快速搜尋之用，但如果有新的資料寫入後，就沒辦法被查詢到了
 
 - 每次查詢時，要將上次查詢結果中的 scroll id 拿來使用，才可以正確的繼續往下搜尋
 
@@ -744,6 +763,11 @@ Scroll API 也是為了解決深度搜尋的另外一種方式，實踐的方法
 - **Scroll**：需要全部 document，但過程中的分頁速度要快，例如：導出全部資料
 
 - **Pagination**：使用 `from` & `size`，如果要處理 deep pagination 的問題，則使用 `search_after`
+
+
+## 值得一看的 Q&A 資料
+
+![Elasticsearch - Q&A Chap43 - 1](/blog/images/Elasticsearch/es_qa_chap43-1.png)
 
 
 
