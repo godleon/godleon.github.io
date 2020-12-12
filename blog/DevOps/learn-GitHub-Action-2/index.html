@@ -22,22 +22,22 @@
     var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
   </script>
 
-  <meta name="description" content="本篇文章介紹在 Proxmox 5.2.1 上安裝 Ceph Luminous 的正確流程">
+  <meta name="description" content="此篇文章是學習 Udemy 課程 &quot;The Complete GitHub Actions &amp; Workflows Guide&quot; 時，將學習 Environment Variables、Encryption、Expressions、Context 等內容的過程中整理出來的重要觀念 &amp; 使用方式">
 <meta property="og:type" content="article">
-<meta property="og:title" content="[Proxmox VE] 安裝 Ceph Luminous">
-<meta property="og:url" content="https://godleon.github.io/blog/Proxmox/proxmox-install-ceph/index.html">
+<meta property="og:title" content="[GitHub Actions] 學習重點節錄(2)">
+<meta property="og:url" content="https://godleon.github.io/blog/DevOps/learn-GitHub-Action-2/index.html">
 <meta property="og:site_name" content="小信豬的原始部落">
-<meta property="og:description" content="本篇文章介紹在 Proxmox 5.2.1 上安裝 Ceph Luminous 的正確流程">
+<meta property="og:description" content="此篇文章是學習 Udemy 課程 &quot;The Complete GitHub Actions &amp; Workflows Guide&quot; 時，將學習 Environment Variables、Encryption、Expressions、Context 等內容的過程中整理出來的重要觀念 &amp; 使用方式">
 <meta property="og:locale" content="en_US">
-<meta property="article:published_time" content="2018-10-11T09:15:00.000Z">
-<meta property="article:modified_time" content="2020-12-12T09:46:51.856Z">
+<meta property="article:published_time" content="2020-12-12T09:20:00.000Z">
+<meta property="article:modified_time" content="2020-12-12T09:46:51.848Z">
 <meta property="article:author" content="godleon">
-<meta property="article:tag" content="Ceph">
-<meta property="article:tag" content="Proxmox">
+<meta property="article:tag" content="GitHub Actions">
+<meta property="article:tag" content="DevOps">
 <meta name="twitter:card" content="summary">
 
 
-<link rel="canonical" href="https://godleon.github.io/blog/Proxmox/proxmox-install-ceph/">
+<link rel="canonical" href="https://godleon.github.io/blog/DevOps/learn-GitHub-Action-2/">
 
 
 <script data-pjax class="page-configurations">
@@ -50,7 +50,7 @@
   };
 </script>
 
-  <title>[Proxmox VE] 安裝 Ceph Luminous | 小信豬的原始部落</title>
+  <title>[GitHub Actions] 學習重點節錄(2) | 小信豬的原始部落</title>
   
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
     <script data-pjax>
@@ -159,7 +159,7 @@
 
       <!--noindex-->
       <section class="post-toc-wrap sidebar-panel">
-          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">1.</span> <span class="nav-text">References</span></a></li></ol></div>
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%92%B0%E5%A2%83%E8%AE%8A%E6%95%B8-Environment-Variable-%E7%9A%84%E5%AD%98%E5%8F%96"><span class="nav-number">1.</span> <span class="nav-text">環境變數(Environment Variable)的存取</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%97%9C%E6%96%BC%E5%9C%A8-Workflow-%E4%B8%AD%E6%8E%88%E6%AC%8A%E6%A9%9F%E5%88%B6"><span class="nav-number">2.</span> <span class="nav-text">關於在 Workflow 中授權機制</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Expression-amp-Context"><span class="nav-number">3.</span> <span class="nav-text">Expression &amp; Context</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Context"><span class="nav-number">3.1.</span> <span class="nav-text">Context</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Expression"><span class="nav-number">3.2.</span> <span class="nav-text">Expression</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%83%E8%80%83%E6%96%87%E4%BB%B6"><span class="nav-number">4.</span> <span class="nav-text">參考文件</span></a></li></ol></div>
       </section>
       <!--/noindex-->
 
@@ -219,7 +219,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/Proxmox/proxmox-install-ceph/">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/DevOps/learn-GitHub-Action-2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/blog/images/avatar.gif">
@@ -235,7 +235,7 @@
     
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          [Proxmox VE] 安裝 Ceph Luminous
+          [GitHub Actions] 學習重點節錄(2)
         </h1>
 
         <div class="post-meta">
@@ -244,23 +244,17 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
+              
 
-              <time title="Created: 2018-10-11 17:15:00" itemprop="dateCreated datePublished" datetime="2018-10-11T17:15:00+08:00">2018-10-11</time>
+              <time title="Created: 2020-12-12 17:20:00 / Modified: 17:46:51" itemprop="dateCreated datePublished" datetime="2020-12-12T17:20:00+08:00">2020-12-12</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-12-12 17:46:51" itemprop="dateModified" datetime="2020-12-12T17:46:51+08:00">2020-12-12</time>
-              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
               </span>
               <span class="post-meta-item-text">In</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/blog/categories/Proxmox/" itemprop="url" rel="index"><span itemprop="name">Proxmox</span></a>
+                  <a href="/blog/categories/DevOps/" itemprop="url" rel="index"><span itemprop="name">DevOps</span></a>
                 </span>
             </span>
 
@@ -273,13 +267,13 @@
       </span>
       <span class="post-meta-item-text">Disqus: </span>
     
-    <a title="disqus" href="/blog/Proxmox/proxmox-install-ceph/#disqus_thread" itemprop="discussionUrl">
-      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="Proxmox/proxmox-install-ceph/" itemprop="commentCount"></span>
+    <a title="disqus" href="/blog/DevOps/learn-GitHub-Action-2/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="DevOps/learn-GitHub-Action-2/" itemprop="commentCount"></span>
     </a>
   </span>
   
   
-            <div class="post-description">本篇文章介紹在 Proxmox 5.2.1 上安裝 Ceph Luminous 的正確流程</div>
+            <div class="post-description">此篇文章是學習 Udemy 課程 "The Complete GitHub Actions & Workflows Guide" 時，將學習 Environment Variables、Encryption、Expressions、Context 等內容的過程中整理出來的重要觀念 & 使用方式</div>
 
         </div>
       </header>
@@ -288,22 +282,62 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <p>本篇文章介紹在 Proxmox 5.2.1 上安裝 Ceph Luminous 的正確流程</p>
-<p>今天新裝了一台 PVE 5.2.1，準備要把這台也加入原本的 Ceph cluster，於是先下了以下指令：</p>
-<blockquote>
-<p>pveceph install –version luminous</p>
-</blockquote>
-<p>結果出現了下面的訊息：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">W: (pve-apt-hook) !! WARNING !!</span><br><span class="line">W: (pve-apt-hook) You are attempting to remove the meta-package &#39;proxmox-ve&#39;!</span><br><span class="line">W: (pve-apt-hook)</span><br><span class="line">W: (pve-apt-hook) If you really you want to permanently remove &#39;proxmox-ve&#39; from your system, run the following command</span><br><span class="line">W: (pve-apt-hook) touch &#39;&#x2F;please-remove-proxmox-ve&#39;</span><br><span class="line">W: (pve-apt-hook) and repeat your apt-get&#x2F;apt invocation.</span><br><span class="line">W: (pve-apt-hook)</span><br><span class="line">W: (pve-apt-hook) If you are unsure why &#39;proxmox-ve&#39; would be removed, please verify</span><br><span class="line">W: (pve-apt-hook) - your APT repository settings</span><br><span class="line">W: (pve-apt-hook) - that you are using &#39;apt-get dist-upgrade&#39; or &#39;apt full-upgrade&#39; to upgrade your system</span><br><span class="line">E: Sub-process &#x2F;usr&#x2F;share&#x2F;proxmox-ve&#x2F;pve-apt-hook returned an error code (1)</span><br><span class="line">E: Failure running script &#x2F;usr&#x2F;share&#x2F;proxmox-ve&#x2F;pve-apt-hook</span><br></pre></td></tr></table></figure>
-
-<p>Google 了一下發現要先加入 <code>pve-no-subscription</code> 這個 repository 才可以(不要傻傻跟著上面的訊息移除了 <code>proxmox-ve</code>，整個 pve 都會不見)，因此設定 Ceph cluster 的正確步驟應該是如下：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 加入 pve-no-subscription repository</span></span><br><span class="line">$ add-apt-repository <span class="string">&quot;deb http://download.proxmox.com/debian/pve <span class="subst">$(lsb_release -cs)</span> pve-no-subscription&quot;</span></span><br><span class="line"></span><br><span class="line">$ apt-get update</span><br><span class="line"></span><br><span class="line"><span class="comment"># 指定安裝 Ceph Luminous</span></span><br><span class="line">$ pveceph install --version luminous</span><br><span class="line"></span><br><span class="line"><span class="comment"># 設定 Ceph cluster 所使用的網段</span></span><br><span class="line">$ pveceph init --network 10.103.2.0/24</span><br><span class="line"></span><br><span class="line"><span class="comment"># 建立 ceph monitor daemon</span></span><br><span class="line">$ pveceph createmon</span><br><span class="line"></span><br><span class="line"><span class="comment"># 加入 OSD</span></span><br><span class="line">$ pveceph createosd /dev/sdb</span><br><span class="line">$ pveceph createosd /dev/sdc</span><br><span class="line">....(根據實際的環境加入所需要的 Disk)</span><br></pre></td></tr></table></figure>
-
-<p>步驟很簡單，PVE 已經幫大家完成很多事情了，以上幾個指令就可以把 Ceph Luminous 安裝完成囉!</p>
-<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
-<li><p><a target="_blank" rel="noopener" href="https://forum.proxmox.com/threads/ceph-install-problem.47147/">Ceph install problem | Proxmox Support Forum</a></p>
+        <h1 id="環境變數-Environment-Variable-的存取"><a href="#環境變數-Environment-Variable-的存取" class="headerlink" title="環境變數(Environment Variable)的存取"></a>環境變數(Environment Variable)的存取</h1><ul>
+<li><p>Environment Variable 可以分為 <code>workflow</code>、<code>job</code>、<code>step</code> 三個 scope，使用的方式同樣都是透過關鍵字 <code>env</code> 的方式定義，存取的範圍也會依據定義的位置而有所不同</p>
 </li>
-<li><p><a target="_blank" rel="noopener" href="https://pve.proxmox.com/pve-docs/chapter-sysadmin.html#sysadmin_package_repositories">Proxmox - Host System Administration</a></p>
+<li><p>若要讓環境變數更安全，可以到 repository 的 <code>settings &gt; Secrets</code> 頁面中，新增 <strong>repository secret</strong>，這樣在 action 執行過程中就不會以明碼顯示；而存取的方式則是透過 <code>$&#123;&#123; secrets.[SECRET_NAME] &#125;&#125;</code> </p>
+</li>
+<li><p>repository secret 有最大長度 64KB 的限制</p>
+</li>
+<li><p>若是要在 action 中使用大型的加密檔案(&gt; 64KB)，可以透過 GPG 工具加密後，傳到 repo 中，再將密碼存入 repository secret，然後在 action 中再次透過 GPG 工具解密後使用</p>
+</li>
+</ul>
+<h1 id="關於在-Workflow-中授權機制"><a href="#關於在-Workflow-中授權機制" class="headerlink" title="關於在 Workflow 中授權機制"></a>關於在 Workflow 中授權機制</h1><p>在上一篇文章中有提到，若是要從外部觸發 workflow，需要有一個有足夠權限的 token，而這個 token 需要到開發者帳號的 <code>settings &gt;&gt; Developer settings</code> 頁面中取得。</p>
+<p>但是，如果假設執行的環境已經在 action 內部了，那還需要申請這樣一個 token 嗎?</p>
+<p>答案是不用的，只要透過 <code>$&#123;&#123; secrets.GITHUB_TOKEN &#125;&#125;</code> 就可以取得一個合法的 token，而這 token 也正式代表了執行目前這個 action 的身份，而這個 token 具體有哪些權限，可以參考<a target="_blank" rel="noopener" href="https://docs.github.com/en/free-pro-team@latest/actions/reference/authentication-in-a-workflow#permissions-for-the-github_token">官方文件的說明</a>。</p>
+<p>而 GITHUB_TOKEN 可以拿來做什麼用呢? 可能會有以下應用場景：</p>
+<ul>
+<li><p>在自動化過程中，建立 issue</p>
+</li>
+<li><p>在 action 執行過程，產生某些檔案，再重新 commit/push 回原本的 repository</p>
+</li>
+</ul>
+<p>總之 GITHUB_TOKEN 可以做蠻多事情的，若是有需要對原本的 repository 做一些異動，是可以透過 GITHUB_TOKEN 作為認證身份來完成這些事情的。</p>
+<h1 id="Expression-amp-Context"><a href="#Expression-amp-Context" class="headerlink" title="Expression &amp; Context"></a>Expression &amp; Context</h1><h2 id="Context"><a href="#Context" class="headerlink" title="Context"></a>Context</h2><p>Context 在 GitHub Actions 的文件中是這麼介紹的：</p>
+<blockquote>
+<p>Contexts are a way to access information about workflow runs, runner environments, jobs, and steps. Contexts use the expression syntax.</p>
+</blockquote>
+<p>因此表示，要存取 workflow 的任何相關資訊，或是與 workflow 的相關設定，就必須要認識有哪些 context 可用，可透過<a target="_blank" rel="noopener" href="https://docs.github.com/en/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#contexts">此官網文件連結</a>取得最新的 context 列表，而 context 的用法則是 <code>$&#123;&#123; <context> &#125;&#125;</code></p>
+<h2 id="Expression"><a href="#Expression" class="headerlink" title="Expression"></a>Expression</h2><p>Expression 一般來說有兩個用途：</p>
+<ol>
+<li><p>針對變數做一些程式化的調整 &amp; 修改，這會在 <code>$&#123;&#123; &#125;&#125;</code> 中發生，而且通常會搭配 <a target="_blank" rel="noopener" href="https://docs.github.com/en/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#functions">function</a> 使用，資料來源很多時候是來自於 <a target="_blank" rel="noopener" href="https://docs.github.com/en/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#contexts">context</a></p>
+</li>
+<li><p>使用 <code>if</code> 關鍵字來調整 workflow 在特定情況下才能執行，而資訊來源很多時候也是來自於 <a target="_blank" rel="noopener" href="https://docs.github.com/en/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#contexts">context</a></p>
+</li>
+</ol>
+<p>以下舉幾個變數搭配 function 的範例：(詳細說明可參考 <a target="_blank" rel="noopener" href="https://docs.github.com/en/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#functions">GitHub Actions 官網文件</a>)</p>
+<ul>
+<li><p><code>contains(github.event.issue.labels.*.name, &#39;bug&#39;)</code>針對 array 中的每個 <strong>name</strong> 值來判斷是否有 bug 這個字串存在</p>
+</li>
+<li><p><code>contains(&#39;Hello world&#39;, &#39;llo&#39;)</code></p>
+</li>
+<li><p><code>startsWith(&#39;Hello world&#39;, &#39;He&#39;)</code></p>
+</li>
+</ul>
+<p>以下是幾個 if 使用的例子：</p>
+<ul>
+<li><p>if 不僅可用在 job level 上，也可以用在 step level 上</p>
+<blockquote>
+<p>例如：<code>if: github.event_name == &#39;push&#39;</code> (github context 提供了很多資訊可以用來在 if 條件上作判斷，<strong>event_name</strong> 只是其中一種而已)</p>
+</blockquote>
+</li>
+<li><p>使用 <code>if: success()</code> or <code>if: failure()</code> or <code>if: always()</code> 來根據前一個 job or step 的結束狀態來決定要不要執行特定工作</p>
+</li>
+</ul>
+<h1 id="參考文件"><a href="#參考文件" class="headerlink" title="參考文件"></a>參考文件</h1><ul>
+<li><p><a target="_blank" rel="noopener" href="https://docs.github.com/en/free-pro-team@latest/actions/reference/authentication-in-a-workflow">Authentication in a workflow - GitHub Docs</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://docs.github.com/en/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions">Context and expression syntax for GitHub Actions - GitHub Docs</a></p>
 </li>
 </ul>
 
@@ -315,22 +349,19 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/blog/tags/Ceph/" rel="tag"># Ceph</a>
-              <a href="/blog/tags/Proxmox/" rel="tag"># Proxmox</a>
+              <a href="/blog/tags/GitHub-Actions/" rel="tag"># GitHub Actions</a>
+              <a href="/blog/tags/DevOps/" rel="tag"># DevOps</a>
           </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/blog/Kubernetes/k8s-DaemonSet-Overview/" rel="prev" title="[Kubernetes] DaemonSet Overview">
-                  <i class="fa fa-chevron-left"></i> [Kubernetes] DaemonSet Overview
+                <a href="/blog/DevOps/learn-GitHub-Action-1/" rel="prev" title="[GitHub Actions] 學習重點節錄(1)">
+                  <i class="fa fa-chevron-left"></i> [GitHub Actions] 學習重點節錄(1)
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/blog/Kubernetes/k8s-Job-Overview/" rel="next" title="[Kubernetes] Job, CronJob & TTL Controller Overview">
-                  [Kubernetes] Job, CronJob & TTL Controller Overview <i class="fa fa-chevron-right"></i>
-                </a>
             </div>
           </div>
       </footer>
@@ -478,9 +509,9 @@ document.addEventListener('pjax:success', () => {
 </script>
 <script>
   var disqus_config = function() {
-    this.page.url = "https://godleon.github.io/blog/Proxmox/proxmox-install-ceph/";
-    this.page.identifier = "Proxmox/proxmox-install-ceph/";
-    this.page.title = "[Proxmox VE] 安裝 Ceph Luminous";
+    this.page.url = "https://godleon.github.io/blog/DevOps/learn-GitHub-Action-2/";
+    this.page.identifier = "DevOps/learn-GitHub-Action-2/";
+    this.page.title = "[GitHub Actions] 學習重點節錄(2)";
     };
   NexT.utils.loadComments('#disqus_thread', () => {
     if (window.DISQUS) {

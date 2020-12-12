@@ -4,6 +4,33 @@
   
     
     <entry>
+      <title>[GitHub Actions] 學習重點節錄(2)</title>
+      <link href="/blog/DevOps/learn-GitHub-Action-2/"/>
+      <url>/blog/DevOps/learn-GitHub-Action-2/</url>
+      
+        <content type="html"><![CDATA[<h1 id="環境變數-Environment-Variable-的存取"><a href="#環境變數-Environment-Variable-的存取" class="headerlink" title="環境變數(Environment Variable)的存取"></a>環境變數(Environment Variable)的存取</h1><ul><li><p>Environment Variable 可以分為 <code>workflow</code>、<code>job</code>、<code>step</code> 三個 scope，使用的方式同樣都是透過關鍵字 <code>env</code> 的方式定義，存取的範圍也會依據定義的位置而有所不同</p></li><li><p>若要讓環境變數更安全，可以到 repository 的 <code>settings &gt; Secrets</code> 頁面中，新增 <strong>repository secret</strong>，這樣在 action 執行過程中就不會以明碼顯示；而存取的方式則是透過 <code>$&#123;&#123; secrets.[SECRET_NAME] &#125;&#125;</code> </p></li><li><p>repository secret 有最大長度 64KB 的限制</p></li><li><p>若是要在 action 中使用大型的加密檔案(&gt; 64KB)，可以透過 GPG 工具加密後，傳到 repo 中，再將密碼存入 repository secret，然後在 action 中再次透過 GPG 工具解密後使用</p></li></ul><h1 id="關於在-Workflow-中授權機制"><a href="#關於在-Workflow-中授權機制" class="headerlink" title="關於在 Workflow 中授權機制"></a>關於在 Workflow 中授權機制</h1><p>在上一篇文章中有提到，若是要從外部觸發 workflow，需要有一個有足夠權限的 token，而這個 token 需要到開發者帳號的 <code>settings &gt;&gt; Developer settings</code> 頁面中取得。</p><p>但是，如果假設執行的環境已經在 action 內部了，那還需要申請這樣一個 token 嗎?</p><p>答案是不用的，只要透過 <code>$&#123;&#123; secrets.GITHUB_TOKEN &#125;&#125;</code> 就可以取得一個合法的 token，而這 token 也正式代表了執行目前這個 action 的身份，而這個 token 具體有哪些權限，可以參考<a href="https://docs.github.com/en/free-pro-team@latest/actions/reference/authentication-in-a-workflow#permissions-for-the-github_token">官方文件的說明</a>。</p><p>而 GITHUB_TOKEN 可以拿來做什麼用呢? 可能會有以下應用場景：</p><ul><li><p>在自動化過程中，建立 issue</p></li><li><p>在 action 執行過程，產生某些檔案，再重新 commit/push 回原本的 repository</p></li></ul><p>總之 GITHUB_TOKEN 可以做蠻多事情的，若是有需要對原本的 repository 做一些異動，是可以透過 GITHUB_TOKEN 作為認證身份來完成這些事情的。</p><h1 id="Expression-amp-Context"><a href="#Expression-amp-Context" class="headerlink" title="Expression &amp; Context"></a>Expression &amp; Context</h1><h2 id="Context"><a href="#Context" class="headerlink" title="Context"></a>Context</h2><p>Context 在 GitHub Actions 的文件中是這麼介紹的：</p><blockquote><p>Contexts are a way to access information about workflow runs, runner environments, jobs, and steps. Contexts use the expression syntax.</p></blockquote><p>因此表示，要存取 workflow 的任何相關資訊，或是與 workflow 的相關設定，就必須要認識有哪些 context 可用，可透過<a href="https://docs.github.com/en/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#contexts">此官網文件連結</a>取得最新的 context 列表，而 context 的用法則是 <code>$&#123;&#123; <context> &#125;&#125;</code></p><h2 id="Expression"><a href="#Expression" class="headerlink" title="Expression"></a>Expression</h2><p>Expression 一般來說有兩個用途：</p><ol><li><p>針對變數做一些程式化的調整 &amp; 修改，這會在 <code>$&#123;&#123; &#125;&#125;</code> 中發生，而且通常會搭配 <a href="https://docs.github.com/en/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#functions">function</a> 使用，資料來源很多時候是來自於 <a href="https://docs.github.com/en/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#contexts">context</a></p></li><li><p>使用 <code>if</code> 關鍵字來調整 workflow 在特定情況下才能執行，而資訊來源很多時候也是來自於 <a href="https://docs.github.com/en/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#contexts">context</a></p></li></ol><p>以下舉幾個變數搭配 function 的範例：(詳細說明可參考 <a href="https://docs.github.com/en/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#functions">GitHub Actions 官網文件</a>)</p><ul><li><p><code>contains(github.event.issue.labels.*.name, &#39;bug&#39;)</code>針對 array 中的每個 <strong>name</strong> 值來判斷是否有 bug 這個字串存在</p></li><li><p><code>contains(&#39;Hello world&#39;, &#39;llo&#39;)</code></p></li><li><p><code>startsWith(&#39;Hello world&#39;, &#39;He&#39;)</code></p></li></ul><p>以下是幾個 if 使用的例子：</p><ul><li><p>if 不僅可用在 job level 上，也可以用在 step level 上</p><blockquote><p>例如：<code>if: github.event_name == &#39;push&#39;</code> (github context 提供了很多資訊可以用來在 if 條件上作判斷，<strong>event_name</strong> 只是其中一種而已)</p></blockquote></li><li><p>使用 <code>if: success()</code> or <code>if: failure()</code> or <code>if: always()</code> 來根據前一個 job or step 的結束狀態來決定要不要執行特定工作</p></li></ul><h1 id="參考文件"><a href="#參考文件" class="headerlink" title="參考文件"></a>參考文件</h1><ul><li><p><a href="https://docs.github.com/en/free-pro-team@latest/actions/reference/authentication-in-a-workflow">Authentication in a workflow - GitHub Docs</a></p></li><li><p><a href="https://docs.github.com/en/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions">Context and expression syntax for GitHub Actions - GitHub Docs</a></p></li></ul>]]></content>
+      
+      
+      <categories>
+          
+          <category> DevOps </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> GitHub Actions </tag>
+            
+            <tag> DevOps </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>[GitHub Actions] 學習重點節錄(1)</title>
       <link href="/blog/DevOps/learn-GitHub-Action-1/"/>
       <url>/blog/DevOps/learn-GitHub-Action-1/</url>
