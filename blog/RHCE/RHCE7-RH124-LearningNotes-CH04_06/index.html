@@ -35,7 +35,7 @@
 <meta property="og:image" content="https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Tee.svg/400px-Tee.svg.png">
 <meta property="og:image" content="https://lh3.googleusercontent.com/2bDqeWVGlV0vGtV0lm6TE-1KwHmNixd6pUAaDGh30pcFJGF3tI3WUsV6dxUzdRbSPh7dR3mzznf_EdinGaKeWQA1xrA9cdOJFajn-jQFCcgEfni4Sdpn4zd-6R4T-Rj0Cezry17a0m_hI61F1nD8TjQFomv6NltRNseZgPgHVM1JU0or0xr8Y322N7MfhzoQIXeLQgQMLTsKtLAr19avk7A3yUQiZn5m6RI6T0rVqmW2FsXYwGEiQiDQlmg9POKDIndNH9LknDoIGHK5PAL_03cmbuY5EdouDrBMQu1PCESLO5GvZgzG-UIWNXMYk692Rai3Cpw6zNbyMUdwqpzvUaCgsPFHYcRfA9C3U1VJ4p-O2Q9iIKq5-8DWzEzGb7HELfYNwAHny8QGnXBGnHa7qtzVUJseFngyW3I2T-rCD7rriDbNYep4-V_fSqMSCNFSpVcs6Xnaj9TmnmXoegWDt3p43VTQxqPPb5C1LpyOK8mwwzFJdrYEjRJNmRzz6o4tUTqfbeay_UdKTzARA4MrsP6k2X5wHPWlDOao9eh7cMtRsyQpk9KE3Mp2l44mIHs_tuIE=w657-h235-no">
 <meta property="article:published_time" content="2016-04-03T08:45:00.000Z">
-<meta property="article:modified_time" content="2020-11-22T08:50:21.512Z">
+<meta property="article:modified_time" content="2020-12-12T04:24:48.363Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="Linux">
 <meta property="article:tag" content="RHCE">
@@ -179,7 +179,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/blog/archives">
-          <span class="site-state-item-count">138</span>
+          <span class="site-state-item-count">139</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -190,7 +190,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/blog/tags/">
-        <span class="site-state-item-count">103</span>
+        <span class="site-state-item-count">104</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -259,7 +259,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-11-22 16:50:21" itemprop="dateModified" datetime="2020-11-22T16:50:21+08:00">2020-11-22</time>
+                <time title="Modified: 2020-12-12 12:24:48" itemprop="dateModified" datetime="2020-12-12T12:24:48+08:00">2020-12-12</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -310,7 +310,7 @@
 </tr>
 <tr>
 <td><code>&gt;&gt;file 2&gt;&amp;1</code><p /><code>&amp;&gt;&gt;file</code></td>
-<td>stderr 會導向變成 stdout 輸出，並附加內容於指定檔案<br />**<font color='red'>不會再有 stderr 輸出，而是全部皆為 stdout 輸出</font>**</td>
+<td>stderr 會導向變成 stdout 輸出，並附加內容於指定檔案<br /><strong><font color='red'>不會再有 stderr 輸出，而是全部皆為 stdout 輸出</font></strong></td>
 </tr>
 </tbody></table>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[vagrant@server tmp]$ find /etc -name passwd &amp;&gt;/tmp/save-both</span><br><span class="line">[vagrant@server tmp]$ cat /tmp/save-both</span><br><span class="line">....</span><br><span class="line">find: ‘/etc/lvm/backup’: Permission denied</span><br><span class="line">find: ‘/etc/lvm/cache’: Permission denied</span><br><span class="line">/etc/passwd</span><br><span class="line">find: ‘/etc/polkit-1/rules.d’: Permission denied</span><br><span class="line">find: ‘/etc/polkit-1/localauthority’: Permission denied</span><br><span class="line">....</span><br><span class="line">/etc/pam.d/passwd</span><br><span class="line">find: ‘/etc/audisp’: Permission denied</span><br><span class="line">....</span><br></pre></td></tr></table></figure>
@@ -474,7 +474,7 @@
 <li><code>blank</code>：保留作為未來使用</li>
 </ol>
 <p>說明第 2 個欄位 <code>password</code></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[vagrant@desktop ~]$ sudo tail -3 /etc/shadow</span><br><span class="line">juliet:<span class="variable">$6</span><span class="variable">$TFn6B61u</span><span class="variable">$sA</span>/maknNkUeghjzgrGkoAiLYzNa/KqDQDR5A0m0PxTZeac4gdXQAleR.sxWcWK5VZnnSIhSAsD/WnIZr51MZA/:16864:0:99999:7:::</span><br><span class="line">romeo:<span class="variable">$6</span><span class="variable">$vRE6wD1I</span><span class="variable">$4eh6QNLPzyMw9pVjr</span>.YwOia6s8y1zixFq2LpHSi/n.Q/A45J/jqiBCNXRJan2rl0p6MwuL.91mf3IkRNZQUVv.:16864:0:99999:7:::</span><br><span class="line">hamlet:<span class="variable">$6</span><span class="variable">$Nu8r</span>/BWW<span class="variable">$PqoSIv9iRx9oQEH2ziw4L2WH0HMXs2YXFvEH8SFHmmKd</span>/WxeAV0qOweqAXUN6TE375W7ShHHLxP6i7jBcHsD/1:16864:0:99999:7:::</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[vagrant@desktop ~]$ sudo tail -3 /etc/shadow</span><br><span class="line">juliet:$6$TFn6B61u<span class="variable">$sA</span>/maknNkUeghjzgrGkoAiLYzNa/KqDQDR5A0m0PxTZeac4gdXQAleR.sxWcWK5VZnnSIhSAsD/WnIZr51MZA/:16864:0:99999:7:::</span><br><span class="line">romeo:$6$vRE6wD1I<span class="variable">$4eh6QNLPzyMw9pVjr</span>.YwOia6s8y1zixFq2LpHSi/n.Q/A45J/jqiBCNXRJan2rl0p6MwuL.91mf3IkRNZQUVv.:16864:0:99999:7:::</span><br><span class="line">hamlet:$6<span class="variable">$Nu8r</span>/BWW<span class="variable">$PqoSIv9iRx9oQEH2ziw4L2WH0HMXs2YXFvEH8SFHmmKd</span>/WxeAV0qOweqAXUN6TE375W7ShHHLxP6i7jBcHsD/1:16864:0:99999:7:::</span><br></pre></td></tr></table></figure>
 
 <p>以 user juliet <code>$6$TFn6B61u$sA/maknNkUeghjz</code> 為例：(以 <strong><font color='red'>$</font></strong> 作為分隔)</p>
 <ol>
