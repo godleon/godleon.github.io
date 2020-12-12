@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "[GitHub Actions] 學習重點節錄(1)"
-description: "此篇文章是學習 Udemy 課程\"The Complete GitHub Actions & Workflows Guide\" 時，將重要的使用觀念 & 方法節錄整理而成，並非完整的教學文章"
+description: "此篇文章是學習 Udemy 課程 \"The Complete GitHub Actions & Workflows Guide\" 時，將學習 Events, Schedules, External Events 等內容的過程中整理出來的重要觀念 & 使用方式"
 date: 2020-12-12 11:00:00
 published: true
 comments: true
