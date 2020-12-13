@@ -84,6 +84,8 @@ Expression 一般來說有兩個用途：
 參考文件
 =======
 
+- [The Complete GitHub Actions & Workflows Guide | Udemy](https://www.udemy.com/course/github-actions/)
+
 - [Authentication in a workflow - GitHub Docs](https://docs.github.com/en/free-pro-team@latest/actions/reference/authentication-in-a-workflow)
 
 - [Context and expression syntax for GitHub Actions - GitHub Docs](https://docs.github.com/en/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions)
