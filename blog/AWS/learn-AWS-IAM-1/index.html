@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="此篇文章是學習 Udemy 課程 &quot;AWS Identity Access Management (IAM) Practical Applications&quot; 時，將學習 IAM Uer &amp; Group、Credential ...等內容的過程中整理出來的重要觀念 &amp; 使用方式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[AWS IAM] 學習重點節錄(1) - IAM Uer &amp; Group、Credential">
+<meta property="og:url" content="https://godleon.github.io/blog/AWS/learn-AWS-IAM-1/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章是學習 Udemy 課程 &quot;AWS Identity Access Management (IAM) Practical Applications&quot; 時，將學習 IAM Uer &amp; Group、Credential ...等內容的過程中整理出來的重要觀念 &amp; 使用方式">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/IAM_AccountID.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/IAM_Credential.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/IAM_team-member.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/IAM_federal-users.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/IAM_application.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/IAM_external-users.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/IAM_cross-account-user.png.png">
+<meta property="article:published_time" content="2020-12-18T01:40:00.000Z">
+<meta property="article:modified_time" content="2020-12-18T02:04:23.493Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="AWS">
+<meta property="article:tag" content="IAM">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/aws/IAM_AccountID.png">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/AWS/learn-AWS-IAM-1/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>[AWS IAM] 學習重點節錄(1) - IAM Uer & Group、Credential | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#IAM-Identity-amp-Access-Management"><span class="nav-number">1.</span> <span class="nav-text">IAM(Identity &amp; Access Management)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#IAM-User"><span class="nav-number">2.</span> <span class="nav-text">IAM User</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%A8%E4%B8%8D%E5%90%8C-root-account-%E4%B9%8B%E9%96%93%E5%A6%82%E4%BD%95%E8%AD%98%E5%88%A5%E5%90%8C%E5%90%8D%E7%9A%84%E4%BD%BF%E7%94%A8%E8%80%85"><span class="nav-number">2.1.</span> <span class="nav-text">在不同 root account 之間如何識別同名的使用者</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Credential"><span class="nav-number">3.</span> <span class="nav-text">Credential</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%9C%9F%E5%AF%A6%E4%BD%BF%E7%94%A8%E8%80%85%E7%9A%84%E9%A1%9E%E5%9E%8B"><span class="nav-number">4.</span> <span class="nav-text">真實使用者的類型</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Root-User"><span class="nav-number">4.1.</span> <span class="nav-text">Root User</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Team-Members"><span class="nav-number">4.2.</span> <span class="nav-text">Team Members</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Federated-Users"><span class="nav-number">4.3.</span> <span class="nav-text">Federated Users</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Application"><span class="nav-number">4.4.</span> <span class="nav-text">Application</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#External-Users"><span class="nav-number">4.5.</span> <span class="nav-text">External Users</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cross-Account-Users"><span class="nav-number">4.6.</span> <span class="nav-text">Cross Account Users</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Customers"><span class="nav-number">4.7.</span> <span class="nav-text">Customers</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Access-Key"><span class="nav-number">5.</span> <span class="nav-text">Access Key</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#IAM-Group"><span class="nav-number">6.</span> <span class="nav-text">IAM Group</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">7.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">143</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">104</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/AWS/learn-AWS-IAM-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [AWS IAM] 學習重點節錄(1) - IAM Uer & Group、Credential
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2020-12-18 09:40:00 / Modified: 10:04:23" itemprop="dateCreated datePublished" datetime="2020-12-18T09:40:00+08:00">2020-12-18</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/AWS/" itemprop="url" rel="index"><span itemprop="name">AWS</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/AWS/learn-AWS-IAM-1/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="AWS/learn-AWS-IAM-1/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此篇文章是學習 Udemy 課程 "AWS Identity Access Management (IAM) Practical Applications" 時，將學習 IAM Uer & Group、Credential ...等內容的過程中整理出來的重要觀念 & 使用方式</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="IAM-Identity-amp-Access-Management"><a href="#IAM-Identity-amp-Access-Management" class="headerlink" title="IAM(Identity &amp; Access Management)"></a>IAM(Identity &amp; Access Management)</h1><p>IAM 是什麼? 有以下幾個重點：</p>
+<ol>
+<li><p>IAM 是 AWS 核心的服務</p>
+</li>
+<li><p>用來控制一件事情 =&gt; <strong>誰可以做什麼?</strong></p>
+</li>
+<li><p>幾乎跟所有其他的 AWS service 都有深度的整合，作為其權限控管的機制</p>
+</li>
+<li><p>IAM 服務是屬於 global service，因此在 IAM 上建立的帳號，可以用在所有的 region 上</p>
+</li>
+</ol>
+<p>因此若是要善用 AWS 上的資源，IAM 是一個必須要熟悉的服務</p>
+<h1 id="IAM-User"><a href="#IAM-User" class="headerlink" title="IAM User"></a>IAM User</h1><ul>
+<li><p>基本上 IAM User 會是一個使用者(or something)，被設定可用來存取 AWS resource</p>
+</li>
+<li><p>第一個建立的 account 稱為 <code>root user</code>，擁有最大的權限</p>
+</li>
+<li><p>建立帳號時，帳號是不分大小寫的，因此像是 <code>Bob</code> 與 <code>bob</code> 是相同的</p>
+</li>
+<li><p>同樣的帳號只能在一個 root account 中出現，不能有重複帳號</p>
+</li>
+<li><p>在 AWS 中做任何事情都要有權限的，而<strong>權限來自於 policy</strong>，即使要變更自己的帳號，也是要有 <code>IAMUserChangePassword</code> policy 權限的</p>
+</li>
+<li><p>一個 root account 可以建立的 user 數量上限是 5,000 (無法更多，AWS 不會提供)</p>
+</li>
+</ul>
+<h2 id="在不同-root-account-之間如何識別同名的使用者"><a href="#在不同-root-account-之間如何識別同名的使用者" class="headerlink" title="在不同 root account 之間如何識別同名的使用者"></a>在不同 root account 之間如何識別同名的使用者</h2><p><img src="/blog/images/aws/IAM_AccountID.png" alt="IAM User Account ID"></p>
+<p>其中有一個比較重要的是，每一個 IAM User 要登入之前，需要知道三項資訊：</p>
+<ol>
+<li><p>Username</p>
+</li>
+<li><p>Password</p>
+</li>
+<li><p>Account ID</p>
+</li>
+</ol>
+<p>因為 username 是可以隨意定的，不同的使用者可能會有相同的 username，而為了區分差別，此時就需要 <code>Account ID</code> 來識別了；而為了方便使用者登入，AWS 提供了 <code>https://[ACCOUNT_ID].signin.aws.amazon.com/console</code> 這樣的 url 並提供在管理網頁上(Security credentials 頁面中)</p>
+<h1 id="Credential"><a href="#Credential" class="headerlink" title="Credential"></a>Credential</h1><p>要使用 AWS resource 需要 credential，用來驗證來訪者的身份；而 AWS 不會管你是哪位使用者，只要擁有合法有權限的 credential 就可以存取 AWS resource，因此其實妥善保護自己的 credential 不要被盜取是相當重要的。</p>
+<p>此外，由於要服務各種不同的 entity 來使用 AWS resource，credential 大致上可分為以下幾種：</p>
+<p><img src="/blog/images/aws/IAM_Credential.png" alt="IAM credential"></p>
+<ol>
+<li><p><code>Email address + Password</code>：這是是給 root account 用的</p>
+</li>
+<li><p><code>Account ID(Number) + User Name + Password</code>：這個是給一般的 user 用的</p>
+</li>
+<li><p><code>Access Key + Secret Key</code>：這是給透過 API 存取 AWS resource 的時候使用的</p>
+</li>
+</ol>
+<h1 id="真實使用者的類型"><a href="#真實使用者的類型" class="headerlink" title="真實使用者的類型"></a>真實使用者的類型</h1><p>現實世界中，有很多種不同的使用者類型，大致上可以分為以下七種：</p>
+<ol>
+<li>Root User</li>
+<li>Team Members</li>
+<li>Federated Users</li>
+<li>Application</li>
+<li>External Users</li>
+<li>Cross Account Users</li>
+<li>Customers</li>
+</ol>
+<p>以上每一種類型的使用者在某些場景下，可能都會有存取 AWS resource 的需求。</p>
+<h2 id="Root-User"><a href="#Root-User" class="headerlink" title="Root User"></a>Root User</h2><p>基本上這就是最大權限的使用者了，會有以下幾種特性：</p>
+<ul>
+<li><p>屬於該 account 的擁有者</p>
+</li>
+<li><p>每個 account 只能有一個 root user</p>
+</li>
+<li><p>有權限把整個 account 刪除</p>
+</li>
+<li><p>擁有所有的權限，而唯一可以限制 root user 的只有 <code>AWS Organization</code> 的機制</p>
+</li>
+<li><p>Best practice =&gt; 不要使用 root user</p>
+</li>
+</ul>
+<h2 id="Team-Members"><a href="#Team-Members" class="headerlink" title="Team Members"></a>Team Members</h2><p><img src="/blog/images/aws/IAM_team-member.png" alt="IAM team members"></p>
+<ul>
+<li><p>這是很常見的狀況，通常會在新創或小公司出現</p>
+</li>
+<li><p>需要存取 AWS resource 都用有各自的帳號，而這些帳號是透過 root account 開出來的</p>
+</li>
+<li><p>這類帳號的組合就是 <code>Account ID + User Name + Password</code></p>
+</li>
+</ul>
+<h2 id="Federated-Users"><a href="#Federated-Users" class="headerlink" title="Federated Users"></a>Federated Users</h2><p><img src="/blog/images/aws/IAM_federal-users.png" alt="IAM Federated Users"></p>
+<ul>
+<li><p>適用在大型公司，擁有很多組織，並且可能有成百上千的使用者需要存取 AWS resource</p>
+</li>
+<li><p>由於一般大型公司都會有 AD 的存在，因此 IAM 也支援透過 AD 認證後，就可以進行 AWS resource 的存取，這樣的方式稱為 single sign on</p>
+</li>
+</ul>
+<h2 id="Application"><a href="#Application" class="headerlink" title="Application"></a>Application</h2><p><img src="/blog/images/aws/IAM_application.png" alt="IAM Application"></p>
+<ul>
+<li><p>很多時候會有 Application 需要直接存取 AWS resource 的需求，此時使用的就不會是 EMail + Password</p>
+</li>
+<li><p>取而代之的是 <code>Access Key + Secret Key</code>，因為 AWS API 僅支援使用這類資訊作為 credential</p>
+</li>
+</ul>
+<h2 id="External-Users"><a href="#External-Users" class="headerlink" title="External Users"></a>External Users</h2><p><img src="/blog/images/aws/IAM_external-users.png" alt="IAM external users"></p>
+<ul>
+<li><p>存取 AWS resource 的人可能並非來自於組織內部，可能是外部的顧問、供應商、合作夥伴之類的</p>
+</li>
+<li><p>這些使用者(or 程式)通常是透過我們無法驗證的其他 identity provider 所驗證過</p>
+</li>
+</ul>
+<h2 id="Cross-Account-Users"><a href="#Cross-Account-Users" class="headerlink" title="Cross Account Users"></a>Cross Account Users</h2><p><img src="/blog/images/aws/IAM_cross-account-user.png.png" alt="IAM cross account users"></p>
+<ul>
+<li><p>這發生在其他 account 的 AWS user 想要存取你的 AWS resource 時，這就屬於 cross account user</p>
+</li>
+<li><p>兩個不同的 account 可能屬於同一家公司，也可能屬於不同公司</p>
+</li>
+</ul>
+<h2 id="Customers"><a href="#Customers" class="headerlink" title="Customers"></a>Customers</h2><ul>
+<li><p>這通常就是使用服務的用戶，可能透過手機 or 網頁連接到在 AWS 上的服務</p>
+</li>
+<li><p>可能也會透過 Facebook 作為 identity provider 來作為認證身份機制，來登入運行在 AWS 上的服務</p>
+</li>
+</ul>
+<h1 id="Access-Key"><a href="#Access-Key" class="headerlink" title="Access Key"></a>Access Key</h1><ul>
+<li><p>Access Key 會與某個 IAM user 有關連</p>
+</li>
+<li><p>每個 IAM user 最多可以有兩組 Access Key</p>
+</li>
+<li><p>通常 Access Key 是用來作為操作 AWS CLI 或是開發程式呼叫 AWS API 時使用</p>
+</li>
+<li><p>要正確的使用 AWS CLI 的功能，就需要把 Access Key 放到 <code>$&#123;HOME&#125;/.aws/credentials</code> 中，格式如下：</p>
+</li>
+</ul>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[default]</span><br><span class="line">aws_access_key_id = [YOUR_ACCESS_KEY_ID]</span><br><span class="line">aws_secret_access_key = [YOUR_SECRET_ACCESS_KEY]</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>Access Key ID + Secret Access Key</code> 的組合在 AWS 是獨一無二的，因此可以用來識別特定使用者之用，並確認其有沒有足夠的權限存取 AWS resource</li>
+</ul>
+<h1 id="IAM-Group"><a href="#IAM-Group" class="headerlink" title="IAM Group"></a>IAM Group</h1><p>其實 Group 概念就很清楚了，基本上就是將同性質的帳號可以群組起來，這樣對群組設定權限就會快多了，然而 IAM Group 有以下特性需要注意：</p>
+<ul>
+<li><p>一個 root account 下最多只能設定 300 個 IAM Group；而每個 IAM User 最多只能加入 10 個 IAM Group 中 (這兩個限制無法請 AWS 提高)</p>
+</li>
+<li><p>IAM Group 只有一層，因此表示 Group 不能在 Group 內，只有 User 可以在 Grouip 內</p>
+</li>
+<li><p>IAM Group 沒有 credential</p>
+</li>
+</ul>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://www.udemy.com/course/aws-identity-access-management-practical-applications/">AWS Identity Access Management (IAM) Practical Applications | Udemy</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/AWS/" rel="tag"># AWS</a>
+              <a href="/blog/tags/IAM/" rel="tag"># IAM</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/DevOps/learn-GitHub-Action-4/" rel="prev" title="[GitHub Actions] 學習重點節錄(4) - Cache、Artifact、版本號管理 & Semantic Versioning 的運用搭配">
+                  <i class="fa fa-chevron-left"></i> [GitHub Actions] 學習重點節錄(4) - Cache、Artifact、版本號管理 & Semantic Versioning 的運用搭配
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/AWS/learn-AWS-IAM-1/";
+    this.page.identifier = "AWS/learn-AWS-IAM-1/";
+    this.page.title = "[AWS IAM] 學習重點節錄(1) - IAM Uer & Group、Credential";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>
