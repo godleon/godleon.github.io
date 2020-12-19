@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "[AWS IAM] 學習重點節錄(1) - IAM Uer & Group、Credential"
-description: "此篇文章是學習 Udemy 課程 \"AWS Identity Access Management (IAM) Practical Applications\" 時，將學習 IAM Uer & Group、Credential ...等內容的過程中整理出來的重要觀念 & 使用方式"
+description: "此篇文章是學習 Udemy 課程 \"AWS Identity Access Management (IAM) Practical Applications\" 時，將學習 IAM User & Group、Credential ...等內容的過程中整理出來的重要觀念 & 使用方式"
 date: 2020-12-18 09:40:00
 published: true
 comments: true
