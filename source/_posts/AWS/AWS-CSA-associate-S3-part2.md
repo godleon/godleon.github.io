@@ -50,7 +50,7 @@ tags:
 - 這裡的 principal 指的是 user, account, service 或是其他 entity ([參考文件](https://docs.aws.amazon.com/AmazonS3/latest/dev/s3-bucket-user-policy-specifying-principal-intro.html))
 
 - S3 Bucket Policy 中同時包含了權限範圍 & principal 的資訊
-> IAM policy 中沒有 principal 的設定，因為在 IAM 中，principle 是以一種 entity 的形式與 IAM policy 綁定後來發揮效用 
+> IAM policy 中沒有 principal 的設定，因為在 IAM principal 是以一種 entity 的形式與 IAM policy 綁定後來發揮效用 
 
 - principal 以外的特殊情況限定，則是透過 `Condition` 欄位進行設定(例如：限制來源 IP、限制 HTTP referer)
 
