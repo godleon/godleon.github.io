@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="此篇文章是學習 Udemy 課程 &quot;AWS Identity Access Management (IAM) Practical Applications&quot; 時所記錄下來的重點，主要說明如何透過 IAM Role 的機制，達成跨帳號(Cross Account)存取 AWS 資源的目的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[AWS IAM] 學習重點節錄(4) - Cross Account Access by IAM Role">
+<meta property="og:url" content="https://godleon.github.io/blog/AWS/learn-AWS-IAM-4-Cross-Account-Acecss-using-Role/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章是學習 Udemy 課程 &quot;AWS Identity Access Management (IAM) Practical Applications&quot; 時所記錄下來的重點，主要說明如何透過 IAM Role 的機制，達成跨帳號(Cross Account)存取 AWS 資源的目的">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/IAM/IAM-Cross-Account-Case-1-1.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/IAM/IAM-Cross-Account-Case-1-2.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/IAM/IAM-Cross-Account-role-and-policy.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/IAM/IAM-Cross-Account-assume-role.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/IAM/IAM-Cross-Account-Case-SAAS-1.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/IAM/IAM-Cross-Account-Case-SAAS-2.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/IAM/IAM-Cross-Account-Case-SAAS-3.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/IAM/IAM-Why-IAM-Role-1.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/IAM/IAM-Why-IAM-Role-2.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/IAM/IAM-Why-IAM-Role-3.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/IAM/IAM-Why-IAM-Role-4.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/IAM/IAM-Why-IAM-Role-5.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/IAM/IAM-Why-IAM-Role-6.png">
+<meta property="article:published_time" content="2020-12-23T22:00:00.000Z">
+<meta property="article:modified_time" content="2020-12-24T03:11:44.757Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="AWS">
+<meta property="article:tag" content="IAM">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/aws/IAM/IAM-Cross-Account-Case-1-1.png">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/AWS/learn-AWS-IAM-4-Cross-Account-Acecss-using-Role/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>[AWS IAM] 學習重點節錄(4) - Cross Account Access by IAM Role | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Access-Secret-Key-%E6%9C%89%E4%BB%80%E9%BA%BC%E5%95%8F%E9%A1%8C"><span class="nav-number">2.</span> <span class="nav-text">Access&#x2F;Secret Key 有什麼問題?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Cross-Account-Role-for-IAM-User-%E8%A8%AD%E5%AE%9A%E7%AF%84%E4%BE%8B"><span class="nav-number">3.</span> <span class="nav-text">Cross Account Role for IAM User 設定範例</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E5%A0%B4%E6%99%AF"><span class="nav-number">3.1.</span> <span class="nav-text">使用場景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A8%AD%E8%A8%88%E5%8E%9F%E7%90%86-amp-%E8%A6%8F%E7%AF%84"><span class="nav-number">3.2.</span> <span class="nav-text">設計原理 &amp; 規範</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A8%AD%E5%AE%9A-IAM-Role-amp-%E8%A8%AD%E5%AE%9A-Trust-Relationships"><span class="nav-number">3.2.1.</span> <span class="nav-text">設定 IAM Role &amp; 設定 Trust Relationships</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A8%AD%E5%AE%9A-IAM-Policy"><span class="nav-number">3.2.2.</span> <span class="nav-text">設定 IAM Policy</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%81%E8%A8%B1-Assuming-Role"><span class="nav-number">3.2.3.</span> <span class="nav-text">允許 Assuming Role</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Cross-Account-Role-for-SAAS-Service-%E8%A8%AD%E5%AE%9A%E7%AF%84%E4%BE%8B"><span class="nav-number">4.</span> <span class="nav-text">Cross Account Role for SAAS Service 設定範例</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%82%BA%E4%BB%80%E9%BA%BC%E8%A6%81%E7%94%A8-IAM-Role"><span class="nav-number">5.</span> <span class="nav-text">為什麼要用 IAM Role?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">146</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">104</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/AWS/learn-AWS-IAM-4-Cross-Account-Acecss-using-Role/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [AWS IAM] 學習重點節錄(4) - Cross Account Access by IAM Role
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2020-12-24 06:00:00 / Modified: 11:11:44" itemprop="dateCreated datePublished" datetime="2020-12-24T06:00:00+08:00">2020-12-24</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/AWS/" itemprop="url" rel="index"><span itemprop="name">AWS</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/AWS/learn-AWS-IAM-4-Cross-Account-Acecss-using-Role/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="AWS/learn-AWS-IAM-4-Cross-Account-Acecss-using-Role/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此篇文章是學習 Udemy 課程 "AWS Identity Access Management (IAM) Practical Applications" 時所記錄下來的重點，主要說明如何透過 IAM Role 的機制，達成跨帳號(Cross Account)存取 AWS 資源的目的</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>前面討論的部份都屬於在同一個 root account 下，要如何進行權限的管理 &amp; 設定。</p>
+<p>但是在某些使用場景下，要存取 AWS resource 來源並非在 root account 下，而是另外一個帳號：</p>
+<p><img src="/blog/images/aws/IAM/IAM-Cross-Account-Case-1-1.png" alt="IAM Cross Account - Case 1"></p>
+<blockquote>
+<p>來自於另外一個帳號的 IAM User Jenny，要存取我們的 S3 bucket</p>
+</blockquote>
+<p>也可能是外部的 SAAS 服務：(例如：New Relic, Data Dog … etc)</p>
+<p><img src="/blog/images/aws/IAM/IAM-Cross-Account-Case-1-2.png" alt="IAM Cross Account - Case 2"></p>
+<p>這時候，透過 IAM Role 來做管理設定會是個相對方便 &amp; 有效的方法，若是透過給予 Access Key 的方式，後續可能會造成很多問題。</p>
+<h1 id="Access-Secret-Key-有什麼問題"><a href="#Access-Secret-Key-有什麼問題" class="headerlink" title="Access/Secret Key 有什麼問題?"></a>Access/Secret Key 有什麼問題?</h1><p>若是使用提供 Access Key &amp; Secret Key 的方式，會有以下幾個隱憂：</p>
+<ul>
+<li><p>你沒辦法確保 access key 提供出去後，對方不會把 Key 再提供給別人</p>
+</li>
+<li><p>若是對方傻呼呼的將 Key 送到 public Git repository，那全世界都會知道你的 access key</p>
+</li>
+<li><p>若因為安全規範，需要 rotate access key，這件事情會相當難完成，這樣每一個曾經給過 access key 的對象又要再來一遍</p>
+</li>
+<li><p>如果對方帳號中需要存取我們 AWS resource 的人因為某些原因，時常變更，或是來來去去，這樣我們就必須要常常調整 IAM User 的設定，並給出新的 access，這對管理上來說會是個惡夢</p>
+</li>
+</ul>
+<p>綜合以上問題，為了讓權限管理這件事情的複雜度可以收斂在一定的範圍內，改用 IAM Role 來管理會是較好的方式。</p>
+<h1 id="Cross-Account-Role-for-IAM-User-設定範例"><a href="#Cross-Account-Role-for-IAM-User-設定範例" class="headerlink" title="Cross Account Role for IAM User 設定範例"></a>Cross Account Role for IAM User 設定範例</h1><h2 id="使用場景"><a href="#使用場景" class="headerlink" title="使用場景"></a>使用場景</h2><p>在<a href="learn-AWS-IAM-3-assuming-role.md">上一篇文章</a>中所提到的是在同一個帳號下的 IAM Role，那若是 Cross Account Role 是什麼樣一個場景呢? 以下舉個範例：  </p>
+<p>![IAM Cross Account -  purpose]/blog/images/aws/IAM/(IAM-Cross-Account-access-resources.png)</p>
+<p>在這邊要達成的目的是：讓帳號 ACME 的 IAM User Troy，可以存取帳號 Stuzio 底下的 S3 bucket</p>
+<h2 id="設計原理-amp-規範"><a href="#設計原理-amp-規範" class="headerlink" title="設計原理 &amp; 規範"></a>設計原理 &amp; 規範</h2><p>了解了上面的跨帳號的資源存取需求後，那接下來要怎麼完成這件事情呢? 假設有 A &amp; B 兩個帳號，而 B 帳號的 IAM User 想要存取 A 帳號的 S3 Bucket，那會需要進行以下幾個步驟：</p>
+<ol>
+<li><p>在 A 帳號中設定一個 IAM Role，並設定 Trust RelationShip 為 B 帳號，允許其 Assume Role</p>
+</li>
+<li><p>在 A 帳號中設定 IAM Policy，將 S3 Bucket 存取權限社繫結到 IAM Role 上</p>
+</li>
+<li><p>在 B 帳號中設定 IAM Policy，允許 Assume Role 成 A 帳號的 IAM Role，並繫結到 B 帳號的 IAM User 上</p>
+</li>
+</ol>
+<h3 id="設定-IAM-Role-amp-設定-Trust-Relationships"><a href="#設定-IAM-Role-amp-設定-Trust-Relationships" class="headerlink" title="設定 IAM Role &amp; 設定 Trust Relationships"></a>設定 IAM Role &amp; 設定 Trust Relationships</h3><p>首先，<strong>必須先設定一個 IAM Role，設定 Trust Relationships，信任來自於另外一個帳號</strong>，要完成這件事情，首先要建立一個 IAM Role(按照上圖，名稱為 <code>StuzioAcmeConsultantRole</code>)，並設定 Trust Relationships 內容如下：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">&quot;Version&quot;</span>: <span class="string">&quot;2012-10-17&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;Statement&quot;</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">&quot;Effect&quot;</span>: <span class="string">&quot;Allow&quot;</span>,</span><br><span class="line">            <span class="comment">//表示信任來自於 AWS root account &quot;arn:aws:iam::183438944504:root&quot;</span></span><br><span class="line">            <span class="comment">//底下所有的 IAM User 送過來的 request</span></span><br><span class="line">            <span class="attr">&quot;Principal&quot;</span>: &#123;</span><br><span class="line">                <span class="attr">&quot;AWS&quot;</span>: <span class="string">&quot;arn:aws:iam::183438944504:root&quot;</span></span><br><span class="line">            &#125;, </span><br><span class="line">            <span class="comment">//允許執行 &quot;sts:AssumeRole&quot; 的操作</span></span><br><span class="line">            <span class="attr">&quot;Action&quot;</span>: <span class="string">&quot;sts:AssumeRole&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;Condition&quot;</span>: &#123;&#125;</span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面這個設定，**表示信任 &amp; 允許另外一個帳號(Account ID = 183438944504)底下的 IAM User，透過 Assuming Role 的方式，切換成此帳號(Account ID = 081278057606)的 IAM Role <code>StuzioAcmeConsultantRole</code>**。</p>
+<h3 id="設定-IAM-Policy"><a href="#設定-IAM-Policy" class="headerlink" title="設定 IAM Policy"></a>設定 IAM Policy</h3><p>接著為了可以存取 S3 Bucket，那就要設定正確的 IAM Policy，以下是設定內容：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">&quot;Version&quot;</span>: <span class="string">&quot;2012-10-17&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;Statement&quot;</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">&quot;Sid&quot;</span>: <span class="string">&quot;FullAccessToProjectX&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;Effect&quot;</span>: <span class="string">&quot;Allow&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;Action&quot;</span>: <span class="string">&quot;s3:*&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;Resource&quot;</span>: [</span><br><span class="line">                <span class="string">&quot;arn:aws:s3:::com.stuzio.project-x&quot;</span>,</span><br><span class="line">                <span class="string">&quot;arn:aws:s3:::com.stuzio.project-x/*&quot;</span></span><br><span class="line">            ]</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">&quot;Sid&quot;</span>: <span class="string">&quot;ListAllBuckets&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;Effect&quot;</span>: <span class="string">&quot;Allow&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;Action&quot;</span>: <span class="string">&quot;s3:ListAllMyBuckets&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;Resource&quot;</span>: <span class="string">&quot;*&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/blog/images/aws/IAM/IAM-Cross-Account-role-and-policy.png" alt="IAM Policy"></p>
+<p>為這個 Policy 取個名字(如上圖的 <code>StuzioProjectXPolicy</code>)，然後再將此 policy attach 到上一個步驟建立的 IAM Role(<code>StuzioAcmeConsultantRole</code>) 上，那 IAM Role 就會有權限存取 S3 Bucket 了。</p>
+<h3 id="允許-Assuming-Role"><a href="#允許-Assuming-Role" class="headerlink" title="允許 Assuming Role"></a>允許 Assuming Role</h3><p>完成了上面的步驟，目前 A 帳號的 IAM Role 已經有權限可以存取 A 帳號的 S3 Bucket，接下來的問題是：<strong>如何讓 B 帳號的 IAM User 可以切換成 A 帳號的 IAM Role ?</strong></p>
+<p>設定流程如下圖：</p>
+<ol>
+<li><p>建立 IAM Policy，提供 Allow “sts:AssumeRole” 的權限，對象(Resource)是 A 帳號的 IAM Role</p>
+</li>
+<li><p>將 IAM Policy 繫結到 B 帳號的 IAM User</p>
+</li>
+</ol>
+<p><img src="/blog/images/aws/IAM/IAM-Cross-Account-assume-role.png" alt="IAM Policy - Assuming Role"></p>
+<p>IAM Policy 的內容如下：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">&quot;Version&quot;</span>: <span class="string">&quot;2012-10-17&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;Statement&quot;</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">&quot;Sid&quot;</span>: <span class="string">&quot;StuzioClientAssumeRolePolicy&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;Effect&quot;</span>: <span class="string">&quot;Allow&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;Action&quot;</span>: <span class="string">&quot;sts:AssumeRole&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;Resource&quot;</span>: <span class="string">&quot;arn:aws:iam::081278057606:role/StuzioAcmeConsultantRole&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>完成後，將此 IAM Policy 繫結到 Troy 身上即可囉!</p>
+<h1 id="Cross-Account-Role-for-SAAS-Service-設定範例"><a href="#Cross-Account-Role-for-SAAS-Service-設定範例" class="headerlink" title="Cross Account Role for SAAS Service 設定範例"></a>Cross Account Role for SAAS Service 設定範例</h1><p>假設需要存取我們 AWS resource 的對象是外部的 SAAS 服務(以 DataDog 為例)時，那應該怎麼設定呢?</p>
+<p>其實概念上跟另外一個 AWS 帳號是差不多的，其實 SAAS 服務也會提供它們自己的 AWS Account ID，此外，還會包含一個 External ID 作為進一步的識別之用，因此 SAAS(以 DataDog 為例)，會提供兩個資訊：</p>
+<ul>
+<li><p>AWS Account ID</p>
+</li>
+<li><p>External ID</p>
+</li>
+</ul>
+<p>因此，我們這邊要做的就是新增一個 IAM Role，設定 Trust Relationships 為 SAAS 提供的 IAM Account &amp; External ID，</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">&quot;Version&quot;</span>: <span class="string">&quot;2012-10-17&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;Statement&quot;</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">&quot;Effect&quot;</span>: <span class="string">&quot;Allow&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;Principal&quot;</span>: &#123;</span><br><span class="line">                <span class="attr">&quot;AWS&quot;</span>: <span class="string">&quot;arn:aws:iam::464622535012:root&quot;</span></span><br><span class="line">            &#125;, </span><br><span class="line">            <span class="attr">&quot;Action&quot;</span>: <span class="string">&quot;sts:AssumeRole&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;Condition&quot;</span>: &#123;</span><br><span class="line">                <span class="attr">&quot;StringEquals&quot;</span>: &#123;</span><br><span class="line">                    <span class="attr">&quot;sts:ExternalId&quot;</span>: <span class="string">&quot;[PUT EXTERNAL ID HERE]&quot;</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>結果如下圖所示：</p>
+<p><img src="/blog/images/aws/IAM/IAM-Cross-Account-Case-SAAS-1.png" alt="IAM Cross Account - SAAS 1"></p>
+<p>接著就是設定 IAM Policy，給入 SAAS 所需要的權限就可以了!</p>
+<p>至於 SAAS 服務端需要建立用來 Assuming Role 的 IAM Policy，SAAS 服務會自己處理，就不需要我們擔心了，最後會變成以下這樣：</p>
+<p><img src="/blog/images/aws/IAM/IAM-Cross-Account-Case-SAAS-2.png" alt="IAM Cross Account - SAAS 2"></p>
+<p>SAAS 服務中的 AWS IAM User 就可以切換成成我們提供的 IAM Role 來存取其所需要的資源囉!</p>
+<p>然而，若是我們有多個環境，每個環境屬於不同的 AWS Account 時，那要讓 SAAS 服務都可以接入，也變得簡單許多，只要重複上面設定 IAM Role + Trust Relationships &amp; IAM Policy 即可，那這樣多環境的情境就換變成下面這樣：</p>
+<p><img src="/blog/images/aws/IAM/IAM-Cross-Account-Case-SAAS-3.png" alt="IAM Cross Account - SAAS 3"></p>
+<h1 id="為什麼要用-IAM-Role"><a href="#為什麼要用-IAM-Role" class="headerlink" title="為什麼要用 IAM Role?"></a>為什麼要用 IAM Role?</h1><p>為什麼相較於使用 IAM User + Group，改成使用 IAM Role 會是比較好的管理策略呢? </p>
+<p>以下舉幾個理由來說明：</p>
+<p><img src="/blog/images/aws/IAM/IAM-Why-IAM-Role-1.png" alt="IAM - Why IAM Role? - 1"></p>
+<ul>
+<li>若是另外一個帳號的管理者希望改由另外一個 IAM User 來存取我們的 AWS resource，只要該管理者自己將 AssumeRole 的 IAM policy 綁到新的 IAM User 身上即可，我們可以完全不用調整</li>
+</ul>
+<p><img src="/blog/images/aws/IAM/IAM-Why-IAM-Role-2.png" alt="IAM - Why IAM Role? - 2"></p>
+<ul>
+<li>可以不用給出 Access/Secret Key，因為無法確保對方會不會安全的存放我們提供出去的 Access/Secret Key</li>
+</ul>
+<p><img src="/blog/images/aws/IAM/IAM-Why-IAM-Role-3.png" alt="IAM - Why IAM Role? - 3"></p>
+<ul>
+<li>若是需要存取 AWS resource 的 entity 數量很大，這樣的管理負擔會很大，且很沒彈性</li>
+</ul>
+<p><img src="/blog/images/aws/IAM/IAM-Why-IAM-Role-4.png" alt="IAM - Why IAM Role? - 4"></p>
+<ul>
+<li>若是有多個環境，那管理的複雜度又會再提昇一個量級上去</li>
+</ul>
+<p><img src="/blog/images/aws/IAM/IAM-Why-IAM-Role-5.png" alt="IAM - Why IAM Role? - 5"></p>
+<ul>
+<li>若是外部的 entity 同時要存取我們多個環境中的資源，使用 IAM User &amp; Group，就表示要管理多組的 Access/Secret Key，同時也造成了對方的不便</li>
+</ul>
+<p><img src="/blog/images/aws/IAM/IAM-Why-IAM-Role-6.png" alt="IAM - Why IAM Role? - 6"></p>
+<ul>
+<li>不需要為每個需要來存取 AWS resource 的 entity 建立 IAM User 了，只要設定 IAM Role 並指定 Trust Relationship 即可</li>
+</ul>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a target="_blank" rel="noopener" href="https://www.udemy.com/course/aws-identity-access-management-practical-applications/">AWS Identity Access Management (IAM) Practical Applications | Udemy</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_common-scenarios_aws-accounts.html">Providing access to an IAM user in another AWS account that you own - AWS Identity and Access Management</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_common-scenarios_third-party.html">Providing access to AWS accounts owned by third parties - AWS Identity and Access Management</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/AWS/" rel="tag"># AWS</a>
+              <a href="/blog/tags/IAM/" rel="tag"># IAM</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/AWS/learn-AWS-IAM-3-assuming-role/" rel="prev" title="[AWS IAM] 學習重點節錄(3) - Assuming IAM Role">
+                  <i class="fa fa-chevron-left"></i> [AWS IAM] 學習重點節錄(3) - Assuming IAM Role
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/AWS/learn-AWS-IAM-4-Cross-Account-Acecss-using-Role/";
+    this.page.identifier = "AWS/learn-AWS-IAM-4-Cross-Account-Acecss-using-Role/";
+    this.page.title = "[AWS IAM] 學習重點節錄(4) - Cross Account Access by IAM Role";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>
