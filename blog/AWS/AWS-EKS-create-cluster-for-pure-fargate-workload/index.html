@@ -30,7 +30,7 @@
 <meta property="og:description" content="此篇文章是介紹如何從零打造一個可用來運行 Fargate workload 的 EKS cluster，並介紹整個過程中需要了解的相關流程 &amp; 重要的權限設定觀念">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2021-01-08T23:35:00.000Z">
-<meta property="article:modified_time" content="2021-01-09T14:10:56.732Z">
+<meta property="article:modified_time" content="2021-01-09T14:15:31.469Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="IAM">
@@ -247,7 +247,7 @@
               <span class="post-meta-item-text">Posted on</span>
               
 
-              <time title="Created: 2021-01-09 07:35:00 / Modified: 22:10:56" itemprop="dateCreated datePublished" datetime="2021-01-09T07:35:00+08:00">2021-01-09</time>
+              <time title="Created: 2021-01-09 07:35:00 / Modified: 22:15:31" itemprop="dateCreated datePublished" datetime="2021-01-09T07:35:00+08:00">2021-01-09</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -428,6 +428,8 @@
 <li><p>根據要存取的 AWS resource 範圍，設定合適的 IAM Policy (例如上面已經有現成的 <code>arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy</code>)</p>
 </li>
 <li><p>新增 IAM Role，並與設定完成的 IAM Policy 繫結，取得 IAM Role ARN</p>
+</li>
+<li><p><strong>設定 IAM Role 的 Trust Relationship，允許來自 WebIdentity(EKS 的 OIDC Provider) 可以執行 AssumeRole 的操作</strong> (這個步驟很重要) </p>
 </li>
 <li><p>回到 k8s 中，新增 service account，並設定 annotation，指定 IAM Role ARN</p>
 </li>
