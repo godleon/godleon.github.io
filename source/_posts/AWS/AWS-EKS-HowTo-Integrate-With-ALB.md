@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "[AWS EKS] 從零打造一個可運行 Fargate workload 的 EKS cluster"
+title:  "[AWS EKS] Ingress Resource & AWS Application Load Balancer(ALB) 整合、串接、管理"
 description: "此篇文章是介紹如何透過管理 Kubernetes Ingress resource 與 AWS ALB 直接進行整合，並解釋要完成這件事情的過程中所需要完成的相關權限設定"
 date: 2021-01-10 04:50:00
 published: true

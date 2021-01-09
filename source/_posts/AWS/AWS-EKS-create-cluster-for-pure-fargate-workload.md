@@ -458,7 +458,33 @@ vpc-cni	v1.7.5-eksbuild.1	ACTIVE	0	arn:aws:iam::777777777777:role/eksctl-eks-tes
 
 如此一來，使用上面建立的 service account 的 pod，就會有能力存取 AWS resource 了，完全不需要 AWS access/secret key。
 
-以下是個 service account 的設定範例：
+### IAM Role Trust Relationship 設定範例
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Federated": "arn:aws:iam::777777777777:oidc-provider/oidc.eks.ap-northeast-1.amazonaws.com/id/${OIDC_WEB_IDENTITY_PROVIDER}"
+      },
+      "Action": "sts:AssumeRoleWithWebIdentity",
+      "Condition": {
+        "StringEquals": {
+          "oidc.eks.us-west-2.amazonaws.com/id/${OIDC_WEB_IDENTITY_PROVIDER}:aud": "sts.amazonaws.com",
+          "oidc.eks.us-west-2.amazonaws.com/id/${OIDC_WEB_IDENTITY_PROVIDER}:sub": [
+            "system:serviceaccount:userA:default-editor",
+            "system:serviceaccount:userB:default-editor",
+          ]
+        }
+      }
+    }
+  ]
+}
+```
+
+### service account 設定範例
 
 ```yaml
 ---
