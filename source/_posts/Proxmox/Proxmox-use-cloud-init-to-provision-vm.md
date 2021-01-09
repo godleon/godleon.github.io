@@ -59,7 +59,7 @@ qm importdisk 9999 xenial-server-cloudimg-amd64-disk1.img rbd_vm
 # 設定 storage type
 # 設定 cloud-init 的功能以 cd-rom 的形式掛載
 # serial 一定要加，否則 cloud image 會無法正常開機
-qm set 9999 --virtio0 rbd_vm:vm-9999-disk-1 --ide2 rbd_vm:cloudinit --boot c --bootdisk virtio0 --serial0 socket
+qm set 9999 --virtio0 rbd_vm:vm-9999-disk-0 --ide2 rbd_vm:cloudinit --boot c --bootdisk virtio0 --serial0 socket
 
 # 設定 SSH key (cloud image 預設是無法使用密碼登入，必須設定 SSH key)
 qm set 9999 --sshkey <your public ssk key path>
