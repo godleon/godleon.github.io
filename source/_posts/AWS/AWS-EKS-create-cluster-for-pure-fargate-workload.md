@@ -452,7 +452,9 @@ vpc-cni	v1.7.5-eksbuild.1	ACTIVE	0	arn:aws:iam::777777777777:role/eksctl-eks-tes
 
 3. 新增 IAM Role，並與設定完成的 IAM Policy 繫結，取得 IAM Role ARN
 
-4. 回到 k8s 中，新增 service account，並設定 annotation，指定 IAM Role ARN
+4. **設定 IAM Role 的 Trust Relationship，允許來自 WebIdentity(EKS 的 OIDC Provider) 可以執行 AssumeRole 的操作** (這個步驟很重要) 
+
+5. 回到 k8s 中，新增 service account，並設定 annotation，指定 IAM Role ARN
 
 如此一來，使用上面建立的 service account 的 pod，就會有能力存取 AWS resource 了，完全不需要 AWS access/secret key。
 
