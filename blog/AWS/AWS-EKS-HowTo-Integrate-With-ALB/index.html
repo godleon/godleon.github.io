@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="此篇文章是介紹如何透過管理 Kubernetes Ingress resource 與 AWS ALB 直接進行整合，並解釋要完成這件事情的過程中所需要完成的相關權限設定">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[AWS EKS] 從零打造一個可運行 Fargate workload 的 EKS cluster">
+<meta property="og:url" content="https://godleon.github.io/blog/AWS/AWS-EKS-HowTo-Integrate-With-ALB/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章是介紹如何透過管理 Kubernetes Ingress resource 與 AWS ALB 直接進行整合，並解釋要完成這件事情的過程中所需要完成的相關權限設定">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/EKS/EKS_aws-access-control.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/EKS/EKS_k8s-service-account-annotation.png">
+<meta property="article:published_time" content="2021-01-09T20:50:00.000Z">
+<meta property="article:modified_time" content="2021-01-09T20:53:28.197Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="AWS">
+<meta property="article:tag" content="IAM">
+<meta property="article:tag" content="EKS">
+<meta property="article:tag" content="ELB">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/aws/EKS/EKS_aws-access-control.png">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/AWS/AWS-EKS-HowTo-Integrate-With-ALB/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>[AWS EKS] 從零打造一個可運行 Fargate workload 的 EKS cluster | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Overview"><span class="nav-number">1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%AC%8A%E9%99%90%E8%A8%AD%E8%A8%88%E8%AA%AA%E6%98%8E"><span class="nav-number">2.</span> <span class="nav-text">權限設計說明</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%98%E5%8F%96%E6%AC%8A%E9%99%90%E5%9C%A8-k8s-amp-AWS-%E6%98%AF%E5%A6%82%E4%BD%95%E7%AE%A1%E7%90%86%E7%9A%84"><span class="nav-number">2.1.</span> <span class="nav-text">存取權限在 k8s &amp; AWS 是如何管理的?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%B3%A6%E4%BA%88-k8s-%E5%AD%98%E5%8F%96-AWS-Resource-%E7%9A%84%E6%AC%8A%E9%99%90"><span class="nav-number">2.2.</span> <span class="nav-text">如何賦予 k8s 存取 AWS Resource 的權限?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AWS-%E5%A6%82%E4%BD%95%E8%AA%8D%E8%AD%89%E4%BE%86%E8%87%AA-k8s-%E7%9A%84%E8%AB%8B%E6%B1%82"><span class="nav-number">2.3.</span> <span class="nav-text">AWS 如何認證來自 k8s 的請求?</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%A1%8C%E5%89%8D%E6%BA%96%E5%82%99"><span class="nav-number">3.</span> <span class="nav-text">行前準備</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ALB-Controller-Traffic-Mode"><span class="nav-number">4.</span> <span class="nav-text">ALB Controller Traffic Mode</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BD%88%E7%BD%B2-ALB-Controller"><span class="nav-number">5.</span> <span class="nav-text">佈署 ALB Controller</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A8%AD%E5%AE%9A-IAM-Role-for-AWS-ALB-Controller"><span class="nav-number">5.1.</span> <span class="nav-text">設定 IAM Role for AWS ALB Controller</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%8F%E9%81%8E-Helm-%E5%AE%89%E8%A3%9D-AWS-Load-Balancer-Controller"><span class="nav-number">5.2.</span> <span class="nav-text">透過 Helm 安裝 AWS Load Balancer Controller</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BD%88%E7%BD%B2%E6%9C%8D%E5%8B%99%E9%80%B2%E8%A1%8C%E6%B8%AC%E8%A9%A6"><span class="nav-number">6.</span> <span class="nav-text">佈署服務進行測試</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">7.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">150</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">106</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/AWS/AWS-EKS-HowTo-Integrate-With-ALB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [AWS EKS] 從零打造一個可運行 Fargate workload 的 EKS cluster
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2021-01-10 04:50:00 / Modified: 04:53:28" itemprop="dateCreated datePublished" datetime="2021-01-10T04:50:00+08:00">2021-01-10</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/AWS/" itemprop="url" rel="index"><span itemprop="name">AWS</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/AWS/AWS-EKS-HowTo-Integrate-With-ALB/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="AWS/AWS-EKS-HowTo-Integrate-With-ALB/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此篇文章是介紹如何透過管理 Kubernetes Ingress resource 與 AWS ALB 直接進行整合，並解釋要完成這件事情的過程中所需要完成的相關權限設定</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h1><p>在這篇文章中，要介紹如何在建立 k8s ingress resource 時，可以串接到 AWS，並建立對應的 ALB 資源。</p>
+<h1 id="權限設計說明"><a href="#權限設計說明" class="headerlink" title="權限設計說明"></a>權限設計說明</h1><h2 id="存取權限在-k8s-amp-AWS-是如何管理的"><a href="#存取權限在-k8s-amp-AWS-是如何管理的" class="headerlink" title="存取權限在 k8s &amp; AWS 是如何管理的?"></a>存取權限在 k8s &amp; AWS 是如何管理的?</h2><p><img src="/blog/images/aws/EKS/EKS_aws-access-control.png" alt="AWS/Kubernetes Access Control"></p>
+<p>要了解如何在 k8s 存取 AWS resource 權限前，必須先弄清楚”存取權限”在 k8s &amp; AWS 中是如何被管理的：</p>
+<ul>
+<li><p>在 k8s 中有自己的 RBAC 機制，透過 ServiceAccount/ClusterRole/ClusterRoleBinding，可以指定某個 service account 在 k8s 中有哪些 API 的存取權限</p>
+</li>
+<li><p>AWS 的部份，主要則是透過 IAM Role + IAM Policy 的組合，來決定套用那個 IAM Role 時可以有哪些 API 的呼叫權限</p>
+</li>
+</ul>
+<h2 id="如何賦予-k8s-存取-AWS-Resource-的權限"><a href="#如何賦予-k8s-存取-AWS-Resource-的權限" class="headerlink" title="如何賦予 k8s 存取 AWS Resource 的權限?"></a>如何賦予 k8s 存取 AWS Resource 的權限?</h2><p><img src="/blog/images/aws/EKS/EKS_k8s-service-account-annotation.png" alt="Kubernetes service account annotation"></p>
+<p>有了上面的概念後，那要存取 AWS Resource 到底要怎麼做呢? 重點大概分為以下幾個部份：</p>
+<ol>
+<li><p>設定 IAM Policy，指定有建立 &amp; 管理 ALB 的相關權限 (可參考 <a target="_blank" rel="noopener" href="https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.1.0/docs/install/iam_policy.json">kubernetes-sigs<br>/<br>aws-load-balancer-controller</a> 專案來取得最新資訊，目前是版本為 <code>v2.1.0</code>)</p>
+</li>
+<li><p>設定 IAM Role，並與上一個步驟的 IAM Policy 繫結</p>
+</li>
+<li><p>設定 k8s service account 的 annotation，指定要使用上一個步驟建立的 IAM Role(要使用 Role ARN)；如此一來，有設定 annotation 的 k8s service account 就會擁有 IAM Role 的權限來存取 AWS resource 了</p>
+</li>
+</ol>
+<h2 id="AWS-如何認證來自-k8s-的請求"><a href="#AWS-如何認證來自-k8s-的請求" class="headerlink" title="AWS 如何認證來自 k8s 的請求?"></a>AWS 如何認證來自 k8s 的請求?</h2><p>到這裡就差一個問題，設定了 k8s service account annotation 之後，要怎麼讓 k8s service account 可以 assume 成指定的 IAM Role 呢?</p>
+<p>這個就需要透過 <strong>Assume Role With WebIdentity</strong> 的方式，而這方式就會依賴 EKS cluster 提供的 <code>OpenID Connect provider</code> 來達成，而 Assume Role 的設定則是在 IAM Role 中的 <code>Trust Entity</code> 中設定，以下是個簡單的範例：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;Version&quot;</span>: <span class="string">&quot;2012-10-17&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;Statement&quot;</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">&quot;Effect&quot;</span>: <span class="string">&quot;Allow&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;Principal&quot;</span>: &#123;</span><br><span class="line">        <span class="attr">&quot;Federated&quot;</span>: <span class="string">&quot;arn:aws:iam::777777777777:oidc-provider/oidc.eks.ap-northeast-1.amazonaws.com/id/$&#123;OIDC_WEB_IDENTITY_PROVIDER&#125;&quot;</span></span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="attr">&quot;Action&quot;</span>: <span class="string">&quot;sts:AssumeRoleWithWebIdentity&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;Condition&quot;</span>: &#123;</span><br><span class="line">        <span class="attr">&quot;StringEquals&quot;</span>: &#123;</span><br><span class="line">          <span class="attr">&quot;oidc.eks.us-west-2.amazonaws.com/id/$&#123;OIDC_WEB_IDENTITY_PROVIDER&#125;:aud&quot;</span>: <span class="string">&quot;sts.amazonaws.com&quot;</span>,</span><br><span class="line">          <span class="attr">&quot;oidc.eks.us-west-2.amazonaws.com/id/$&#123;OIDC_WEB_IDENTITY_PROVIDER&#125;:sub&quot;</span>: [</span><br><span class="line">            <span class="string">&quot;system:serviceaccount:userA:default-editor&quot;</span>,</span><br><span class="line">            <span class="string">&quot;system:serviceaccount:userB:default-editor&quot;</span>,</span><br><span class="line">          ]</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如此一來 IAM 可以辨識存取 AWS resource 的請求是來自於哪個 k8s cluster，並決定有沒有存取 AWS API 的權限。</p>
+<h1 id="行前準備"><a href="#行前準備" class="headerlink" title="行前準備"></a>行前準備</h1><p>要開始進行 EKS cluster &amp; AWS ALB 的互動之前，要先完成兩件事情：</p>
+<ol>
+<li><p>已經有一個 EKS cluster，並做好相關的權限設定 (可參考<a href="AWS-EKS-create-cluster-for-pure-fargate-workload.md">前一篇文章</a>進行設定)</p>
+</li>
+<li><p>Kuberntes 必須知道哪個 subnet 是 public，哪個是 private，這樣才可以正確的佈署好 Internet-facing &amp; Internal ALB，因此要做以下設定：</p>
+<ul>
+<li>在 public subnet 中新增 tag <code>kubernetes.io/role/elb = 1</code></li>
+<li>在 private subnet 中新增 tag <code>kubernetes.io/role/internal-elb = 1</code></li>
+<li>在所有 EKS 使用的 subnet 中新增 tag <code>kubernetes.io/cluster/eks-test  = shared</code> (假設 EKS cluster 名稱為 <code>eks-test</code>)</li>
+</ul>
+</li>
+</ol>
+<p>AWS Load Balancer Controller 會持續監聽 k8s 上 Ingress resource 的變化；若是要明確指定特定的 k8s Ingress resource 要使用 AWS ALB 建立，那就要在 Ingress resource 的 YAML 宣告中加上 annotation 設定 <code>kubernetes.io/ingress.class: alb</code>。</p>
+<h1 id="ALB-Controller-Traffic-Mode"><a href="#ALB-Controller-Traffic-Mode" class="headerlink" title="ALB Controller Traffic Mode"></a>ALB Controller Traffic Mode</h1><p>而目前 AWS Load Balancer Controller 支援兩種 traffic mode，分別是：</p>
+<ul>
+<li><p><code>Instance</code>：(預設)註冊到 ALB 的單位是 worker node，而 ALB 會將流量導入 worker node 中，k8s service 所開放的 NodePort；若要明確指定，則是可以明確的指定 annotation <code>alb.ingress.kubernetes.io/target-type: instance</code> (<strong>目前 Fargate 不支援 instance mode，因為 Fargate pod 不支援 NodePort service</strong>)</p>
+<blockquote>
+<p>這是透過設定 service type 為 NortPort，並將流量導向 NodePort 去 </p>
+</blockquote>
+</li>
+<li><p><code>IP</code>：註冊的單位是 Pod，ALB 會將 traffic 直接導入 Pod 中，必須明確指定 annotation <code>alb.ingress.kubernetes.io/target-type: ip</code>，<strong>若是使用 fargate，則只有 IP traffic mode 可以選</strong></p>
+</li>
+</ul>
+<p>此外，若要為 ALB 加上 tag 資訊，則是透過設定 annotation <code>alb.ingress.kubernetes.io/tags</code> 來完成。</p>
+<h1 id="佈署-ALB-Controller"><a href="#佈署-ALB-Controller" class="headerlink" title="佈署 ALB Controller"></a>佈署 ALB Controller</h1><p>接著要佈署 ALB Controller 到 EKS Cluster 中，以下透過 eksctl 進行權限設定的部份：</p>
+<h2 id="設定-IAM-Role-for-AWS-ALB-Controller"><a href="#設定-IAM-Role-for-AWS-ALB-Controller" class="headerlink" title="設定 IAM Role for AWS ALB Controller"></a>設定 IAM Role for AWS ALB Controller</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">$ mkdir -p /tmp/eks-test</span><br><span class="line"></span><br><span class="line">$ <span class="built_in">cd</span> /tmp/eks-test</span><br><span class="line"></span><br><span class="line"><span class="comment"># 下載 AWS Load Balancer Controller 所會使用到的 IAM Policy 清單</span></span><br><span class="line">$ curl -o iam_policy.json https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.1.0/docs/install/iam_policy.json</span><br><span class="line"></span><br><span class="line"><span class="comment"># 建立 IAM Policy</span></span><br><span class="line">$ aws iam create-policy \</span><br><span class="line">    --policy-name AWSLoadBalancerControllerIAMPolicy \</span><br><span class="line">    --policy-document file://iam_policy.json</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 若是原本在 eksctl 管理下存在 IAM service account，那就先移除</span></span><br><span class="line"><span class="comment"># 因為第二次重裝的 EKS cluster 不會有該 service account 的資訊</span></span><br><span class="line">$ eksctl delete iamserviceaccount --name aws-load-balancer-controller --namespace kube-system --cluster eks-test</span><br><span class="line"></span><br><span class="line"><span class="comment"># 新增一個 IAM Role，並加入指定的 IAM Policy</span></span><br><span class="line"><span class="comment"># 並指定 service account &quot;aws-load-balancer-controller&quot; 使用此 IAM Role</span></span><br><span class="line">$ eksctl create iamserviceaccount \</span><br><span class="line">  --cluster=eks-test \</span><br><span class="line">  --namespace=kube-system \</span><br><span class="line">  --name=aws-load-balancer-controller \</span><br><span class="line">  --attach-policy-arn=arn:aws:iam::777777777777:policy/AWSLoadBalancerControllerIAMPolicy \</span><br><span class="line">  --override-existing-serviceaccounts \</span><br><span class="line">  --approve</span><br><span class="line">[ℹ]  eksctl version 0.34.0</span><br><span class="line">[ℹ]  using region ap-northeast-1</span><br><span class="line">[ℹ]  1 existing iamserviceaccount(s) (kube-system/aws-node) will be excluded</span><br><span class="line">[ℹ]  1 iamserviceaccount (kube-system/aws-load-balancer-controller) was included (based on the include/exclude rules)</span><br><span class="line">[ℹ]  1 iamserviceaccount (kube-system/aws-node) was excluded (based on the include/exclude rules)</span><br><span class="line">[!]  metadata of serviceaccounts that exist <span class="keyword">in</span> Kubernetes will be updated, as --override-existing-serviceaccounts was <span class="built_in">set</span></span><br><span class="line">[ℹ]  1 task: &#123; 2 sequential sub-tasks: &#123; create IAM role <span class="keyword">for</span> serviceaccount <span class="string">&quot;kube-system/aws-load-balancer-controller&quot;</span>, create serviceaccount <span class="string">&quot;kube-system/aws-load-balancer-controller&quot;</span> &#125; &#125;</span><br><span class="line">[ℹ]  building iamserviceaccount stack <span class="string">&quot;eksctl-eks-test-addon-iamserviceaccount-kube-system-aws-load-balancer-controller&quot;</span></span><br><span class="line">[ℹ]  deploying stack <span class="string">&quot;eksctl-eks-test-addon-iamserviceaccount-kube-system-aws-load-balancer-controller&quot;</span></span><br><span class="line">[ℹ]  created serviceaccount <span class="string">&quot;kube-system/aws-load-balancer-controller&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 檢視 Service Account 的內容</span></span><br><span class="line"><span class="comment"># 可看到 aws-load-balancer-controller service account 所對應到的 IAM Role 是那一個</span></span><br><span class="line"><span class="comment"># 進 AWS Console 檢查一下，可以看到此 IAM Role 繫結的就是上面建立的 IAM Policy</span></span><br><span class="line">$ kubectl -n kube-system describe sa/aws-load-balancer-controller</span><br><span class="line">Name:                aws-load-balancer-controller</span><br><span class="line">Namespace:           kube-system</span><br><span class="line">Labels:              &lt;none&gt;</span><br><span class="line">Annotations:         eks.amazonaws.com/role-arn: arn:aws:iam::777777777777:role/eksctl-eks-test-addon-iamserviceaccount-kube-Role1-1MNNDI4RVIZFF</span><br><span class="line">Image pull secrets:  &lt;none&gt;</span><br><span class="line">Mountable secrets:   aws-load-balancer-controller-token-z2xg9</span><br><span class="line">Tokens:              aws-load-balancer-controller-token-z2xg9</span><br><span class="line">Events:              &lt;none&gt;</span><br></pre></td></tr></table></figure>
+
+<p>其實上面有提到權限設定的說明部份，因此即使不透過 eksctl，要自行完成設定 IAM service account 也不是太困難的事情，大概就是以下流程：</p>
+<ol>
+<li><p>使用 <a target="_blank" rel="noopener" href="https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.1.0/docs/install/iam_policy.json">AWS 提供的 IAM Policy 檔案</a>，新增 IAM Policy</p>
+</li>
+<li><p>新增 IAM Role，與上個步驟的 IAM Policy 繫結</p>
+</li>
+<li><p>設定 IAM Role 的 Trust Relationship，完成 <code>sts:AssumeRoleWithWebIdentity</code> 的設定，來源為 EKS cluster 的 OIDC Connect Provider</p>
+</li>
+<li><p>在 EKS 中新增 service account，並透過 annotation 指定 IAM Role ARN</p>
+</li>
+<li><p>佈署 AWS Load Balancer Controller 時指定使用上面建立的 IAM Role</p>
+</li>
+</ol>
+<h2 id="透過-Helm-安裝-AWS-Load-Balancer-Controller"><a href="#透過-Helm-安裝-AWS-Load-Balancer-Controller" class="headerlink" title="透過 Helm 安裝 AWS Load Balancer Controller"></a>透過 Helm 安裝 AWS Load Balancer Controller</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl apply -f https://raw.githubusercontent.com/aws/eks-charts/master/stable/aws-load-balancer-controller/crds/crds.yaml</span><br><span class="line"></span><br><span class="line"><span class="comment"># 要先安裝 Helm</span></span><br><span class="line">$ helm repo add eks https://aws.github.io/eks-charts</span><br><span class="line"></span><br><span class="line">$ helm upgrade -i aws-load-balancer-controller eks/aws-load-balancer-controller \</span><br><span class="line">  --<span class="built_in">set</span> clusterName=[EKS_CLUSTER_ID] \</span><br><span class="line">  --<span class="built_in">set</span> region=[REGION)_ID] \</span><br><span class="line">  --<span class="built_in">set</span> vpcId=[VPC_ID] \</span><br><span class="line">  --<span class="built_in">set</span> serviceAccount.create=<span class="literal">false</span> \</span><br><span class="line">  --<span class="built_in">set</span> serviceAccount.name=aws-load-balancer-controller \</span><br><span class="line">  -n kube-system</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="佈署服務進行測試"><a href="#佈署服務進行測試" class="headerlink" title="佈署服務進行測試"></a>佈署服務進行測試</h1><ul>
+<li>AWS LoadBalancer Controller 產生出來的 ingress 有能力自動發現指定 domain 對應的 ACM 並直接套用</li>
+</ul>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">default</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">deployment-2048</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">matchLabels:</span></span><br><span class="line">      <span class="attr">app.kubernetes.io/name:</span> <span class="string">app-2048</span></span><br><span class="line">  <span class="attr">replicas:</span> <span class="number">2</span></span><br><span class="line">  <span class="attr">template:</span></span><br><span class="line">    <span class="attr">metadata:</span></span><br><span class="line">      <span class="attr">labels:</span></span><br><span class="line">        <span class="attr">app.kubernetes.io/name:</span> <span class="string">app-2048</span></span><br><span class="line">    <span class="attr">spec:</span></span><br><span class="line">      <span class="attr">containers:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">image:</span> <span class="string">alexwhen/docker-2048</span></span><br><span class="line">        <span class="attr">imagePullPolicy:</span> <span class="string">Always</span></span><br><span class="line">        <span class="attr">name:</span> <span class="string">app-2048</span></span><br><span class="line">        <span class="attr">ports:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">containerPort:</span> <span class="number">80</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">default</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">service-2048</span></span><br><span class="line">  </span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">ports:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">port:</span> <span class="number">80</span></span><br><span class="line">      <span class="attr">targetPort:</span> <span class="number">80</span></span><br><span class="line">      <span class="attr">protocol:</span> <span class="string">TCP</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">NodePort</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">app.kubernetes.io/name:</span> <span class="string">app-2048</span></span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="comment"># 搭配上一篇文章 EKS fargate 的建置</span></span><br><span class="line"><span class="comment"># 配合 &quot;alb.ingress.kubernetes.io/target-type&quot; 設定為 ip</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">extensions/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Ingress</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">default</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">ingress-2048</span></span><br><span class="line">  <span class="attr">annotations:</span></span><br><span class="line">    <span class="attr">kubernetes.io/ingress.class:</span> <span class="string">alb</span></span><br><span class="line">    <span class="attr">alb.ingress.kubernetes.io/scheme:</span> <span class="string">internet-facing</span></span><br><span class="line">    <span class="attr">alb.ingress.kubernetes.io/target-type:</span> <span class="string">ip</span></span><br><span class="line">    <span class="attr">alb.ingress.kubernetes.io/listen-ports:</span> <span class="string">&#x27;[&#123;&quot;HTTP&quot;:80&#125;, &#123;&quot;HTTPS&quot;:443&#125;]&#x27;</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">tls:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">hosts:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">eks-test.mydomain.com</span></span><br><span class="line">  <span class="attr">rules:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">http:</span></span><br><span class="line">        <span class="attr">paths:</span></span><br><span class="line">          <span class="bullet">-</span> <span class="attr">path:</span> <span class="string">/*</span></span><br><span class="line">            <span class="attr">backend:</span></span><br><span class="line">              <span class="attr">serviceName:</span> <span class="string">service-2048</span></span><br><span class="line">              <span class="attr">servicePort:</span> <span class="number">80</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/eks/latest/userguide/alb-ingress.html">Application load balancing on Amazon EKS - Amazon EKS</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/eks/latest/userguide/load-balancing.html">Network load balancing on Amazon EKS - Amazon EKS</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/">AWS LoadBalancer Controller 官網</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/AWS/" rel="tag"># AWS</a>
+              <a href="/blog/tags/IAM/" rel="tag"># IAM</a>
+              <a href="/blog/tags/EKS/" rel="tag"># EKS</a>
+              <a href="/blog/tags/ELB/" rel="tag"># ELB</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/DevOps/learn-packer/" rel="prev" title="[Packer] 學習重點節錄">
+                  <i class="fa fa-chevron-left"></i> [Packer] 學習重點節錄
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/AWS/AWS-EKS-HowTo-Integrate-With-ALB/";
+    this.page.identifier = "AWS/AWS-EKS-HowTo-Integrate-With-ALB/";
+    this.page.title = "[AWS EKS] 從零打造一個可運行 Fargate workload 的 EKS cluster";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>
