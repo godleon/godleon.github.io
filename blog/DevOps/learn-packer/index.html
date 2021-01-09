@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="此篇文章是學習 Udemy 課程 &quot;HashiCorp Packer - Build automated machine images&quot; 時，將學習 HashiCorp Packer 過程中理解到的重要觀念 &amp; 使用方式進行統整並分享">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[Packer] 學習重點節錄">
+<meta property="og:url" content="https://godleon.github.io/blog/DevOps/learn-packer/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章是學習 Udemy 課程 &quot;HashiCorp Packer - Build automated machine images&quot; 時，將學習 HashiCorp Packer 過程中理解到的重要觀念 &amp; 使用方式進行統整並分享">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://godleon.github.io/blog/images/devops/packer/packer-use-case-1.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/devops/packer/packer-terminology.png">
+<meta property="article:published_time" content="2021-01-09T13:50:00.000Z">
+<meta property="article:modified_time" content="2021-01-09T13:54:00.460Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="DevOps">
+<meta property="article:tag" content="Packer">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/devops/packer/packer-use-case-1.png">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/DevOps/learn-packer/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>[Packer] 學習重點節錄 | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Overview"><span class="nav-number">1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E5%A0%B4%E6%99%AF"><span class="nav-number">2.</span> <span class="nav-text">常用場景</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%B8%B8%E8%A6%8B%E8%A1%93%E8%AA%9E"><span class="nav-number">3.</span> <span class="nav-text">常見術語</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Builds"><span class="nav-number">3.1.</span> <span class="nav-text">Builds</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Builders"><span class="nav-number">3.2.</span> <span class="nav-text">Builders</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Artifacts"><span class="nav-number">3.3.</span> <span class="nav-text">Artifacts</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Provisioners"><span class="nav-number">3.4.</span> <span class="nav-text">Provisioners</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Post-processors"><span class="nav-number">3.5.</span> <span class="nav-text">Post-processors</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Templates"><span class="nav-number">3.6.</span> <span class="nav-text">Templates</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Builder"><span class="nav-number">4.</span> <span class="nav-text">Builder</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Null-Builder"><span class="nav-number">4.1.</span> <span class="nav-text">Null Builder</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#File-Builder"><span class="nav-number">4.2.</span> <span class="nav-text">File Builder</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B-Amazon-AMI-%E9%9C%80%E8%A6%81%E7%9A%84%E6%9C%80%E4%BD%8E%E6%AC%8A%E9%99%90"><span class="nav-number">5.</span> <span class="nav-text">建立 Amazon AMI 需要的最低權限</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Provisioner"><span class="nav-number">6.</span> <span class="nav-text">Provisioner</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Shell-Local-Remote"><span class="nav-number">6.1.</span> <span class="nav-text">Shell Local(Remote)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Ansible-Local-Remote"><span class="nav-number">6.2.</span> <span class="nav-text">Ansible Local(Remote)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Provision-%E5%B8%B8%E7%94%A8%E7%9A%84-Parameter"><span class="nav-number">6.3.</span> <span class="nav-text">Provision 常用的 Parameter</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Post-Processors"><span class="nav-number">7.</span> <span class="nav-text">Post Processors</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Artifice"><span class="nav-number">7.1.</span> <span class="nav-text">Artifice</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Manifest"><span class="nav-number">7.2.</span> <span class="nav-text">Manifest</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">8.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">149</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">106</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/DevOps/learn-packer/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [Packer] 學習重點節錄
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2021-01-09 21:50:00 / Modified: 21:54:00" itemprop="dateCreated datePublished" datetime="2021-01-09T21:50:00+08:00">2021-01-09</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/DevOps/" itemprop="url" rel="index"><span itemprop="name">DevOps</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/DevOps/learn-packer/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="DevOps/learn-packer/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此篇文章是學習 Udemy 課程 "HashiCorp Packer - Build automated machine images" 時，將學習 HashiCorp Packer 過程中理解到的重要觀念 & 使用方式進行統整並分享</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h1><p><a target="_blank" rel="noopener" href="https://www.packer.io/">HashiCorp Packer</a> 是一個可以用來打包 Image 的工具，像是 Amazon AMI、Docker Image …. 等等，透過 Packer 可以將打包 image 的工作標準化並且以更有效率的方式進行。</p>
+<p>因此如果在工作上有需要在各個不同的 cloud provider 平台上進行 machine image 的打包，那 Packer 肯定會是一個可以幫上很大的忙。</p>
+<h1 id="常用場景"><a href="#常用場景" class="headerlink" title="常用場景"></a>常用場景</h1><ul>
+<li><p>可加入到 CI/CD pipeline 中，用來產生各種環境所需要的 machine image</p>
+</li>
+<li><p>可與其他工具(例如：Consul, Terraform, Vagrant)整合</p>
+</li>
+<li><p>透過製作 image 的方式，讓多個環境(development/testing/staging/production)所使用的環境可以保持一致</p>
+</li>
+</ul>
+<p>整合進到 CI/CD pipeline，大概會是下面這個模樣：(裡面的工具是可以替換的)</p>
+<p><img src="/blog/images/devops/packer/packer-use-case-1.png" alt="Packer - Use Case 1"></p>
+<ol>
+<li><p>當 developer 將程式開發完成後，會將程式送到 GitHub 上</p>
+</li>
+<li><p>觸發 CI server(上圖以 Jenkines 為例)，開始進行自動化工作，透過 packer 並搭配 Ansible/CHEF/Pupput 這類的 configuration management tool，打包成新的 AWS EC2 AMI</p>
+</li>
+<li><p>接著透過 terraform，使用上一個步驟產生的 AMI，產生新的 EC2 instance </p>
+</li>
+</ol>
+<blockquote>
+<p>當然，在 microservice 的時代，可能就會改成打包成 container image 後，放到 Kubernetes 中運行</p>
+</blockquote>
+<h1 id="常見術語"><a href="#常見術語" class="headerlink" title="常見術語"></a>常見術語</h1><p>介紹在 Packer 中需要了解的術語之前，可以先看一下下面這張圖：</p>
+<p><img src="/blog/images/devops/packer/packer-terminology.png" alt="Packer - Terminology"></p>
+<p>這張圖展示了在不同的階段，是由下面哪些元件發生了作用，可以當作一個流程圖來參考：</p>
+<h2 id="Builds"><a href="#Builds" class="headerlink" title="Builds"></a>Builds</h2><ul>
+<li>用來定義要產生 machine image 用的 task，而這些定義的內容是與被要給 builder 所拿來處理用，例如以下範例：</li>
+</ul>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">   <span class="attr">&quot;builders&quot;</span>:[</span><br><span class="line">      &#123;</span><br><span class="line">         <span class="attr">&quot;type&quot;</span>:<span class="string">&quot;amazon-ebs&quot;</span>,</span><br><span class="line">         <span class="attr">&quot;access_key&quot;</span>:<span class="string">&quot;YOUR_ACCESS_KEY&quot;</span>,</span><br><span class="line">         <span class="attr">&quot;secret_key&quot;</span>:<span class="string">&quot;YOUR_SECRET_KEY&quot;</span>,</span><br><span class="line">         <span class="attr">&quot;region&quot;</span>:<span class="string">&quot;us-east-1&quot;</span>,</span><br><span class="line">         <span class="attr">&quot;source_ami&quot;</span>:<span class="string">&quot;ami-0885b1f6bd170450c&quot;</span>,</span><br><span class="line">         <span class="attr">&quot;instance_type&quot;</span>:<span class="string">&quot;t3a.nano&quot;</span>,</span><br><span class="line">         <span class="attr">&quot;ssh_username&quot;</span>:<span class="string">&quot;ubuntu&quot;</span>,</span><br><span class="line">         <span class="attr">&quot;ami_name&quot;</span>:<span class="string">&quot;packer-demo-1&quot;</span></span><br><span class="line">      &#125;</span><br><span class="line">   ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>Amazon EC2 支援的 Builder type 有 <code>amazon-ebs</code>、<code>amazon-instance</code>、<code>amazon-chroot</code> … 等等</p>
+</blockquote>
+<ul>
+<li>如果要一次打包多個 cloud provider 的 Machine Image，可以同時有多個 build 同時運作</li>
+</ul>
+<h2 id="Builders"><a href="#Builders" class="headerlink" title="Builders"></a>Builders</h2><ul>
+<li><p>Packer 的元件之一，主要用來運行 &amp; 產生 machine image</p>
+</li>
+<li><p>根據 build 中定義的需求，build process 中可能會呼叫不同的 builder 來製作 machine image (例如：Virtual Box, VMware, Amazon EC2、GCC … etc)</p>
+</li>
+</ul>
+<h2 id="Artifacts"><a href="#Artifacts" class="headerlink" title="Artifacts"></a>Artifacts</h2><ul>
+<li><p>單一 build 的產出內容，基本上就是 machine image</p>
+</li>
+<li><p>每個 build 都會產生一個 artifact</p>
+</li>
+<li><p>以 AWS 為例，可以為每一個 region 都產生一個 machine image (AMI 屬於 region level，並非 global level)</p>
+</li>
+</ul>
+<h2 id="Provisioners"><a href="#Provisioners" class="headerlink" title="Provisioners"></a>Provisioners</h2><ul>
+<li><p>Packer 的元件之一，用來在運行中的 image(其實就是某個 instace) 中安裝所需要的軟體、工具、設定 …. etc</p>
+</li>
+<li><p>可用執行這件任務的工具，有 Ansible、Puppet、Chef、Shell Script …. 等等</p>
+</li>
+</ul>
+<h2 id="Post-processors"><a href="#Post-processors" class="headerlink" title="Post-processors"></a>Post-processors</h2><ul>
+<li><p>可以針對 provisioner 產生出來的 image 再進行後續的處理，甚至是產生新的 machine image</p>
+</li>
+<li><p>常在此階段進行的工作可能像是壓縮 artifacts、將 artifact 上傳到特定的 repository … 等等</p>
+</li>
+</ul>
+<h2 id="Templates"><a href="#Templates" class="headerlink" title="Templates"></a>Templates</h2><ul>
+<li>預先定義好的 JSON 檔案，可讓 packer 用來產生新的 machine image</li>
+</ul>
+<h1 id="Builder"><a href="#Builder" class="headerlink" title="Builder"></a>Builder</h1><p>常用的 builder 除了 <a target="_blank" rel="noopener" href="https://www.packer.io/docs/builders/amazon">Amazon AMI</a> &amp; <a target="_blank" rel="noopener" href="https://www.packer.io/docs/builders/docker">Docker</a> 之外，還有一些特殊的 builder 也可以了解一下：</p>
+<h2 id="Null-Builder"><a href="#Null-Builder" class="headerlink" title="Null Builder"></a><a target="_blank" rel="noopener" href="https://www.packer.io/docs/builders/null">Null Builder</a></h2><p>Null Builder 啥也不做，因此它的用途其實是用來加速 debug 後面的 Provisioner &amp; Post-processor 用的，<strong>因為一般正常的 builder 會花費大量的時間來處理工作</strong>，相關的使用細節可以查詢 <a target="_blank" rel="noopener" href="https://www.packer.io/docs/builders/null">Null Builder 官網文件</a></p>
+<h2 id="File-Builder"><a href="#File-Builder" class="headerlink" title="File Builder"></a><a target="_blank" rel="noopener" href="https://www.packer.io/docs/builders/file">File Builder</a></h2><p>用途是在 builder 端產生一個檔案，看似好像是個沒啥用途的 builder，但其實常用來作為 debug 之用</p>
+<h1 id="建立-Amazon-AMI-需要的最低權限"><a href="#建立-Amazon-AMI-需要的最低權限" class="headerlink" title="建立 Amazon AMI 需要的最低權限"></a>建立 Amazon AMI 需要的最低權限</h1><p>使用 Packer 建立 Amazon AMI 需要有 EC2 特定的權限，必須設定 IAM Policy + IAM Role + IAM User(Assume Role) 的方式取得可用的權限。</p>
+<p>基本上製作 Amazon AMI 會有以下流程產生：</p>
+<ol>
+<li><p>從指定的 AMI 中產生 EC2 instance</p>
+</li>
+<li><p>根據 provision 的設定內容，安裝相關套件，進行各種設定</p>
+</li>
+<li><p>將 EC2 instance 關機</p>
+</li>
+<li><p>為關機後的 EC2 instance 進行 snapshot 產生 AMI</p>
+</li>
+<li><p>移除 EC2 instance</p>
+</li>
+</ol>
+<p>因此以下是製作 AWS IAM 的最小範圍權限：(<a target="_blank" rel="noopener" href="https://www.packer.io/docs/builders/amazon#iam-task-or-instance-role">官網文件來源</a>)</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;Version&quot;</span>: <span class="string">&quot;2012-10-17&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;Statement&quot;</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">&quot;Effect&quot;</span>: <span class="string">&quot;Allow&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;Action&quot;</span>: [</span><br><span class="line">        <span class="string">&quot;ec2:AttachVolume&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ec2:AuthorizeSecurityGroupIngress&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ec2:CopyImage&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ec2:CreateImage&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ec2:CreateKeypair&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ec2:CreateSecurityGroup&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ec2:CreateSnapshot&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ec2:CreateTags&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ec2:CreateVolume&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ec2:DeleteKeyPair&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ec2:DeleteSecurityGroup&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ec2:DeleteSnapshot&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ec2:DeleteVolume&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ec2:DeregisterImage&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ec2:DescribeImageAttribute&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ec2:DescribeImages&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ec2:DescribeInstances&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ec2:DescribeInstanceStatus&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ec2:DescribeRegions&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ec2:DescribeSecurityGroups&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ec2:DescribeSnapshots&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ec2:DescribeSubnets&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ec2:DescribeTags&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ec2:DescribeVolumes&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ec2:DetachVolume&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ec2:GetPasswordData&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ec2:ModifyImageAttribute&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ec2:ModifyInstanceAttribute&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ec2:ModifySnapshotAttribute&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ec2:RegisterImage&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ec2:RunInstances&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ec2:StopInstances&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ec2:TerminateInstances&quot;</span></span><br><span class="line">      ],</span><br><span class="line">      <span class="attr">&quot;Resource&quot;</span>: <span class="string">&quot;*&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="Provisioner"><a href="#Provisioner" class="headerlink" title="Provisioner"></a>Provisioner</h1><h2 id="Shell-Local-Remote"><a href="#Shell-Local-Remote" class="headerlink" title="Shell Local(Remote)"></a>Shell Local(Remote)</h2><p>兩者個差異在於 <strong>Shell Script 所執行的位置</strong>不同：</p>
+<ul>
+<li><p><a target="_blank" rel="noopener" href="https://www.packer.io/docs/provisioners/shell-local"><code>Shell Local</code></a>：script 會執行在 builder 所在的環境內</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://www.packer.io/docs/provisioners/shell"><code>Shell Remote</code></a>：script 會執行在遠端用來打包 &amp; 產生 machine image 的機器上</p>
+</li>
+</ul>
+<h2 id="Ansible-Local-Remote"><a href="#Ansible-Local-Remote" class="headerlink" title="Ansible Local(Remote)"></a>Ansible Local(Remote)</h2><p>兩者的差異在 <strong>Ansible 所在的位置</strong>不同：</p>
+<ul>
+<li><p><a target="_blank" rel="noopener" href="https://www.packer.io/docs/provisioners/ansible-local"><code>Ansible Local</code></a>：Ansible 是安裝在遠端用來打包 &amp; 產生 machine image 的機器上</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://www.packer.io/docs/provisioners/ansible"><code>Ansible Remote</code></a>：Ansible 安裝在執行 packer 的環境中</p>
+</li>
+</ul>
+<p>實際上在應用上，<code>Ansible Local</code> 可能會是相對方便的方法，因為 Builder 環境使用的 user 可能跟 remote 環境不同，因此還要各自指定正確的 user 才可以使用 Ansible Remote (不同的 AMI 會有其不同的 sudoer)。</p>
+<h2 id="Provision-常用的-Parameter"><a href="#Provision-常用的-Parameter" class="headerlink" title="Provision 常用的 Parameter"></a>Provision 常用的 Parameter</h2><ul>
+<li><p>在 <a target="_blank" rel="noopener" href="https://learn.hashicorp.com/tutorials/packer/getting-started-parallel-builds">parallel build</a> 的場景下，在 <code>provisioners</code> 中可以指定只針對 build 完後特定幾個的 artifact 進行後續的 provision 的工作</p>
+</li>
+<li><p>也可以透過 <a target="_blank" rel="noopener" href="https://www.packer.io/docs/templates/provisioners#build-specific-overrides"><code>override</code></a> 關鍵字，為特定 build 的 artifact 指定不一樣的 provision 操作</p>
+</li>
+</ul>
+<h1 id="Post-Processors"><a href="#Post-Processors" class="headerlink" title="Post Processors"></a>Post Processors</h1><h2 id="Artifice"><a href="#Artifice" class="headerlink" title="Artifice"></a><a target="_blank" rel="noopener" href="https://www.packer.io/docs/post-processors/artifice">Artifice</a></h2><p>Artifice post-processor 的功能在於，覆蓋 provision 階段產生出來的 artifact，並將 post-processor 後續的處理都轉到 Artifice post-processor 指定的檔案上，以下是一個簡單範例：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;builders&quot;</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">&quot;type&quot;</span>: <span class="string">&quot;vmware-vmx&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;source_path&quot;</span>: <span class="string">&quot;/opt/ubuntu-1404-vmware.vmx&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;ssh_username&quot;</span>: <span class="string">&quot;vagrant&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;ssh_password&quot;</span>: <span class="string">&quot;vagrant&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;shutdown_command&quot;</span>: <span class="string">&quot;sudo shutdown -h now&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;headless&quot;</span>: <span class="string">&quot;true&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;skip_compaction&quot;</span>: <span class="string">&quot;true&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">  ],</span><br><span class="line">  <span class="attr">&quot;provisioners&quot;</span>: [</span><br><span class="line">    &#123;  <span class="comment">//安裝 consul</span></span><br><span class="line">      <span class="attr">&quot;type&quot;</span>: <span class="string">&quot;shell&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;inline&quot;</span>: [</span><br><span class="line">        <span class="string">&quot;sudo apt-get install -y python-pip&quot;</span>,</span><br><span class="line">        <span class="string">&quot;sudo pip install ifs&quot;</span>,</span><br><span class="line">        <span class="string">&quot;sudo ifs install consul --version=0.5.2&quot;</span></span><br><span class="line">      ]</span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;  <span class="comment">//下載 consul binary</span></span><br><span class="line">      <span class="attr">&quot;type&quot;</span>: <span class="string">&quot;file&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;source&quot;</span>: <span class="string">&quot;/usr/local/bin/consul&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;destination&quot;</span>: <span class="string">&quot;consul&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;direction&quot;</span>: <span class="string">&quot;download&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">  ],</span><br><span class="line">  <span class="attr">&quot;post-processors&quot;</span>: [</span><br><span class="line">    [</span><br><span class="line">      &#123;  <span class="comment">//指定後續的 post-processor 改成對下載的 consul binary 進行處理</span></span><br><span class="line">        <span class="attr">&quot;type&quot;</span>: <span class="string">&quot;artifice&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;files&quot;</span>: [<span class="string">&quot;consul&quot;</span>]</span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;  <span class="comment">//壓縮</span></span><br><span class="line">        <span class="attr">&quot;type&quot;</span>: <span class="string">&quot;compress&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;output&quot;</span>: <span class="string">&quot;consul-0.5.2.tar.gz&quot;</span></span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;  <span class="comment">//將壓縮後的結果上傳到 aws s3 bucket</span></span><br><span class="line">        <span class="attr">&quot;type&quot;</span>: <span class="string">&quot;shell-local&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;inline&quot;</span>: [</span><br><span class="line">          <span class="string">&quot;/usr/local/bin/aws s3 cp consul-0.5.2.tar.gz s3://&lt;s3 path&gt;&quot;</span></span><br><span class="line">        ]</span><br><span class="line">      &#125;</span><br><span class="line">    ]</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="Manifest"><a href="#Manifest" class="headerlink" title="Manifest"></a><a target="_blank" rel="noopener" href="https://www.packer.io/docs/post-processors/manifest">Manifest</a></h2><p>第一次使用 Packer 打包 machine image 時，當時就有個疑問：當 image 打包完，我如果要透過程式取得打包後產生的 AMI ID，這要怎麼做?</p>
+<p>當時想，該不會要我去 parsing packer output 吧…? 這樣實在太 low 了，而 <code>Manifest</code> 就為這樣的需求提供了一個很好的解法。</p>
+<p>透過 Manifest post-processor，就可以將打包過程中的重要資訊以 json 的格式產生出來，而每次打包個過程都會更新 manifest，這讓後續的自動化變得容易串接了。</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a target="_blank" rel="noopener" href="https://www.udemy.com/course/hashicorp-packer-build-automated-machine-images/">HashiCorp Packer - Build automated machine images | Udemy</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://www.packer.io/docs">Documentation | Packer by HashiCorp</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/DevOps/" rel="tag"># DevOps</a>
+              <a href="/blog/tags/Packer/" rel="tag"># Packer</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/AWS/AWS-EKS-create-cluster-for-pure-fargate-workload/" rel="prev" title="[AWS EKS] 從零打造一個可運行 Fargate workload 的 EKS cluster">
+                  <i class="fa fa-chevron-left"></i> [AWS EKS] 從零打造一個可運行 Fargate workload 的 EKS cluster
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/DevOps/learn-packer/";
+    this.page.identifier = "DevOps/learn-packer/";
+    this.page.title = "[Packer] 學習重點節錄";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>
