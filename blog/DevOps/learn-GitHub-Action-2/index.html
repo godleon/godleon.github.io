@@ -30,7 +30,7 @@
 <meta property="og:description" content="此篇文章是學習 Udemy 課程 &quot;The Complete GitHub Actions &amp; Workflows Guide&quot; 時，將學習 Environment Variables、Encryption、Expressions、Context ...等內容的過程中整理出來的重要觀念 &amp; 使用方式">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2020-12-12T09:20:00.000Z">
-<meta property="article:modified_time" content="2021-01-15T03:52:14.132Z">
+<meta property="article:modified_time" content="2021-01-15T05:23:21.445Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="GitHub Actions">
 <meta property="article:tag" content="DevOps">
@@ -252,7 +252,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-01-15 11:52:14" itemprop="dateModified" datetime="2021-01-15T11:52:14+08:00">2021-01-15</time>
+                <time title="Modified: 2021-01-15 13:23:21" itemprop="dateModified" datetime="2021-01-15T13:23:21+08:00">2021-01-15</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -313,7 +313,7 @@
 <blockquote>
 <p>Contexts are a way to access information about workflow runs, runner environments, jobs, and steps. Contexts use the expression syntax.</p>
 </blockquote>
-<p>因此表示，要存取 workflow 的任何相關資訊，或是與 workflow 的相關設定，就必須要認識有哪些 context 可用，可透過<a target="_blank" rel="noopener" href="https://docs.github.com/en/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#contexts">此官網文件連結</a>取得最新的 context 列表，而 context 的用法則是 <code>$&#123;&#123; <context> &#125;&#125;</code></p>
+<p>因此表示，要存取 workflow 的任何相關資訊，或是與 workflow 的相關設定，就必須要認識有哪些 context 可用，可透過<a target="_blank" rel="noopener" href="https://docs.github.com/en/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#contexts">此官網文件連結</a>取得最新的 context 列表，而 context 的用法則是 <code>$&#123;&#123; \<context\> &#125;&#125;</code></p>
 <h2 id="Expression"><a href="#Expression" class="headerlink" title="Expression"></a>Expression</h2><p>Expression 一般來說有兩個用途：</p>
 <ol>
 <li><p>針對變數做一些程式化的調整 &amp; 修改，這會在 <code>$&#123;&#123; &#125;&#125;</code> 中發生，而且通常會搭配 <a target="_blank" rel="noopener" href="https://docs.github.com/en/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#functions">function</a> 使用，資料來源很多時候是來自於 <a target="_blank" rel="noopener" href="https://docs.github.com/en/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#contexts">context</a></p>
