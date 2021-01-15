@@ -53,7 +53,7 @@ Expression & Context
 Context 在 GitHub Actions 的文件中是這麼介紹的：
 > Contexts are a way to access information about workflow runs, runner environments, jobs, and steps. Contexts use the expression syntax.
 
-因此表示，要存取 workflow 的任何相關資訊，或是與 workflow 的相關設定，就必須要認識有哪些 context 可用，可透過[此官網文件連結](https://docs.github.com/en/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#contexts)取得最新的 context 列表，而 context 的用法則是 `${{ <context> }}`
+因此表示，要存取 workflow 的任何相關資訊，或是與 workflow 的相關設定，就必須要認識有哪些 context 可用，可透過[此官網文件連結](https://docs.github.com/en/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#contexts)取得最新的 context 列表，而 context 的用法則是 `${{ \<context\> }}`
 
 
 ## Expression
