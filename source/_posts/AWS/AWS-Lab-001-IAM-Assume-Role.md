@@ -14,7 +14,8 @@ tags:
   - GitHub Actions
 ---
 
-完整的實作程式碼可以參考[此專案(godleon/aws-lab-001-assume-role)](https://github.com/godleon/aws-lab-001-assume-role)
+完整的實作程式碼可以參考[此專案(godleon/aws-labs at lab001-iam-assume-role)](https://github.com/godleon/aws-labs/tree/lab001-iam-assume-role)
+
 
 觀念說明
 =======
