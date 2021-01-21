@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "[Elasticsearch] 深入搜索"
+title:  "[AWS Elasticsearch] 建置 & 開始使用 AWS Elasticsearch service"
 description: "此篇文章介紹如何開始使用 AWS Managed Elasticsearch service & 不同的網路配置在使用上有何優缺點，並驗證佈署成功並使用"
 date: 2021-01-16 21:55:00
 published: true
