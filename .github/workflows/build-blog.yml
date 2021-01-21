@@ -19,7 +19,20 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: 15.x
-    - run: node version
+    - run: node -v
     - run: git branch
+    - run: |
+        mkdir /tmp/dir_to_commit
+        rm -rf /tmp/dir_to_commit/*
+        hexo clean
+        hexo generate
+        hexo new page "categories"
+        hexo new page "tags"
+        hexo new page "about"
+        ls -al blog/
+        cp blog/index.html /tmp/dir_to_commit/
+        cp -r blog /tmp/dir_to_commit/
+        ls -al /tmp/dir_to_commit/
+        ls -al /tmp/dir_to_commit/blog
     # - run: npm run build --if-present
     # - run: npm test
