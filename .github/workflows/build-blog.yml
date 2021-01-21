@@ -1,4 +1,4 @@
-name: Build Haxo Blog
+name: Build Hexo Blog
 
 on:
   push:
@@ -15,14 +15,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Use Node.js 12.x
+    - name: Use Node.js 15.x
       uses: actions/setup-node@v1
       with:
-        node-version: 12.x
+        node-version: 15.x
     - run: node -v
     - run: git branch
     - run: |
-        npm install
+        npm install -g
         hexo clean
         hexo generate
         hexo new page "categories"
