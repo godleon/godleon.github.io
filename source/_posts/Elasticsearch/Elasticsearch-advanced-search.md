@@ -1356,7 +1356,7 @@ POST /articles/_search
 }
 ```
 
-每個回傳的 suggest 都包含了一個算分，這也代表著相似性(相似性越高，分數越高)，相似性是由 **LEvenshtein Edit Distance** 的計算方法來實作出來的，核心概念就是 `一個詞變更了多少字元就可以和另外一個詞一致`。
+每個回傳的 suggest 都包含了一個算分，這也代表著相似性(相似性越高，分數越高)，相似性是由 **Levenshtein Edit Distance** 的計算方法來實作出來的，核心概念就是 `一個詞變更了多少字元就可以和另外一個詞一致`。
 
 而相似性的設定部份也可以透過一些參數可以來控制，例如 `max_edits`
 
@@ -1408,6 +1408,44 @@ POST /articles/_search
   }
 }
 ```
+
+## Fuzzy Query
+
+Fuzzy Query 也是以 **Levenshtein Edit Distance** 為基礎，使用 `fuzzy` 關鍵字，可以容忍使用者搜尋時輸入少量的錯誤，依然可以找到符合的結果，以下是簡單的範例：
+
+```json
+//一個字元輸入錯誤，還是可以找到資料
+//因為 fuzziness 設定為 1
+GET /movies/_search
+{
+  "query": {
+    "fuzzy": {
+      "title": {"value": "intersteller", "fuzziness": 1}
+    }
+  }
+}
+
+//但有兩個字元輸入錯誤就無法找到資料了
+GET /movies/_search
+{
+  "query": {
+    "fuzzy": {
+      "title": {"value": "inersteller", "fuzziness": 1}
+    }
+  }
+}
+
+//調整 fuzziness = 2 之後就可以找到資料了
+GET /movies/_search
+{
+  "query": {
+    "fuzzy": {
+      "title": {"value": "inersteller", "fuzziness": 2}
+    }
+  }
+}
+```
+
 
 
 

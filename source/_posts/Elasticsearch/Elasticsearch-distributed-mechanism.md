@@ -710,9 +710,13 @@ PUT test_keyword/_mapping
 
 - 但假設查詢的 `From=990` & `Size=10` 時，Elasticsearch 會進行以下操作：
 
-  - 在每個 shard 中取得 1000 個 document，然後 coordinating node 會整合所有結果，最後透過排序選取前 1000 個 document
+  - 在每個 shard 中取得 1000 個 document，然後 coordinating node 會整合所有結果，最後透過排序選取前 1000 個 document 
+  
+  - **這表示所有資料都會經過 retrieved、collected、sorted 三個階段，資料量大時其實消耗很多資源**
 
   - 頁數越深，佔用的 memory 越多；而為了避免記憶體耗用過大，Elasticsearch 預設限制到 10,000 個 document(可透過修改 `index.max_result_window` 來調整)
+
+- 可以透過限制搜尋資料筆數上限來避免此問題
 
 
 ## 使用 search_after 避免 Deep Pagination(深度分頁)問題
@@ -853,6 +857,8 @@ PUT products/_doc/1?version=30000&version_type=external
   "count":102
 }
 ```
+
+- 若是希望由系統來處理同時多筆操作更新相同資料時，可以使用 [`retry_on_conflict`](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update.html) 參數，在遇到 seq_no 衝突時可以自動重試
 
 
 

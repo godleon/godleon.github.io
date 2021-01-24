@@ -179,7 +179,11 @@ Document 的基本 CRUD 與批次操作
   - 如果 ID 不存在，則建立新的 document；若 ID 已經存在，則刪除現存的 document 再建立新的，**version** 的部份會增加
   - 語法為 [`PUT _index/_doc/[ID]`](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html)，例如：**PUT /users/_doc/1**
 
-- `Update`(**POST**)：
+- `Update`(**PUT**)：
+  - PUT 其實也可以作為更新 document 用，但更新的範圍是整個 document
+  - 實際上，Elasticsearch document 是無法修改的；而更新這個操作其實是新增一個新的 document，將原有的 **_version** 加 1 後，舊的 document 被標示為 **deletion**
+
+- `Partially Update`(**POST**)：
   - document 必須已經存在，更新時只會對 document 中相對應的欄位作增量更新 or 對應欄位的修改
   - json payload 需要包含在 `doc` 欄位中 (可參考[官網文件](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update.html)) 
   - 語法為 [`POST _index/_update/[ID]`](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update.html)，例如：**POST /users/_update/1**
@@ -283,11 +287,11 @@ GET my-index-000001/_msearch
 
 - index： 針對整個文檔，既可以新增又可以更新；
 
-- create：只是新增操作，已有報錯，可以用PUT指定ID，或POST不指定ID；
+- create：只是新增操作，已有報錯，可以用 PUT 指定 ID，或 POST 不指定 ID；
 
-- update：指的是部分更新，官方只是說用POST，請求body裡用script或 doc裡包含文檔要更新的部分；
+- update：指的是部分更新，官方只是說用POST，request body 裡用 script 或 doc 裡包含文檔要更新的部分；
 
-- delete和read：就是delete和get請求了，比較簡單
+- delete 和 read：就是 delete 和 get 請求了，比較簡單
 
 
 
@@ -338,17 +342,20 @@ Inverted Index(倒排索引)介紹
 
 Analyzer 是專門處理分詞的組件，由三個部份組成：
 
-- Character Filter (針對原始文件進行處理，例如：去除 HTML tag)
+- `Character Filter`：針對原始文件進行處理，例如：去除 HTML tag
 
-- Tokenizer (根據規則切分 term)
+- `Tokenizer`：根據規則切分 term
 
-- Token Filter (將分割後的 term 進行加工，例如：轉小寫、刪除 [stopwords](https://zh.wikipedia.org/wiki/%E5%81%9C%E7%94%A8%E8%AF%8D)、增加同義詞)
+- `Token Filter`：將分割後的 term 進行加工，例如：轉小寫、刪除 [stopwords](https://zh.wikipedia.org/wiki/%E5%81%9C%E7%94%A8%E8%AF%8D)、增加同義詞、stemming(例如將 box, boxed, boxing ... 等字轉換成 box)
+> 有時後會希望不要過濾 stopwords，而是直接把內容當成完整的 phrase 看待 (例如：**to be or not to be**)
 
 ![Elasticsearch - Analyzer](/blog/images/Elasticsearch/es_analyzer-1.png)
 
 - Elasticsearch 內建很多 Analyzer，每個 Analyzer 會由不同的 character filter, tokenizer, token filter 組合而成，使用者也可以自訂 Analyzer
 
 ## Elasticsearch 內建的 Analyzer
+
+以下是幾個 Elasticsearch 內建的 Analyzer，有興趣的人可以試試看每個 Analyzer 處理完後資料的效果：
 
 ```bash
 # character filter: standard (按詞切分)
@@ -853,6 +860,8 @@ Dynamic Mapping 和常見欄位類型
 - 但推算的結果不一定會完全正確(例如：地理位置相關訊息可能會推斷錯誤)
 
 - term data type 推算錯誤可能會導致某些查詢無法正常使用，例如：range 查詢
+
+> 若是濫用 Dynamic Mapping，導致不斷有新欄位出現卻不管制，cluster state 會一直變更調整，而這樣的調整會需要同步到 cluster 中的所有 node 上，若是因為大量的 field mapping 而導致更新 cluster state 的操作若是太頻繁，很有可能會導致記憶體不足的問題發生，甚至會導致 cluster 掛掉，這現象稱為 `Mapping Explosion` 
 
 ## 範例
 
