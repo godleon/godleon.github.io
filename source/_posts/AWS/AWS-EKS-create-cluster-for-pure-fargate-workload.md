@@ -47,7 +47,7 @@ $ chmod +x ./kubectl
 $ mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$PATH:$HOME/bin
 
 # 或是直接移到 /usr/loca/bin/ 目錄下也行
-$ sudo mv ./kubectl /usr/loca/bin/
+$ sudo mv ./kubectl /usr/local/bin/
 ```
 
 ## 安裝 eksctl：
