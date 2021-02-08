@@ -32,7 +32,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/k8s_multi-containers-in-a-pod.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/kubernetes-pod-life-cycle-status.jpg">
 <meta property="article:published_time" content="2018-09-05T20:10:00.000Z">
-<meta property="article:modified_time" content="2021-01-24T09:12:41.637Z">
+<meta property="article:modified_time" content="2021-02-08T02:53:31.636Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="Kubernetes">
 <meta property="article:tag" content="CKA">
@@ -177,7 +177,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/blog/archives">
-          <span class="site-state-item-count">153</span>
+          <span class="site-state-item-count">154</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -188,7 +188,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/blog/tags/">
-        <span class="site-state-item-count">108</span>
+        <span class="site-state-item-count">109</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -257,7 +257,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-01-24 17:12:41" itemprop="dateModified" datetime="2021-01-24T17:12:41+08:00">2021-01-24</time>
+                <time title="Modified: 2021-02-08 10:53:31" itemprop="dateModified" datetime="2021-02-08T10:53:31+08:00">2021-02-08</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -360,7 +360,8 @@
 <p> 3.2 當 kubelet 發現 pod 被標記為 <strong>terminating</strong> 狀態時(目前尚在寬限期內)，開始停止 pod 的流程：</p>
 <pre><code> 3.2.1 如果在pod中 定義了 [preStop hook](https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#hook-details)，此時會被呼叫；如果 preStop hook 在超過寬限期過後依然在運行，第二步會再增加 2 秒的寬限期
 
- 3.2.2 向 Pod 中的 process 發送 **TERM** 信號；</code></pre>
+ 3.2.2 向 Pod 中的 process 發送 **TERM** 信號；
+</code></pre>
 <p> 3.3 該 Pod 會從 service 的 endpoint list 中移除，replication controller 不會再進行管理；此時若是有終止比較慢的 pod，也不會繼續處理 load balancer 轉發過來的流量</p>
 </li>
 <li><p>過了寬限期後，將會向 Pod 中還在運作的 process 發送 <strong>SIGKILL</strong> 來清除 process。</p>

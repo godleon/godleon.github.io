@@ -38,7 +38,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/middleware/message-queue_concept-binding.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/middleware/message-queue_concept-binding.png">
 <meta property="article:published_time" content="2020-02-12T09:20:00.000Z">
-<meta property="article:modified_time" content="2021-01-24T09:12:41.633Z">
+<meta property="article:modified_time" content="2021-02-08T02:53:31.628Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="Message Queue">
 <meta property="article:tag" content="RabbitMQ">
@@ -181,7 +181,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/blog/archives">
-          <span class="site-state-item-count">153</span>
+          <span class="site-state-item-count">154</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -192,7 +192,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/blog/tags/">
-        <span class="site-state-item-count">108</span>
+        <span class="site-state-item-count">109</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -261,7 +261,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-01-24 17:12:41" itemprop="dateModified" datetime="2021-01-24T17:12:41+08:00">2021-01-24</time>
+                <time title="Modified: 2021-02-08 10:53:31" itemprop="dateModified" datetime="2021-02-08T10:53:31+08:00">2021-02-08</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -392,9 +392,9 @@
 <li><p><strong>Channel</strong>：在真實的 TCP 連接中定義出來的 virtual connection，這才是實際上 producer/consumer 與 message broker 之間的連接改念</p>
 </li>
 <li><p><strong>Binding</strong>：Binding 定義了 <code>Exchange</code> &amp; <code>Queue</code> 之間的關係以及訊息 routing 的設定，可能還包含了一些 filter 的設定<br><img src="/blog/images/middleware/message-queue_concept-binding.png" alt="Message Queue Case 2"></p>
-</li>
+<h1 id="細部探究-Message-Queue-amp-Exchange-的屬性資訊"><a href="#細部探究-Message-Queue-amp-Exchange-的屬性資訊" class="headerlink" title="細部探究 Message, Queue &amp; Exchange 的屬性資訊"></a>細部探究 Message, Queue &amp; Exchange 的屬性資訊</h1></li>
 </ul>
-<h1 id="細部探究-Message-Queue-amp-Exchange-的屬性資訊"><a href="#細部探究-Message-Queue-amp-Exchange-的屬性資訊" class="headerlink" title="細部探究 Message, Queue &amp; Exchange 的屬性資訊"></a>細部探究 Message, Queue &amp; Exchange 的屬性資訊</h1><p>了解了上面關於 Messaging System 的標準組成元素之後，可以大致了解一個 Message Queue 大概是如何與外部 application 進行溝通運作的；但如果要更探究 Message Queue 內部的運作細節，可以從標準組成元素中的屬性(attribute)來進行了解。</p>
+<p>了解了上面關於 Messaging System 的標準組成元素之後，可以大致了解一個 Message Queue 大概是如何與外部 application 進行溝通運作的；但如果要更探究 Message Queue 內部的運作細節，可以從標準組成元素中的屬性(attribute)來進行了解。</p>
 <blockquote>
 <p>這部份的學習會以 <a target="_blank" rel="noopener" href="https://www.rabbitmq.com/">RabbitMQ</a> 為主，因此以下屬性介紹會以 RabiitMQ 為主，但跟其他主流的 Message Queue 應該不會差異太大</p>
 </blockquote>
