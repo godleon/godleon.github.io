@@ -30,7 +30,7 @@
 <meta property="og:description" content="此篇文章是介紹如何從零打造一個可用來運行 Fargate workload 的 EKS cluster，並介紹整個過程中需要了解的相關流程 &amp; 重要的權限設定觀念">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2021-01-08T23:35:00.000Z">
-<meta property="article:modified_time" content="2021-02-08T02:53:31.628Z">
+<meta property="article:modified_time" content="2021-02-22T01:02:43.437Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="IAM">
@@ -253,7 +253,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-02-08 10:53:31" itemprop="dateModified" datetime="2021-02-08T10:53:31+08:00">2021-02-08</time>
+                <time title="Modified: 2021-02-22 09:02:43" itemprop="dateModified" datetime="2021-02-22T09:02:43+08:00">2021-02-22</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -295,8 +295,8 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ curl <span class="string">&quot;https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip&quot;</span> -o <span class="string">&quot;awscliv2.zip&quot;</span></span><br><span class="line">$ unzip awscliv2.zip</span><br><span class="line">$ sudo ./aws/install</span><br></pre></td></tr></table></figure>
 
 <h2 id="安裝-kubectl"><a href="#安裝-kubectl" class="headerlink" title="安裝 kubectl"></a>安裝 kubectl</h2><p>這部份可以看一下<a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html">官網文件</a>目前提供的是什麼版本，基本上根據 EKS 的版本選擇對應的 kubectl 會比較沒有問題。</p>
-<p>以下以 <code>1.18.9</code> 為例，安裝 kubectl：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.18.9/2020-11-02/bin/linux/amd64/kubectl</span><br><span class="line">$ chmod +x ./kubectl</span><br><span class="line">$ mkdir -p <span class="variable">$HOME</span>/bin &amp;&amp; cp ./kubectl <span class="variable">$HOME</span>/bin/kubectl &amp;&amp; <span class="built_in">export</span> PATH=<span class="variable">$PATH</span>:<span class="variable">$HOME</span>/bin</span><br><span class="line"></span><br><span class="line"><span class="comment"># 或是直接移到 /usr/loca/bin/ 目錄下也行</span></span><br><span class="line">$ sudo mv ./kubectl /usr/<span class="built_in">local</span>/bin/</span><br></pre></td></tr></table></figure>
+<p>以下以 <code>1.19.6</code> 為例，安裝 kubectl：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.19.6/2021-01-05/bin/linux/amd64/kubectl</span><br><span class="line">$ chmod +x ./kubectl</span><br><span class="line">$ mkdir -p <span class="variable">$HOME</span>/bin &amp;&amp; cp ./kubectl <span class="variable">$HOME</span>/bin/kubectl &amp;&amp; <span class="built_in">export</span> PATH=<span class="variable">$PATH</span>:<span class="variable">$HOME</span>/bin</span><br><span class="line"></span><br><span class="line"><span class="comment"># 或是直接移到 /usr/loca/bin/ 目錄下也行</span></span><br><span class="line">$ sudo mv ./kubectl /usr/<span class="built_in">local</span>/bin/</span><br></pre></td></tr></table></figure>
 
 <h2 id="安裝-eksctl："><a href="#安裝-eksctl：" class="headerlink" title="安裝 eksctl："></a>安裝 eksctl：</h2><p>eksctl 可以在某些時候透過 CloudFormation 幫使用者建立較為複雜的資源(例如：EKS cluster、IAM service account … 等等)，可以讓使用者很快的入手，以下是安裝 eksctl 的流程：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ curl --silent --location <span class="string">&quot;https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_<span class="subst">$(uname -s)</span>_amd64.tar.gz&quot;</span> | tar xz -C /tmp</span><br><span class="line">$ sudo mv /tmp/eksctl /usr/<span class="built_in">local</span>/bin</span><br><span class="line">$ eksctl version</span><br></pre></td></tr></table></figure>
