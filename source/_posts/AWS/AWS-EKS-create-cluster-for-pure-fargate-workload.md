@@ -39,10 +39,10 @@ $ sudo ./aws/install
 
 這部份可以看一下[官網文件](https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html)目前提供的是什麼版本，基本上根據 EKS 的版本選擇對應的 kubectl 會比較沒有問題。
 
-以下以 `1.18.9` 為例，安裝 kubectl：
+以下以 `1.19.6` 為例，安裝 kubectl：
 
 ```bash
-$ curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.18.9/2020-11-02/bin/linux/amd64/kubectl
+$ curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.19.6/2021-01-05/bin/linux/amd64/kubectl
 $ chmod +x ./kubectl
 $ mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$PATH:$HOME/bin
 
