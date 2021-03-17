@@ -20,6 +20,32 @@ Concepts
 
 - [如何設定 kubeconfig 與 Kubernetes cluster 互動](https://github.com/godleon/learning_kubernetes/blob/master/concept/howto_configure_kubeconfig.md)
 
+基本上，kubeconfig 內容的組成是由以下幾個部份組成：
+
+- **clusters**：這裡定義了一個或多個 cluster control plane 的 name、endpoint、認證用資訊 ... 等等
+
+- **users**：這裡定義了使用者的資訊
+
+- **contexts**：此部份就是 user & cluster 的組合，並且會給一個 name
+
+- **current-context**：指定目前預設使用的 context
+
+![kubeconfig structure](/blog/images/kubernetes/k8s_kubeconfig-structure.png)
+
+透過上面的組合，就可以在同一個 kubeconfig 中定義多個 cluster，並根據管理需求隨時切換 current-context 指定的 cluster
+
+以下是常用指令：
+
+```bash
+# 檢視目前 kuebconfig 的內容
+$ kubectl config view 可以
+
+# 切換 current context
+$ kubeconfig config use-context [CONTEXT_NAME]
+```
+
+
+
 ## Overview & Components
 
 - [組成元件概觀](https://github.com/godleon/learning_kubernetes/blob/master/concept/component_overview.md)
