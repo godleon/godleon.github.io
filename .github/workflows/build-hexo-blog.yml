@@ -57,6 +57,16 @@ jobs:
         git config --global user.name "godleon" 
         git config --global user.email "godleon@gmail.com"
         cd master/
+        echo "--------------------"
         git status
-        git add --all .
-        git status
+        echo "--------------------"
+        git add .
+        echo "--------------------"
+        git commit -m "GitHub Action Auto Builder Update"
+
+    - name: Push changes
+      uses: ad-m/github-push-action@v0.6.0
+      with:
+        github_token: ${{ github.token }}
+        branch: master
+        directory: master
