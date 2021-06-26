@@ -33,9 +33,6 @@ jobs:
         yarn install
         npx hexo clean
         npx hexo generate
-        npx hexo new page "categories"
-        npx hexo new page "tags"
-        npx hexo new page "about"
-        npx ls -al blog/
+        ls -al blog/
     # - run: npm run build --if-present
     # - run: npm test
