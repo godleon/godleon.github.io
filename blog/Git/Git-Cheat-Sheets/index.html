@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 5.0.2">
+<meta name="generator" content="Hexo 5.2.0">
   <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
@@ -37,7 +37,7 @@
 <meta property="og:image" content="http://rypress.com/tutorials/git/media/12-1.png">
 <meta property="og:image" content="http://rypress.com/tutorials/git/media/12-2.png">
 <meta property="article:published_time" content="2016-11-08T08:20:00.000Z">
-<meta property="article:modified_time" content="2021-06-26T08:22:52.037Z">
+<meta property="article:modified_time" content="2021-06-26T08:30:19.048Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="Git">
 <meta name="twitter:card" content="summary">
@@ -259,7 +259,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-06-26 16:22:52" itemprop="dateModified" datetime="2021-06-26T16:22:52+08:00">2021-06-26</time>
+                <time title="Modified: 2021-06-26 16:30:19" itemprop="dateModified" datetime="2021-06-26T16:30:19+08:00">2021-06-26</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -362,7 +362,7 @@
 <h1 id="Plumbing"><a href="#Plumbing" class="headerlink" title="Plumbing"></a>Plumbing</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 顯示指定的 object 內容(其中 &lt;type&gt; 可以是 commit / tree / blob / tag)</span></span><br><span class="line">$ git cat-file &lt;<span class="built_in">type</span>&gt; &lt;object-id&gt;</span><br></pre></td></tr></table></figure>
 
 <p><img src="http://rypress.com/tutorials/git/media/12-1.png" alt="commit and tree objects"></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查詢指定的 object id 是屬於哪種 type</span></span><br><span class="line">$ git cat-file -t &lt;object-id&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 列出指定 tree 物件的內容</span></span><br><span class="line">$ git ls-tree &lt;tree-id&gt;</span><br><span class="line">040000 tree 5aa02e7f90df11621262d7fe91a9357bb44494aa    about</span><br><span class="line">100644 blob 4838a99c7bb4cc75941ff0a5e3a05fe4889570f9    blue.html</span><br><span class="line">.......</span><br><span class="line">100644 blob c9d942d8aadb84617d78455f8e2da25866c079a2    style.css</span><br><span class="line">100644 blob e9d1781fd949fd41d2439ae3824a293531bc38a5    yellow.html</span><br><span class="line"></span><br><span class="line"><span class="comment"># 顯示指定 object id(這裡指的是 blob 物件) 的內容</span></span><br><span class="line">$ git cat-file blob e9d178</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查詢指定的 object id 是屬於哪種 type</span></span><br><span class="line">$ git cat-file -t &lt;object-id&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 列出指定 tree 物件的內容</span></span><br><span class="line">$ git ls-tree &lt;tree-id&gt;</span><br><span class="line">040000 tree 5aa02e7f90df11621262d7fe91a9357bb44494aa	about</span><br><span class="line">100644 blob 4838a99c7bb4cc75941ff0a5e3a05fe4889570f9	blue.html</span><br><span class="line">.......</span><br><span class="line">100644 blob c9d942d8aadb84617d78455f8e2da25866c079a2	style.css</span><br><span class="line">100644 blob e9d1781fd949fd41d2439ae3824a293531bc38a5	yellow.html</span><br><span class="line"></span><br><span class="line"><span class="comment"># 顯示指定 object id(這裡指的是 blob 物件) 的內容</span></span><br><span class="line">$ git cat-file blob e9d178</span><br></pre></td></tr></table></figure>
 
 <p><img src="http://rypress.com/tutorials/git/media/12-2.png" alt="commit, tree, and blob objects"></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 對 git object database 進行 garbage collection </span></span><br><span class="line">$ git gc</span><br><span class="line"></span><br><span class="line"><span class="comment"># 將指定的檔案從 working directory 移到 staged area (新增的檔案要額外加上 --add 參數)</span></span><br><span class="line">$ git update-index [--add] &lt;file&gt;</span><br><span class="line">    Stage the specified file, using the optional --add flag to denote a new untracked file.</span><br><span class="line"></span><br><span class="line"><span class="comment"># 從目前的 index 中產生一個 tree 物件，並存入 object database 中</span></span><br><span class="line">$ git write-tree</span><br><span class="line"></span><br><span class="line"><span class="comment"># 從指定的 tree object &amp; parent commit 中產生一個新的 commit 物件</span></span><br><span class="line">$ git commit-tree &lt;tree-id&gt; -p &lt;parent-id&gt; </span><br></pre></td></tr></table></figure>
