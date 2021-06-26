@@ -38,10 +38,10 @@ jobs:
         ls -al raw/
         ls -al master/
     
-    # - run: |
-    #     yarn install
-    #     npx hexo clean
-    #     npx hexo generate
-    #     ls -al blog/
-    # - run: npm run build --if-present
-    # - run: npm test
+    - name: Generate Blog Content
+      run: |
+        cd raw/
+        yarn install
+        npx hexo clean
+        npx hexo generate
+        ls -al ./
