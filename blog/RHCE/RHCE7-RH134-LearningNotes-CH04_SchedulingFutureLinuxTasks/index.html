@@ -30,7 +30,7 @@
 <meta property="og:description" content="此文章記錄學習 RHCE7 RH134 Chapter 4 Scheduling Future Linux Tasks 留下的內容">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2016-05-04T20:25:00.000Z">
-<meta property="article:modified_time" content="2021-03-17T02:07:05.981Z">
+<meta property="article:modified_time" content="2021-06-26T07:58:54.178Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="Linux">
 <meta property="article:tag" content="RHCE">
@@ -173,18 +173,18 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/blog/archives">
-          <span class="site-state-item-count">154</span>
+          <span class="site-state-item-count">155</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/blog/categories/">
-        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-count">25</span>
         <span class="site-state-item-name">categories</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/blog/tags/">
-        <span class="site-state-item-count">109</span>
+        <span class="site-state-item-count">110</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -253,7 +253,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-03-17 10:07:05" itemprop="dateModified" datetime="2021-03-17T10:07:05+08:00">2021-03-17</time>
+                <time title="Modified: 2021-06-26 15:58:54" itemprop="dateModified" datetime="2021-06-26T15:58:54+08:00">2021-06-26</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -331,7 +331,7 @@
 <p>在 RHEL 7 之前，暫存檔的監控 &amp; 移除由 <code>tmpwatch</code> 套件來管理；但在 RHEL 7，systemd 提供了一個稱為 <code>systemd-tmpfiles</code> 的服務來監控 &amp; 管理所指定的目錄</p>
 <p>透過 <code>stat filename</code> 可以檢視 inode 的內容，與 systemd-tmpfiles 相關的為 <code>Access Time</code>(atime)、<code>Modify Time</code>(mtime)、以及 <code>Change Time</code>(ctime)</p>
 <h3 id="4-4-1-Managing-temporary-files-with-systemd-tmpfiles"><a href="#4-4-1-Managing-temporary-files-with-systemd-tmpfiles" class="headerlink" title="4.4.1 Managing temporary files with systemd-tmpfiles"></a>4.4.1 Managing temporary files with systemd-tmpfiles</h3><p><code>systemd-tmpfiles</code> 的功能在於定期(並非依賴 system cron，而是透過自身的 Timer 機制)的清除指定的目錄內容，或是恢復指定監控的目錄下被務刪的檔案，以下是設定範例(<code>/usr/lib/systemd/system/systemd-tmpfiles-clean.timer</code>)：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[Timer]</span><br><span class="line">OnBootSec&#x3D;15min   # 開機後的 15 分鐘執行一次</span><br><span class="line">OnUnitActiveSec&#x3D;1d  # 之後每天執行一次</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[Timer]</span><br><span class="line">OnBootSec=15min   # 開機後的 15 分鐘執行一次</span><br><span class="line">OnUnitActiveSec=1d  # 之後每天執行一次</span><br></pre></td></tr></table></figure>
 
 <p><code>systemd-tmpfiles</code> 的設定檔有 3 個地方：</p>
 <ul>

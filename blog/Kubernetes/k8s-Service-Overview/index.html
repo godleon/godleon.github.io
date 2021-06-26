@@ -33,7 +33,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/k8s_service-iptables-proxy-mode.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/k8s_service-ipvs-proxy-mode.png">
 <meta property="article:published_time" content="2018-11-10T20:20:00.000Z">
-<meta property="article:modified_time" content="2021-03-17T02:07:05.981Z">
+<meta property="article:modified_time" content="2021-06-26T07:58:54.174Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="Kubernetes">
 <meta property="article:tag" content="CKA">
@@ -178,18 +178,18 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/blog/archives">
-          <span class="site-state-item-count">154</span>
+          <span class="site-state-item-count">155</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/blog/categories/">
-        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-count">25</span>
         <span class="site-state-item-name">categories</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/blog/tags/">
-        <span class="site-state-item-count">109</span>
+        <span class="site-state-item-count">110</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -258,7 +258,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-03-17 10:07:05" itemprop="dateModified" datetime="2021-03-17T10:07:05+08:00">2021-03-17</time>
+                <time title="Modified: 2021-06-26 15:58:54" itemprop="dateModified" datetime="2021-06-26T15:58:54+08:00">2021-06-26</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -314,7 +314,7 @@
 <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">my-service</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="comment"># type 一共有四種(ClusterIP, NodePort, LoadBalancer, ExternalName)</span></span><br><span class="line">  <span class="comment"># 預設是 ClusterIP</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">ClusterIP</span></span><br><span class="line">  <span class="comment"># 選擇帶有 &quot;app=MyApp&quot; 的 pod</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">MyApp</span></span><br><span class="line">  <span class="comment"># Service 實際對外服務的設定</span></span><br><span class="line">  <span class="attr">ports:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">protocol:</span> <span class="string">TCP</span></span><br><span class="line">    <span class="attr">port:</span> <span class="number">80</span></span><br><span class="line">    <span class="comment"># 此為 Pod 對外開放的 port number</span></span><br><span class="line">    <span class="attr">targetPort:</span> <span class="number">9376</span></span><br></pre></td></tr></table></figure>
 
 <p>透過以上的定義，會產生出以下的 network topology：</p>
-<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Pod  &lt;---&gt;  Endpoint(tcp:9376)  &lt;---&gt; Service(tcp:80, with VIP)</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Pod  &lt;---&gt;  Endpoint(tcp:9376)  &lt;---&gt; Service(tcp:80, with VIP)</span><br></pre></td></tr></table></figure>
 
 <p>Service 會為每個符合 label selector 設定的 pod 建立一個 Endpoint 的 resource object 來與之搭配。</p>
 <p>此外，在 Service 設定上還有以下有幾個需要額外注意的重點：</p>
@@ -522,7 +522,7 @@
 </li>
 </ul>
 <h2 id="IPs-amp-VIPs"><a href="#IPs-amp-VIPs" class="headerlink" title="IPs &amp; VIPs"></a>IPs &amp; VIPs</h2><p>service VIP 不像是 pod IP 是個真實的 IP，而是透過 Linux iptables rules 去定義當網路流量進到 VIP 時應該如何導向正確的 endpoints(也就是 pod IP)，而這個處理過程如下：</p>
-<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">networking traffic ---&gt; Service_VIP:port ---&gt; Pod:targetPort</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">networking traffic ---&gt; Service_VIP:port ---&gt; Pod:targetPort</span><br></pre></td></tr></table></figure>
 
 <p>若是直接對 service VIP 進行存取，但不是存取原本在 service 中定義好的 port，就完全不會得到任何回應。</p>
 <p>而當 service 建立 or 刪除時，相對應的 DNS record 也會由 k8s 中的 DNS service 所維護，確保使用者可以透過 domain name 找到 service VIP。</p>

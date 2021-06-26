@@ -30,7 +30,7 @@
 <meta property="og:description" content="此篇文章介紹 Kubernetes Ingress 的基本概念 &amp; 使用方式 (以 Traefik 為例)">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2018-07-04T09:50:00.000Z">
-<meta property="article:modified_time" content="2021-03-17T02:07:05.981Z">
+<meta property="article:modified_time" content="2021-06-26T07:58:54.174Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="Kubernetes">
 <meta property="article:tag" content="CKA">
@@ -174,18 +174,18 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/blog/archives">
-          <span class="site-state-item-count">154</span>
+          <span class="site-state-item-count">155</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/blog/categories/">
-        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-count">25</span>
         <span class="site-state-item-name">categories</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/blog/tags/">
-        <span class="site-state-item-count">109</span>
+        <span class="site-state-item-count">110</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -254,7 +254,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-03-17 10:07:05" itemprop="dateModified" datetime="2021-03-17T10:07:05+08:00">2021-03-17</time>
+                <time title="Modified: 2021-06-26 15:58:54" itemprop="dateModified" datetime="2021-06-26T15:58:54+08:00">2021-06-26</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -301,13 +301,13 @@
 </li>
 </ol>
 <p>首先，在沒有 Ingress 之前，從外面到 K8s cluster 的流量會如下圖：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">  internet</span><br><span class="line">      |</span><br><span class="line">------------</span><br><span class="line">[ Services ]</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">  internet</span><br><span class="line">      |</span><br><span class="line">------------</span><br><span class="line">[ Services ]</span><br></pre></td></tr></table></figure>
 
 <blockquote>
 <p>但在原有的模式下，如果是在 GCP or AWS 使用 K8s 的話，還可以搭配 LoadBalancer 的 service type 動態取得 LB 對外提供服務；但如果是自己架設 K8s，那就只能透過 Service NodePort 的方式讓使用者從外部存取運行在 K8s 上的服務。</p>
 </blockquote>
 <p>所以 Ingress 在 K8s v1.1 之後就應運而生了，而 Ingress 其實就是一堆 rule 的集合，讓外面進來的網路流量可以正確的被導到後方的 Service，架構變成如下圖：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"> internet</span><br><span class="line">     |</span><br><span class="line">[ Ingress ]</span><br><span class="line">--|-----|--</span><br><span class="line">[ Services ]</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"> internet</span><br><span class="line">     |</span><br><span class="line">[ Ingress ]</span><br><span class="line">--|-----|--</span><br><span class="line">[ Services ]</span><br></pre></td></tr></table></figure>
 
 <p>在官網文件中提到 Ingress 可以負責以下工作：</p>
 <ul>
@@ -398,7 +398,7 @@
 </blockquote>
 <p>除此之外，還有 DNS 的部份需要設定；在上面的 ingress host 設定是 <code>traefik-ui.k8s.example.com</code>，由於這個 domain name 是虛擬的，因此我們必須修改 client 端的 DNS 設定(<code>/etc/hosts</code>)，將 worker node 的 IP 指到這個 domain name。</p>
 <p>在我的實驗環境中，worker node 一共有三台，分別是 **10.103.10.[61-63]**，因此在 client 的 <code>/etc/hosts</code> 中加入以下設定</p>
-<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">10.103.10.61  traefik-ui.k8s.example.com</span><br><span class="line">10.103.10.62  traefik-ui.k8s.example.com</span><br><span class="line">10.103.10.63  traefik-ui.k8s.example.com</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">10.103.10.61  traefik-ui.k8s.example.com</span><br><span class="line">10.103.10.62  traefik-ui.k8s.example.com</span><br><span class="line">10.103.10.63  traefik-ui.k8s.example.com</span><br></pre></td></tr></table></figure>
 
 <p>完成之後就可以透過 <a target="_blank" rel="noopener" href="http://traefik-ui.k8s.example.com/">http://traefik-ui.k8s.example.com</a> 連到 Traefik Dashboard 了!</p>
 <h1 id="佈署網站-amp-設定-Ingress"><a href="#佈署網站-amp-設定-Ingress" class="headerlink" title="佈署網站 &amp; 設定 Ingress"></a>佈署網站 &amp; 設定 Ingress</h1><p>在這邊會另外建立一個 <code>ingress-test</code> 作為測試用的 namespace，並設定為 kubectl 的 default namespace：</p>
@@ -421,7 +421,7 @@
 </li>
 </ul>
 <p>由於上述的並非真的由我控制的 domain，因此我們必須修改 client 端的 DNS 設定(<code>/etc/hosts</code>) 如下：</p>
-<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">10.103.10.61  stilton.k8s.example.com cheddar.k8s.example.com wensleydale.k8s.example.com</span><br><span class="line">10.103.10.62  stilton.k8s.example.com cheddar.k8s.example.com wensleydale.k8s.example.com</span><br><span class="line">10.103.10.63  stilton.k8s.example.com cheddar.k8s.example.com wensleydale.k8s.example.com</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">10.103.10.61  stilton.k8s.example.com cheddar.k8s.example.com wensleydale.k8s.example.com</span><br><span class="line">10.103.10.62  stilton.k8s.example.com cheddar.k8s.example.com wensleydale.k8s.example.com</span><br><span class="line">10.103.10.63  stilton.k8s.example.com cheddar.k8s.example.com wensleydale.k8s.example.com</span><br></pre></td></tr></table></figure>
 
 
 <p>接著以下會分為 <strong>Name-based Routing</strong> &amp; <strong>Path-bsaed Routing</strong> 進行示範：</p>
@@ -461,7 +461,7 @@
 </li>
 </ul>
 <h2 id="Path-bsaed-Routing"><a href="#Path-bsaed-Routing" class="headerlink" title="Path-bsaed Routing"></a>Path-bsaed Routing</h2><p>這個在 DNS 設定部份就簡單多了，在以下範例中，只要設定一個 DNS record(<code>cheese.k8s.example.com</code>) 即可，因此 DNS 設定(<code>/etc/hosts</code>)必須加入以下資訊：</p>
-<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">10.103.10.61  cheese.k8s.example.com</span><br><span class="line">10.103.10.62  cheese.k8s.example.com</span><br><span class="line">10.103.10.63  cheese.k8s.example.com</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">10.103.10.61  cheese.k8s.example.com</span><br><span class="line">10.103.10.62  cheese.k8s.example.com</span><br><span class="line">10.103.10.63  cheese.k8s.example.com</span><br></pre></td></tr></table></figure>
 
 <p>而在 <strong>Deployment</strong> &amp; <strong>Service</strong> 的部份跟 Name-based Routing 是相同的，而這裡的 ingress 設定(<code>path-based-routing_cheese-ingress.yaml</code>)則是跟上面不同：</p>
 <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">extensions/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Ingress</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">cheeses</span></span><br><span class="line">  <span class="attr">annotations:</span></span><br><span class="line">    <span class="attr">kubernetes.io/ingress.class:</span> <span class="string">traefik</span></span><br><span class="line">    <span class="attr">traefik.frontend.rule.type:</span> <span class="string">PathPrefixStrip</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">rules:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">host:</span> <span class="string">cheeses.k8s.example.com</span></span><br><span class="line">    <span class="attr">http:</span></span><br><span class="line">      <span class="attr">paths:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">path:</span> <span class="string">/stilton</span></span><br><span class="line">        <span class="attr">backend:</span></span><br><span class="line">          <span class="attr">serviceName:</span> <span class="string">stilton</span></span><br><span class="line">          <span class="attr">servicePort:</span> <span class="string">http</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">path:</span> <span class="string">/cheddar</span></span><br><span class="line">        <span class="attr">backend:</span></span><br><span class="line">          <span class="attr">serviceName:</span> <span class="string">cheddar</span></span><br><span class="line">          <span class="attr">servicePort:</span> <span class="string">http</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">path:</span> <span class="string">/wensleydale</span></span><br><span class="line">        <span class="attr">backend:</span></span><br><span class="line">          <span class="attr">serviceName:</span> <span class="string">wensleydale</span></span><br><span class="line">          <span class="attr">servicePort:</span> <span class="string">http</span></span><br></pre></td></tr></table></figure>

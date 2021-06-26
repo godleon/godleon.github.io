@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="本篇文章是學習 Udemy 課程 &#39;Istio Hands-On for Kubernetes&#39; 過程中所留下的學習筆記">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Istio 簡介">
+<meta property="og:url" content="https://godleon.github.io/blog/ServiceMesh/istio-introdution/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="本篇文章是學習 Udemy 課程 &#39;Istio Hands-On for Kubernetes&#39; 過程中所留下的學習筆記">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://godleon.github.io/blog/images/service-mesh/tracing-trace-span.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/service-mesh/istio-without-edge-proxy.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/service-mesh/istio-with-edge-proxy.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/service-mesh/istio-with-edge-proxy-gateway.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/service-mesh/istio-permissive-mtls.png">
+<meta property="article:published_time" content="2021-06-26T07:45:00.000Z">
+<meta property="article:modified_time" content="2021-06-26T07:58:54.182Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="ServiceMesh">
+<meta property="article:tag" content="Istio">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/service-mesh/tracing-trace-span.png">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/ServiceMesh/istio-introdution/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Istio 簡介 | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Architecture"><span class="nav-number">1.</span> <span class="nav-text">Architecture</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Traffic-Splitting"><span class="nav-number">1.1.</span> <span class="nav-text">Traffic Splitting</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Identity-based-routing"><span class="nav-number">1.2.</span> <span class="nav-text">Identity based routing</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Query-String-based-routing"><span class="nav-number">1.3.</span> <span class="nav-text">Query String based routing</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Egress-Traffic-Security-and-Traffic-Control"><span class="nav-number">2.</span> <span class="nav-text">Egress Traffic Security and Traffic Control</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Istio-Hands-On-for-Kubernetes"><span class="nav-number">3.</span> <span class="nav-text">Istio Hands-On for Kubernetes</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Finding-Performance-Problems"><span class="nav-number">3.1.</span> <span class="nav-text">Finding Performance Problems</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%82%BA%E4%BB%80%E9%BA%BC%E4%B8%8D%E7%9B%B4%E6%8E%A5%E7%94%A8-Envoy-%E8%80%8C%E7%94%A8-Istio"><span class="nav-number">3.2.</span> <span class="nav-text">為什麼不直接用 Envoy 而用 Istio ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Telemetry"><span class="nav-number">3.3.</span> <span class="nav-text">Telemetry</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#distributed-tracing"><span class="nav-number">3.4.</span> <span class="nav-text">distributed tracing</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Traffic-Management"><span class="nav-number">4.</span> <span class="nav-text">Traffic Management</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Gateway"><span class="nav-number">5.</span> <span class="nav-text">Gateway</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Dark-Releases"><span class="nav-number">6.</span> <span class="nav-text">Dark Releases</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Fault-Injection"><span class="nav-number">7.</span> <span class="nav-text">Fault Injection</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Circuit-Breaking"><span class="nav-number">8.</span> <span class="nav-text">Circuit Breaking</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Mutual-TLS"><span class="nav-number">9.</span> <span class="nav-text">Mutual TLS</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Customization-Istio"><span class="nav-number">10.</span> <span class="nav-text">Customization Istio</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Upgrade-Istio"><span class="nav-number">11.</span> <span class="nav-text">Upgrade Istio</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">155</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">110</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/ServiceMesh/istio-introdution/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Istio 簡介
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2021-06-26 15:45:00 / Modified: 15:58:54" itemprop="dateCreated datePublished" datetime="2021-06-26T15:45:00+08:00">2021-06-26</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Istio/" itemprop="url" rel="index"><span itemprop="name">Istio</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/ServiceMesh/istio-introdution/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="ServiceMesh/istio-introdution/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">本篇文章是學習 Udemy 課程 'Istio Hands-On for Kubernetes' 過程中所留下的學習筆記</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="Architecture"><a href="#Architecture" class="headerlink" title="Architecture"></a>Architecture</h1><ul>
+<li><p>Istio Gateway 可以有多個，而接收的流量是來自於 Istio ingressgateway service</p>
+</li>
+<li><p>Istio ingressgateway service 是由 Istio profile 所產生，且同時會產生對應的 AWS classic ELB</p>
+</li>
+<li><p>所有的 k8s service 都會註冊到 Istio Service Registry</p>
+</li>
+<li><p>要調整 traffic routing 的行為，可以在 virtual service 上面指定，將特定的流量導向特定的 service </p>
+</li>
+<li><p>virtuial service 正是 Istio 發揮 routing 能力的地方，以下舉幾個例子：</p>
+<ul>
+<li>canary deployment</li>
+<li>routing rules based on http header attribute</li>
+<li>30% request 回應 HTTP 400 (fault injection)</li>
+<li>10% request 以 timeout 方式處理<blockquote>
+<p>以上是單純 ingress 做不到的，但透過 Istio Virtual Service 就可以</p>
+</blockquote>
+</li>
+</ul>
+</li>
+<li><p>service entries 是 egress 用的，主要用來定義在 istio mesh 外部的服務，而非 istio mesh 的服務若是希望在 k8s 內部被存取到，就需要被增加到 service entry 中</p>
+</li>
+<li><p>TLS 屬於 L4，無法看到 HTTP header host</p>
+</li>
+<li><p>SNI 是用來告訴 server 要回應哪個 certificate (Istio Gateway 才知道要回應哪個 certificate)</p>
+</li>
+</ul>
+<h2 id="Traffic-Splitting"><a href="#Traffic-Splitting" class="headerlink" title="Traffic Splitting"></a>Traffic Splitting</h2><ol>
+<li><p>需要為 pod 加上 <code>version</code> label，並非在 service level</p>
+</li>
+<li><p>也需要為 pod 加上 app label</p>
+</li>
+<li><p>建立 Istio Destination Rules (<code>kind: DestinationRule</code>)，根據不同的 version label 不同的值，設定不同的 subset (可以把 version 與 subnet 視為相同的概念)</p>
+</li>
+<li><p>在 virtual service 中加上 subset &amp; weight 的資訊 (但在 <code>gateway</code> 的設定中，必須同時包含 gateway 名稱 &amp; <code>mesh</code> 關鍵字)</p>
+<blockquote>
+<p>關鍵字 <code>mesh</code> 是用來讓 virtual service 中的規則都被設定在每一個 sidecar envoy proxy 中，而不會只有在 mesg edge(就是 gateway) 出現</p>
+</blockquote>
+</li>
+</ol>
+<h2 id="Identity-based-routing"><a href="#Identity-based-routing" class="headerlink" title="Identity based routing"></a>Identity based routing</h2><ul>
+<li><p>可以在 client 端設定特定的 HTTP header，並在 virtual service 中根據 HTTP header 的內容進行 routing</p>
+</li>
+<li><p>應用範例：在 header 中放入 user_id，只有特定的 user_id 會 routing 到新版的的服務中</p>
+</li>
+<li><p>規則是</p>
+</li>
+</ul>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1alpha3</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">VirtualService</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">reviews</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">hosts:</span> <span class="comment"># destinations that these routing rules apply to. VirtualService must be bound to the gateway and must have one or more hosts that match the hosts specified in a server</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">reviews</span></span><br><span class="line">  <span class="attr">gateways:</span> <span class="comment"># names of gateways and sidecars that should apply these routes</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">bookinfo-gateway</span> <span class="comment"># Don&#x27;t ONLY USE this gateway as &quot;reviews&quot; k8s service is used internally by productpage service, so this VS rule should be applied to Envoy sidecar proxy inside reviews pod, not edge proxy in gateway pod. </span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">mesh</span> <span class="comment"># applies to all the sidecars in the mesh. The reserved word mesh is used to imply all the sidecars in the mesh. When gateway field is omitted, the default gateway (mesh) will be used, which would apply the rule to all sidecars in the mesh. If a list of gateway names is provided, the rules will apply only to the gateways. To apply the rules to both gateways and sidecars, specify mesh as one of the gateway names. Ref: https://istio.io/latest/docs/reference/config/networking/virtual-service/#VirtualService</span></span><br><span class="line">  <span class="attr">http:</span> <span class="comment"># L7 load balancing by http path and host, just like K8s ingress resource</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">match:</span> <span class="comment"># &lt;---- this routing to apply to all requests from the specifieduser</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">headers:</span> <span class="comment"># <span class="doctag">Note:</span> The keys uri, scheme, method, and authority will be ignored.</span></span><br><span class="line">        <span class="attr">end-user:</span> <span class="comment"># WARNING: merely passing this key-value pair in curl won&#x27;t work as productpage service won&#x27;t propagate custom header attributes to review service! You need to login as a user Ref: https://stackoverflow.com/a/50878208/1528958</span></span><br><span class="line">          <span class="attr">exact:</span> <span class="string">log-in-as-this-user</span></span><br><span class="line">    <span class="attr">route:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">destination:</span></span><br><span class="line">        <span class="attr">host:</span> <span class="string">reviews</span></span><br><span class="line">        <span class="attr">subset:</span> <span class="string">v1</span> <span class="comment"># then route traffic destined to reviews (defined in hosts above) to backend reviews service of version 1</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">route:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">destination:</span></span><br><span class="line">        <span class="attr">host:</span> <span class="string">reviews</span></span><br><span class="line">        <span class="attr">subset:</span> <span class="string">v1</span></span><br><span class="line">      <span class="attr">weight:</span> <span class="number">10</span> <span class="comment"># &lt;--- canary release. % of traffic to subset v1</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">destination:</span></span><br><span class="line">        <span class="attr">host:</span> <span class="string">reviews</span></span><br><span class="line">        <span class="attr">subset:</span> <span class="string">v2</span></span><br><span class="line">      <span class="attr">weight:</span> <span class="number">10</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">destination:</span></span><br><span class="line">        <span class="attr">host:</span> <span class="string">reviews</span></span><br><span class="line">        <span class="attr">subset:</span> <span class="string">v3</span></span><br><span class="line">      <span class="attr">weight:</span> <span class="number">80</span></span><br></pre></td></tr></table></figure>
+
+
+<h2 id="Query-String-based-routing"><a href="#Query-String-based-routing" class="headerlink" title="Query String based routing"></a>Query String based routing</h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1alpha3</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">VirtualService</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">reviews</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">hosts:</span> <span class="comment"># destinations that these routing rules apply to. VirtualService must be bound to the gateway and must have one or more hosts that match the hosts specified in a server</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">reviews</span></span><br><span class="line">  <span class="attr">gateways:</span> <span class="comment"># names of gateways and sidecars that should apply these routes</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">bookinfo-gateway</span> <span class="comment"># Don&#x27;t ONLY USE this gateway as &quot;reviews&quot; k8s service is used internally by productpage service, so this VS rule should be applied to Envoy sidecar proxy inside reviews pod, not edge proxy in gateway pod. </span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">mesh</span> <span class="comment"># applies to all the sidecars in the mesh. The reserved word mesh is used to imply all the sidecars in the mesh. When gateway field is omitted, the default gateway (mesh) will be used, which would apply the rule to all sidecars in the mesh. If a list of gateway names is provided, the rules will apply only to the gateways. To apply the rules to both gateways and sidecars, specify mesh as one of the gateway names. Ref: https://istio.io/latest/docs/reference/config/networking/virtual-service/#VirtualService</span></span><br><span class="line">  <span class="attr">http:</span> <span class="comment"># L7 load balancing by http path and host, just like K8s ingress resource</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">match:</span> <span class="comment"># &lt;---- this routing to apply to all requests from the specifieduser</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">headers:</span> <span class="comment"># <span class="doctag">Note:</span> The keys uri, scheme, method, and authority will be ignored.</span></span><br><span class="line">        <span class="attr">end-user:</span> <span class="comment"># WARNING: merely passing this key-value pair in curl won&#x27;t work as productpage service won&#x27;t propagate custom header attributes to review service! You need to login as a user Ref: https://stackoverflow.com/a/50878208/1528958</span></span><br><span class="line">          <span class="attr">exact:</span> <span class="string">log-in-as-this-user</span></span><br><span class="line">    <span class="comment"># - uri:</span></span><br><span class="line">    <span class="comment">#     regex: &#x27;^/tester&#x27; # could be exact|prefix|regex</span></span><br><span class="line">    <span class="comment">#   ignoreUriCase: true</span></span><br><span class="line">    <span class="attr">route:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">destination:</span></span><br><span class="line">        <span class="attr">host:</span> <span class="string">reviews</span></span><br><span class="line">        <span class="attr">subset:</span> <span class="string">v1</span> <span class="comment"># then route traffic destined to reviews (defined in hosts above) to backend reviews service of version 1</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">match:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">queryParams:</span></span><br><span class="line">        <span class="attr">test-v2:</span></span><br><span class="line">          <span class="attr">exact:</span> <span class="string">&quot;true&quot;</span> <span class="comment"># if &quot;?test-v2=true&quot; in query string. <span class="doctag">NOTE:</span> prefix not supported for queryString</span></span><br><span class="line">    <span class="attr">route:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">destination:</span></span><br><span class="line">        <span class="attr">host:</span> <span class="string">reviews</span></span><br><span class="line">        <span class="attr">subset:</span> <span class="string">v2</span> <span class="comment"># then route traffic destined to reviews (defined in hosts above) to backend reviews service of version 1</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">route:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">destination:</span></span><br><span class="line">        <span class="attr">host:</span> <span class="string">reviews</span></span><br><span class="line">        <span class="attr">subset:</span> <span class="string">v1</span></span><br><span class="line">      <span class="attr">weight:</span> <span class="number">10</span> <span class="comment"># &lt;--- canary release. % of traffic to subset v1</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">destination:</span></span><br><span class="line">        <span class="attr">host:</span> <span class="string">reviews</span></span><br><span class="line">        <span class="attr">subset:</span> <span class="string">v2</span></span><br><span class="line">      <span class="attr">weight:</span> <span class="number">10</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">destination:</span></span><br><span class="line">        <span class="attr">host:</span> <span class="string">reviews</span></span><br><span class="line">        <span class="attr">subset:</span> <span class="string">v3</span></span><br><span class="line">      <span class="attr">weight:</span> <span class="number">80</span></span><br></pre></td></tr></table></figure>
+
+<p>這樣透過 <code>http://example.com/?test-v2=true</code> 就可以連到 v2</p>
+<h1 id="Egress-Traffic-Security-and-Traffic-Control"><a href="#Egress-Traffic-Security-and-Traffic-Control" class="headerlink" title="Egress Traffic Security and Traffic Control"></a>Egress Traffic Security and Traffic Control</h1><ul>
+<li><p>istio 預設對 egress 的流量是全部開放的(ALLOW_ANY)</p>
+</li>
+<li><p>但這樣就無法監控 service 對外的流量情況</p>
+</li>
+<li><p>沒有監控到的在 Kiali 中就會以 PassThroughCluster 來呈現，若是有間控到的就會以 service entry 的方式出現</p>
+</li>
+</ul>
+<h1 id="Istio-Hands-On-for-Kubernetes"><a href="#Istio-Hands-On-for-Kubernetes" class="headerlink" title="Istio Hands-On for Kubernetes"></a>Istio Hands-On for Kubernetes</h1><h2 id="Finding-Performance-Problems"><a href="#Finding-Performance-Problems" class="headerlink" title="Finding Performance Problems"></a>Finding Performance Problems</h2><ul>
+<li><p>可透過 Kiali &amp; Jeager 來檢視回應狀況 &amp; 時間</p>
+</li>
+<li><p>要避免 cascade failure 的方式 =&gt; circuit break</p>
+</li>
+</ul>
+<h2 id="為什麼不直接用-Envoy-而用-Istio"><a href="#為什麼不直接用-Envoy-而用-Istio" class="headerlink" title="為什麼不直接用 Envoy 而用 Istio ?"></a>為什麼不直接用 Envoy 而用 Istio ?</h2><ul>
+<li><p>Envoy 其實挺複雜的，看一下官網文件就知道了</p>
+</li>
+<li><p>Istio 大幅簡化了 Envoy，讓其可以很方便的放入 Kubernetes 中運行，透過原本操作 Kubernetes 的方式就可以操作 Envoy</p>
+</li>
+<li><p>1.5 版之前，Istio control plane 是很複雜的，後來這些功能都收到 istiod 裡面了</p>
+</li>
+</ul>
+<h2 id="Telemetry"><a href="#Telemetry" class="headerlink" title="Telemetry"></a>Telemetry</h2><ul>
+<li>沒有辦法直接塞一個 sidecar container proxy 進到已經存在的 pod，只能砍掉那個 pod 讓他自己重新長出來</li>
+</ul>
+<h2 id="distributed-tracing"><a href="#distributed-tracing" class="headerlink" title="distributed tracing"></a>distributed tracing</h2><ul>
+<li><p>Istio 不需要額外使用 OpenTracing client library 蒐集資料，但需要 propagate headers</p>
+</li>
+<li><p>trace 是整個要追蹤的目標，這會根據目標的不同而不同；而 span 則是 trace 中不同的分段</p>
+</li>
+</ul>
+<p><img src="/blog/images/service-mesh/tracing-trace-span.png" alt="Trace &amp; Span"></p>
+<ul>
+<li><p><a target="_blank" rel="noopener" href="https://istio.io/latest/docs/tasks/observability/distributed-tracing/overview/#trace-context-propagation">requirements - x-request-id</a></p>
+</li>
+<li><p>若要收集 open tracing 的資料，application 需要做點調整，當收到以下 HTTP header 資訊時，若有進一步的呼叫，要帶上這些 HTTP header 的內容：</p>
+<ul>
+<li>x-request-id</li>
+<li>x-b3-traceid</li>
+<li>x-b3-spanid</li>
+<li>x-b3-parentspanid</li>
+<li>x-b3-sampled</li>
+<li>x-b3-flags</li>
+<li>x-ot-span-context</li>
+</ul>
+</li>
+</ul>
+<h1 id="Traffic-Management"><a href="#Traffic-Management" class="headerlink" title="Traffic Management"></a>Traffic Management</h1><ul>
+<li><p>當 workload 移到 Istio 後，建議額外加上一個 <code>app</code> label，因為在 Kiali 監控的顯示中會拉取 <code>app</code> label 的資料作為 App 名稱的顯示，提供一個方便辨識的值對於監控會很有幫助</p>
+</li>
+<li><p>加上 <code>vresion</code> label，當同一個 app 有不同的 version 存在時，可以在 Kialia Graph 中的 <strong>Versioned app graph</strong> 中看到不同 version 的分佈</p>
+</li>
+<li><p>對 virtualservice 的調整，會被 istiod 佈署到所有的 envoy proxy 中；並非用來取代 k8s 中的 service，其實兩者沒啥太多關係</p>
+</li>
+<li><p>virtualservice 其實只需要一個就好，並不需要每個 micro service 都搭配一個</p>
+</li>
+<li><p>在 virtualservice 的 <code>spec.hosts</code> 中的設定，指定的是 service 名稱，用來指定 virtualservice 的 rule 要套用到哪些 service 的 envoy proxy 上；若是要指定其他 namespace 的 service，則需要使用 FQDN</p>
+</li>
+<li><p>若要實作 sticky session，virtual service 就不需要有 weighted 的相關設定； 但若使用 useSourceIp 可能還是會有問題</p>
+</li>
+<li><p>若要透過 HTTP header 做 ConsistentHashing 來達成 sticky session 的效果，那程式中就必須要實作 header propagation</p>
+</li>
+<li><p>若沒有設定 weighting，那就跟原生的 k8s 一樣是 round robin；用了 weighting 就可以調整權重；進一步要用 sticky session 就不能用 weighting 設定了</p>
+</li>
+<li><p>適用情境：當每個 user 進來的 request 需要花大量的資源運算處理，而這結果是可以復用的；那就可以透過 ConsistentHashing 的設定讓同一個 user 去使用相同的 pod，而 pod 在處理完後快取在自己的 memory 中，有同樣的 request 就可以直接回應</p>
+<blockquote>
+<p>不過這也衍生出另外一個問題 =&gt; 要考量 pod lifecycle，不應該期待 pod 一直都會存活著</p>
+</blockquote>
+</li>
+</ul>
+<h1 id="Gateway"><a href="#Gateway" class="headerlink" title="Gateway"></a>Gateway</h1><ul>
+<li>canary 用在 frontend pod 會失效，因為 frontend pod 是第一個入口，而且 proxy 是運行在 container 本身發送 request 之後，因此分配比例這件事情其實就只是 browser 端就已經決定了，因此 canary deployment 設定的比例就會無效</li>
+</ul>
+<p><img src="/blog/images/service-mesh/istio-without-edge-proxy.png" alt="Istio without Edge Proxy"></p>
+<ul>
+<li>承上，若要在 frontend service 中要達成 canary 佈署指定的分配，就會需要一個 edge proxy 來解決這個問題(也就是 Istio Gateway)，作為整個 service chain 的第一個 service</li>
+</ul>
+<p><img src="/blog/images/service-mesh/istio-with-edge-proxy.png" alt="Istio without Edge Proxy"><br><img src="/blog/images/service-mesh/istio-with-edge-proxy-gateway.png" alt="Istio without Edge Proxy Gateway"></p>
+<ul>
+<li>Gateway 中的 <code>spec.servers.hosts</code> 設定可以用來限定特定 domain name 的 traffic</li>
+</ul>
+<h1 id="Dark-Releases"><a href="#Dark-Releases" class="headerlink" title="Dark Releases"></a>Dark Releases</h1><ul>
+<li><p>可以直接將新版的程式直接以 canary 的方式佈署，並透過 HTTP header match 的方式來篩選可用新版的使用者</p>
+</li>
+<li><p>透過上面的方式，新版程式可以直接佈署到 production 環境，透過 browser extension 的方式修改 HTTP header 直接在 production 環境真實測試</p>
+</li>
+<li><p>但要完成上面的目的，程式同時需要提供 HTTP header propagation 的相關開發</p>
+</li>
+</ul>
+<h1 id="Fault-Injection"><a href="#Fault-Injection" class="headerlink" title="Fault Injection"></a>Fault Injection</h1><ul>
+<li><p>可以透過 fault injection 來讓特定比例的 request 得到錯誤的回應，或是讓回應速度變慢</p>
+</li>
+<li><p>通常是用來與 chaos engineering 的概念搭配，試圖製造某些混亂，目的在於檢視目前系統是否可以進一步提昇穩定性的評估方法 </p>
+</li>
+</ul>
+<h1 id="Circuit-Breaking"><a href="#Circuit-Breaking" class="headerlink" title="Circuit Breaking"></a>Circuit Breaking</h1><ul>
+<li><p>網路不可靠，總是會有問題發生，如何避免 cascading fauilure 是個需要考慮的議題</p>
+</li>
+<li><p>cascading failure 隨時都有可能發生，不只可能是網路造成的，沒寫好的程式或是其他因素都有可能</p>
+</li>
+<li><p>failure 一定會發生，如何 fail fast 且不會影響服務，就可以搭配 circuit breaking 的機制來做</p>
+</li>
+<li><p>Istio 上的 circuit breaking 機制可以細到 pod level，因此同一個服務的多個 pod 其中一個有問題，就只會對其熔斷，不會影響同一個 service 的其他 pod</p>
+</li>
+<li><p>每一段時間，circuit breaker 就會去測試有問題的 pod 是否恢復，恢復的話就會重新把 traffic 送過去</p>
+</li>
+<li><p>micro service 的架構上，必須設計可以容忍某個服務臨時有狀況中斷，相關的 error handler 要做好</p>
+</li>
+<li><p>circuit breaking 並不是用來緩解有問題的程式的一個方式，通常是用來緊急處理用，有問題的程式終究還是要找到方法解決</p>
+</li>
+<li><p>istio 中要開發 circuit breaking 相關的設定，需要透過 Destination Rule (關鍵字：<code>Outlier Detection</code>)</p>
+</li>
+<li><p>baseEjectionTime 是用來指定將 pod 從 LB 移除的時間單位，隨著每次 pod 被偵測到尚未恢復，pod 從 LB 移除的時間就會呈現倍數加長</p>
+</li>
+<li><p>若是 service 有設定 circuit breaking，在 Kiali 上就會有一個小小的閃電圖示</p>
+</li>
+<li><p>其實 circuit breaking 可能會把系統弄的更複雜，因為目前沒有一個好的監控機制可以即時了解目前 circuit breaking 的運作狀況(但這問題應該之後會被其他軟體解決)</p>
+</li>
+</ul>
+<h1 id="Mutual-TLS"><a href="#Mutual-TLS" class="headerlink" title="Mutual TLS"></a>Mutual TLS</h1><ul>
+<li><p>可以用來避免在 cluster 內的 man-in-the-middle attack；同一個 worker node 之間的 pod 相互傳輸是沒啥問題的，但不同 worker node 之間的資料傳輸安全性可就無法被保證了</p>
+<blockquote>
+<p>跨不同 AZ 的 worker node，pod 之間的網路傳輸是會離開資料中心的</p>
+</blockquote>
+</li>
+<li><p>做法：</p>
+<ul>
+<li>撰寫規則，阻擋所有 envoy proxy 之間非 TLS 的流量</li>
+<li>升級所有 envoy proxy，讓相互之間的通訊套用 mTLS</li>
+</ul>
+</li>
+<li><p>mTLS 其實已經預設開啟，在 Kiali 圖形顯示中，把 Display 中的 <code>Security</code> 打勾，在服務之間的連線有出現一個鎖頭的圖示就表示是流量是經過 TLS 加密的</p>
+</li>
+<li><p>如果有個 pod 從 non-istio enabled namespace 送出 request 到 istio enabled namespace 中的 pod，中間的流量就無法自動被 istio mTLS 加密，而為了讓這流量可以正常，可以設定 <code>PERMISSIVE</code> mTLS(這是預設值)<br><img src="/blog/images/service-mesh/istio-permissive-mtls.png" alt="Istio permissive mTLS"></p>
+</li>
+<li><p>也可以將 mTLS 設定為 restrict，這樣就會拒絕非 HTTPS 的請求，只要套用以下的 YAML 設定：</p>
+</li>
+</ul>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">&quot;security.istio.io/v1beta1&quot;</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">&quot;PeerAuthentication&quot;</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">&quot;force-mtls&quot;</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">&quot;default&quot;</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">mtls:</span></span><br><span class="line">    <span class="attr">mode:</span> <span class="string">STRICT</span></span><br></pre></td></tr></table></figure>
+
+
+<h1 id="Customization-Istio"><a href="#Customization-Istio" class="headerlink" title="Customization Istio"></a>Customization Istio</h1><ul>
+<li><p>建立使用 istioctl 來管理 istio 相關的安裝 &amp; 設定</p>
+</li>
+<li><p><code>default</code> &amp; <code>demo</code> profile 除了安裝的元件不太相同之外，對於元件的 resource request &amp; limitation 設定也不同，而 default 會相對需要多一些的硬體資源</p>
+</li>
+<li><p>建議透過 Prometheus &amp; Grafana 觀察一段時間後，再設定合適的 resource request &amp; limitation</p>
+</li>
+<li><p>istio 若要透過 YAML 安裝在 minikube 中，需要把 <code>values.global.jwtPolicy</code> 設定為 <code>first-party-jwt</code></p>
+</li>
+</ul>
+<h1 id="Upgrade-Istio"><a href="#Upgrade-Istio" class="headerlink" title="Upgrade Istio"></a>Upgrade Istio</h1><ul>
+<li><p>in-place upgrade 很容易失敗，千萬不要在 production 環境上做這件事情</p>
+</li>
+<li><p>要使用 istio canary upgrade 必須先設定 <code>revision</code> label 才可以使用</p>
+</li>
+<li><p>帶有 revision label 的情況下，每個 envoy proxy 只會連到對應 revision label 的 istiod</p>
+</li>
+<li><p>canary upgrade 依然會將 ingress gateway &amp; egress gateway 進行 in-place upgrade，風險依然很大的</p>
+</li>
+<li><p>最保險的方式還是使用 Live Cluster Switchover 的方式，先建立一座全新的 cluster，安裝好所有新版的相關套件 &amp; workload，測試 ok 後再從 DNS level 將流量切過去 (只是因為修改的是 DNS，這就需要花點時間等待完全生效)</p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/ServiceMesh/" rel="tag"># ServiceMesh</a>
+              <a href="/blog/tags/Istio/" rel="tag"># Istio</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/AWS/AWS-CloudFront-Introduction/" rel="prev" title="[AWS] CloudFront 簡介">
+                  <i class="fa fa-chevron-left"></i> [AWS] CloudFront 簡介
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/ServiceMesh/istio-introdution/";
+    this.page.identifier = "ServiceMesh/istio-introdution/";
+    this.page.title = "Istio 簡介";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>

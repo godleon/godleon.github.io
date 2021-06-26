@@ -31,7 +31,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://godleon.github.io/blog/images/devops/terraform_module-example-structure.png">
 <meta property="article:published_time" content="2020-05-12T22:35:00.000Z">
-<meta property="article:modified_time" content="2021-03-17T02:07:05.977Z">
+<meta property="article:modified_time" content="2021-06-26T07:58:54.170Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="Terraform">
 <meta property="article:tag" content="DevOps">
@@ -175,18 +175,18 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/blog/archives">
-          <span class="site-state-item-count">154</span>
+          <span class="site-state-item-count">155</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/blog/categories/">
-        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-count">25</span>
         <span class="site-state-item-name">categories</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/blog/tags/">
-        <span class="site-state-item-count">109</span>
+        <span class="site-state-item-count">110</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -255,7 +255,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-03-17 10:07:05" itemprop="dateModified" datetime="2021-03-17T10:07:05+08:00">2021-03-17</time>
+                <time title="Modified: 2021-06-26 15:58:54" itemprop="dateModified" datetime="2021-06-26T15:58:54+08:00">2021-06-26</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -342,7 +342,7 @@
 <li><p>在 module 中要鎖定 terraform &amp; provider 的版本，因為 terraform 不同版本間並不相容，以下是範例：</p>
 </li>
 </ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">terraform &#123;</span><br><span class="line">  required_version &#x3D; &quot;&gt;&#x3D; 0.12, &lt; 0.13&quot;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">provider &quot;aws&quot; &#123;</span><br><span class="line">  region &#x3D; &quot;us-east-2&quot;</span><br><span class="line"></span><br><span class="line">  # AWS provider 2.0 以上的版本皆可</span><br><span class="line">  version &#x3D; &quot;~&gt; 2.0&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">terraform &#123;</span><br><span class="line">  required_version = &quot;&gt;= 0.12, &lt; 0.13&quot;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">provider &quot;aws&quot; &#123;</span><br><span class="line">  region = &quot;us-east-2&quot;</span><br><span class="line"></span><br><span class="line">  # AWS provider 2.0 以上的版本皆可</span><br><span class="line">  version = &quot;~&gt; 2.0&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <blockquote>
 <p>若是針對 production 環境，可以考慮鎖定更細的版本號</p>
 </blockquote>
@@ -359,7 +359,7 @@
 <li><p>若要直接使用 Terraform Registry 上的 module，不一定要完整指定 Git Repo ＆ version 來達成，可以類似以下比較簡單的宣告方式：</p>
 </li>
 </ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"># 使用範本</span><br><span class="line">module &quot;&lt;Name&gt;&quot; &#123;</span><br><span class="line">    source  &#x3D; &quot;&lt;OWNER&gt;&#x2F;&lt;REPO&gt;&#x2F;&lt;PROVIDER&gt;&quot;</span><br><span class="line">    version &#x3D; &quot;&lt;VERSION&gt;&quot;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># 實際使用範例</span><br><span class="line">module &quot;vault&quot; &#123;</span><br><span class="line">    source  &#x3D; &quot;hashicorp&#x2F;vault&#x2F;aws&quot;</span><br><span class="line">    version &#x3D; &quot;0.12.2&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"># 使用範本</span><br><span class="line">module &quot;&lt;Name&gt;&quot; &#123;</span><br><span class="line">    source  = &quot;&lt;OWNER&gt;/&lt;REPO&gt;/&lt;PROVIDER&gt;&quot;</span><br><span class="line">    version = &quot;&lt;VERSION&gt;&quot;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># 實際使用範例</span><br><span class="line">module &quot;vault&quot; &#123;</span><br><span class="line">    source  = &quot;hashicorp/vault/aws&quot;</span><br><span class="line">    version = &quot;0.12.2&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 
 <h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
