@@ -44,4 +44,10 @@ jobs:
         yarn install
         npx hexo clean
         npx hexo generate
-        ls -al ./
+        cd -
+        rm -rf master/blog
+        rm -rf master/index.html
+        cp -r raw/blog master/
+        cp raw/index.html master/index.html
+        cd master/
+        git status
