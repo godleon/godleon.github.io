@@ -31,11 +31,11 @@ jobs:
     
     - run: |
         yarn install
-        hexo clean
-        hexo generate
-        hexo new page "categories"
-        hexo new page "tags"
-        hexo new page "about"
-        ls -al blog/
+        npx hexo clean
+        npx hexo generate
+        npx hexo new page "categories"
+        npx hexo new page "tags"
+        npx hexo new page "about"
+        npx ls -al blog/
     # - run: npm run build --if-present
     # - run: npm test
