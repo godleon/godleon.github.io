@@ -43,12 +43,12 @@ jobs:
         cd raw/
         yarn install
         npx hexo clean
-        npx hexo deploy --generate
+        npx hexo generate
         cd -
         rm -rf master/blog
         rm -rf master/index.html
         cp -r raw/blog master/
-        cp raw/index.html master/index.html
+        cp raw/blog/index.html master/
         cd master/
         git status
 
