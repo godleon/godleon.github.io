@@ -30,7 +30,7 @@ jobs:
     - run: ls -al
     
     - run: |
-        npm install -g
+        npm install
         hexo clean
         hexo generate
         hexo new page "categories"
