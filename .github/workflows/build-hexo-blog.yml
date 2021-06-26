@@ -9,7 +9,7 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     # strategy:
     #   matrix:
@@ -30,7 +30,7 @@ jobs:
     - run: ls -al
     
     - run: |
-        npm install
+        yarn install
         hexo clean
         hexo generate
         hexo new page "categories"
