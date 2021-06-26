@@ -19,20 +19,29 @@ jobs:
     - uses: actions/checkout@v2
       with:
         ref: raw
+        path: raw
 
-    - name: Use Node.js 15.x
+    - uses: actions/checkout@v2
+      with:
+        ref: master
+        path: master
+
+    - name: Use Node.js 16.x
       uses: actions/setup-node@v1
       with:
-        node-version: 15.x
+        node-version: 16.x
     
     - run: node -v
     
-    - run: ls -al
-    
     - run: |
-        yarn install
-        npx hexo clean
-        npx hexo generate
-        ls -al blog/
+        ls -al
+        ls -al raw/
+        ls -al master/
+    
+    # - run: |
+    #     yarn install
+    #     npx hexo clean
+    #     npx hexo generate
+    #     ls -al blog/
     # - run: npm run build --if-present
     # - run: npm test
