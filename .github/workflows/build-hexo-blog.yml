@@ -51,3 +51,12 @@ jobs:
         cp raw/index.html master/index.html
         cd master/
         git status
+
+    - name: Commit files
+      run: |
+        git config --global user.name "godleon" 
+        git config --global user.email "godleon@gmail.com"
+        cd master/
+        git status
+        git add --all .
+        git status
