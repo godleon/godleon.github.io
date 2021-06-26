@@ -1,8 +1,10 @@
-name: Build Hexo Blog
+name: build-hexo-blog
 
 on:
   push:
     branches: [ "raw" ]
+  workflow_dispatch:
+    input:
 
 jobs:
   build:
@@ -15,12 +17,18 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        ref: raw
+
     - name: Use Node.js 15.x
       uses: actions/setup-node@v1
       with:
         node-version: 15.x
+    
     - run: node -v
-    - run: git branch
+    
+    - run: ls -al
+    
     - run: |
         npm install -g
         hexo clean
