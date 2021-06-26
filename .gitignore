@@ -3,3 +3,4 @@ source/_draft
 node_modules
 yarn.lock
 blog/
+db.json
