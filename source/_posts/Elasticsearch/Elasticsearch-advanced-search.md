@@ -220,7 +220,7 @@ POST /movies/_search
 以下是一些簡單範例：
 
 ```json
-#結構化搜索，精確匹配
+//結構化搜索，精確匹配
 DELETE products
 
 //加入資料
@@ -295,6 +295,17 @@ POST products/_search
           }
         }
       }
+    }
+  }
+}
+
+//使用 prefix 搜尋年份為 201 開頭的電影
+//但這樣的搜尋必須是 year 欄位為 keyword/text/wildcard 才有辦法執行
+GET /movies/_search
+{
+  "query": {
+    "prefix": {
+      "year": "201"
     }
   }
 }
@@ -1454,10 +1465,12 @@ Completion & Context Suggester
 
 這個是搜尋體驗優化的另一個重要功能；這功能可以協助使用者在輸入每一個字元時，系統可以快速到後端查詢到與目前輸入字元相關的結果並給出查詢字串補全的功能。
 
+此外，在 7.0 版後的 Elasticsearch，還提供了一個 `[search_as_you_type](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-as-you-type.html)` data type，用來協助使用者建置查詢字串自動補全的功能。
+
 
 ## [Completion Suggester](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-suggesters.html#completion-suggester)
 
-- Completion Suggester 提供 auto complete 的功能，因此使用者每輸入一個字，就需要即時發送一個查詢到後端來搜尋符合項目
+- Completion Suggester 提供 auto completion 的功能，因此使用者每輸入一個字，就需要即時發送一個查詢到後端來搜尋符合項目
 
 - 承上，這樣的行為對效能的要求就會相對嚴格；而 Elasticsearch 本身則採用了不同的數據結構來實現這個需求，將 analyzer 處理過後的數據編碼成 FST 和索引一起存放，而整個 FST 會被放到記憶體中，因此存取相對快很多
 

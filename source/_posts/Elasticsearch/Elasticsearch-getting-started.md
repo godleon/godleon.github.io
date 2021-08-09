@@ -1679,6 +1679,8 @@ Elasticsearch 聚合分析簡介
 
 - [Pipiline Aggregation](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-pipeline.html): 對其他 aggregation 的結果再一次的進行 aggregation
 
+- [Histogram Aggregation](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-histogram-aggregation.html)：可以針對特定欄位值，指定範圍後一次產生多個 bucket 並統計各範圍的區間值，而統計區間一般是使用數值值型的欄位，但也可以使用[日期欄位](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-datehistogram-aggregation.html)
+
 
 ## 範例：Bucketing (分桶)
 
@@ -1699,6 +1701,8 @@ GET kibana_sample_data_flights/_search
 ```
 
 ## 範例：Bucketing + Metric
+
+這是 aggregate 後再 aggregate 的範例：
 
 ```json
 //查看航班目的地的統計資訊，並以目的地為單位，額外增加平均，最高最低價格
@@ -1760,6 +1764,41 @@ GET kibana_sample_data_flights/_search
             "size": 5
           }
         }
+      }
+    }
+  }
+}
+```
+
+## 範例：Histogram
+
+```json
+//查看 price 欄位以 50 為區間的 histogram 資訊
+POST /sales/_search?size=0
+{
+  "aggs": {
+    "prices": {
+      "histogram": {
+        "field": "price",
+        "interval": 50
+      }
+    }
+  }
+}
+
+//搜尋 agent 為 "Googlebot"，以小時為區間的 histogram 資料
+GET /kafka-logs/_search?size=0
+{
+  "query": {
+    "match": {
+      "agent": "Googlebot"
+    }
+  }, 
+  "aggs": {
+    "timestamp": {
+      "date_histogram": {
+        "field": "@timestamp",
+        "interval": "hour"
       }
     }
   }

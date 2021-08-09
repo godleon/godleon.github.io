@@ -141,6 +141,7 @@ EC2 簡介
 - **Shutdown Behavior**：可指定關閉 instance 時，只是單純的停止(stop)，或是直接將其終止(terminate)
 
 - **Enable Termination Protection**：可以用來保護此 VM 不會被誤刪
+> 若是 shutdown behavior 設定為 `terminate`，那當 EC2 instance shutdown 時，還是會被移除，不受 Termination Protection 的保護
 
 - **Tenancy**：可用來決定是否可以跟別的使用者共享同一台實體機的資源，有 `Shared`、`Dedicated`、`Dedicated host` 三個選項
 
@@ -306,3 +307,9 @@ References
 - [Amazon EC2 常見問答集 – Amazon Web Services](https://aws.amazon.com/tw/ec2/faqs/) [(英文版)](https://aws.amazon.com/ec2/faqs/?nc1=h_ls)
 
 - [Security groups for your VPC - Amazon Virtual Private Cloud](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html)
+
+- [Edmodo: Optimizing Infrastructure Costs with Spot Fleet and On Demand Instances - YouTube](https://www.youtube.com/watch?v=zbq_ZU2dl2Y)
+
+- [Leveraging Amazon EC2 Spot Best Practices Using the New Capacity Optimized Allocation Strategy - YouTube](https://www.youtube.com/watch?v=whFb8YHjdFo)
+
+- [Technical Deep Dive on Amazon EC2 Fleet - AWS Online Tech Talks - YouTube](https://www.youtube.com/watch?v=QX3PDkOqXLE)

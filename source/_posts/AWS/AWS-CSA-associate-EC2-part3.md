@@ -115,6 +115,8 @@ Placement Group
 
 ## Cluster
 
+![AWS EC2 Placement Group - Cluster](/blog/images/aws/EC2_PlacementGroup-cluster.png)
+
 - instance 一定會在同一個 AZ 內
 
 - 會盡可能的將 instance 放在一起，甚至同一個機櫃上，以取得更低的網路延遲
@@ -123,11 +125,15 @@ Placement Group
 
 - 承上三點，所以選擇 instance type 時，至少要選擇有 10Gb 以上網路的 instance type 才能享受到 placement group 的所帶來的優勢
 
+- 通常用在需要快速完成的 big data 相關應用；或是需要極低的 network latency & high throughput 的其他應用
+
 - **增加新的 EC2 intance 到 cluster placement group，可能會因為當下 VM 所在的硬體已經資源不足，出現 `insufficient capacity error`；此時的解決方法就是停止並重新啟動 VM，讓 VM 移動到不同的硬體上啟動，就可以解決此問題(新的 VM 就可以順利增加了)**
 
 ## Spread
 
-- instance 不一定會在同一個 AZ 內
+![AWS EC2 Placement Group - Spread](/blog/images/aws/EC2_PlacementGroup-spread.png)
+
+- instance 不一定會在同一個 AZ 內；在同一個 AZ 中的 insance 也不會在相同的實體機器上
 
 - 不同 placement group 的 instance 絕對不會在同一個 rack 上，因此某個 rack 發生問題不會導致所有 instance 無法使用
 
@@ -135,19 +141,27 @@ Placement Group
 
 - 隔離的單位為單一 instance
 
-- **每個 spread placement group 在每個 AZ 最多只能有 7 個 running instance** (**只有 spread 有此限制**)
+- **每個 spread placement group 在每個 AZ 最多只能有 7 個 running instance** (因此若是 EC2 instance 太多，很容易碰到上限)
+
+- 最大化 HA 的選項
 
 ## Partition
 
+![AWS EC2 Placement Group - Partition](/blog/images/aws/EC2_PlacementGroup-partition.png)
+
 - instance 不一定會在同一個 AZ 內
 
+- 每個 AZ 中最多只能有 7 個 partition；最多總共可以有 100 個 EC2 instance
+
 - 運作方式 & 效果 spread type 類似，只是單位是 instance group (多個 instance 形成一個名稱為 `partition` 的單位)
+
+- 從 EC2 instance 的 metadata 中可以取得 partition 配置的相關資訊
 
 - 不同的 partition 不會被安排在同一個 rack 上
 
 - 隔離的單位為 partition(也就是一群 instance)
 
-- 通常像是 HDFS、HBase、Cassandra 可以利用 partition placement group 來額外設定 hardware-level HA
+- 通常像是 HDFS、HBase、Cassandra、Kafka 可以利用 partition placement group 來額外設定 hardware-level HA
 
 ## 其他
 
