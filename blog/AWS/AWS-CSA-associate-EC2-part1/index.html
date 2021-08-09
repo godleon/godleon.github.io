@@ -31,7 +31,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/EC2_spot-lifecycle.png">
 <meta property="article:published_time" content="2020-05-27T20:50:00.000Z">
-<meta property="article:modified_time" content="2021-06-28T08:48:39.185Z">
+<meta property="article:modified_time" content="2021-08-09T06:12:22.641Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -256,7 +256,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-06-28 16:48:39" itemprop="dateModified" datetime="2021-06-28T16:48:39+08:00">2021-06-28</time>
+                <time title="Modified: 2021-08-09 14:12:22" itemprop="dateModified" datetime="2021-08-09T14:12:22+08:00">2021-08-09</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -396,6 +396,9 @@
 <li><p><strong>Shutdown Behavior</strong>：可指定關閉 instance 時，只是單純的停止(stop)，或是直接將其終止(terminate)</p>
 </li>
 <li><p><strong>Enable Termination Protection</strong>：可以用來保護此 VM 不會被誤刪</p>
+<blockquote>
+<p>若是 shutdown behavior 設定為 <code>terminate</code>，那當 EC2 instance shutdown 時，還是會被移除，不受 Termination Protection 的保護</p>
+</blockquote>
 </li>
 <li><p><strong>Tenancy</strong>：可用來決定是否可以跟別的使用者共享同一台實體機的資源，有 <code>Shared</code>、<code>Dedicated</code>、<code>Dedicated host</code> 三個選項</p>
 </li>
@@ -537,6 +540,12 @@
 <li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/tw/ec2/faqs/">Amazon EC2 常見問答集 – Amazon Web Services</a> <a target="_blank" rel="noopener" href="https://aws.amazon.com/ec2/faqs/?nc1=h_ls">(英文版)</a></p>
 </li>
 <li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html">Security groups for your VPC - Amazon Virtual Private Cloud</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=zbq_ZU2dl2Y">Edmodo: Optimizing Infrastructure Costs with Spot Fleet and On Demand Instances - YouTube</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=whFb8YHjdFo">Leveraging Amazon EC2 Spot Best Practices Using the New Capacity Optimized Allocation Strategy - YouTube</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=QX3PDkOqXLE">Technical Deep Dive on Amazon EC2 Fleet - AWS Online Tech Talks - YouTube</a></p>
 </li>
 </ul>
 

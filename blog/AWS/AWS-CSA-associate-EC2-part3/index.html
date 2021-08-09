@@ -29,8 +29,11 @@
 <meta property="og:site_name" content="小信豬的原始部落">
 <meta property="og:description" content="此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為與 EC2 相關的服務，會分成三篇文章來記錄，此為第三部份，包含了 Bootstrap Scripts、Instance Metadata、Placement Group、WAF、EFS、FSx、FSx for Lustre ... 等內容">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/EC2_PlacementGroup-cluster.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/EC2_PlacementGroup-spread.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/EC2_PlacementGroup-partition.png">
 <meta property="article:published_time" content="2020-06-01T21:20:00.000Z">
-<meta property="article:modified_time" content="2021-06-28T08:48:39.185Z">
+<meta property="article:modified_time" content="2021-08-09T06:12:22.641Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -40,6 +43,7 @@
 <meta property="article:tag" content="FSx for Lustre">
 <meta property="article:tag" content="WAF">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/aws/EC2_PlacementGroup-cluster.png">
 
 
 <link rel="canonical" href="https://godleon.github.io/blog/AWS/AWS-CSA-associate-EC2-part3/">
@@ -257,7 +261,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-06-28 16:48:39" itemprop="dateModified" datetime="2021-06-28T16:48:39+08:00">2021-06-28</time>
+                <time title="Modified: 2021-08-09 14:12:22" itemprop="dateModified" datetime="2021-08-09T14:12:22+08:00">2021-08-09</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -374,7 +378,8 @@
 </blockquote>
 <p>簡單來說，<code>Placement Group</code> 這個功能可以讓使用者根據需求決定”你想要把 EC2 instance 擺在哪裡?”這件事情</p>
 <p>而 AWS 提供了三種 placement group，分別是 <code>cluster</code>、<code>spread</code>、<code>partition</code>，使用者可以根據需求自行選擇：</p>
-<h2 id="Cluster"><a href="#Cluster" class="headerlink" title="Cluster"></a>Cluster</h2><ul>
+<h2 id="Cluster"><a href="#Cluster" class="headerlink" title="Cluster"></a>Cluster</h2><p><img src="/blog/images/aws/EC2_PlacementGroup-cluster.png" alt="AWS EC2 Placement Group - Cluster"></p>
+<ul>
 <li><p>instance 一定會在同一個 AZ 內</p>
 </li>
 <li><p>會盡可能的將 instance 放在一起，甚至同一個機櫃上，以取得更低的網路延遲</p>
@@ -383,11 +388,14 @@
 </li>
 <li><p>承上三點，所以選擇 instance type 時，至少要選擇有 10Gb 以上網路的 instance type 才能享受到 placement group 的所帶來的優勢</p>
 </li>
+<li><p>通常用在需要快速完成的 big data 相關應用；或是需要極低的 network latency &amp; high throughput 的其他應用</p>
+</li>
 <li><p><strong>增加新的 EC2 intance 到 cluster placement group，可能會因為當下 VM 所在的硬體已經資源不足，出現 <code>insufficient capacity error</code>；此時的解決方法就是停止並重新啟動 VM，讓 VM 移動到不同的硬體上啟動，就可以解決此問題(新的 VM 就可以順利增加了)</strong></p>
 </li>
 </ul>
-<h2 id="Spread"><a href="#Spread" class="headerlink" title="Spread"></a>Spread</h2><ul>
-<li><p>instance 不一定會在同一個 AZ 內</p>
+<h2 id="Spread"><a href="#Spread" class="headerlink" title="Spread"></a>Spread</h2><p><img src="/blog/images/aws/EC2_PlacementGroup-spread.png" alt="AWS EC2 Placement Group - Spread"></p>
+<ul>
+<li><p>instance 不一定會在同一個 AZ 內；在同一個 AZ 中的 insance 也不會在相同的實體機器上</p>
 </li>
 <li><p>不同 placement group 的 instance 絕對不會在同一個 rack 上，因此某個 rack 發生問題不會導致所有 instance 無法使用</p>
 </li>
@@ -395,19 +403,26 @@
 </li>
 <li><p>隔離的單位為單一 instance</p>
 </li>
-<li><p><strong>每個 spread placement group 在每個 AZ 最多只能有 7 個 running instance</strong> (<strong>只有 spread 有此限制</strong>)</p>
+<li><p><strong>每個 spread placement group 在每個 AZ 最多只能有 7 個 running instance</strong> (因此若是 EC2 instance 太多，很容易碰到上限)</p>
+</li>
+<li><p>最大化 HA 的選項</p>
 </li>
 </ul>
-<h2 id="Partition"><a href="#Partition" class="headerlink" title="Partition"></a>Partition</h2><ul>
+<h2 id="Partition"><a href="#Partition" class="headerlink" title="Partition"></a>Partition</h2><p><img src="/blog/images/aws/EC2_PlacementGroup-partition.png" alt="AWS EC2 Placement Group - Partition"></p>
+<ul>
 <li><p>instance 不一定會在同一個 AZ 內</p>
 </li>
+<li><p>每個 AZ 中最多只能有 7 個 partition；最多總共可以有 100 個 EC2 instance</p>
+</li>
 <li><p>運作方式 &amp; 效果 spread type 類似，只是單位是 instance group (多個 instance 形成一個名稱為 <code>partition</code> 的單位)</p>
+</li>
+<li><p>從 EC2 instance 的 metadata 中可以取得 partition 配置的相關資訊</p>
 </li>
 <li><p>不同的 partition 不會被安排在同一個 rack 上</p>
 </li>
 <li><p>隔離的單位為 partition(也就是一群 instance)</p>
 </li>
-<li><p>通常像是 HDFS、HBase、Cassandra 可以利用 partition placement group 來額外設定 hardware-level HA</p>
+<li><p>通常像是 HDFS、HBase、Cassandra、Kafka 可以利用 partition placement group 來額外設定 hardware-level HA</p>
 </li>
 </ul>
 <h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><ul>
