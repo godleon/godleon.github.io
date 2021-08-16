@@ -73,6 +73,7 @@ Image Builder 服務的運行流程如下圖：
 3. 驗證無誤，協助發布到指定的 region
 
 
+
 AMI 在 production 環境上的管理應用
 ===============================
 
@@ -81,3 +82,10 @@ AMI 在 production 環境上的管理應用
 - 搭配 **`AWS Config`** 服務，找出沒有符合使用規範(必須使用特定 tag 的 AMI) 的 EC2 instance (如下圖所示)
 
 ![AWS AMI in production with AWS Config service](/blog/images/aws/AMI/AMI-in-production-with-AWS-Config-service.png)
+
+
+
+References
+==========
+
+- [Ultimate AWS Certified SysOps Administrator Associate 2021 | Udemy](https://www.udemy.com/course/ultimate-aws-certified-sysops-administrator-associate/)
