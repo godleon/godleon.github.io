@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="此篇文章是學習 AWS 認證課程(Certified SysOps Administrator Associate)內容時所留下的學習筆記，主要內容為實際操作維運 CloudFormation 服務時，需要了解的相關概念 &amp; 基礎知識，以及相關需要注意的事項">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AWS SOA 學習筆記 - CloudFormation">
+<meta property="og:url" content="https://godleon.github.io/blog/AWS/AWS-SOA-CloudFormation/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章是學習 AWS 認證課程(Certified SysOps Administrator Associate)內容時所留下的學習筆記，主要內容為實際操作維運 CloudFormation 服務時，需要了解的相關概念 &amp; 基礎知識，以及相關需要注意的事項">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/CloudFormation_signal-wait.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/CloudFormation_ChangeSets.png">
+<meta property="article:published_time" content="2021-09-12T10:15:00.000Z">
+<meta property="article:modified_time" content="2021-09-12T10:17:55.517Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="AWS">
+<meta property="article:tag" content="CloudFormation">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/aws/CloudFormation_signal-wait.png">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/AWS/AWS-SOA-CloudFormation/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>AWS SOA 學習筆記 - CloudFormation | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#CloudFormation-Update-amp-Delete"><span class="nav-number">1.</span> <span class="nav-text">CloudFormation Update &amp; Delete</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CloudFormation-Template-%E5%85%A7%E5%AE%B9%E7%B5%84%E6%88%90"><span class="nav-number">2.</span> <span class="nav-text">CloudFormation Template 內容組成</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Resources"><span class="nav-number">2.1.</span> <span class="nav-text">Resources</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Parameters"><span class="nav-number">2.2.</span> <span class="nav-text">Parameters</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mappings"><span class="nav-number">2.3.</span> <span class="nav-text">Mappings</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Outputs"><span class="nav-number">2.4.</span> <span class="nav-text">Outputs</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Exports-amp-Cross-Stack-Reference"><span class="nav-number">2.4.1.</span> <span class="nav-text">Exports &amp; Cross Stack Reference</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Conditions"><span class="nav-number">2.5.</span> <span class="nav-text">Conditions</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Intrisic-Function"><span class="nav-number">2.6.</span> <span class="nav-text">Intrisic Function</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Helper-scripts"><span class="nav-number">3.</span> <span class="nav-text">Helper scripts</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#cfn-init"><span class="nav-number">3.1.</span> <span class="nav-text">cfn-init</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cfn-signal-amp-wait-condition"><span class="nav-number">3.2.</span> <span class="nav-text">cfn-signal &amp; wait condition</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-cfn-signal-%E9%81%87%E5%88%B0%E5%95%8F%E9%A1%8C%E6%99%82%E5%A6%82%E4%BD%95%E6%8E%92%E9%99%A4"><span class="nav-number">3.3.</span> <span class="nav-text">使用 cfn-signal 遇到問題時如何排除?</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Auto-Scaling-Group"><span class="nav-number">4.</span> <span class="nav-text">Auto Scaling Group</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#CreationPolicy"><span class="nav-number">4.1.</span> <span class="nav-text">CreationPolicy</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#UpdatePolicy"><span class="nav-number">4.2.</span> <span class="nav-text">UpdatePolicy</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#rolling-update"><span class="nav-number">4.2.1.</span> <span class="nav-text">rolling update</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#replace"><span class="nav-number">4.2.2.</span> <span class="nav-text">replace</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%A7%BB%E9%99%A4-CloudFormation-stack"><span class="nav-number">5.</span> <span class="nav-text">移除 CloudFormation stack</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Deletion-Policy"><span class="nav-number">5.1.</span> <span class="nav-text">Deletion Policy</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Termination-Protection"><span class="nav-number">5.2.</span> <span class="nav-text">Termination Protection</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E9%9C%80%E8%A6%81%E7%95%99%E6%84%8F%E7%9A%84%E5%8A%9F%E8%83%BD"><span class="nav-number">6.</span> <span class="nav-text">其他需要留意的功能</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Rollback"><span class="nav-number">6.1.</span> <span class="nav-text">Rollback</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Nested-Stack"><span class="nav-number">6.2.</span> <span class="nav-text">Nested Stack</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ChangeSets"><span class="nav-number">6.3.</span> <span class="nav-text">ChangeSets</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Drifts"><span class="nav-number">6.4.</span> <span class="nav-text">Drifts</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DependsOn"><span class="nav-number">6.5.</span> <span class="nav-text">DependsOn</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#StackSet"><span class="nav-number">6.6.</span> <span class="nav-text">StackSet</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">7.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">158</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">111</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/AWS/AWS-SOA-CloudFormation/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AWS SOA 學習筆記 - CloudFormation
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2021-09-12 18:15:00 / Modified: 18:17:55" itemprop="dateCreated datePublished" datetime="2021-09-12T18:15:00+08:00">2021-09-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/AWS/" itemprop="url" rel="index"><span itemprop="name">AWS</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/AWS/AWS-SOA-CloudFormation/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="AWS/AWS-SOA-CloudFormation/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此篇文章是學習 AWS 認證課程(Certified SysOps Administrator Associate)內容時所留下的學習筆記，主要內容為實際操作維運 CloudFormation 服務時，需要了解的相關概念 & 基礎知識，以及相關需要注意的事項</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="CloudFormation-Update-amp-Delete"><a href="#CloudFormation-Update-amp-Delete" class="headerlink" title="CloudFormation Update &amp; Delete"></a>CloudFormation Update &amp; Delete</h1><ul>
+<li><p>調整 CloudFormation stack YAML 後，若是從 console 中看到 <code>Action=Modify</code> &amp; <code>Replcace=True</code>，以 EC2 instance 為例，就會被 terminated 後重建，原本的資源不會保留；若是 <code>Replcace=False</code> 那就會保留原有的 resource 僅進行調整</p>
+</li>
+<li><p>資源建立的順序，是透過 <code>!Ref</code> 來判斷的</p>
+</li>
+</ul>
+<h1 id="CloudFormation-Template-內容組成"><a href="#CloudFormation-Template-內容組成" class="headerlink" title="CloudFormation Template 內容組成"></a>CloudFormation Template 內容組成</h1><h2 id="Resources"><a href="#Resources" class="headerlink" title="Resources"></a>Resources</h2><ul>
+<li><p><code>Resources</code> 的設定是必要的，是用來指定要建立 or 設定什麼 AWS resource (可參考 <a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-template-resource-type-ref.html">AWS 官方文件</a>找到 resource 列表)</p>
+</li>
+<li><p>以 <code>AWS:&quot;aws-product-name::data-type-name</code> 的形式表示</p>
+</li>
+<li><p>可互相參考 &amp; 連結，而這樣的定義通常也可以用來看出 resource 之間的相依關係</p>
+</li>
+<li><p>所有要建立的 resource 都必須清楚定義在 CloudFormation tempalte 中，不能做 code generation 這類的行為，因此無法產生動態數量的 AWS resource</p>
+</li>
+<li><p>並非所有 AWS resource 都可以透過 CloudFormation 建立，還是有少數的資源無法；但可以透過 AWS Lambda Custom Resource 來做 work around</p>
+</li>
+</ul>
+<h2 id="Parameters"><a href="#Parameters" class="headerlink" title="Parameters"></a>Parameters</h2><ul>
+<li><p><code>Parameters</code> 是提供 input 給 CloudFormation template 的方式</p>
+</li>
+<li><p>通常在以下情況會用到 parameters：</p>
+<ul>
+<li>需要復用 CloudFormation template 時，可能是在跨公司 or 組織的狀況下</li>
+<li>某些設定無法預先知道，例如：SSH Key</li>
+</ul>
+</li>
+<li><p>透過 type 的特性，可以在開發 CloudFormation template 時避免掉很多錯誤</p>
+</li>
+<li><p>CloudFormation 中有很多設定可以用來控制如何使用 parameter，例如：<code>Type</code>、<code>Description</code>、<code>Constraints</code>、<code>ConstraintDescription</code>、<code>Min/Max Length</code>、<code>Min/Max Value</code>、<code>Defaults</code>、<code>AllowValues(array)</code>、<code>AllowedPattern(regexp)</code>、<code>NoEcho(Boolean, 用來傳遞 secret)</code> … 等等</p>
+</li>
+<li><p>要引用透過 parameter 傳進來的內容，必須使用 <code>Fn::Ref</code>，也就是 <code>!Ref</code> 關鍵字</p>
+</li>
+<li><p>除了自訂的 parameter 之外，AWS 還提供了 <a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/pseudo-parameter-reference.html"><code>pseudo parameter</code></a> 可供使用，基本概念就是用來參考到 AWS resource 相關資訊，例如：</p>
+<ul>
+<li><code>AWS:AccountID</code>：1234567890</li>
+<li><code>AWS::NoValue</code>：沒有任何內容</li>
+<li><code>AWS::Region</code>：us-east-2</li>
+<li><code>AWS::StackId</code>：arn:aws:cloudformation:us-east-1:：1234567890:stack/MyStack/xxx-xxx-xxx-xxx</li>
+<li><code>AWS::StackName</code>：MyStack</li>
+</ul>
+</li>
+</ul>
+<h2 id="Mappings"><a href="#Mappings" class="headerlink" title="Mappings"></a>Mappings</h2><p><code>Mappings</code> 是一群預先定義好的 value，以三層結構的方式定義，常用來當 key 的內容像是 region id, environment … 等等，但需要注意的是，在 <code>Mappings</code> 的 section 中，不能包含 paramter、pseudo parameter、intrinsic functions …. 等內容存在。</p>
+<p>以下是一個 Mappings 的定義範例：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">Mappings:</span> </span><br><span class="line">  <span class="attr">RegionMap:</span> </span><br><span class="line">    <span class="attr">us-east-1:</span></span><br><span class="line">      <span class="attr">HVM64:</span> <span class="string">ami-0ff8a91507f77f867</span></span><br><span class="line">      <span class="attr">HVMG2:</span> <span class="string">ami-0a584ac55a7631c0c</span></span><br><span class="line">    <span class="attr">us-west-1:</span></span><br><span class="line">      <span class="attr">HVM64:</span> <span class="string">ami-0bdb828fd58c52235</span></span><br><span class="line">      <span class="attr">HVMG2:</span> <span class="string">ami-066ee5fd4a9ef77f1</span></span><br></pre></td></tr></table></figure>
+
+<p>在 CloudFormation template 用引用 Mappings 的內容，則是需要使用到 <a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-findinmap.html"><code>Fn::FindInMap</code></a> function，參考使用範例如下：</p>
+<blockquote>
+<p>語法 <code>!FindInMap [ MapName, TopLevelKey, SecondLevelKey ]</code></p>
+</blockquote>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">....</span> <span class="string">(略)</span></span><br><span class="line"><span class="attr">Resources:</span> </span><br><span class="line">  <span class="attr">myEC2Instance:</span> </span><br><span class="line">    <span class="attr">Type:</span> <span class="string">&quot;AWS::EC2::Instance&quot;</span></span><br><span class="line">    <span class="attr">Properties:</span></span><br><span class="line">      <span class="comment"># 這裡同時 pseudo parameter</span></span><br><span class="line">      <span class="attr">ImageId:</span> <span class="type">!FindInMap</span> [<span class="string">RegionMap</span>, <span class="type">!Ref</span> <span class="string">&quot;AWS::Region&quot;</span>, <span class="string">HVM64</span>]</span><br><span class="line">      <span class="attr">InstanceType:</span> <span class="string">m1.small</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="Outputs"><a href="#Outputs" class="headerlink" title="Outputs"></a>Outputs</h2><ul>
+<li><p><code>Outputs</code> section 是用來定義 cloudformation stack 的輸出內容(非必要)，若是有定義，透過 AWS console/CLI 就可以看到</p>
+</li>
+<li><p>這通常用在有其他 stack 要利用特定 stack output value 時，例如：參考到 network stack 產生出來的 VPC/subnet ID</p>
+</li>
+<li><p>若是 stack A 的 output 有被其他 stack 參考到，那在所有參考到 stack A output 的 stack 都被刪除前，stack A 都無法被刪除</p>
+</li>
+</ul>
+<p>Ouputs section 的定義格式如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 格式</span></span><br><span class="line"><span class="attr">Outputs:</span></span><br><span class="line">  <span class="attr">Logical ID:</span></span><br><span class="line">    <span class="attr">Description:</span> <span class="string">Information</span> <span class="string">about</span> <span class="string">the</span> <span class="string">value</span></span><br><span class="line">    <span class="attr">Value:</span> <span class="string">Value</span> <span class="string">to</span> <span class="string">return</span></span><br><span class="line">    <span class="attr">Export:</span></span><br><span class="line">      <span class="attr">Name:</span> <span class="string">Value</span> <span class="string">to</span> <span class="string">export</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 實際範例</span></span><br><span class="line"><span class="attr">Outputs:</span></span><br><span class="line">  <span class="attr">BackupLoadBalancerDNSName:</span></span><br><span class="line">    <span class="attr">Description:</span> <span class="string">The</span> <span class="string">DNSName</span> <span class="string">of</span> <span class="string">the</span> <span class="string">backup</span> <span class="string">load</span> <span class="string">balancer</span></span><br><span class="line">    <span class="attr">Value:</span> <span class="type">!GetAtt</span> <span class="string">BackupLoadBalancer.DNSName</span></span><br><span class="line">    <span class="attr">Condition:</span> <span class="string">CreateProdResources</span></span><br><span class="line">  <span class="attr">InstanceID:</span></span><br><span class="line">    <span class="attr">Description:</span> <span class="string">The</span> <span class="string">Instance</span> <span class="string">ID</span></span><br><span class="line">    <span class="attr">Value:</span> <span class="type">!Ref</span> <span class="string">EC2Instance</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="Exports-amp-Cross-Stack-Reference"><a href="#Exports-amp-Cross-Stack-Reference" class="headerlink" title="Exports &amp; Cross Stack Reference"></a>Exports &amp; Cross Stack Reference</h3><p>在 CloudFormation template 中除了定義 outputs 之外，也可以透過定義 <code>Export</code> 的方式讓其他的 stack 可以透過 <code>Fn::ImportValue</code> 的方式參考到目前 stack 的 outputs，重點如下：</p>
+<ul>
+<li><p><code>Export</code> 的定義是用來做 cross-stack reference 用的，在同一個帳號中，region 內的 Export name 不能重複</p>
+</li>
+<li><p>Export name 的值不能 ref 到其他的 AWS resource，但可以用 pseudo parameter，例如：</p>
+</li>
+</ul>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">Export:</span></span><br><span class="line">  <span class="attr">Name:</span> <span class="type">!Join</span> [ <span class="string">&quot;:&quot;</span>, [ <span class="type">!Ref</span> <span class="string">&quot;AWS::StackName&quot;</span>, <span class="string">AccountVPC</span> ] ]</span><br></pre></td></tr></table></figure>
+
+<p>以下是使用範例：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Stack A Export</span></span><br><span class="line"><span class="attr">Outputs:</span></span><br><span class="line">  <span class="attr">PublicSubnet:</span></span><br><span class="line">    <span class="attr">Description:</span> <span class="string">The</span> <span class="string">subnet</span> <span class="string">ID</span> <span class="string">to</span> <span class="string">use</span> <span class="string">for</span> <span class="string">public</span> <span class="string">web</span> <span class="string">servers</span></span><br><span class="line">    <span class="attr">Value:</span></span><br><span class="line">      <span class="attr">Ref:</span> <span class="string">PublicSubnet</span></span><br><span class="line">    <span class="attr">Export:</span></span><br><span class="line">      <span class="attr">Name:</span></span><br><span class="line">        <span class="attr">&#x27;Fn::Sub&#x27;:</span> <span class="string">&#x27;$&#123;AWS::StackName&#125;-SubnetID&#x27;</span></span><br><span class="line">  <span class="attr">WebServerSecurityGroup:</span></span><br><span class="line">    <span class="attr">Description:</span> <span class="string">The</span> <span class="string">security</span> <span class="string">group</span> <span class="string">ID</span> <span class="string">to</span> <span class="string">use</span> <span class="string">for</span> <span class="string">public</span> <span class="string">web</span> <span class="string">servers</span></span><br><span class="line">    <span class="attr">Value:</span></span><br><span class="line">      <span class="attr">&#x27;Fn::GetAtt&#x27;:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">WebServerSecurityGroup</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">GroupId</span></span><br><span class="line">    <span class="attr">Export:</span></span><br><span class="line">      <span class="attr">Name:</span></span><br><span class="line">        <span class="attr">&#x27;Fn::Sub&#x27;:</span> <span class="string">&#x27;$&#123;AWS::StackName&#125;-SecurityGroupID&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Stack B Import</span></span><br><span class="line"><span class="attr">Resources:</span></span><br><span class="line">  <span class="attr">WebServerInstance:</span></span><br><span class="line">    <span class="attr">Type:</span> <span class="string">&#x27;AWS::EC2::Instance&#x27;</span></span><br><span class="line">    <span class="attr">Properties:</span></span><br><span class="line">      <span class="attr">InstanceType:</span> <span class="string">t2.micro</span></span><br><span class="line">      <span class="attr">ImageId:</span> <span class="string">ami-a1b23456</span></span><br><span class="line">      <span class="attr">NetworkInterfaces:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">GroupSet:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="type">!ImportValue</span> </span><br><span class="line">              <span class="attr">&#x27;Fn::Sub&#x27;:</span> <span class="string">&#x27;$&#123;NetworkStackNameParameter&#125;-SecurityGroupID&#x27;</span></span><br><span class="line">          <span class="attr">AssociatePublicIpAddress:</span> <span class="string">&#x27;true&#x27;</span></span><br><span class="line">          <span class="attr">DeviceIndex:</span> <span class="string">&#x27;0&#x27;</span></span><br><span class="line">          <span class="attr">DeleteOnTermination:</span> <span class="string">&#x27;true&#x27;</span></span><br><span class="line">          <span class="attr">SubnetId:</span> <span class="type">!ImportValue</span> </span><br><span class="line">            <span class="attr">&#x27;Fn::Sub&#x27;:</span> <span class="string">&#x27;$&#123;NetworkStackNameParameter&#125;-SubnetID&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="Conditions"><a href="#Conditions" class="headerlink" title="Conditions"></a>Conditions</h2><p><code>Conditions</code> 是用來讓開發者可以決定什麼情況下要不要建立 resource，例如：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">Parameters:</span></span><br><span class="line">  <span class="attr">EnvType:</span></span><br><span class="line">    <span class="attr">Type:</span> <span class="string">String</span></span><br><span class="line">    <span class="attr">AllowedValues:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">prod</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">test</span></span><br><span class="line">  <span class="attr">BucketName:</span></span><br><span class="line">    <span class="attr">Default:</span> <span class="string">&#x27;&#x27;</span></span><br><span class="line">    <span class="attr">Type:</span> <span class="string">String</span></span><br><span class="line"><span class="comment"># condition 需要獨立定義</span></span><br><span class="line"><span class="attr">Conditions:</span></span><br><span class="line">  <span class="attr">IsProduction:</span> <span class="type">!Equals</span> </span><br><span class="line">    <span class="bullet">-</span> <span class="type">!Ref</span> <span class="string">EnvType</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">prod</span></span><br><span class="line">  <span class="attr">CreateBucket:</span> <span class="type">!Not</span> </span><br><span class="line">    <span class="bullet">-</span> <span class="type">!Equals</span> </span><br><span class="line">      <span class="bullet">-</span> <span class="type">!Ref</span> <span class="string">BucketName</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">&#x27;&#x27;</span></span><br><span class="line">  <span class="attr">CreateBucketPolicy:</span> <span class="type">!And</span> </span><br><span class="line">    <span class="bullet">-</span> <span class="type">!Condition</span> <span class="string">IsProduction</span></span><br><span class="line">    <span class="bullet">-</span> <span class="type">!Condition</span> <span class="string">CreateBucket</span></span><br><span class="line"><span class="attr">Resources:</span></span><br><span class="line">  <span class="attr">Bucket:</span></span><br><span class="line">    <span class="attr">Type:</span> <span class="string">&#x27;AWS::S3::Bucket&#x27;</span></span><br><span class="line">    <span class="comment"># 透過 &quot;Condition&quot; 關鍵字決定要不要建立此 resource</span></span><br><span class="line">    <span class="attr">Condition:</span> <span class="string">CreateBucket</span></span><br><span class="line">  <span class="attr">Policy:</span></span><br><span class="line">    <span class="attr">Type:</span> <span class="string">&#x27;AWS::S3::BucketPolicy&#x27;</span></span><br><span class="line">    <span class="comment"># 透過 &quot;Condition&quot; 關鍵字決定要不要建立此 resource</span></span><br><span class="line">    <span class="attr">Condition:</span> <span class="string">CreateBucketPolicy</span></span><br><span class="line">    <span class="attr">Properties:</span></span><br><span class="line">      <span class="attr">Bucket:</span> <span class="type">!Ref</span> <span class="string">Bucket</span></span><br><span class="line">      <span class="attr">PolicyDocument:</span> <span class="string">...</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="Intrisic-Function"><a href="#Intrisic-Function" class="headerlink" title="Intrisic Function"></a>Intrisic Function</h2><p>CloudFormation 中比較重要需要認識的 Intrisic Function 大概有以下幾個：(詳細可參考<a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference.html">官網文件</a>)</p>
+<ul>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-ref.html"><code>Ref</code></a>：若是用在 parameter 上，會回傳 parameter value；若是用在 resource 上，則會回傳 resource ID</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-getatt.html"><code>Fn::GetAtt</code></a>：取得特定 resource 的屬性資料</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-findinmap.html"><code>Fn::FindInMap</code></a>：透過 <code>!FindInMap [ MapName, TopLevelKey, SecondLevelKey ]</code> 的格式從 Mapping 定義中尋找資料</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-importvalue.html"><code>Fn::ImportValue</code></a>：從另外一個 stack outupt 取得資料</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-join.html"><code>Fn::Join</code></a> &amp; <a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-sub.html"><code>Fn::Sub</code></a>：字串處理</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-conditions.html">Condition Functions</a>：例如 <code>Fn::And</code>、<code>Fn::Equal</code>、<code>Fn:If</code>、<code>Fn::Not</code>、<code>Fn::OR</code> …. 等等</p>
+</li>
+<li><p><code>Fn::Base64</code>：若是要為 EC2 instance 加入 User Data，就必須要透過此 function</p>
+</li>
+</ul>
+<h1 id="Helper-scripts"><a href="#Helper-scripts" class="headerlink" title="Helper scripts"></a>Helper scripts</h1><p>CloudFormation 設計出來主要目的是要達成 Infrastructure as Code 的目標，但其實還是有些缺點存在的，例如：</p>
+<ol>
+<li><p>要為 EC2 User Data 的可讀性不高</p>
+</li>
+<li><p>宣告式的內容要<code>描述流程+條件判斷</code>不容易</p>
+</li>
+</ol>
+<p>也因為這個，就有了 helper script 這樣的功能出現，以下介紹些常用的 helper script。</p>
+<h2 id="cfn-init"><a href="#cfn-init" class="headerlink" title="cfn-init"></a>cfn-init</h2><p>若是覺得 EC2 User Data script 沒這麼友善，可以考慮 <a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-init.html"><code>cfn-init</code></a> 這個功能，簡單說明如下：</p>
+<ul>
+<li><p>透過 <code>Metadata</code> 欄位設定 init script，而這個 script 的撰寫方式類似 Ansible</p>
+</li>
+<li><p>將原本寫在 User Data 的內容全部改寫到 init script 中</p>
+</li>
+<li><p>在 User Data 中透過 <code>/opt/aws/bin/cfn-init</code> 指令，<strong>從 CloudFormation 服務中取得 init script 的內容並執行</strong>(上面定義的 metadata 會儲存在 CloudFormation 服務中)</p>
+</li>
+<li><p>init script 執行的相關 log 存放於 <code>/var/log/cfn-init.log</code>、<code>/var/log/cfn-init-cmd.log</code>、<code>/var/log/cfn-init-output.log</code> 這幾個檔案中</p>
+</li>
+</ul>
+<blockquote>
+<p>結論：cfn-init 的用途其實就是要讓 User Data 的內容可讀性更高而已</p>
+</blockquote>
+<h2 id="cfn-signal-amp-wait-condition"><a href="#cfn-signal-amp-wait-condition" class="headerlink" title="cfn-signal &amp; wait condition"></a>cfn-signal &amp; wait condition</h2><p><code>cfn-signal</code> 要處理的就是<code>處理流程+條件判斷</code>，這在一般程式語言中是再平常不過的功能，但在 CloudFormation template 這樣的宣告式語言中要作到就需要花點功夫。</p>
+<p>從上面 <code>cfn-init</code> 的功能繼續延伸下來，如果要判斷 init script 是否有執行成功才能決定要不要往下建立其他的 resource，只有 <code>cfn-init</code> 是作不到的，還需要搭配 <code>cfn-init</code> + <code>wait condition</code> 來完成這件事情，以下是相關 helper function 的運作流程：</p>
+<p><img src="/blog/images/aws/CloudFormation_signal-wait.png" alt="CloudFromation Help Script - cfn-signal &amp; wait condition"></p>
+<ol>
+<li><p>CloudFormation 中的 <code>cfn-init</code> 為 EC2 instance 執行初始化</p>
+</li>
+<li><p>EC2 instance 在初始化過程中，將相關的 log 資料回傳給 CloudFormation service</p>
+</li>
+<li><p>CloudFormation service 中啟動一個 wait condition，等待 EC2 instance 透過 <code>cfn-signal</code> 送訊號過來</p>
+</li>
+<li><p>EC2 instance 透過 <code>cfn-signal</code> 成功發送訊號給 CloudFormation service，滿足 wait condition，繼續往下執行</p>
+</li>
+</ol>
+<blockquote>
+<p>CloudFormation 撰寫範例可以參考<a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-signal.html">官網文件</a></p>
+</blockquote>
+<h2 id="使用-cfn-signal-遇到問題時如何排除"><a href="#使用-cfn-signal-遇到問題時如何排除" class="headerlink" title="使用 cfn-signal 遇到問題時如何排除?"></a>使用 cfn-signal 遇到問題時如何排除?</h2><p>透過以上的流程說明，可以清楚知道 <code>cfn-signal</code> 是怎麼運作的，哪就會有些條件需要滿足，如果遇到了問題就可以比較有清晰的思路排查問題，因此若是使用 <code>cfn-signal</code> 遇到問題時，大概可以從以下幾個方向著手：</p>
+<ol>
+<li><p>EC2 instance 需要向 CloudFormation service 回報狀態，因此連外網路必須是暢通的</p>
+</li>
+<li><p>承上，EC2 instance 中也必須要包含相關的 helper script，Amazon Linux AMI 有自帶，若是使用其他的 AMI，就得先下載</p>
+</li>
+<li><p>如果 signal 一直沒送到 CloudFormation service，就要檢查 init script 是否成功執行，那這時候就需要進到 EC2 instance 檢查 <code>/var/logs/cloud-init.log</code> &amp; <code>/var/logs/cfn-init.log</code> 的內容 (在那之前需要先停掉 rollback 功能，否則 EC2 會被 CloudFormation 移除)</p>
+</li>
+</ol>
+<h1 id="Auto-Scaling-Group"><a href="#Auto-Scaling-Group" class="headerlink" title="Auto Scaling Group"></a>Auto Scaling Group</h1><p>透過 CloudFormation 建立 ASG(Auto Scaling Group) 需要注意兩個部份，分別是 <code>Creation Policy</code> &amp; <code>Update Policy</code>，這兩個部份是用來驗證 stack 可否算建立成功以及實際更新策略的執行方式。</p>
+<h2 id="CreationPolicy"><a href="#CreationPolicy" class="headerlink" title="CreationPolicy"></a>CreationPolicy</h2><p>以下面這個範例來說明：(來自於<a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-attribute-creationpolicy.html">官網文件</a>)</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">AutoScalingGroup:</span></span><br><span class="line">  <span class="attr">Type:</span> <span class="string">AWS::AutoScaling::AutoScalingGroup</span></span><br><span class="line">  <span class="attr">Properties:</span></span><br><span class="line">    <span class="attr">AvailabilityZones:</span></span><br><span class="line">      <span class="attr">Fn::GetAZs:</span> <span class="string">&#x27;&#x27;</span></span><br><span class="line">    <span class="attr">LaunchConfigurationName:</span></span><br><span class="line">      <span class="attr">Ref:</span> <span class="string">LaunchConfig</span></span><br><span class="line">    <span class="comment"># 指定 capacity 為 3</span></span><br><span class="line">    <span class="attr">DesiredCapacity:</span> <span class="string">&#x27;3&#x27;</span></span><br><span class="line">    <span class="attr">MinSize:</span> <span class="string">&#x27;1&#x27;</span></span><br><span class="line">    <span class="attr">MaxSize:</span> <span class="string">&#x27;4&#x27;</span></span><br><span class="line">  <span class="attr">CreationPolicy:</span></span><br><span class="line">    <span class="comment"># 需要有 3 個 instance 在 15 分鐘內回傳 success signal 才能算成功</span></span><br><span class="line">    <span class="attr">ResourceSignal:</span></span><br><span class="line">      <span class="attr">Count:</span> <span class="string">&#x27;3&#x27;</span></span><br><span class="line">      <span class="attr">Timeout:</span> <span class="string">PT15M</span></span><br><span class="line"><span class="comment">#### .... (略)</span></span><br></pre></td></tr></table></figure>
+
+<p>上面的範例中，指定了 ASG 的 desired capacity，並且在 <code>CreationPolicy</code> 中指定要在 15 分鐘內(<code>PT15M</code>)收到 3 個 instance 回傳 signal 後才算是建立成功。</p>
+<h2 id="UpdatePolicy"><a href="#UpdatePolicy" class="headerlink" title="UpdatePolicy"></a>UpdatePolicy</h2><p>ASG update policy 中有分為 rolling update &amp; replace，以下使用範例來說明。</p>
+<h3 id="rolling-update"><a href="#rolling-update" class="headerlink" title="rolling update"></a>rolling update</h3><p>使用(來自於<a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-attribute-updatepolicy.html">官網文件</a>)的範例來解釋：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">AutoScalingGroup:</span></span><br><span class="line">  <span class="attr">Type:</span> <span class="string">AWS::AutoScaling::AutoScalingGroup</span></span><br><span class="line">  <span class="attr">Properties:</span></span><br><span class="line">    <span class="attr">AvailabilityZones:</span></span><br><span class="line">      <span class="attr">Fn::GetAZs:</span> <span class="string">&#x27;&#x27;</span></span><br><span class="line">    <span class="attr">LaunchConfigurationName:</span></span><br><span class="line">      <span class="attr">Ref:</span> <span class="string">LaunchConfig</span></span><br><span class="line">    <span class="attr">DesiredCapacity:</span> <span class="string">&#x27;3&#x27;</span></span><br><span class="line">    <span class="attr">MinSize:</span> <span class="string">&#x27;1&#x27;</span></span><br><span class="line">    <span class="attr">MaxSize:</span> <span class="string">&#x27;4&#x27;</span></span><br><span class="line"><span class="comment">## ........... (略)</span></span><br><span class="line">  <span class="attr">UpdatePolicy:</span></span><br><span class="line">    <span class="attr">AutoScalingScheduledAction:</span></span><br><span class="line">      <span class="comment"># 這設定為 &quot;true&quot; 會忽略目前 ASG 的原有設定，使用上面新的設定</span></span><br><span class="line">      <span class="attr">IgnoreUnmodifiedGroupSizeProperties:</span> <span class="string">&#x27;true&#x27;</span></span><br><span class="line">    <span class="comment"># 這會最少保留 1 instance，並最多一次更新 2 個，以 rolling update 的方式進行更新，並要求在 1 分鐘內要收到 signal</span></span><br><span class="line">    <span class="attr">AutoScalingRollingUpdate:</span></span><br><span class="line">      <span class="attr">MinInstancesInService:</span> <span class="string">&#x27;1&#x27;</span></span><br><span class="line">      <span class="attr">MaxBatchSize:</span> <span class="string">&#x27;2&#x27;</span></span><br><span class="line">      <span class="attr">PauseTime:</span> <span class="string">PT1M</span></span><br><span class="line">      <span class="attr">WaitOnResourceSignals:</span> <span class="string">&#x27;true&#x27;</span></span><br><span class="line"><span class="comment">## ........... (略)</span></span><br></pre></td></tr></table></figure>
+
+<p>上面的範例會達成以下效果：</p>
+<ol>
+<li><p><code>IgnoreUnmodifiedGroupSizeProperties: &#39;true&#39;</code>：因此會忽略原有 ASG 的設定，直接以新的為主</p>
+</li>
+<li><p><code>MinInstancesInService: &#39;1&#39;</code>：至少會保留 1 個 instance 不動</p>
+</li>
+<li><p><code>MaxBatchSize: &#39;2&#39;</code>：在滿足上面的條件下，最多一次更新 2 個 EC2 instance</p>
+</li>
+<li><p><code>PauseTime: PT1M</code> &amp; <code>WaitOnResourceSignals: &#39;true&#39;</code>：會等待 1 分鐘來自 EC2 instance 送往 CloudFormation service 的 signal </p>
+</li>
+</ol>
+<h3 id="replace"><a href="#replace" class="headerlink" title="replace"></a>replace</h3><p>replace 就比較直覺了，以下是範例：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">UpdatePolicy:</span></span><br><span class="line">  <span class="attr">AutoScalingReplacingUpdate:</span></span><br><span class="line">    <span class="attr">WillReplace:</span> <span class="string">&#x27;true&#x27;</span></span><br><span class="line"><span class="attr">CreationPolicy:</span></span><br><span class="line">  <span class="attr">ResourceSignal:</span></span><br><span class="line">    <span class="attr">Count:</span> <span class="type">!Ref</span> <span class="string">&#x27;ResourceSignalsOnCreate&#x27;</span></span><br><span class="line">    <span class="attr">Timeout:</span> <span class="string">PT10M</span></span><br><span class="line">  <span class="attr">AutoScalingCreationPolicy:</span></span><br><span class="line">    <span class="attr">MinSuccessfulInstancesPercent:</span> <span class="type">!Ref</span> <span class="string">&#x27;MinSuccessfulPercentParameter&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>沒什麼特別，就是換掉就對了；只是會在搭配 <code>CreationPolicy</code> 來驗證是否有完整更新成功。</p>
+<h1 id="移除-CloudFormation-stack"><a href="#移除-CloudFormation-stack" class="headerlink" title="移除 CloudFormation stack"></a>移除 CloudFormation stack</h1><h2 id="Deletion-Policy"><a href="#Deletion-Policy" class="headerlink" title="Deletion Policy"></a>Deletion Policy</h2><p>在 CloudFormation template 中定義的每個 resource，都可以設定 <code>DeletionPolicy</code>，用來指定當 stack 被移除時的行為，一共有以下幾個：</p>
+<ul>
+<li><p><code>DeletionPolicy=Retain</code>：此 resource 會被保留，適用於所有 resource type，包含 nested stack</p>
+</li>
+<li><p><code>DeletionPolicy=Snapshot</code>：會透過 snapshot 備份，但僅支援 EBS volume、ElastiCache cluster、ElastiCache ReplicationGroup、RDS DBInstance、RDS DBCluster、Redshift Cluster … 等等</p>
+</li>
+<li><p><code>DeletionPolicy=Delete</code>：這是預設值；但對於 <code>AWS::RDS::DBCluster</code> 來說，default policy 還是 snapshot；此外，要移除 S3 bucket 之前還是要自行先清空 bucket 內的 object</p>
+</li>
+</ul>
+<h2 id="Termination-Protection"><a href="#Termination-Protection" class="headerlink" title="Termination Protection"></a>Termination Protection</h2><p>若是擔心 cloudformation stack 被移除，可以在 stack 被建立出來後，將 Termination Protection 屬性啟用，那 stack 就會變成無法移除的狀態。</p>
+<p>若是後須需要移除 stack，將 Termination Protection 關閉後，即可正常移除。</p>
+<h1 id="其他需要留意的功能"><a href="#其他需要留意的功能" class="headerlink" title="其他需要留意的功能"></a>其他需要留意的功能</h1><h2 id="Rollback"><a href="#Rollback" class="headerlink" title="Rollback"></a>Rollback</h2><p>當 CloudFormation 建立(or 更新) stack 失敗後，就會進入到 rollback 的狀態，分為以下兩種：</p>
+<ul>
+<li><p>stack 建立失敗：</p>
+<ul>
+<li>預設會將 stack 所有的 resource 給 rollback，可以從 cloudformation log 中看到過程，但看不到細部的錯誤訊息</li>
+<li>若是要進行進一步的 troubleshooting(例如：檢查 <code>cfn-init</code> script 為何執行失敗)，那就要先 disable rollback 功能</li>
+</ul>
+</li>
+<li><p>stack 更新失敗：</p>
+<ul>
+<li>預設會還原成原本的狀態</li>
+<li>在 cloudformation 可以看到 log 中有失敗的過程 &amp; 相關的錯誤訊息</li>
+</ul>
+</li>
+</ul>
+<p>還有個比較麻煩的狀況，就是連 rollback 都失敗時，而這個問題通常是人操作所造成的，例如下面的情境：</p>
+<ol>
+<li><p>使用者 A 建立了 stack </p>
+</li>
+<li><p>使用者 B 修改了 stack 內容</p>
+</li>
+<li><p>使用者 A 透過 CloudFormation 更新 stack，但遇到更新失敗</p>
+</li>
+<li><p>CloudFormation 嘗試還原原本的 stack 狀態，但因為第二個步驟中已經被修改掉，因此 rollback 失敗</p>
+</li>
+</ol>
+<p>遇到 rollback 失敗情況，有兩個方式可以處理：</p>
+<ol>
+<li><p>明確 skip 有問題的 resource</p>
+</li>
+<li><p>修正 resource 錯誤的狀態，再一次進行 update/rollback</p>
+</li>
+</ol>
+<h2 id="Nested-Stack"><a href="#Nested-Stack" class="headerlink" title="Nested Stack"></a>Nested Stack</h2><ul>
+<li><p>顧名思義，就是 stack 中包含了 stack；若是有特定的 stack 內容常被重複使用，就可以利用這樣的設計</p>
+</li>
+<li><p>像是 Load Balancer &amp; Security Group 這一類的 resource 就適合獨立拉出來設定並透過 nested stack 建立</p>
+</li>
+<li><p>nested stack 是種 best practice 的設計</p>
+</li>
+<li><p>要更新 nested stack，盡可能從 parent(root) stack 動手</p>
+</li>
+</ul>
+<h2 id="ChangeSets"><a href="#ChangeSets" class="headerlink" title="ChangeSets"></a>ChangeSets</h2><ul>
+<li><p>通常用在更新 stack 前，執行前想弄清楚到底有哪些資源會被更新時使用</p>
+</li>
+<li><p>ChangeSets 內容中不會提到變更是否成功 or 失敗 (實際執行後才會知道)</p>
+</li>
+</ul>
+<p><img src="/blog/images/aws/CloudFormation_ChangeSets.png" alt="CloudFromation Help Script - cfn-signal &amp; wait condition"></p>
+<ul>
+<li>ChangeSets 可以透過不斷修改 CloudFormation template 後重新產生，確認有符合需求後再執行</li>
+</ul>
+<h2 id="Drifts"><a href="#Drifts" class="headerlink" title="Drifts"></a>Drifts</h2><p>使用 CloudFormation 這一類 IaC 的方式建立 resource，最怕遇到的就是人為手動修的部份，為了讓使用者可以確認目前的 stack 有無被手動修改，AWS 提供了一個 <code>Drifts</code> 檢測功能，可以讓使用者知道 stack 有沒有被手動修改過。</p>
+<p>只是需要注意的是，<code>Drifts</code> 功能並無法保護 stack 不被修改，只能偵測而已。</p>
+<h2 id="DependsOn"><a href="#DependsOn" class="headerlink" title="DependsOn"></a>DependsOn</h2><p>前面提到像 CloudFormation template 這種 IaC 的方式，要定義流程其實不太容易，不過透過 <code>DependsOn</code> 關鍵字，可以明確定定義 resource 建立的先後。</p>
+<h2 id="StackSet"><a href="#StackSet" class="headerlink" title="StackSet"></a>StackSet</h2><ul>
+<li><p>若是要透過 CloudFormation 將資源佈署到 multiple account/region 中，就需要使用到 <code>StackSet</code> 的功能</p>
+</li>
+<li><p>執行這功能需要有 Administator 的權限</p>
+</li>
+<li><p>當 stackset 被更新時，所有 account/region 中的 stack 都會被更新</p>
+</li>
+<li><p>可以指定同時間有多少 resource 被建立 or 容忍失敗的數量</p>
+</li>
+</ul>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a target="_blank" rel="noopener" href="https://www.udemy.com/course/ultimate-aws-certified-sysops-administrator-associate/">Ultimate AWS Certified SysOps Administrator Associate 2021 | Udemy</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://devops4solutions.com/aws-cloudformation-init-with-examples/">AWS CloudFormation Init with Examples - DevOps4Solutions</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/AWS/" rel="tag"># AWS</a>
+              <a href="/blog/tags/CloudFormation/" rel="tag"># CloudFormation</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/AWS/AWS-SOA-AMI/" rel="prev" title="AWS SOA 學習筆記 - AMI(Amazon Machine Image)">
+                  <i class="fa fa-chevron-left"></i> AWS SOA 學習筆記 - AMI(Amazon Machine Image)
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/AWS/AWS-SOA-CloudFormation/";
+    this.page.identifier = "AWS/AWS-SOA-CloudFormation/";
+    this.page.title = "AWS SOA 學習筆記 - CloudFormation";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>
