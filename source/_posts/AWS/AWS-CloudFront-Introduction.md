@@ -127,7 +127,7 @@ AWS 會主動更新 Edge Location 的 IP 清單，可以參考[此網頁](https:
 
 > After you create an Amazon S3 bucket, it can take up to 24 hours for the bucket name to propagate across all AWS Regions. During this time, you might receive the 307 Temporary Redirect response for requests to regional endpoints that aren't in the same Region as your bucket. For more information, see Temporary request redirection.
 
-因此可以知道，在前 254 hours 內，透過 CloudFront 存取 S3 origin server 的資源，有可能會得到 HTTP 307 的訊息，但這問題會隨著 S3 資訊被同步到所有 region 後而消失。
+因此可以知道，在前 24 hours 內，透過 CloudFront 存取 S3 origin server 的資源，有可能會得到 HTTP 307 的訊息，但這問題會隨著 S3 資訊被同步到所有 region 後而消失。
 
 
 
