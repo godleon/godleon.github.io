@@ -84,14 +84,17 @@ AWS S3 可以為每個 object(最細可以到 object 為單位) 進行資料的�
 終端可分為兩個部份，分別是 `server side` & `client side`：
 
 - **Server Side Encryption**(SSE)：加密金鑰會由 AWS 管理，而加密金鑰可透過以下幾種方式取得：
-  - 由 S3 管理的 key (`SSE-S3`)
-  - 透過 AWS Key Management Service 來管理金鑰 (`SSE-KMS`)
-  - Server Side Encryption with Customer Provided Keys (`SSE-C`)
+  - 由 S3 管理的 key (`SSE-S3`)，需要在上傳(HTTP/S) object 多給個 HTTP header `x-amz-server-side-encryption=AES256`
+![S3 - SSE-S3](/blog/images/aws/Storage/S3_SSE-S3.png)
+  - 透過 AWS Key Management Service 來管理金鑰 (`SSE-KMS`)，需要在上傳(HTTP/S) object 多給個 HTTP header `x-amz-server-side-encryption=aws:kms`
+![S3 - SSE-KMS](/blog/images/aws/Storage/S3_SSE-KMS.png)
+  - Server Side Encryption with Customer Provided Keys (`SSE-C`)，僅限 HTTPS，且每個 request 都要帶上 Key
+![S3 - SSE-C](/blog/images/aws/Storage/S3_SSE-C.png)
 
 - **Client Side Encryption**：
   - 由使用者自行加密後，再將加密後的資料傳到 S3 上
   - 在檔案下載的場景下，使用者也還是必須自行解密
-
+![S3 - Client Side Encryption](/blog/images/aws/Storage/S3_ClientSide-Encryption.png)
 
 
 版本控制(Version Control)
