@@ -30,10 +30,14 @@
 <meta property="og:description" content="此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 S3 服務，共分為四個部份，此為第二個部份">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_Access-Authorization-Process.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Storage/S3_SSE-S3.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Storage/S3_SSE-KMS.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Storage/S3_SSE-C.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Storage/S3_ClientSide-Encryption.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_Lifecycle-Policy-example.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_Event-Notification.png">
 <meta property="article:published_time" content="2020-04-28T21:50:00.000Z">
-<meta property="article:modified_time" content="2021-10-24T04:21:19.357Z">
+<meta property="article:modified_time" content="2021-10-24T08:31:53.605Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -257,7 +261,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-10-24 12:21:19" itemprop="dateModified" datetime="2021-10-24T12:21:19+08:00">2021-10-24</time>
+                <time title="Modified: 2021-10-24 16:31:53" itemprop="dateModified" datetime="2021-10-24T16:31:53+08:00">2021-10-24</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -357,15 +361,15 @@
 <ul>
 <li><p><strong>Server Side Encryption</strong>(SSE)：加密金鑰會由 AWS 管理，而加密金鑰可透過以下幾種方式取得：</p>
 <ul>
-<li>由 S3 管理的 key (<code>SSE-S3</code>)</li>
-<li>透過 AWS Key Management Service 來管理金鑰 (<code>SSE-KMS</code>)</li>
-<li>Server Side Encryption with Customer Provided Keys (<code>SSE-C</code>)</li>
+<li>由 S3 管理的 key (<code>SSE-S3</code>)，需要在上傳(HTTP/S) object 多給個 HTTP header <code>x-amz-server-side-encryption=AES256</code><br><img src="/blog/images/aws/Storage/S3_SSE-S3.png" alt="S3 - SSE-S3"></li>
+<li>透過 AWS Key Management Service 來管理金鑰 (<code>SSE-KMS</code>)，需要在上傳(HTTP/S) object 多給個 HTTP header <code>x-amz-server-side-encryption=aws:kms</code><br><img src="/blog/images/aws/Storage/S3_SSE-KMS.png" alt="S3 - SSE-KMS"></li>
+<li>Server Side Encryption with Customer Provided Keys (<code>SSE-C</code>)，僅限 HTTPS，且每個 request 都要帶上 Key<br><img src="/blog/images/aws/Storage/S3_SSE-C.png" alt="S3 - SSE-C"></li>
 </ul>
 </li>
 <li><p><strong>Client Side Encryption</strong>：</p>
 <ul>
 <li>由使用者自行加密後，再將加密後的資料傳到 S3 上</li>
-<li>在檔案下載的場景下，使用者也還是必須自行解密</li>
+<li>在檔案下載的場景下，使用者也還是必須自行解密<br><img src="/blog/images/aws/Storage/S3_ClientSide-Encryption.png" alt="S3 - Client Side Encryption"></li>
 </ul>
 </li>
 </ul>
