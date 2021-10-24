@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="此篇文章是學習 AWS 認證課程(Certified SysOps Administrator Associate)內容時所留下的學習筆記，主要內容為 EBS &amp; EFS 服務在實際操作維運上需要注意的事項">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AWS SOA 學習筆記 - Storage Service(EBS &amp; EFS)">
+<meta property="og:url" content="https://godleon.github.io/blog/AWS/AWS-SOA-Storage-Data-Management/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章是學習 AWS 認證課程(Certified SysOps Administrator Associate)內容時所留下的學習筆記，主要內容為 EBS &amp; EFS 服務在實際操作維運上需要注意的事項">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Storage/EBS_Fast-Snapshot-Restore.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Storage/EFS_Access-Points.png">
+<meta property="article:published_time" content="2021-10-24T04:20:00.000Z">
+<meta property="article:modified_time" content="2021-10-24T04:21:19.357Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="AWS">
+<meta property="article:tag" content="EBS">
+<meta property="article:tag" content="EFS">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/aws/Storage/EBS_Fast-Snapshot-Restore.png">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/AWS/AWS-SOA-Storage-Data-Management/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>AWS SOA 學習筆記 - Storage Service(EBS & EFS) | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Encryption-amp-DownTime"><span class="nav-number">1.</span> <span class="nav-text">Encryption &amp; DownTime</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#KMS-amp-CloudHSM"><span class="nav-number">2.</span> <span class="nav-text">KMS &amp; CloudHSM</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#AMI"><span class="nav-number">3.</span> <span class="nav-text">AMI</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EBS-Volume-Type"><span class="nav-number">4.</span> <span class="nav-text">EBS Volume Type</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#gp2-v-s-gp3"><span class="nav-number">4.1.</span> <span class="nav-text">gp2 v.s. gp3</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Provisioned-IOPS-SSD"><span class="nav-number">4.2.</span> <span class="nav-text">Provisioned IOPS SSD</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hard-Disk"><span class="nav-number">4.3.</span> <span class="nav-text">Hard Disk</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EBS-%E9%87%8D%E8%A6%81%E5%8A%9F%E8%83%BD-%E6%93%8D%E4%BD%9C-%E8%AA%AA%E6%98%8E"><span class="nav-number">5.</span> <span class="nav-text">EBS 重要功能(操作)說明</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Volume-Resizing"><span class="nav-number">5.1.</span> <span class="nav-text">Volume Resizing</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Snapshot"><span class="nav-number">5.2.</span> <span class="nav-text">Snapshot</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Encryption"><span class="nav-number">5.3.</span> <span class="nav-text">Encryption</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EFS"><span class="nav-number">6.</span> <span class="nav-text">EFS</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%8D%E5%8B%99%E7%89%B9%E8%89%B2"><span class="nav-number">6.1.</span> <span class="nav-text">服務特色</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%88%E8%83%BD%E7%9B%B8%E9%97%9C%E9%81%B8%E9%A0%85"><span class="nav-number">6.2.</span> <span class="nav-text">效能相關選項</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Access-Points"><span class="nav-number">6.3.</span> <span class="nav-text">Access Points</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A0%85"><span class="nav-number">6.4.</span> <span class="nav-text">其他注意事項</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">7.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">159</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">111</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/AWS/AWS-SOA-Storage-Data-Management/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AWS SOA 學習筆記 - Storage Service(EBS & EFS)
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2021-10-24 12:20:00 / Modified: 12:21:19" itemprop="dateCreated datePublished" datetime="2021-10-24T12:20:00+08:00">2021-10-24</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/AWS/" itemprop="url" rel="index"><span itemprop="name">AWS</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/AWS/AWS-SOA-Storage-Data-Management/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="AWS/AWS-SOA-Storage-Data-Management/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此篇文章是學習 AWS 認證課程(Certified SysOps Administrator Associate)內容時所留下的學習筆記，主要內容為 EBS & EFS 服務在實際操作維運上需要注意的事項</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="Encryption-amp-DownTime"><a href="#Encryption-amp-DownTime" class="headerlink" title="Encryption &amp; DownTime"></a>Encryption &amp; DownTime</h1><ul>
+<li><p>若是希望資料可以加密，大多數的服務都是需要在啟用時就指定好，例如：EFS, RDS, EBS volume</p>
+</li>
+<li><p>在上面的服務中，若是要再之後才要進行加密，就必須透過新增服務加上 migrate data 的方式來達成</p>
+</li>
+<li><p>S3 在這個部份則是彈性許多，不僅可以 bucket/object level 啟用加密，也不會影響運行中的服務</p>
+</li>
+</ul>
+<h1 id="KMS-amp-CloudHSM"><a href="#KMS-amp-CloudHSM" class="headerlink" title="KMS &amp; CloudHSM"></a>KMS &amp; CloudHSM</h1><ul>
+<li><p>KMS &amp; CloudHSM 都是用來加密資料用</p>
+</li>
+<li><p>KMS 用在可以接受 shared tenancy 的環境；CloudHSM 則是用在嚴格的獨立環境中的</p>
+</li>
+<li><p>KMS 只支援對稱加密(symmetric encryption)，CloudHSM 則是同時支援對稱加密 &amp; 非對稱加密(asymmetric encryption)</p>
+</li>
+</ul>
+<h1 id="AMI"><a href="#AMI" class="headerlink" title="AMI"></a>AMI</h1><ul>
+<li><p>AMI 是用來產生 EC2 instance 的 template</p>
+</li>
+<li><p>可以從 EC2 instance 建立自己的 AMI</p>
+</li>
+<li><p>若是要透過 AMI 產生 instance，那就要先註冊</p>
+</li>
+<li><p>AMI 是 region level 的物件；若是要在其他 region 使用同樣的 AMI，那就要複製到 target region 並註冊</p>
+</li>
+</ul>
+<h1 id="EBS-Volume-Type"><a href="#EBS-Volume-Type" class="headerlink" title="EBS Volume Type"></a>EBS Volume Type</h1><ul>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html">官網文件比較</a></p>
+</li>
+<li><p>僅有 <code>gp2/gp3</code> &amp; <code>io1/io2</code> 可以作為 boot volume，<code>st1</code> &amp; <code>sc1</code> 兩種 HDD 類型的 EBS volume 則無法</p>
+</li>
+</ul>
+<h2 id="gp2-v-s-gp3"><a href="#gp2-v-s-gp3" class="headerlink" title="gp2 v.s. gp3"></a>gp2 v.s. gp3</h2><p>gp2 是舊型的 general purpose SSD type，有以下特性：</p>
+<ul>
+<li>IOPS 可以 burst 到 3000，但這需要 credit</li>
+<li>IOPS 會與 volume size 有關連，最大可以到 16000</li>
+<li>每增加 1GB 會多 3 IOPS，因此 5334 GB 的 gp2 volume 可以取得最大的 IOPS</li>
+</ul>
+<p>gp3 則是新型的 general purpose SSD type，特性如下：</p>
+<ul>
+<li>基礎 IOPS 為 3000，並且有 125 MiB/s 的 throughput</li>
+<li>可以獨立增加 IOPS 到 16,000 &amp; throughput 到 1,000 MiB/s</li>
+</ul>
+<h2 id="Provisioned-IOPS-SSD"><a href="#Provisioned-IOPS-SSD" class="headerlink" title="Provisioned IOPS SSD"></a>Provisioned IOPS SSD</h2><ul>
+<li><p>若是需要穩定的高 IOPS 的應用或是 IOPS 要求超過 16000，那可以考慮用這個類型的 volume type</p>
+</li>
+<li><p>適合用在 DB 或是對儲存效能敏感的 workload</p>
+</li>
+<li><p><code>io1</code>/<code>io2</code>(容量範圍：4GB ~ 16TB)</p>
+<ul>
+<li>最大 PIOPS(provisioned) 為 64000，但這僅限於 <a target="_blank" rel="noopener" href="https://aws.amazon.com/ec2/nitro/">Nitro EC2 instance</a>；其他 type 的 EC2 instance 僅能發揮到 32000 IOPS </li>
+<li>可以單獨調整 IOPS 上限，跟 volume size 無關</li>
+<li>相較於 io1，io2 有較高的可用性 &amp; IOPS (以相同價格為基礎作為計算)</li>
+</ul>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/about-aws/whats-new/2021/07/aws-announces-general-availability-amazon-ebs-block-express-volumes/">io2 Block Express</a>(容量範圍：4GB ~ 64TB)：</p>
+<ul>
+<li>低於 ms 級別的延遲</li>
+<li>最大的 IOPS 可到 256,000，跟 volume size 有關，每增加 1GB 會多 1000 IOPS</li>
+</ul>
+</li>
+<li><p><strong>io 系列的 volume type 都支援 EBS multi-attach (在同一個 AZ 的前提下)</strong></p>
+<ul>
+<li>但這情境平常不容易遇到，可能僅有在 application level 需要管理到 concurrent write 操作時才會使用</li>
+<li>必須使用具備 cluster-aware 能力的檔案系統，像是 <code>XFS</code> or <code>EXT4</code> 就並非是這一類的檔案系統</li>
+</ul>
+</li>
+</ul>
+<h2 id="Hard-Disk"><a href="#Hard-Disk" class="headerlink" title="Hard Disk"></a>Hard Disk</h2><ul>
+<li><p>無法作為 boot volume</p>
+</li>
+<li><p>容量從 125MiB ~ 16TB</p>
+</li>
+<li><p><code>st1</code>(throughput optimized) 適合用於 big data、data warehouse、log processing … 這一類的 workload，max IOPS 為 500，max throughput 則為 500 MiB/s</p>
+</li>
+<li><p><code>sc1</code>(cold hdd)：不常存取的資料可以用這 volume type，max IOPS 250，max throught 250 MiB/s</p>
+</li>
+</ul>
+<h1 id="EBS-重要功能-操作-說明"><a href="#EBS-重要功能-操作-說明" class="headerlink" title="EBS 重要功能(操作)說明"></a>EBS 重要功能(操作)說明</h1><h2 id="Volume-Resizing"><a href="#Volume-Resizing" class="headerlink" title="Volume Resizing"></a>Volume Resizing</h2><ul>
+<li><p>EBS volume 的容量僅能增加，不能減少；但若要增加 IOPS，那就只有 io 系列的 volume type 可以作到</p>
+</li>
+<li><p>EBS volume 容量調整後，還需要在作業系統中調整硬碟設定才可以吃到增加的容量，相關操作可參考<a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/recognize-expanded-volume-linux.html">官方文件</a></p>
+</li>
+</ul>
+<h2 id="Snapshot"><a href="#Snapshot" class="headerlink" title="Snapshot"></a>Snapshot</h2><ul>
+<li><p>執行 snapshot 操作不需要先 detach volume，但建議這麼做，避免可能的資料不一致問題</p>
+</li>
+<li><p>snapshot 可以複製到不同的 AZ or region </p>
+</li>
+<li><p>若要有效管理 EBS volume snapshot，可考慮使用 <a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/snapshot-lifecycle.html">Amazon Data Lifecycle Manager</a> 來協助管理</p>
+</li>
+<li><p>Amazon Data Lifecycle Manager 可協助作到以下幾件事情：</p>
+<ul>
+<li>對 EBS snapshot &amp; EBS-backed AMI 進行自動化的 creation、retention、deletion … 等操作</li>
+<li>執行定期備份(scheduled backup)、跨帳號 snapshot 複製(cross-account snapshot copy)、移除過期備份(delete outdated backup) …. 等功能</li>
+<li>功能運行的基礎是基於 <code>tag</code> 的設定，因此必須為 EC2 instance or EBS volume 加上正確的 tag</li>
+<li>無法管理並非由 DLM 所建立出來的 snapshot or AMI</li>
+</ul>
+</li>
+</ul>
+<p>另外，還有個值得一提的功能是 <code>FSR(Fast Snapshot Restore)</code>；由於 snapshot 是儲存在 S3，當真正要使用時才會從 S3 開始拉取，因此對於第一次存取的 volume block 就會很慢(I/O latency)，而 FSR 基本上就是幫你把完整的 volume block 都先拉取過一輪，這樣之後使用透過 snapshot 產生的 EBS volume 的效能就會提昇很多；不過這功能很昂貴，要慎用，而且通常會是容量很大的 snapshot/volume 使用這功能才會有比較好的效益。</p>
+<blockquote>
+<p>DLM 中可以直接開啟這功能<br><img src="/blog/images/aws/Storage/EBS_Fast-Snapshot-Restore.png" alt="EBS - Fast Snapshot Restore"></p>
+</blockquote>
+<h2 id="Encryption"><a href="#Encryption" class="headerlink" title="Encryption"></a>Encryption</h2><p>一個加密後的 EBS volume 可以帶來以下的效果：</p>
+<ul>
+<li>資料在 volume 中是加密的</li>
+<li>資料從 instance 傳遞到 volume 的過程中是加密的</li>
+<li>所有的 snapshot 都是加密的</li>
+<li>加解密的過程都是透明的，因此對使用者來說，沒有什麼額外的使用負擔，只要選擇加密即可</li>
+</ul>
+<p>若是要將非加密的 EBS volume 改成加密的 EBS volume，可以透過以下幾個步驟完成：</p>
+<ol>
+<li>建立一個 snapshot (from 未加密的 EBS volume)</li>
+<li>透過 <code>copy</code> 的方式，加密 snapshot</li>
+<li>透過加密後的 snapshot 產生 EBS volume<blockquote>
+<p>其實可以跳過第二個步驟，未加密的 snapshot 也可以直接產生一個加密後的 EBS volume</p>
+</blockquote>
+</li>
+</ol>
+<p>其他需要注意的地方：</p>
+<ul>
+<li>加密會稍微增加資料存取時的 latency</li>
+</ul>
+<h1 id="EFS"><a href="#EFS" class="headerlink" title="EFS"></a>EFS</h1><h2 id="服務特色"><a href="#服務特色" class="headerlink" title="服務特色"></a>服務特色</h2><ul>
+<li><p>managed NFS，用在 Linux-based EC2 instance 上，可讓超過 100 個 EC2 instance 同時存取</p>
+</li>
+<li><p>multi-AZ 的設計，高可用，但價格是 EBS volume gp2 的三倍價格</p>
+</li>
+<li><p>使用 NFS v4.1 協定</p>
+</li>
+<li><p>存取權限除了 NFS 服務本身提供的之外，也可以透過 security group 來管理</p>
+</li>
+<li><p>搭配 KMS 可作到 encrption at rest</p>
+</li>
+<li><p>EFS 提供了 <code>Storage Tiers</code> 的機制，可以指定檔案多少天內沒有被存取，就從 <code>Standard</code> 自動轉到 <code>EFS-IA(Infrequnt Access)</code> 以取得更便宜的使用價格</p>
+</li>
+</ul>
+<h2 id="效能相關選項"><a href="#效能相關選項" class="headerlink" title="效能相關選項"></a>效能相關選項</h2><ul>
+<li><p>Performance Mode：有 <code>General Purpose</code>(適用於 web server、CMS … 等服務) &amp; <code>Max I/O</code>(適用於 big data、media processing …等服務) 可選</p>
+</li>
+<li><p>Throughput Mode：有 <code>Bursting</code>(1 TB = 50 MiB/s，最大 100 MiB/s) &amp; <code>Provisioned</code> 可選</p>
+</li>
+</ul>
+<h2 id="Access-Points"><a href="#Access-Points" class="headerlink" title="Access Points"></a>Access Points</h2><p><img src="/blog/images/aws/Storage/EFS_Access-Points.png" alt="EFS - Access Points"></p>
+<p>若要作到更細膩的 EFS 存取控制，那就需要了解 <a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/efs/latest/ug/efs-access-points.html">Access Points</a> 這個功能，可提供的功能如下：</p>
+<ul>
+<li><p>可以限定存取 EFS 時所使用的 POSIX user &amp; group</p>
+</li>
+<li><p>可限定存取的是某一個目錄作為 client 的 root directory</p>
+</li>
+<li><p>可以使用 IAM policy 用來限制存取 EFS 服務的 client 端</p>
+</li>
+</ul>
+<h2 id="其他注意事項"><a href="#其他注意事項" class="headerlink" title="其他注意事項"></a>其他注意事項</h2><p>在 EFS 中，有些設定可以直接進行變更，但有些不行，舉例來說，以下設定可以直接進行變更：</p>
+<ul>
+<li><p>調整 lifecycle policy</p>
+</li>
+<li><p>調整 throughput mode &amp; 調整 provisioned throughput 的上限</p>
+</li>
+<li><p>access points</p>
+</li>
+</ul>
+<p>但有些設定則無法直接變更，例如：</p>
+<ul>
+<li><p>將資料移到設定加密的 EFS 設定中</p>
+</li>
+<li><p>調整 Performance Mode (例如：general purpose -&gt; Max I/O)</p>
+</li>
+</ul>
+<p>上面這兩個操作，就需要新建立一個 EFS 設定，並搭配 DataSync 服務來完成。</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a target="_blank" rel="noopener" href="https://www.udemy.com/course/ultimate-aws-certified-sysops-administrator-associate/">Ultimate AWS Certified SysOps Administrator Associate 2021 | Udemy</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Storage.html">Amazon Elastic Block Store (Amazon EBS) - Amazon Elastic Compute Cloud</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/efs/latest/ug">What is Amazon Elastic File System? - Amazon Elastic File System</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/AWS/" rel="tag"># AWS</a>
+              <a href="/blog/tags/EBS/" rel="tag"># EBS</a>
+              <a href="/blog/tags/EFS/" rel="tag"># EFS</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/AWS/AWS-SOA-CloudFormation/" rel="prev" title="AWS SOA 學習筆記 - CloudFormation">
+                  <i class="fa fa-chevron-left"></i> AWS SOA 學習筆記 - CloudFormation
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/AWS/AWS-SOA-Storage-Data-Management/";
+    this.page.identifier = "AWS/AWS-SOA-Storage-Data-Management/";
+    this.page.title = "AWS SOA 學習筆記 - Storage Service(EBS & EFS)";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>
