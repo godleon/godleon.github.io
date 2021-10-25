@@ -116,6 +116,7 @@ S3 is object based. 每個 object 都包含以下資訊：
 - 若是新增檔案(透過 `PUTS` 的方式新增)，當檔案寫入後馬上就可以讀取到
 
 - 若是更新(`overwrite PUTS`) or 刪除檔案(`DELETE`)，則是 Eventual Consistency，這樣的變更需要花點時間才會完全套用(propagate)到所有的硬體設施中
+> 在 2020/12 時，推出了 [strong consistency](https://aws.amazon.com/s3/consistency/)，現在不論是更新(`overwrite PUTS`) or 刪除檔案(`DELETE`)，馬上讀取都可以得到最新的結果了
 
 
 S3 Storage Class
