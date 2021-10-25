@@ -76,7 +76,7 @@ What is S3?
 - 檔案加密 
 
 - MFA Delete
-> 重要檔案可以加上 MFA(多因素認證) 的流程進行確認，才能實際刪除檔案 (**只有 root account 可以開啟此功能**)
+> 重要檔案可以加上 MFA(多因素認證) 的流程進行確認，才能實際刪除檔案 (**只有 root account 可以開啟此功能**，且只能透過 CLI 開啟)
 
 - 可透過 **Access Control List** & **Bucket Policy** 來提升存取檔案的安全性
 > 剛建立好的 bucket or 上傳的 object 所預設的權限僅限於自己可以存取(private & inaccessible)，完全沒有預設對外開放的規則

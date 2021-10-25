@@ -176,7 +176,7 @@ Cross Region Replication
 
 - 要啟用 cross region replication 的功能，source & destination bucket 都必須要啟用 versioning 才可以
 
-- 設定 replication 前已經存在的 object 不會自動被同步，只有後續上傳的 object & 版本資訊會被同步
+- 設定 replication 前已經存在的 object 不會自動被同步，只有後續上傳的 object & 版本資訊會被同步(注意! 連 version ID 都會被複製)
 
 - 任何與 object 相關的 metadata or ACL 被變更時，都會觸發 replication 的工作執行
 
@@ -189,6 +189,7 @@ Cross Region Replication
 - Delete marker 本身是不會被跨 region 複製的，因此刪除 source bucket 的資料的行為並不會複製到另一個 region 的 destination bucket
 
 - 在 source bucket 刪除特定的版本 or delete marker 的行為，都不會被複製到另一個 region 的 destination bucket
+> 目前已經有 `Delete marker replication` 選項可以選，可以複製一般的 delete 行為所產生的 delete marker，但不會複製因為 lifecycle rule 所產生的 delete marker
 
 
 
