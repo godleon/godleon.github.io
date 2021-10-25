@@ -37,7 +37,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_Lifecycle-Policy-example.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_Event-Notification.png">
 <meta property="article:published_time" content="2020-04-28T21:50:00.000Z">
-<meta property="article:modified_time" content="2021-10-25T01:18:21.328Z">
+<meta property="article:modified_time" content="2021-10-25T20:47:42.472Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -261,7 +261,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-10-25 09:18:21" itemprop="dateModified" datetime="2021-10-25T09:18:21+08:00">2021-10-25</time>
+                <time title="Modified: 2021-10-26 04:47:42" itemprop="dateModified" datetime="2021-10-26T04:47:42+08:00">2021-10-26</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -446,7 +446,7 @@
 <h1 id="Cross-Region-Replication"><a href="#Cross-Region-Replication" class="headerlink" title="Cross Region Replication"></a>Cross Region Replication</h1><ul>
 <li><p>要啟用 cross region replication 的功能，source &amp; destination bucket 都必須要啟用 versioning 才可以</p>
 </li>
-<li><p>設定 replication 前已經存在的 object 不會自動被同步，只有後續上傳的 object &amp; 版本資訊會被同步</p>
+<li><p>設定 replication 前已經存在的 object 不會自動被同步，只有後續上傳的 object &amp; 版本資訊會被同步(注意! 連 version ID 都會被複製)</p>
 </li>
 <li><p>任何與 object 相關的 metadata or ACL 被變更時，都會觸發 replication 的工作執行</p>
 </li>
@@ -459,6 +459,9 @@
 <li><p>Delete marker 本身是不會被跨 region 複製的，因此刪除 source bucket 的資料的行為並不會複製到另一個 region 的 destination bucket</p>
 </li>
 <li><p>在 source bucket 刪除特定的版本 or delete marker 的行為，都不會被複製到另一個 region 的 destination bucket</p>
+<blockquote>
+<p>目前已經有 <code>Delete marker replication</code> 選項可以選，可以複製一般的 delete 行為所產生的 delete marker，但不會複製因為 lifecycle rule 所產生的 delete marker</p>
+</blockquote>
 </li>
 </ul>
 <h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
