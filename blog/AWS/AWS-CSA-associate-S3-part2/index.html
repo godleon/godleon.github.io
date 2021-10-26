@@ -37,7 +37,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_Lifecycle-Policy-example.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_Event-Notification.png">
 <meta property="article:published_time" content="2020-04-28T21:50:00.000Z">
-<meta property="article:modified_time" content="2021-10-26T01:38:53.454Z">
+<meta property="article:modified_time" content="2021-10-26T02:44:37.244Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -261,7 +261,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-10-26 09:38:53" itemprop="dateModified" datetime="2021-10-26T09:38:53+08:00">2021-10-26</time>
+                <time title="Modified: 2021-10-26 10:44:37" itemprop="dateModified" datetime="2021-10-26T10:44:37+08:00">2021-10-26</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -405,11 +405,6 @@
 <li><p>若要自動移除資料，也可以設定 <code>expiration</code> 相關的 policy 來達成</p>
 </li>
 <li><p>預設這個功能是關閉的</p>
-</li>
-<li><p><strong>資料無法直接存進 S3 Glacier，必須先存進 S3 standard 後，設定 lifecycle policy 為 immediate 來達成馬上進入 Glacier 的目的</strong></p>
-<blockquote>
-<p>透過 <code>AWS Storage Tape Gateway</code> 或是 <code>AWS DataSync</code> 就可以例外，直接將資料存入 Glacier(or Deep Archive) </p>
-</blockquote>
 </li>
 <li><p><strong>小於 128KB 的檔案無法透過 lifecycle policy 轉移 storage class (因為容量小也不會有太多費用….)</strong></p>
 </li>

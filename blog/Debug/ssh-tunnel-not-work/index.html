@@ -30,7 +30,7 @@
 <meta property="og:description" content="此篇文章紀錄了使用 SSH tunnel 遇到了異常(open failed: administratively prohibited: open failed)，排除的過程 &amp; 方法">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2021-01-15T03:45:00.000Z">
-<meta property="article:modified_time" content="2021-10-26T01:38:53.462Z">
+<meta property="article:modified_time" content="2021-10-26T02:44:37.248Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="Debug">
 <meta property="article:tag" content="SSH">
@@ -252,7 +252,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-10-26 09:38:53" itemprop="dateModified" datetime="2021-10-26T09:38:53+08:00">2021-10-26</time>
+                <time title="Modified: 2021-10-26 10:44:37" itemprop="dateModified" datetime="2021-10-26T10:44:37+08:00">2021-10-26</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -290,7 +290,7 @@
     <div class="post-body" itemprop="articleBody">
         <p>今天一如往常的使用類似下面的指令設定了 SSH Tunnel：</p>
 <blockquote>
-<p>ssh <a href="mailto:&#x75;&#98;&#117;&#x6e;&#x74;&#x75;&#64;&#109;&#121;&#x2e;&#x62;&#97;&#x73;&#116;&#105;&#x6f;&#110;&#x2e;&#99;&#111;&#109;">&#x75;&#98;&#117;&#x6e;&#x74;&#x75;&#64;&#109;&#121;&#x2e;&#x62;&#97;&#x73;&#116;&#105;&#x6f;&#110;&#x2e;&#99;&#111;&#109;</a> -N -L 9200:mydomain.com.tw:443</p>
+<p>ssh <a href="mailto:&#117;&#x62;&#x75;&#x6e;&#x74;&#x75;&#64;&#x6d;&#x79;&#46;&#x62;&#97;&#x73;&#x74;&#105;&#111;&#110;&#x2e;&#99;&#111;&#x6d;">&#117;&#x62;&#x75;&#x6e;&#x74;&#x75;&#64;&#x6d;&#x79;&#46;&#x62;&#97;&#x73;&#x74;&#105;&#111;&#110;&#x2e;&#99;&#111;&#x6d;</a> -N -L 9200:mydomain.com.tw:443</p>
 </blockquote>
 <p>結果在本機開啟 9200 port 時，出現了以下的錯誤訊息：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">channel 2: open failed: administratively prohibited: open failed</span><br></pre></td></tr></table></figure>
