@@ -29,15 +29,15 @@
 <meta property="og:site_name" content="小信豬的原始部落">
 <meta property="og:description" content="此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 S3 服務，共分為四個部份，此為第一個部份">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_Storage-Classes-comparision.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Storage/S3_StorageClass.png">
 <meta property="article:published_time" content="2020-04-26T04:00:00.000Z">
-<meta property="article:modified_time" content="2021-10-25T21:41:09.474Z">
+<meta property="article:modified_time" content="2021-10-26T01:38:53.454Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
 <meta property="article:tag" content="S3">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://godleon.github.io/blog/images/aws/S3_Storage-Classes-comparision.png">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/aws/Storage/S3_StorageClass.png">
 
 
 <link rel="canonical" href="https://godleon.github.io/blog/AWS/AWS-CSA-associate-S3-part1/">
@@ -255,7 +255,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-10-26 05:41:09" itemprop="dateModified" datetime="2021-10-26T05:41:09+08:00">2021-10-26</time>
+                <time title="Modified: 2021-10-26 09:38:53" itemprop="dateModified" datetime="2021-10-26T09:38:53+08:00">2021-10-26</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -399,7 +399,8 @@
 </blockquote>
 </li>
 </ul>
-<h1 id="S3-Storage-Class"><a href="#S3-Storage-Class" class="headerlink" title="S3 Storage Class"></a>S3 Storage Class</h1><p>S3 根據使用者存取的頻率與需求，提供不同的 storage class 供使用者選擇：</p>
+<h1 id="S3-Storage-Class"><a href="#S3-Storage-Class" class="headerlink" title="S3 Storage Class"></a>S3 Storage Class</h1><p><img src="/blog/images/aws/Storage/S3_StorageClass.png" alt="S3 Storage Class comparison"></p>
+<p>S3 根據使用者存取的頻率與需求，提供不同的 storage class 供使用者選擇：</p>
 <blockquote>
 <p><strong>調整單位可以細到 object level，而非僅僅是 bucket level</strong></p>
 </blockquote>
@@ -464,11 +465,15 @@
 </li>
 </ul>
 <h2 id="Intelligent-Tiering"><a href="#Intelligent-Tiering" class="headerlink" title="Intelligent Tiering"></a>Intelligent Tiering</h2><ul>
+<li><p>提供 99.9% 的可用率</p>
+</li>
+<li><p>提供跨 AZ 的 11 個 9 的可靠度</p>
+</li>
 <li><p>存取效能等同於 S3 standard</p>
 </li>
 <li><p>AWS 會自動協助使用者進行優化，將不常存取的檔案移動到較為便宜的 access tier，常用的則會留在 standard tier</p>
 </li>
-<li><p>透過人工智慧分析，自動將使用成本最佳化，且不會造成效能的影響，也可以減輕管理上的負擔</p>
+<li><p>透過人工智慧分析，自動將使用成本最佳化，且不會造成效能的影響，也可以減輕管理上的負擔(但需要花費一些監控 &amp; auto-tiering 的費用)</p>
 </li>
 </ul>
 <blockquote>
@@ -492,11 +497,13 @@
 </li>
 <li><p>一個 AZ 全毀的情況下還是可以取得資料 </p>
 </li>
-<li><p>儲存費用很低</p>
+<li><p>儲存費用很低(可作為地端磁帶機的取代方案)</p>
 </li>
 <li><p><strong>低消為 90 天的收費 (短時間的儲存不划算)</strong></p>
 </li>
 <li><p><strong>會自動將存進來的資料進行 AES 256-bits 的加密</strong></p>
+</li>
+<li><p>取得檔案的方案有 <code>Expedited(1~5 分鐘)</code>、<code>Standard(3~5 小時)</code>、<code>Bulk(5~12 小時)</code> 三種</p>
 </li>
 </ul>
 <h3 id="參考資料-4"><a href="#參考資料-4" class="headerlink" title="參考資料"></a>參考資料</h3><ul>
@@ -511,11 +518,14 @@
 </li>
 <li><p>費用最便宜的選項</p>
 </li>
+<li><p><strong>低消為 180 天的收費 (短時間的儲存不划算)</strong></p>
+</li>
+<li><p>取得檔案的方案有 <code>Standard(12 小時)</code>、<code>Bulk(48 小時)</code> 兩種</p>
+</li>
 </ul>
 <h3 id="參考資料-5"><a href="#參考資料-5" class="headerlink" title="參考資料"></a>參考資料</h3><ul>
 <li><a target="_blank" rel="noopener" href="https://aws.amazon.com/tw/s3/storage-classes/#____">物件儲存類別 – Amazon S3 Storage Class(Glacier Deep Archive)</a></li>
 </ul>
-<p><img src="/blog/images/aws/S3_Storage-Classes-comparision.png" alt="S3 Storage Class comparison"></p>
 <h1 id="S3-的收費標準"><a href="#S3-的收費標準" class="headerlink" title="S3 的收費標準"></a>S3 的收費標準</h1><p>介紹了 S3 的眾多特性，總是要了解使用 S3 服務時，在哪些時候 AWS 會進行收費，目前收費的情況會發生在以下幾個部份：</p>
 <ul>
 <li><p>資料儲存的費用 (儲存越多當然就收費越多，單位費用會根據使用的 access tier 而不同，例如：standard 會比 IA 貴)</p>
