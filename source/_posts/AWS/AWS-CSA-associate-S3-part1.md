@@ -122,9 +122,10 @@ S3 is object based. 每個 object 都包含以下資訊：
 S3 Storage Class
 ================
 
+![S3 Storage Class comparison](/blog/images/aws/Storage/S3_StorageClass.png)
+
 S3 根據使用者存取的頻率與需求，提供不同的 storage class 供使用者選擇：
 > **調整單位可以細到 object level，而非僅僅是 bucket level**
-
 ## Standard
 
 - 存取速度最快
@@ -189,11 +190,15 @@ S3 根據使用者存取的頻率與需求，提供不同的 storage class 供�
 
 ## Intelligent Tiering
 
+- 提供 99.9% 的可用率
+
+- 提供跨 AZ 的 11 個 9 的可靠度
+
 - 存取效能等同於 S3 standard
 
 - AWS 會自動協助使用者進行優化，將不常存取的檔案移動到較為便宜的 access tier，常用的則會留在 standard tier
 
-- 透過人工智慧分析，自動將使用成本最佳化，且不會造成效能的影響，也可以減輕管理上的負擔
+- 透過人工智慧分析，自動將使用成本最佳化，且不會造成效能的影響，也可以減輕管理上的負擔(但需要花費一些監控 & auto-tiering 的費用)
 
 > 但最多幫使用者將資料移動到 IA tier 的費率，無法更低了(例如：**One Zone-IA** or **Glacier**)
 
@@ -214,11 +219,13 @@ S3 根據使用者存取的頻率與需求，提供不同的 storage class 供�
 
 - 一個 AZ 全毀的情況下還是可以取得資料 
 
-- 儲存費用很低
+- 儲存費用很低(可作為地端磁帶機的取代方案)
 
 - **低消為 90 天的收費 (短時間的儲存不划算)**
 
 - **會自動將存進來的資料進行 AES 256-bits 的加密**
+
+- 取得檔案的方案有 `Expedited(1~5 分鐘)`、`Standard(3~5 小時)`、`Bulk(5~12 小時)` 三種
 
 ### 參考資料
 
@@ -234,12 +241,14 @@ S3 根據使用者存取的頻率與需求，提供不同的 storage class 供�
 
 - 費用最便宜的選項
 
+- **低消為 180 天的收費 (短時間的儲存不划算)**
+
+- 取得檔案的方案有 `Standard(12 小時)`、`Bulk(48 小時)` 兩種
+
 
 ### 參考資料
 
 - [物件儲存類別 – Amazon S3 Storage Class(Glacier Deep Archive)](https://aws.amazon.com/tw/s3/storage-classes/#____)
-
-![S3 Storage Class comparison](/blog/images/aws/S3_Storage-Classes-comparision.png)
 
 
 S3 的收費標準
