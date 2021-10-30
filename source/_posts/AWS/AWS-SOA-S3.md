@@ -230,7 +230,7 @@ S3 是一個可以自動擴展以提供更高的存取性能的服務，而存�
 
 ## S3/Glacier Select
 
-![S3 Select](/blog/images/aws/Storage/S3_select)
+![S3 Select](/blog/images/aws/Storage/S3_select.png)
 
 - 這功能只能用於 CSV & JSON 格式存放的 object
 

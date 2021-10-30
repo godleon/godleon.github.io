@@ -84,20 +84,47 @@ FSX & FSx for Lustre
 
 - FSx 可以想像一下就是 Windows 中的 SMB 協定提供出來的檔案系統，所以其實跟 EFS 之於 Linux 是差不多相同意思
 
-- FSx 同樣也是全託管(fully managed)服務，資料的 HA 也會自動保證(同 region 跨 AZ，也可以選擇 single AZ)
+- FSx 同樣也是全託管(fully managed)服務，資料的 HA 也會自動保證(同 region 跨 AZ，有 auto failover 的功能；但也可以選擇 single AZ)
+> single AZ 也是會進行資料複製
+
+- 可與 Microsoft Active Directory 整合，以提供 ACL、user quota ... 等功能
+
+- 可支援從地端設備進行存取
+
+- 資料會每天自動備份到 S3
 
 - **支援 Microsoft Distributed File System (DFS)**
 
 ## FSx for Lustre
 
-- 這是強化版的共享檔案系統，可同時被 Windows & Linux 使用，總之就是**高效能 + 可擴展**
+- 用於平行大規模處理的資料存取場景中
 
-- 可以提供 low latency、high throughtput/IOPS 等特性，用在像是機器學習、HPC .... 這類資料存取繁重的應用是很合適的
+- 這是強化版的共享檔案系統，可同時被 Windows & Linux 使用(主要是 Linux)，總之就是**高效能 + 可擴展**
 
-- 可與 S3 進行整合，資料處理完就可以直接存放到 S3
+- 可以提供 low latency、high throughtput/IOPS 等特性，用在像是機器學習、HPC .... 這類資料存取繁重的應用是很合適的(其他像是 video processing, financial modeling, electronic design automation ... 等工作也很合適)
+
+- throughput 可達 100 GB/s 以上，百萬等級的 IOPS，以及低於 ms 的 latency
+
+- 可與 S3 進行無縫整合，可從 S3 讀取資料，資料處理完就可以直接存放到 S3
+
+- 可讓地端設備直接進行存取
 
 - **不支援 Microsoft Distributed File System (DFS)**
 
+## FSx File System Deployment 選項
+
+FSx 有兩種 file system 可供選擇，分別是：
+
+- Scratch File System
+  - 用於資料暫存的目的
+  - 資料沒有對應的複本，若是底層主機掛點資料就掉了
+  - 有很高的 bust 空間
+  - 可作為短期資料處理、降低成本的選項
+
+- Persistent File System
+  - 適用於長期的資料儲存
+  - 資料會再同一個 AZ 中自動產生複本
+  - 若底層主機出問題，資料會自動在幾分鐘內自行恢復
 
 
 Placement Group
