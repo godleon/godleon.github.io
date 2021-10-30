@@ -190,6 +190,10 @@ CloudFront 就是 AWS 透過佈建在全世界各地的 edge server 所提供的
 
 - `Restrict Viewer Access(Use Signed URLs or Signed Cookies)`：開啟此功能，可以限定使用者必須要登入後取得特定域名的 cookie 才可以存取 CDN 上的快取資源；或是讓資源在特定時間(例如：60 mins)過後就失效
 
+- 若 Origin(源端) 為 ALB，且要開啟 `sticky session` 的功能，需要注意以下事項：
+  - 必須將用來控制 session affinity 的 cookie 往後 forward 至源端
+  - 設定的 TTL 必須小於認證用 cookie 的存活時間
+
 
 ## 可能發生的效能問題
 
