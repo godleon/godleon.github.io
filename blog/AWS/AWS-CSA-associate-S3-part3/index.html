@@ -30,11 +30,17 @@
 <meta property="og:description" content="此篇文章是學習 AWS 認證課程(Certified Solution Architect Associate)內容時所留下的學習筆記，主要內容為 S3 服務，共分為四個部份，此為第三個部份">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_Transfer-Acceleration.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Storage/Snow_family.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_StorageGateway-FileGateway.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Storage/StorageGateway_File-Gateway.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Storage/StorageGateway_Volume-Gateway.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_StorageGateway-VolumeGateway-StoredVolume.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/S3_StorageGateway-VolumeGateway-CachedVolume.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Storage/StorageGateway_Tape-Gateway.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Storage/StorageGateway_activation.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Storage/StorageGateway_cached-volume.png">
 <meta property="article:published_time" content="2020-05-10T02:00:00.000Z">
-<meta property="article:modified_time" content="2021-10-30T04:41:19.164Z">
+<meta property="article:modified_time" content="2021-10-30T05:39:19.080Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -165,7 +171,7 @@
 
       <!--noindex-->
       <section class="post-toc-wrap sidebar-panel">
-          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Transfer-Acceleration"><span class="nav-number">1.</span> <span class="nav-text">Transfer Acceleration</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Snowball-%E7%B3%BB%E5%88%97%E6%9C%8D%E5%8B%99"><span class="nav-number">2.</span> <span class="nav-text">Snowball 系列服務</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Snowball-Edge"><span class="nav-number">2.1.</span> <span class="nav-text">Snowball Edge</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Snowmobile"><span class="nav-number">2.2.</span> <span class="nav-text">Snowmobile</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Storage-Gateway"><span class="nav-number">3.</span> <span class="nav-text">Storage Gateway</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-Storage-Gateway"><span class="nav-number">3.1.</span> <span class="nav-text">什麼是 Storage Gateway ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Storage-Gateway-%E5%A6%82%E4%BD%95%E8%99%95%E7%90%86%E4%B8%8D%E5%90%8C%E9%A1%9E%E5%9E%8B%E7%9A%84%E8%B3%87%E6%96%99"><span class="nav-number">3.2.</span> <span class="nav-text">Storage Gateway 如何處理不同類型的資料 ?</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#File-Gateway"><span class="nav-number">3.2.1.</span> <span class="nav-text">File Gateway</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Volume-Gateway"><span class="nav-number">3.2.2.</span> <span class="nav-text">Volume Gateway</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Stored-Volume"><span class="nav-number">3.2.2.1.</span> <span class="nav-text">Stored Volume</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Cached-Volume"><span class="nav-number">3.2.2.2.</span> <span class="nav-text">Cached Volume</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Tape-Gateway"><span class="nav-number">3.2.3.</span> <span class="nav-text">Tape Gateway</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Athena-vs-Macie"><span class="nav-number">4.</span> <span class="nav-text">Athena vs Macie</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Athena"><span class="nav-number">4.1.</span> <span class="nav-text">Athena</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Macie"><span class="nav-number">4.2.</span> <span class="nav-text">Macie</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#S3"><span class="nav-number">5.1.</span> <span class="nav-text">S3</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Snowball"><span class="nav-number">5.2.</span> <span class="nav-text">Snowball</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Snowmobile-1"><span class="nav-number">5.3.</span> <span class="nav-text">Snowmobile</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Storage-Gateway-1"><span class="nav-number">5.4.</span> <span class="nav-text">Storage Gateway</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Athena-amp-Macie"><span class="nav-number">5.5.</span> <span class="nav-text">Athena &amp; Macie</span></a></li></ol></li></ol></div>
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Transfer-Acceleration"><span class="nav-number">1.</span> <span class="nav-text">Transfer Acceleration</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Snowball-%E7%B3%BB%E5%88%97%E6%9C%8D%E5%8B%99-Snow-Family"><span class="nav-number">2.</span> <span class="nav-text">Snowball 系列服務 (Snow Family)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Snowball-Edge"><span class="nav-number">2.1.</span> <span class="nav-text">Snowball Edge</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Snowmobile"><span class="nav-number">2.2.</span> <span class="nav-text">Snowmobile</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Snowcon"><span class="nav-number">2.3.</span> <span class="nav-text">Snowcon</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Storage-Gateway"><span class="nav-number">3.</span> <span class="nav-text">Storage Gateway</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-Storage-Gateway"><span class="nav-number">3.1.</span> <span class="nav-text">什麼是 Storage Gateway ?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Storage-Gateway-%E5%A6%82%E4%BD%95%E8%99%95%E7%90%86%E4%B8%8D%E5%90%8C%E9%A1%9E%E5%9E%8B%E7%9A%84%E8%B3%87%E6%96%99"><span class="nav-number">3.2.</span> <span class="nav-text">Storage Gateway 如何處理不同類型的資料 ?</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#File-Gateway"><span class="nav-number">3.2.1.</span> <span class="nav-text">File Gateway</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Volume-Gateway"><span class="nav-number">3.2.2.</span> <span class="nav-text">Volume Gateway</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Stored-Volume"><span class="nav-number">3.2.2.1.</span> <span class="nav-text">Stored Volume</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Cached-Volume"><span class="nav-number">3.2.2.2.</span> <span class="nav-text">Cached Volume</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Tape-Gateway"><span class="nav-number">3.2.3.</span> <span class="nav-text">Tape Gateway</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A0%85-for-SysOps-certification"><span class="nav-number">3.3.</span> <span class="nav-text">其他注意事項 (for SysOps certification)</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Athena-vs-Macie"><span class="nav-number">4.</span> <span class="nav-text">Athena vs Macie</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Athena"><span class="nav-number">4.1.</span> <span class="nav-text">Athena</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Macie"><span class="nav-number">4.2.</span> <span class="nav-text">Macie</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#S3"><span class="nav-number">5.1.</span> <span class="nav-text">S3</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Snowball"><span class="nav-number">5.2.</span> <span class="nav-text">Snowball</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Snowmobile-1"><span class="nav-number">5.3.</span> <span class="nav-text">Snowmobile</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Storage-Gateway-1"><span class="nav-number">5.4.</span> <span class="nav-text">Storage Gateway</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Athena-amp-Macie"><span class="nav-number">5.5.</span> <span class="nav-text">Athena &amp; Macie</span></a></li></ol></li></ol></div>
       </section>
       <!--/noindex-->
 
@@ -258,7 +264,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-10-30 12:41:19" itemprop="dateModified" datetime="2021-10-30T12:41:19+08:00">2021-10-30</time>
+                <time title="Modified: 2021-10-30 13:39:19" itemprop="dateModified" datetime="2021-10-30T13:39:19+08:00">2021-10-30</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -310,7 +316,15 @@
 </ul>
 <p><img src="/blog/images/aws/S3_Transfer-Acceleration.png" alt="S3 Transfer Acceleration"></p>
 <p>此外，AWS 也提供了一個<a target="_blank" rel="noopener" href="https://s3-accelerate-speedtest.s3-accelerate.amazonaws.com/en/accelerate-speed-comparsion.html">測速的網頁</a>，使用者可以自行評估須不需要開啟 S3 Transfer Acceleration 功能。</p>
-<h1 id="Snowball-系列服務"><a href="#Snowball-系列服務" class="headerlink" title="Snowball 系列服務"></a>Snowball 系列服務</h1><p>Snowball 是設計用來協助使用者移動大量資料用，不論是從本地端到 AWS，或是從 AWS 回到本地端，都可以利用此服務。</p>
+<h1 id="Snowball-系列服務-Snow-Family"><a href="#Snowball-系列服務-Snow-Family" class="headerlink" title="Snowball 系列服務 (Snow Family)"></a>Snowball 系列服務 (Snow Family)</h1><p><img src="/blog/images/aws/Storage/Snow_family.png" alt="Snow Family"></p>
+<p>Snowball 是設計用來協助使用者移動大量資料用，不論是從本地端到 AWS，或是從 AWS 回到本地端，都可以利用此服務；此外，AWS 還提供了 <a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/snowball/latest/developer-guide/aws-opshub.html">OpsHub</a> 工具可以裝在本地端的電腦上，用來管理 Snow Family 相關裝置。</p>
+<p>使用原則大概是：</p>
+<ul>
+<li><p>若是透過網路傳遞資料需要超過 1 週，那就可以考慮使用 snowball 設備來處理</p>
+</li>
+<li><p>若是傳遞資料量超過 10TB，使用 Snowmobile 比較合適</p>
+</li>
+</ul>
 <h2 id="Snowball-Edge"><a href="#Snowball-Edge" class="headerlink" title="Snowball Edge"></a>Snowball Edge</h2><ul>
 <li><p>Snowball 是個安全且兼顧的硬體裝置，被設計用來移動大量資料，不論是從本地端到 AWS，或是 AWS 到本地端都可；簡單來說，就是被設計用來做資料遷移和邊緣運算裝置，可簡單稱為 <code>Snowball Edge</code></p>
 </li>
@@ -329,6 +343,16 @@
 <li><p>Snowmobile 本身是個 數百 PB ~ EB 等級的資料移動服務，這樣量級的資料量，需要拖車來運送了….</p>
 </li>
 <li><p>Snowmobile 採用了多層安全保護，包含專門安全人員、GPS 追蹤、警示監控、24 小時全年無休的視訊監視，以及運輸期間選擇性的安全護衛車隊(帶保鏢的意思….)</p>
+</li>
+</ul>
+<h2 id="Snowcon"><a href="#Snowcon" class="headerlink" title="Snowcon"></a>Snowcon</h2><ul>
+<li><p>設備更小，更適合攜帶，可在嚴峻的環境中運行</p>
+</li>
+<li><p>可提供 edge computing、storage、data transfer … 等功能</p>
+</li>
+<li><p>有 8TB 的儲存空間</p>
+</li>
+<li><p>可透過 AWS DataSync 服務將資料回傳至 AWS</p>
 </li>
 </ul>
 <h1 id="Storage-Gateway"><a href="#Storage-Gateway" class="headerlink" title="Storage Gateway"></a>Storage Gateway</h1><h2 id="什麼是-Storage-Gateway"><a href="#什麼是-Storage-Gateway" class="headerlink" title="什麼是 Storage Gateway ?"></a>什麼是 Storage Gateway ?</h2><p>AWS Storage Gateway 是一種混合雲端儲存服務，有以下兩個特性：</p>
@@ -355,7 +379,7 @@
 <ul>
 <li><p>會將檔案以 object 的形式存放在 S3 bucket 中</p>
 </li>
-<li><p><strong>存取會以 local 為主，File Gateway 會協助慢慢將資料同步到 S3 中</strong></p>
+<li><p><strong>存取會以 local 為主，File Gateway 會協助慢慢將資料同步到 S3 中</strong> (近期存取的資料會 cache 在 File Gateway 上)</p>
 </li>
 <li><p>本地端可透過 NFS 的方式進行儲存 (POSIX compitable)</p>
 </li>
@@ -363,8 +387,12 @@
 </li>
 <li><p>一旦將資料移動到 S3 後，就可以使用 S3 提供的 versioning, lifecycle management, cross-region replication … 等功能</p>
 </li>
+<li><p>可整合 AD(Active Directory) 作為使用者身份認證</p>
+</li>
 </ul>
-<h3 id="Volume-Gateway"><a href="#Volume-Gateway" class="headerlink" title="Volume Gateway"></a>Volume Gateway</h3><p>Volume Gateway 提供了 <code>iSCSI</code> 的方式，讓資料可透過 <strong>單一磁碟(volume)</strong> 為單位的角度來進行資料的儲存與管理；寫入 volume 的資料會以非同步的方式透過 volume snapshot 的方式進行儲存，也因為是 block device 的關係，因此每次的變更備份都是只有處理變更的 block 部份而已。</p>
+<p><img src="/blog/images/aws/Storage/StorageGateway_File-Gateway.png" alt="Storage Gateway - File Gateway"></p>
+<h3 id="Volume-Gateway"><a href="#Volume-Gateway" class="headerlink" title="Volume Gateway"></a>Volume Gateway</h3><p><img src="/blog/images/aws/Storage/StorageGateway_Volume-Gateway.png" alt="Storage Gateway - File Gateway"></p>
+<p>Volume Gateway 提供了 <code>iSCSI</code> 的方式，讓資料可透過 <strong>單一磁碟(volume)</strong> 為單位的角度來進行資料的儲存與管理；寫入 volume 的資料會以非同步的方式透過 volume snapshot 的方式進行儲存，也因為是 block device 的關係，因此每次的變更備份都是只有處理變更的 block 部份而已。</p>
 <p>而根據 volume 使用情境的不同，Volume Gateway 還可以分成以下兩種：</p>
 <h4 id="Stored-Volume"><a href="#Stored-Volume" class="headerlink" title="Stored Volume"></a>Stored Volume</h4><p><img src="/blog/images/aws/S3_StorageGateway-VolumeGateway-StoredVolume.png" alt="Storage Gateway - Stored Volume"></p>
 <ul>
@@ -389,7 +417,8 @@
 <li><p>支援的 volume 大小範圍為 1GB ~ 32TB</p>
 </li>
 </ul>
-<h3 id="Tape-Gateway"><a href="#Tape-Gateway" class="headerlink" title="Tape Gateway"></a>Tape Gateway</h3><ul>
+<h3 id="Tape-Gateway"><a href="#Tape-Gateway" class="headerlink" title="Tape Gateway"></a>Tape Gateway</h3><p><img src="/blog/images/aws/Storage/StorageGateway_Tape-Gateway.png" alt="Storage Gateway - Tape Gateway"></p>
+<ul>
 <li><p>用來解決磁帶備份 &amp; 保存的問題</p>
 </li>
 <li><p>以 <code>iSCSI</code> device 的形式提供給使用者進行資料存放</p>
@@ -400,6 +429,26 @@
 </li>
 <li><p><strong>支援將資料直接存入 S3 Glacier &amp; S3 Glacier Deep Archive</strong></p>
 </li>
+</ul>
+<h2 id="其他注意事項-for-SysOps-certification"><a href="#其他注意事項-for-SysOps-certification" class="headerlink" title="其他注意事項 (for SysOps certification)"></a>其他注意事項 (for SysOps certification)</h2><ul>
+<li><p>若因為需要維護的關係需要重啟 storage gateway；File Gateway 可直接重啟；但 Volume/Tape Gateway 就需要先停止服務，重啟後再啟動服務</p>
+</li>
+<li><p>啟動 storage gateway 有兩種方式：CLI &amp; 送 HTTP request 到 Gateway VM(port 80)</p>
+</li>
+<li><p>啟動 storage gateway 失敗的原因可能有：</p>
+<ul>
+<li>Gateway VM port 80 未開啟</li>
+<li>Gateway VM 沒有對時正確</li>
+</ul>
+</li>
+</ul>
+<p><img src="/blog/images/aws/Storage/StorageGateway_activation.png" alt="Storage Gateway - Activation"></p>
+<ul>
+<li>使用 Volume Gateway 時，會希望 <code>CacheHitPercent</code> 越高越好，而 <code>CachePercentUsed</code> 越低越好</li>
+</ul>
+<p><img src="/blog/images/aws/Storage/StorageGateway_cached-volume.png" alt="Storage Gateway - Activation"></p>
+<ul>
+<li>若希望 Volume Gateway cache disk 可以大一些，需要使用 cached volume 複製一個更大量的 cache disk，再指定新的 disk 作為 cached volume</li>
 </ul>
 <h1 id="Athena-vs-Macie"><a href="#Athena-vs-Macie" class="headerlink" title="Athena vs Macie"></a>Athena vs Macie</h1><p>這兩個服務提供了使用者直接對儲存在 S3 的資料進行查詢 &amp; 分析的能力。</p>
 <h2 id="Athena"><a href="#Athena" class="headerlink" title="Athena"></a>Athena</h2><ul>
