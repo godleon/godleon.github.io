@@ -123,7 +123,7 @@ AWS S3 可以為每個 object(最細可以到 object 為單位) 進行資料的�
 AWS S3 生命週期管理功能有以下幾個重點：
 
 - 可以根據預先定義好的規則(時間週期)，自動協助使用者將存放在 S3 的 object 在不同的 storage tier 中移動，讓檔案儲存的方式以更自動化且節省成本的方式進行，
-> 類似地端儲存中，是將資料從 `hot`(frequently	accessed) -> `warm`(less	frequently	accessed) -> `cold`(long-term	backup	or	archive) 的概念)
+> 類似地端儲存中，是將資料從 `hot`(frequently	accessed) -> `warm`(less frequently	accessed) -> `cold`(long-term	backup or	archive) 的概念)
 
 - 可與版本控管(version control)的機制結合
 

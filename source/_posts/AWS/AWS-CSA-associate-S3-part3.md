@@ -35,10 +35,19 @@ S3 transfer acceleration 是利用 AWS 佈署在全世界的 edge server 來達�
 
 
 
-Snowball 系列服務
-================
+Snowball 系列服務 (Snow Family)
+==============================
 
-Snowball 是設計用來協助使用者移動大量資料用，不論是從本地端到 AWS，或是從 AWS 回到本地端，都可以利用此服務。
+![Snow Family](/blog/images/aws/Storage/Snow_family.png)
+
+Snowball 是設計用來協助使用者移動大量資料用，不論是從本地端到 AWS，或是從 AWS 回到本地端，都可以利用此服務；此外，AWS 還提供了 [OpsHub](https://docs.aws.amazon.com/snowball/latest/developer-guide/aws-opshub.html) 工具可以裝在本地端的電腦上，用來管理 Snow Family 相關裝置。
+
+使用原則大概是：
+
+- 若是透過網路傳遞資料需要超過 1 週，那就可以考慮使用 snowball 設備來處理
+
+- 若是傳遞資料量超過 10TB，使用 Snowmobile 比較合適
+
 
 ## Snowball Edge
 
@@ -59,6 +68,16 @@ Snowball 是設計用來協助使用者移動大量資料用，不論是從本�
 - Snowmobile 本身是個 數百 PB ~ EB 等級的資料移動服務，這樣量級的資料量，需要拖車來運送了....
 
 - Snowmobile 採用了多層安全保護，包含專門安全人員、GPS 追蹤、警示監控、24 小時全年無休的視訊監視，以及運輸期間選擇性的安全護衛車隊(帶保鏢的意思....)
+
+## Snowcon
+
+- 設備更小，更適合攜帶，可在嚴峻的環境中運行
+
+- 可提供 edge computing、storage、data transfer ... 等功能
+
+- 有 8TB 的儲存空間
+
+- 可透過 AWS DataSync 服務將資料回傳至 AWS
 
 
 Storage Gateway
@@ -95,7 +114,7 @@ AWS Storage Gateway 是一種混合雲端儲存服務，有以下兩個特性：
 
 - 會將檔案以 object 的形式存放在 S3 bucket 中
 
-- **存取會以 local 為主，File Gateway 會協助慢慢將資料同步到 S3 中**
+- **存取會以 local 為主，File Gateway 會協助慢慢將資料同步到 S3 中** (近期存取的資料會 cache 在 File Gateway 上)
 
 - 本地端可透過 NFS 的方式進行儲存 (POSIX compitable)
 
@@ -103,7 +122,13 @@ AWS Storage Gateway 是一種混合雲端儲存服務，有以下兩個特性：
 
 - 一旦將資料移動到 S3 後，就可以使用 S3 提供的 versioning, lifecycle management, cross-region replication ... 等功能
 
+- 可整合 AD(Active Directory) 作為使用者身份認證
+
+![Storage Gateway - File Gateway](/blog/images/aws/Storage/StorageGateway_File-Gateway.png)
+
 ### Volume Gateway
+
+![Storage Gateway - File Gateway](/blog/images/aws/Storage/StorageGateway_Volume-Gateway.png)
 
 Volume Gateway 提供了 `iSCSI` 的方式，讓資料可透過 **單一磁碟(volume)** 為單位的角度來進行資料的儲存與管理；寫入 volume 的資料會以非同步的方式透過 volume snapshot 的方式進行儲存，也因為是 block device 的關係，因此每次的變更備份都是只有處理變更的 block 部份而已。
 
@@ -134,6 +159,8 @@ Volume Gateway 提供了 `iSCSI` 的方式，讓資料可透過 **單一磁碟(v
 
 ### Tape Gateway
 
+![Storage Gateway - Tape Gateway](/blog/images/aws/Storage/StorageGateway_Tape-Gateway.png)
+
 - 用來解決磁帶備份 & 保存的問題
 
 - 以 `iSCSI` device 的形式提供給使用者進行資料存放
@@ -143,6 +170,25 @@ Volume Gateway 提供了 `iSCSI` 的方式，讓資料可透過 **單一磁碟(v
 - 會將資料非同步的回傳至 S3，並搭配 Glacier 將成本降低
 
 - **支援將資料直接存入 S3 Glacier & S3 Glacier Deep Archive**
+
+## 其他注意事項 (for SysOps certification)
+
+- 若因為需要維護的關係需要重啟 storage gateway；File Gateway 可直接重啟；但 Volume/Tape Gateway 就需要先停止服務，重啟後再啟動服務
+
+- 啟動 storage gateway 有兩種方式：CLI & 送 HTTP request 到 Gateway VM(port 80)
+
+- 啟動 storage gateway 失敗的原因可能有：
+  - Gateway VM port 80 未開啟
+  - Gateway VM 沒有對時正確
+
+![Storage Gateway - Activation](/blog/images/aws/Storage/StorageGateway_activation.png)
+
+- 使用 Volume Gateway 時，會希望 `CacheHitPercent` 越高越好，而 `CachePercentUsed` 越低越好
+
+![Storage Gateway - Activation](/blog/images/aws/Storage/StorageGateway_cached-volume.png)
+
+- 若希望 Volume Gateway cache disk 可以大一些，需要使用 cached volume 複製一個更大量的 cache disk，再指定新的 disk 作為 cached volume
+
 
 
 Athena vs Macie
