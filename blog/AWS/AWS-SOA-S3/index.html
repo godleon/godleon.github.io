@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="此篇文章是學習 AWS 認證課程(Certified SysOps Administrator Associate)內容時所留下的學習筆記，主要內容為 S3 服務在實際操作維運上需要注意的事項">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AWS SOA 學習筆記 - Storage Service(S3)">
+<meta property="og:url" content="https://godleon.github.io/blog/AWS/AWS-SOA-S3/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章是學習 AWS 認證課程(Certified SysOps Administrator Associate)內容時所留下的學習筆記，主要內容為 S3 服務在實際操作維運上需要注意的事項">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Storage/S3_CORS-1.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Storage/S3_CORS-2.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Storage/S3_KMS-limitation.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Storage/S3_multi-part-upload.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Storage/S3_byte-range-fetch.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Storage/S3_byte-range-fetch-partially.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Storage/S3_transfer-acceleration.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Storage/S3_select">
+<meta property="article:published_time" content="2021-10-30T03:20:00.000Z">
+<meta property="article:modified_time" content="2021-10-30T03:23:18.636Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="AWS">
+<meta property="article:tag" content="S3">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/aws/Storage/S3_CORS-1.png">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/AWS/AWS-SOA-S3/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>AWS SOA 學習筆記 - Storage Service(S3) | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#S3-CORS-Cross-Origin-Resource-Sharing"><span class="nav-number">1.</span> <span class="nav-text">S3 CORS(Cross-Origin Resource Sharing)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8E%9F%E7%90%86%E8%AA%AA%E6%98%8E"><span class="nav-number">1.1.</span> <span class="nav-text">原理說明</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A1%88%E4%BE%8B"><span class="nav-number">1.2.</span> <span class="nav-text">案例</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E9%A0%90%E8%A8%AD%E5%B0%87%E6%AA%94%E6%A1%88%E5%8A%A0%E5%AF%86"><span class="nav-number">2.</span> <span class="nav-text">如何預設將檔案加密</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-Bucket-Policy"><span class="nav-number">2.1.</span> <span class="nav-text">使用 Bucket Policy</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Default-Encryption"><span class="nav-number">2.2.</span> <span class="nav-text">Default Encryption</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A0%85"><span class="nav-number">2.3.</span> <span class="nav-text">注意事項</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Pre-signed-URL"><span class="nav-number">3.</span> <span class="nav-text">Pre-signed URL</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#S3-Inventory"><span class="nav-number">4.</span> <span class="nav-text">S3 Inventory</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Lifecycle-Rules"><span class="nav-number">5.</span> <span class="nav-text">Lifecycle Rules</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#S3-Analytics"><span class="nav-number">6.</span> <span class="nav-text">S3 Analytics</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#S3-Performance"><span class="nav-number">7.</span> <span class="nav-text">S3 Performance</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Baseline-Performance"><span class="nav-number">7.1.</span> <span class="nav-text">Baseline Performance</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#S3-KMS-%E5%AD%98%E5%8F%96%E9%99%90%E5%88%B6"><span class="nav-number">7.2.</span> <span class="nav-text">S3 KMS 存取限制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Multi-Part-upload"><span class="nav-number">7.3.</span> <span class="nav-text">Multi-Part upload</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Byte-Range-Fetch"><span class="nav-number">7.4.</span> <span class="nav-text">Byte-Range Fetch</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#S3-Transfer-Acceleration"><span class="nav-number">7.5.</span> <span class="nav-text">S3 Transfer Acceleration</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#S3-Glacier-Select"><span class="nav-number">7.6.</span> <span class="nav-text">S3&#x2F;Glacier Select</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#S3-Glacier"><span class="nav-number">8.</span> <span class="nav-text">S3 Glacier</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Glacier-Operations"><span class="nav-number">8.1.</span> <span class="nav-text">Glacier Operations</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Vault-Policy-Lock"><span class="nav-number">8.2.</span> <span class="nav-text">Vault Policy&#x2F;Lock</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#S3-Access-Points"><span class="nav-number">9.</span> <span class="nav-text">S3 Access Points</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">10.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">160</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">111</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/AWS/AWS-SOA-S3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AWS SOA 學習筆記 - Storage Service(S3)
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2021-10-30 11:20:00 / Modified: 11:23:18" itemprop="dateCreated datePublished" datetime="2021-10-30T11:20:00+08:00">2021-10-30</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/AWS/" itemprop="url" rel="index"><span itemprop="name">AWS</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/AWS/AWS-SOA-S3/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="AWS/AWS-SOA-S3/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此篇文章是學習 AWS 認證課程(Certified SysOps Administrator Associate)內容時所留下的學習筆記，主要內容為 S3 服務在實際操作維運上需要注意的事項</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="S3-CORS-Cross-Origin-Resource-Sharing"><a href="#S3-CORS-Cross-Origin-Resource-Sharing" class="headerlink" title="S3 CORS(Cross-Origin Resource Sharing)"></a>S3 CORS(Cross-Origin Resource Sharing)</h1><h2 id="原理說明"><a href="#原理說明" class="headerlink" title="原理說明"></a>原理說明</h2><p><code>CORS(Cross-Origin Resource Sharing)</code> 的議題很多時候總是會讓很多人搞不清楚如何正確的處理，而這個問題卻時常在 S3 發生，原因是因為 S3 常被用來存放靜態資源，而主站域名通常與靜態資源存放的域名並不相同，因此往往就會需要處理 CORS 的問題，若是過一層 CDN 那這件事情又會再變得複雜一點；但無論如何，搞清楚運作原理，會讓處理 CORS 的問題更有明確的方向。</p>
+<p>以下透過一張圖來解釋一下 CORS 的狀況是怎麼發生的：</p>
+<p><img src="/blog/images/aws/Storage/S3_CORS-1.png" alt="S3 CORS"></p>
+<ol>
+<li><p>(圖中 1) 在上面這張圖上，首先要先搞清楚 <code>Origin</code> 是什麼，在圖中的 Web Browser 一開始存取的是 <code>http://www.example.com</code>，因此 <code>Ogitin = http://www.example.com</code></p>
+</li>
+<li><p>(圖中 2 &amp; 3) 但在上一個步驟取到的網頁中，裡面卻要 Web Browser 再向另一個域名 <code>http://www.other.com</code> 取得其他資源，此時因為資源所在的域名跟 Origin 不同，所以變成了 Cross Origin 的存取，因此 <code>Cross Origin = http://www.other.com</code>；這時候 Web Browser 就需要送一個 preflight request(<strong>OPTION</strong>) 給 Cross Origin 的域名，詢問是否可以進行 cross origin 的存取</p>
+</li>
+<li><p>(圖中 4) 域名 <code>http://www.other.com</code> 的主機對於 preflight check 的回應會包含 <code>Access-Control-Allow-Origin</code> &amp; <code>Access-Control-Allow-Methods</code>，Web Browser 拿到之後就會知道有沒有被允許繼續往下取得資源</p>
+</li>
+<li><p>(圖中 5 &amp; 6) Web Browser 確認域名 <code>http://www.other.com</code> 的主機是允許 CORS 的，因此就按照一般取得資源的流程繼續往下走(但在 request header 中會多帶上 <code>ORIGIN</code> 的資訊)；而上個步驟的與 CORS 相關的 header 資訊也都會一併帶在這個域名的 request response 中</p>
+</li>
+</ol>
+<h2 id="案例"><a href="#案例" class="headerlink" title="案例"></a>案例</h2><p>以下同樣用一張圖來介紹一個 CORS 的實際案例：</p>
+<p><img src="/blog/images/aws/Storage/S3_CORS-2.png" alt="S3 CORS"></p>
+<ol>
+<li><p>Web Browser 一開始向 <code>http://bucket-html.s3-website.eu-west-3.amazonaws.com</code> 取得 index.html</p>
+</li>
+<li><p>index.html 中包含了要求去取得另一個域名的資源(此時就變成了一個 CORS 的存取)，因此在取得此資源時，除了 resource URI 之外，還會帶上 <code>ORIGIN</code> 的資訊 (圖中略過了 preflight check)</p>
+</li>
+<li><p>另一個域名的主機若是有允許 request header <code>ORIGIN</code> 的域名，那就會回應正確的內容，並帶上 <code>Access-Control-Allow-Origin</code> header</p>
+</li>
+</ol>
+<h1 id="如何預設將檔案加密"><a href="#如何預設將檔案加密" class="headerlink" title="如何預設將檔案加密"></a>如何預設將檔案加密</h1><p>若要強化資料安全性，將檔案加密是一個常見的手段，但在 S3 的檔案要怎麼強制上傳的檔案被加密呢? 基本上有兩種方式：(這裡提的是 server-side encryption)</p>
+<h2 id="使用-Bucket-Policy"><a href="#使用-Bucket-Policy" class="headerlink" title="使用 Bucket Policy"></a>使用 Bucket Policy</h2><p>由於上傳檔案時要指定檔案需要加密，需要傳入特定的 header <code>x-amz-server-side-encryption</code>，因此可以透過設定以下 bucket policy 來限定檔案上傳時必須要加密：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;Version&quot;</span>: <span class="string">&quot;2012-10-17&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;Id&quot;</span>: <span class="string">&quot;PutObjPolicy&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;Statement&quot;</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">&quot;Sid&quot;</span>: <span class="string">&quot;DenyIncorrectEncryptionHeader&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;Effect&quot;</span>: <span class="string">&quot;Deny&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;Principal&quot;</span>: <span class="string">&quot;*&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;Action&quot;</span>: <span class="string">&quot;s3:PutObject&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;Resource&quot;</span>: <span class="string">&quot;arn:aws:s3:::&lt;bucket_name&gt;/*&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;Condition&quot;</span>: &#123;</span><br><span class="line">        <span class="attr">&quot;StringNotEquals&quot;</span>: &#123;</span><br><span class="line">          <span class="attr">&quot;s3:x-amz-server-side-encryption&quot;</span>: <span class="string">&quot;AES256&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="attr">&quot;Sid&quot;</span>: <span class="string">&quot;DenyUnEncryptedObjectUploads&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;Effect&quot;</span>: <span class="string">&quot;Deny&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;Principal&quot;</span>: <span class="string">&quot;*&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;Action&quot;</span>: <span class="string">&quot;s3:PutObject&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;Resource&quot;</span>: <span class="string">&quot;arn:aws:s3:::&lt;bucket_name&gt;/*&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;Condition&quot;</span>: &#123;</span><br><span class="line">          <span class="attr">&quot;Null&quot;</span>: &#123;</span><br><span class="line">            <span class="attr">&quot;s3:x-amz-server-side-encryption&quot;</span>: <span class="literal">true</span></span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Default-Encryption"><a href="#Default-Encryption" class="headerlink" title="Default Encryption"></a>Default Encryption</h2><p>這個可以直接在 bucket level 設定，設定完成後，所有上傳到 bucket 的檔案都會預設以指定的加密形式進行加密。</p>
+<h2 id="注意事項"><a href="#注意事項" class="headerlink" title="注意事項"></a>注意事項</h2><p>需要注意的是，Bucket Policy 的規則檢查的優先順序在於 Default Encryption 之前，因此若是兩者設定上有衝突，那可能會有非預期的結果發生。</p>
+<h1 id="Pre-signed-URL"><a href="#Pre-signed-URL" class="headerlink" title="Pre-signed URL"></a>Pre-signed URL</h1><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/ShareObjectPreSignedURL.html">S3 pre-signed URL</a> 可以為沒有開啟存取權限的 S3 bucket 提供臨時的 download/upload 權限，常用的情況可能像是：</p>
+<ul>
+<li><p>僅允許登入後的使用者從 S3 bucket 下載特定影片</p>
+</li>
+<li><p>動態的開放使用者可存取特定檔案的權限</p>
+</li>
+<li><p>僅允許使用者暫時可上傳檔案到特定的位置</p>
+</li>
+</ul>
+<p>而這功能有以下幾個特點：</p>
+<ul>
+<li><p>download URL 可透過 SDK or CLI 產生，但 upload URL 僅能透過 SDK 產生</p>
+</li>
+<li><p>預設有效時間為 3600 秒，可透過 <code>--expires-in [TIME_BY_SECONDS]</code> 參數來進行調整</p>
+</li>
+<li><p>pre-signed URL 所擁有的權限繼承自建立 URL 的使用者的權限</p>
+</li>
+</ul>
+<p>最後，透過 CLI 產生 pre-signed url 的方式可以參考<a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/cli/latest/reference/s3/presign.html">官網文件</a>。</p>
+<h1 id="S3-Inventory"><a href="#S3-Inventory" class="headerlink" title="S3 Inventory"></a>S3 Inventory</h1><p>S3 Inventory 的功能可以列出在 bucket 的所有 object &amp; 對應的 metadata 作為後續分析之用，而此功能可能運用的場景有：</p>
+<ul>
+<li><p>提供稽核相關的報表用</p>
+</li>
+<li><p>定期取得 S3 bucket 中檔案的數量 &amp; 使用量</p>
+</li>
+</ul>
+<p>而此功能有以下幾個特色：</p>
+<ul>
+<li><p>可以根據查詢需求，產生日報表 or 週報表；同時也有 filter 的功能</p>
+</li>
+<li><p>輸出的形式有 CSV、ORC or Apache Parquet …. 等格式</p>
+</li>
+<li><p>可透過 AWS Athena、Redshift、Presto、Hive、Spark … 等工具進行查詢</p>
+</li>
+</ul>
+<h1 id="Lifecycle-Rules"><a href="#Lifecycle-Rules" class="headerlink" title="Lifecycle Rules"></a>Lifecycle Rules</h1><p>S3 Lifecycle Rule 中可以設定的 action 分成兩個部份，分別是 <code>Transition</code> &amp; <code>Expiration</code>。</p>
+<p>transition action 是用來定義什麼情況下 object 要在不同的 storage class 移動，例如：</p>
+<ul>
+<li><p>將建立超過 60 天的 object 移動到 Standard IA</p>
+</li>
+<li><p>將建立超過 6 個月的 object 移動到 Glacier</p>
+</li>
+</ul>
+<p>而 expiration action 則是用來定義什麼情況下 object 會過期(or 刪除)，例如：</p>
+<ul>
+<li><p>access log 相關檔案在建立的 365 天後移除</p>
+</li>
+<li><p>自動移除舊版本的檔案 (必須啟用 versioning 功能)</p>
+</li>
+<li><p>自動移除未上傳完整的 multi-part object</p>
+</li>
+</ul>
+<p>另外一個需要注意的是，上述的規則可以套用在特定的 prefix(例如：<code>s3://mybucket/test_path/*</code>)，也可以套用在包含指定 tag(例如：<code>department: finance</code>) 的 object 上。</p>
+<h1 id="S3-Analytics"><a href="#S3-Analytics" class="headerlink" title="S3 Analytics"></a>S3 Analytics</h1><ul>
+<li><p>這是可以用來協助使用者分析目前 S3 bucket 中 object 的狀況，並提供相關報告建議使用者可以何時將 object 從 <code>STANDARD</code> 轉移到 <code>STANDARD_IA</code> 的功能。</p>
+</li>
+<li><p>無法用在 <code>ONEZONE_IA</code> or <code>GLACIER</code> 上</p>
+</li>
+<li><p>報告每天會更新一次，第一次啟動需要 24~48 小時的時間</p>
+</li>
+<li><p>若是不曉得如何制定合適的 lifecycle rule，是可以考慮使用的一個服務</p>
+</li>
+</ul>
+<h1 id="S3-Performance"><a href="#S3-Performance" class="headerlink" title="S3 Performance"></a>S3 Performance</h1><p>若是想要提昇存取 S3 時的效能，了解關於此議題的相關設計是很重要的，而以下列舉與 S3 存取效能有關的議題</p>
+<h2 id="Baseline-Performance"><a href="#Baseline-Performance" class="headerlink" title="Baseline Performance"></a>Baseline Performance</h2><p>S3 是一個可以自動擴展以提供更高的存取性能的服務，而存取性能的單位上限來自於 <code>prefix</code>；每個 prefix 可以達到以下存取效能：</p>
+<ul>
+<li><p>3,500 PUT/COPY/POST/DELETE</p>
+</li>
+<li><p>5,500 GET/HEAD</p>
+</li>
+</ul>
+<p>因此要提高 S3 存取效能，很直觀的方式就是增加 prefix 數量，舉例來說：</p>
+<ul>
+<li><p>若是將所有 object 放在同一個 prefix(例如：<code>bucket/folder1/files[1-9999]</code>, prefix = <code>/folder1/</code>)，那這樣存取效能就會很普通</p>
+</li>
+<li><p>若是將 object 分散在多個 prefix(例如：<code>bucket/folder[1-9999]/files[1-9999]</code>)，在存取不同 prefix 時，存取的限制都是分開計算的，在大量資料的取用下，效能就會有顯著提昇</p>
+</li>
+</ul>
+<h2 id="S3-KMS-存取限制"><a href="#S3-KMS-存取限制" class="headerlink" title="S3 KMS 存取限制"></a>S3 KMS 存取限制</h2><p><img src="/blog/images/aws/Storage/S3_KMS-limitation.png" alt="S3 KMS Limitation"></p>
+<p>若是 S3 使用 KMS 加密(SSE-KMS)，那在大量存取 object 時可能會碰到 KMS 的存取額度上限，因此在 object 的上下傳行為中，會進行兩次 KMS API call，分別是：</p>
+<ul>
+<li><p>upload：<code>GenerateDataKey</code></p>
+</li>
+<li><p>download：<code>Decrypt</code></p>
+</li>
+</ul>
+<p>而目前 KMS quota 根據所在 region 的不同分別是 5500 ~ 30000 request/sec 不等，若是真的有大量存取需求，可能需要注意會不會碰到這個存取限制。</p>
+<blockquote>
+<p>若是真的會超過，可以開 ticket 申請增加 service quota</p>
+</blockquote>
+<h2 id="Multi-Part-upload"><a href="#Multi-Part-upload" class="headerlink" title="Multi-Part upload"></a>Multi-Part upload</h2><p><img src="/blog/images/aws/Storage/S3_multi-part-upload.png" alt="S3 multi-part upload"></p>
+<ul>
+<li><p>可以將大檔案分成多個部份以平行的方式上傳，藉此提高傳輸效率；建議檔案大小超過 100MB 時使用，而若是檔案超過 5GB 就一定得使用 multi-part upload，否則會上傳失敗</p>
+</li>
+<li><p>沒有上傳順序問題，最大可以分成 10,000 個 part</p>
+</li>
+</ul>
+<h2 id="Byte-Range-Fetch"><a href="#Byte-Range-Fetch" class="headerlink" title="Byte-Range Fetch"></a>Byte-Range Fetch</h2><p><img src="/blog/images/aws/Storage/S3_byte-range-fetch.png" alt="S3 Byte-Range fetch"></p>
+<p>有分段平行上傳的功能，自然也有對應的下載功能，而分段平行下載的功能稱為 <code>Byte-Range Fetch</code>，實現原理是將檔案分成多個部份，以平行的方式下載以提昇傳輸效率。</p>
+<p>而若是只要取得檔案中的某一段內容，也可以使用此功能來達成，例如以下是取得檔案前段內容的範例：</p>
+<p><img src="/blog/images/aws/Storage/S3_byte-range-fetch-partially.png" alt="S3 Byte-Range fetch"></p>
+<h2 id="S3-Transfer-Acceleration"><a href="#S3-Transfer-Acceleration" class="headerlink" title="S3 Transfer Acceleration"></a>S3 Transfer Acceleration</h2><p><img src="/blog/images/aws/Storage/S3_transfer-acceleration.png" alt="S3 transfer acceleration"></p>
+<p>其實現原理是的利用 AWS 佈署在全球的 edge 節點，並搭配 AWS 自己的骨幹網路，讓使用者就近傳到 edge 節點後，走骨幹網路快速的將資料送回給指定的 bucket。</p>
+<h2 id="S3-Glacier-Select"><a href="#S3-Glacier-Select" class="headerlink" title="S3/Glacier Select"></a>S3/Glacier Select</h2><p><img src="/blog/images/aws/Storage/S3_select" alt="S3 Select"></p>
+<ul>
+<li><p>這功能只能用於 CSV &amp; JSON 格式存放的 object</p>
+</li>
+<li><p>可以指定取得檔案中符合查詢結果的內容，而非所有內容；因此有機會可以大幅減少需要傳輸的檔案內容來提昇傳輸效率</p>
+</li>
+</ul>
+<h1 id="S3-Glacier"><a href="#S3-Glacier" class="headerlink" title="S3 Glacier"></a>S3 Glacier</h1><p><a href="%E5%AD%98%E5%8F%96%E6%99%82%E9%96%93%E6%9C%83%E9%9C%80%E8%A6%81%E6%95%B8%E5%88%86%E9%90%98%E5%88%B0%E6%95%B8%E5%B0%8F%E6%99%82%E4%B8%8D%E7%AD%89">之前的文章</a>中有提到過 Glacier 的特色，這邊繼續進行一些更深入的探討：</p>
+<ul>
+<li><p>每個存放在 Glacier 的 object 稱為 <code>Archive</code>，最大的容量是 40TB</p>
+</li>
+<li><p>Archive 統一存放在稱為 <code>Vault</code> 中</p>
+</li>
+</ul>
+<h2 id="Glacier-Operations"><a href="#Glacier-Operations" class="headerlink" title="Glacier Operations"></a>Glacier Operations</h2><p>相關的操作可以從 <code>Glacier</code> &amp; <code>Vault</code> 兩個角度來看：</p>
+<ul>
+<li><p>Glacier 相關操作：</p>
+<ul>
+<li>Upload：指的是上傳 archive</li>
+<li>Download：這裡要分為幾個步驟，分別是：<ol>
+<li>首先要向 Archive initiate 一個 retrieve job</li>
+<li>Glacier 需要花點時間準備</li>
+<li>準備完成後，使用者會需要再現定的時間內下載指定的檔案(from staging server)</li>
+</ol>
+</li>
+<li>Delete：這需要透過 API or SDK 指定特定的 Archive ID 來完成</li>
+</ul>
+</li>
+<li><p>Vault 相關操作：</p>
+<ul>
+<li>Create/Delete：只能在已經沒有任何 Archive 在 Vault 裡面時才可以執行</li>
+<li>Retrieve Metadata：用來取得 creation date、archive 數量、archive 使用空間 … 等資訊</li>
+<li>Download Inventory： 列出存在於 Vault 中的  archive 資訊</li>
+</ul>
+</li>
+<li><p>Restore Link 是會過期的；這在建立 restore job 時可以指定</p>
+</li>
+</ul>
+<h2 id="Vault-Policy-Lock"><a href="#Vault-Policy-Lock" class="headerlink" title="Vault Policy/Lock"></a>Vault Policy/Lock</h2><ul>
+<li><p>每個 Vault 只能有一個 access policy &amp; lock policy</p>
+</li>
+<li><p>Access Policy 跟 bucket policy 是一樣的；Lock Policy 則是通常用來進行合規相關的制定(例如：幾年內資料不能刪除)</p>
+</li>
+</ul>
+<h1 id="S3-Access-Points"><a href="#S3-Access-Points" class="headerlink" title="S3 Access Points"></a>S3 Access Points</h1><p>S3 本身就提供了資料存取的功能，而 Access Point 通常是為了管理上的需求，或是降低存取管理上的複雜度，提出的一個將存取管理再包裝一層的作法，使用上有些需要注意的地方：</p>
+<ul>
+<li><p>每個 Access Point 都有自己專屬的 DNS</p>
+</li>
+<li><p>在 Account + Region 的條件下，名稱是唯一的 (不像是 S3 bucket name 需要 global unique)，且連結到特定的 bucket</p>
+</li>
+<li><p>可針對每個 access point 設定對應的 policy 進行存取限制</p>
+</li>
+</ul>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://www.udemy.com/course/ultimate-aws-certified-sysops-administrator-associate/">Ultimate AWS Certified SysOps Administrator Associate 2021 | Udemy</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/AWS/" rel="tag"># AWS</a>
+              <a href="/blog/tags/S3/" rel="tag"># S3</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/AWS/AWS-SOA-Storage-Data-Management/" rel="prev" title="AWS SOA 學習筆記 - Storage Service(EBS & EFS)">
+                  <i class="fa fa-chevron-left"></i> AWS SOA 學習筆記 - Storage Service(EBS & EFS)
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/AWS/AWS-SOA-S3/";
+    this.page.identifier = "AWS/AWS-SOA-S3/";
+    this.page.title = "AWS SOA 學習筆記 - Storage Service(S3)";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>
