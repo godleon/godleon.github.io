@@ -63,7 +63,7 @@ IAM Role 如何運作?
 
 這是什麼意思?
 
-`Assume Role` 基本上是一種 Action(`"Action": "sts:AssumeRole"`)，因為 Assume Role 這個行為是從 **AWS Security Token Service** 中取得一個暫時的 token，藉此取得該 Role 所是先定義好的權限。(`sts:AssumeRole` Action & IAM Role 的對應關係可以從[此 AWS 官網文件](https://docs.aws.amazon.com/service-authorization/latest/reference/list_awssecuritytokenservice.html#awssecuritytokenservice-actions-as-permissions)找到)
+`Assume Role` 基本上是一種 Action(`"Action": "sts:AssumeRole"`)，因為 Assume Role 這個行為是從 **AWS Security Token Service** 中取得一個暫時的 token，藉此取得該 Role 所事先定義好的權限。(`sts:AssumeRole` Action & IAM Role 的對應關係可以從[此 AWS 官網文件](https://docs.aws.amazon.com/service-authorization/latest/reference/list_awssecuritytokenservice.html#awssecuritytokenservice-actions-as-permissions)找到)
 
 因此! 還要建立一個 policy，專門用來針對特定的 Resource(這裡當然指的就是 `IAM Role` 了)，允許 `"Action": "sts:AssumeRole"` 的操作，內容大致會如下所示：
 
