@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="此篇文章是學習 AWS 認證課程(Certified SysOps Administrator Associate)內容時所留下的學習筆記，主要內容為 Database 相關服務(RDS, RDS Proxy, Aurora, Elasticache)在實際操作維運上需要注意的事項">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AWS SOA 學習筆記 - Storage Service(Database)">
+<meta property="og:url" content="https://godleon.github.io/blog/AWS/AWS-SOA-Database/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章是學習 AWS 認證課程(Certified SysOps Administrator Associate)內容時所留下的學習筆記，主要內容為 Database 相關服務(RDS, RDS Proxy, Aurora, Elasticache)在實際操作維運上需要注意的事項">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/DB/RDS_IAM-authentication.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/DB/RDS_Proxy.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/DB/Aurora_Multi-AZ.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/DB/Aurora_Multi-AZ.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/DB/Elasticache_replication-with-cluster-mode-disabled.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/DB/Elasticache_replication-with-cluster-mode-enabled.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/DB/Elasticache_scaling-with-cluster-mode-disabled.png">
+<meta property="article:published_time" content="2021-10-31T05:50:00.000Z">
+<meta property="article:modified_time" content="2021-10-31T05:54:06.557Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="AWS">
+<meta property="article:tag" content="RDS">
+<meta property="article:tag" content="Aurora">
+<meta property="article:tag" content="Elasticache">
+<meta property="article:tag" content="RDS Proxy">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/aws/DB/RDS_IAM-authentication.png">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/AWS/AWS-SOA-Database/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>AWS SOA 學習筆記 - Storage Service(Database) | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#RDS"><span class="nav-number">1.</span> <span class="nav-text">RDS</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Encryption-amp-Security"><span class="nav-number">1.1.</span> <span class="nav-text">Encryption &amp; Security</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#at-rest-encrption"><span class="nav-number">1.1.1.</span> <span class="nav-text">at-rest encrption</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#in-flight-encryption"><span class="nav-number">1.1.2.</span> <span class="nav-text">in-flight encryption</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8D-RDS-Instance-%E5%9F%B7%E8%A1%8C%E5%8A%A0%E5%AF%86%E6%93%8D%E4%BD%9C"><span class="nav-number">1.2.</span> <span class="nav-text">對 RDS Instance 執行加密操作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RDS-amp-IAM"><span class="nav-number">1.3.</span> <span class="nav-text">RDS &amp; IAM</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#IAM-Authentication"><span class="nav-number">1.3.1.</span> <span class="nav-text">IAM Authentication</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Parameter-Group"><span class="nav-number">1.4.</span> <span class="nav-text">Parameter Group</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%87%89%E8%80%83%E9%A0%88%E7%9F%A5"><span class="nav-number">1.4.1.</span> <span class="nav-text">應考須知</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RDS-Proxy"><span class="nav-number">2.</span> <span class="nav-text">RDS Proxy</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Aurora"><span class="nav-number">3.</span> <span class="nav-text">Aurora</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Multi-AZ"><span class="nav-number">3.1.</span> <span class="nav-text">Multi-AZ</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Backup-Backtracking-Restore"><span class="nav-number">3.2.</span> <span class="nav-text">Backup &#x2F; Backtracking &#x2F; Restore</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Database-Cloning"><span class="nav-number">3.3.</span> <span class="nav-text">Database Cloning</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Failover-Priority"><span class="nav-number">3.4.</span> <span class="nav-text">Failover Priority</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Elasticache"><span class="nav-number">4.</span> <span class="nav-text">Elasticache</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-v-s-Memcached"><span class="nav-number">4.1.</span> <span class="nav-text">Redis v.s. Memcached</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-Replication-with-Cluster-Mode-Enabled-Disabled"><span class="nav-number">4.2.</span> <span class="nav-text">Redis Replication with Cluster Mode Enabled(Disabled)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#cluster-mode-disabled"><span class="nav-number">4.2.1.</span> <span class="nav-text">cluster mode disabled</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#cluster-mode-enabled"><span class="nav-number">4.2.2.</span> <span class="nav-text">cluster mode enabled</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-Scaling-with-Cluster-Mode-Enabled-Disabled"><span class="nav-number">4.3.</span> <span class="nav-text">Redis Scaling with Cluster Mode Enabled(Disabled)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#cluster-mode-disabled-1"><span class="nav-number">4.3.1.</span> <span class="nav-text">cluster mode disabled</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#cluster-mode-enabled-1"><span class="nav-number">4.3.2.</span> <span class="nav-text">cluster mode enabled</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Memcached-Scaling"><span class="nav-number">4.4.</span> <span class="nav-text">Memcached Scaling</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">161</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">112</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/AWS/AWS-SOA-Database/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AWS SOA 學習筆記 - Storage Service(Database)
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2021-10-31 13:50:00 / Modified: 13:54:06" itemprop="dateCreated datePublished" datetime="2021-10-31T13:50:00+08:00">2021-10-31</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/AWS/" itemprop="url" rel="index"><span itemprop="name">AWS</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/AWS/AWS-SOA-Database/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="AWS/AWS-SOA-Database/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此篇文章是學習 AWS 認證課程(Certified SysOps Administrator Associate)內容時所留下的學習筆記，主要內容為 Database 相關服務(RDS, RDS Proxy, Aurora, Elasticache)在實際操作維運上需要注意的事項</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="RDS"><a href="#RDS" class="headerlink" title="RDS"></a>RDS</h1><h2 id="Encryption-amp-Security"><a href="#Encryption-amp-Security" class="headerlink" title="Encryption &amp; Security"></a>Encryption &amp; Security</h2><p>RDS Encryption 分為兩個部份，分別是 <code>at-rest encrption</code> &amp; <code>in-flight encryption</code>，兩者的思路跟作法其實都不太一樣</p>
+<h3 id="at-rest-encrption"><a href="#at-rest-encrption" class="headerlink" title="at-rest encrption"></a>at-rest encrption</h3><p>這部份屬於資料內容的加密：</p>
+<ul>
+<li><p>與 KMS 服務搭配，使用 AES-256 加密 (for master &amp; read replica)</p>
+</li>
+<li><p>encryption 功能在 RDS instance 新增啟動時就要決定是否啟用</p>
+</li>
+<li><p>若 master DB 沒有設定加密，那 replica DB 也無法</p>
+</li>
+<li><p>Oracle &amp; SQL Server 另外還有自己本身支援的 TDE(Transparent Data Encryption) 可用</p>
+</li>
+</ul>
+<h3 id="in-flight-encryption"><a href="#in-flight-encryption" class="headerlink" title="in-flight encryption"></a>in-flight encryption</h3><p>這部份屬於傳輸過程中的加密：</p>
+<ul>
+<li><p>透過 SSL certification 將傳遞到 RDS 過程中的資料加密</p>
+</li>
+<li><p>要啟用 SSL，連線到 DB 時必須明確指定 (正確操作方式可參考<a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.SSL.html">文件說明</a>)</p>
+</li>
+</ul>
+<h2 id="對-RDS-Instance-執行加密操作"><a href="#對-RDS-Instance-執行加密操作" class="headerlink" title="對 RDS Instance 執行加密操作"></a>對 RDS Instance 執行加密操作</h2><p>執行加密操作需要搭配 snapshot 的功能，首先要了解 snapshot &amp; encryption 之間的特性，會比較清楚正確的流程該如何進行：</p>
+<ul>
+<li><p>未加密的 RDS instance 所產生的 snapshot 也是未加密的型態</p>
+</li>
+<li><p>已加密的 RDS instance 所產生的 snapshot 也是已加密的型態</p>
+</li>
+<li><p>未加密的 snapshot 可以轉換為已加密的 snapshot </p>
+</li>
+</ul>
+<p>了解上面的特性後，要將一個未加密的 RDS instance 轉換為加密的 RDS instance 流程如下：</p>
+<ol>
+<li><p>透過未加密的 RDS instance 建立一個 snapshot</p>
+</li>
+<li><p>snapshot 透過 COPY 的操作轉換成已加密的 snapshot</p>
+</li>
+<li><p>將已加密的 snapshot 還原成已加密 RDS instance</p>
+</li>
+<li><p>將 application 端的連線改到新的 RDS instance 上</p>
+</li>
+</ol>
+<h2 id="RDS-amp-IAM"><a href="#RDS-amp-IAM" class="headerlink" title="RDS &amp; IAM"></a>RDS &amp; IAM</h2><p>在 IAM 的部份主要作為 Access Management 之用，分為兩個部份：</p>
+<ul>
+<li><p>可透過 IAM policy 來控制誰可以管理 RDS instance (需要透過 RDS API)</p>
+</li>
+<li><p>以 IAM 的方式進行 DB 連線登入的認證 (僅 MySQL &amp; PostgreSQL 支援)</p>
+</li>
+</ul>
+<h3 id="IAM-Authentication"><a href="#IAM-Authentication" class="headerlink" title="IAM Authentication"></a>IAM Authentication</h3><p><img src="/blog/images/aws/DB/RDS_IAM-authentication.png" alt="RDS IAM authentication"></p>
+<p>使用 RDS IAM Authentication 需要注意的是：</p>
+<ul>
+<li><p>僅適用於 MySQL &amp; PostgreSQL</p>
+</li>
+<li><p>不需要密碼，只要透過 IAM &amp; RDS API call 取得認證用 token 即可 (token 在 15 分鐘內有效)</p>
+</li>
+</ul>
+<p>可以帶來以下好處：</p>
+<ul>
+<li><p>cliet 與 RDS instance 之間的連線必須透過 SSL 加密</p>
+</li>
+<li><p>可統一透過 IAM 管理權限</p>
+</li>
+</ul>
+<h2 id="Parameter-Group"><a href="#Parameter-Group" class="headerlink" title="Parameter Group"></a>Parameter Group</h2><ul>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithParamGroups.html">Parameter Group</a> 是調整 RDS instance 運作行為的方法</p>
+</li>
+<li><p>Parameter Group 中有很多設定，分為 dynamic &amp; static 兩種；<strong>其中 dynamic 修改後立即生效，而 static 修改後需要 reboot RDS instance 才會生效</strong></p>
+</li>
+<li><p>修改 RDS instance 所使用的 Parameter Group 也需要 reboot 才會生效</p>
+</li>
+</ul>
+<h3 id="應考須知"><a href="#應考須知" class="headerlink" title="應考須知"></a>應考須知</h3><ul>
+<li><p>在 PostgreSQL &amp; SQL Server 中，可透過 Parameter Group 中的 <code>rds.force_ssl=1</code> 來強制要求使用 SSL connection</p>
+</li>
+<li><p>上面的參數對 MySQL &amp; MariaDB 無效，需要透過內部的權限設定來處理 (類似下方的設定方式)</p>
+<blockquote>
+<p>GRANT SELECT on mydb.* TO ‘myuser@%’ IDENTIFIED BY ‘xxxx’ REQUIRE SSL;</p>
+</blockquote>
+</li>
+</ul>
+<h1 id="RDS-Proxy"><a href="#RDS-Proxy" class="headerlink" title="RDS Proxy"></a>RDS Proxy</h1><p>這裡以 Lambda Function 連接 RDS instance 的角度來出發，說明 RDS proxy 的定位 &amp; 可帶來的優點。</p>
+<p>首先先了解一下使用 Lambda Function 會需要考慮到以下問題：</p>
+<ul>
+<li><p>Lambda Function 預設放在 AWS 自行管理的 VPC 中，並非我們自己所建立的 VPC，若要存取 RDS instance，就需要考慮到 public subnet 來存取位於 private subnet RDS instance 的問題</p>
+<blockquote>
+<p>問題可以透過將 Lambda Function 放到我們自己管理的 VPC 來解決</p>
+</blockquote>
+</li>
+<li><p>Lambda Function 若是執行數量很多，很有可能遇到 RDS instance 出現 too many connection 的錯誤</p>
+</li>
+</ul>
+<p>而上面的問題，透過 <a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/rds-proxy.html">RDS Proxy</a> 可以很容易被解決：</p>
+<p><img src="/blog/images/aws/DB/RDS_Proxy.png" alt="RDS Proxy"></p>
+<ul>
+<li><p>可將 RDS Proxy 放到 VPC 中的 public subnet，而 RDS instance 僅允許來自 RDS Proxy 的連線</p>
+</li>
+<li><p>Lambda Function 改連 RDS Proxy</p>
+</li>
+</ul>
+<p>透過上面的方式，可以帶來以下好處：</p>
+<ul>
+<li><p>RDS Proxy 可將認證管理的部份包一層，並統一對外改由 IAM authentication 的方式來作為連線認證方式</p>
+</li>
+<li><p>RDS Proxy 具備 auto-scaling 功能</p>
+</li>
+<li><p>Lambda Function 可以不用管理 idle connection 的問題，交給 RDS Proxy 處理即可</p>
+</li>
+</ul>
+<h1 id="Aurora"><a href="#Aurora" class="headerlink" title="Aurora"></a>Aurora</h1><h2 id="Multi-AZ"><a href="#Multi-AZ" class="headerlink" title="Multi-AZ"></a>Multi-AZ</h2><p><img src="/blog/images/aws/DB/Aurora_Multi-AZ.png" alt="Aurora Multi-AZ"></p>
+<ul>
+<li><p>從上圖可看出，Aurora shared storage volume 提供了 Replication + Self Healing + Auto Expanding …. 等功能</p>
+</li>
+<li><p>Aurora 的效能來自於將 storage 拆分成超過 100 個 volume 來達成</p>
+</li>
+<li><p>automatic failover 可以在 30 秒內完成</p>
+</li>
+</ul>
+<h2 id="Backup-Backtracking-Restore"><a href="#Backup-Backtracking-Restore" class="headerlink" title="Backup / Backtracking / Restore"></a>Backup / Backtracking / Restore</h2><ul>
+<li><p>Automatic Backup 的部份跟 RDS 是一樣的</p>
+</li>
+<li><p>backtracking 的機制可以讓 Aurora 指定 在72 小時之的時間範圍內還原</p>
+</li>
+<li><p>這功能目前只有 Aurora MySQL 有提供</p>
+</li>
+</ul>
+<h2 id="Database-Cloning"><a href="#Database-Cloning" class="headerlink" title="Database Cloning"></a>Database Cloning</h2><ul>
+<li><p>透過原本 cluster 使用的 cluster volume 來建立新的 DB cluster</p>
+</li>
+<li><p>使用 <code>copy-on-write</code> 的技術實現此功能，因此速度極快</p>
+</li>
+<li><p>適合用來為測試環境產生一份來自 production 的資料時使用</p>
+</li>
+</ul>
+<h2 id="Failover-Priority"><a href="#Failover-Priority" class="headerlink" title="Failover Priority"></a>Failover Priority</h2><ul>
+<li><p>每個 Aurora read replica 都有一直 priority tier 的設定，分別從 0~15</p>
+</li>
+<li><p>當 write instance 發生問題時，RDS 會自動 promote read replica 為 write instance，而 priority tier 越小優先權越大</p>
+</li>
+<li><p>若 priority tier 相同，那會選擇 size 最大的</p>
+</li>
+<li><p>若 priority tier &amp; size 都相同，那就隨機挑一個</p>
+</li>
+</ul>
+<h1 id="Elasticache"><a href="#Elasticache" class="headerlink" title="Elasticache"></a>Elasticache</h1><h2 id="Redis-v-s-Memcached"><a href="#Redis-v-s-Memcached" class="headerlink" title="Redis v.s. Memcached"></a>Redis v.s. Memcached</h2><p>目前 AWS Elasticache 提供了 Redis &amp; Memcached 兩個選擇，以下是官方文件給出的比較表：</p>
+<p><img src="/blog/images/aws/DB/Aurora_Multi-AZ.png" alt="Elasticache comparision"></p>
+<h2 id="Redis-Replication-with-Cluster-Mode-Enabled-Disabled"><a href="#Redis-Replication-with-Cluster-Mode-Enabled-Disabled" class="headerlink" title="Redis Replication with Cluster Mode Enabled(Disabled)"></a>Redis Replication with Cluster Mode Enabled(Disabled)</h2><p>因為只有 Redis 有 replication 的功能，因此這部份的說明就以 Redis 為主</p>
+<h3 id="cluster-mode-disabled"><a href="#cluster-mode-disabled" class="headerlink" title="cluster mode disabled"></a>cluster mode disabled</h3><p><img src="/blog/images/aws/DB/Elasticache_replication-with-cluster-mode-disabled.png" alt="Elasticache Redis Replication - cluster mode disabled"></p>
+<p>這是比較單純的模式，將 cluster mode 關閉的情況下，以下列出在 repication 的運作行為需要注意的地方：</p>
+<ul>
+<li><p>非同步複製 (不論有沒有啟用 cluster mode 都是相同的)</p>
+</li>
+<li><p>primary node 可用來 read/write，其他就只有 read-only</p>
+</li>
+<li><p>只會有一個 shard，其他所有的 replica node 都具備有一模一樣的資料</p>
+</li>
+<li><p>Multi-AZ 是預設啟用的 (目的是為了 failover 用)</p>
+</li>
+<li><p>對提昇 read performance 是有幫助的</p>
+</li>
+</ul>
+<h3 id="cluster-mode-enabled"><a href="#cluster-mode-enabled" class="headerlink" title="cluster mode enabled"></a>cluster mode enabled</h3><p><img src="/blog/images/aws/DB/Elasticache_replication-with-cluster-mode-enabled.png" alt="Elasticache Redis Replication - cluster mode enabled"></p>
+<p>cluster mode 開啟後事情會變得複雜些，以下列出在 replication 的運作行為需要注意的地方：</p>
+<ul>
+<li><p>資料會根據 shard 的數量被切份，並平均分散在不同的 shard</p>
+</li>
+<li><p>承上，可作為提昇 write performance 的手段</p>
+</li>
+<li><p>每個 shard 都可以各自有最多 5 個 replica node</p>
+</li>
+<li><p>同樣支援 Multi-AZ</p>
+</li>
+<li><p>一個 cluster 最大支援 500 個 node</p>
+<ul>
+<li>500 shards (1 master)</li>
+<li>250 shards (1 master + 1 replica)</li>
+<li>…</li>
+<li>83 shards (1 master + 5 replicas)</li>
+</ul>
+</li>
+</ul>
+<h2 id="Redis-Scaling-with-Cluster-Mode-Enabled-Disabled"><a href="#Redis-Scaling-with-Cluster-Mode-Enabled-Disabled" class="headerlink" title="Redis Scaling with Cluster Mode Enabled(Disabled)"></a>Redis Scaling with Cluster Mode Enabled(Disabled)</h2><p>此部份也是一樣以 Redis 為主進行討論</p>
+<h3 id="cluster-mode-disabled-1"><a href="#cluster-mode-disabled-1" class="headerlink" title="cluster mode disabled"></a>cluster mode disabled</h3><p>進行水平擴展，只要簡單的新增/減少 read replica 即可。</p>
+<p>若是垂直擴展，需要調整 node type，那 Elasticache 內部其實是建立一個新的 Node Group，完成資料同步後，再透過 DNS update 的方式完成(如下圖)</p>
+<p><img src="/blog/images/aws/DB/Elasticache_scaling-with-cluster-mode-disabled.png" alt="Elasticache Redis scaling - cluster mode disabled"></p>
+<h3 id="cluster-mode-enabled-1"><a href="#cluster-mode-enabled-1" class="headerlink" title="cluster mode enabled"></a>cluster mode enabled</h3><p>cluster mode 開啟的情況下，scaling 就會分成 Online/Offline scaling 兩種，其中 Online mode 不會有 downtime，但存取效能會稍微有影響，而 Offline mode 則會有 downtime(但可支援更多類型的調整，例如：更換 node type，升級 engine 版本 … 等等)。</p>
+<p>進行水平擴展有以下方式：</p>
+<ul>
+<li>Resharding：增加 or 移除 shard</li>
+<li>Shard Rebalancing：讓 shard 的分佈更平均</li>
+<li>這個可選擇 online scaling or offline scaling</li>
+</ul>
+<p>進行垂直擴展的部份一樣是調整 node type，但 cluster mode enabled 情況下可以作到 online scaling</p>
+<h2 id="Memcached-Scaling"><a href="#Memcached-Scaling" class="headerlink" title="Memcached Scaling"></a>Memcached Scaling</h2><ul>
+<li><p>Memcached cluster 可包含 node 數量為 1~40</p>
+</li>
+<li><p>水平擴展很單純，就是單純新增(or 移除) node，只要 <a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AmazonElastiCache/latest/mem-ug/AutoDiscovery.html">Auto Discovery</a> 功能有啟用，application(client) 就會自動找到新增的 node，不需要進行額外調整 </p>
+</li>
+<li><p>垂直擴展的流程是：</p>
+<ol>
+<li>使用新的 node type 建立新的 cluster</li>
+<li>更新 application 指向新的 cluster</li>
+<li>移除舊的 cluster<blockquote>
+<p>需要注意的是，由於 Memcached 不會協助複製資料，因此新的 cluster 啟動實是完全沒資料的，application 需要再重新填入所需要的資料</p>
+</blockquote>
+</li>
+</ol>
+</li>
+</ul>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a target="_blank" rel="noopener" href="https://www.udemy.com/course/ultimate-aws-certified-sysops-administrator-associate/">Ultimate AWS Certified SysOps Administrator Associate 2021 | Udemy</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/">What is Amazon Relational Database Service (Amazon RDS)? - Amazon Relational Database Service</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/AWS/" rel="tag"># AWS</a>
+              <a href="/blog/tags/RDS/" rel="tag"># RDS</a>
+              <a href="/blog/tags/Aurora/" rel="tag"># Aurora</a>
+              <a href="/blog/tags/Elasticache/" rel="tag"># Elasticache</a>
+              <a href="/blog/tags/RDS-Proxy/" rel="tag"># RDS Proxy</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/AWS/AWS-SOA-S3/" rel="prev" title="AWS SOA 學習筆記 - Storage Service(S3)">
+                  <i class="fa fa-chevron-left"></i> AWS SOA 學習筆記 - Storage Service(S3)
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/AWS/AWS-SOA-Database/";
+    this.page.identifier = "AWS/AWS-SOA-Database/";
+    this.page.title = "AWS SOA 學習筆記 - Storage Service(Database)";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>
