@@ -130,9 +130,11 @@ RDS 提供兩種備份類型：
 
 - Automatic Backup 每天會執行一個完整的 full snapshot，資料保存週期可以設定 1~35 天，這個週期稱為 `retention period`
 
+- 每五分鐘會自動備份 transaction log，而這備份也提供了還原到任何時間點的能力 (從最後一個五分鐘備份)
+
 - 進行復原程序時，AWS 會自動選擇最近時間點的 backup 來還原；使用者可以決定恢復到 retention period 中的任何一個時間點
 
-- Automatic Backup 是預設啟用的，資料會存到 S3
+- Automatic Backup 是預設啟用的，資料會存到 S3 **(若是要停用 backup，則將 retention period 設定為 0)**
 
 - S3 會提供與 RDS storage 容量相同的免費額度，假設啟動 5GB 容量的 RDS，S3 就會相對應提供免費的 5GB 備份空間，超過才需要收費
 
@@ -146,7 +148,10 @@ RDS 提供兩種備份類型：
 
 #### DB snapshot
 
-- 需要使用者手動執行
+- 需要使用者手動執行，會衝擊到 RDS instance 運行時的 I/O 效能
+> 若是啟用 multi-AZ，那 snapshot 就會對 standby DB 執行，則不會影響 master DB 效能
+
+- snapshot 保存時間的長短可以自行決定
 
 - 即使 RDS instance 被移除，snapshot 依然會繼續存在
 
@@ -161,11 +166,12 @@ RDS 提供兩種備份類型：
 
 - 加密功能目前支援 MySQL, Oracle, SQL Server, PostgreSQL, MariaDB, Aurora
 
-- 需要搭配 AWS KMS(Key Management Service) 使用
+- 需要搭配 AWS KMS(Key Management Service) 使用 (AES-256)
 
 - DB 資料進資料庫後會以加密後的形式存在
 
 - 連同 automatic backup, read replicas, snapshot ... 這幾個部份都是以加密的方式存在
+> 若是 master 沒有加密，那 read replica 也無法加密
 
 
 ### Multi-AZ
@@ -187,7 +193,9 @@ RDS 提供兩種備份類型：
 
 - 目前支援 Multi-AZ 的資料庫類型有 SQL server、Oracle、MySQL、PostgreSQL、MariaDB
 
-- 建議在 production 環境，`Multi-AZ Failover` 的功能一定要開啟
+- 建議在 production 環境，`Multi-AZ Automatic Failover` 的功能一定要開啟
+
+- **從 single-AZ 轉換為 multi-AZ 的過程是個不會影響線上服務的操作(zero downtime)**，只要在 console 直接啟用 multi-AZ 功能即可
 
 
 ### Read Replicas
@@ -224,7 +232,9 @@ RDS 提供兩種備份類型：
 
 - read replica 本身可以將自己提昇為 primary DB，但這樣一來同步複本的功能就會消失
 
-- **data replication 過程中產生的資料傳輸是免費的**
+- **在同一個 region 中，data replication 過程中產生的資料傳輸是免費的 (即使是 cross AZ 也是免費的)**
+
+- cross region 的 data replication 就會有傳輸費用的產生
 
 ## 其他考試重點
 
@@ -252,7 +262,7 @@ Aurora
 
 - 提供相容於 MySQL & PostgreSQL 的關聯式資料庫服務
 
-- 對於傳統關聯式資料庫的服務的需求，Aurora 提供了另一個高效能(倍數成長)、高可用、簡單、使用成本低的選擇
+- 對於傳統關聯式資料庫的服務的需求，Aurora 提供了另一個高效能(號稱 5 倍的 RDS MySQL 效能 & 3 倍的 RDS PostgreSQL 效能)、高可用、簡單、使用成本低的選擇
 
 - 使用者可省下許多處理管理工作的時間，例如：佈建硬體、資料庫設定、更新、備份...等工作
 
@@ -260,7 +270,7 @@ Aurora
 
 ## Aurora 服務的特色
 
-- 資料庫開始的容量為 10GB，最大可到 64TB；儲存空間可以自動擴展
+- 資料庫開始的容量為 10GB，最大可到 64TB；儲存空間可以自動擴展 (以 10GB 為單位遞增)
 
 - **每個 AZ 會有兩份資料備份，搭配最低三個 AZ 的設定，資料一共會有 6 份的備份**
 
@@ -272,7 +282,11 @@ Aurora
 
 - 不論是備份 or snapshot 都不會影響 Aurora 的運作效能
 
+- 透過 `Backtrack` 的機制，不需要使用備份就可以還原到任何一個時間點的資料
+
 - 若是服務初期階段，workload 很低且無法預測，可以使用 Aurora Serverless 來將費用降到最低；此服務也可以在服務需求變大時，自動的 scale up
+
+- 對比 RDS，成本會多 20% 左右，但效能會更好
 
 ## RDS Replica Types
 
@@ -296,6 +310,7 @@ RDS 提供三種複本(replica)類型：
 | 自動 Failover | Yes | No |
 | 支援使用者自訂的 replication delay | No | Yes |
 | 支援複本與 primary 不同的 data or schema | No | Yes |
+> Aurora replication 的速度更快，延遲更低，可達到 10ms 以下的 replica lag
 
 ## 啟動 Aurora 服務需要提供的資訊
 
@@ -467,9 +482,11 @@ Elasticache 提供兩種 Engine Type，分別是 `Redis` & `Memcached`，以下�
 
 ## 應考重點
 
-- Elasicache 主要用來增加 DB & web application 的效能
+- Elasicache 主要用來增加 DB & web application 的效能 (資料讀取密集的相關操作可以轉到 Elasticache 處理，可以大幅降低 DB 負擔)
 
 - 搭配 Elasticache，可以避免查詢行為一直打進 DB，直接透過 cache 回應，可以大幅降低 request response time，同時也可以降低 DB 的負載
+
+- 協助 application 成為 stateless 的關鍵
 
 - Redis 支援 Multi-AZ
 
