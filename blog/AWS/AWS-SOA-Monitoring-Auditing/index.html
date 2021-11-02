@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="此篇文章是學習 AWS 認證課程(Certified SysOps Administrator Associate)內容時所留下的學習筆記，主要內容為 Monitoring &amp; Auditing 在實際操作維運上需要注意的事項，相關的服務包含 CloudWatch、EventBridge、CloudTrail, AWS Config ... 等等">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AWS SOA 學習筆記 - Storage Service(Database)">
+<meta property="og:url" content="https://godleon.github.io/blog/AWS/AWS-SOA-Monitoring-Auditing/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章是學習 AWS 認證課程(Certified SysOps Administrator Associate)內容時所留下的學習筆記，主要內容為 Monitoring &amp; Auditing 在實際操作維運上需要注意的事項，相關的服務包含 CloudWatch、EventBridge、CloudTrail, AWS Config ... 等等">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/MonitorAudit/CloudWatch-Logs_subscription.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/MonitorAudit/CloudWatch-Logs_aggregation.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/MonitorAudit/CloudTrail-Insight.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/MonitorAudit/Config_remidiation.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/MonitorAudit/Config_notification-EventBridge.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/MonitorAudit/Config_notification-SNS.png">
+<meta property="article:published_time" content="2021-11-02T02:30:00.000Z">
+<meta property="article:modified_time" content="2021-11-02T02:32:15.047Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="AWS">
+<meta property="article:tag" content="CloudWatch">
+<meta property="article:tag" content="CloudTrail">
+<meta property="article:tag" content="EventBridge">
+<meta property="article:tag" content="AWS Config">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/aws/MonitorAudit/CloudWatch-Logs_subscription.png">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/AWS/AWS-SOA-Monitoring-Auditing/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>AWS SOA 學習筆記 - Storage Service(Database) | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#CloudWatch"><span class="nav-number">1.</span> <span class="nav-text">CloudWatch</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#CloudWatch-Metric"><span class="nav-number">1.1.</span> <span class="nav-text">CloudWatch Metric</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CloudWatch-Custom-Metric"><span class="nav-number">1.2.</span> <span class="nav-text">CloudWatch Custom Metric</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CloudWatch-Dashboard"><span class="nav-number">1.3.</span> <span class="nav-text">CloudWatch Dashboard</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CloudWatch-Log"><span class="nav-number">2.</span> <span class="nav-text">CloudWatch Log</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Overview"><span class="nav-number">2.1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Data-Source"><span class="nav-number">2.2.</span> <span class="nav-text">Data Source</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Metric-Filter-amp-Insight"><span class="nav-number">2.3.</span> <span class="nav-text">Metric Filter &amp; Insight</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%88%87%E5%85%B6%E4%BB%96%E6%9C%8D%E5%8B%99%E6%95%B4%E5%90%88%E6%87%89%E7%94%A8%E7%9A%84%E6%83%85%E5%A2%83"><span class="nav-number">2.4.</span> <span class="nav-text">與其他服務整合應用的情境</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EventBridge"><span class="nav-number">3.</span> <span class="nav-text">EventBridge</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Overview-1"><span class="nav-number">3.1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CloudWatch-Event"><span class="nav-number">3.2.</span> <span class="nav-text">CloudWatch Event</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%B2%E5%8C%96%E7%9A%84-Event-Bridge"><span class="nav-number">3.3.</span> <span class="nav-text">進化的 Event Bridge</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Service-Quota"><span class="nav-number">4.</span> <span class="nav-text">Service Quota</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CloudTrail"><span class="nav-number">5.</span> <span class="nav-text">CloudTrail</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Overview-2"><span class="nav-number">5.1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CloudTrail-Event"><span class="nav-number">5.2.</span> <span class="nav-text">CloudTrail Event</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Management-Events"><span class="nav-number">5.2.1.</span> <span class="nav-text">Management Events</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Data-Events"><span class="nav-number">5.2.2.</span> <span class="nav-text">Data Events</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CloudTrail-Insight-Events"><span class="nav-number">5.2.3.</span> <span class="nav-text">CloudTrail Insight Events</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#AWS-Config"><span class="nav-number">6.</span> <span class="nav-text">AWS Config</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Overview-3"><span class="nav-number">6.1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Config-Rules"><span class="nav-number">6.2.</span> <span class="nav-text">Config Rules</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Remediation"><span class="nav-number">6.3.</span> <span class="nav-text">Remediation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Notification"><span class="nav-number">6.4.</span> <span class="nav-text">Notification</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">7.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">162</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">114</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/AWS/AWS-SOA-Monitoring-Auditing/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AWS SOA 學習筆記 - Storage Service(Database)
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2021-11-02 10:30:00 / Modified: 10:32:15" itemprop="dateCreated datePublished" datetime="2021-11-02T10:30:00+08:00">2021-11-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/AWS/" itemprop="url" rel="index"><span itemprop="name">AWS</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/AWS/AWS-SOA-Monitoring-Auditing/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="AWS/AWS-SOA-Monitoring-Auditing/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此篇文章是學習 AWS 認證課程(Certified SysOps Administrator Associate)內容時所留下的學習筆記，主要內容為 Monitoring & Auditing 在實際操作維運上需要注意的事項，相關的服務包含 CloudWatch、EventBridge、CloudTrail, AWS Config ... 等等</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="CloudWatch"><a href="#CloudWatch" class="headerlink" title="CloudWatch"></a>CloudWatch</h1><h2 id="CloudWatch-Metric"><a href="#CloudWatch-Metric" class="headerlink" title="CloudWatch Metric"></a>CloudWatch Metric</h2><ul>
+<li><p>若是希望 Auto Scaling Group 可以有更快的擴展速度，那就需要打開 detailed monitoring 功能</p>
+</li>
+<li><p>Free Tier 足夠提供 10 個 detail monitoring metric 的額度</p>
+</li>
+</ul>
+<h2 id="CloudWatch-Custom-Metric"><a href="#CloudWatch-Custom-Metric" class="headerlink" title="CloudWatch Custom Metric"></a>CloudWatch Custom Metric</h2><ul>
+<li><p>用來上傳自訂的 metric 到 CloudWatch 用 (例如：EC2 instance memory 使用狀況、磁碟空間)</p>
+</li>
+<li><p>透過 <code>PutMetricData</code> API</p>
+</li>
+<li><p>可為 metric 增加 dimension(其實就是 attribute) 變成多維的資料</p>
+</li>
+<li><p>以上傳頻率來說，標準是一分鐘傳一次。若是要密集一點，最短可以到 1 秒鐘</p>
+</li>
+</ul>
+<h2 id="CloudWatch-Dashboard"><a href="#CloudWatch-Dashboard" class="headerlink" title="CloudWatch Dashboard"></a>CloudWatch Dashboard</h2><ul>
+<li><p>Global service</p>
+</li>
+<li><p>可以包含多個 region 的監控資訊，甚至來自不同 AWS 帳號也可以</p>
+</li>
+<li><p>可設定 dashboard 的 time zone &amp; range，以及 auto refresh 的時間(10s, 1m, 2m, 5m, 15m)</p>
+</li>
+<li><p>可透過 EMail or Cognito+SSO，將 dashboard 可以分享給沒有 AWS 帳號的使用者</p>
+</li>
+<li><p>價格部份，使用 3 個 dashboard 內(上限為 50 個 metric)是免費的；之後一個 dashboard 每個月要收費 $3</p>
+</li>
+</ul>
+<h1 id="CloudWatch-Log"><a href="#CloudWatch-Log" class="headerlink" title="CloudWatch Log"></a>CloudWatch Log</h1><h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><p>要使用 CloudWatch Log，必須先知道 Log 透過什麼機制送進 CloudWatch 的，首先需要了解兩個部份：</p>
+<ul>
+<li><p>Log Stream：這指的是同一個來源所傳過來一連串的 log event，這來源可能是 application、log file、container …. 等等</p>
+</li>
+<li><p>Log Group：這是為了管理方便而再多包裝一層的功能，讓多個 log stream 可以共用 retenstion、monitoring、ACL … 等設定</p>
+</li>
+</ul>
+<p>當 log 資料送進 CloudWatch Log 後，為了進一步處理方便後續利用，可以繼續送到以下幾個地方：</p>
+<ul>
+<li>S3：透過 S3 Export，利用 <code>CreateExportTask</code> API，設定需要 12 小時左右才會生效 (非 near-real time or real-time 的作法)</li>
+<li>Kinesis Data Stream</li>
+<li>Kinesis Data Firehose</li>
+<li>Lambda</li>
+<li>Elasticsearch</li>
+</ul>
+<h2 id="Data-Source"><a href="#Data-Source" class="headerlink" title="Data Source"></a>Data Source</h2><p>Log 的來源可以來自以下地方：</p>
+<ul>
+<li><p>SDK、CloudWatch Log Agent、<a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/UseCloudWatchUnifiedAgent.html">CloudWatch Unified Agent</a></p>
+</li>
+<li><p>Elastic Beanstalk application log</p>
+</li>
+<li><p>ECS container log</p>
+</li>
+<li><p>AWS Lambda Function log</p>
+</li>
+<li><p>VPC Flow log</p>
+</li>
+<li><p>API Gateway</p>
+</li>
+<li><p>CloudTrail (可以加上 filter)</p>
+</li>
+<li><p>Route53：DNS 查詢相關 log</p>
+</li>
+</ul>
+<h2 id="Metric-Filter-amp-Insight"><a href="#Metric-Filter-amp-Insight" class="headerlink" title="Metric Filter &amp; Insight"></a>Metric Filter &amp; Insight</h2><ul>
+<li><p>CloudWatch Log 中有提供 filter 可讓使用者容易找到所需要的 log 資訊，例如：包含特定 IP 的 log，出現 “ERROR” 關鍵字的 log 資訊</p>
+</li>
+<li><p><code>Metric Filter</code> 這項功能，可以讓使用者自訂 log filter pattern，當出現符合 filter pattern 的 log 後，對應的 metric 就會增加；而這 metric 後續可以用來設定 CloudWatch Alarm 之用</p>
+</li>
+<li><p>CloudWatch Logs Insight 可以用來查詢 log 並可將查詢結果加到 CloudWatch dashboard 中</p>
+</li>
+</ul>
+<h2 id="與其他服務整合應用的情境"><a href="#與其他服務整合應用的情境" class="headerlink" title="與其他服務整合應用的情境"></a>與其他服務整合應用的情境</h2><p>CloudWatch Logs 可以透過 <code>Subscription</code> &amp; <code>Aggregation</code>，與其他服務整合，讓 Log 資訊可以延伸出更多種應用，以下舉兩個例子：</p>
+<p><img src="/blog/images/aws/MonitorAudit/CloudWatch-Logs_subscription.png" alt="CloudWatch Logs Subscription"></p>
+<p>透過 subscription filter，可選擇將傳進 CloudWatch Logs 的 logs 轉發到其他服務，例如：</p>
+<ul>
+<li><p>轉發到 Lambda Function，經過自定義的處理後，再轉送到 Elasticsearch 中儲存 (real time)</p>
+</li>
+<li><p>轉發到 Kinesis Data Firehose，經過自定義的處理後(當作實際送儲存之前的緩衝)，再批次轉發到 Elasticsearch or S3 … 等服務 (near real time)</p>
+</li>
+<li><p>集中轉發到 Kinesis Data Streams 服務後，再轉送給 Kinesis Data Firehos/Analytics、EC2、Lambda … 等服務進行後續處理</p>
+</li>
+</ul>
+<p><img src="/blog/images/aws/MonitorAudit/CloudWatch-Logs_aggregation.png" alt="CloudWatch Logs Aggregation"></p>
+<p>透過上圖的架構，可以將來自多個 AWS account(可能來自不同的 region) 的 CloudWatch Logs 統一集中轉發到 Kinesis Data Streams 服務後，接著轉送給 Kinesis Data Firehose 後，再批次儲存到 S3 中。(near real time)</p>
+<h1 id="EventBridge"><a href="#EventBridge" class="headerlink" title="EventBridge"></a>EventBridge</h1><h2 id="Overview-1"><a href="#Overview-1" class="headerlink" title="Overview"></a>Overview</h2><p>Event Bridge 前身為 <strong>CloudWatch Event</strong>，主要功能是讓使用者可以針對 Event 進行更多客製化管理 or 操作，而這個服務帶來了幾個優點：</p>
+<ul>
+<li><p>Decoupling：將 event source, routing rule、event target … 等角色拆分開來，可以分別獨立設計 &amp; 擴充</p>
+</li>
+<li><p>Simplified event routing：使用者可以根據實際業務 or 管理需求，設定對應的 routing rule，將 event 送到有需要得知訊息的地方</p>
+</li>
+<li><p>Improved Availability：這是個全託管的 serverless 服務，可用性交給 AWS 負責，使用者只要負責使用即可</p>
+</li>
+<li><p>Third party integration：甚至可以整合外部的 SAAS 服務</p>
+</li>
+</ul>
+<h2 id="CloudWatch-Event"><a href="#CloudWatch-Event" class="headerlink" title="CloudWatch Event"></a>CloudWatch Event</h2><p>Event Bridge 包含了所有 CloudWatch Event 的所有功能，而這功能主要內容是：</p>
+<ul>
+<li><p>可以攔截眾多 AWS service 所產生的 event，例如：EC2 Instace Start、CodeBuild Failure、S3、Trust Advisor …. 等等</p>
+</li>
+<li><p>可與 CloudTrail 整合，攔截所有 API call</p>
+</li>
+<li><p>可設定 schedule(or Cron)，定期發送 event</p>
+</li>
+<li><p>有了上面的 event 後，這些 event 會產生對應的 JSON payload，可將其轉送到指定的 target(不同類型的其他服務)，例如：</p>
+<ul>
+<li>Compute：Lambda、Batch、ECS task</li>
+<li>Integration：SQS、SNS、Kinesis Data Streams、Kinesis Data Firehose</li>
+<li>Orchestration：Step Functions、CodePipeline、CodeBuild</li>
+<li>Maintenance：SSM、EC2 Actions</li>
+</ul>
+</li>
+</ul>
+<h2 id="進化的-Event-Bridge"><a href="#進化的-Event-Bridge" class="headerlink" title="進化的 Event Bridge"></a>進化的 Event Bridge</h2><p>Event Bridge 是更進化的服務，還可以整合外部的 SAAS，因此也對原本的 CloudWatch Event 進行了一層封裝，因此有些新的設計概念需要釐清，大致列舉如下：</p>
+<ul>
+<li><p>Event Bus：將 event 的來源透過 event bus 的方式來呈現，預設為 <code>default</code>，也就是泛指來自 AWS service 的相關 event；也可以對外部的 SAAS 服務設計 <code>partner</code> event bus(針對 AWS 已經整合完成的服務)，甚至可以設定 <code>custom</code> event bus，讓 application 可以送 event 到 Event Bridge 中</p>
+</li>
+<li><p>Rules：這個部份定義了要如何處理 &amp; filter 從 event bus 收到的 event </p>
+</li>
+<li><p>Schema Registry：由於每個 event 的內容不一樣，自然會產生不一樣的 JSON payload，而這些 payload 所代表的意義，就需要使用 schema 來定義，方便後續處理 event 的 target 可以了解每個 event JSON payload 所代表的意義為何，才可以進行相對應的處理</p>
+</li>
+</ul>
+<h1 id="Service-Quota"><a href="#Service-Quota" class="headerlink" title="Service Quota"></a>Service Quota</h1><p>這裡需要注意的就是當 service quota 快接近上限時，如何主動得到 CloudWatch Alarm 的通知，有兩種方法：</p>
+<ol>
+<li><p>進入 Serivce Quota 後，找到要設定 Alarm 的選項，直接將其加入到 CloudWatch Alarm 中，後續再到 CloudWatch 中設定其他 notification or action 的細節；這樣的作法可以為所有 service quota 都設定對應的 alarm</p>
+</li>
+<li><p>透過 Trusted Advisor：由於 Trusted Advisor 有內建常用的 service quota 的檢查，超過預定上限(約 80%) 就會檢查失敗進行通知；只是 Trusted Advisor 的檢查並不會涵蓋所有的 service quota，因此在選用此方案時還是要注意一下</p>
+</li>
+</ol>
+<h1 id="CloudTrail"><a href="#CloudTrail" class="headerlink" title="CloudTrail"></a>CloudTrail</h1><h2 id="Overview-2"><a href="#Overview-2" class="headerlink" title="Overview"></a>Overview</h2><ul>
+<li><p>可將 CloudTrail 產生的 log 存放至 S3 or CloudWatch Logs</p>
+</li>
+<li><p>CloudTrail 可以針對全部 region 套用，也可以針對單一 region 套用</p>
+</li>
+<li><p>CloudTrail Events 預設儲存 90 天(指的是可以從 CloudTrail console 的 Event history 中查詢到的時間範圍)，若是要查詢到更久之前的 event，那就要透過 Athena 對存放 event 的 S3 bucket 進行查詢</p>
+</li>
+</ul>
+<h2 id="CloudTrail-Event"><a href="#CloudTrail-Event" class="headerlink" title="CloudTrail Event"></a>CloudTrail Event</h2><p>CloudTrail Event 分為三類，分別是 <code>Management Events</code>、<code>Data Events</code>、<code>CloudTrail Insight Events</code></p>
+<h3 id="Management-Events"><a href="#Management-Events" class="headerlink" title="Management Events"></a>Management Events</h3><ul>
+<li><p>在 AWS resource 產生的操作都算是此類，例如：安全性設定(IAM <code>AttachRolePolicy</code>)、routing rule 設定(EC2 <code>CreateSubnet</code>) … 等等</p>
+</li>
+<li><p>CloudTrail 預設會記錄 Management Events (只有此項預設是開啟的)</p>
+</li>
+<li><p>可將 Read Events &amp; Write Events 分開</p>
+</li>
+</ul>
+<h3 id="Data-Events"><a href="#Data-Events" class="headerlink" title="Data Events"></a>Data Events</h3><ul>
+<li><p>CloudTrail 預設不會記錄 Data Events</p>
+</li>
+<li><p>此類 Event 分成兩個來源，分別是 <code>S3</code> &amp; <code>Lambda Function</code></p>
+</li>
+<li><p>S3 記錄的是 object-level 的相關操作，例如：<strong>GetObject</strong>、<strong>DeleteObject</strong>、<strong>PutObject</strong> … 等等；同時也可以將 Read/Write Event 分開</p>
+</li>
+<li><p>Lambda Function 的部份則是記錄執行操作(<strong>Invoke</strong>)</p>
+</li>
+</ul>
+<h3 id="CloudTrail-Insight-Events"><a href="#CloudTrail-Insight-Events" class="headerlink" title="CloudTrail Insight Events"></a>CloudTrail Insight Events</h3><p><img src="/blog/images/aws/MonitorAudit/CloudTrail-Insight.png" alt="CloudTrail Insight Event"></p>
+<ul>
+<li><p>這是用來偵測帳號中的異常 API 存取行為，例如：異常資源佈署行為、達到 service limit、突然大量的 IAM 相關操作 … 等等</p>
+</li>
+<li><p>CloudTrail Insight 會分析日常的存取行為後，建立一個 baseline 作為判斷異常的基礎</p>
+</li>
+<li><p>baseline 建立後就會持續的分析 <code>**write**</code> event 來偵測異常狀況</p>
+</li>
+<li><p>當 Insight Event 產生後，可以送到 CloudTrail console、S3，或是產生 EventBridge event 來進行後續自動化操作的整合</p>
+</li>
+</ul>
+<h1 id="AWS-Config"><a href="#AWS-Config" class="headerlink" title="AWS Config"></a>AWS Config</h1><h2 id="Overview-3"><a href="#Overview-3" class="headerlink" title="Overview"></a>Overview</h2><ul>
+<li><p>AWS Config 是個可以用來協助檢查、稽核，並記錄 AWS resource 相關配置是否有符合預先定義好的規範的服務</p>
+</li>
+<li><p>可以記錄並提供 resource 隨著時間變更的過程 &amp; 內容</p>
+</li>
+<li><p>此服務主要用來解決類似以下問題：</p>
+<ul>
+<li>是否有不受限制來源的 SSH 存取的 security group 存在 ?</li>
+<li>是否有任何 S3 bucket 設定了 public access ?</li>
+<li>某段時間內，ALB 做了哪些變更</li>
+</ul>
+</li>
+<li><p>可指定針對檢查到的任何變更都發送通知到 EventBridge or SNS</p>
+</li>
+<li><p>是個 per-region 的服務，但可以 cross-region 蒐集資料並彙整(aggregate)至單一 account</p>
+</li>
+<li><p>可將服務過程中產生的記錄資訊統一存放在 S3，日後可用 Athena 進行分析</p>
+</li>
+</ul>
+<h2 id="Config-Rules"><a href="#Config-Rules" class="headerlink" title="Config Rules"></a>Config Rules</h2><ul>
+<li><p>Config Rule 其實就是定義了檢查(or 稽核)所要實現的細節，例如：檢查 security group 是否有不限制來源的 SSH 存取設定</p>
+</li>
+<li><p>AWS 定義了近百個 managed config rules，可以直接拿來利用</p>
+</li>
+<li><p>若是需要自行開發 custom config rule，那需要透過 AWS Lambda (例如：檢查 EBS volume 是否屬於 gp2)</p>
+</li>
+<li><p>可以指定在任何 configuration 變更進行 Config 檢查，也可以指定一段時間檢查一次</p>
+</li>
+<li><p><strong>需要注意的是，AWS Config</strong> 無法阻止不合規的設定發生，單純只是個檢查後，提供相關資訊給管理者(頂多後續可以指定 remidiation action)</p>
+</li>
+<li><p>這是個收費服務，記錄的資訊越多 or 檢查的項目越多，費用就越高</p>
+</li>
+</ul>
+<h2 id="Remediation"><a href="#Remediation" class="headerlink" title="Remediation"></a>Remediation</h2><ul>
+<li><p>AWS Config 可以結合 SSM Automation，針對非合規的 configuration 部份進行自動化的處理</p>
+</li>
+<li><p>自動化的處理可以搭配 AWS managed automation document 或是自訂的 automation document</p>
+<blockquote>
+<p>可用 automation document 來呼叫 Lambda Function 執行更複雜的客製化作業</p>
+</blockquote>
+</li>
+</ul>
+<p>以下舉個 Remediation 的例子，當發現 IAM user 已經超過一定天數沒有存取行為後，就直接廢止該 IAM user 的 access key</p>
+<p><img src="/blog/images/aws/MonitorAudit/Config_remidiation.png" alt="AWS Config - Remediation"></p>
+<h2 id="Notification"><a href="#Notification" class="headerlink" title="Notification"></a>Notification</h2><p>notification 的部份可以搭配 EventBridge or SNS</p>
+<p><img src="/blog/images/aws/MonitorAudit/Config_notification-EventBridge.png" alt="AWS Config - notification EventBridge"></p>
+<blockquote>
+<p>搭配 EventBridge 可以設定 filter，並將相關資訊往後丟給 Lambda Function / SNS / SQS … 等服務進行後續處理</p>
+</blockquote>
+<p><img src="/blog/images/aws/MonitorAudit/Config_notification-SNS.png" alt="AWS Config - notification SNS"></p>
+<blockquote>
+<p>比較簡單的作法就是直接送給 SNS 進行通知</p>
+</blockquote>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a target="_blank" rel="noopener" href="https://www.udemy.com/course/ultimate-aws-certified-sysops-administrator-associate/">Ultimate AWS Certified SysOps Administrator Associate 2021 | Udemy</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/awscloudtrail/latest/userguide">What Is AWS CloudTrail? - AWS CloudTrail</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/config/latest/developerguide">What Is AWS Config? - AWS Config</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/AWS/" rel="tag"># AWS</a>
+              <a href="/blog/tags/CloudWatch/" rel="tag"># CloudWatch</a>
+              <a href="/blog/tags/CloudTrail/" rel="tag"># CloudTrail</a>
+              <a href="/blog/tags/EventBridge/" rel="tag"># EventBridge</a>
+              <a href="/blog/tags/AWS-Config/" rel="tag"># AWS Config</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/AWS/AWS-SOA-Database/" rel="prev" title="AWS SOA 學習筆記 - Storage Service(Database)">
+                  <i class="fa fa-chevron-left"></i> AWS SOA 學習筆記 - Storage Service(Database)
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/AWS/AWS-SOA-Monitoring-Auditing/";
+    this.page.identifier = "AWS/AWS-SOA-Monitoring-Auditing/";
+    this.page.title = "AWS SOA 學習筆記 - Storage Service(Database)";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>
