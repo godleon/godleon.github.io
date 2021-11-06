@@ -4,6 +4,35 @@
   
     
     <entry>
+      <title>AWS SOA 學習筆記 - 備份相關服務</title>
+      <link href="/blog/AWS/AWS-SOA-Backup/"/>
+      <url>/blog/AWS/AWS-SOA-Backup/</url>
+      
+        <content type="html"><![CDATA[<h1 id="AWS-DataSync"><a href="#AWS-DataSync" class="headerlink" title="AWS DataSync"></a>AWS DataSync</h1><h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><p>DataSync 服務的功能主要是將地端(on-premise)大量的資料移動到 AWS 上存放，需要注意的重點有以下部份：</p><ul><li><p>可以將資料送到 AWS S3、EFS、FSx for Windows …. 等服務</p></li><li><p>可以將資料透過 NFS or SMB protocol 將存放於 NAS(or local) 的資料送到雲端</p></li><li><p>資料備份的任務可以 by hour/daily/weekly 設定排程，也可以設定上傳時的頻寬限制</p></li><li><p>上述的功能需要透過在地端放一個 DataSync agent 來完成</p></li></ul><h2 id="範例應用場景"><a href="#範例應用場景" class="headerlink" title="範例應用場景"></a>範例應用場景</h2><p>以下舉兩個可能的應用場景：</p><p><img src="/blog/images/aws/Backup/DataSync_Example.png" alt="AWS DataSync Example 1"></p><p>此場景中，資料存放於地端的 NFS or SMB server：</p><ul><li><p>地端會找台機器安裝 AWS DataSync Agent</p></li><li><p>DataSync Agent 會與 AWS DataSync 服務進行連線，並將資料上傳到 AWS storage 服務中</p></li></ul><p><img src="/blog/images/aws/Backup/DataSync_Example2.png" alt="AWS DataSync Example 2"></p><p>這個場景是要將 EFS 中的資料傳到另外一個 region 中的 EFS 中：</p><ul><li><p>需要在 origin region 中安裝一台 EC2 instance，並在其中安裝 AWS DataSync Agent</p></li><li><p>DataSync Agent 會透過 NFS protocol 與 EFS 串連，並透過 AWS DataSync 服務，將資料轉送到 destination region 中的 EFS 服務中</p></li></ul><h1 id="AWS-Backup"><a href="#AWS-Backup" class="headerlink" title="AWS Backup"></a>AWS Backup</h1><p><img src="/blog/images/aws/Backup/Backup.png" alt="AWS Backup"></p><ul><li><p>全託管服務，支援 EFx、EFS、DynamoDB、EC2、EBS、RDS、Aurora、Storage Gateway(volume gateway) … 等服務的備份</p></li><li><p>統一並全自動管理 AWS resource 的備份工作</p></li><li><p>支援 cross-region &amp; cross-account 的備份</p></li><li><p>對於備份的內容，可以作到 point-in-time recovery</p></li><li><p>可自訂 backup policy (實際名稱為 <strong>Backup Plans</strong>)，可以進行以下細節的設定：</p><ul><li>備份頻率 (every 12 hours, daily, weekly, monthly, cron)</li><li>backup windows</li><li>可設定一段時間後轉存至冷儲存(Never、Days、Weeks、Months、Years)</li><li>可設定備份保存期間 (Always、Days、Weeks、Months、Years)</li></ul></li><li><p>可制定 tag-based 的 backup policy</p></li></ul><h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul><li><p><a href="https://www.udemy.com/course/ultimate-aws-certified-sysops-administrator-associate/">Ultimate AWS Certified SysOps Administrator Associate 2021 | Udemy</a></p></li><li><p><a href="https://docs.aws.amazon.com/datasync/latest/userguide/what-is-datasync.html">What is AWS DataSync? - AWS DataSync</a></p></li><li><p><a href="https://docs.aws.amazon.com/aws-backup/latest/devguide/whatisbackup.html">What is AWS Backup? - AWS Backup</a></p></li></ul>]]></content>
+      
+      
+      <categories>
+          
+          <category> AWS </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> AWS </tag>
+            
+            <tag> AWS DataSync </tag>
+            
+            <tag> AWS Backup </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>AWS SOA 學習筆記 - Account Management &amp; Cost Optimization 相關服務</title>
       <link href="/blog/AWS/AWS-SOA-Account-Management/"/>
       <url>/blog/AWS/AWS-SOA-Account-Management/</url>
@@ -354,7 +383,7 @@
       <link href="/blog/Debug/ssh-tunnel-not-work/"/>
       <url>/blog/Debug/ssh-tunnel-not-work/</url>
       
-        <content type="html"><![CDATA[<p>今天一如往常的使用類似下面的指令設定了 SSH Tunnel：</p><blockquote><p>ssh <a href="mailto:&#x75;&#98;&#x75;&#x6e;&#116;&#x75;&#64;&#109;&#x79;&#46;&#98;&#97;&#115;&#x74;&#105;&#x6f;&#110;&#46;&#x63;&#x6f;&#109;">&#x75;&#98;&#x75;&#x6e;&#116;&#x75;&#64;&#109;&#x79;&#46;&#98;&#97;&#115;&#x74;&#105;&#x6f;&#110;&#46;&#x63;&#x6f;&#109;</a> -N -L 9200:mydomain.com.tw:443</p></blockquote><p>結果在本機開啟 9200 port 時，出現了以下的錯誤訊息：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">channel 2: open failed: administratively prohibited: open failed</span><br></pre></td></tr></table></figure><p>上網查了一下，總結一下以後，一共要確認以下兩點：</p><ol><li><p>在 <code>/etc/ssh/sshd_config</code> 要有 <code>AllowTCPForwarding yes</code> 的設定</p></li><li><p>Bastion node 要有能力對上面範例中的 <code>mydomain.com.tw</code> 進行域名解析</p></li></ol><p>關於 <code>AllowTCPForwarding</code> 的部份，基本上預設值就是 <code>yes</code>，所以只要確認沒有 <code>AllowTCPForwarding no</code> 存在即可。</p><p>至於域名解析的部份就比較雷，今天查了一兩個小時才發現這個問題，原來機器上的 DNS server 設定跑掉了，導致於 SSH tunnel 一直不正常，因此下次遇到這一類的問題，記得確認一下 DNS 解析的部份是正常的。</p><h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul><li><p><a href="https://stackoverflow.com/questions/34402682/trying-to-make-a-ssh-tunel">amazon ec2 - Trying to make a SSH Tunel - Stack Overflow</a></p></li><li><p><a href="https://forums.gentoo.org/viewtopic-t-659363-start-0.html">Gentoo Forums :: View topic - SSH service no work.. [SOLVED]</a></p></li></ul>]]></content>
+        <content type="html"><![CDATA[<p>今天一如往常的使用類似下面的指令設定了 SSH Tunnel：</p><blockquote><p>ssh <a href="mailto:&#117;&#x62;&#x75;&#110;&#x74;&#117;&#64;&#x6d;&#121;&#x2e;&#x62;&#x61;&#115;&#x74;&#105;&#x6f;&#x6e;&#x2e;&#99;&#x6f;&#x6d;">&#117;&#x62;&#x75;&#110;&#x74;&#117;&#64;&#x6d;&#121;&#x2e;&#x62;&#x61;&#115;&#x74;&#105;&#x6f;&#x6e;&#x2e;&#99;&#x6f;&#x6d;</a> -N -L 9200:mydomain.com.tw:443</p></blockquote><p>結果在本機開啟 9200 port 時，出現了以下的錯誤訊息：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">channel 2: open failed: administratively prohibited: open failed</span><br></pre></td></tr></table></figure><p>上網查了一下，總結一下以後，一共要確認以下兩點：</p><ol><li><p>在 <code>/etc/ssh/sshd_config</code> 要有 <code>AllowTCPForwarding yes</code> 的設定</p></li><li><p>Bastion node 要有能力對上面範例中的 <code>mydomain.com.tw</code> 進行域名解析</p></li></ol><p>關於 <code>AllowTCPForwarding</code> 的部份，基本上預設值就是 <code>yes</code>，所以只要確認沒有 <code>AllowTCPForwarding no</code> 存在即可。</p><p>至於域名解析的部份就比較雷，今天查了一兩個小時才發現這個問題，原來機器上的 DNS server 設定跑掉了，導致於 SSH tunnel 一直不正常，因此下次遇到這一類的問題，記得確認一下 DNS 解析的部份是正常的。</p><h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul><li><p><a href="https://stackoverflow.com/questions/34402682/trying-to-make-a-ssh-tunel">amazon ec2 - Trying to make a SSH Tunel - Stack Overflow</a></p></li><li><p><a href="https://forums.gentoo.org/viewtopic-t-659363-start-0.html">Gentoo Forums :: View topic - SSH service no work.. [SOLVED]</a></p></li></ul>]]></content>
       
       
       <categories>

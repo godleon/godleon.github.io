@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="此篇文章是學習 AWS 認證課程(Certified SysOps Administrator Associate)內容時所留下的學習筆記，主要內容為備份服務(DataSync &amp; Backup)在實際操作維運上需要注意的事項">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AWS SOA 學習筆記 - 備份相關服務">
+<meta property="og:url" content="https://godleon.github.io/blog/AWS/AWS-SOA-Backup/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章是學習 AWS 認證課程(Certified SysOps Administrator Associate)內容時所留下的學習筆記，主要內容為備份服務(DataSync &amp; Backup)在實際操作維運上需要注意的事項">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Backup/DataSync_Example.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Backup/DataSync_Example2.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Backup/Backup.png">
+<meta property="article:published_time" content="2021-11-06T12:45:00.000Z">
+<meta property="article:modified_time" content="2021-11-06T12:43:51.697Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="AWS">
+<meta property="article:tag" content="AWS DataSync">
+<meta property="article:tag" content="AWS Backup">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/aws/Backup/DataSync_Example.png">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/AWS/AWS-SOA-Backup/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>AWS SOA 學習筆記 - 備份相關服務 | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#AWS-DataSync"><span class="nav-number">1.</span> <span class="nav-text">AWS DataSync</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Overview"><span class="nav-number">1.1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AF%84%E4%BE%8B%E6%87%89%E7%94%A8%E5%A0%B4%E6%99%AF"><span class="nav-number">1.2.</span> <span class="nav-text">範例應用場景</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#AWS-Backup"><span class="nav-number">2.</span> <span class="nav-text">AWS Backup</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">3.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">118</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/AWS/AWS-SOA-Backup/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AWS SOA 學習筆記 - 備份相關服務
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2021-11-06 20:45:00 / Modified: 20:43:51" itemprop="dateCreated datePublished" datetime="2021-11-06T20:45:00+08:00">2021-11-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/AWS/" itemprop="url" rel="index"><span itemprop="name">AWS</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/AWS/AWS-SOA-Backup/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="AWS/AWS-SOA-Backup/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此篇文章是學習 AWS 認證課程(Certified SysOps Administrator Associate)內容時所留下的學習筆記，主要內容為備份服務(DataSync & Backup)在實際操作維運上需要注意的事項</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="AWS-DataSync"><a href="#AWS-DataSync" class="headerlink" title="AWS DataSync"></a>AWS DataSync</h1><h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><p>DataSync 服務的功能主要是將地端(on-premise)大量的資料移動到 AWS 上存放，需要注意的重點有以下部份：</p>
+<ul>
+<li><p>可以將資料送到 AWS S3、EFS、FSx for Windows …. 等服務</p>
+</li>
+<li><p>可以將資料透過 NFS or SMB protocol 將存放於 NAS(or local) 的資料送到雲端</p>
+</li>
+<li><p>資料備份的任務可以 by hour/daily/weekly 設定排程，也可以設定上傳時的頻寬限制</p>
+</li>
+<li><p>上述的功能需要透過在地端放一個 DataSync agent 來完成</p>
+</li>
+</ul>
+<h2 id="範例應用場景"><a href="#範例應用場景" class="headerlink" title="範例應用場景"></a>範例應用場景</h2><p>以下舉兩個可能的應用場景：</p>
+<p><img src="/blog/images/aws/Backup/DataSync_Example.png" alt="AWS DataSync Example 1"></p>
+<p>此場景中，資料存放於地端的 NFS or SMB server：</p>
+<ul>
+<li><p>地端會找台機器安裝 AWS DataSync Agent</p>
+</li>
+<li><p>DataSync Agent 會與 AWS DataSync 服務進行連線，並將資料上傳到 AWS storage 服務中</p>
+</li>
+</ul>
+<p><img src="/blog/images/aws/Backup/DataSync_Example2.png" alt="AWS DataSync Example 2"></p>
+<p>這個場景是要將 EFS 中的資料傳到另外一個 region 中的 EFS 中：</p>
+<ul>
+<li><p>需要在 origin region 中安裝一台 EC2 instance，並在其中安裝 AWS DataSync Agent</p>
+</li>
+<li><p>DataSync Agent 會透過 NFS protocol 與 EFS 串連，並透過 AWS DataSync 服務，將資料轉送到 destination region 中的 EFS 服務中</p>
+</li>
+</ul>
+<h1 id="AWS-Backup"><a href="#AWS-Backup" class="headerlink" title="AWS Backup"></a>AWS Backup</h1><p><img src="/blog/images/aws/Backup/Backup.png" alt="AWS Backup"></p>
+<ul>
+<li><p>全託管服務，支援 EFx、EFS、DynamoDB、EC2、EBS、RDS、Aurora、Storage Gateway(volume gateway) … 等服務的備份</p>
+</li>
+<li><p>統一並全自動管理 AWS resource 的備份工作</p>
+</li>
+<li><p>支援 cross-region &amp; cross-account 的備份</p>
+</li>
+<li><p>對於備份的內容，可以作到 point-in-time recovery</p>
+</li>
+<li><p>可自訂 backup policy (實際名稱為 <strong>Backup Plans</strong>)，可以進行以下細節的設定：</p>
+<ul>
+<li>備份頻率 (every 12 hours, daily, weekly, monthly, cron)</li>
+<li>backup windows</li>
+<li>可設定一段時間後轉存至冷儲存(Never、Days、Weeks、Months、Years)</li>
+<li>可設定備份保存期間 (Always、Days、Weeks、Months、Years)</li>
+</ul>
+</li>
+<li><p>可制定 tag-based 的 backup policy</p>
+</li>
+</ul>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a target="_blank" rel="noopener" href="https://www.udemy.com/course/ultimate-aws-certified-sysops-administrator-associate/">Ultimate AWS Certified SysOps Administrator Associate 2021 | Udemy</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/datasync/latest/userguide/what-is-datasync.html">What is AWS DataSync? - AWS DataSync</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/aws-backup/latest/devguide/whatisbackup.html">What is AWS Backup? - AWS Backup</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/AWS/" rel="tag"># AWS</a>
+              <a href="/blog/tags/AWS-DataSync/" rel="tag"># AWS DataSync</a>
+              <a href="/blog/tags/AWS-Backup/" rel="tag"># AWS Backup</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/AWS/AWS-SOA-Account-Management/" rel="prev" title="AWS SOA 學習筆記 - Account Management & Cost Optimization 相關服務">
+                  <i class="fa fa-chevron-left"></i> AWS SOA 學習筆記 - Account Management & Cost Optimization 相關服務
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/AWS/AWS-SOA-Backup/";
+    this.page.identifier = "AWS/AWS-SOA-Backup/";
+    this.page.title = "AWS SOA 學習筆記 - 備份相關服務";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>
