@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="此篇文章是學習 AWS 認證課程(Certified SysOps Administrator Associate)內容時所留下的學習筆記，主要內容為 Account Management 相關服務(Organization, Control Tower、Service Catelog)以及費用優化相關服務(Billing Alarm、Cost Explorer、Budget、Cost Alloc">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AWS SOA 學習筆記 - Storage Service(Database)">
+<meta property="og:url" content="https://godleon.github.io/blog/AWS/AWS-SOA-Account-Management/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章是學習 AWS 認證課程(Certified SysOps Administrator Associate)內容時所留下的學習筆記，主要內容為 Account Management 相關服務(Organization, Control Tower、Service Catelog)以及費用優化相關服務(Billing Alarm、Cost Explorer、Budget、Cost Alloc">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/AccountManagement/Organization-OU.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/AccountManagement/Organization_OU-example.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/AccountManagement/Organization_SCP-example.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/AccountManagement/Organization_IAM-policy.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/AccountManagement/ServiceCatalog_overview.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/AccountManagement/ServiceCatalog_sharing-option.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/AccountManagement/ServiceCatalog_TagOption-Library.png">
+<meta property="article:published_time" content="2021-11-06T03:30:00.000Z">
+<meta property="article:modified_time" content="2021-11-06T03:32:18.203Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="AWS">
+<meta property="article:tag" content="AWS Organization">
+<meta property="article:tag" content="AWS Cost Optimization">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/aws/AccountManagement/Organization-OU.png">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/AWS/AWS-SOA-Account-Management/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>AWS SOA 學習筆記 - Storage Service(Database) | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#AWS-Service-Health"><span class="nav-number">1.</span> <span class="nav-text">AWS Service Health</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#AWS-Serive-Health-Dashboard"><span class="nav-number">1.1.</span> <span class="nav-text">AWS Serive Health Dashboard</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AWS-Personal-Health-Dashboard"><span class="nav-number">1.2.</span> <span class="nav-text">AWS Personal Health Dashboard</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Organization"><span class="nav-number">2.</span> <span class="nav-text">Organization</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Overview"><span class="nav-number">2.1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Organization-Unit"><span class="nav-number">2.2.</span> <span class="nav-text">Organization Unit</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Service-Control-Policy-SCP"><span class="nav-number">2.3.</span> <span class="nav-text">Service Control Policy (SCP)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%A8%E4%B8%8D%E5%90%8C-Organization-%E4%B9%8B%E9%96%93-Migration-Account-%E7%9A%84%E6%96%B9%E5%BC%8F"><span class="nav-number">2.4.</span> <span class="nav-text">在不同 Organization 之間 Migration Account 的方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E7%AE%A1%E7%90%86%E9%A0%88%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A0%85"><span class="nav-number">2.5.</span> <span class="nav-text">其他管理須注意事項</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#IAM-policy"><span class="nav-number">2.5.1.</span> <span class="nav-text">IAM policy</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Tag-policy"><span class="nav-number">2.5.2.</span> <span class="nav-text">Tag policy</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Control-Tower"><span class="nav-number">3.</span> <span class="nav-text">Control Tower</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Service-Catalog"><span class="nav-number">4.</span> <span class="nav-text">Service Catalog</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Overview-1"><span class="nav-number">4.1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sharing-Options"><span class="nav-number">4.2.</span> <span class="nav-text">Sharing Options</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TagOption-Library"><span class="nav-number">4.3.</span> <span class="nav-text">TagOption Library</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%B2%BB%E7%94%A8%E7%AE%A1%E7%90%86%E7%9B%B8%E9%97%9C%E6%9C%8D%E5%8B%99"><span class="nav-number">5.</span> <span class="nav-text">費用管理相關服務</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#AWS-Billing-Alarm"><span class="nav-number">5.1.</span> <span class="nav-text">AWS Billing Alarm</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AWS-Cost-Explorer"><span class="nav-number">5.2.</span> <span class="nav-text">AWS Cost Explorer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AWS-Budges"><span class="nav-number">5.3.</span> <span class="nav-text">AWS Budges</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cost-Allocation-Tags"><span class="nav-number">5.4.</span> <span class="nav-text">Cost Allocation Tags</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AWS-Compute-Optimizer"><span class="nav-number">5.5.</span> <span class="nav-text">AWS Compute Optimizer</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">163</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">116</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/AWS/AWS-SOA-Account-Management/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AWS SOA 學習筆記 - Storage Service(Database)
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2021-11-06 11:30:00 / Modified: 11:32:18" itemprop="dateCreated datePublished" datetime="2021-11-06T11:30:00+08:00">2021-11-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/AWS/" itemprop="url" rel="index"><span itemprop="name">AWS</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/AWS/AWS-SOA-Account-Management/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="AWS/AWS-SOA-Account-Management/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此篇文章是學習 AWS 認證課程(Certified SysOps Administrator Associate)內容時所留下的學習筆記，主要內容為 Account Management 相關服務(Organization, Control Tower、Service Catelog)以及費用優化相關服務(Billing Alarm、Cost Explorer、Budget、Cost Allocation Tags、Compute Optimizer)在實際操作維運上需要注意的事項</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="AWS-Service-Health"><a href="#AWS-Service-Health" class="headerlink" title="AWS Service Health"></a>AWS Service Health</h1><h2 id="AWS-Serive-Health-Dashboard"><a href="#AWS-Serive-Health-Dashboard" class="headerlink" title="AWS Serive Health Dashboard"></a>AWS Serive Health Dashboard</h2><p>當服務不穩定時，有時不一定是來自於程式端 or 設定的問題，也有可能來自於 AWS 底層服務的問題所造成，而若想知道目前 AWS 底層服務目前的狀況，可以到 AWS 提供的 <a target="_blank" rel="noopener" href="https://status.aws.amazon.com/">Service Health Dashboard</a> 查詢；這個 dashbord 中直接告訴你目前哪個 region 的哪個服務目前是否異常，往下拉可以看到一週內每天的服務健康狀況，同時也可以加入 RSS 訂閱通知。</p>
+<h2 id="AWS-Personal-Health-Dashboard"><a href="#AWS-Personal-Health-Dashboard" class="headerlink" title="AWS Personal Health Dashboard"></a>AWS Personal Health Dashboard</h2><p>上面的是 AWS Global Service 的狀況，而若是要了解到目前我們所使用的 Service 是否被某些底層服務異常所影響，可以透過 <a target="_blank" rel="noopener" href="https://phd.aws.amazon.com/">Personal Health Dashboard</a> 進行了解，這個 dashboard 有以下特色：</p>
+<ul>
+<li><p>Global service</p>
+</li>
+<li><p>顯示哪些 AWS 底層服務的狀況會影響到你，並說明原因</p>
+</li>
+<li><p>顯示會對使用者所擁有的哪些 resource 造成影響</p>
+</li>
+<li><p>列出 issue 並提供可用來處理此 issue 的操作指示</p>
+</li>
+<li><p>會顯示相關的 maintenance event 訊息</p>
+</li>
+<li><p>可透過 AWS Health API 存取相關內容</p>
+</li>
+<li><p>可透過 AWS Organization 匯總來自於多個帳號的相同類型資訊</p>
+</li>
+</ul>
+<p>了解到 Personal Health Dashboard 可提供的資訊後，若是發生狀況時需要被通知，那就可以透過 EventBridge，搭配 SNS or Lambda + Slack 進行通知。</p>
+<h1 id="Organization"><a href="#Organization" class="headerlink" title="Organization"></a>Organization</h1><h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><p>Organization 是個可以協助管理多個 AWS account 的功能，有以下特色 &amp; 使用規範：</p>
+<ul>
+<li><p>屬於 Global Service </p>
+</li>
+<li><p>允許管理多個 AWS Account，並且整併多個帳號的帳單(可針對總體用量取得使用折扣)</p>
+</li>
+<li><p>可共享 RI or Saving Plan 折扣，但需要在 payer account &amp; 其他 account 都開啟 sharing 的功能(可以關閉不共享)</p>
+</li>
+<li><p>主要的帳號為 <code>master account</code>，無法變更；其他帳號則為 <code>member account</code></p>
+</li>
+<li><p>member account 只能隸屬於某個 organization</p>
+</li>
+<li><p>提供可進行 AWS account 自動建立的 API</p>
+</li>
+</ul>
+<p>那一般 Organization 是用在什麼情況呢….? 一般若是想針對 department / cost center 進行分類、甚至是對 dev/test/production 環境進行分類時可以使用，會有以下優點：</p>
+<ul>
+<li><p>達到比較好的環境隔離</p>
+</li>
+<li><p>每個環境(or 分類)可以透過 SCP(Service Control Policy) 指定不同的存取策略</p>
+</li>
+<li><p>每個 account 有各自的 service quota limitation</p>
+</li>
+</ul>
+<p>了解了 organization 的特色後，那管理上可能會與單一的 account 有所不同：</p>
+<ul>
+<li><p>改成使用 multiple account 而非一個 account 加上多個 VPC</p>
+</li>
+<li><p>透過 <code>tag</code> 的方式來對帳號進行不同分類</p>
+</li>
+<li><p>若要達到稽核的目的，需要在每個 account 都開啟 CloudTrail，並收到統一的 S3 bucket 進行管理</p>
+</li>
+<li><p>將 CloudWatch log 統一送到專門處理 loggin 的 account</p>
+</li>
+<li><p>需要建立 cross account role 作為管理用途</p>
+</li>
+</ul>
+<h2 id="Organization-Unit"><a href="#Organization-Unit" class="headerlink" title="Organization Unit"></a>Organization Unit</h2><p><img src="/blog/images/aws/AccountManagement/Organization-OU.png" alt="AWS Organization Unit"></p>
+<p>Organization 機制的運行，會仰賴透過 OU(Organization Unit) 的方式，每個帳號都會屬於某一個 OU；此外，OU 底下可能還會有 OU，因此有可能長成下面的樣子：</p>
+<p><img src="/blog/images/aws/AccountManagement/Organization_OU-example.png" alt="AWS Organization Unit example"></p>
+<h2 id="Service-Control-Policy-SCP"><a href="#Service-Control-Policy-SCP" class="headerlink" title="Service Control Policy (SCP)"></a>Service Control Policy (SCP)</h2><p>有組織就會有管理，而在 organization 的機制中，就是透過 SCP 進行管理，其運作行為如下：</p>
+<ul>
+<li><p>無法套用在 master account 上；而且對 service-linked role 沒有影響</p>
+</li>
+<li><p>policy 可以套用在 OU or account level，且會套用在 AWS account 下的所有 user &amp; role，包含 root account</p>
+</li>
+<li><p>透過黑白名單的方式針對可用的 IAM action 進行管理</p>
+</li>
+<li><p>SCP 必須清楚指定 allow 的內容，並非預設 allow anything</p>
+</li>
+<li><p>定義的方式 &amp; 內容跟 IAM 權限完全相同</p>
+</li>
+</ul>
+<p>然而 SCP 套用在 OU or account 所影響的範圍都各自不同，以下是個詳細的範例：</p>
+<p><img src="/blog/images/aws/AccountManagement/Organization_SCP-example.png" alt="AWS Organization SCP example"></p>
+<h2 id="在不同-Organization-之間-Migration-Account-的方式"><a href="#在不同-Organization-之間-Migration-Account-的方式" class="headerlink" title="在不同 Organization 之間 Migration Account 的方式"></a>在不同 Organization 之間 Migration Account 的方式</h2><p>一般 AWS account 若要更換 organization，流程如下：</p>
+<ol>
+<li><p>從 old organization 移除 member account</p>
+</li>
+<li><p>new organization 發送 invitation 給 AWS account</p>
+</li>
+<li><p>AWS account 可以在 organization console 中看到 invitation，接受即可加入 new organization</p>
+</li>
+</ol>
+<blockquote>
+<p>若是要移動 master account，那需要先移除所有的 member account 後，再按照上面的步驟加入 new organization</p>
+</blockquote>
+<h2 id="其他管理須注意事項"><a href="#其他管理須注意事項" class="headerlink" title="其他管理須注意事項"></a>其他管理須注意事項</h2><h3 id="IAM-policy"><a href="#IAM-policy" class="headerlink" title="IAM policy"></a>IAM policy</h3><p><img src="/blog/images/aws/AccountManagement/Organization_IAM-policy.png" alt="AWS Organization IAM policy"></p>
+<p>在 IAM policy 的部份，organization 中會多出一個 <code>aws:PrincipleOrgID</code> 的 condition key，可以用來表示 organization 中所有的 AWS account；因此若是要針對 organization level 的權限設定，可以直接拿這個 condition key 來使用。</p>
+<h3 id="Tag-policy"><a href="#Tag-policy" class="headerlink" title="Tag policy"></a>Tag policy</h3><p>以下是一個 tag policy example：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">&quot;tags&quot;</span>: &#123;</span><br><span class="line">        <span class="attr">&quot;costcenter&quot;</span>: &#123;</span><br><span class="line">            <span class="attr">&quot;tag_key&quot;</span>: &#123;</span><br><span class="line">                <span class="attr">&quot;@@assign&quot;</span>: <span class="string">&quot;CostCenter&quot;</span></span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="attr">&quot;tag_value&quot;</span>: &#123;</span><br><span class="line">                <span class="attr">&quot;@@assign&quot;</span>: [</span><br><span class="line">                    <span class="string">&quot;100&quot;</span>,</span><br><span class="line">                    <span class="string">&quot;200&quot;</span></span><br><span class="line">                ]</span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="attr">&quot;enforced_for&quot;</span>: &#123;</span><br><span class="line">                <span class="attr">&quot;@@assign&quot;</span>: [</span><br><span class="line">                    <span class="string">&quot;secretsmanager:*&quot;</span></span><br><span class="line">                ]</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>基本上 tag policy 是用來達成以下目的：</p>
+<ul>
+<li><p>在 organization 中強制 tag 設定的標準</p>
+</li>
+<li><p>對於透過 tag 來進行 resource 的分類有一致性的標準</p>
+</li>
+<li><p>定義 tag key &amp; 可用的 value 哪些</p>
+</li>
+<li><p>有效透過此方式管理成本分配 &amp; 執行其他 attribute-based access control</p>
+</li>
+<li><p>避免不合法的 tag 被使用</p>
+</li>
+<li><p>方便用來產生報告</p>
+</li>
+<li><p>可透過 CloudWatch Event 隨時監控是否有不合規的 tag 出現</p>
+</li>
+</ul>
+<h1 id="Control-Tower"><a href="#Control-Tower" class="headerlink" title="Control Tower"></a>Control Tower</h1><p>前面有提到可以用 Organization 功能進行 multiple account 的管理，並透過 SCP 機制提供彈性的權限管理功能，但這些事情從完全沒有到建置完成需要花費很多功夫，而 Control Tower 就是一個用來簡化整個工作的服務。</p>
+<p>Control Tower 的功能，就像是以 Organization + Multiple Account 為基礎，為管理者打造出完整的框架；Control Tower 是怎麼辦到的? 主要是因為它提供了以下幾項功能：</p>
+<ul>
+<li><p>透過簡單的點擊設定就可以完成 Organization + Multiple Account 的設定 </p>
+</li>
+<li><p>透過 <code>guardrail</code>，可以進行 policy 的自動化管理 (service control policy)</p>
+</li>
+<li><p>可以自動偵測 policy 是否違反規定</p>
+</li>
+<li><p>提供方便的監控功能來檢視設定是否合規</p>
+</li>
+</ul>
+<h1 id="Service-Catalog"><a href="#Service-Catalog" class="headerlink" title="Service Catalog"></a>Service Catalog</h1><h2 id="Overview-1"><a href="#Overview-1" class="headerlink" title="Overview"></a>Overview</h2><p>想像一個場景，如果公司內有很多人需要在 AWS 上建立資源並開始使用並進行開發測試(例如：建立 LAMP stack)，但這些人可能對於 AWS 的服務並非都很熟悉，那要怎麼解決這問題?</p>
+<p>一開始想到的可能是透過 CloudFormation 建立出這些資源，但 CloudFormation 其實是個需要花不少時間學習的服務，而 <code>Service Catalog</code> 的角色正式定位在解決這樣的問題上。</p>
+<p><img src="/blog/images/aws/AccountManagement/ServiceCatalog_overview.png" alt="AWS Service Catalog"></p>
+<p>Service Catalog 有以下特色：</p>
+<ul>
+<li><p>將 CloudFormation 包裝一層，隱藏複雜的細節，並透過 <code>product</code> 的形式呈現給使用者 (其實是 <code>Product</code> + <code>Profolio</code>)</p>
+</li>
+<li><p>可以針對每個 product 作權限的管控 (透過 IAM permission)</p>
+</li>
+<li><p>面向使用者的是 product，而使用者可以使用這些 product 建立屬於自己的 AWS 資源</p>
+</li>
+</ul>
+<h2 id="Sharing-Options"><a href="#Sharing-Options" class="headerlink" title="Sharing Options"></a>Sharing Options</h2><p><img src="/blog/images/aws/AccountManagement/ServiceCatalog_sharing-option.png" alt="AWS Service Catalog - sharing options"></p>
+<p>Service Catalog 中的設定可以分享給 Organization 中的其他 AWS account，並且有兩種 sharing option 可用，分別是 <code>reference</code> &amp; <code>copy</code>，而這兩者的差別其實是顯而易見的：</p>
+<ul>
+<li><p>透過 reference 的方式，origin portfolio 改變了，引用這個 portfolio 的 AWS account 也會反應這樣的改變</p>
+</li>
+<li><p>透過 copy 就不是這樣了，origin portfolio 改變了，需要 recipient account 自行進行變更</p>
+</li>
+</ul>
+<h2 id="TagOption-Library"><a href="#TagOption-Library" class="headerlink" title="TagOption Library"></a>TagOption Library</h2><p><img src="/blog/images/aws/AccountManagement/ServiceCatalog_TagOption-Library.png" alt="AWS Service Catalog - TagOption Library"></p>
+<p>TagOption Library 的概念其實很簡單，就是為 portfolio 預先制定一組 tag，當使用者透過 portfolio 產生出對應的 AWS resource 後，這些 resource 都會自動帶上對應的 tag，方便後續管理。</p>
+<p>此外，也可以定義哪些 tag 才可以使用 &amp; 分享給 Organization 中的其他 AWS Account。</p>
+<h1 id="費用管理相關服務"><a href="#費用管理相關服務" class="headerlink" title="費用管理相關服務"></a>費用管理相關服務</h1><h2 id="AWS-Billing-Alarm"><a href="#AWS-Billing-Alarm" class="headerlink" title="AWS Billing Alarm"></a>AWS Billing Alarm</h2><ul>
+<li><p>billing 因為是 Global 等級的服務，因此相關的資料都存放在 <code>us-east-1</code> region 中</p>
+</li>
+<li><p>這對應到的是真實的費用，並非某個 project 的費用</p>
+</li>
+<li><p>需要啟用 Billing Alarm 才會有 billing 相關的 metric 可用</p>
+</li>
+</ul>
+<h2 id="AWS-Cost-Explorer"><a href="#AWS-Cost-Explorer" class="headerlink" title="AWS Cost Explorer"></a>AWS Cost Explorer</h2><ul>
+<li><p>提供視覺化的 dashboard 讓使用者知道 AWS 的花費 &amp; 對應的資源用量 (時間自訂, by month/day/hour)</p>
+</li>
+<li><p>可自訂 dashboard 來分析花費 &amp; 資源使用狀況</p>
+</li>
+<li><p>可以協助用來選擇最合適的 saving plan 進行節費</p>
+</li>
+<li><p>可預測未來 12 個月的費用增長</p>
+</li>
+</ul>
+<h2 id="AWS-Budges"><a href="#AWS-Budges" class="headerlink" title="AWS Budges"></a>AWS Budges</h2><ul>
+<li><p>用來設定 budget，並可藉此設定 alarm</p>
+</li>
+<li><p>不僅可以對使用花費設定 budget，共有四種類型的 budget，分別是 <code>Cost</code>、<code>Usage</code>、<code>Reservation</code>、<code>Saving Plans</code></p>
+</li>
+<li><p>可設定 filter，條件可設定 Service、Linked Account、Tag、Purchase Option、Instance Type、Region、AZ、API operation …. 等等</p>
+</li>
+<li><p>RI 可以用來追蹤利用率；RI 適用於 EC2、Elasticache、RDS, Redshift … 等服務</p>
+</li>
+<li><p>每個 budget 最多可設定 5 個 SNS notification</p>
+</li>
+</ul>
+<h2 id="Cost-Allocation-Tags"><a href="#Cost-Allocation-Tags" class="headerlink" title="Cost Allocation Tags"></a>Cost Allocation Tags</h2><ul>
+<li><p>這是以 tag 為基礎將費用進行客製化分類的功能</p>
+</li>
+<li><p>tag 分為兩種，分別為 AWS 自行產生的 tag，prefix 為 <code>aws:</code>(例如：<code>aws: createdBy</code>)；另一個則是使用者自行定義的，prefix 為 <code>user:</code>(例如：<code>user: Application</code>)</p>
+</li>
+<li><p>從 Cost Allocation Tags 功能 console 中啟用指定的 tag 後，後續的 report 就會根據 tag 將其分類出來，提供更清晰的呈現</p>
+</li>
+</ul>
+<h2 id="AWS-Compute-Optimizer"><a href="#AWS-Compute-Optimizer" class="headerlink" title="AWS Compute Optimizer"></a>AWS Compute Optimizer</h2><ul>
+<li><p>可以針對 workload 推薦最佳化的 AWS resource 規格推薦，最高可以省下 25% 的費用</p>
+</li>
+<li><p>透過 Machine Learning 的技術，分析實際資源使用狀況(根據實際配置 &amp; CloudWatch metric)，協助使用者選擇最佳的資源規格</p>
+</li>
+<li><p>支援 EC2 instance/ASG、EBS volume、Lambda Function</p>
+</li>
+<li><p>可將建議報告送到 S3</p>
+</li>
+</ul>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a target="_blank" rel="noopener" href="https://www.udemy.com/course/ultimate-aws-certified-sysops-administrator-associate/">Ultimate AWS Certified SysOps Administrator Associate 2021 | Udemy</a></p>
+</li>
+<li><p><a href="hhttps://docs.aws.amazon.com/organizations/latest/userguide">What is AWS Organizations? - AWS Organizations</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/controltower">AWS Control Tower - govern a new secure, multi-account environment</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/servicecatalog/latest/adminguide">What Is AWS Service Catalog? - AWS Service Catalog</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/compute-optimizer/">AWS Compute Optimizer</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/AWS/" rel="tag"># AWS</a>
+              <a href="/blog/tags/AWS-Organization/" rel="tag"># AWS Organization</a>
+              <a href="/blog/tags/AWS-Cost-Optimization/" rel="tag"># AWS Cost Optimization</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/AWS/AWS-SOA-Monitoring-Auditing/" rel="prev" title="AWS SOA 學習筆記 - Storage Service(Database)">
+                  <i class="fa fa-chevron-left"></i> AWS SOA 學習筆記 - Storage Service(Database)
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/AWS/AWS-SOA-Account-Management/";
+    this.page.identifier = "AWS/AWS-SOA-Account-Management/";
+    this.page.title = "AWS SOA 學習筆記 - Storage Service(Database)";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>
