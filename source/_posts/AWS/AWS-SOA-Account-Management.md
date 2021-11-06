@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "AWS SOA 學習筆記 - Storage Service(Database)"
+title:  "AWS SOA 學習筆記 - Account Management & Cost Optimization 相關服務"
 description: "此篇文章是學習 AWS 認證課程(Certified SysOps Administrator Associate)內容時所留下的學習筆記，主要內容為 Account Management 相關服務(Organization, Control Tower、Service Catelog)以及費用優化相關服務(Billing Alarm、Cost Explorer、Budget、Cost Allocation Tags、Compute Optimizer)在實際操作維運上需要注意的事項"
 date: 2021-11-06 11:30:00
 published: true
