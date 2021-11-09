@@ -105,7 +105,7 @@ KMS(Key Management Service)
 
 - 非常適合用來對 S3 object、資料庫密碼、存在 System Manager Parameter Store 的 API key 進行加解密
 
-- 加解密的來源資料，最大限制為 4KB
+- 加解密的來源資料，最大限制為 4KB (超過 4KB 則是使用 Envelope Encryption)
 
 - 可與 CloudTrail 整合，提供稽核的功能 (相關的 log 資訊會存於 S3 中)
 
@@ -116,12 +116,14 @@ KMS(Key Management Service)
 
 CMK(Customer Master Key) 有三種，分別是：
 
-- `AWS Managed CMK`：免費，由 AWS 負責管理，使用者碰不到，在使用各個 AWS 服務時會預設拿來做加解密用，但也只有 AWS 服務可以直接使用
+- `AWS Managed Service Default CMK`：免費，由 AWS 負責管理，使用者碰不到，在使用各個 AWS 服務時會預設拿來做加解密用，但也只有 AWS 服務可以直接使用
 
-- `Customer Managed CMK`：完全可由使用者定義 rotation、key policy(誰可使用? 在什麼情況下可用? ... 等等)，也可以開啟 or 關閉
-> **若是不小心刪除 key，也不會馬上消失，key 會處於 `pending deletion` 的狀態 7~30 天，讓使用者有機會救回誤刪除的 key**
+- `Customer Managed CMK`：需要收費；完全可由使用者定義 rotation、key policy(誰可使用? 在什麼情況下可用? ... 等等)，也可以開啟 or 關閉；可與 application 整合進行加解密用
+> **若是不小心刪除 key，也不會馬上消失，key 會處於 `pending deletion` 的狀態 7~30 天，讓使用者有機會救回誤刪除的 key** (但同時也無法使用這把 key 進行加解密)
 
-- `AWS Owned CMK`：這完全由 AWS 負責管理，不會屬於特定使用者帳號下，也看不到，用來在多個帳號之間，確保使用者帳號使用服務時的安全性。
+- ~~`AWS Owned CMK`：這完全由 AWS 負責管理，不會屬於特定使用者帳號下，也看不到，用來在多個帳號之間，確保使用者帳號使用服務時的安全性。~~
+
+- 使用者自行匯入的 Key：需要收費，且必須為 256-bit symmetric key
 
 
 ## Symmetric & Asymmetric CMK 的差異
@@ -165,6 +167,20 @@ CMK(Customer Master Key) 有三種，分別是：
 
 ## Key Policy
 
+KMS Policy 需要注意的事項有以下幾個：
+
+- 用來控制 KMS key 的存取，類似 S3 bucket policy；但其中的差別在於，無法控制特定操作下不使用 KMS key
+
+- Default KMS Key Policy：
+  - 當沒指定 KMS Key policy 時，這個會被建立
+  - root user 有完整的存取權限，連同整個 AWS account 底下的使用者
+  - 要限定使用需要透過 IAM policy
+
+- Custom KMS Key Policy：
+  - 在 KMS Key 中清楚定義可存取的 user/role
+  - 定義誰可以管理這把 Key
+  - 若 KMS Key 有 cross-account 存取的需求時，是很方便的
+
 當使用程式 or AWS CLI 建立 CMK 時，可以自訂 key policy，但若是沒有指定 policy，AWS 則會預設提供一個 key policy，內容大概像以下：
 
 ```json
@@ -179,7 +195,11 @@ CMK(Customer Master Key) 有三種，分別是：
 ```
 > 比較需要注意的是，若是不小心刪除了 key policy，使用者就無法存取 CMK 了；此時只能找 AWS 原廠協助重新設定 key policy 才能再度使用 CMK
 
-以下是其他範例，用來指定特定的 User or Role 擁有 CMK 的權限：
+以下是其他範例，用來指定特定的 User or Role 擁有 CMK 的權限，有以下兩個重點：
+
+1. 確認 Key Policy 允許特定使用者(or Role) 使用
+
+2. 確認 IAM Policy 允許 API call 
 
 ```json
 //提供給 Role "EncryptionApp" 呼叫資料加解密的權限
@@ -213,13 +233,40 @@ CMK(Customer Master Key) 有三種，分別是：
 }
 ```
 
+## KMS Key Rotation
+
+### Automatic Rotation
+
+![KMS Automatic Key Rotation](/blog/images/aws/Security/KMS_automatic-key-rotation.png)
+
+- 這裡說明的是 customer-managed CMK，並非 AWS-managed CMK
+
+- 若是啟用 automatic key rotation，那每一年都會自動做一次(不能調整 rotation 週期)
+
+- 原先的 key 會保留用來解密舊資料用(如上圖)
+
+- 新的 key 會有相同的 CMK ID
+
+## Manual Rotation
+
+![KMS Manual Key Rotation](/blog/images/aws/Security/KMS_automatic-key-rotation.png)
+
+- 這功能用在當 automatic rotation 可能因為合規問題而無法使用時，或是若是需要每 90 or 180 天進行 key rotation 時
+
+- 新的 key 會有不同的 CMK ID
+
+- 必須將原本的 key 保留才可以解密舊資料
+
+- 為了對 application 隱藏 key rotation 的細節，可使用 `alias`
+
+
 ## 實作注意事項
 
 - 在 AWS Managed Keys 中，列出了目前已經與 KMS 整合的服務所使用的 key，這些都是由 AWS 管理，只要了解當前 AWS 有管理這些 key 即可
 
 - 在 Customer Managed Keys 畫面中的內容，才是由使用者自行管理的部份
 
-- 若是要將放在 region A S3 已經加密的檔案移動到 region B，那需要進行下列操作：
+- 若是要將放在 region A S3 已經加密的檔案移動到 region B，那需要進行下列操作：(**加密的 EBS snapshot 也是相同操作**)
   1. 先將檔案解密(使用位於 region A 的 key)
   2. 將檔案移動到 region B
   3. 在使用 region B 的 key 加密
@@ -243,12 +290,20 @@ CMK(Customer Master Key) 有三種，分別是：
 
 - 若要存放類似資料庫密碼的服務，KMS 無法滿足，而是應該用 `Secrets Manager` 這樣的服務來完成
 
+- 使用者永遠也看不到實際 CMK 的內容
+
+- 可以搭配 CloudTrail & CloudWatch Event(EventBrige) & SNS，對 Key Deletion 的操作發送通知，如下圖：
+
+![KMS key deletion notification](/blog/images/aws/Security/KMS_key-deletion-notification.png)
+
 
 
 CloudHSM
 ========
 
-若是希望 key management 可以自己做，或是需要比 KMS 更高的安全性，那 CloudHSM 可能就是唯一選擇了!
+若是希望 key management 可以自己做，或是需要比 KMS 更高的安全性，那 CloudHSM 可能就是唯一選擇了! 在這服務中，AWS 會提供硬體裝置來協助產生加解密用的金鑰，但完全要靠自己管理。
+
+![CloudHSM overview](/blog/images/aws/Security/CloudHSM_overview.png)
 
 ## 什麼是 CloudHSM ?
 
@@ -259,8 +314,10 @@ CloudHSM
 
 - 使用者透過 CloudHSM 自行管理 key (**將 key 存於經過第三方認證過的硬體安全模組，擁有完全的控制權**)
 
-- 由於所有 key 都是自行管理，因此無法與 AWS managed service 整合
+- 由於所有 key 都是自行管理，因此無法與 AWS managed service 整合，且需要搭配 CloudHSM 對應的 client 軟體來使用
 > AWS 完全無法存取 CloudHSM 中的 key
+
+- 同時支援產生同步 & 非同步加解密的 key
 
 - 運行於 VPC 中
 
@@ -272,6 +329,10 @@ CloudHSM
   - Microsoft CryptoNG (CNG)
 
 - **key 若是遺失了，AWS 是無法協助的**
+
+- Redshift 支援與 CloudHSM 搭配進行資料加解密
+
+- 若是選用 `SSE-C` 加密，使用 CloudHSM 是個好選擇
 
 ## CloudHSM 如何應用?
 
@@ -285,6 +346,17 @@ CloudHSM
 > 使用上很容易，就建立 EC2 instance，把 CloudHSM 產生的 ENI interface 附加上去即可
 
 3. CloudHSM 並沒有 native HA，有需要的話就要自己做(例如上圖)
+
+權限的部份需要注意的是：
+
+- IAM permission 是用來限制誰可以存取 HSM cluster，以及可以進行的操作
+
+- 其他管理 key & user 的部份則需要完全透過 CloudHSM client 軟體來完成
+
+## CloudHSM v.s. KMS
+
+![CloudHSM v.s. KMS 1](/blog/images/aws/Security/CloudHSM_compare-with-KMS-1.png)
+![CloudHSM v.s. KMS 2](/blog/images/aws/Security/CloudHSM_compare-with-KMS-2.png)
 
 
 
