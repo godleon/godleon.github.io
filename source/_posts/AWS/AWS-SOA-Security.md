@@ -185,6 +185,31 @@ SSM Parameter Store 同樣也可以存 secure string，那與 Secrets Manager �
 
 
 
+IAM 安全工具
+===========
+
+IAM 服務中有提供幾個提昇安全性的工具，分別是 `Credentials Report` & `Access Advisor` & `Access Analyzer`，以下分別進行介紹：
+
+## Credentials Report
+
+其中 `Credentials Report` 是屬於 account level，可以用來產生報告，報告中會列出 AWS account 中的 IAM user & 設定(運行)狀況，可協助管理者用來評估是否要求使用者提昇安全性。(例如：啟用 MFA)
+
+## Access Advisor
+
+`Access Advisor` 屬於 user level，會列出當前的 IAM user 被賦予的權限，以及最近存取的服務有哪些；而透過這些資訊，就可以適時的調整 IAM policy，進一步達成 least privilege 的目標。
+
+## Access Analyzer
+
+![IAM Access Analyzer](/blog/images/aws/Security/IAM-Access-Analyzer.png)
+
+- 可用來檢測哪些 AWS resource 可被外界進行存取(例如：S3 Bucket、SQS queue、Secret Manager secret ... 等等)
+
+- 可定義 **`Zone of Trust`**，範圍可能像是 AWS Account or Organization
+
+- 若是有發現在 Zone of Trust 定義之外的範圍被存取，就會提供這些資訊出來
+
+
+
 References
 ==========
 
@@ -197,3 +222,5 @@ References
 - [AWS Trusted Advisor](https://aws.amazon.com/premiumsupport/technology/trusted-advisor/)
 
 - [What is AWS Secrets Manager? - AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html)
+
+- [Getting credential reports for your AWS account - AWS Identity and Access Management](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_getting-report.html)
