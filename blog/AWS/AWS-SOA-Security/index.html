@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="此篇文章是學習 AWS 認證課程(Certified SysOps Administrator Associate)內容時所留下的學習筆記，主要內容為 Security 相關服務(Inspector、Trusted Advisor、Secrets Manager)在實際操作維運上需要注意的事項">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AWS SOA 學習筆記 - Security &amp; Compliance">
+<meta property="og:url" content="https://godleon.github.io/blog/AWS/AWS-SOA-Security/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章是學習 AWS 認證課程(Certified SysOps Administrator Associate)內容時所留下的學習筆記，主要內容為 Security 相關服務(Inspector、Trusted Advisor、Secrets Manager)在實際操作維運上需要注意的事項">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Security/PenetrationTesting_CustomerServicePolicy.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Security/Inspector_overview.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Security/GuardDuty.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Security/SecretsManager_monitoring.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Security/SecretsManager_debug.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/Security/SecretsManager_rotation-compare-with-SSM.png">
+<meta property="article:published_time" content="2021-11-09T22:20:00.000Z">
+<meta property="article:modified_time" content="2021-11-09T22:24:15.176Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="AWS">
+<meta property="article:tag" content="Security">
+<meta property="article:tag" content="AWS Inspector">
+<meta property="article:tag" content="AWS Trusted Advisor">
+<meta property="article:tag" content="AWS Secrets Manager">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/aws/Security/PenetrationTesting_CustomerServicePolicy.png">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/AWS/AWS-SOA-Security/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>AWS SOA 學習筆記 - Security & Compliance | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Penetration-Test"><span class="nav-number">1.</span> <span class="nav-text">Penetration Test</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#AWS-Inspector"><span class="nav-number">2.</span> <span class="nav-text">AWS Inspector</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Logging"><span class="nav-number">3.</span> <span class="nav-text">Logging</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#GuardDuty"><span class="nav-number">4.</span> <span class="nav-text">GuardDuty</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Trusted-Advisor"><span class="nav-number">5.</span> <span class="nav-text">Trusted Advisor</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Secrets-Manager"><span class="nav-number">6.</span> <span class="nav-text">Secrets Manager</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Overview"><span class="nav-number">6.1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%A3%E6%8E%A7%E7%9B%B8%E9%97%9C%E4%BA%8B%E4%BB%B6"><span class="nav-number">6.2.</span> <span class="nav-text">監控相關事件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%92%E9%99%A4-Rotation-%E6%99%82%E7%99%BC%E7%94%9F%E7%9A%84%E5%95%8F%E9%A1%8C"><span class="nav-number">6.3.</span> <span class="nav-text">排除 Rotation 時發生的問題</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Secrets-Manager-v-s-SSM-Parameter-Store"><span class="nav-number">6.4.</span> <span class="nav-text">Secrets Manager v.s. SSM Parameter Store</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">7.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">165</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">121</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/AWS/AWS-SOA-Security/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AWS SOA 學習筆記 - Security & Compliance
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2021-11-10 06:20:00 / Modified: 06:24:15" itemprop="dateCreated datePublished" datetime="2021-11-10T06:20:00+08:00">2021-11-10</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/AWS/" itemprop="url" rel="index"><span itemprop="name">AWS</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/AWS/AWS-SOA-Security/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="AWS/AWS-SOA-Security/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此篇文章是學習 AWS 認證課程(Certified SysOps Administrator Associate)內容時所留下的學習筆記，主要內容為 Security 相關服務(Inspector、Trusted Advisor、Secrets Manager)在實際操作維運上需要注意的事項</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="Penetration-Test"><a href="#Penetration-Test" class="headerlink" title="Penetration Test"></a>Penetration Test</h1><p>AWS 允許客戶為了做些安全性上的評估，對特定的服務進行滲透測試，例如：EC2 instance、NAT Gateway、ELB、RDS、Aurora、CloudFront …. 等等；但並非 AWS 允許客戶為所欲為的進行安全性相關的測試，有些行為還是會被禁止的，例如：<a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/best-practices-resolver-zone-walking.html">DNS zone walking</a>、DDoS、port flooding … 等等。</p>
+<p>以下是 AWS 官網文件提供的詳細列表資訊供參考：</p>
+<p><img src="/blog/images/aws/Security/PenetrationTesting_CustomerServicePolicy.png" alt="Customer Service Policy for Penetration Testing"></p>
+<h1 id="AWS-Inspector"><a href="#AWS-Inspector" class="headerlink" title="AWS Inspector"></a>AWS Inspector</h1><ul>
+<li><p>AWS Inspector 是個自動化的安全性評估工具，可以協助用來分析目前運作中的 OS 是否包含了一些潛在的漏洞威脅，目前僅能用在 EC2 instance 上</p>
+</li>
+<li><p>也可以針對網路存取進行安全性相關分析(這屬於 Agentless 的操作)</p>
+</li>
+<li><p>Inspector 是透過在 EC2 instance 中安裝 inspector agent 來達成資安分析的目的，稱為 <code>Host Assessment</code>，可分為以下三個部份：</p>
+<ul>
+<li>Common Vulnerabilities and Exposures</li>
+<li>Center for Internet Security(CIS) Benchmarks</li>
+<li>Security Best Practice</li>
+</ul>
+</li>
+<li><p>分析完後可以將結果透過 SNS 發送通知，也可以產生安全性相關的評估報表</p>
+</li>
+</ul>
+<p><img src="/blog/images/aws/Security/Inspector_overview.png" alt="AWS Inspector"></p>
+<h1 id="Logging"><a href="#Logging" class="headerlink" title="Logging"></a>Logging</h1><p>為了提供強化安全性 or 提供稽核的目的，AWS 很多服務都有相對應的 service log 可以提供，例如：</p>
+<ul>
+<li><p>CloudTrail trails：追蹤所有 API call</p>
+</li>
+<li><p>Config Rules：針對 config &amp; 相關合規需求進行持續檢查驗證</p>
+</li>
+<li><p>CloudWatch Logs：可以將 application log 都往這邊送</p>
+</li>
+<li><p>VPC Flow Logs：提供 VPC 內 IP traffic 的資訊</p>
+</li>
+<li><p>ELB Access Log：記錄經過 ELB 的 reqeust 的 metadata</p>
+</li>
+<li><p>CloudFront Log：每個 edge server 收到 HTTP request 的 access log</p>
+</li>
+<li><p>WAF Log：HTTP reqeust 經過 WAF 分析處理後的結果</p>
+</li>
+</ul>
+<p>這些 log 可以長期的存放在 S3 中，並透過 Athena 進行進一步的分析；若是這些資料需要封存，可以送到 Glacier。</p>
+<h1 id="GuardDuty"><a href="#GuardDuty" class="headerlink" title="GuardDuty"></a>GuardDuty</h1><p>GuardDuty 是個使用 Machine Learning 來偵測威脅是否存在的服務，而要進行威脅偵測，總是需要有資料來源，這些資料來源包含以下內容：</p>
+<ul>
+<li><p>CloudTrail Logs：偵測不尋常的 API call，未授權的佈署行為</p>
+</li>
+<li><p>VPC Flow Logs：異常的內部流量 &amp; IP</p>
+</li>
+<li><p>DNS Logs：偵測被入侵的 EC2 instance 送出包含編碼內容的 DNS 查詢</p>
+</li>
+</ul>
+<p><img src="/blog/images/aws/Security/GuardDuty.png" alt="AWS GuardDuty"></p>
+<p>對於偵測到的異常，可以透過 EventBridge(CloudWatch Event) 送到 SNS or Lambda 進行更進一步的處理。</p>
+<blockquote>
+<p>可用來偵測加密貨幣攻擊</p>
+</blockquote>
+<h1 id="Trusted-Advisor"><a href="#Trusted-Advisor" class="headerlink" title="Trusted Advisor"></a>Trusted Advisor</h1><p>這是一個用來分析 AWS account 下的服務使用狀態，並提供以下的建議：</p>
+<ul>
+<li><p>Cost Optimization</p>
+</li>
+<li><p>Performance </p>
+</li>
+<li><p>Security</p>
+</li>
+<li><p>Fault Tolerance</p>
+</li>
+<li><p>Service Limit</p>
+</li>
+</ul>
+<p>一般的帳號僅提供 core checks；若要完整的檢查功能，則需要購買 Business &amp; Enterprise support plan 才會有。</p>
+<p>以下是 Trusted Advisor 可能給出的建議範例：</p>
+<ul>
+<li><p>Cost Optimization</p>
+<ul>
+<li>資源使用率低的 EC2 instance、沒在用的 ELB &amp; EBS volume</li>
+<li>提供 RI &amp; Saving Plan 採購建議</li>
+</ul>
+</li>
+<li><p>Performance </p>
+<ul>
+<li>使用率高的 EC2 instance、CloudFront CDN 相關優化手段</li>
+<li>EC2 與 EBS 的 throughput 優化、DNS alias record 的優化建議</li>
+</ul>
+</li>
+<li><p>Security</p>
+<ul>
+<li>建議 root account 啟用 MFA、IAM Key rotation、被外部服務使用的 Access Key</li>
+<li>開放太多的 S3 bucket permission、沒有限制的 security group 設定</li>
+</ul>
+</li>
+<li><p>Fault Tolerance</p>
+<ul>
+<li>ELB AZ balance</li>
+<li>ASG/RDS Multi-AZ</li>
+</ul>
+</li>
+</ul>
+<h1 id="Secrets-Manager"><a href="#Secrets-Manager" class="headerlink" title="Secrets Manager"></a>Secrets Manager</h1><h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><ul>
+<li><p>顧名思義，專門用來儲存 secret 用，內容會透過 KMS 進行加密；可強制設定每隔多少天就需要 rotate</p>
+</li>
+<li><p>需要仰賴 Lambda 進行 rotation，而每次 rotate 就會產生新的 secret</p>
+</li>
+<li><p>可與 RDS 直接整合</p>
+</li>
+</ul>
+<h2 id="監控相關事件"><a href="#監控相關事件" class="headerlink" title="監控相關事件"></a>監控相關事件</h2><p>在 AWS 要執行事件監控這件事情，肯定是要搭配 <code>CloudTrail</code> &amp; <code>CloudWatch</code>(or <code>EventBridge</code>) 來完成，如下圖：</p>
+<p><img src="/blog/images/aws/Security/SecretsManager_monitoring.png" alt="Secrets Manager - Monitoring"></p>
+<ul>
+<li><p>CloudTrail 會記錄 Secrets Manager 相關的 API</p>
+</li>
+<li><p>搭配 CloudWatch 的 metric filter，可以用來協助捕捉與安全 or 合規相關的 API call，也可用來協助排除維運時發生的錯誤</p>
+</li>
+<li><p>CloudTrail 還會記錄以下非 API 的事件：</p>
+<ul>
+<li>RotationStarted</li>
+<li>RotationSuccessed</li>
+<li>RotationFailed</li>
+<li>RotationAbandoned</li>
+<li>StartSecretVersionDelete</li>
+<li>CancelSecretVersionDelete</li>
+<li>EndSecretVersionDelete</li>
+</ul>
+</li>
+<li><p>有了上面的 metric &amp; event，就可以搭配 CloudWatch Alarm 來進行些自動化的工作</p>
+</li>
+</ul>
+<h2 id="排除-Rotation-時發生的問題"><a href="#排除-Rotation-時發生的問題" class="headerlink" title="排除 Rotation 時發生的問題"></a>排除 Rotation 時發生的問題</h2><p>rotation 是 secrets manager 一向相當重要的功能，不過因為這功能仰賴於 Lambda Function，因此可能在程式 or 權限設定上都有出錯的可能，因此了解以下的架構，會方便管理者遇到問題時進行查找：</p>
+<p><img src="/blog/images/aws/Security/SecretsManager_debug.png" alt="Secrets Manager - Troubleshooting Rotation"></p>
+<ul>
+<li><p>Secrets Manager 所有的 API call &amp; non-API event 都會送到 CloudTrail</p>
+</li>
+<li><p>要進行 rotation 時，會呼叫 Lambda Function，同時更改 RDS 密碼(如果有的話)，而相關執行的 log 都會發送到 CloudWatch Logs 上</p>
+</li>
+<li><p>上述過程若是不順利，管理者就可以透過 CloudTrail or CloudWatch Logs 的資訊來排除問題</p>
+</li>
+</ul>
+<h2 id="Secrets-Manager-v-s-SSM-Parameter-Store"><a href="#Secrets-Manager-v-s-SSM-Parameter-Store" class="headerlink" title="Secrets Manager v.s. SSM Parameter Store"></a>Secrets Manager v.s. SSM Parameter Store</h2><p>SSM Parameter Store 同樣也可以存 secure string，那與 Secrets Manager 有什麼差異呢? 列舉如下：</p>
+<ul>
+<li><p>Secrets Manager 比較貴</p>
+</li>
+<li><p>Secrets Manager 可以搭配 Lambda Function 做自動的 secret rotatio；在 SSM Parameter Store 要完成這件事情需要搭配 EventBridge(CloudWatch Event)，架構如下圖：</p>
+</li>
+</ul>
+<p><img src="/blog/images/aws/Security/SecretsManager_rotation-compare-with-SSM.png" alt="Key Rotation comparison"></p>
+<ul>
+<li><p>Secrets Manager 必須搭配 KMS；SSM Parameter Store 則不一定</p>
+</li>
+<li><p>可以使用 SSM Pameter Store API 拉取 Secret Manager 中的 secret</p>
+</li>
+</ul>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a target="_blank" rel="noopener" href="https://www.udemy.com/course/ultimate-aws-certified-sysops-administrator-associate/">Ultimate AWS Certified SysOps Administrator Associate 2021 | Udemy</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/security/penetration-testing/">Penetration Testing - Amazon Web Services (AWS)</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/inspector/latest/userguide">What is Amazon Inspector? - Amazon Inspector</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/premiumsupport/technology/trusted-advisor/">AWS Trusted Advisor</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html">What is AWS Secrets Manager? - AWS Secrets Manager</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/AWS/" rel="tag"># AWS</a>
+              <a href="/blog/tags/Security/" rel="tag"># Security</a>
+              <a href="/blog/tags/AWS-Inspector/" rel="tag"># AWS Inspector</a>
+              <a href="/blog/tags/AWS-Trusted-Advisor/" rel="tag"># AWS Trusted Advisor</a>
+              <a href="/blog/tags/AWS-Secrets-Manager/" rel="tag"># AWS Secrets Manager</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/AWS/AWS-SOA-Backup/" rel="prev" title="AWS SOA 學習筆記 - 備份相關服務">
+                  <i class="fa fa-chevron-left"></i> AWS SOA 學習筆記 - 備份相關服務
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/AWS/AWS-SOA-Security/";
+    this.page.identifier = "AWS/AWS-SOA-Security/";
+    this.page.title = "AWS SOA 學習筆記 - Security & Compliance";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>
