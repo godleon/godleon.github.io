@@ -165,6 +165,16 @@ IAM Security Token Service (STS)
 
 - 可與 Identity Federation 搭配；也可以與用在設定 Cross-Account Access & AWS service 權限時的 IAM Role 搭配
 
+## 關於 Assume Role
+
+STS 中提供了 AssumeRole API，而根據 identity 的來源不同，延伸出的 assume role 的方式有三種：
+
+- **AssumeRole**：使用者使用 AWS 帳號登入，這個來源也有可能是 cross account access
+
+- **AssumeRoleWithSAM**：使用者透過 SAML 進行登入
+
+- **AssmeRoleWithWebIdentity**：使用者透過外部的 Idp(例如：Facebook, Google .... 等等)登入，而這樣的認證串接方式，AWS 建議搭配 Congnito 服務使用
+
 ## 使用 STS 的好處
 
 - 對於暫時需要 AWS resource 存取權限的應用程式，不用特定產生 credential
