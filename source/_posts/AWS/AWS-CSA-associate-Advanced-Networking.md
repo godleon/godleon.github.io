@@ -241,6 +241,45 @@ Health Check 是 Route53 中一個很棒的功能，善用此功能可以提昇�
 
 
 
+Route53 & Hybrid DNS
+====================
+
+這個部份的重點在於當整體環境屬於 Hybrid(包含 cloud & on-premises) 時，Route53 是如何解析 domain name 的，這要完成這件事，Route53 提供了稱為 `Resolver Endpoints` 的功能，其中包含了以下兩個部份：
+- Inbound Endpoint：用來讓 on-premises 中的資源查詢 AWS 內部資源 domain name 用
+- Outbound Endpoint：跟 inbound 正好相反，讓 AWS 內部資源查詢 on-premises 環境中的 domain name 用
+
+## Inbound Endpoint
+
+![Route53 Resolver Inbound Endpoint](/blog/images/aws/Route53/AWS-Route53_Resolver-Inbound-Endpoint.png)
+
+Inbound Endpoint 的用意在於用來讓 on-premises 環境中的資源查詢 AWS 內部的域名，重點有以下幾個：
+
+1. AWS(cloud) & on-premises 的環境是透過 VPN or DX connection 連接起來的
+
+2. AWS 中必須設定一個 Resolver Inbound Endpoint，這個 endpoint 具備有 HA 的設計，並且會把 DNS query 轉發給 Route53
+
+3. 當 on-premises 環境中的資源要查詢 AWS 內部域名時，就往 inbound endpoint 發送即可
+
+
+## Outbound Endpoint
+
+![Route53 Resolver Outbound Endpoint](/blog/images/aws/Route53/AWS-Route53_Resolver-Outbound-Endpoint.png)
+
+Outbound Endpoint 的部份是用來讓 AWS 內部的資源查詢 on-premises 環境中的域名，基本上跟 inbound 是反向的，就是在 on-premise 中要準備好對應的 DNS server 就是了。
+
+## Resolver Rules
+
+![Route53 Resolver Rules](/blog/images/aws/Route53/AWS-Route53_Resolver-Rules.png)
+
+Resolver Rule 也是個需要注意的地方，這個 rule 的設定控制著要如何將 DNS 查詢轉發給 DNS resolver，總共有三層設定：
+
+1. Conditional Forwarding Rules：這是第一層設定，用來指定哪個 domain name 的查詢要轉發到哪個 DNS server
+
+2. System Rules：這是第二層設定，可以選擇性的複寫第一層設定
+
+3. Auto-defined System Rules：這是給 AWS 內部的 domain or private hosted zone 使用
+
+
 CloudFront
 ==========
 
