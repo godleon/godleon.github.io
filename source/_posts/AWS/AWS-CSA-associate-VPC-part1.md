@@ -113,6 +113,8 @@ Overview
 
 > 若需要正確的計算 IP 範圍，可以使用 [CIDR.xyz](https://cidr.xyz/) 網站。
 
+**另外一個需要注意的是，一個 VPC 可以同時包含最多 5 個 IPv4 CIDR 的設定，只是一般都只會設定一個。**
+
 ### 補充示意圖
 
 了解上面的概念後，接著看下面這張 VPC 網路示意圖，就不會覺得很突兀了：
@@ -191,6 +193,8 @@ Overview
 
 - 可以設定與整個 VPC 進行 peering，也可以只與 VPC 中特定的 subnet 進行 peering
 
+- 需要額外設定 Routing Table Rules，才可以讓兩個 VPC 之間的流量互通
+
 
 ## 應考重點整理
 
@@ -255,8 +259,13 @@ Overview
 
 - `Auto-assign public IP` 是預設關閉的
 
-- 一個 class C 的 subnet 中只有 251 個 IP 可用 (AWS 保留了幾個 IP，詳細規劃可參考[官網文件](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html))
-> **每個 subnet 中的前四個 IP & 最後一個 IP 都會被 AWS 佔用**
+- 每個 subnet 中，AWS 都會固定佔用 5 個 IP(這表示一個 class C 的 subnet 中只有 251 個 IP 可用，關於 AWS 保留了幾個 IP，詳細規劃可參考[官網文件](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html))，以下是目前的資訊：
+  - 第 1 個 IP 為 network address
+  - 第 2 個 IP 用來作為 VPC router 用
+  - 第 3 個 IP 給 DNS server 用
+  - 第 4 個 IP 保留給 AWS 未來使用
+  - 最後一個 IP 為 network broadcast address 
+> **每個 subnet 中的前四個 IP & 最後一個 IP 都會被 AWS 佔用；代表每個 subnet 都會被 AWS 佔用掉 5 個 IP**
 
 當 subnet 建立完成後，VPC 架構圖就會變成如下：
 
@@ -363,7 +372,9 @@ NAT 在這裡的目的很簡單，就是為了讓 private subnet 具備連網的
 
 - 不需要更新，也不用跟任何的 security group 綁定
 
-- 會自動被派發 public IP
+- 需要搭配 EIP 使用
+
+- 不需要額外管理 Security Group 的設定
 
 - **若要使用 NAT gateway，還是要設定 route table 將要對外的流量導向 NAT gateway (基本上 NAT Gateway 只會接收來自 private subnet 的流量)**
 
@@ -372,6 +383,12 @@ NAT 在這裡的目的很簡單，就是為了讓 private subnet 具備連網的
 - 建議若是 resource 橫跨 AZ，就不要使用單一 AZ 的 NAT gateway，這樣就會造成 single point of faliure；比較好的作法是讓每個 AZ 都有一個 NAT gateway，而該 AZ 中的 resource 就使用該 AZ 中的 NAT gateway
 
 - **NAT Gateway 是用來處理 IPv4 的對外流量；若要處理 IPv6 的對外流量，則需要改用 [egress-only internet gateway](https://docs.aws.amazon.com/vpc/latest/userguide/egress-only-internet-gateway.html)**
+
+## NAT Instance v.s. NAT Gateway
+
+以下是 AWS 官方針對兩個方式的差別的說明文件：
+
+> [Compare NAT gateways and NAT instances - Amazon Virtual Private Cloud](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-comparison.html)
 
 
 

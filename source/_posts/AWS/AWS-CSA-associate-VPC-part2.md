@@ -133,15 +133,17 @@ Direct Connect 服務是讓使用者可以從地端資料中心建立一條私�
 
 - 在 Direct Connect Location 中有許多 AWS Cage，裡面有 Direct Connect Router；使用者也會放置自己的 Router，然後透過 cross line 進行實體對接
 
-- 使用者還是需要將地端設備網路接到 Router 中，但這一段通常都會落在同一個資料中心
+- 使用者還是需要將地端設備網路接到 Router 中，但這一段通常都會落在同一個資料中心(例如：台灣的內湖四方機房)
 
-- Direct Connect Router 則會有 AWS 自己佈建的專線網路回到 AWS 中
+- Direct Connect Router 則會有 AWS 自己佈建的專線網路回到 AWS Data Center 中
 
 - 一個 Direct Connect Location 只能是一個 region，無法存取 cross region resource
 
 ![AWS Direct Connect 2](/blog/images/aws/VPC_Direct-Connect-2.png)
 
 - AWS 在各地提供許多 **Direct Connect Location**(通常會與當地的 ISP 合作，而這樣的合作夥伴稱為 `Direct Connect Authorized Provider`)，讓使用者可以就近選擇合適的點接入(透過 `cross-network connection`)
+
+- 建置一條連線需要耗時一個月以上，因此若是需要短時間急用可能這方案就不太合適
 
 - 藉由此專線，可以使用專線，同時存取 AWS 公用資源(例如：S3)，也可以直接存取位於 VPC private subnet 中的服務
 
@@ -286,13 +288,13 @@ VPC Endpoint
 
 ## 簡介
 
-為了資訊安全，在網路架構的規劃中，我們可能會進可能的將服務放在 private subnet 中，並禁止其對外的流量。
+為了資訊安全，在網路架構的規劃中，我們可能會儘可能的將服務放在 private subnet 中，並禁止其對外的流量。
 
 但如果服務有對外與其他 managed service(例如：S3) 連接的需求呢?
 
 原本的作法可以透過 NAT gateway 讓服務取得連網的能力；但另外一種較好的方式，則是透過 `VPC enpoint` 將 managed service 黏到 VPC private subnet 中，變成 private subnet 中的一個 endpoint。
 
-**如此一來，即使沒有 NAT gateway，也可以讓服務直接存取 AWS managed service。**
+**如此一來，即使沒有 NAT gateway(甚至沒有 Internet Gateway)，也可以讓服務直接存取 AWS managed service。**
 
 舉例來說，原來要存取 S3 必須要有連網能力，因此需要透過 NAT Gateway，所以會是以下的架構：
 
@@ -315,8 +317,17 @@ VPC Endpoint
 - VPC endpoint 類型有兩種，分別是 `Interface Endpoint` & `Gateway Endpoint`
 
 - 目前支援 Gateway Endpoint 的服務有 `S3` & `DynamoDB`
-> 因此若要連線的服務是 S3 or DynamoDB，就要建立 VPC gateway endpoint，而非 VPC interface endpoint 
+> 因此若要連線的服務是 S3 or DynamoDB，就要建立 VPC gateway endpoint，而非 VPC interface endpoint (後來發現 S3 也有 interface endpoint 了) 
 
+## Issue Debug
+
+若設定 VPC endpoint 出現問題，有可能是以下幾個地方沒設定好：
+
+1. DNS：需要同時開啟 VPC `DNS Resolution` & `DNS Hostnames` 的功能
+
+2. Routing：若選擇 Gateway endpoint，需要正確的設定 Routing Table 才可以連到
+
+3. Security Group：若選擇 Interface endpoint，就需要正確的設定 security group 才可以連到
 
 
 References
