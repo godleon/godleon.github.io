@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="此篇文章是學習 AWS 認證課程(Certified SysOps Administrator Associate)內容時所留下的學習筆記，主要內容為 VPC(Virtual Private Cloud) 服務在實際操作維運上需要注意的事項">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AWS SOA 學習筆記 - VPC(Virtual Private Cloud)">
+<meta property="og:url" content="https://godleon.github.io/blog/AWS/AWS-SOA-VPC/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章是學習 AWS 認證課程(Certified SysOps Administrator Associate)內容時所留下的學習筆記，主要內容為 VPC(Virtual Private Cloud) 服務在實際操作維運上需要注意的事項">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/VPC/AWS-VPC_DNS-Resolution.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/VPC/AWS-VPC_DNS-Hostnames.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/VPC/AWS-VPC_Route53-Private-Zone.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/VPC/AWS-VPC_VPC-FlowLogs-Debug.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/VPC/AWS-VPC_Site-to-Site-VPN.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/VPC/AWS-VPC_VPN-CloudHub.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/VPC/AWS-VPC_PrivateLink.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/VPC/AWS-VPC_PrivateLink2.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/VPC/AWS-VPC_Before-Transit-Gateway.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/VPC/AWS-VPC_After-Transit-Gateway.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/VPC/AWS-VPC_After-Transit-Gateway.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/VPC/AWS-VPC_Transit-Gateway-VPN-ECMP.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/VPC/AWS-VPC_Traffic-Mirroring.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/VPC/AWS-VPC_Egress-Only-Internet-Gateway.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/VPC/AWS-VPC_IPv6-Routing.png">
+<meta property="article:published_time" content="2022-01-15T08:00:00.000Z">
+<meta property="article:modified_time" content="2022-01-15T08:02:16.261Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="AWS">
+<meta property="article:tag" content="VPC">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/aws/VPC/AWS-VPC_DNS-Resolution.png">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/AWS/AWS-SOA-VPC/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>AWS SOA 學習筆記 - VPC(Virtual Private Cloud) | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#DNS-Resolution-Options"><span class="nav-number">1.</span> <span class="nav-text">DNS Resolution Options</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#DNS-Resolution"><span class="nav-number">1.1.</span> <span class="nav-text">DNS Resolution</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DNS-Hostnames"><span class="nav-number">1.2.</span> <span class="nav-text">DNS Hostnames</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#VPC-Reachability-Analyzer"><span class="nav-number">2.</span> <span class="nav-text">VPC Reachability Analyzer</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#VPC-Flow-Logs-Troubleshooting"><span class="nav-number">3.</span> <span class="nav-text">VPC Flow Logs Troubleshooting</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Site-to-Site-VPN"><span class="nav-number">4.</span> <span class="nav-text">Site-to-Site VPN</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Site-to-Site-VPN-1"><span class="nav-number">4.1.</span> <span class="nav-text">Site-to-Site VPN</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VPN-CloudHub"><span class="nav-number">4.2.</span> <span class="nav-text">VPN CloudHub</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#VPC-Endpoint-AWS-PrivateLink"><span class="nav-number">5.</span> <span class="nav-text">VPC Endpoint (AWS PrivateLink)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Transit-Gateway"><span class="nav-number">6.</span> <span class="nav-text">Transit Gateway</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Overview"><span class="nav-number">6.1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E5%B8%B3%E8%99%9F%E5%85%B1%E4%BA%AB-Direct-Connect"><span class="nav-number">6.2.</span> <span class="nav-text">多帳號共享 Direct Connect</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Site-to-Site-VPN-ECMP"><span class="nav-number">6.3.</span> <span class="nav-text">Site-to-Site VPN ECMP</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Traffic-Mirroring"><span class="nav-number">7.</span> <span class="nav-text">Traffic Mirroring</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#IPv6"><span class="nav-number">8.</span> <span class="nav-text">IPv6</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Overview-1"><span class="nav-number">8.1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Egress-Only-Internet-Gateway"><span class="nav-number">8.2.</span> <span class="nav-text">Egress-Only Internet Gateway</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">9.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">166</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">121</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/AWS/AWS-SOA-VPC/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AWS SOA 學習筆記 - VPC(Virtual Private Cloud)
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2022-01-15 16:00:00 / Modified: 16:02:16" itemprop="dateCreated datePublished" datetime="2022-01-15T16:00:00+08:00">2022-01-15</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/AWS/" itemprop="url" rel="index"><span itemprop="name">AWS</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/AWS/AWS-SOA-VPC/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="AWS/AWS-SOA-VPC/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此篇文章是學習 AWS 認證課程(Certified SysOps Administrator Associate)內容時所留下的學習筆記，主要內容為 VPC(Virtual Private Cloud) 服務在實際操作維運上需要注意的事項</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="DNS-Resolution-Options"><a href="#DNS-Resolution-Options" class="headerlink" title="DNS Resolution Options"></a>DNS Resolution Options</h1><p>在 VPC 中關於 DNS 的設定有兩個，分別是：</p>
+<ol>
+<li><p><code>enableDnsSupport</code>：DNS Resolution</p>
+</li>
+<li><p><code>enableDnsHostnames</code>：DNS Hostnames</p>
+</li>
+</ol>
+<h2 id="DNS-Resolution"><a href="#DNS-Resolution" class="headerlink" title="DNS Resolution"></a>DNS Resolution</h2><p><img src="/blog/images/aws/VPC/AWS-VPC_DNS-Resolution.png" alt="VPC - DNS resolution"></p>
+<p><code>enableDnsSupport</code> 這個設定是用來決定是否 VPC 中的 DNS 解析是由 Route53 Resolver 來處理(此選項預設為 <code>true</code>)，而這個 AWS 預設提供的 DNS server 會在以下兩個 IP address：</p>
+<ol>
+<li><p><code>169.254.169.253</code></p>
+</li>
+<li><p><code>xx.xx.xx.2</code> (這是服務所在的 subnet 的第二個 IP address)</p>
+<blockquote>
+<p>此 IP 來自於 AWS 在每個 subnet 預佔的 5 個 IP 的第二個，相關資料可參考 <a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html">AWS 官網文件</a>說明</p>
+</blockquote>
+</li>
+</ol>
+<p>而若是這個選項沒有啟用，那就必須自己建立 DNS server，並將所有需要 DNS 查詢的部份指向自己的 custom DNS server(如上圖所示)</p>
+<h2 id="DNS-Hostnames"><a href="#DNS-Hostnames" class="headerlink" title="DNS Hostnames"></a>DNS Hostnames</h2><p><img src="/blog/images/aws/VPC/AWS-VPC_DNS-Hostnames.png" alt="VPC - DNS resolution"></p>
+<ul>
+<li><p>這個選項 <code>enableDnsHostnames</code> 在 default VPC 中預設是開啟(true)的，但在新建立的 VPC 中預設是關閉(false)的</p>
+</li>
+<li><p>這選項必須在 <code>enableDnsSupport</code> 也設定 true 下才會有作用</p>
+</li>
+<li><p>開啟此選項，每個有 public IP address 的 EC2 instance 都會得到一個 public hostname</p>
+</li>
+</ul>
+<p>此外，若是有設定 Route53 private host zone，那就必須同時啟用 <code>enableDnsSupport</code> &amp; <code>enableDnsSupport</code> 兩個選項，裡面的 DNS record 設定在 VPC 中才會有效</p>
+<p><img src="/blog/images/aws/VPC/AWS-VPC_Route53-Private-Zone.png" alt="VPC - Route53 Private Host Zone"></p>
+<h1 id="VPC-Reachability-Analyzer"><a href="#VPC-Reachability-Analyzer" class="headerlink" title="VPC Reachability Analyzer"></a>VPC Reachability Analyzer</h1><p>當 Security Group &amp; NACL(Network Access Control List) 在設定上有誤需要排查網路問題時，AWS 提供了 <a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/vpc/latest/reachability/what-is-reachability-analyzer.html">VPC Reachability Analyzer</a> 這個工具，可以用來協助分析網路不通的原因。</p>
+<p>此工具本身不會主動送 packet，只是單純分析從 source 到 destination 中的 NACL &amp; Security Group 設定，檢查那一段的設定出了問題以至於網路不通；若是不通會在畫面顯示問題是出現在那一段。</p>
+<p>而這服務是要收費的，一次是 $0.1 美金，有需要的排查網路問題時應該是可以派上些用場。</p>
+<h1 id="VPC-Flow-Logs-Troubleshooting"><a href="#VPC-Flow-Logs-Troubleshooting" class="headerlink" title="VPC Flow Logs Troubleshooting"></a>VPC Flow Logs Troubleshooting</h1><p>關於 VPC Flow Log 的介紹可以看一下之前寫的 <a href="AWS/AWS-CSA-associate-VPC-part2/">CSA 考試重點內容</a>中有提到，以下簡單說明一下如何透過 VPC Flow 來協助排查 security group or NACL 設定上的問題</p>
+<p><img src="/blog/images/aws/VPC/AWS-VPC_VPC-FlowLogs-Debug.png" alt="VPC Flow Logs - Troubleshooting"></p>
+<p>上圖是用來說明觀測 VPC Flow log 重點，在下方逐一說明</p>
+<p>對於外部進來的 request：</p>
+<ol>
+<li><p>若是 inbound 被 reject，那可能 SG &amp; NACL 都有問題</p>
+</li>
+<li><p>若 inbound accept，但 outbound reject，通常是 NACL 的問題</p>
+</li>
+</ol>
+<p>對於內部出去的 request：</p>
+<ol>
+<li><p>若 outbound 被 reject，那可能 SG &amp; NACL 都有問題</p>
+</li>
+<li><p>若 oubound accept，但 inbound 被 reject，通常是 NACL 的問題</p>
+</li>
+</ol>
+<blockquote>
+<p>其實整個核心的檢查概念還是在 Security Group 是屬於 stateful 的，而 NACL 是屬於 stateless</p>
+</blockquote>
+<h1 id="Site-to-Site-VPN"><a href="#Site-to-Site-VPN" class="headerlink" title="Site-to-Site VPN"></a>Site-to-Site VPN</h1><h2 id="Site-to-Site-VPN-1"><a href="#Site-to-Site-VPN-1" class="headerlink" title="Site-to-Site VPN"></a>Site-to-Site VPN</h2><p><img src="/blog/images/aws/VPC/AWS-VPC_Site-to-Site-VPN.png" alt="VPC - Site to Site VPN"></p>
+<p>在建置 Site-to-Site VPN 的部份，需要注意的重點有：</p>
+<ul>
+<li><p>在 VPC 端建立 <code>Virtual Private Gateway(VGW)</code>，可以設定 ASN(Autonomous System Number)</p>
+</li>
+<li><p>在 on-premise 端建立 <code>Customer Gateway(CGW)</code>，這可以是透過軟體安裝的方式 or 直接使用支援的硬體設備</p>
+</li>
+<li><p>Customer Gateway 可以直接使用 public IP，但放在 NAT 後面其實也是沒問題的</p>
+</li>
+<li><p><strong>Virtual Private Gateway 必須啟用 Route Propagation</strong>，相關的 NACL &amp; Security 也需要設定正確，兩端才會互通</p>
+</li>
+<li><p>完成了 <code>Virtual Private Gateway(VGW)</code> &amp; <code>Customer Gateway(CGW)</code> 的設定，才可以新增 site-to-site VPN 的設定</p>
+</li>
+</ul>
+<h2 id="VPN-CloudHub"><a href="#VPN-CloudHub" class="headerlink" title="VPN CloudHub"></a>VPN CloudHub</h2><p><img src="/blog/images/aws/VPC/AWS-VPC_VPN-CloudHub.png" alt="VPC - VPN CloudHub"></p>
+<p>若是 on-premise 的 site 有多個，都同時想要與 AWS VPC 進行 site-to-site VPN 串接，on-premise site 之間也有互通的需求，那就可以利用 VPN CloudHub 這個服務：</p>
+<ul>
+<li><p>可提供 VPC 同時與多個 on-premise site 串接</p>
+</li>
+<li><p>可作為備援線路之用，但因為是 VPN，因此還是走 public Internet</p>
+</li>
+<li><p>每個 site 都連到同一個 Virtual Private Gateway，設定 dynamic routing &amp; routing table 後，就可以互通了</p>
+</li>
+</ul>
+<h1 id="VPC-Endpoint-AWS-PrivateLink"><a href="#VPC-Endpoint-AWS-PrivateLink" class="headerlink" title="VPC Endpoint (AWS PrivateLink)"></a>VPC Endpoint (AWS PrivateLink)</h1><p>關於 VPC Endpoint 的介紹可以看一下之前寫的 <a href="AWS/AWS-CSA-associate-VPC-part2/">CSA 考試重點內容</a>中有提到，以下繼續補充在 SOA 課程中額外看到的部份。</p>
+<p>當要讓 VPC 中某個服務同時給很多個 VPC 存取時，有幾種方式：</p>
+<ol>
+<li><p>透過 public Internet；若是內部服務，其實這樣不是很合適</p>
+</li>
+<li><p>透過 VPC peering；這方法要建立很多 peering 相關設定</p>
+</li>
+<li><p>透過 VPC Endpoint；這是目前解決此類問題的最佳解</p>
+</li>
+</ol>
+<p><img src="/blog/images/aws/VPC/AWS-VPC_PrivateLink.png" alt="VPC - AWS PrivateLink"></p>
+<p>VPC Endpoint(AWS PrivateLink) 有以下特點：</p>
+<ol>
+<li><p>更安全，自動擴展，可支援上千的 VPC 的連線(甚至來自其他帳號的 VPC 也可以)</p>
+</li>
+<li><p>不需要做 VPC peering、Internet Gateway、NAT、Route Table …. 等設定</p>
+</li>
+<li><p>Service VPC 中需要一個 NLB(Network Load Balancer)，Consumer VPC 則只要一個 ENI(or GWLB) 即可</p>
+</li>
+</ol>
+<p>另外一個比較複雜的場景如下圖：</p>
+<p><img src="/blog/images/aws/VPC/AWS-VPC_PrivateLink2.png" alt="VPC - AWS PrivateLink 2"></p>
+<p>上圖的重點如下：</p>
+<ul>
+<li><p>內部服務透過 ALB 暴露出來，前面掛 NLB 來滿足 AWS PrivateLink 建置需求</p>
+</li>
+<li><p>consumer VPC 直接黏一張 ENI，就可以有個 VPC endpoint 可以存取 service VPC 的服務</p>
+</li>
+<li><p>on-premise site 存取的入口統一都是 Virtual Private Gateway，可以走 DX(DirectConnect) or VPN 過來</p>
+</li>
+</ul>
+<h1 id="Transit-Gateway"><a href="#Transit-Gateway" class="headerlink" title="Transit Gateway"></a>Transit Gateway</h1><h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><p>當 VPC 數量多起來，且 VPC 之間的串接越來越複雜的時候，peering 部份的設定自然也會變得越來越複雜，結果狀況就會變成如下圖所示：</p>
+<p><img src="/blog/images/aws/VPC/AWS-VPC_Before-Transit-Gateway.png" alt="VPC - Before Transit Gateway"></p>
+<p>從上圖可看出，除了多個 VPC 之間的複雜 peering 關係之外，考慮到還有 on-premise site 要連上 VPC，因此又會包含了 VPN connection，整體的 network topology 越來越複雜且難以管理。</p>
+<p>因此 AWS 還提供了另外一個稱為 <a target="_blank" rel="noopener" href="https://aws.amazon.com/transit-gateway">Transit Gateway</a>的服務，來解決此問題，使用 Transit Gateway，network topology 可以優化成下面的樣子：</p>
+<p><img src="/blog/images/aws/VPC/AWS-VPC_After-Transit-Gateway.png" alt="VPC - After Transit Gateway"></p>
+<ul>
+<li><p>將多個 VPC &amp; on-premise site 以 star topology 的方式串接起來</p>
+</li>
+<li><p>雖然 Transit Gateway 屬於 regional service，但可以串接多個 region 的 VPC</p>
+</li>
+<li><p>可利用 RAM(Resource Access Manager) 將 Transit Gateway 可以跨 AWS Account 使用</p>
+</li>
+<li><p>也可以將 on-premise site 所用的 Direct Connect Gateway or VPN connection 串接上來</p>
+</li>
+<li><p>Transit Gateway 是唯一支援 IP Multicast 的服務</p>
+</li>
+</ul>
+<h2 id="多帳號共享-Direct-Connect"><a href="#多帳號共享-Direct-Connect" class="headerlink" title="多帳號共享 Direct Connect"></a>多帳號共享 Direct Connect</h2><p><img src="/blog/images/aws/VPC/AWS-VPC_After-Transit-Gateway.png" alt="VPC - After Transit Gateway - share direct connect between multiple accounts"></p>
+<p>Transit Gateway 提供給多個 AWS account 共用的功能，如上圖所示，這樣的作法需要搭配 Direct Connect 進行，因此會需要透過 <code>Direct Connect Gateway</code> + <code>Direct Connect Endpoint</code> 的組合來完成。</p>
+<h2 id="Site-to-Site-VPN-ECMP"><a href="#Site-to-Site-VPN-ECMP" class="headerlink" title="Site-to-Site VPN ECMP"></a>Site-to-Site VPN ECMP</h2><p><img src="/blog/images/aws/VPC/AWS-VPC_Transit-Gateway-VPN-ECMP.png" alt="VPC - After Transit Gateway Site-to-Site VPN ECMP"></p>
+<p>Transit Gateway 還額外提供了 Site-to-Site VPN ECMP(Equal-Cost Multi-Path Routing) 的功能，這功能的特點是：</p>
+<ul>
+<li><p>允許多個網路封包可以各自走在最佳化的路徑上(不一定會是同一條)，封包來回也可以走不同線路 (如上圖框起來的地方所示)</p>
+</li>
+<li><p>透過建立多條 site-to-site VPN 連線到 Transit Gateway，可達到增加到 AWS 的連線頻寬的效果 (如上圖的兩個 site-to-site VPN connection)</p>
+</li>
+</ul>
+<h1 id="Traffic-Mirroring"><a href="#Traffic-Mirroring" class="headerlink" title="Traffic Mirroring"></a>Traffic Mirroring</h1><p><img src="/blog/images/aws/VPC/AWS-VPC_Traffic-Mirroring.png" alt="VPC - Traffic Mirroring"></p>
+<ul>
+<li><p>traffic mirroring 的功能通常用來排查問題時使用、content inspection、threat monitoring …. 等場景下使用</p>
+</li>
+<li><p>可以將指定將某個 ENI 的流量複製起來並導向另一個 ENI or NLB(Network Load Balancer)，甚至導向不同的 VPC 也可以(不一定需要在同一個 VPC)</p>
+</li>
+<li><p>可捕捉所有流量，也可以設定過濾條件來過濾某些不需要的網路封包</p>
+</li>
+</ul>
+<h1 id="IPv6"><a href="#IPv6" class="headerlink" title="IPv6"></a>IPv6</h1><h2 id="Overview-1"><a href="#Overview-1" class="headerlink" title="Overview"></a>Overview</h2><p>以下列出使用 AWS VPC 時需要注意的 IPv6 重點：</p>
+<ul>
+<li><p>IPv6 沒有 private IP range，所有的 IP 都是 public accessible</p>
+</li>
+<li><p>IPv4 預設無法 disable，但 IPv6 可以 (所以因為 IP 不夠而導致 EC2 instance 無法啟動應該幾乎都是 IPv4 address 不足的問題)</p>
+</li>
+<li><p>在 VPC 啟用 IPv6 時，可選擇由 AWS 提供的 IPv6 range，也可以用自己的</p>
+</li>
+<li><p>若是啟用 IPv6，一樣會需要通過 Internet Gateway 來處理</p>
+</li>
+<li><p>並非所有 Internet Provider 都支援 IPv6，因此不是所有 client 都支援以 IPv6 的形式連線，可以到 <a target="_blank" rel="noopener" href="https://test-ipv6.com/">Test your IPv6 Connectivity</a> 網站測試看看自己是否有 IPv6 的連線能力</p>
+</li>
+</ul>
+<h2 id="Egress-Only-Internet-Gateway"><a href="#Egress-Only-Internet-Gateway" class="headerlink" title="Egress-Only Internet Gateway"></a>Egress-Only Internet Gateway</h2><p><img src="/blog/images/aws/VPC/AWS-VPC_Egress-Only-Internet-Gateway.png" alt="VPC - Egress-Only Internet Gateway"></p>
+<ul>
+<li><p>這是專門給 IPv6 的 EC2 Instance 使用的，目的是要讓對外 IPv6 的存取可以通，但從外面連不到 VPC 內部的 IPv6 EC2 instance</p>
+</li>
+<li><p>若用的是 Internet Gateway，就會像上圖左邊一樣，外面也可以透過 IPv6 連到 EC2 instance</p>
+</li>
+<li><p>新增 Egress-Only Internet Gateway，還是要把 Route Table 設定好才會如預期的運作</p>
+</li>
+</ul>
+<p>正確的 route table 設定如下圖所示：</p>
+<p><img src="/blog/images/aws/VPC/AWS-VPC_IPv6-Routing.png" alt="VPC - Egress-Only Internet Gateway"></p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://www.udemy.com/course/ultimate-aws-certified-sysops-administrator-associate/">Ultimate AWS Certified SysOps Administrator Associate 2021 | Udemy</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/AWS/" rel="tag"># AWS</a>
+              <a href="/blog/tags/VPC/" rel="tag"># VPC</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/AWS/AWS-SOA-Security/" rel="prev" title="AWS SOA 學習筆記 - Security & Compliance">
+                  <i class="fa fa-chevron-left"></i> AWS SOA 學習筆記 - Security & Compliance
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/AWS/AWS-SOA-VPC/";
+    this.page.identifier = "AWS/AWS-SOA-VPC/";
+    this.page.title = "AWS SOA 學習筆記 - VPC(Virtual Private Cloud)";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>
