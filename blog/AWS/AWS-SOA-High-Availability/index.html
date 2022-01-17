@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="此篇文章是學習 AWS 認證課程(Certified SysOps Administrator Associate)內容時所留下的學習筆記，主要內容為達到 High Availability &amp; Scalability 的目標時，在實際操作維運上需要注意的事項">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AWS SOA 學習筆記 - High Availability &amp; Scalability">
+<meta property="og:url" content="https://godleon.github.io/blog/AWS/AWS-SOA-High-Availability/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章是學習 AWS 認證課程(Certified SysOps Administrator Associate)內容時所留下的學習筆記，主要內容為達到 High Availability &amp; Scalability 的目標時，在實際操作維運上需要注意的事項">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/HA/AWS_Gateway-Load-Balancer.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/HA/AWS_Gateway-Load-Balancer.png">
+<meta property="article:published_time" content="2022-01-17T22:20:00.000Z">
+<meta property="article:modified_time" content="2022-01-17T22:28:14.404Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="AWS">
+<meta property="article:tag" content="RDS">
+<meta property="article:tag" content="Elasticache">
+<meta property="article:tag" content="EC2">
+<meta property="article:tag" content="ELB">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/aws/HA/AWS_Gateway-Load-Balancer.png">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/AWS/AWS-SOA-High-Availability/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>AWS SOA 學習筆記 - High Availability & Scalability | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Application-Load-Balancer"><span class="nav-number">1.</span> <span class="nav-text">Application Load Balancer</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Network-Load-Balancer"><span class="nav-number">2.</span> <span class="nav-text">Network Load Balancer</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Gateway-Load-Balancer"><span class="nav-number">3.</span> <span class="nav-text">Gateway Load Balancer</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Sticky-Session"><span class="nav-number">4.</span> <span class="nav-text">Sticky Session</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ELB-SSL-TLS-Certificate"><span class="nav-number">5.</span> <span class="nav-text">ELB - SSL&#x2F;TLS Certificate</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ELB-Monitoring-Troubleshooting-Logging-and-Tracing"><span class="nav-number">6.</span> <span class="nav-text">ELB - Monitoring, Troubleshooting, Logging, and Tracing</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Target-Group-%E7%9B%B8%E9%97%9C%E8%A8%AD%E5%AE%9A"><span class="nav-number">7.</span> <span class="nav-text">Target Group 相關設定</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Auto-Scaling-Group"><span class="nav-number">8.</span> <span class="nav-text">Auto Scaling Group</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Overview"><span class="nav-number">8.1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Launch-Configuration-%E8%88%87-Launch-Template-%E7%9A%84%E5%B7%AE%E7%95%B0"><span class="nav-number">8.2.</span> <span class="nav-text">Launch Configuration 與 Launch Template 的差異</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lifecycle-Hooks"><span class="nav-number">8.3.</span> <span class="nav-text">Lifecycle Hooks</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Health-Check"><span class="nav-number">8.4.</span> <span class="nav-text">Health Check</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Troubleshooting"><span class="nav-number">8.5.</span> <span class="nav-text">Troubleshooting</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RDS-and-Multi-AZ-Failover"><span class="nav-number">9.</span> <span class="nav-text">RDS and Multi-AZ Failover</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#RDS"><span class="nav-number">9.1.</span> <span class="nav-text">RDS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Read-Replica"><span class="nav-number">9.2.</span> <span class="nav-text">Read Replica</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%A0%E5%AF%86-RDS"><span class="nav-number">9.3.</span> <span class="nav-text">加密 RDS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Maintenance-Windows"><span class="nav-number">9.4.</span> <span class="nav-text">Maintenance Windows</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Elasticache"><span class="nav-number">10.</span> <span class="nav-text">Elasticache</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">11.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">167</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">121</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/AWS/AWS-SOA-High-Availability/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AWS SOA 學習筆記 - High Availability & Scalability
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2022-01-18 06:20:00 / Modified: 06:28:14" itemprop="dateCreated datePublished" datetime="2022-01-18T06:20:00+08:00">2022-01-18</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/AWS/" itemprop="url" rel="index"><span itemprop="name">AWS</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/AWS/AWS-SOA-High-Availability/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="AWS/AWS-SOA-High-Availability/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此篇文章是學習 AWS 認證課程(Certified SysOps Administrator Associate)內容時所留下的學習筆記，主要內容為達到 High Availability & Scalability 的目標時，在實際操作維運上需要注意的事項</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="Application-Load-Balancer"><a href="#Application-Load-Balancer" class="headerlink" title="Application Load Balancer"></a>Application Load Balancer</h1><ul>
+<li><p>運行在 Layer 7</p>
+</li>
+<li><p>可將 request 送到多個 target group；而 target group 可以是 EC2、ECS、Lambda … 等服務(IP 也行，但一定得是 private IP，例如：on-premise site service)</p>
+</li>
+<li><p>支援以 path、hostname、query string、header 資訊為基礎的 routing，可根據這些條件將 request 遞送到不同的 target group 中</p>
+</li>
+<li><p>還可針對不同的 target group 有權重(weight)的設計，來決定轉發流量的百分比；透過此功能，可達到 Blue/Green Deployment 的效果</p>
+</li>
+<li><p>application 端看不到 client IP，這資訊會放到 <code>x-forwarded-for</code> header 中</p>
+</li>
+</ul>
+<h1 id="Network-Load-Balancer"><a href="#Network-Load-Balancer" class="headerlink" title="Network Load Balancer"></a>Network Load Balancer</h1><ul>
+<li><p>運行在 Layer 4，用來轉發 TCP/UDP 流量</p>
+</li>
+<li><p>相較於 ALB，有較低的 latency (400ms -&gt; 100ms)</p>
+</li>
+<li><p>每個 NLB 在一個 AZ 都會有一個固定 IP(其他 ELB 只有 hostname)</p>
+</li>
+<li><p>不包含在 free tier 中</p>
+</li>
+<li><p>target group 可以是 EC2、IP address(private IP only)、也可以是另一個 ALB</p>
+</li>
+</ul>
+<h1 id="Gateway-Load-Balancer"><a href="#Gateway-Load-Balancer" class="headerlink" title="Gateway Load Balancer"></a>Gateway Load Balancer</h1><p><img src="/blog/images/aws/HA/AWS_Gateway-Load-Balancer.png" alt="AWS Gateway Load Balancer"></p>
+<ul>
+<li><p>這個服務是用在內部若是安裝了多個 3rd-party security virtual appliance 時，若是希望從外部進來的流量都可以經過這些 appliance 的檢測，那就需要搭配 Gateway Load Balancer 來完成</p>
+</li>
+<li><p>firewall, intrusion detection、prevention system, deep packet inspection system, payload manupulation 都屬於這類的 appliance</p>
+</li>
+<li><p>後面的 target group(appliance 安裝的地方) 可以是 EC2 instane，也可以是個 IP address(必須是 private IP)</p>
+</li>
+<li><p>運行在 TCP Layer 3，其實就是 <code>transparent network gateway</code> + <code>load balancer</code> 的功能</p>
+</li>
+<li><p>使用 <code>GENEVE</code> protocol (port 6081)</p>
+</li>
+</ul>
+<h1 id="Sticky-Session"><a href="#Sticky-Session" class="headerlink" title="Sticky Session"></a>Sticky Session</h1><ul>
+<li><p><code>Sticky Session</code> 功能是讓同一個 client 送的 reuqest 可讓 ELB 導向同一個 instance，有可能造成 request 無法平均轉發</p>
+</li>
+<li><p>目前支援的 ELB 有 CLB &amp; ALB</p>
+</li>
+</ul>
+<p>此功能是透過 cookie 實現的，一共分為以下兩種類型：</p>
+<ul>
+<li><p>Application-based Cookie<br>又可分為 <code>custom cookie</code> &amp; <code>application cookie</code> 兩種，差異如下：</p>
+<ul>
+<li>custom cookie：<ul>
+<li>由 application 產生，可以包含任何自訂的 key/value 組合</li>
+<li>設定必須指定在 target group 中</li>
+<li>不能使用 <code>AWSALB</code>、<code>AWSALBAPP</code>、<code>AWSALBTG</code> … 等關鍵字作為 cookie name</li>
+</ul>
+</li>
+<li>application cookie：由 ELB 自動產生，cookie name 為 <code>AWSALBAPP</code></li>
+</ul>
+</li>
+<li><p>Duration-based Cookie：由 ELB 自動產生，cookie name 為 <code>AWSALB</code>(for ALB) or <code>AWSELB</code>(for CLB)，可以自行決定有效期間是多久</p>
+</li>
+</ul>
+<h1 id="ELB-SSL-TLS-Certificate"><a href="#ELB-SSL-TLS-Certificate" class="headerlink" title="ELB - SSL/TLS Certificate"></a>ELB - SSL/TLS Certificate</h1><ul>
+<li><p>SNI(Server Name Indication) 是用來解決一個 web server 同時服務多個域名的狀況</p>
+</li>
+<li><p>client 也需要使用較新的 protocol，才可以在 SSL handshake 階段指定 hostname</p>
+</li>
+<li><p>目前 AWS 中僅有 ALB/NLB/CloudFront 支援 SNI，CLB 沒有</p>
+</li>
+</ul>
+<h1 id="ELB-Monitoring-Troubleshooting-Logging-and-Tracing"><a href="#ELB-Monitoring-Troubleshooting-Logging-and-Tracing" class="headerlink" title="ELB - Monitoring, Troubleshooting, Logging, and Tracing"></a>ELB - Monitoring, Troubleshooting, Logging, and Tracing</h1><ul>
+<li><p><code>HTTP 400</code> 屬於 BAD_REQUEST，表示 client 送了不合法的 HTTP request</p>
+</li>
+<li><p><code>HTTP 503 Service Unavailable</code>，必須確認 ELB 後方是否有 healthy instance，需要檢查一下 CloudWatch 中 ELB 的 <code>HealthyHostCount</code> metrics</p>
+</li>
+<li><p><code>HTTP 504 Gateway Timeout</code> 表示要檢查 EC2 instance 是否有開啟 keep-alive 設定，並確保這個設定的時間比 ELB 的 idle timeout 設定時間更長</p>
+</li>
+<li><p>ALB 會為每個 request 額外加上 <code>X-Amzn-Trace-Id</code> header，這可用來追蹤 request 從 ELB 轉發出來後是到哪裡去(但 ALB 目前還沒與 X-Ray 整合)</p>
+</li>
+</ul>
+<h1 id="Target-Group-相關設定"><a href="#Target-Group-相關設定" class="headerlink" title="Target Group 相關設定"></a>Target Group 相關設定</h1><p>target group 有些設定可以用來調整 ELB 轉發 request 的行為，以下介紹幾個比較重要的設定：</p>
+<ul>
+<li><p><code>deregistration_delay.timeout_second</code>：這是用來設定當要對 EC2 instance 進行 deregistration 時，要等待的時間，確保 request 可以完成後再斷掉連線</p>
+</li>
+<li><p><code>slow_start.duration_seconds</code>：這可以用來設定給剛加入的 healthy instance 暖身的時間，在設定時間內不會把足量 request 轉發過去，會逐漸增加轉發數量，直到時間到了後，才會轉發足量 request 過去</p>
+</li>
+<li><p><code>load_balancing.algorithm.type</code>：用來決定 ELB 如何轉發 request，有 <strong>round robin</strong> &amp; <strong>least outstanding request</strong> 兩種，這是 ALB 擁有的兩種模式</p>
+<blockquote>
+<p>若是 NLB，還有 <strong>Flow Hash</strong>(基於 IP address、source/destination port、TCP sequence number) 可選</p>
+</blockquote>
+</li>
+<li><p><code>sitckness.enable</code>：是否啟用 sticky session</p>
+</li>
+<li><p><code>sitckness.type</code>：分為 application-based &amp; duration-based cookie 兩種</p>
+</li>
+<li><p><code>sitckness.app_cookie.cookie_name</code> &amp; <code>sitckness.app_cookie.duration_seconds</code> &amp; <code>sitckness.lb_cookie.duration_seconds</code>：這幾個設定的用法可以參考上面 sticky session 章節的說明</p>
+</li>
+</ul>
+<h1 id="Auto-Scaling-Group"><a href="#Auto-Scaling-Group" class="headerlink" title="Auto Scaling Group"></a>Auto Scaling Group</h1><h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><ul>
+<li><p>可根據 CPU、Network …. 等 CloudWatch metric 來作為 scaling policy，也可以使用 custom metrics(memory 用量算這個)</p>
+</li>
+<li><p>ASG 透過 Launch Configuration or Launch Template 來建立新的 EC2 instance</p>
+<blockquote>
+<p>包含 AMI + Instance Type、EC2 User Data、EBS volume、Securiry Group、SSH KeyPair … 等設定</p>
+</blockquote>
+</li>
+<li><p>設定在 ASG 上的 IAM role 會被指定到由 ASG 產生出來的 EC2 instance</p>
+</li>
+<li><p>若是透過 ASG 產生出來的 EC2 instance 因為某些不明原因被移除了，ASG 會幫忙重新產生出來</p>
+</li>
+<li><p>ASG 可以協助將被 ELB 標記為 unhealthy 的 EC2 instance，然後再重建一個取代他</p>
+</li>
+<li><p>ASG 相關的 CloudWatch metric 需要 enable group metric 才會開始蒐集，蒐集間隔為 1 分鐘</p>
+</li>
+</ul>
+<h2 id="Launch-Configuration-與-Launch-Template-的差異"><a href="#Launch-Configuration-與-Launch-Template-的差異" class="headerlink" title="Launch Configuration 與 Launch Template 的差異"></a>Launch Configuration 與 Launch Template 的差異</h2><p>相同處：</p>
+<ul>
+<li>都需要設定 AMI ID、instance type、SSH key pair, security group、EC2 user data … 等跟啟動 EC2 相關的資訊</li>
+</ul>
+<p>差異處：</p>
+<ul>
+<li><p>Launch Configuration：舊版的設定，任何一次更新都需要重建</p>
+</li>
+<li><p>Launch Template：(較新的版本，建議使用)</p>
+<ul>
+<li>有版本管理的功能，因此一個 launch template 可以有多個版本</li>
+<li>可建立 parameter subset，因此一部份的設定可以被重複利用 or 繼承</li>
+<li>可部屬 on-demand &amp; spot instance (混合也可)</li>
+<li>支援 plancement group, capacity reservation、dedicated host、multiple instance type …. 等設定</li>
+<li>可使用 T2 unlimited burst 功能</li>
+</ul>
+</li>
+</ul>
+<p>使用限制：</p>
+<ul>
+<li>無法同時使用 Launch Configuration 與 Launch Template</li>
+</ul>
+<h2 id="Lifecycle-Hooks"><a href="#Lifecycle-Hooks" class="headerlink" title="Lifecycle Hooks"></a>Lifecycle Hooks</h2><p><img src="/blog/images/aws/HA/AWS_Gateway-Load-Balancer.png" alt="AWS - Auto Scaling Group Lifecycle Hooks"></p>
+<p>預設情況下，透過 ASG 產生的 instance 啟動後就會被歸類在 <code>InService</code> 的狀態；若是要在 instance 被歸類在 InService 之前執行一些命令，那就需要透過 Lifecycle Hook 來完成。</p>
+<p>從上圖來看，當 instance 進入 pending 狀態後，搭配 lifecycle hook，就會進入上圖的第 2 &amp; 3 階段，並可以指定執行一段 script 後，再進入到 InService 階段。</p>
+<p>而移除 instance 階段也可以加入這個 hook，讓 instance 實際被移除之前，搭配 hook 進入到第 5 &amp; 6 階段，做一些額外的操作，而通常這樣的 hook 常用在清理資源、取得 log … 等工作。</p>
+<p>最後，Lifecycle Hook 可與 EventBridge、SNS、SQS …. 等服務進行整合串接。</p>
+<h2 id="Health-Check"><a href="#Health-Check" class="headerlink" title="Health Check"></a>Health Check</h2><ul>
+<li><p>為了確保 HA，ASG 中有 multi-AZ 的設定勢必需要的</p>
+</li>
+<li><p>ASG 支援以下幾種 health check 方式：</p>
+<ul>
+<li>EC2 status check</li>
+<li>ELB health check</li>
+<li>custom health check：這方式是透過 AWS CLI/SDK 送訊息給 ASG</li>
+</ul>
+</li>
+<li><p>ASG 會把 unhealthy instance 移除後重建一個新的，不會用 reboot 的方式</p>
+</li>
+<li><p>這個部份可能需要了解的 CLI command：</p>
+<ul>
+<li><code>set-instance-health</code>：用來作為 custom health check 用</li>
+<li><code>terminate-instance-in-a-auto-scaling-group</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="Troubleshooting"><a href="#Troubleshooting" class="headerlink" title="Troubleshooting"></a>Troubleshooting</h2><p>使用 ASG 時可能會發生以下幾種狀況：</p>
+<ol>
+<li><p>有 <code>&lt;number of instances&gt;</code> 個 instance 已經運行中，後續啟動新的 EC2 instance 失敗</p>
+<blockquote>
+<p>可能是 ASG 已經達到 MaximumCapacity 的限制；需要時可增加來解決此 issue</p>
+</blockquote>
+</li>
+<li><p>啟用 EC2 instance 時失敗：</p>
+<blockquote>
+<p>指定的 security group or SSH key pair 可能因為被移除而不存在</p>
+</blockquote>
+</li>
+<li><p>若是 ASG 持續啟用 EC2 instance 但卻失敗，且維持持續失敗狀態超過了 24 小時，它就會自動中止這個行為不會再繼續嘗試</p>
+</li>
+</ol>
+<p>另外 ASG 無法正常運作也有可能是以下原因造成：</p>
+<ol>
+<li><p>autoscaling config 沒有正確運作</p>
+</li>
+<li><p>沒找到指定的 autoscaling group</p>
+</li>
+<li><p>AZ 不支援指定的 instance type</p>
+</li>
+<li><p>AZ 已經不存在了 (機率很低)</p>
+</li>
+<li><p>不支援指定的 EBS mapping</p>
+</li>
+<li><p>autoscaling 服務並沒有在 AWS account 中啟用</p>
+</li>
+<li><p>嘗試將 EBS block device 繫結到 instance-store AMI</p>
+</li>
+</ol>
+<h1 id="RDS-and-Multi-AZ-Failover"><a href="#RDS-and-Multi-AZ-Failover" class="headerlink" title="RDS and Multi-AZ Failover"></a>RDS and Multi-AZ Failover</h1><h2 id="RDS"><a href="#RDS" class="headerlink" title="RDS"></a>RDS</h2><ul>
+<li><p>Multi-AZ failover 不是種 scaling solution，因為無法降低負載</p>
+</li>
+<li><p>若是有啟用 multi-AZ，那 snapshot 的操作會對 secondary DB(slave) 執行，不會對 master DB 執行，因此 master DB 不會有 performance impact；但若是沒有啟用 multi-AZ，那 snapshot 就會對 master DB 執行，會造成短暫的 performance impact (取決於資料量的多寡)</p>
+</li>
+<li><p>reboot with failover，會讓 RDS instance 重新啟動後換到另一個 AZ (在啟動 multi-AZ 的情況下)</p>
+</li>
+<li><p>當 failover 發生時，AWS 會將 RDS endpoint DNS 切到正常的 AZ 中的 slave(standby) RDS instance</p>
+</li>
+</ul>
+<h2 id="Read-Replica"><a href="#Read-Replica" class="headerlink" title="Read Replica"></a>Read Replica</h2><ul>
+<li><p>最多 5 個 read replica</p>
+</li>
+<li><p>read replica 可以跨 AZ &amp; region</p>
+</li>
+<li><p>replication 是非同步的，因此<strong>需要關心 replica lag metric</strong></p>
+</li>
+<li><p>Read Replica 可以被 promote 成獨立(standalone)的 DB，接著就可以當 master DB 用，但會斷開與 master DB 的 replication link，因此在 promote 開始就會與 master DB 開始有資料上的差異</p>
+</li>
+<li><p>promote read replica 並不會取代原本的 master DB，這<strong>跟 multi-AZ 架構中的 failover 是完全不同的概念</strong></p>
+</li>
+<li><p>若沒有啟用 automated backups 並設定 retention period 大於 0，那就無法新增 read replica</p>
+</li>
+</ul>
+<h2 id="加密-RDS"><a href="#加密-RDS" class="headerlink" title="加密 RDS"></a>加密 RDS</h2><ul>
+<li><p>看教學影片中，有看到 <code>db.t2.micro</code> 的 RDS instance type 不支援建立時就加密；不過現在都至少是 t3 以上，也都可以了加密了 </p>
+</li>
+<li><p>無法對現有未加密的 RDS instance 進行加密，正確的流程是：</p>
+<ol>
+<li>對現有的 RDS instance 進行 snapshot</li>
+<li>將 snapshot 複製到同一個(or 另外一個) region，並在複製選項中勾選 <code>Encrypt</code> 選項</li>
+<li>將加密(encrypted)後的 snapshot 還原成新的 RDS instance</li>
+</ol>
+</li>
+<li><p>若是要將加密後的 RDS snapshot 分享給另外一個帳號，需要注意的是：</p>
+<ul>
+<li>不能用預設的 default KMS key，因為這無法分享，必須使用 custom AWS KMS key 才可以</li>
+<li>用來加密的 custom AWS KMS key 要分享給另外一個帳號，對方才可以解密</li>
+<li>透過 AWS console / CLI / RDS API 都可以將 encrypted snapshot 分享給另外一個帳號</li>
+<li>不能將 encrypted snapshot 公開分享</li>
+<li>不能分享透過 TDE(Transparent Data Encryption) 技術加密的 snapshot (for Oracle or Microsoft SQL Server)</li>
+</ul>
+</li>
+</ul>
+<h2 id="Maintenance-Windows"><a href="#Maintenance-Windows" class="headerlink" title="Maintenance Windows"></a>Maintenance Windows</h2><p>在 AWS service 中，有些有 maintenance windows 的設計，而這個設計是用來讓管理者可以指定日常系統維護的時間(例如：每週三凌晨 04:00~06:00)，告知 AWS 若是服務有 software or security 相關的更新，可以在 maintenance windows 指定的時間進行。</p>
+<p>目前可以設定 maintenance windows 的 AWS managed service 有以下幾個：</p>
+<ul>
+<li>RDS</li>
+<li>Elasticache</li>
+<li>Redshift</li>
+<li>DynamoDB DAX</li>
+<li>Neptune</li>
+<li>Amazon DocumentDB</li>
+</ul>
+<p>而沒有 maintenance windows 設計的常見服務則有：</p>
+<ul>
+<li>EC2</li>
+<li>Lambda</li>
+<li>Amazon QLDB</li>
+</ul>
+<h1 id="Elasticache"><a href="#Elasticache" class="headerlink" title="Elasticache"></a>Elasticache</h1><ul>
+<li><p>目前 AWS Elasticache 提供 Memcached &amp; Redis 兩個 cache engine 選項</p>
+</li>
+<li><p>僅有 Redis 可以提供 Master/Slave replication &amp; cross-AZ redundency 的架構；而 Memcached 僅有 single AZ</p>
+</li>
+<li><p>若要減輕 DB 存取壓力/負載，那使用 <code>Elasticache</code> 是正確的處理方式；但若是要減輕運行 OLAP transaction 的負載，那 <code>Redshift</code> 才是正確的選擇</p>
+</li>
+</ul>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://www.udemy.com/course/ultimate-aws-certified-sysops-administrator-associate/">Ultimate AWS Certified SysOps Administrator Associate 2021 | Udemy</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/AWS/" rel="tag"># AWS</a>
+              <a href="/blog/tags/RDS/" rel="tag"># RDS</a>
+              <a href="/blog/tags/Elasticache/" rel="tag"># Elasticache</a>
+              <a href="/blog/tags/EC2/" rel="tag"># EC2</a>
+              <a href="/blog/tags/ELB/" rel="tag"># ELB</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/AWS/AWS-SOA-VPC/" rel="prev" title="AWS SOA 學習筆記 - VPC(Virtual Private Cloud)">
+                  <i class="fa fa-chevron-left"></i> AWS SOA 學習筆記 - VPC(Virtual Private Cloud)
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/AWS/AWS-SOA-High-Availability/";
+    this.page.identifier = "AWS/AWS-SOA-High-Availability/";
+    this.page.title = "AWS SOA 學習筆記 - High Availability & Scalability";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>
