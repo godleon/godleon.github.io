@@ -9,6 +9,7 @@ categories:
   - AWS
 tags:
   - AWS
+  - SOA
   - ELB
   - EC2
   - RDS

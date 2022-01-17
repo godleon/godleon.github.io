@@ -9,6 +9,7 @@ categories:
   - AWS
 tags:
   - AWS
+  - SOA
   - Security
   - AWS Inspector
   - AWS Trusted Advisor

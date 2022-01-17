@@ -9,6 +9,7 @@ categories:
   - AWS
 tags:
   - AWS
+  - SOA
   - AWS Organization
   - AWS Cost Optimization
 ---
