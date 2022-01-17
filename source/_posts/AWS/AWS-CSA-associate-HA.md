@@ -83,7 +83,7 @@ AWS 提供三種 Load Balancer 類型，分別是：
 
 - 當要考慮到 `HA` & `fault tolerance`，就必須至少要有 **ELB + ASG(cross AZ + 最少兩個 instance)** 這樣的組合 
 
-- **Classic Load Balancer 不支援 `Server Name Indication(SNI)`(可在同一個 load balancer 上設定支援多個 HTTPS domain)，必須改用 ALB**
+- **Classic Load Balancer 不支援 `Server Name Indication(SNI)`(可在同一個 load balancer 上設定支援多個 HTTPS domain)，目前僅有 ALB/NLB/CloudFront 支援 SNI**
 
 
 ### Health Check
@@ -108,7 +108,7 @@ Advanced Load Balancer 須知
 
 - ALB 也支援 sticky session，但流量僅能導向 target group level
 
-## Cross Zone Load Balancing
+## Cross-Zone Load Balancing
 
 簡單來說，Cross Zone Load Balancing 可以讓 Load Balancer 將流量分散到不同的 AZ 上，細節的部份可用以下三張圖說明，在那之前有幾個假設狀況：
 
@@ -120,7 +120,7 @@ Advanced Load Balancer 須知
 
 > **Cross Zone Load Balancing 在 ALB 預設是開啟的，但在 NLB 預設是關閉的**
 
-###  未開啟 Cross Zone Load Balancing
+###  未開啟 Cross-Zone Load Balancing
 
 首先是一般情況下沒有開啟 Cross Zone Load Balancing 功能的情況下：
 
@@ -132,9 +132,9 @@ Advanced Load Balancer 須知
 
 - 上方的四個 instance 共同分攤了 50% 的流量，但下方單獨的 instance 一台就扛了該 AZ 所有的流量
 
-### 開啟 Cross Zone Load Balancing
+### 開啟 Cross-Zone Load Balancing
 
-很明顯上面的流量分配是有問題，還是有優化空間的，這時候就可以透過開啟 Cross Zone Load Balancing 功能來處理，當開啟了 Cross Zone Load Balancing，流量的分配就會變成如下：
+很明顯上面的流量分配是有問題，還是有優化空間的，這時候就可以透過開啟 Cross-Zone Load Balancing 功能來處理，當開啟了 Cross-Zone Load Balancing，流量的分配就會變成如下：
 
 ![with Cross Zone Load Balancing](/blog/images/aws/ELB_with-Cross-Zone-Load-Balancing.png)
 
@@ -143,6 +143,8 @@ Advanced Load Balancer 須知
 - 下方 AZ 可以知道上方 AZ 中的 instance 所得到的流量相對少，因此就會有一部份流量會轉回上方 AZ 中
 
 - 透過 ELB 將流量導向另外一個 AZ，藉此平均分散流量到 instance 上
+ 
+- ALB 預設開啟 Cross-Zone Load Balancing，inter-AZ 的傳輸費用是免費的；而 NLB 預設是關閉的，inter-AZ 的傳輸費用是要收費的
 
 ### 單一 AZ ELB + 開啟 Cross Zone Load Balancing
 
