@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "AWS SOA 學習筆記 - SSM(System Manager) & OpsWorks"
+title:  "AWS SOA 學習筆記 - SSM(System Manager)"
 description: "此篇文章是學習 AWS 認證課程(Certified SysOps Administrator Associate)內容時所留下的學習筆記，主要內容為 SSM(System Manager) 服務在實際操作維運上需要注意的事項"
 date: 2022-01-22 20:45:00
 published: true
