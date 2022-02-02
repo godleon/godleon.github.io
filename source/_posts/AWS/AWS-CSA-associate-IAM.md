@@ -158,9 +158,9 @@ IAM Security Token Service (STS)
 - 用來取得臨時存取 AWS resource 用的權限(以 token 的形式提供)的服務
 
 - 這個暫存的 credential 是有效期的，可以根據需求設定從幾分鐘到幾個小時，過期了就會自動失效
-> 透過 `GetSessionToken` 可拿到有效期限為 15 mins ~ 36 hours(預設 12 hours) 的 credential；如果是 cross-account 取得的 credential，那有效期限僅有 15 mins ~ 1 hour
+> 透過 `GetSessionToken` 可拿到有效期限為 15 mins ~ 36 hours(預設 12 hours) 的 credential；如果是 cross-account 取得的 credential，那有效期限僅有 15 mins ~ 1 hour ([官網文件說明](https://docs.aws.amazon.com/STS/latest/APIReference/API_GetSessionToken.html))
 
-- credential 只能透過 STS API call 取得(無法從 AWS console 設定取得)
+- **credential 只能透過 STS API call 取得(無法從 AWS console 設定取得)**
 
 - 取得的 credential 包含 `session token`、`access key ID`、`secret access key` 三個部份
 
@@ -227,7 +227,7 @@ IAM API Keys
 
 ## IAM users sign-in link
 
-![IAM users sign-in link](http://etutorialsworld.com/wp-content/uploads/2016/05/72.22BAWS2BIAM2BDashboard-1.png)
+![IAM users sign-in link](https://docs.aws.amazon.com/IAM/latest/UserGuide/images/sign-in-iam-user-capture.png)
 
 1. 這是用來提供給其他使用者存取 AWS resource 之用，並非 root account，需要注意一下!
 
