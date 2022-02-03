@@ -35,7 +35,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/RDS_Read-Replicas-1.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/RDS_Read-Replicas-2.png">
 <meta property="article:published_time" content="2020-05-24T22:20:00.000Z">
-<meta property="article:modified_time" content="2022-02-02T09:15:40.311Z">
+<meta property="article:modified_time" content="2022-02-03T13:36:40.380Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -263,7 +263,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2022-02-02 17:15:40" itemprop="dateModified" datetime="2022-02-02T17:15:40+08:00">2022-02-02</time>
+                <time title="Modified: 2022-02-03 21:36:40" itemprop="dateModified" datetime="2022-02-03T21:36:40+08:00">2022-02-03</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -426,7 +426,7 @@
 <li><p>即使 RDS instance 被移除，snapshot 依然會繼續存在</p>
 </li>
 </ul>
-<h4 id="還原"><a href="#還原" class="headerlink" title="還原"></a>還原</h4><p>不論是透過 Automatic Backup 或是 snapshot 還原，原本的 RDS instance 都會消失，會產生一個全新的 RDS instance &amp; DNS endpoint</p>
+<h4 id="還原"><a href="#還原" class="headerlink" title="還原"></a>還原</h4><p>不論是透過 Automatic Backup 或是 snapshot 還原，都會產生一個全新的 RDS instance &amp; DNS endpoint</p>
 <p><img src="/blog/images/aws/RDS_restore.png" alt="RDS restore from backup"></p>
 <h3 id="加密"><a href="#加密" class="headerlink" title="加密"></a>加密</h3><ul>
 <li><p>加密功能目前支援 MySQL, Oracle, SQL Server, PostgreSQL, MariaDB, Aurora</p>
@@ -464,7 +464,7 @@
 </li>
 <li><p>建議在 production 環境，<code>Multi-AZ Automatic Failover</code> 的功能一定要開啟</p>
 </li>
-<li><p>**從 single-AZ 轉換為 multi-AZ 的過程是個不會影響線上服務的操作(zero downtime)**，只要在 console 直接啟用 multi-AZ 功能即可</p>
+<li><p><strong>從 single-AZ 轉換為 multi-AZ 的過程是個不會影響線上服務的操作(zero downtime)，只要在 console 直接啟用 multi-AZ 功能即可</strong></p>
 </li>
 </ul>
 <h3 id="Read-Replicas"><a href="#Read-Replicas" class="headerlink" title="Read Replicas"></a>Read Replicas</h3><ul>
@@ -811,7 +811,7 @@
 </li>
 <li><p>搭配 Elasticache，可以避免查詢行為一直打進 DB，直接透過 cache 回應，可以大幅降低 request response time，同時也可以降低 DB 的負載</p>
 </li>
-<li><p>協助 application 成為 stateless 的關鍵</p>
+<li><p><strong>協助 application 成為 stateless 的關鍵</strong></p>
 </li>
 <li><p>Redis 支援 Multi-AZ</p>
 </li>

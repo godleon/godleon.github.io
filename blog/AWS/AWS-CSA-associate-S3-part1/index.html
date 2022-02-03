@@ -31,7 +31,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/Storage/S3_StorageClass.png">
 <meta property="article:published_time" content="2020-04-26T04:00:00.000Z">
-<meta property="article:modified_time" content="2022-02-02T09:15:40.311Z">
+<meta property="article:modified_time" content="2022-02-03T13:36:40.380Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -255,7 +255,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2022-02-02 17:15:40" itemprop="dateModified" datetime="2022-02-02T17:15:40+08:00">2022-02-02</time>
+                <time title="Modified: 2022-02-03 21:36:40" itemprop="dateModified" datetime="2022-02-03T21:36:40+08:00">2022-02-03</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -572,6 +572,9 @@
 <li><p>檔案上傳後就可以馬上讀取到</p>
 </li>
 <li><p>若是更新 or 刪除檔案，則需要一段時間才會取得最新結果</p>
+<blockquote>
+<p>目前已經有 strong consistency，因此已經沒有這個問題存在了</p>
+</blockquote>
 </li>
 <li><p>S3 有眾多的 storage class 可以選用，使用者可以根據實際需求進行不同 storage class 的搭配以降低費用；若是懶的管理可以考慮選用 <code>Intelligent Tiering</code>，AWS 會根據實際使用狀況，最佳化使用成本 (但要長期備份的資料還是要自己移到 <code>Glacier</code> or <code>Glacier Deep Archive</code>)</p>
 </li>
