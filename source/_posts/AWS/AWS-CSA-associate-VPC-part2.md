@@ -259,7 +259,7 @@ Global Accelerator 是由很多部份設定所組成，因此了解 Global Accel
 
 ### Listener
 
-- 在 Global Accelerator 中必須預先定義要加速的流量(例如：tcp 80 & 443)，Listner 就是用來設定這一類的規則
+- 在 Global Accelerator 中必須預先定義要加速的流量(例如：tcp 80 & 443)，Listener 就是用來設定這一類的規則
 
 - 每個 Listener 可以與多個 Endpoint Group 關聯，並會將流量根據規則導向 endpoint group
 

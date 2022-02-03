@@ -157,7 +157,7 @@ RDS 提供兩種備份類型：
 
 #### 還原
 
-不論是透過 Automatic Backup 或是 snapshot 還原，原本的 RDS instance 都會消失，會產生一個全新的 RDS instance & DNS endpoint
+不論是透過 Automatic Backup 或是 snapshot 還原，都會產生一個全新的 RDS instance & DNS endpoint
 
 ![RDS restore from backup](/blog/images/aws/RDS_restore.png)
 
@@ -195,7 +195,7 @@ RDS 提供兩種備份類型：
 
 - 建議在 production 環境，`Multi-AZ Automatic Failover` 的功能一定要開啟
 
-- **從 single-AZ 轉換為 multi-AZ 的過程是個不會影響線上服務的操作(zero downtime)**，只要在 console 直接啟用 multi-AZ 功能即可
+- **從 single-AZ 轉換為 multi-AZ 的過程是個不會影響線上服務的操作(zero downtime)，只要在 console 直接啟用 multi-AZ 功能即可**
 
 
 ### Read Replicas
@@ -486,7 +486,7 @@ Elasticache 提供兩種 Engine Type，分別是 `Redis` & `Memcached`，以下�
 
 - 搭配 Elasticache，可以避免查詢行為一直打進 DB，直接透過 cache 回應，可以大幅降低 request response time，同時也可以降低 DB 的負載
 
-- 協助 application 成為 stateless 的關鍵
+- **協助 application 成為 stateless 的關鍵**
 
 - Redis 支援 Multi-AZ
 

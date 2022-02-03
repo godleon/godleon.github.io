@@ -35,7 +35,7 @@ tags:
 
 - IAM policy 可以與 IAM user/group/role 綁定，而這些被綁定的對象，則稱為 `principal`
 
-> 簡單來說，**IAM policy 就是用來定義 principal 可以在你的 AWS 環境上做哪些事情**
+> 簡單來說，**IAM policy 就是用來定義 principal 可以在你的 AWS 環境上做哪些事情(AWS API 呼叫的管控)**
 
 - 可以沿用管控其他 AWS resource 的經驗同樣的套用到 S3 bucket 的管理上
 

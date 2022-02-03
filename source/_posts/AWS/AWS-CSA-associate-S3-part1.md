@@ -296,6 +296,7 @@ S3 的收費標準
 - 檔案上傳後就可以馬上讀取到
 
 - 若是更新 or 刪除檔案，則需要一段時間才會取得最新結果
+> 目前已經有 strong consistency，因此已經沒有這個問題存在了
 
 - S3 有眾多的 storage class 可以選用，使用者可以根據實際需求進行不同 storage class 的搭配以降低費用；若是懶的管理可以考慮選用 `Intelligent Tiering`，AWS 會根據實際使用狀況，最佳化使用成本 (但要長期備份的資料還是要自己移到 `Glacier` or `Glacier Deep Archive`)
 
