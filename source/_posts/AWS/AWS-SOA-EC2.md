@@ -151,7 +151,7 @@ spot instance 的特色就是相較於 on-demand，可以透過很低的價格(7
 
 - 必須預先定義一個最大願意支付的價格(max price)；若是 spot instance price 大於 max price，使用者會被通知，在兩分鐘內決定要 stop or terminate instance
 
-- 若希望 spot instance 不要被收走，可以設定 `**spot block**`，指定 1~6 小時的長度，那 AWS 會盡可能的保留給你使用
+- 若希望 spot instance 不要被收走，可以設定 `spot block`，指定 1~6 小時的長度，那 AWS 會盡可能的保留給你使用
 > 但還是有極低的機率會有可能被回收
 
 有鑑於 spot instance 是會被回收的，因此比較適合用 spot instance 運行的就會是 batch job, data analysis, 失敗可以重來的工作 ... 等這一類型的 workload
@@ -160,7 +160,7 @@ spot instance 的特色就是相較於 on-demand，可以透過很低的價格(7
 
 ![spot lifecycle](/blog/images/aws/EC2_spot-lifecycle.png)
 
-要使用 spot instance，要建立一個 **`spot request`**，裡面會包含 max price ... 等像上圖中的相關資訊，其中比較需要注意的是 request type 是 `one-time` or `persistent`，這關係到了 spot instance lifecycle 的表現，基本原則如下：
+要使用 spot instance，要建立一個 `spot request`，裡面會包含 max price ... 等像上圖中的相關資訊，其中比較需要注意的是 request type 是 `one-time` or `persistent`，這關係到了 spot instance lifecycle 的表現，基本原則如下：
 
 - max price > spot instance price，那 spot instance 就會啟動
 
@@ -188,7 +188,7 @@ spot instance 的特色就是相較於 on-demand，可以透過很低的價格(7
 
 1. 使用者必須先定義 Launch Pool，這包含了提供 instance type、OS、AZ ... 等資訊 (可以設定多個 Launch Pool)
 
-2. spot fleet 會根據設定好的 target capacity & 價格限制，從 Launch Pool 啟動 spot instance(不夠的話就會改成啟動 on-demand instance)，直到滿足 target capacity or 達到價格上線
+2. spot fleet 會根據設定好的 target capacity & 價格限制，從 Launch Pool 啟動 spot instance(不夠的話就會改成啟動 on-demand instance)，直到滿足 target capacity or 達到價格上限
 
 而配置 spot instance 有以下策略可以設定：
 
@@ -207,13 +207,13 @@ Burstable Instances
 
 - AWS 提供了稱為 burstable type 的 instance T2 & T3，可以根據使用者需求，短時間內取得比較好的 CPU 性能
 
-- 但要 burst 需要有 **`burst credit`**，提昇 CPU 性能的代價就是會消耗 credit，而當 credit 消耗完後，CPU 性能就會變得很差
+- 但要 burst 需要有 `burst credit`，提昇 CPU 性能的代價就是會消耗 credit，而當 credit 消耗完後，CPU 性能就會變得很差
 
 - 若是 instance 停止 burst，那 credit 就會逐漸累積起來，但不同的 instance type 各有其上限
 
 - 適合用來應付偶發性的 traffic spike 時需要大量 CPU 運算的場景
 
-- 有鑑於 burst credit 有時會有不夠用的問題，因此 AWS 還提供了 **`T2/T3 Unlimited`** 的 instance type 可用，那就沒有 credit 的問題，不過一直將 CPU 用滿，會需要多花費不少錢，那不如就使用 M or C 系列的 instance type
+- 有鑑於 burst credit 有時會有不夠用的問題，因此 AWS 還提供了 `T2/T3 Unlimited` 的 instance type 可用，那就沒有 credit 的問題，不過一直將 CPU 用滿，會需要多花費不少錢，那不如就使用 M or C 系列的 instance type
 
 
 監控 (Unified CloudWatch Agent)
@@ -236,7 +236,7 @@ Burstable Instances
 
 ## Unified CloudWatch Agent
 
-若是要更進階的監控資料蒐集，甚至包含 log，那就可以考慮使用 **`Unified CloudWatch Agent`**，這個工作有以下特性：
+若是要更進階的監控資料蒐集，甚至包含 log，那就可以考慮使用 `Unified CloudWatch Agent`，這個工作有以下特性：
 
 - 除了 EC2 instance 之外，也可以用在 on-premise 的機器上
 
@@ -246,7 +246,7 @@ Burstable Instances
 
 - 可透過 SSM Parameter Store 來統一管理 Unified CloudWatch Agent 的設定
 
-- 預設上傳的 metric 的 default namespace 為 **`CWAgent`**
+- 預設上傳的 metric 的 default namespace 為 `CWAgent`
 
 - 具備上傳資料到 CloudWatch 的 IAM 權限也是必備的
 
