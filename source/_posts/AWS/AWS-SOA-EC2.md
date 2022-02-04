@@ -17,7 +17,7 @@ tags:
 變更 Instance Type
 ==================
 
-當 EC2 instace 需要 scale out 時，那可以透過調整 instance type 的方式達成(例如：`m5.large` -> `m5.xlarge`)，只是此項操作僅支援 EBS-Backed instance，不支援 Instance Store instance (差異可參考[此文章](https://medium.com/awesome-cloud/aws-difference-between-ebs-and-instance-store-f030c4407387))，執行流程如下：
+當 EC2 instace 需要 scale up 時，那可以透過調整 instance type 的方式達成(例如：`m5.large` -> `m5.xlarge`)，只是此項操作僅支援 EBS-Backed instance，不支援 Instance Store instance (差異可參考[此文章](https://medium.com/awesome-cloud/aws-difference-between-ebs-and-instance-store-f030c4407387))，執行流程如下：
 
 1. 停止(stop) instance
 
@@ -137,7 +137,7 @@ Troubleshooting
 
 3. 使用者透過 AWS 提供的網頁界面連入 EC2 instance
 
-> 若是要明確的指定 EC2 Instance Connect 的 source IP range，可以從 [https://ip-ranges.amazonaws.com/ip-ranges.json](https://ip-ranges.amazonaws.com/ip-ranges.json) 取得 IP 清單，搜尋 **`EC2_INSTANCE_CONNECT`**，找到對應的 region 即可找到正確的 IP CIDR range
+> 若是要明確的指定 EC2 Instance Connect 的 source IP range，可以從 [https://ip-ranges.amazonaws.com/ip-ranges.json](https://ip-ranges.amazonaws.com/ip-ranges.json) 取得 IP 清單，搜尋 `EC2_INSTANCE_CONNECT`，找到對應的 region 即可找到正確的 IP CIDR range
 
 
 Spot Instance & Spot Fleet
@@ -151,7 +151,7 @@ spot instance 的特色就是相較於 on-demand，可以透過很低的價格(7
 
 - 必須預先定義一個最大願意支付的價格(max price)；若是 spot instance price 大於 max price，使用者會被通知，在兩分鐘內決定要 stop or terminate instance
 
-- 若希望 spot instance 不要被收走，可以設定 **`spot block`**，指定 1~6 小時的長度，那 AWS 會盡可能的保留給你使用
+- 若希望 spot instance 不要被收走，可以設定 `**spot block**`，指定 1~6 小時的長度，那 AWS 會盡可能的保留給你使用
 > 但還是有極低的機率會有可能被回收
 
 有鑑於 spot instance 是會被回收的，因此比較適合用 spot instance 運行的就會是 batch job, data analysis, 失敗可以重來的工作 ... 等這一類型的 workload
