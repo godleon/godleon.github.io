@@ -31,7 +31,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/EBS_Storage-Type-Comparison.png">
 <meta property="article:published_time" content="2020-05-30T01:10:00.000Z">
-<meta property="article:modified_time" content="2022-02-03T13:36:40.380Z">
+<meta property="article:modified_time" content="2022-02-04T05:36:06.665Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -260,7 +260,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2022-02-03 21:36:40" itemprop="dateModified" datetime="2022-02-03T21:36:40+08:00">2022-02-03</time>
+                <time title="Modified: 2022-02-04 13:36:06" itemprop="dateModified" datetime="2022-02-04T13:36:06+08:00">2022-02-04</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -307,6 +307,9 @@
 <li><p>可使用 EBS snapshot 將資料備份到 S3，並搭配 S3 lifecycle 管理機制來提高資料的安全性</p>
 </li>
 <li><p>是種 block device 服務，但可以同時掛載到多個 EC2 instance 中(有限定 instance type，<a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volumes-multi.html">AWS 文件說明</a>)</p>
+<blockquote>
+<p>僅支援 <code>io1</code> &amp; <code>io2</code> 的 volume type，而且也不是所有 region 都支援這樣的操作</p>
+</blockquote>
 </li>
 </ul>
 <h2 id="EBS-Volume-Type"><a href="#EBS-Volume-Type" class="headerlink" title="EBS Volume Type"></a>EBS Volume Type</h2><p>EBS volume type 有四種(官方宣稱)，直接使用下表來進行比較：</p>
@@ -327,7 +330,7 @@
 </li>
 <li><p>snapshot 是 volume 在特定時間點的複本</p>
 </li>
-<li><p>snapshot 的特性是**<code>遞增(incremental)</code>**，因此對 volume 進行 snapshot 只會針對有變動的 block 進行處理(也只有增加的部份容量會被收費)</p>
+<li><p>snapshot 的特性是 **<code>遞增(incremental)</code>**，因此對 volume 進行 snapshot 只會針對有變動的 block 進行處理(也只有增加的部份容量會被收費)</p>
 <blockquote>
 <p>假設同一個 EBS volume 的 snapshot 有兩個，若是第一個完整的 snapshot 被刪除，還是可以從第二個 snapshot 還原所有資料</p>
 </blockquote>
@@ -396,7 +399,7 @@
 </li>
 </ol>
 <h2 id="其他考試重點"><a href="#其他考試重點" class="headerlink" title="其他考試重點"></a>其他考試重點</h2><ul>
-<li><p>使用 <code>io1</code> volume 通常是為了取得最高的 IOPS 能力，但 **每 GB 的空間最多只能提供 50 IOPS(比例為 50:1)**，因此一個 10GB 的 io1 volume 最多只能提供 500 IOPS/s</p>
+<li><p>使用 <code>io1</code> volume 通常是為了取得最高的 IOPS 能力，但**每 GB 的空間最多只能提供 50 IOPS(比例為 50:1)**，因此一個 10GB 的 io1 volume 最多只能提供 500 IOPS/s</p>
 </li>
 <li><p>若要達到 64,000 IOPS(上限，現在好像可以更高了)，則需要至少 1280GB(64000/50) 大小的 io1 volume，並搭配 <a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html#ec2-nitro-instances">Nitro System</a> 的 EC2 instance 才可以達到</p>
 </li>

@@ -31,7 +31,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/EC2_spot-lifecycle.png">
 <meta property="article:published_time" content="2020-05-27T20:50:00.000Z">
-<meta property="article:modified_time" content="2022-02-03T13:36:40.380Z">
+<meta property="article:modified_time" content="2022-02-04T05:36:06.665Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CSA">
@@ -256,7 +256,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2022-02-03 21:36:40" itemprop="dateModified" datetime="2022-02-03T21:36:40+08:00">2022-02-03</time>
+                <time title="Modified: 2022-02-04 13:36:06" itemprop="dateModified" datetime="2022-02-04T13:36:06+08:00">2022-02-04</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -447,8 +447,14 @@
 </ul>
 <h1 id="EC2-Instance-管理功能"><a href="#EC2-Instance-管理功能" class="headerlink" title="EC2 Instance 管理功能"></a>EC2 Instance 管理功能</h1><h2 id="Status-Check"><a href="#Status-Check" class="headerlink" title="Status Check"></a>Status Check</h2><ul>
 <li><p><strong>System Status Checks</strong>：這是用來檢查底層實體機器 &amp; Hypervisor 的狀態</p>
+<blockquote>
+<p>這檢查有問題通常是 AWS 需要負責解決的</p>
+</blockquote>
 </li>
 <li><p><strong>Instance Status Check</strong>：這是用來檢查 VM 本身的狀態</p>
+<blockquote>
+<p>這檢查有問題通常是使用者自己需要自行解決的</p>
+</blockquote>
 </li>
 </ul>
 <h2 id="Actions"><a href="#Actions" class="headerlink" title="Actions"></a>Actions</h2><ul>
@@ -499,6 +505,9 @@
 <li><p><strong>EC2 instance tenancy 可以從 host 轉為 dedicated，也可以從 dadicated 轉為 host；但無法轉成 default or 從 default 轉為其他種(host or dedicated)</strong></p>
 </li>
 <li><p>若是希望可以不透過 RDP or SSH 的方式在 EC2 instance 內執行指令，可以從 AWS console 中選擇 <code>Run Command</code> 來達成此目的</p>
+<blockquote>
+<p>這是由 SSM 所提供的功能</p>
+</blockquote>
 </li>
 </ul>
 <h2 id="Security-Group-2"><a href="#Security-Group-2" class="headerlink" title="Security Group"></a>Security Group</h2><ul>
