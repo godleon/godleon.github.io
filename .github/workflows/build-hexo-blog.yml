@@ -37,11 +37,21 @@ jobs:
     - name: Generate Blog Content
       run: |
         cd raw/
+        
+        echo '--------------- npm install -g npm-upgrade ---------------'
+        npm install -g npm-upgrade
+
         echo '--------------- yarn install ---------------'
         yarn install
-        cd node_modules/nib
-        cat node_modules/stylus/package.json
+
+        echo '--------------- upgrade stylus ---------------'
+        cd node_modules/nib/node_modules/stylus
+        cat package.json
+        yes | npm-upgrade
+        cat package.json
+        yarn install
         cd -
+        
         echo '--------------- npx hexo clean ---------------'
         npx hexo clean
         echo '--------------- npx hexo generate ---------------'
