@@ -327,7 +327,7 @@ HA Architechture
 
 - 將靜態圖片從 EC2 instance 指向 CloudFront，是透過 url rewrite 功能達成的；這功能一般在 web server 都會有，可以善用
 
-- 範例中 S3 是設定可以 public read，基於安全性需求，可能改成設定只有 CloudFront 可以 read ...?
+- 範例中 S3 是設定可以 public read；但基於安全性需求，可以搭配 **OAI(Origin Access Identity)** 設定改成只有 CloudFront 可以 read ...
 
 - 設定 ALB 時要指定到後方的 Target Group；而 Target Group 則是指到後方已經設定好 WP 的 EC2 instance
 

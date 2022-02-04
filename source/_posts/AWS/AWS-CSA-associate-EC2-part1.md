@@ -197,8 +197,10 @@ EC2 Instance 管理功能
 ## Status Check
 
 - **System Status Checks**：這是用來檢查底層實體機器 & Hypervisor 的狀態
+> 這檢查有問題通常是 AWS 需要負責解決的
 
 - **Instance Status Check**：這是用來檢查 VM 本身的狀態
+> 這檢查有問題通常是使用者自己需要自行解決的
 
 
 ## Actions
@@ -261,6 +263,7 @@ Security Group
 - **EC2 instance tenancy 可以從 host 轉為 dedicated，也可以從 dadicated 轉為 host；但無法轉成 default or 從 default 轉為其他種(host or dedicated)**
 
 - 若是希望可以不透過 RDP or SSH 的方式在 EC2 instance 內執行指令，可以從 AWS console 中選擇 `Run Command` 來達成此目的
+> 這是由 SSM 所提供的功能
 
 ## Security Group
 

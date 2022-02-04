@@ -297,7 +297,7 @@ CloudFront 就是 AWS 透過佈建在全世界各地的 edge server 所提供的
   
   - **Web Distribution**: 通常是一般網站使用的靜態資源，像是 image, css, javascript, music ... 都屬於此類；也包含透過 HTTP 協議傳輸的視訊協定，例如：HTTP Live Streaming(HLS), Dynamic Adaptive Streaming over HTTP (DASH), Microsoft Smooth Streaming (MSS), or HTTP Dynamic Streaming (HDS) .... 等等。
   
-  - **RTMP**: 用於視訊串流類的服務中(但這通常會根據服務型態不同，還需要額外考慮視訊延遲的問題)
+  - ~~**RTMP**: 用於視訊串流類的服務中(但這通常會根據服務型態不同，還需要額外考慮視訊延遲的問題)~~
   > CloudFront 將會在 2020 年底停止 RTMP 的支援
 
 - Edge Locations 並非只是用來拉取資料，也會有寫入資料的應用場景(例如：**S3 Transger Acceleration**)
@@ -327,6 +327,7 @@ CloudFront 就是 AWS 透過佈建在全世界各地的 edge server 所提供的
 - CDN 的運作基礎在於提供使用者一個最近的 edge server 進行存取，但要提供出這樣的資訊，就必須要進行完整的 DNS 查詢流程，因此是 DNS 查詢很慢，也是會影響到使用 CDN 的效能的
 
 - 若是在 url 帶上 query string，那 edge server 就不會回應了，而這樣的 request 就會回到 origin server，當然效能自然就會差很多
+> 若是 query string 也有設定為 cache key，edge server 也還是可以回應快取內容
 
 - 若要要提昇 CDN 效能，比較直接的作法就是拉長 cache 的過期時間
 
