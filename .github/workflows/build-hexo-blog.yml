@@ -40,7 +40,7 @@ jobs:
         echo '--------------- yarn install ---------------'
         yarn install
         cd node_modules/nib
-        find ./
+        cat node_modules/stylus/package.json
         cd -
         echo '--------------- npx hexo clean ---------------'
         npx hexo clean
