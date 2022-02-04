@@ -275,7 +275,7 @@ KMS Policy 需要注意的事項有以下幾個：
 - 每個 CMK(Customer Managed Key) 建立出來後，用來識別只有 `KeyId`，但這是很難記住的一串亂碼，**可為每個 CMK 設定 alias 藉以方便識別**
 > 使用 AWS CLI 的指令關鍵字為 `aws kms create-alias`
 
-- CMK 建立後會預設給一組 key policy，內容就是給 root 這把 key 所有的權限
+- CMK 建立後會預設給一組 key policy，內容就是給 root account 這把 key 所有的權限
 
 - CMK 可設定 rotate policy 為一年(也可以不設定)；AWS Managed Key 的 rotation policy 則是預設為三年
 
@@ -292,7 +292,7 @@ KMS Policy 需要注意的事項有以下幾個：
 
 - 使用者永遠也看不到實際 CMK 的內容
 
-- 可以搭配 CloudTrail & CloudWatch Event(EventBrige) & SNS，對 Key Deletion 的操作發送通知，如下圖：
+- 可以搭配 CloudTrail & CloudWatch Event(EventBridge) & SNS，對 Key Deletion 的操作發送通知，如下圖：
 
 ![KMS key deletion notification](/blog/images/aws/Security/KMS_key-deletion-notification.png)
 

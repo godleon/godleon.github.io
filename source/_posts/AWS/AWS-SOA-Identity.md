@@ -114,7 +114,7 @@ STS (Security Token Service)
 
 - **`AssumeRoleWithWebIdentity`** 回傳 credential 給其他的 IdP(例如：Google、FB、OIDC provider .... 等等)，AWS 建議這個搭配 Cognito 來設定
 
-- **`GetSessionToken`** 這個是給 MFA 使用，用於 AWS IAM User & AWS account root user
+- **`GetSessionToken`** 用來給 AWS IAM User & 其他 AWS account 使用，目的就是要取得臨時的 credential 來獲取臨時存取 AWS resource 的權限
 
 ## Assume Role
 

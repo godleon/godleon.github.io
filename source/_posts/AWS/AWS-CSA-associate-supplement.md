@@ -48,6 +48,8 @@ tags:
 
 - [AWS Certified Solutions Architect – Associate SAA-C02 Exam Learning Path | Jayendra's Blog](https://jayendrapatil.com/aws-certified-solutions-architect-associate-saa-c02-exam-learning-path/)
 
+- [我是如何在一年內通過 AWS 五大核心認證 - Continuous Improvement](https://easoncao.com/how-i-pass-aws-all-five-certificate-within-one-year/)
+
 ## 考試經驗分享
 
 - [AWS Solutions Architect Associate證照準備(SAA-C01)＆(SAA-C02) | by LazyTech | Medium](https://medium.com/@show99520show99520/aws-solutions-architect-associate%E8%AD%89%E7%85%A7%E6%BA%96%E5%82%99-saa-c01-%E8%88%87-saa-c02-ee4cd66ca2b0)
