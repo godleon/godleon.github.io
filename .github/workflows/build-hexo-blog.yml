@@ -39,6 +39,9 @@ jobs:
         cd raw/
         echo '--------------- yarn install ---------------'
         yarn install
+        cd node_modules/nib
+        find ./
+        cd -
         echo '--------------- npx hexo clean ---------------'
         npx hexo clean
         echo '--------------- npx hexo generate ---------------'
