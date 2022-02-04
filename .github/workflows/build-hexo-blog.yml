@@ -45,11 +45,8 @@ jobs:
         yarn install
 
         echo '--------------- upgrade stylus ---------------'
-        cd node_modules/nib/node_modules/stylus
-        cat package.json
-        yes | npm-upgrade
-        cat package.json
-        yarn install
+        cd node_modules/nib
+        find ./ | grep 'package.json'
         cd -
         
         echo '--------------- npx hexo clean ---------------'
