@@ -46,7 +46,7 @@ jobs:
 
         echo '--------------- upgrade stylus ---------------'
         cd node_modules/nib
-        find ./ | grep 'package.json'
+        find ./ | grep 'package.json' | xargs cat
         cd -
         
         echo '--------------- npx hexo clean ---------------'
