@@ -32,11 +32,11 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/MonitorAudit/CloudWatch-Logs_subscription.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/MonitorAudit/CloudWatch-Logs_aggregation.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/MonitorAudit/CloudTrail-Insight.png">
-<meta property="og:image" content="https://godleon.github.io/blog/images/aws/MonitorAudit/Config_remidiation.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/MonitorAudit/Config_remediation.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/MonitorAudit/Config_notification-EventBridge.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/MonitorAudit/Config_notification-SNS.png">
 <meta property="article:published_time" content="2021-11-02T02:30:00.000Z">
-<meta property="article:modified_time" content="2022-02-05T06:24:42.013Z">
+<meta property="article:modified_time" content="2022-02-05T07:01:10.078Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="CloudWatch">
@@ -263,7 +263,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2022-02-05 14:24:42" itemprop="dateModified" datetime="2022-02-05T14:24:42+08:00">2022-02-05</time>
+                <time title="Modified: 2022-02-05 15:01:10" itemprop="dateModified" datetime="2022-02-05T15:01:10+08:00">2022-02-05</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -459,7 +459,7 @@
 </li>
 <li><p>CloudTrail Insight 會分析日常的存取行為後，建立一個 baseline 作為判斷異常的基礎</p>
 </li>
-<li><p>baseline 建立後就會持續的分析 <code>**write**</code> event 來偵測異常狀況</p>
+<li><p>baseline 建立後就會持續的分析 <code>write</code> event 來偵測異常狀況</p>
 </li>
 <li><p>當 Insight Event 產生後，可以送到 CloudTrail console、S3，或是產生 EventBridge event 來進行後續自動化操作的整合</p>
 </li>
@@ -507,7 +507,7 @@
 </li>
 </ul>
 <p>以下舉個 Remediation 的例子，當發現 IAM user 已經超過一定天數沒有存取行為後，就直接廢止該 IAM user 的 access key</p>
-<p><img src="/blog/images/aws/MonitorAudit/Config_remidiation.png" alt="AWS Config - Remediation"></p>
+<p><img src="/blog/images/aws/MonitorAudit/Config_remediation.png" alt="AWS Config - Remediation"></p>
 <h2 id="Notification"><a href="#Notification" class="headerlink" title="Notification"></a>Notification</h2><p>notification 的部份可以搭配 EventBridge or SNS</p>
 <p><img src="/blog/images/aws/MonitorAudit/Config_notification-EventBridge.png" alt="AWS Config - notification EventBridge"></p>
 <blockquote>
