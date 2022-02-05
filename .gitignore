@@ -5,3 +5,4 @@ yarn.lock
 blog/
 db.json
 test/
+index.html
