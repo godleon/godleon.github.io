@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "AWS SOA 學習筆記 - Storage Service(Database)"
+title:  "AWS SOA 學習筆記 - Monitoring & Auditing"
 description: "此篇文章是學習 AWS 認證課程(Certified SysOps Administrator Associate)內容時所留下的學習筆記，主要內容為 Monitoring & Auditing 在實際操作維運上需要注意的事項，相關的服務包含 CloudWatch、EventBridge、CloudTrail, AWS Config ... 等等"
 date: 2021-11-02 10:30:00
 published: true
