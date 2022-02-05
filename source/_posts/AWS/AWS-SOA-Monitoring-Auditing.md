@@ -216,7 +216,7 @@ CloudTrail Event 分為三類，分別是 `Management Events`、`Data Events`、
 
 - CloudTrail Insight 會分析日常的存取行為後，建立一個 baseline 作為判斷異常的基礎
 
-- baseline 建立後就會持續的分析 `**write**` event 來偵測異常狀況
+- baseline 建立後就會持續的分析 `write` event 來偵測異常狀況
 
 - 當 Insight Event 產生後，可以送到 CloudTrail console、S3，或是產生 EventBridge event 來進行後續自動化操作的整合
 
@@ -265,7 +265,7 @@ AWS Config
 
 以下舉個 Remediation 的例子，當發現 IAM user 已經超過一定天數沒有存取行為後，就直接廢止該 IAM user 的 access key
 
-![AWS Config - Remediation](/blog/images/aws/MonitorAudit/Config_remidiation.png)
+![AWS Config - Remediation](/blog/images/aws/MonitorAudit/Config_remediation.png)
 
 ## Notification
 
