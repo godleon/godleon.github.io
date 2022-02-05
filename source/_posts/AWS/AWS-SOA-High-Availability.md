@@ -177,7 +177,7 @@ Auto Scaling Group
 
 ## Health Check
 
-- 為了確保 HA，ASG 中有 multi-AZ 的設定勢必需要的
+- 為了確保 HA，ASG 中有 multi-AZ 的設定是必須要的
 
 - ASG 支援以下幾種 health check 方式：
   - EC2 status check
@@ -251,7 +251,7 @@ RDS and Multi-AZ Failover
 
 ## 加密 RDS
 
-- 看教學影片中，有看到 `db.t2.micro` 的 RDS instance type 不支援建立時就加密；不過現在都至少是 t3 以上，也都可以了加密了 
+- 看教學影片中，有看到 `db.t2.micro` 的 RDS instance type 不支援建立時就加密；不過現在都至少是 t3 以上，也都可以加密了 
 
 - 無法對現有未加密的 RDS instance 進行加密，正確的流程是：
   1. 對現有的 RDS instance 進行 snapshot
