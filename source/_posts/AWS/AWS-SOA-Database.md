@@ -116,7 +116,7 @@ RDS Proxy
 首先先了解一下使用 Lambda Function 會需要考慮到以下問題：
 
 - Lambda Function 預設放在 AWS 自行管理的 VPC 中，並非我們自己所建立的 VPC，若要存取 RDS instance，就需要考慮到 public subnet 來存取位於 private subnet RDS instance 的問題
-> 問題可以透過將 Lambda Function 放到我們自己管理的 VPC 來解決
+> 這問題可以透過將 Lambda Function 放到我們自己管理的 VPC 來解決
 
 - Lambda Function 若是執行數量很多，很有可能遇到 RDS instance 出現 too many connection 的錯誤
 
@@ -186,7 +186,7 @@ Elasticache
 
 目前 AWS Elasticache 提供了 Redis & Memcached 兩個選擇，以下是官方文件給出的比較表：
 
-![Elasticache comparision](/blog/images/aws/DB/Aurora_Multi-AZ.png)
+![Elasticache comparision](/blog/images/aws/DB/Elasticache_comparision.png)
 
 
 ## Redis Replication with Cluster Mode Enabled(Disabled)
