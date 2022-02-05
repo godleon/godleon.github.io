@@ -199,7 +199,7 @@ configuration 存放於 Parameter Store 的結構設計，可以 by dept，例�
     - dev/
       - db-url
       - db-pwd
-    - proc/
+    - prod/
       - db-url
       - db-pwd
   - app2/
@@ -217,7 +217,7 @@ SSM Inventory & State Manager
 
 - 用來蒐集 EC2 instance & on-premise 機器上的 metadata (包含安裝了哪些軟體、OS drivers、更新、運行哪些服務 ... 等等)
 
-- 這些資料可以在 AWS coconsole 中查詢，也可以存在 S3 並搭配 Athena or QuickSight 這一類的服務進行查詢
+- 這些資料可以在 AWS console 中查詢，也可以存在 S3 並搭配 Athena or QuickSight 這一類的服務進行查詢
 
 - 可以指定資料蒐集的時間間隔
 
