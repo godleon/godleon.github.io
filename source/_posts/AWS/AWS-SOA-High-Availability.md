@@ -165,7 +165,7 @@ Auto Scaling Group
 
 ## Lifecycle Hooks
 
-![AWS - Auto Scaling Group Lifecycle Hooks](/blog/images/aws/HA/AWS_Gateway-Load-Balancer.png)
+![AWS - Auto Scaling Group Lifecycle Hooks](/blog/images/aws/HA/AWS_ASG-Lifecycle.png)
 
 預設情況下，透過 ASG 產生的 instance 啟動後就會被歸類在 `InService` 的狀態；若是要在 instance 被歸類在 InService 之前執行一些命令，那就需要透過 Lifecycle Hook 來完成。
 

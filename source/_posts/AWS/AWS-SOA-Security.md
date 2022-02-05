@@ -205,9 +205,9 @@ IAM 服務中有提供幾個提昇安全性的工具，分別是 `Credentials Re
 
 - 可用來檢測哪些 AWS resource 可被外界進行存取(例如：S3 Bucket、SQS queue、Secret Manager secret ... 等等)
 
-- 可定義 **`Zone of Trust`**，範圍可能像是 AWS Account or Organization
+- 可定義 `Zone of Trust`，範圍可能像是 AWS Account or Organization
 
-- 若是有發現在 Zone of Trust 定義之外的範圍被存取，就會提供這些資訊出來
+- 若是有發現在 **Zone of Trust** 定義之外的範圍被存取，就會提供這些資訊出來
 
 
 
