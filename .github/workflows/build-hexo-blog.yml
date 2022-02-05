@@ -37,20 +37,25 @@ jobs:
     - name: Generate Blog Content
       run: |
         cd raw/
-        
-        echo '--------------- npm install -g npm-upgrade ---------------'
-        npm install -g npm-upgrade
 
         echo '--------------- yarn install ---------------'
         yarn install
         
         echo '--------------- npx hexo clean ---------------'
         npx hexo clean
+
         echo '--------------- npx hexo generate ---------------'
         npx hexo generate
+
+        echo '--------------- remove master branch files ---------------'
         cd -
+        ls -al ./
+        ls -al master/
         rm -rf master/blog
         rm -rf master/index.html
+        
+        echo '--------------- copy blog files ---------------'
+        ls -al raw/
         cp -r raw/blog master/
         cp raw/blog/index.html master/
         cd master/
