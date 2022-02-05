@@ -32,7 +32,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/HA/AWS_Gateway-Load-Balancer.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/HA/AWS_ASG-Lifecycle.png">
 <meta property="article:published_time" content="2022-01-17T22:20:00.000Z">
-<meta property="article:modified_time" content="2022-02-05T13:11:40.732Z">
+<meta property="article:modified_time" content="2022-02-05T13:19:46.302Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="RDS">
@@ -259,7 +259,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2022-02-05 21:11:40" itemprop="dateModified" datetime="2022-02-05T21:11:40+08:00">2022-02-05</time>
+                <time title="Modified: 2022-02-05 21:19:46" itemprop="dateModified" datetime="2022-02-05T21:19:46+08:00">2022-02-05</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -435,7 +435,7 @@
 <p>而移除 instance 階段也可以加入這個 hook，讓 instance 實際被移除之前，搭配 hook 進入到第 5 &amp; 6 階段，做一些額外的操作，而通常這樣的 hook 常用在清理資源、取得 log … 等工作。</p>
 <p>最後，Lifecycle Hook 可與 EventBridge、SNS、SQS …. 等服務進行整合串接。</p>
 <h2 id="Health-Check"><a href="#Health-Check" class="headerlink" title="Health Check"></a>Health Check</h2><ul>
-<li><p>為了確保 HA，ASG 中有 multi-AZ 的設定勢必需要的</p>
+<li><p>為了確保 HA，ASG 中有 multi-AZ 的設定是必須要的</p>
 </li>
 <li><p>ASG 支援以下幾種 health check 方式：</p>
 <ul>
@@ -510,7 +510,7 @@
 </li>
 </ul>
 <h2 id="加密-RDS"><a href="#加密-RDS" class="headerlink" title="加密 RDS"></a>加密 RDS</h2><ul>
-<li><p>看教學影片中，有看到 <code>db.t2.micro</code> 的 RDS instance type 不支援建立時就加密；不過現在都至少是 t3 以上，也都可以了加密了 </p>
+<li><p>看教學影片中，有看到 <code>db.t2.micro</code> 的 RDS instance type 不支援建立時就加密；不過現在都至少是 t3 以上，也都可以加密了 </p>
 </li>
 <li><p>無法對現有未加密的 RDS instance 進行加密，正確的流程是：</p>
 <ol>
