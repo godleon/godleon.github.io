@@ -176,7 +176,7 @@ Parameter Store
 
 ## Overview
 
-![AWS Parameter Store](/blog/images/aws/SSM/SSM-Automation.png)
+![AWS Parameter Store](/blog/images/aws/SSM/SSM-ParameterStore.png)
 
 - Parameter Store 是個 serverless 服務，提供安全存放 configuration & secret 的地方
 
