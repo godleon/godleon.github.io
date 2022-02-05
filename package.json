@@ -6,6 +6,7 @@
     "version": "5.2.0"
   },
   "dependencies": {
+    "highlight.js": "11.3.1", 
     "hexo": "5.2.0",
     "hexo-generator-archive": "1.0.0",
     "hexo-generator-category": "1.0.0",
