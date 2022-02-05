@@ -32,7 +32,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/CloudFormation_signal-wait.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/CloudFormation_ChangeSets.png">
 <meta property="article:published_time" content="2021-09-12T10:15:00.000Z">
-<meta property="article:modified_time" content="2022-02-05T00:14:30.429Z">
+<meta property="article:modified_time" content="2022-02-05T04:30:07.165Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="SOA">
@@ -256,7 +256,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2022-02-05 08:14:30" itemprop="dateModified" datetime="2022-02-05T08:14:30+08:00">2022-02-05</time>
+                <time title="Modified: 2022-02-05 12:30:07" itemprop="dateModified" datetime="2022-02-05T12:30:07+08:00">2022-02-05</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -458,7 +458,7 @@
 <h3 id="replace"><a href="#replace" class="headerlink" title="replace"></a>replace</h3><p>replace 就比較直覺了，以下是範例：</p>
 <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">UpdatePolicy:</span></span><br><span class="line">  <span class="attr">AutoScalingReplacingUpdate:</span></span><br><span class="line">    <span class="attr">WillReplace:</span> <span class="string">&#x27;true&#x27;</span></span><br><span class="line"><span class="attr">CreationPolicy:</span></span><br><span class="line">  <span class="attr">ResourceSignal:</span></span><br><span class="line">    <span class="attr">Count:</span> <span class="type">!Ref</span> <span class="string">&#x27;ResourceSignalsOnCreate&#x27;</span></span><br><span class="line">    <span class="attr">Timeout:</span> <span class="string">PT10M</span></span><br><span class="line">  <span class="attr">AutoScalingCreationPolicy:</span></span><br><span class="line">    <span class="attr">MinSuccessfulInstancesPercent:</span> <span class="type">!Ref</span> <span class="string">&#x27;MinSuccessfulPercentParameter&#x27;</span></span><br></pre></td></tr></table></figure>
 
-<p>沒什麼特別，就是換掉就對了；只是會在搭配 <code>CreationPolicy</code> 來驗證是否有完整更新成功。</p>
+<p>沒什麼特別，就是換掉就對了；只是會再搭配 <code>CreationPolicy</code> 來驗證是否有完整更新成功。</p>
 <h1 id="移除-CloudFormation-stack"><a href="#移除-CloudFormation-stack" class="headerlink" title="移除 CloudFormation stack"></a>移除 CloudFormation stack</h1><h2 id="Deletion-Policy"><a href="#Deletion-Policy" class="headerlink" title="Deletion Policy"></a>Deletion Policy</h2><p>在 CloudFormation template 中定義的每個 resource，都可以設定 <code>DeletionPolicy</code>，用來指定當 stack 被移除時的行為，一共有以下幾個：</p>
 <ul>
 <li><p><code>DeletionPolicy=Retain</code>：此 resource 會被保留，適用於所有 resource type，包含 nested stack</p>
