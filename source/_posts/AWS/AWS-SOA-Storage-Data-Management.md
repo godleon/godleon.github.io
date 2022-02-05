@@ -83,6 +83,7 @@ gp3 則是新型的 general purpose SSD type，特性如下：
 - **io 系列的 volume type 都支援 EBS multi-attach (在同一個 AZ 的前提下)**
   - 但這情境平常不容易遇到，可能僅有在 application level 需要管理到 concurrent write 操作時才會使用
   - 必須使用具備 cluster-aware 能力的檔案系統，像是 `XFS` or `EXT4` 就並非是這一類的檔案系統
+> `io1` 的 multi-attach 僅在特定幾個 region 有支援 ([官網文件來源](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volumes-multi.html))
 
 ## Hard Disk
 

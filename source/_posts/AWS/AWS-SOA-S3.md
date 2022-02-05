@@ -53,7 +53,7 @@ S3 CORS(Cross-Origin Resource Sharing)
 
 ## 使用 Bucket Policy
 
-由於上傳檔案時要指定檔案需要加密，需要傳入特定的 header `x-amz-server-side-encryption`，因此可以透過設定以下 bucket policy 來限定檔案上傳時必須要加密：
+由於上傳檔案時要指定檔案需要加密，需要傳入特定的 header `x-amz-server-side-encryption`，因此可以透過設定以下 bucket policy 來限定檔案上傳時必須要加密：([參考資料來源](https://aws.amazon.com/blogs/security/how-to-prevent-uploads-of-unencrypted-objects-to-amazon-s3/))
 
 ```json
 {
@@ -256,7 +256,7 @@ S3 Glacier
   - Download：這裡要分為幾個步驟，分別是：
     1. 首先要向 Archive initiate 一個 retrieve job
     2. Glacier 需要花點時間準備
-    3. 準備完成後，使用者會需要再現定的時間內下載指定的檔案(from staging server)
+    3. 準備完成後，使用者會需要在限定的時間內下載指定的檔案(from staging server)
   - Delete：這需要透過 API or SDK 指定特定的 Archive ID 來完成
 
 - Vault 相關操作：

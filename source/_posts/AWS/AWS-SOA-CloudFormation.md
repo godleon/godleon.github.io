@@ -377,7 +377,7 @@ CreationPolicy:
     MinSuccessfulInstancesPercent: !Ref 'MinSuccessfulPercentParameter'
 ```
 
-沒什麼特別，就是換掉就對了；只是會在搭配 `CreationPolicy` 來驗證是否有完整更新成功。
+沒什麼特別，就是換掉就對了；只是會再搭配 `CreationPolicy` 來驗證是否有完整更新成功。
 
 
 
