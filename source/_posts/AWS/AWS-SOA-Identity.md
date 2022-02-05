@@ -145,7 +145,7 @@ Assume Role 的重點在於：
 
 3. developer 呼叫 assume role API
 
-4. STS 服務提供暫時性的 credential 並回船
+4. STS 服務提供暫時性的 credential 並回傳
 
 5. developer 成功 assume role 後並更新資料到 produciton bucket
 
