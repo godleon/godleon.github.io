@@ -85,6 +85,8 @@ gp3 則是新型的 general purpose SSD type，特性如下：
   - 必須使用具備 cluster-aware 能力的檔案系統，像是 `XFS` or `EXT4` 就並非是這一類的檔案系統
 > `io1` 的 multi-attach 僅在特定幾個 region 有支援 ([官網文件來源](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volumes-multi.html))
 
+- EBS Multi-Attach 預設是不開啟的，必須先 enable 後才可以使用 ([參考資料](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volumes-multi.html))
+
 ## Hard Disk
 
 - 無法作為 boot volume
