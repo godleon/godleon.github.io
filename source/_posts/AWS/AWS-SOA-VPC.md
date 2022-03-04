@@ -171,7 +171,7 @@ Transit Gateway
 
 - 雖然 Transit Gateway 屬於 regional service，但可以串接多個 region 的 VPC
 
-- 可利用 RAM(Resource Access Manager) 將 Transit Gateway 可以跨 AWS Account 使用
+- 可利用 RAM(Resource Access Manager) 讓 Transit Gateway 可以跨 AWS Account 使用
 
 - 也可以將 on-premise site 所用的 Direct Connect Gateway or VPN connection 串接上來
 
@@ -180,7 +180,7 @@ Transit Gateway
 
 ## 多帳號共享 Direct Connect 
 
-![VPC - After Transit Gateway - share direct connect between multiple accounts](/blog/images/aws/VPC/AWS-VPC_After-Transit-Gateway.png)
+![VPC - After Transit Gateway - share direct connect between multiple accounts](/blog/images/aws/VPC/AWS-VPC_Transit-Gateway-Share-Direct-Connect.png)
 
 Transit Gateway 提供給多個 AWS account 共用的功能，如上圖所示，這樣的作法需要搭配 Direct Connect 進行，因此會需要透過 `Direct Connect Gateway` + `Direct Connect Endpoint` 的組合來完成。
 
