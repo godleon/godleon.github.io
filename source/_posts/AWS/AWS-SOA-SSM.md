@@ -26,7 +26,7 @@ Overview
 
 - 不同環境之間參數的管理
 
-- 如何利用 Configuration Management Tool(例如：Chef & Puppet)
+- 如何利用 Configuration Management Tool(例如：`Chef` & `Puppet`)
 
 
 
