@@ -104,7 +104,7 @@ Tags & Resource Group
 
 - 許多 AWS resource(非全部) 都可以用 key/value 的形式來設定 tag，其中 EC2 instance 很常被用來設定 tag
 
-- Naming 的歸則是很自由的，可以隨意根據需求去設置，但建議還是參考一下 [AWS 提供的規範 & 建議]([`Tag`](https://docs.aws.amazon.com/general/latest/gr/aws_tagging.html))來進行
+- 命名的規則是很自由的，可以隨意根據需求去設置，但建議還是參考一下 [AWS 提供的規範 & 建議]([`Tag`](https://docs.aws.amazon.com/general/latest/gr/aws_tagging.html))來進行
 
 - tag 通常被用在作為 **資源分類**、**自動化**、**成本分類/分析** .... 等目的
 
@@ -122,7 +122,7 @@ SSM Document & Run Command & Automation
 
 ## SSM Document
 
-- SSM Document 是種預先定義好的一連串執行命令，在 AWS console SSM 的 `Shared Resources` 可以找到，其中預設都是 AWS 所提供的，可以針對 AWS resource 進行一些特定操作，例如：重啟 EC2 isntance(`AWS-RestartEC2Instance`)
+- SSM Document 是種預先定義好的一連串執行命令，在 AWS console SSM 的 `Shared Resources` 可以找到，其中預設都是 AWS 所提供的，可以針對 AWS resource 進行一些特定操作，例如：重啟 EC2 instance(`AWS-RestartEC2Instance`)
 
 - 除了 AWS 預設提供的之外，使用者也可以定義屬於自己的 Document
 
