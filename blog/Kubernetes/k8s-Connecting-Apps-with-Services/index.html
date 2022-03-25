@@ -30,7 +30,7 @@
 <meta property="og:description" content="本篇文章的主題在介紹在 Kubernetes cluster 中，如何連線到 service，以及如何從頭建立一個帶有 TLS 憑證的 HTTPS 服務">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2018-11-19T20:05:00.000Z">
-<meta property="article:modified_time" content="2022-03-05T00:02:50.121Z">
+<meta property="article:modified_time" content="2022-03-25T23:28:17.396Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="Kubernetes">
 <meta property="article:tag" content="CKA">
@@ -174,7 +174,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/blog/archives">
-          <span class="site-state-item-count">169</span>
+          <span class="site-state-item-count">170</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -254,7 +254,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2022-03-05 08:02:50" itemprop="dateModified" datetime="2022-03-05T08:02:50+08:00">2022-03-05</time>
+                <time title="Modified: 2022-03-26 07:28:17" itemprop="dateModified" datetime="2022-03-26T07:28:17+08:00">2022-03-26</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -357,7 +357,7 @@
 
 <h1 id="如何更安全的存取-Service"><a href="#如何更安全的存取-Service" class="headerlink" title="如何更安全的存取 Service"></a>如何更安全的存取 Service</h1><p>以下示範如何設定一個名稱為 <code>my-secure-nginx</code> 的 HTTPS service。</p>
 <h2 id="產生-TLS-certificate-amp-建立-Secret"><a href="#產生-TLS-certificate-amp-建立-Secret" class="headerlink" title="產生 TLS certificate &amp;  建立 Secret"></a>產生 TLS certificate &amp;  建立 Secret</h2><p>首先產生 TLS certificate，並取得 Base64 編碼結果：(記得 TLS certificate 的 domain 要設定為 <code>my-secure-nginx</code>)</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 產生 TLS certificate</span></span><br><span class="line">$ openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /tmp/nginx.key -out /tmp/nginx.crt -subj <span class="string">&quot;/CN=my-secure-nginx/O=my-secure-nginx&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 取得 Base64 編碼結果</span></span><br><span class="line">$ <span class="built_in">cat</span> /tmp/nginx.crt | base64</span><br><span class="line">LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS ... (略)</span><br><span class="line">$ <span class="built_in">cat</span> /tmp/nginx.key | base64 </span><br><span class="line">LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS ... (略)</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 產生 TLS certificate</span></span><br><span class="line">$ openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /tmp/nginx.key -out /tmp/nginx.crt -subj <span class="string">&quot;/CN=my-secure-nginx/O=my-secure-nginx&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 取得 Base64 編碼結果</span></span><br><span class="line">$ <span class="built_in">cat</span> /tmp/nginx.crt | <span class="built_in">base64</span></span><br><span class="line">LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS ... (略)</span><br><span class="line">$ <span class="built_in">cat</span> /tmp/nginx.key | <span class="built_in">base64</span> </span><br><span class="line">LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS ... (略)</span><br></pre></td></tr></table></figure>
 
 <p>套用以下 YAML 設定，建立一個 Secret resource object：</p>
 <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">&quot;v1&quot;</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">&quot;Secret&quot;</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">&quot;my-secure-nginx-secret&quot;</span></span><br><span class="line"><span class="attr">data:</span></span><br><span class="line">  <span class="attr">nginx.crt:</span> <span class="string">&quot;LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS ... (略)&quot;</span></span><br><span class="line">  <span class="attr">nginx.key:</span> <span class="string">&quot;LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS ... (略)&quot;</span></span><br></pre></td></tr></table></figure>

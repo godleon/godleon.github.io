@@ -30,7 +30,7 @@
 <meta property="og:description" content="此文章記錄學習 RHCE RH124 所留下的內容，此篇包含 RH124 chapter 1~3，分別是 &#39;ACCESSING THE COMMAND LINE&#39;, &#39;MANAGING FILES FROM THE COMMAND LINE&#39;, 以及 &#39;GETTING HELP IN RED HAT ENTERPRISE LINUX&#39;">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2016-02-17T15:20:00.000Z">
-<meta property="article:modified_time" content="2022-03-05T00:02:50.125Z">
+<meta property="article:modified_time" content="2022-03-25T23:28:17.400Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="Linux">
 <meta property="article:tag" content="RHCE">
@@ -173,7 +173,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/blog/archives">
-          <span class="site-state-item-count">169</span>
+          <span class="site-state-item-count">170</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -253,7 +253,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2022-03-05 08:02:50" itemprop="dateModified" datetime="2022-03-05T08:02:50+08:00">2022-03-05</time>
+                <time title="Modified: 2022-03-26 07:28:17" itemprop="dateModified" datetime="2022-03-26T07:28:17+08:00">2022-03-26</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -460,7 +460,7 @@ Chapter 2. MANAGING FILES FROM THE COMMAND LINE
 <td>任何可印出來的字元(但不包含空白 or 英文字母)</td>
 </tr>
 </tbody></table>
-<h4 id="Brace-Expansion"><a href="#Brace-Expansion" class="headerlink" title="Brace Expansion"></a>Brace Expansion</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[vagrant@server ~]$ <span class="built_in">echo</span> &#123;Sunday,Month,Tuesday&#125;.lo</span><br><span class="line">Sunday.log Month.log Tuesday.log</span><br><span class="line"></span><br><span class="line">[vagrant@server ~]$ <span class="built_in">echo</span> file&#123;a..c&#125;.txt</span><br><span class="line">filea.txt fileb.txt filec.txt</span><br><span class="line"></span><br><span class="line">[vagrant@server ~]$ <span class="built_in">echo</span> file&#123;a,b&#125;&#123;1,2&#125;.txt</span><br><span class="line">filea1.txt filea2.txt fileb1.txt fileb2.txt</span><br><span class="line"></span><br><span class="line">[vagrant@server ~]$ <span class="built_in">echo</span> file&#123;a&#123;1,2&#125;,b,c&#125;.txt</span><br><span class="line">filea1.txt filea2.txt fileb.txt filec.txt</span><br></pre></td></tr></table></figure>
+<h4 id="Brace-Expansion"><a href="#Brace-Expansion" class="headerlink" title="Brace Expansion"></a>Brace Expansion</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[vagrant@server ~]$ <span class="built_in">echo</span> &#123;Sunday,Month,Tuesday&#125;.lo</span><br><span class="line">Sunday.<span class="built_in">log</span> Month.<span class="built_in">log</span> Tuesday.<span class="built_in">log</span></span><br><span class="line"></span><br><span class="line">[vagrant@server ~]$ <span class="built_in">echo</span> file&#123;a..c&#125;.txt</span><br><span class="line">filea.txt fileb.txt filec.txt</span><br><span class="line"></span><br><span class="line">[vagrant@server ~]$ <span class="built_in">echo</span> file&#123;a,b&#125;&#123;1,2&#125;.txt</span><br><span class="line">filea1.txt filea2.txt fileb1.txt fileb2.txt</span><br><span class="line"></span><br><span class="line">[vagrant@server ~]$ <span class="built_in">echo</span> file&#123;a&#123;1,2&#125;,b,c&#125;.txt</span><br><span class="line">filea1.txt filea2.txt fileb.txt filec.txt</span><br></pre></td></tr></table></figure>
 
 <h4 id="Command-Substitution"><a href="#Command-Substitution" class="headerlink" title="Command Substitution"></a>Command Substitution</h4><ul>
 <li><p>單引號中的變數 $ 無效</p>
