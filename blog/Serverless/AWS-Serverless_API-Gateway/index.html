@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="此篇文章介紹 AWS API Gateway 的概念與特性，以及使用上所需要注意的操作細節">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AWS Serverless 學習筆記 - API Gateway">
+<meta property="og:url" content="https://godleon.github.io/blog/Serverless/AWS-Serverless_API-Gateway/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章介紹 AWS API Gateway 的概念與特性，以及使用上所需要注意的操作細節">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://godleon.github.io/blog/images/serverless/AWS-serverless_what-is-api-gateway.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/serverless/AWS-serverless_AWS-API-Gateway-Arch.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/serverless/AWS-serverless_API-Gateway-Endpoint_edge-optimized.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/serverless/AWS-serverless_API-Gateway-Endpoint_regional.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/serverless/AWS-serverless_API-Gateway-Endpoint_regional.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/serverless/AWS_API-Gateway_Request-Response-Cycle.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/serverless/AWS-serverless_Lambda-version-alias.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/serverless/AWS-serverless_API-Gateway-canary-enabled.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/serverless/AWS-serverless_API-Gateway-Enable-CORS.png">
+<meta property="article:published_time" content="2022-04-16T03:15:00.000Z">
+<meta property="article:modified_time" content="2022-04-16T03:21:44.652Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="AWS">
+<meta property="article:tag" content="API Gateway">
+<meta property="article:tag" content="Serverless">
+<meta property="article:tag" content="Lambda">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/serverless/AWS-serverless_what-is-api-gateway.png">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/Serverless/AWS-Serverless_API-Gateway/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>AWS Serverless 學習筆記 - API Gateway | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%80%E9%BA%BC%E6%98%AF-API-Gateway"><span class="nav-number">1.</span> <span class="nav-text">什麼是 API Gateway ?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#API-Gateway-Components"><span class="nav-number">2.</span> <span class="nav-text">API Gateway Components</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Resources"><span class="nav-number">2.1.</span> <span class="nav-text">Resources</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Stages"><span class="nav-number">2.2.</span> <span class="nav-text">Stages</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Models"><span class="nav-number">2.3.</span> <span class="nav-text">Models</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#API-Keys"><span class="nav-number">2.4.</span> <span class="nav-text">API Keys</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Usage-Plan"><span class="nav-number">2.5.</span> <span class="nav-text">Usage Plan</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Custom-Domain-Names"><span class="nav-number">2.6.</span> <span class="nav-text">Custom Domain Names</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#API-Gateway-Endpoint-Type"><span class="nav-number">3.</span> <span class="nav-text">API Gateway Endpoint Type</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Edge-Optimized"><span class="nav-number">3.1.</span> <span class="nav-text">Edge Optimized</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Regional"><span class="nav-number">3.2.</span> <span class="nav-text">Regional</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Private"><span class="nav-number">3.3.</span> <span class="nav-text">Private</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A0%85"><span class="nav-number">3.4.</span> <span class="nav-text">其他注意事項</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Requqest-Response-Cycle"><span class="nav-number">4.</span> <span class="nav-text">Requqest&#x2F;Response Cycle</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Method-Request"><span class="nav-number">4.1.</span> <span class="nav-text">Method Request</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Integration-Request"><span class="nav-number">4.2.</span> <span class="nav-text">Integration Request</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Integration-Response"><span class="nav-number">4.3.</span> <span class="nav-text">Integration Response</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Method-Response"><span class="nav-number">4.4.</span> <span class="nav-text">Method Response</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%9C%A8-API-Gateway-%E4%B8%AD%E4%BD%9C%E5%88%B0-Cross-Account-Call"><span class="nav-number">5.</span> <span class="nav-text">如何在 API Gateway 中作到 Cross Account Call ?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Lambda-Version-amp-Alias"><span class="nav-number">6.</span> <span class="nav-text">Lambda Version &amp; Alias</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Canaray-Deployment"><span class="nav-number">7.</span> <span class="nav-text">Canaray Deployment</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#API-Caching"><span class="nav-number">8.</span> <span class="nav-text">API Caching</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CORS-Cross-Orgin-Resource-Sharing"><span class="nav-number">9.</span> <span class="nav-text">CORS(Cross Orgin Resource Sharing)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#REST-API-v-s-HTTP-API"><span class="nav-number">10.</span> <span class="nav-text">REST API v.s. HTTP API</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">11.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">172</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">124</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/Serverless/AWS-Serverless_API-Gateway/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AWS Serverless 學習筆記 - API Gateway
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2022-04-16 11:15:00 / Modified: 11:21:44" itemprop="dateCreated datePublished" datetime="2022-04-16T11:15:00+08:00">2022-04-16</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/AWS/" itemprop="url" rel="index"><span itemprop="name">AWS</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/Serverless/AWS-Serverless_API-Gateway/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="Serverless/AWS-Serverless_API-Gateway/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此篇文章介紹 AWS API Gateway 的概念與特性，以及使用上所需要注意的操作細節</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="什麼是-API-Gateway"><a href="#什麼是-API-Gateway" class="headerlink" title="什麼是 API Gateway ?"></a>什麼是 API Gateway ?</h1><p>API Gateway 其實就是接收所有 API 的第一個入口，並協助分發到後端的程式進行處理的一個角色，假設以下圖的餐廳為例：</p>
+<p><img src="/blog/images/serverless/AWS-serverless_what-is-api-gateway.png" alt="What is API Gateway"></p>
+<p>在此場景中，所有的客人都是發送 API 的 client 端，然後右邊像是 Dessert/Main Course/Drinks … 等幾個 station 則是幾個作為 backend service 的部份，最後則是中間的 Orchestrator 的角色，負責接收客人的需求，並將需求正確的轉發給對應的 station 處理。</p>
+<p>因此在這個場景中，orchestrator 就是屬於 API Gateway 的角色。</p>
+<p>而實際中，AWS API Gateway 提供的重要功能包含以下幾個(但不限於)：</p>
+<ol>
+<li><p>讓開發人員可以根據業務需求，建立、發佈、維護、監控和保護 API service</p>
+</li>
+<li><p>提供 API 認證(authentication) &amp; 授權(authorization) 的功能</p>
+</li>
+<li><p>可對 API request 提供 tracing、caching、甚至是 throttling 的功能</p>
+</li>
+<li><p>提供 staged deployment、canary release … 等功能</p>
+</li>
+</ol>
+<p>以下是 AWS API 的架構示意圖：</p>
+<p><img src="/blog/images/serverless/AWS-serverless_AWS-API-Gateway-Arch.png" alt="AWS API Gateway"></p>
+<p>可以看出，API Gateway 背後可支援的 backend service 有很多個，Lambda 只是其中一個，也可以是 EC2、Kinesis、DynamoDB、甚至是其他 public endpoint 都可以。</p>
+<h1 id="API-Gateway-Components"><a href="#API-Gateway-Components" class="headerlink" title="API Gateway Components"></a>API Gateway Components</h1><p>以下介紹在 AWS Gateway 的設定中，比較重要的幾個 component：</p>
+<h2 id="Resources"><a href="#Resources" class="headerlink" title="Resources"></a>Resources</h2><p><code>Resources</code> 中是用來定義所有的 API 清單，但若沒有進行佈署(deploy)，是不會在任何環境生效的</p>
+<blockquote>
+<p>例如：每次開始學習都會新增的 <code>/helloworld</code></p>
+</blockquote>
+<p>而在每個 Resource 底下，都可以新增不同的 <code>Method</code>(目前支援 GET、POST、HEAD、DELETE、OPTIONS、PUT、ANY … 等七種)，每個 method 都可以對應到不同的 backend service。</p>
+<h2 id="Stages"><a href="#Stages" class="headerlink" title="Stages"></a>Stages</h2><p>提供 <code>Stages</code> 的設計，等同於 dev/staging/production 這樣的設計，可以讓開發者決定將 API 佈署(deploy)到哪個環境</p>
+<h2 id="Models"><a href="#Models" class="headerlink" title="Models"></a>Models</h2><p><code>Models</code> 用來定義 API 所使用的資料格式，透過 JSON schema lanaguage 來定義；舉例來說，可以檢查傳入的資料應該有哪些欄位，直接拒絕不符合傳入資料定義的 request，算是可以額外設定一層的自動檢查機制</p>
+<blockquote>
+<p>這是選擇性設定，不設定也是沒關係的</p>
+</blockquote>
+<h2 id="API-Keys"><a href="#API-Keys" class="headerlink" title="API Keys"></a>API Keys</h2><p>可產生 API Key，用來作為呼叫 API 時的身份認證機制，可以防範未授權的呼叫 API</p>
+<p>而 API Key 同時也可以額外綁定 Usage Plan 的設計來限制用量(例如：每秒不能呼叫超過 100 次 API)</p>
+<h2 id="Usage-Plan"><a href="#Usage-Plan" class="headerlink" title="Usage Plan"></a>Usage Plan</h2><p>這部份的設定可以讓 API client 對於存取特定的 API，進行 throttling &amp; quota limits … 等設定，而限定的依據會需要透過 client API key 來完成</p>
+<h2 id="Custom-Domain-Names"><a href="#Custom-Domain-Names" class="headerlink" title="Custom Domain Names"></a>Custom Domain Names</h2><p>若要使用自訂的 domain name 存取 API，那就需要透過 <code>Custom Domain Names</code> 的功能，需要指定以下內容：</p>
+<ul>
+<li><p>domain name</p>
+</li>
+<li><p>支援的最小 TLS version</p>
+</li>
+<li><p>Endpoint Type (Regional or Edge-Optimized with CloudFront)</p>
+</li>
+<li><p>ACM 憑證</p>
+</li>
+</ul>
+<h1 id="API-Gateway-Endpoint-Type"><a href="#API-Gateway-Endpoint-Type" class="headerlink" title="API Gateway Endpoint Type"></a>API Gateway Endpoint Type</h1><p>API Gateway Endpoint Type 有分為三種，分別是：</p>
+<ul>
+<li><p>edge optimized</p>
+</li>
+<li><p>regional</p>
+</li>
+<li><p>private</p>
+</li>
+</ul>
+<h2 id="Edge-Optimized"><a href="#Edge-Optimized" class="headerlink" title="Edge Optimized"></a>Edge Optimized</h2><p><img src="/blog/images/serverless/AWS-serverless_API-Gateway-Endpoint_edge-optimized.png" alt="AWS API Gateway Endpoint Type - edge optimized"></p>
+<ul>
+<li><p>利用了 CloudFront 散布在全世界的 edge 節點，最靠近使用者，可取得最低的 latency</p>
+</li>
+<li><p>但也有無法取得內部資料的問題，例如：DB 資料(in private subnet)</p>
+</li>
+</ul>
+<blockquote>
+<p>基本上，設計時需要考量與外部服務互動的需求，才能判斷這個是不是合適的 endpoint type</p>
+</blockquote>
+<h2 id="Regional"><a href="#Regional" class="headerlink" title="Regional"></a>Regional</h2><p><img src="/blog/images/serverless/AWS-serverless_API-Gateway-Endpoint_regional.png" alt="AWS API Gateway Endpoint Type - regional"></p>
+<ul>
+<li><p>這個就很直觀，擺放的位置就是 region；基本上搭配 Route53 + CloudFront 是用來提供全球加速時很常見的組合設計</p>
+</li>
+<li><p>可像上圖搭配 multi-region 的設計，來提高服務可用性</p>
+</li>
+</ul>
+<h2 id="Private"><a href="#Private" class="headerlink" title="Private"></a>Private</h2><p><img src="/blog/images/serverless/AWS-serverless_API-Gateway-Endpoint_regional.png" alt="AWS API Gateway Endpoint Type - prirvate"></p>
+<ul>
+<li><p>顧名思義，就是僅有內 VPC 內部可存取</p>
+</li>
+<li><p>這類型的 API Gateway，會提供一個 VPC endpoint 提供存取，也僅能透過 VPC endpoint 才能存取</p>
+</li>
+</ul>
+<h2 id="其他注意事項"><a href="#其他注意事項" class="headerlink" title="其他注意事項"></a>其他注意事項</h2><ul>
+<li>API endpoint type 是可以變更的；但<strong>無法將 private API 變更為 edge-optimized API</strong></li>
+</ul>
+<h1 id="Requqest-Response-Cycle"><a href="#Requqest-Response-Cycle" class="headerlink" title="Requqest/Response Cycle"></a>Requqest/Response Cycle</h1><p><img src="/blog/images/serverless/AWS_API-Gateway_Request-Response-Cycle.png" alt="AWS API Gateway - Requqest/Response Cycle"></p>
+<p>當一個 request 進到 API Gateway 且 match 到某個 path &amp; method 後(例如上圖的 <code>GET /first-api-test</code>)，那就會進入到 Request/Response Cycle，而在這個 cycle 中，共有四個階段，分別是：</p>
+<ol>
+<li><p>Method Request</p>
+</li>
+<li><p>Integration Request</p>
+</li>
+<li><p>Integration Response</p>
+</li>
+<li><p>Method Response</p>
+</li>
+</ol>
+<p>在這四個階段，每一個階段都有其可以設定當 API 運行更為安全 &amp; 有效率的設定可以套用，以下分成四個部份來繼續說明。</p>
+<h2 id="Method-Request"><a href="#Method-Request" class="headerlink" title="Method Request"></a>Method Request</h2><p>這部份的功能其實就像個 Gateway Keeper，作為 API request 進到 API Gateway 後的第一道的把關，所謂的把關，表示有些工作是可以在此階段完成的，例如：</p>
+<ul>
+<li><p>設定 Query String Paramters &amp; Request Headers</p>
+</li>
+<li><p>搭配 <code>Request Validator</code>，可設定要驗證 <code>Body</code> or <code>Query String Paramters</code> &amp; <code>Request Headers</code></p>
+</li>
+</ul>
+<p>透過這些驗證的設置，若是驗證不過的 API call，可以在 API Gateway 這邊就回應 Error，這個有問題的 request 就不需要傳送到 backend service 中，達到過濾有問題的 request 的效果。</p>
+<h2 id="Integration-Request"><a href="#Integration-Request" class="headerlink" title="Integration Request"></a>Integration Request</h2><ul>
+<li><p>Body Mapping Template 可用來檢查資料，甚至可以將 input data 先做好轉換(or 擷取 input data 中的一部分)再往後送；透過此機制，可以從 input data 只取得後面 Lambda Function 所需要的資料，將不需要的資料都過濾掉</p>
+</li>
+<li><p>主要用來觸發後面的 Mock Endpoint、Lambda Function、AWS Service、其他 HTTP endpoint …. 等等</p>
+</li>
+</ul>
+<p>以 Lambda 為例，其實 request 從 API Gateway 進入後，不論是帶 query string parameter &amp; headers &amp; body，經過了 <code>Method Request</code> &amp; <code>Integration Request</code> 階段後，都只能透過 event 取值，而以 query string parameter 為例，實際上根本不會在 event 參數出現，因此就需要在 <code>Integration Request</code> 階段做個 mapping 的設計來將 query string parameter 的內容轉成 event 中的內容。</p>
+<h2 id="Integration-Response"><a href="#Integration-Response" class="headerlink" title="Integration Response"></a>Integration Response</h2><ul>
+<li><p>這個階段可以將回傳的資料做轉換</p>
+</li>
+<li><p>用來設定不同的 status code 會需要 mapping 到的 header value 為何</p>
+<blockquote>
+<p>有哪些 response header 需要定義在 <code>Method Response</code> 階段，這邊才會出現</p>
+</blockquote>
+</li>
+<li><p>這個階段的同時也有 Body Mapping Tempalte 可以設定，也可以用來做一層轉換，只回應給 client 需要的資料</p>
+</li>
+</ul>
+<h2 id="Method-Response"><a href="#Method-Response" class="headerlink" title="Method Response"></a>Method Response</h2><ul>
+<li><p>用來定義 response 應該要有的樣子，一般不會設定 block，只是用來設定不同的 status code 應該要回應的資料模樣</p>
+</li>
+<li><p>可來設定當 status=200 時，需要回應哪些 header(實際 mapping 到什麼內容需要在第三個 <code>Integration Response</code> 階段設定)；也可以設定 response data 的格式驗證</p>
+</li>
+</ul>
+<h1 id="如何在-API-Gateway-中作到-Cross-Account-Call"><a href="#如何在-API-Gateway-中作到-Cross-Account-Call" class="headerlink" title="如何在 API Gateway 中作到 Cross Account Call ?"></a>如何在 API Gateway 中作到 Cross Account Call ?</h1><p>若是目前有兩個 Account 分別是 prod &amp; dev，希望從 prod Account 的 API Gateway 中，呼叫 dev Account 的 Lambda Function，應該要怎麼做?</p>
+<p>其實概念很簡單，就是給權限而已，重點的部份有以下幾個：</p>
+<ul>
+<li><p>在 dev Account Lambda Function 新增權限</p>
+</li>
+<li><p><code>source ARN</code> 設定 prod Account 的 API Gateway(要包含 Resource &amp; Method 的完整 ARN)</p>
+</li>
+<li><p><code>Principal</code> 的部份需要設定為 <code>apigateway.amazonaws.com</code></p>
+</li>
+<li><p><code>Allow Action</code> 設定為 <code>lambda:InvokeFunction</code></p>
+</li>
+</ul>
+<p>當建立 method，指定的 Lambda Function 是來自另一個 AWS Account(需要使用完整的 Lambda Function ARN) 時，AWS console 就會跳出提示要使用者透過 CLI 來建立 permission，但其實重點就是上面的那幾個部份，所以要自己做也行。</p>
+<h1 id="Lambda-Version-amp-Alias"><a href="#Lambda-Version-amp-Alias" class="headerlink" title="Lambda Version &amp; Alias"></a>Lambda Version &amp; Alias</h1><p>Lambda 提供了 <code>Version</code> &amp; <code>Alias</code> 的功能，一開始只有 Version 1，然後會有一個 <code>$LATEST</code> 的變數指到最新的 version，隨著 version 的更新，<code>$LATEST</code> 的指向也會跟著改指到最新的 version，這時候如果搭配 <code>Alias</code>，就可能變成下圖的樣子：</p>
+<p><img src="/blog/images/serverless/AWS-serverless_Lambda-version-alias.png" alt="AWS Lambda Version &amp; Alias"></p>
+<p>在上圖中的狀況是：</p>
+<ol>
+<li><p>目前這個 Lambda Function 共有四個版本，Version 1~4，因此 <code>$LATEST</code> 是指到 Version 4</p>
+</li>
+<li><p>建立了一個 Alias，而這個 Alias 可以指向特定的 version，也可以同時指向兩個 version；以上圖的 <code>oldestNewest</code> 為例，就同時指向了 Version 1 &amp; 4；此外還可以額外設定 traffic split，上圖會將流量以 50:50 的比例分散到同一個 Lambda Function 的不同 version</p>
+</li>
+<li><p>有了 Alias 後，API Gateway 就可以指向 alias (在預設情況下，直接指定 Lambda 就表示指向其 <code>$LATEST</code> 所指向的 version)，接著透過特定 Resource + Method 進來的 request 就會以 50:50 的比例被分散流量</p>
+</li>
+</ol>
+<p>透過上圖的架構，就可以達到類似 Canary Deployment 的效果，讓一部分的流量可以先送到 Lambda <code>$LATEST</code> version，其他的留在原本的版本。</p>
+<p>另外，若是希望可以動態的讓 API call 轉發到不同的 alias，可以透過 <a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/apigateway/latest/developerguide/stage-variables.html">Stage Variable</a> 的方式，以類似 <code>versionTest:$&#123;stageVariables.lambdaAlias&#125;</code> 的方式來設定 method 對應的 Lambda Function。</p>
+<h1 id="Canaray-Deployment"><a href="#Canaray-Deployment" class="headerlink" title="Canaray Deployment"></a>Canaray Deployment</h1><p>上面介紹透過 Alias 的方式可以達到類似 Canary Deployment 的效果，但在 API Gateway 中，Canary Deployment 就是其中一個功能，只是達成的方式比較不太一樣，以下簡單介紹如何使用 API Gateway 提供的 Canary Deployment 功能。</p>
+<p>完整 Canary Deployment 的流程如下：</p>
+<ol>
+<li><p>在指定的 Stage 中(例如：<code>dev</code>)啟用 Canary 功能 (此時可以看到 <strong>Stage’s Request Distribution</strong> 的設定中，流向 canary 的比例是 0%)</p>
+</li>
+<li><p>在 <code>Resource -&gt; Method</code> 的 <code>Integration Request</code> 的設定中，調整 Lambda Function 的設定(改成新的 Lambda Function)</p>
+</li>
+<li><p>接著執行 Deploy API，此時畫面會出現像是 <code>dev (Canary Enabled)</code> 的選項(如下圖)，表示這個修改會被視為 canary deployment<br><img src="/blog/images/serverless/AWS-serverless_API-Gateway-canary-enabled.png" alt="AWS API Gateway - canary enabled"></p>
+</li>
+<li><p>此時流量還不會切到 canary version 上，還是需要到 Stages 設定中，切到 <code>Canary</code> tab 去調整 <code>Stage’s Request Distribution</code> 的比例才行</p>
+</li>
+<li><p>確認 canary version 沒問題，就可以透過 <strong>Promote Canary</strong> 的功能，將所有流量都切到 canary version 上</p>
+</li>
+</ol>
+<blockquote>
+<p>需要注意的是，Canary Deployment 在 API Gateway 中是設定在 <code>Stage</code> level 的，因此當啟用了 Canary 功能之後，指定的 stage 就會啟用 canary 功能，而不是只有特定的 Resource &amp; Method 有啟用 canary </p>
+</blockquote>
+<h1 id="API-Caching"><a href="#API-Caching" class="headerlink" title="API Caching"></a>API Caching</h1><p>API Gateway 可以提供 cache 的功能，但有以下幾點需要注意：</p>
+<ul>
+<li><p>這功能不包含在 free tier 中，啟用就需要付費</p>
+</li>
+<li><p>可以設定 cache capaciry、是否要加密、TTL …. 等選項</p>
+</li>
+<li><p>僅支援 GET method</p>
+</li>
+</ul>
+<h1 id="CORS-Cross-Orgin-Resource-Sharing"><a href="#CORS-Cross-Orgin-Resource-Sharing" class="headerlink" title="CORS(Cross Orgin Resource Sharing)"></a>CORS(Cross Orgin Resource Sharing)</h1><p>關於 CORS 的部份，目前已經有很多文章寫這個部份，可以參考以下連結了解：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://ithelp.ithome.com.tw/articles/10251693">[Day 27] Cross-Origin Resource Sharing (CORS) - iT 邦幫忙::一起幫忙解決難題，拯救 IT 人的一天</a></li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://ithelp.ithome.com.tw/articles/10267489">DAY05 - API串接常見問題 - CORS - 概念篇 (2) - iT 邦幫忙::一起幫忙解決難題，拯救 IT 人的一天</a></p>
+<p>API Gateway 若要處理 CORS 的問題，只要點選 <code>Enable CORS</code>，就會出現以下設定畫面：</p>
+<p><img src="/blog/images/serverless/AWS-serverless_API-Gateway-Enable-CORS.png" alt="API Gateway - Enable CORS"></p>
+<p>相關的設定給進去，就會自動將所有設定都完成，包含連 <code>OPTIONS</code> 的部份都會處理好(透過 <strong>MOCK integration</strong> 完成的)，因此 pre-flight 的問題就可以一併解決了。</p>
+<h1 id="REST-API-v-s-HTTP-API"><a href="#REST-API-v-s-HTTP-API" class="headerlink" title="REST API v.s. HTTP API"></a>REST API v.s. HTTP API</h1><p>這邊提供 AWS 官網文件中，兩者的說明 &amp; 差異部份，可以根據自己的需求選擇合適的項目：</p>
+<ul>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-overview-developer-experience.html">API Gateway use cases - Amazon API Gateway</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-basic-concept.html">Amazon API Gateway concepts - Amazon API Gateway</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-vs-rest.html">Choosing between HTTP APIs and REST APIs - Amazon API Gateway</a></p>
+</li>
+</ul>
+<p>基本上，REST API 提供較為完整的功能(細部比較可以參考上面連結中的比較表)，但價格比較貴；HTTP API 則反之，不過因為功能沒這麼多的關係，latency 表線上也會相對好一些。</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html">Amazon API Gateway &gt; Developer Guide</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/apigateway/latest/developerguide/how-to-integration-settings.html">Setting up REST API integrations - Amazon API Gateway</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/apigateway/latest/developerguide/stage-variables.html">Setting up stage variables for a REST API deployment - Amazon API Gateway</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-api-migration.html">Change a public or private API endpoint type in API Gateway - Amazon API Gateway</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/AWS/" rel="tag"># AWS</a>
+              <a href="/blog/tags/API-Gateway/" rel="tag"># API Gateway</a>
+              <a href="/blog/tags/Serverless/" rel="tag"># Serverless</a>
+              <a href="/blog/tags/Lambda/" rel="tag"># Lambda</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/Serverless/AWS-Serverless_Fundamental/" rel="prev" title="AWS Serverless 學習筆記 - 初探 AWS Lambda">
+                  <i class="fa fa-chevron-left"></i> AWS Serverless 學習筆記 - 初探 AWS Lambda
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/Serverless/AWS-Serverless_API-Gateway/";
+    this.page.identifier = "Serverless/AWS-Serverless_API-Gateway/";
+    this.page.title = "AWS Serverless 學習筆記 - API Gateway";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>

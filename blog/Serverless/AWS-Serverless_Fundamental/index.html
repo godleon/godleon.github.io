@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="此篇文章介紹 AWS Serverless 的概念 &amp; Lambda 的特性與簡單試用">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AWS Serverless 學習筆記 - 初探 AWS Lambda">
+<meta property="og:url" content="https://godleon.github.io/blog/Serverless/AWS-Serverless_Fundamental/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="此篇文章介紹 AWS Serverless 的概念 &amp; Lambda 的特性與簡單試用">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://godleon.github.io/blog/images/serverless/AWS-serverless-services.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/serverless/AWS-serverless-scenarios.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/serverless/AWS-example-helloworld-result1.png">
+<meta property="article:published_time" content="2022-04-09T03:15:00.000Z">
+<meta property="article:modified_time" content="2022-04-16T03:21:44.652Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="AWS">
+<meta property="article:tag" content="Serverless">
+<meta property="article:tag" content="Lambda">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://godleon.github.io/blog/images/serverless/AWS-serverless-services.png">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/Serverless/AWS-Serverless_Fundamental/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>AWS Serverless 學習筆記 - 初探 AWS Lambda | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%A8%8E-Lambda"><span class="nav-number">1.</span> <span class="nav-text">深入探討 Lambda</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Serverless-%E7%9A%84%E9%87%8D%E9%BB%9E"><span class="nav-number">1.1.</span> <span class="nav-text">Serverless 的重點</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Serverless-Lambda"><span class="nav-number">1.2.</span> <span class="nav-text">Serverless !&#x3D; Lambda</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%9C%E6%96%BC-Lambda-%E9%81%8B%E8%A1%8C%E6%99%82%E5%8F%AF%E9%81%B8%E7%94%A8%E7%9A%84%E8%B3%87%E6%BA%90%E9%87%8F"><span class="nav-number">1.3.</span> <span class="nav-text">關於 Lambda 運行時可選用的資源量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%AF%E8%A7%B8%E7%99%BC-Lambda-%E7%9A%84%E6%83%85%E5%A2%83"><span class="nav-number">1.4.</span> <span class="nav-text">可觸發 Lambda 的情境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B5%90%E8%AB%96"><span class="nav-number">1.5.</span> <span class="nav-text">結論</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Lambda-%E4%BD%BF%E7%94%A8%E8%B2%BB%E7%94%A8%E9%AB%98%E5%97%8E"><span class="nav-number">2.</span> <span class="nav-text">Lambda 使用費用高嗎?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E6%AC%A1%E5%BB%BA%E7%AB%8B-Lambda-%E5%B0%B1%E4%B8%8A%E6%89%8B"><span class="nav-number">3.</span> <span class="nav-text">第一次建立 Lambda 就上手</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Hello-World"><span class="nav-number">3.1.</span> <span class="nav-text">Hello World</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#S3-Get-Object"><span class="nav-number">3.2.</span> <span class="nav-text">S3 Get Object</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9C%89%E5%93%AA%E4%BA%9B%E6%96%B9%E5%BC%8F%E5%8F%AF%E4%BB%A5%E5%BB%BA%E7%AB%8B-Lambda"><span class="nav-number">4.</span> <span class="nav-text">有哪些方式可以建立 Lambda ?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">172</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">124</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/Serverless/AWS-Serverless_Fundamental/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AWS Serverless 學習筆記 - 初探 AWS Lambda
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2022-04-09 11:15:00" itemprop="dateCreated datePublished" datetime="2022-04-09T11:15:00+08:00">2022-04-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2022-04-16 11:21:44" itemprop="dateModified" datetime="2022-04-16T11:21:44+08:00">2022-04-16</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/AWS/" itemprop="url" rel="index"><span itemprop="name">AWS</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/Serverless/AWS-Serverless_Fundamental/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="Serverless/AWS-Serverless_Fundamental/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">此篇文章介紹 AWS Serverless 的概念 & Lambda 的特性與簡單試用</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="深入探討-Lambda"><a href="#深入探討-Lambda" class="headerlink" title="深入探討 Lambda"></a>深入探討 Lambda</h1><h2 id="Serverless-的重點"><a href="#Serverless-的重點" class="headerlink" title="Serverless 的重點"></a>Serverless 的重點</h2><ul>
+<li><p>不需要佈署 or 管理 server</p>
+</li>
+<li><p>會根據需求自動的 scale out/in</p>
+</li>
+<li><p>不需要為 idle 資源支付費用</p>
+</li>
+<li><p>天生就具備的 HA &amp; fault tolerance 等特性</p>
+</li>
+</ul>
+<h2 id="Serverless-Lambda"><a href="#Serverless-Lambda" class="headerlink" title="Serverless != Lambda"></a>Serverless != Lambda</h2><p>首先需要了解的是，serverless 僅是個概念，並不等同於 Lambda；serverless 是<strong>對於使用者來說，可以免去管理 server 的負擔</strong>，但對於 AWS 來說，其實 server 本身還是存在的，只是底層這些 resource 都是由 AWS 幫你管理好了，使用者只要專注在開發 &amp; 佈署應用即可。</p>
+<p>目前 AWS 提供的 serverless service 其實很多，下圖是目前比較常見的幾個：</p>
+<p><img src="/blog/images/serverless/AWS-serverless-services.png" alt="AWS Serverless Services"></p>
+<p>但要如何判斷 AWS service 是否為 serverless? 只要評估一下上一個 section 提到的四個原則，如果都滿足，表示這個服務屬於 serverless(例如：Lambda、SNS、SQS)，只要有一項不滿足，則該服務不屬於 serverless(例如：EC2、Kinesis)</p>
+<h2 id="關於-Lambda-運行時可選用的資源量"><a href="#關於-Lambda-運行時可選用的資源量" class="headerlink" title="關於 Lambda 運行時可選用的資源量"></a>關於 Lambda 運行時可選用的資源量</h2><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/lambda/latest/operatorguide/computing-power.html">AWS 官網文件</a></p>
+<p>文件中提到可設定 Lambda Function 執行時使用的記憶體範圍在 128MB ~ 10,240MB(10GB) 之間(一開始只有 3GB，後來加大了，詳情可參考 <a target="_blank" rel="noopener" href="https://aws.amazon.com/about-aws/whats-new/2020/12/aws-lambda-supports-10gb-memory-6-vcpu-cores-lambda-functions/">AWS 官網新聞</a>)</p>
+<p>比較需要注意的是，Lambda function 執行時 的vCPU core 的數量是根據 memory 的設定大小來決定，如果在設定最大 10GB memory 的情況下，可以取得最大 6 vCPU core；簡單來說，就是記憶體設定越大，執行速度會越快，當然費用也會越高</p>
+<blockquote>
+<p>實際上就是只有 <code>memory</code> &amp; <code>timeout</code> 設定可以調整而已</p>
+</blockquote>
+<h2 id="可觸發-Lambda-的情境"><a href="#可觸發-Lambda-的情境" class="headerlink" title="可觸發 Lambda 的情境"></a>可觸發 Lambda 的情境</h2><p>Lambda 可以被應用的場景其實相當的多，以下圖為例：</p>
+<p><img src="/blog/images/serverless/AWS-serverless-scenarios.png" alt="AWS Serverless Scenarios"></p>
+<ul>
+<li><p>最左邊是一系列可以用來作為 event source 來觸發 Lambda Function 執行一段特定的程式</p>
+</li>
+<li><p>中間則是開發 Lambda Function 時可選用的 runtime；其實除了常見幾個之外，甚至可以使用自己的 runtime(例如：COBOL)</p>
+</li>
+<li><p>右邊則是 Lambda Function 可以對外互動的對象，除了資料庫之外，當然對眾多的 AWS service 也沒問題(這部份就需要有對應的 IAM permission 才行)</p>
+</li>
+</ul>
+<h2 id="結論"><a href="#結論" class="headerlink" title="結論"></a>結論</h2><ul>
+<li>Lambda 並非適用於解決所有問題，但多了解一個工具，有助於在處理各式不同問題時，更有機會選擇到正確的工具來完成</li>
+</ul>
+<h1 id="Lambda-使用費用高嗎"><a href="#Lambda-使用費用高嗎" class="headerlink" title="Lambda 使用費用高嗎?"></a>Lambda 使用費用高嗎?</h1><p>基本上不要濫用，使用合適的資源配置，Lambda 應該是可以省下很多費用的，畢竟使用 Lambda 的一大優勢就是不需要為閒置的資源付費。</p>
+<p>關於費用的部份，基本重點如下：</p>
+<ul>
+<li><p>在 free tier 涵蓋的範圍中，AWS 每個月都會提供免費的一百萬次呼叫 &amp; 400,000 GB-seconds 的運算時間，超過才會開始計算費用</p>
+</li>
+<li><p>計費的時間單位為 1ms(原本為 100ms，後來在 reInvent 2020 時降低到 1ms)</p>
+</li>
+<li><p>不需要任何的 commitment</p>
+</li>
+<li><p><strong>再也不需要為閒置資源付費</strong></p>
+</li>
+</ul>
+<p>若是想進一步精算 Lambda 使用的費用，可以使用 <a target="_blank" rel="noopener" href="https://s3.amazonaws.com/lambda-tools/pricing-calculator.html">AWS Lambda Pricing Calculator</a> 這個工具來完成。</p>
+<h1 id="第一次建立-Lambda-就上手"><a href="#第一次建立-Lambda-就上手" class="headerlink" title="第一次建立 Lambda 就上手"></a>第一次建立 Lambda 就上手</h1><h2 id="Hello-World"><a href="#Hello-World" class="headerlink" title="Hello World"></a>Hello World</h2><p>第一次建立 Lambda 當然要先用 Hello World 來開場，以下是建立 Lambda Function 時選擇 <code>Author from scratch</code> 所產生的範例，結果就會是一個 Hello World 的範例，大概會是以下的樣子：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">exports.handler = async (event, context) =&gt; &#123;</span><br><span class="line">    </span><br><span class="line">    console.log(event);</span><br><span class="line">    </span><br><span class="line">    console.log(context);</span><br><span class="line">    console.log(context.invokedFunctionArn);</span><br><span class="line">    console.log(context.memoryLimitInMB);</span><br><span class="line">    </span><br><span class="line">    // TODO implement</span><br><span class="line">    const response = &#123;</span><br><span class="line">        statusCode: 200,</span><br><span class="line">        body: JSON.stringify(&#x27;Hello from Lambda!&#x27;),</span><br><span class="line">    &#125;;</span><br><span class="line">    return response;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>整個測試的過程有幾個重點：</p>
+<ol>
+<li><p><code>handler</code> 這邊就是程式的起點</p>
+</li>
+<li><p><code>event</code> 會包含 event source 的內容，若是這個 event 來自於 AWS 某個服務，就會有相關的詳細內容出現在這，以 JSON 形式表示</p>
+</li>
+<li><p><code>context</code> 則是此 Lambda Function 呼叫的相關內容(在 nodejs 中這個參數預設不會出現，是我加上去的)，包含像是 Lambda Function ARN、記憶體最大用量上限 … 等資訊</p>
+</li>
+<li><p>若是調整了執行的記憶體用量，不用重新 Deploy 就會生效</p>
+</li>
+</ol>
+<p>以下是執行測試結果：</p>
+<p><img src="/blog/images/serverless/AWS-example-helloworld-result1.png" alt="AWS example helloworld result"></p>
+<h2 id="S3-Get-Object"><a href="#S3-Get-Object" class="headerlink" title="S3 Get Object"></a>S3 Get Object</h2><p>第二個建立的範例就改用 <code>Use a blueprint</code> 的方式，選擇 <code>s3-get-object</code> 作為範本來建立，整個測試的細節不描述了，以下僅說明一下整個過程的重點：</p>
+<ul>
+<li><p>由於 Lambda Function 會需要存取 S3 bucket 中的資料，因此就會需要建立一個相對應的 IAM Role，並給予正確的權限後，assign 給 Lamnda 作為 Execution role (不過因為使用 blueprint 的關係，相關權限都會預先設定好)</p>
+</li>
+<li><p>為了在開發階段可以方便進行測試，AWS 在 Test 中提供了很多 event template 可選，當然也包含範例中的 <code>s3-put</code>，因此在開發階段就可以知道當檔案存放進 S3 後，所產生出來的 event payload 會長什麼模樣，就很方便開發者進行相關程式的開發 ＆ 測試</p>
+</li>
+<li><p>若要檢查 Lambda Function 實際的執行輸出，可以到 <code>Monitor -&gt; View Logs in CloudWatch</code> 檢視，預設都會全部輸出到 CloudWatch Log 中</p>
+<blockquote>
+<p>這代表若是大量輸出 log，可能就會需要考慮費用的問題，因為 CloudWatch Log 費用其實不低</p>
+</blockquote>
+</li>
+<li><p>若是新增另外一個 trigger，以 DynamoDB 為例，就會出現 <code>Please ensure the role can perform the GetRecords, GetShardIterator, DescribeStream, ListShards, and ListStreams Actions on your stream in IAM.</code> 的錯誤，原因就是原本的 Execution Role 並沒有足夠的 IAM 權限，因此就需要補上對應的權限才可以順利新增 trigger</p>
+</li>
+<li><p>為了讓開發階段時不會被 trigger 所產生的 event 干擾，可以暫時 disable trigger</p>
+<blockquote>
+<p>需要注意的是，並不是每個 trigger 都可以被 disable (DynamoDB、SQS 可以，但 S3 就不行)</p>
+</blockquote>
+</li>
+</ul>
+<h1 id="有哪些方式可以建立-Lambda"><a href="#有哪些方式可以建立-Lambda" class="headerlink" title="有哪些方式可以建立 Lambda ?"></a>有哪些方式可以建立 Lambda ?</h1><p>建立 Lambda 的方式有以下幾種：</p>
+<ol>
+<li><p>AWS Console</p>
+</li>
+<li><p>CloudFormation / SAM(Serverless Application Model) / CDK</p>
+</li>
+<li><p>AWS CLI</p>
+</li>
+</ol>
+<p>基本上一開始練習測試都是透過 AWS Console，但後續若是要考慮到大量開發 &amp; 佈署的部份，一般都會引入 DevOps 相關的自動化工具來完成，而自動化的部份就會搭配上面的第 2 &amp; 3 的選項來完成。</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a target="_blank" rel="noopener" href="https://www.udemy.com/course/aws-serverless-a-complete-guide/">Rocking AWS Serverless - A Real World Guide | Udemy</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/lambda/latest/operatorguide/intro.html">AWS Lambda &gt; Operator Guide</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://s3.amazonaws.com/lambda-tools/pricing-calculator.html">AWS Lambda Pricing Calculator</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/AWS/" rel="tag"># AWS</a>
+              <a href="/blog/tags/Serverless/" rel="tag"># Serverless</a>
+              <a href="/blog/tags/Lambda/" rel="tag"># Lambda</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/AWS/AWS-SOA-Suppliment/" rel="prev" title="AWS SOA 學習筆記 - 模擬考筆記">
+                  <i class="fa fa-chevron-left"></i> AWS SOA 學習筆記 - 模擬考筆記
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/blog/Serverless/AWS-Serverless_API-Gateway/" rel="next" title="AWS Serverless 學習筆記 - API Gateway">
+                  AWS Serverless 學習筆記 - API Gateway <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/Serverless/AWS-Serverless_Fundamental/";
+    this.page.identifier = "Serverless/AWS-Serverless_Fundamental/";
+    this.page.title = "AWS Serverless 學習筆記 - 初探 AWS Lambda";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>
