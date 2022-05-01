@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Helm 學習筆記"
-description: "此篇文章是在學習 Udemy 線上課程 "HELM - Package Manager for Kubernetes Complete Master Course" 的過程中所留下的學習筆記"
+description: "此篇文章是在學習 Udemy 線上課程(HELM - Package Manager for Kubernetes Complete Master Course)的過程中所留下的學習筆記"
 date: 2022-05-01 15:15:00
 published: true
 comments: true
@@ -9,6 +9,8 @@ categories:
   - Helm
 tags:
   - Helm
+  - DevOps
+  - Kubernetes
 ---
 
 
