@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Istio 流量管理"
+title:  "Istio 流量管理相關功能介紹"
 description: "本篇文章是介紹 Istio 在 Traffic Management 的部份，有哪些特性 & 功能可供使用，藉此可以根據實際需求，在 Istio Mesh 中制定更多種不同的流量管理策略"
 date: 2022-08-31 06:45:00
 published: true
