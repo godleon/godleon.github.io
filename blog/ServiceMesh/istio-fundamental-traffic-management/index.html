@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"godleon.github.io","root":"/blog/","scheme":"Muse","version":"8.0.0-rc.5","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false};
+  </script>
+
+  <meta name="description" content="本篇文章是介紹 Istio 在 Traffic Management 的部份，有哪些特性 &amp; 功能可供使用，藉此可以根據實際需求，在 Istio Mesh 中制定更多種不同的流量管理策略">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Istio 流量管理">
+<meta property="og:url" content="https://godleon.github.io/blog/ServiceMesh/istio-fundamental-traffic-management/index.html">
+<meta property="og:site_name" content="小信豬的原始部落">
+<meta property="og:description" content="本篇文章是介紹 Istio 在 Traffic Management 的部份，有哪些特性 &amp; 功能可供使用，藉此可以根據實際需求，在 Istio Mesh 中制定更多種不同的流量管理策略">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-08-30T22:45:00.000Z">
+<meta property="article:modified_time" content="2022-08-30T22:48:19.058Z">
+<meta property="article:author" content="godleon">
+<meta property="article:tag" content="ServiceMesh">
+<meta property="article:tag" content="Istio">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://godleon.github.io/blog/ServiceMesh/istio-fundamental-traffic-management/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Istio 流量管理 | 小信豬的原始部落</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-703592-7"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-703592-7');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">小信豬的原始部落</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Subsets-amp-Destination-Rule"><span class="nav-number">1.</span> <span class="nav-text">Subsets &amp; Destination Rule</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Subset-amp-Virtual-Service-%E7%9A%84%E6%90%AD%E9%85%8D"><span class="nav-number">1.1.</span> <span class="nav-text">Subset &amp; Virtual Service 的搭配</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Destination-Rule-%E5%85%B6%E4%BB%96%E5%8A%9F%E8%83%BD"><span class="nav-number">1.2.</span> <span class="nav-text">Destination Rule 其他功能</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Resiliency"><span class="nav-number">2.</span> <span class="nav-text">Resiliency</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#timeout"><span class="nav-number">2.1.</span> <span class="nav-text">timeout</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#retry"><span class="nav-number">2.2.</span> <span class="nav-text">retry</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Failure-Injection"><span class="nav-number">3.</span> <span class="nav-text">Failure Injection</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#delay"><span class="nav-number">3.1.</span> <span class="nav-text">delay</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#abort"><span class="nav-number">3.2.</span> <span class="nav-text">abort</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Service-Entry-amp-Wordload-Entry"><span class="nav-number">4.</span> <span class="nav-text">Service Entry &amp; Wordload Entry</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Service-Entry"><span class="nav-number">4.1.</span> <span class="nav-text">Service Entry</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Workload-Entry"><span class="nav-number">4.2.</span> <span class="nav-text">Workload Entry</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Sidecar"><span class="nav-number">5.</span> <span class="nav-text">Sidecar</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Envoy-Filter"><span class="nav-number">6.</span> <span class="nav-text">Envoy Filter</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">7.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">godleon</p>
+  <div class="site-description" itemprop="description">把時間花在哪裡，成就就在哪裡</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives">
+          <span class="site-state-item-count">174</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+        <span class="site-state-item-count">124</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://godleon.github.io/blog/ServiceMesh/istio-fundamental-traffic-management/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="godleon">
+      <meta itemprop="description" content="把時間花在哪裡，成就就在哪裡">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小信豬的原始部落">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Istio 流量管理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2022-08-31 06:45:00 / Modified: 06:48:19" itemprop="dateCreated datePublished" datetime="2022-08-31T06:45:00+08:00">2022-08-31</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Istio/" itemprop="url" rel="index"><span itemprop="name">Istio</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/blog/ServiceMesh/istio-fundamental-traffic-management/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="ServiceMesh/istio-fundamental-traffic-management/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">本篇文章是介紹 Istio 在 Traffic Management 的部份，有哪些特性 & 功能可供使用，藉此可以根據實際需求，在 Istio Mesh 中制定更多種不同的流量管理策略</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="Subsets-amp-Destination-Rule"><a href="#Subsets-amp-Destination-Rule" class="headerlink" title="Subsets &amp; Destination Rule"></a>Subsets &amp; Destination Rule</h1><h2 id="Subset-amp-Virtual-Service-的搭配"><a href="#Subset-amp-Virtual-Service-的搭配" class="headerlink" title="Subset &amp; Virtual Service 的搭配"></a>Subset &amp; Virtual Service 的搭配</h2><p>在<a href="/blog/ServiceMesh/istio-introdution/">之前的 Istio 文章</a>中有提過在 <code>VirtualService</code> 的部份，可以透過 subset 的方式進行 traffic 分流，但沒提到 <code>subset</code> 是怎麼被定義出來的，以下進行說明。</p>
+<p>假設目前有個 Kubernetes service：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">customers</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">default</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">customers</span></span><br><span class="line">  <span class="attr">ports:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">http</span></span><br><span class="line">      <span class="attr">protocol:</span> <span class="string">TCP</span></span><br><span class="line">      <span class="attr">port:</span> <span class="number">80</span></span><br></pre></td></tr></table></figure>
+
+<p>若是 customers 同時有多個版本在 k8s 中，分別帶有 <code>version: v2</code> &amp; <code>version: v3</code>，若僅使用 k8s service，要進一步拆分的方式就是定義另外另外一個 service 來處理。</p>
+<p>但若是透過 <a target="_blank" rel="noopener" href="https://istio.io/latest/docs/reference/config/networking/destination-rule/">Istio Destination Rule</a>，那就可以在同一個 k8s service 的前提下，透過 subset 來細化，例如：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1alpha3</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">DestinationRule</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">customers-ab</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">host:</span> <span class="string">customers.default.svc.cluster.local</span></span><br><span class="line">  <span class="attr">trafficPolicy:</span></span><br><span class="line">    <span class="attr">loadBalancer:</span></span><br><span class="line">      <span class="attr">simple:</span> <span class="string">LEAST_REQUEST</span></span><br><span class="line">  <span class="attr">subsets:</span></span><br><span class="line">  <span class="comment"># subnet &quot;v1&quot;，指定帶有 &quot;version: v1&quot; label 的 pod</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">v1</span></span><br><span class="line">    <span class="attr">labels:</span></span><br><span class="line">      <span class="attr">version:</span> <span class="string">v1</span></span><br><span class="line">    </span><br><span class="line">  <span class="comment"># subnet &quot;v2&quot;，指定帶有 &quot;version: v2&quot; label 的 pod</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">v2</span></span><br><span class="line">    <span class="attr">labels:</span></span><br><span class="line">      <span class="attr">version:</span> <span class="string">v2</span></span><br><span class="line">    <span class="attr">trafficPolicy:</span></span><br><span class="line">      <span class="attr">loadBalancer:</span></span><br><span class="line">        <span class="attr">simple:</span> <span class="string">ROUND_ROBIN</span></span><br></pre></td></tr></table></figure>
+
+<p>從上面的範例中，有以下兩個重點：</p>
+<ol>
+<li><p>透過 pod 中的 <code>version</code> label 來進一步拆分成多個 subset，而這件事情是在 Destination Rule 完成的，而 k8s service 一直都只有一個</p>
+</li>
+<li><p>Destination Rule 中可以定義 Global-Level 的 traffic policy，但每個 subset 還可以設定各自的 traffic policy 設計來 override global 的設定</p>
+</li>
+</ol>
+<p>那搭配 VirtualService 執行分流的範例如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1alpha3</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">VirtualService</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">customers-route</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">hosts:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">customers.default.svc.cluster.local</span></span><br><span class="line">  <span class="attr">http:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">customers-v1-routes</span></span><br><span class="line">    <span class="attr">route:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">destination:</span></span><br><span class="line">        <span class="attr">host:</span> <span class="string">customers.default.svc.cluster.local</span></span><br><span class="line">        <span class="attr">subset:</span> <span class="string">v1</span></span><br><span class="line">      <span class="attr">weight:</span> <span class="number">70</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">customers-v2-routes</span></span><br><span class="line">    <span class="attr">route:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">destination:</span></span><br><span class="line">        <span class="attr">host:</span> <span class="string">customers.default.svc.cluster.local</span></span><br><span class="line">        <span class="attr">subset:</span> <span class="string">v2</span></span><br><span class="line">      <span class="attr">weight:</span> <span class="number">30</span></span><br></pre></td></tr></table></figure>
+
+<p>透過 Destination Rule 定義 subset + Virtual Service 的分流機制，再不改變原有 k8s service 的設定下，就可以輕鬆達到 A/B testing 的目標。</p>
+<h2 id="Destination-Rule-其他功能"><a href="#Destination-Rule-其他功能" class="headerlink" title="Destination Rule 其他功能"></a>Destination Rule 其他功能</h2><p>除了定義 subset 之外，Destination Rule 還可以針對 Traffic Policy 的部份設定以下功能：</p>
+<ol>
+<li><p><a target="_blank" rel="noopener" href="https://istio.io/latest/docs/reference/config/networking/destination-rule/#LocalityLoadBalancerSetting">Load Balancer Settings</a>：可針對 traffic 目的地設定不同的 load balancing policy</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://istio.io/latest/docs/reference/config/networking/destination-rule/#ConnectionPoolSettings">Connection Pool Settings</a>：這是屬於 host-level 的設定，可以套用在 TCP-level or HTTP-level</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://istio.io/latest/docs/reference/config/networking/destination-rule/#OutlierDetection">Outlier Detection</a>：這是用來設計熔斷(circuit breaker)機制時所使用</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://istio.io/latest/docs/reference/config/networking/destination-rule/#ClientTLSSettings">Client TLS settings</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://istio.io/latest/docs/reference/config/networking/destination-rule/#TrafficPolicy-PortTrafficPolicy">Port Traffic policy</a>：讓 traffic policy 可以套用在 port-level 上</p>
+</li>
+</ol>
+<p>這部份可以設定的細節很多，可以參考上面連結指向的 Istio 官網文件得到最新的資訊</p>
+<h1 id="Resiliency"><a href="#Resiliency" class="headerlink" title="Resiliency"></a>Resiliency</h1><p>Istio 提供了些功能，可以在服務遇到某些偶發性的故障 or 某些特殊狀況(例如：接近負載上限)而短時間無法正常運行時，可以提供保持可接受服務水準的能力；這些功能不是為了避免服務故障，而是嘗試在沒有停機 or 資料遺失的前提下面對服務故障的狀況，目標是在服務發生故障時可以恢復到正常的狀態。</p>
+<p>因此 Istio 中提供了 <code>timeout</code> &amp; <code>retry</code> 的機制，可以用來將這兩個機制套用在 Virtual Service 上。</p>
+<h2 id="timeout"><a href="#timeout" class="headerlink" title="timeout"></a>timeout</h2><p>以下是一個 <a target="_blank" rel="noopener" href="https://istio.io/latest/docs/concepts/traffic-management/#timeouts">timeout</a> 設定的例子，若是 request 超過 10 秒，那 Envoy proxy 會放棄這個 request 並回應 <code>HTTP 408(Request Timeout)</code></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1alpha3</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">VirtualService</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">ratings</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">hosts:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">ratings</span></span><br><span class="line">  <span class="attr">http:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">route:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">destination:</span></span><br><span class="line">        <span class="attr">host:</span> <span class="string">ratings</span></span><br><span class="line">        <span class="attr">subset:</span> <span class="string">v1</span></span><br><span class="line">    <span class="attr">timeout:</span> <span class="string">10s</span></span><br></pre></td></tr></table></figure>
+
+<p>關於 timeout 還有以下重點需要注意：</p>
+<ol>
+<li><p>在 Istio 中可以為所有服務設定 default timeout，但若是 default timeout 不符合特定服務使用，就可以透過 Virtual Service 為其設定個別的 timeout 設定</p>
+</li>
+<li><p>當 request 因為 timeout 產生 408 error，connection 還會持續開啟不會關閉，除非 <a target="_blank" rel="noopener" href="https://istio.io/latest/docs/reference/config/networking/destination-rule/#OutlierDetection">outlier detection</a> 設定被觸發(發生服務熔斷的狀況)</p>
+</li>
+</ol>
+<h2 id="retry"><a href="#retry" class="headerlink" title="retry"></a>retry</h2><p>除了 timeout 之外，搭配 retry 還可以進一步作到更細膩的控制，以下是一個 retry 設定的範例：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1alpha3</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">VirtualService</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">ratings</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">hosts:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">ratings</span></span><br><span class="line">  <span class="attr">http:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">route:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">destination:</span></span><br><span class="line">        <span class="attr">host:</span> <span class="string">ratings</span></span><br><span class="line">        <span class="attr">subset:</span> <span class="string">v1</span></span><br><span class="line">    <span class="attr">retries:</span></span><br><span class="line">      <span class="attr">attempts:</span> <span class="number">10</span></span><br><span class="line">      <span class="attr">perTryTimeout:</span> <span class="string">2s</span></span><br><span class="line">      <span class="comment"># 可以指定在特定狀況下才進行 retry</span></span><br><span class="line">      <span class="attr">retryOn:</span> <span class="string">connect-failure,reset</span></span><br></pre></td></tr></table></figure>
+
+<p>retry 設定上有以下幾個重點 &amp; 特性需要了解：</p>
+<ol>
+<li><p>在 retry 設定中，可以設定 <code>attempts</code>(嘗試次數) &amp; <code>perTryTimeout</code>(每次 retry 的 timeout)，還可以透過 <code>retryOn</code> 關鍵字，設定在特定的條件下才會進行 retry(例如：HTTP 5xx)</p>
+</li>
+<li><p>如果同時設定 retry timeout &amp; timeout，那就會以較長的 timeout 設定為主</p>
+</li>
+<li><p><code>retryOn</code> 設定的選項可以參考 <a target="_blank" rel="noopener" href="https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/router_filter#x-envoy-retry-on">Envoy 文件</a>取得更詳細的說明</p>
+</li>
+<li><p>假設原本 service 有三個 endpoint，其中一個 endpoint 發生錯誤而產生 retry 行為時，request 就會往另外兩個正常服務的 endpoint 發送，而不會發送到造成錯誤導致需要 retry 的 endpoint</p>
+</li>
+</ol>
+<h1 id="Failure-Injection"><a href="#Failure-Injection" class="headerlink" title="Failure Injection"></a>Failure Injection</h1><p>在 micro service 的架構中，服務之間互相發送請求是頻繁發生的行為，而我們無法保證上游服務 100% 都沒問題，也許有時候會有偶發性的故障，甚至一段時間無法提供服務。</p>
+<p>而為了提昇服務應對上游服務(upstream service)故障時的能力，我們可以在上游服務中設定一些 fault injection policy 來模擬對上游服務進行請求時發生故障時的情境；而若是在上游服務故障的情況下，服務都可以正常運行，那表示服務不會因為上游服務的問題導致自身故障，進而提昇服務的穩定性。</p>
+<p>在 Istio 中提供了兩種 <a target="_blank" rel="noopener" href="https://istio.io/latest/docs/tasks/traffic-management/fault-injection/">fault injection</a> policy，分別是 <code>delay</code> &amp; <code>abort</code> 以下分別進行說明。</p>
+<h2 id="delay"><a href="#delay" class="headerlink" title="delay"></a>delay</h2><p>delay 可以用來模擬以下兩種情況：</p>
+<ol>
+<li><p>緩慢的網路</p>
+</li>
+<li><p>上游服務負載過重</p>
+</li>
+</ol>
+<p>以下是 delay 的範例：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">piVersion:</span> <span class="string">networking.istio.io/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">VirtualService</span></span><br><span class="line"><span class="string">...</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">hosts:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">ratings</span></span><br><span class="line">  <span class="attr">http:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">fault:</span></span><br><span class="line">      <span class="attr">delay:</span></span><br><span class="line">        <span class="attr">fixedDelay:</span> <span class="string">7s</span></span><br><span class="line">        <span class="attr">percentage:</span></span><br><span class="line">          <span class="attr">value:</span> <span class="number">100</span></span><br><span class="line">    <span class="attr">match:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">headers:</span></span><br><span class="line">        <span class="attr">end-user:</span></span><br><span class="line">          <span class="attr">exact:</span> <span class="string">jason</span></span><br><span class="line">    <span class="attr">route:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">destination:</span></span><br><span class="line">        <span class="attr">host:</span> <span class="string">ratings</span></span><br><span class="line">        <span class="attr">subset:</span> <span class="string">v1</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">route:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">destination:</span></span><br><span class="line">        <span class="attr">host:</span> <span class="string">ratings</span></span><br><span class="line">        <span class="attr">subset:</span> <span class="string">v1</span></span><br><span class="line">    <span class="attr">fault:</span></span><br><span class="line">      <span class="attr">delay:</span></span><br><span class="line">        <span class="attr">percentage:</span></span><br><span class="line">          <span class="attr">value:</span> <span class="number">5</span></span><br><span class="line">        <span class="attr">fixedDelay:</span> <span class="string">3s</span></span><br></pre></td></tr></table></figure>
+
+<p>上面的設定 dely 設定可以分成兩個部份：</p>
+<ol>
+<li><p>若是在 request 中就有加上 <code>end-user: jason</code> header，然後每個 request 都會被延遲 7 秒鐘</p>
+</li>
+<li><p>若是沒有加上 <code>end-user: jason</code> header，其中 5% 的 request 會延遲 3 秒鐘</p>
+</li>
+</ol>
+<h2 id="abort"><a href="#abort" class="headerlink" title="abort"></a>abort</h2><p>abort 很直觀，就是直接模擬上游服務故障的狀況，以下給個範例：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">VirtualService</span></span><br><span class="line"><span class="string">...</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">hosts:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">ratings</span></span><br><span class="line">  <span class="attr">http:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">route:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">destination:</span></span><br><span class="line">        <span class="attr">host:</span> <span class="string">ratings</span></span><br><span class="line">    <span class="attr">fault:</span></span><br><span class="line">      <span class="attr">abort:</span></span><br><span class="line">        <span class="comment"># 若沒有指定 percentage，那就會 100% 都 abort</span></span><br><span class="line">        <span class="attr">percentage:</span></span><br><span class="line">          <span class="attr">value:</span> <span class="number">30</span></span><br><span class="line">        <span class="attr">httpStatus:</span> <span class="number">404</span></span><br></pre></td></tr></table></figure>
+
+<p>上面的 abort 設定，會讓送到 rating 服務的 request，有 30% 的 request 會回應 404。</p>
+<p>此外，關於 abort 還有以下重點需要記得：</p>
+<ol>
+<li><p>以上面設定的範例，若是沒有指定 percentage，那 100% 都會 abort</p>
+</li>
+<li><p>若是 virtual service 中有設定 retry policy，只有真實的故障才會觸發 retry 的行為；fault injection 所造成的故障，不會觸發 retry 的行為</p>
+</li>
+</ol>
+<h1 id="Service-Entry-amp-Wordload-Entry"><a href="#Service-Entry-amp-Wordload-Entry" class="headerlink" title="Service Entry &amp; Wordload Entry"></a>Service Entry &amp; Wordload Entry</h1><p>若是服務安裝在 Kubernetes 中，只要加上了 Envoy sidecar proxy，那我們就可以搭配一些 mesh feature(例如：Fault Injection、Destination Rule … 等等) 使用，但如果服務在外部 or 在其他 VM 上，那肯定就沒有 Envoy sidecar proxy 存在了。</p>
+<p>此時，若依然對這類型的服務在 Istio mesh 中設定 traffic routing or fault injection 這樣的功能，就可以搭配 <a target="_blank" rel="noopener" href="https://istio.io/latest/docs/reference/config/networking/service-entry/">Service Entry</a> &amp; <a target="_blank" rel="noopener" href="https://istio.io/latest/docs/reference/config/networking/workload-entry/">Workload Entry</a> 來達成這個目標</p>
+<h2 id="Service-Entry"><a href="#Service-Entry" class="headerlink" title="Service Entry"></a>Service Entry</h2><p>一般來說，透過 Istio 掛上 Envoy sidecar proxy 的服務會被自動發現並註冊到 Istio service registry 來加入 mesh 中，而 <code>ServiceEntry</code> 的目的是透過手動指定的方式將其他的服務註冊到 Istio service registry，藉此達到呼叫外部服務時也可以使用 mesh feature 的目的。</p>
+<p>以下是 <code>ServiceEntry</code> 的定義範例，定義了一個服務，並將存取 Dropbox, Google、Facebook … 等外部服務 API 的 HTTPS 請求都歸類在這一類</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ServiceEntry</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">external-svc-https</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">hosts:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">api.dropboxapi.com</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">www.googleapis.com</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">api.facebook.com</span></span><br><span class="line">  <span class="attr">location:</span> <span class="string">MESH_EXTERNAL</span></span><br><span class="line">  <span class="attr">ports:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">number:</span> <span class="number">443</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">https</span></span><br><span class="line">    <span class="attr">protocol:</span> <span class="string">TLS</span></span><br><span class="line">  <span class="attr">resolution:</span> <span class="string">DNS</span></span><br></pre></td></tr></table></figure>
+
+<p>有了這個定義後，就可以透過像是 Fault Injection 的功能來模擬上述外部服務故障時的應對狀況。</p>
+<p>此外，Service Entry 定義的方式其實很彈性，除了上面的方式外，也可以透過 IP &amp; port number；也可以搭配 egress gateway 做出更多的變化，相關內容可以參考 <a target="_blank" rel="noopener" href="https://istio.io/latest/docs/reference/config/networking/service-entry/">Istio Service Entry 官方文件</a>。 </p>
+<h2 id="Workload-Entry"><a href="#Workload-Entry" class="headerlink" title="Workload Entry"></a>Workload Entry</h2><p><code>WorkloadEntry</code> 是用來描述非 Kubernetes 的單一 workload(例如：VM or bare metal server)，目的也是同樣要將這些 workload 加入到 Istio mesh 中，但需要搭配 Service Entry 才可以將 Workload Entry 中所定義的內容註冊到 mesh 中。</p>
+<p>這裡透過以下範例說明一下如何使用：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 指定 vm1 &amp; IP</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">WorkloadEntry</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">customers-vm-1</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">serviceAccount:</span> <span class="string">customers</span></span><br><span class="line">  <span class="attr">address:</span> <span class="number">1.0</span><span class="number">.0</span><span class="number">.0</span></span><br><span class="line">  <span class="attr">labels:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">customers</span></span><br><span class="line">    <span class="attr">instance-id:</span> <span class="string">vm1</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 指定 vm2 &amp; IP</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">WorkloadEntry</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">customers-vm-2</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">serviceAccount:</span> <span class="string">customers</span></span><br><span class="line">  <span class="attr">address:</span> <span class="number">2.0</span><span class="number">.0</span><span class="number">.0</span></span><br><span class="line">  <span class="attr">labels:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">customers</span></span><br><span class="line">    <span class="attr">instance-id:</span> <span class="string">vm2</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 透過 ServiceEntry，指定 vm1 &amp; vm2 共同的 label</span></span><br><span class="line"><span class="comment"># 將其視為同一個 service(customers-svc) 並註冊到 service registry 中</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ServiceEntry</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">customers-svc</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">hosts:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">customers.com</span></span><br><span class="line">  <span class="attr">location:</span> <span class="string">MESH_INTERNAL</span></span><br><span class="line">  <span class="attr">ports:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">number:</span> <span class="number">80</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">http</span></span><br><span class="line">    <span class="attr">protocol:</span> <span class="string">HTTP</span></span><br><span class="line">  <span class="attr">resolution:</span> <span class="string">STATIC</span></span><br><span class="line">  <span class="attr">workloadSelector:</span></span><br><span class="line">    <span class="attr">labels:</span></span><br><span class="line">      <span class="attr">app:</span> <span class="string">customers</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="Sidecar"><a href="#Sidecar" class="headerlink" title="Sidecar"></a>Sidecar</h1><p>預設情況下，Istio sidecar proxy 的行為是：</p>
+<ol>
+<li><p>inject 到所有的 workload</p>
+</li>
+<li><p>處理跟 workload 有關的所有流量，這包含 inbound &amp; outbound 流量</p>
+</li>
+</ol>
+<p>但若是我們希望調整這樣的行為呢? 例如：只要處理特定 port 的 inbound 流量、只要處理對外連到特定 namespace 的流量才需要處理</p>
+<p>若是有上述的需求，就需要透過 <code>Sidecar</code> CRD 來進行客製化，以下舉個範例：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Sidecar</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="literal">no</span><span class="string">-ip-tables</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">prod-us1</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="comment"># 選擇帶有指定 label 設定的 workload</span></span><br><span class="line">  <span class="attr">workloadSelector:</span></span><br><span class="line">    <span class="attr">labels:</span></span><br><span class="line">      <span class="attr">app:</span> <span class="string">productpage</span></span><br><span class="line">  <span class="attr">ingress:</span></span><br><span class="line">  <span class="comment"># 將送到 port 9080 的 traffic 轉發到 workload 本身的 8080 port</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">port:</span></span><br><span class="line">      <span class="comment"># binds to proxy_instance_ip:9080 (0.0.0.0:9080, if no unicast IP is available for the instance)</span></span><br><span class="line">      <span class="attr">number:</span> <span class="number">9080</span> </span><br><span class="line">      <span class="attr">protocol:</span> <span class="string">HTTP</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">somename</span></span><br><span class="line">    <span class="attr">defaultEndpoint:</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span><span class="string">:8080</span></span><br><span class="line">    <span class="comment"># not needed if metadata is set for entire proxy</span></span><br><span class="line">    <span class="attr">captureMode:</span> <span class="string">NONE</span> </span><br><span class="line">  <span class="attr">egress:</span></span><br><span class="line">  <span class="comment"># 將送到 workload 的 3306 port 的 MySQL request，轉發到外部的 mysql.foo.com:3306</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">port:</span></span><br><span class="line">      <span class="attr">number:</span> <span class="number">3306</span></span><br><span class="line">      <span class="attr">protocol:</span> <span class="string">MYSQL</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">egressmysql</span></span><br><span class="line">    <span class="comment"># not needed if metadata is set for entire proxy</span></span><br><span class="line">    <span class="attr">captureMode:</span> <span class="string">NONE</span> </span><br><span class="line">    <span class="attr">bind:</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span></span><br><span class="line">    <span class="attr">hosts:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">&quot;*/mysql.foo.com&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>上面的範例中，針對帶有 label <code>app: productpage</code> 的 workload，調整了 sidecar proxy 對於 ingress &amp; egress 的運作行為。</p>
+<p>另外還有些使用 Sidecar CRD 時的重點：</p>
+<ol>
+<li><p>若是設定沒有指定 <code>workloadSelector</code> 的 Sidecar CRD 只能有一個，這樣的定義方式是用來作為調整整個 namespace 中 sidecar proxy 的預設行為</p>
+</li>
+<li><p>在 ingress 設定中，<code>defaultEndpoint</code> 可以是 <strong>IP:Port</strong> 的形式設定(但僅能是 <code>127.0.0.1:PORT</code> or <code>0.0.0.0:PORT</code> 兩種)，或是透過 <code>unix:///path/to/socket</code> 來表示 UNIX domain socket</p>
+</li>
+<li><p>在 egress 設定中，<code>hosts</code> 可以是 <code>namespace/dnsName</code> 形式的設定，表示特定 namespace 的服務；也可以指定任何透過 <a target="_blank" rel="noopener" href="https://istio.io/latest/docs/reference/config/networking/virtual-service/">VirtualService</a> &amp; <a target="_blank" rel="noopener" href="https://istio.io/latest/docs/reference/config/networking/service-entry/">ServiceEntry</a> 註冊在 service registry 的服務</p>
+</li>
+<li><p><code>captureMode</code> 用來定義送到 sidecar proxy listener 的流量如何被捕捉，詳細的說明可以參考 <a target="_blank" rel="noopener" href="https://istio.io/latest/docs/reference/config/networking/sidecar/#CaptureMode">Istio 官網文件</a></p>
+</li>
+</ol>
+<h1 id="Envoy-Filter"><a href="#Envoy-Filter" class="headerlink" title="Envoy Filter"></a>Envoy Filter</h1><p><code>EnvoyFilter</code> 提供了一個機制，讓使用者可以調整 Istio Polit 所產生的 Envoy configuration，達成像是調整特定欄位(例如：request/response header)的值、增加特定的 filter、增加新的 listener(or cluster) … 等等，<strong>這功能必須小心使用，否則可能會影響整個 Istio mesh 的穩定性</strong>。</p>
+<p>Envoy Filter 的使用設定有以下特定：</p>
+<ol>
+<li><p>EnvoyFilter 設定是可以疊加的，這表示特定 namespace 的特定 workload(由 <code>workloadSelector</code> 設定)可以設定任意數量的 Envoy Filter</p>
+</li>
+<li><p>root namespace(一般是 <code>istio-system</code>，但可以從 <a target="_blank" rel="noopener" href="https://istio.io/latest/docs/reference/config/istio.mesh.v1alpha1/#MeshConfig">MeshConfig</a> 中調整) 的 Envoy Filter 會先被套用，再來才是 workload namepsace 中所有匹配的 Envoy Filter</p>
+</li>
+</ol>
+<p>以下是個 Envoy Filter 的簡單範例：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.istio.io/v1alpha3</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">EnvoyFilter</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">api-header-filter</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">default</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">workloadSelector:</span></span><br><span class="line">    <span class="attr">labels:</span></span><br><span class="line">      <span class="attr">app:</span> <span class="string">web-frontend</span></span><br><span class="line">  <span class="attr">configPatches:</span></span><br><span class="line">  <span class="comment"># 設定 filter</span></span><br><span class="line">  <span class="comment"># 1. 處理當 traffic 進入 default namespace 中，帶有 label &quot;app: web-frontend&quot; 的服務</span></span><br><span class="line">  <span class="comment"># 2. 進入 port 8080</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">applyTo:</span> <span class="string">HTTP_FILTER</span></span><br><span class="line">    <span class="attr">match:</span></span><br><span class="line">      <span class="attr">context:</span> <span class="string">SIDECAR_INBOUND</span></span><br><span class="line">      <span class="attr">listener:</span></span><br><span class="line">        <span class="attr">portNumber:</span> <span class="number">8080</span></span><br><span class="line">        <span class="attr">filterChain:</span></span><br><span class="line">          <span class="attr">filter:</span></span><br><span class="line">            <span class="attr">name:</span> <span class="string">&quot;envoy.filters.network.http_connection_manager&quot;</span></span><br><span class="line">            <span class="attr">subFilter:</span></span><br><span class="line">              <span class="attr">name:</span> <span class="string">&quot;envoy.filters.http.router&quot;</span></span><br><span class="line">    <span class="attr">patch:</span></span><br><span class="line">      <span class="comment"># 透過 LUA，在 response 中增加一個 &quot;api-version: v1&quot; 的 header</span></span><br><span class="line">      <span class="attr">operation:</span> <span class="string">INSERT_BEFORE</span></span><br><span class="line">      <span class="attr">value:</span></span><br><span class="line">        <span class="attr">name:</span> <span class="string">envoy.filters.http.lua</span></span><br><span class="line">        <span class="attr">typed_config:</span></span><br><span class="line">          <span class="string">&quot;@type&quot;</span><span class="string">:</span> <span class="string">&quot;type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua&quot;</span></span><br><span class="line">          <span class="attr">inlineCode:</span> <span class="string">|</span></span><br><span class="line"><span class="string">            function envoy_on_response(response_handle)</span></span><br><span class="line"><span class="string">              response_handle:headers():add(&quot;api-version&quot;, &quot;v1&quot;)</span></span><br><span class="line"><span class="string">            end</span></span><br></pre></td></tr></table></figure>
+
+<p>透過上面的 Envoy Filter，可以為特定的 workload，增加一個額外的 response header。</p>
+<p><a target="_blank" rel="noopener" href="https://istio.io/latest/docs/reference/config/networking/envoy-filter/">Istio 官網文件</a>中還有不少範例，可以參考看看，但若是要查詢究竟 Envoy 支援的 HTTP filter 有哪些，每一個支援了什麼功能，那到 <a target="_blank" rel="noopener" href="https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/http_filters">Envoy 官網文件</a>中可以看到最詳細的資訊。</p>
+<blockquote>
+<p>上述範例中所使用到的 <a target="_blank" rel="noopener" href="https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/lua_filter">Lua</a> 只是 Envoy 支援的眾多 HTTP filter 的其中一種而已</p>
+</blockquote>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a target="_blank" rel="noopener" href="https://academy.tetrate.io/courses/istio-fundamentals">Tetrate Academy | Learn Istio from experts</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://istio.io/latest/docs/reference/config/networking/virtual-service/">Istio / Virtual Service</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://istio.io/latest/docs/reference/config/networking/destination-rule">Istio / Destination Rule</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://istio.io/latest/docs/concepts/traffic-management/#network-resilience-and-testing">Istio / Traffic Management - Network resilience and testing</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://istio.io/latest/docs/tasks/traffic-management/fault-injection/">Istio / Fault Injection</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://istio.io/latest/docs/reference/config/networking/service-entry/">Istio / Service Entry</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://istio.io/latest/docs/reference/config/networking/workload-entry/">Istio / Workload Entry</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://istio.io/latest/docs/reference/config/networking/sidecar">Istio / Sidecar</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://medium.com/@chinhung_liu/work-note-unix-domain-socket-62b42f25ffc2">Work Note-Unix domain socket. socket是常見的一種process之間的溝通方式（IPC），socket通訊… | by Chin-Hung Liu | Medium</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://istio.io/latest/docs/reference/config/networking/envoy-filter/">Istio / Envoy Filter</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/ServiceMesh/" rel="tag"># ServiceMesh</a>
+              <a href="/blog/tags/Istio/" rel="tag"># Istio</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blog/DevOps/learn-Helm/" rel="prev" title="Helm 學習筆記">
+                  <i class="fa fa-chevron-left"></i> Helm 學習筆記
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+      
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">godleon</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+<script src="/blog/js/utils.js"></script><script src="/blog/js/motion.js"></script><script src="/blog/js/schemes/muse.js"></script><script src="/blog/js/next-boot.js"></script>
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+    <div class="pjax">
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://godleon-blog-hexo.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://godleon.github.io/blog/ServiceMesh/istio-fundamental-traffic-management/";
+    this.page.identifier = "ServiceMesh/istio-fundamental-traffic-management/";
+    this.page.title = "Istio 流量管理";
+    };
+  NexT.utils.loadComments('#disqus_thread', () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://godleon-blog-hexo.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+    </div>
+</body>
+</html>
