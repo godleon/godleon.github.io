@@ -310,7 +310,7 @@ spec:
 
 - 若有搭配 Label Selectors，k8s 就會建立相對應的 endpoint，而存取 service 時，k8s DNS 就會直接回應 endpoint list 的資訊(**A record**)，因此 **client 可以使用 service domain name 直接存取到 pod**
 
-> 這代表原本 service 透過 Linud iptables 所提供的負載平衡的功能就沒有了，但 client 可以根據 endpoint 的資訊來對 pod 進行直接的存取
+> 這代表原本 service 透過 Linux iptables 所提供的負載平衡的功能就沒有了，但 client 可以根據 endpoint 的資訊來對 pod 進行直接的存取
 
 - 若是沒有搭配 Label Selector，就沒有 ClusterIP 也沒有對應的 Endpoint，但應該沒有人會做這麼做，而是改以以 ExternalName type 的方式來進行(後面會提到)
 
