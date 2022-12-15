@@ -33,7 +33,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/k8s_service-iptables-proxy-mode.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/kubernetes/k8s_service-ipvs-proxy-mode.png">
 <meta property="article:published_time" content="2018-11-10T20:20:00.000Z">
-<meta property="article:modified_time" content="2022-08-30T22:51:41.924Z">
+<meta property="article:modified_time" content="2022-12-15T09:30:43.018Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="Kubernetes">
 <meta property="article:tag" content="CKA">
@@ -258,7 +258,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2022-08-31 06:51:41" itemprop="dateModified" datetime="2022-08-31T06:51:41+08:00">2022-08-31</time>
+                <time title="Modified: 2022-12-15 17:30:43" itemprop="dateModified" datetime="2022-12-15T17:30:43+08:00">2022-12-15</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -434,7 +434,7 @@
 </li>
 </ul>
 <blockquote>
-<p>這代表原本 service 透過 Linud iptables 所提供的負載平衡的功能就沒有了，但 client 可以根據 endpoint 的資訊來對 pod 進行直接的存取</p>
+<p>這代表原本 service 透過 Linux iptables 所提供的負載平衡的功能就沒有了，但 client 可以根據 endpoint 的資訊來對 pod 進行直接的存取</p>
 </blockquote>
 <ul>
 <li>若是沒有搭配 Label Selector，就沒有 ClusterIP 也沒有對應的 Endpoint，但應該沒有人會做這麼做，而是改以以 ExternalName type 的方式來進行(後面會提到)</li>
