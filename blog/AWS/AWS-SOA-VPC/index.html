@@ -338,7 +338,7 @@
 <h1 id="VPC-Reachability-Analyzer"><a href="#VPC-Reachability-Analyzer" class="headerlink" title="VPC Reachability Analyzer"></a>VPC Reachability Analyzer</h1><p>當 Security Group &amp; NACL(Network Access Control List) 在設定上有誤需要排查網路問題時，AWS 提供了 <a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/vpc/latest/reachability/what-is-reachability-analyzer.html">VPC Reachability Analyzer</a> 這個工具，可以用來協助分析網路不通的原因。</p>
 <p>此工具本身不會主動送 packet，只是單純分析從 source 到 destination 中的 NACL &amp; Security Group 設定，檢查那一段的設定出了問題以至於網路不通；若是不通會在畫面顯示問題是出現在那一段。</p>
 <p>而這服務是要收費的，一次是 $0.1 美金，有需要的排查網路問題時應該是可以派上些用場。</p>
-<h1 id="VPC-Flow-Logs-Troubleshooting"><a href="#VPC-Flow-Logs-Troubleshooting" class="headerlink" title="VPC Flow Logs Troubleshooting"></a>VPC Flow Logs Troubleshooting</h1><p>關於 VPC Flow Log 的介紹可以看一下之前寫的 <a href="AWS/AWS-CSA-associate-VPC-part2/">CSA 考試重點內容</a>中有提到，以下簡單說明一下如何透過 VPC Flow 來協助排查 security group or NACL 設定上的問題</p>
+<h1 id="VPC-Flow-Logs-Troubleshooting"><a href="#VPC-Flow-Logs-Troubleshooting" class="headerlink" title="VPC Flow Logs Troubleshooting"></a>VPC Flow Logs Troubleshooting</h1><p>關於 VPC Flow Log 的介紹可以看一下之前寫的 <a href="/blog/AWS/AWS-CSA-associate-VPC-part2/">CSA 考試重點內容</a>中有提到，以下簡單說明一下如何透過 VPC Flow 來協助排查 security group or NACL 設定上的問題</p>
 <p><img src="/blog/images/aws/VPC/AWS-VPC_VPC-FlowLogs-Debug.png" alt="VPC Flow Logs - Troubleshooting"></p>
 <p>上圖是用來說明觀測 VPC Flow log 重點，在下方逐一說明</p>
 <p>對於外部進來的 request：</p>
