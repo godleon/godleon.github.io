@@ -55,7 +55,7 @@ Cross Account Role for IAM User 設定範例
 
 在[上一篇文章](learn-AWS-IAM-3-assuming-role.md)中所提到的是在同一個帳號下的 IAM Role，那若是 Cross Account Role 是什麼樣一個場景呢? 以下舉個範例：  
 
-![IAM Cross Account -  purpose]/blog/images/aws/IAM/(IAM-Cross-Account-access-resources.png)
+![IAM Cross Account -  purpose](/blog/images/aws/IAM/IAM-Cross-Account-access-resources.png)
 
 在這邊要達成的目的是：讓帳號 ACME 的 IAM User Troy，可以存取帳號 Stuzio 底下的 S3 bucket
 
