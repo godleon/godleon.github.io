@@ -31,6 +31,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/IAM/IAM-Cross-Account-Case-1-1.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/IAM/IAM-Cross-Account-Case-1-2.png">
+<meta property="og:image" content="https://godleon.github.io/blog/images/aws/IAM/IAM-Cross-Account-access-resources.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/IAM/IAM-Cross-Account-role-and-policy.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/IAM/IAM-Cross-Account-assume-role.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/IAM/IAM-Cross-Account-Case-SAAS-1.png">
@@ -43,7 +44,7 @@
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/IAM/IAM-Why-IAM-Role-5.png">
 <meta property="og:image" content="https://godleon.github.io/blog/images/aws/IAM/IAM-Why-IAM-Role-6.png">
 <meta property="article:published_time" content="2020-12-23T22:00:00.000Z">
-<meta property="article:modified_time" content="2022-12-15T09:30:43.010Z">
+<meta property="article:modified_time" content="2023-07-14T08:10:30.466Z">
 <meta property="article:author" content="godleon">
 <meta property="article:tag" content="AWS">
 <meta property="article:tag" content="IAM">
@@ -266,7 +267,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2022-12-15 17:30:43" itemprop="dateModified" datetime="2022-12-15T17:30:43+08:00">2022-12-15</time>
+                <time title="Modified: 2023-07-14 16:10:30" itemprop="dateModified" datetime="2023-07-14T16:10:30+08:00">2023-07-14</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -324,7 +325,7 @@
 </ul>
 <p>綜合以上問題，為了讓權限管理這件事情的複雜度可以收斂在一定的範圍內，改用 IAM Role 來管理會是較好的方式。</p>
 <h1 id="Cross-Account-Role-for-IAM-User-設定範例"><a href="#Cross-Account-Role-for-IAM-User-設定範例" class="headerlink" title="Cross Account Role for IAM User 設定範例"></a>Cross Account Role for IAM User 設定範例</h1><h2 id="使用場景"><a href="#使用場景" class="headerlink" title="使用場景"></a>使用場景</h2><p>在<a href="learn-AWS-IAM-3-assuming-role.md">上一篇文章</a>中所提到的是在同一個帳號下的 IAM Role，那若是 Cross Account Role 是什麼樣一個場景呢? 以下舉個範例：  </p>
-<p>![IAM Cross Account -  purpose]/blog/images/aws/IAM/(IAM-Cross-Account-access-resources.png)</p>
+<p><img src="/blog/images/aws/IAM/IAM-Cross-Account-access-resources.png" alt="IAM Cross Account -  purpose"></p>
 <p>在這邊要達成的目的是：讓帳號 ACME 的 IAM User Troy，可以存取帳號 Stuzio 底下的 S3 bucket</p>
 <h2 id="設計原理-amp-規範"><a href="#設計原理-amp-規範" class="headerlink" title="設計原理 &amp; 規範"></a>設計原理 &amp; 規範</h2><p>了解了上面的跨帳號的資源存取需求後，那接下來要怎麼完成這件事情呢? 假設有 A &amp; B 兩個帳號，而 B 帳號的 IAM User 想要存取 A 帳號的 S3 Bucket，那會需要進行以下幾個步驟：</p>
 <ol>
@@ -489,7 +490,7 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2022</span>
+  <span itemprop="copyrightYear">2023</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
